@@ -1,4 +1,7 @@
-<html lang="en" class="mdl-js"><head>
+<!DOCTYPE html>
+<html lang="en" class="mdl-js">
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Dashboard</title>
@@ -7,121 +10,150 @@
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_purple.min.css">
     <script defer="" src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
-  <style>
-       .container {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 50px;
-      }
-      .mdl-card {
-        width: 45%;
-        background-color:#F1ECE8 !important;
-      }
-      .archive-container {
-        margin-top: 50px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .archive-item {
-        margin: 10px;
-        text-align: center;
-      }
-      .archive-item canvas {
-        border: 1px solid #000;
-      }
-      
-      
-  </style>
-  </head>
-  <body cz-shortcut-listen="true">
-    <div class="mdl-layout__container"><div class="mdl-layout mdl-js-layout mdl-layout--fixed-header is-upgraded" data-upgraded=",MaterialLayout">
-      <header class="mdl-layout__header is-casting-shadow">
-        <div class="mdl-layout__header-row">
-          <span class="mdl-layout-title">QR Code Dashboard</span>
-        </div>
-      </header>
-      <main class="mdl-layout__content">
-        <div class="page-content">
-          <div class="container">
-            <!-- Left Card -->
-            <div class="mdl-card mdl-shadow--2dp">
-              <div class="mdl-card__title">
-                <h2 class="mdl-card__title-text">Generate QR Code</h2>
-              </div>
-              <div class="mdl-card__supporting-text">
-                <p>Enter a URL to generate a QR code:</p>
-                <form id="qr-form">
-                  <div class="mdl-textfield mdl-js-textfield is-upgraded" data-upgraded=",MaterialTextfield">
-                    <input class="mdl-textfield__input" type="text" id="url-input">
-                    <label class="mdl-textfield__label" for="url-input">URL</label>
-                  </div>
-                </form>
-              </div>
-              <div class="mdl-card__actions mdl-card--border" style="
-      border: none;
-  ">
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="generateQRCode()" data-upgraded=",MaterialButton">
-                  Generate
-                </button>
-              </div>
-            </div>
-  
-            <!-- Right Card -->
-            <div class="mdl-card mdl-shadow--2dp" style="
-      width: 40%;
-  ">
-              <div class="mdl-card__title">
-                <h2 class="mdl-card__title-text">QR Code</h2>
-              </div>
-              <div class="mdl-card__supporting-text">
-                <canvas id="qr-code"></canvas>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Archive Section -->
-          <div class="archive-container" id="archive-container">
-            <!-- Archived QR codes will be added here -->
-          </div>
-        </div>
-      </main>
-    </div></div>
-    <script>
-       function generateQRCode() {
-        var url = document.getElementById('url-input').value;
-        var qr = new QRious({
-          element: document.getElementById('qr-code'),
-          size: 200,
-          value: url
-        });
-  
-        archiveQRCode(url, qr.toDataURL());
-      }
-  
-      function archiveQRCode(url, dataURL) {
-        var archiveContainer = document.getElementById('archive-container');
-        var archiveItem = document.createElement('div');
-        archiveItem.className = 'archive-item';
-  
-        var qrThumbnail = document.createElement('canvas');
-        var context = qrThumbnail.getContext('2d');
-        qrThumbnail.width = 100;
-        qrThumbnail.height = 100;
-        var img = new Image();
-        img.onload = function() {
-          context.drawImage(img, 0, 0, 100, 100);
-        };
-        img.src = dataURL;
-  
-        var urlText = document.createElement('p');
-        urlText.textContent = url;
-  
-        archiveItem.appendChild(qrThumbnail);
-        archiveItem.appendChild(urlText);
-        archiveContainer.appendChild(archiveItem);
-      }
-    </script>
-  
-  </body></html>
+    <style>
+        body {
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
 
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mdl-card {
+            background-color: #3a3a3a !important;
+            color: #ffffff;
+        }
+
+        .left-card {
+            width: 65%;
+        }
+
+        .right-card {
+            flex-grow: 1;
+        }
+
+        .mdl-textfield__input {
+            width: 100%;
+        }
+
+        .mdl-button--colored {
+            background-color: #d35400 !important;
+            color: #ffffff !important;
+        }
+
+        .archive-container {
+            margin-top: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .archive-item {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .archive-item canvas {
+            border: 1px solid #ffffff;
+        }
+    </style>
+</head>
+
+<body cz-shortcut-listen="true">
+    <div class="mdl-layout__container">
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header is-upgraded" data-upgraded=",MaterialLayout">
+            <header class="mdl-layout__header is-casting-shadow">
+                <div class="mdl-layout__header-row">
+                    <span class="mdl-layout-title">QR Code Dashboard</span>
+                </div>
+            </header>
+            <main class="mdl-layout__content">
+                <div class="page-content">
+                    <div class="container">
+                        <!-- Left Card -->
+                        <div class="mdl-card mdl-shadow--2dp left-card">
+                            <div class="mdl-card__title">
+                                <h2 class="mdl-card__title-text">Generate QR Code</h2>
+                            </div>
+                            <div class="mdl-card__supporting-text">
+                                <p>Enter a URL to generate a QR code:</p>
+                                <form id="qr-form">
+                                    <div class="mdl-textfield mdl-js-textfield is-upgraded" data-upgraded=",MaterialTextfield">
+                                        <input class="mdl-textfield__input" type="text" id="url-input">
+                                        <label class="mdl-textfield__label" for="url-input">URL</label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="mdl-card__actions mdl-card--border" style="border: none;">
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                                    onclick="generateQRCode()" data-upgraded=",MaterialButton">
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Card -->
+                        <div class="mdl-card mdl-shadow--2dp right-card">
+                            <div class="mdl-card__title">
+                                <h2 class="mdl-card__title-text">QR Code</h2>
+                            </div>
+                            <div class="mdl-card__supporting-text">
+                                <canvas id="qr-code"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Archive Section -->
+                    <div class="archive-container" id="archive-container">
+                        <!-- Archived QR codes will be added here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        function generateQRCode() {
+            var url = document.getElementById('url-input').value;
+            var qr = new QRious({
+                element: document.getElementById('qr-code'),
+                size: 200,
+                value: url
+            });
+
+            archiveQRCode(url, qr.toDataURL());
+        }
+
+        function archiveQRCode(url, dataURL) {
+            var archiveContainer = document.getElementById('archive-container');
+            var archiveItem = document.createElement('div');
+            archiveItem.className = 'archive-item';
+
+            var qrThumbnail = document.createElement('canvas');
+            var context = qrThumbnail.getContext('2d');
+            qrThumbnail.width = 100;
+            qrThumbnail.height = 100;
+            var img = new Image();
+            img.onload = function () {
+                context.drawImage(img, 0, 0, 100, 100);
+            };
+            img.src = dataURL;
+
+            var urlText = document.createElement('p');
+            urlText.textContent = url;
+
+            archiveItem.appendChild(qrThumbnail);
+            archiveItem.appendChild(urlText);
+            archiveContainer.appendChild(archiveItem);
+        }
+    </script>
+
+</body>
+
+</html>
