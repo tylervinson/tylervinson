@@ -39,7 +39,8 @@
         .mdl-textfield__input {
             width: calc(100% - 100px);
         }
-        .mdl-button--colored {
+        .mdl-button--colored,
+        button {
             background-color: #d35400 !important;
             color: #ffffff !important;
             box-shadow: none !important;
@@ -89,7 +90,6 @@
             <p>Redirecting in <span id="countdown">10</span> seconds...</p>
         </div>
         <div class="mdl-card__actions mdl-card--border">
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="closePopup()">Close</button>
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="cancelRedirect()">Cancel</button>
         </div>
     </div>
