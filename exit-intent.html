@@ -84,10 +84,27 @@
             return { currentURL, exitURL };
         }
 
+        // Function to validate URL format
+        function isValidURL(url) {
+            try {
+                new URL(url);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
         // Handle form submission
         document.getElementById('url-form').addEventListener('submit', function(event) {
             event.preventDefault();
             var inputURL = document.getElementById('url-input').value;
+
+            // Validate the URL format
+            if (!isValidURL(inputURL)) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
             var urls = getURLs(inputURL);
 
             // Check if the URL is external
