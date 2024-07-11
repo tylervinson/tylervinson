@@ -73,7 +73,7 @@
                     <p>Exit Intent demonstration.<br>Test by entering either an <a href="#" id="copy-url-link">internal</a> or external URL below.</p>
                     <form id="url-form" class="url-form-container">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="url" id="url-input" required>
+                            <input class="mdl-textfield__input" type="url" id="url-input" required style="height: 30px;">
                             <label class="mdl-textfield__label" for="url-input">Enter a URL...</label>
                         </div>
                         <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Go</button>
@@ -148,24 +148,11 @@
             }
         }
 
-        // Function to copy text to clipboard
-        function copyToClipboard(text) {
-            var tempInput = document.createElement('input');
-            tempInput.style.position = 'absolute';
-            tempInput.style.left = '-9999px';
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-        }
-
-        // Handle link click to copy URL
+        // Handle link click to populate the form field
         document.getElementById('copy-url-link').addEventListener('click', function(event) {
             event.preventDefault();
             var internalURL = 'https://tylervinson.github.io/tylervinson';
-            copyToClipboard(internalURL);
-            this.textContent = 'Internal URL copied';
+            document.getElementById('url-input').value = internalURL;
         });
 
         // Handle form submission
