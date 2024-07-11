@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exit Intent Popup Demo</title>
+    <style>
+        #exit-intent-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            z-index: 10000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exit Intent Popup Demo</h1>
+    <p><a href="#" id="internal-link">Internal Link</a></p>
+    <p><a href="https://www.cnn.com" id="external-link">External Link</a></p>
+
+    <div id="exit-intent-popup">
+        <p id="exit-message"></p>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+        // Function to create the exit intent popup
+        function createExitIntentPopup(currentURL, exitURL) {
+            var popup = document.getElementById('exit-intent-popup');
+            var message = document.getElementById('exit-message');
+            message.textContent = `You are being directed away from ${currentURL} to an unaffiliated website: ${exitURL}`;
+            popup.style.display = 'block';
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            var popup = document.getElementById('exit-intent-popup');
+            popup.style.display = 'none';
+        }
+
+        // Function to get the current URL and exit URL dynamically
+        function getURLs() {
+            var currentURL = window.location.href;
+            var exitURL = 'https://www.cnn.com';
+            return { currentURL, exitURL };
+        }
+
+        // Initialize the popup with dynamic URLs
+        var urls = getURLs();
+
+        // Add event listener for mouseout event to detect exit intent
+        document.addEventListener('mouseout', function(event) {
+            if (event.clientY < 50) {
+                createExitIntentPopup(urls.currentURL, urls.exitURL);
+            }
+        });
+
+        // Handle internal link to refresh the page
+        document.getElementById('internal-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            window.location.reload();
+        });
+
+        // Handle external link to show exit intent popup
+        document.getElementById('external-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            createExitIntentPopup(urls.currentURL, urls.exitURL);
+        });
+    </script>
+</body>
+</html>
