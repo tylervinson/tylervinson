@@ -14,6 +14,8 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .mdl-grid {
             width: 100%;
@@ -23,6 +25,7 @@
         .mdl-cell {
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
         }
         .mdl-card {
             width: 100%;
@@ -32,19 +35,12 @@
             height: 100%;
             margin-bottom: 20px;
         }
-        .mdl-cell--6-col {
-            flex: 0 0 calc(50% - 10px);
-            margin-right: 20px;
-        }
-        .mdl-cell--6-col:last-child {
-            margin-right: 0;
-        }
     </style>
 </head>
 <body>
 
     <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
                     <h2 class="mdl-card__title-text">QR Code</h2>
@@ -59,7 +55,7 @@
                 </div>
             </div>
         </div>
-        <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
                     <h2 class="mdl-card__title-text">Broker Modal</h2>
@@ -74,7 +70,7 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
                     <h2 class="mdl-card__title-text">Card 3</h2>
@@ -89,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="mdl-cell mdl-cell--6-col">
+        <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
                     <h2 class="mdl-card__title-text">Card 4</h2>
@@ -103,7 +99,7 @@
                     </a>
                 </div>
             </div>
-        </div> -->
+        </div>
         <!-- Add more cards as needed -->
     </div>
 
