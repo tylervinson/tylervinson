@@ -20,6 +20,15 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             display: none;
         }
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-content {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -30,9 +39,16 @@
             </div>
         </header>
         <main class="mdl-layout__content">
-            <div class="page-content">
-                <p><a href="#" id="internal-link" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Refresh Page</a></p>
-                <p><a href="https://www.cnn.com" id="external-link" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Go to CNN</a></p>
+            <div class="form-container">
+                <div class="form-content">
+                    <form id="url-form">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="url" id="url-input" required>
+                            <label class="mdl-textfield__label" for="url-input">Enter a URL...</label>
+                        </div>
+                        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Go</button>
+                    </form>
+                </div>
             </div>
         </main>
     </div>
@@ -62,32 +78,24 @@
         }
 
         // Function to get the current URL and exit URL dynamically
-        function getURLs() {
+        function getURLs(inputURL) {
             var currentURL = window.location.href;
-            var exitURL = 'https://www.cnn.com';
+            var exitURL = inputURL;
             return { currentURL, exitURL };
         }
 
-        // Initialize the popup with dynamic URLs
-        var urls = getURLs();
+        // Handle form submission
+        document.getElementById('url-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var inputURL = document.getElementById('url-input').value;
+            var urls = getURLs(inputURL);
 
-        // Add event listener for mouseout event to detect exit intent
-        document.addEventListener('mouseout', function(event) {
-            if (event.clientY < 50) {
+            // Check if the URL is external
+            if (new URL(inputURL).origin !== window.location.origin) {
                 createExitIntentPopup(urls.currentURL, urls.exitURL);
+            } else {
+                window.location.href = inputURL;
             }
-        });
-
-        // Handle internal link to refresh the page
-        document.getElementById('internal-link').addEventListener('click', function(event) {
-            event.preventDefault();
-            window.location.reload();
-        });
-
-        // Handle external link to show exit intent popup
-        document.getElementById('external-link').addEventListener('click', function(event) {
-            event.preventDefault();
-            createExitIntentPopup(urls.currentURL, urls.exitURL);
         });
     </script>
 </body>
