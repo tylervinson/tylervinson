@@ -148,11 +148,17 @@
             }
         }
 
-        // Handle link click to populate the form field
+        // Handle link click to populate the form field and focus it
         document.getElementById('copy-url-link').addEventListener('click', function(event) {
             event.preventDefault();
             var internalURL = 'https://tylervinson.github.io/tylervinson';
-            document.getElementById('url-input').value = internalURL;
+            var urlInput = document.getElementById('url-input');
+            urlInput.value = internalURL;
+            urlInput.focus();
+
+            // Trigger the Material Design Lite update
+            urlInput.parentNode.MaterialTextfield.change(internalURL);
+            urlInput.parentNode.classList.add('is-dirty');
         });
 
         // Handle form submission
