@@ -28,7 +28,7 @@
             flex-direction: column;
         }
         .form-content {
-            text-align: center;
+            text-align: left;
             width: 100%;
             max-width: 600px;
         }
@@ -38,7 +38,6 @@
         }
         .mdl-textfield__input {
             width: calc(100% - 100px);
-            padding-left: 40px;
         }
         .mdl-button--colored {
             background-color: #d35400 !important;
@@ -50,8 +49,8 @@
         }
         .url-form-container {
             display: flex;
-            justify-content: center;
             align-items: center;
+            margin-top: 20px;
         }
         .mdl-textfield, .mdl-button--colored {
             margin-top: 20px;
@@ -70,8 +69,8 @@
         </header>
         <main class="mdl-layout__content">
             <div class="form-container">
-                <p>Exit Intent demonstration.<br>Test by entering either an <a href='https://tylervinson.github.io/tylervinson' target="_blank">internal</a> or external URL below.</p>
                 <div class="form-content">
+                    <p>Exit Intent demonstration.<br>Test by entering either an <a href="https://tylervinson.github.io/tylervinson" target="_blank">internal</a> or external URL below.</p>
                     <form id="url-form" class="url-form-container">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="url" id="url-input" required>
