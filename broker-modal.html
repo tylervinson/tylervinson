@@ -43,10 +43,14 @@
 <script type="text/javascript">
   // Function to close the modal
   function closeModal() {
-    var modal = $('#formModal');
+    var modal = document.getElementById('enhancement-request-form');
     if (modal) {
-      modal.modal('hide');
-      console.log('Success: Modal has been closed.');
+      modal.classList.remove('in');
+      modal.style.display = "none";
+      var backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.style.display = "none";
+      }
     }
   }
 
@@ -62,6 +66,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
