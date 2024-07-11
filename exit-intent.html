@@ -25,6 +25,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            flex-direction: column;
         }
         .form-content {
             text-align: center;
@@ -40,6 +41,7 @@
         </header>
         <main class="mdl-layout__content">
             <div class="form-container">
+                <button onclick="window.location.href='https://tylervinson.github.io/tylervinson';" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Internal Link</button>
                 <div class="form-content">
                     <form id="url-form">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -56,6 +58,7 @@
     <div id="exit-intent-popup" class="mdl-card mdl-shadow--2dp">
         <div class="mdl-card__supporting-text">
             <p id="exit-message"></p>
+            <p>Redirecting in <span id="countdown">10</span> seconds...</p>
         </div>
         <div class="mdl-card__actions mdl-card--border">
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="closePopup()">Close</button>
@@ -69,6 +72,19 @@
             var message = document.getElementById('exit-message');
             message.textContent = `You are being directed away from ${currentURL} to an unaffiliated website: ${exitURL}`;
             popup.style.display = 'block';
+
+            var countdownElement = document.getElementById('countdown');
+            var countdown = 10;
+            countdownElement.textContent = countdown;
+
+            var countdownInterval = setInterval(function() {
+                countdown--;
+                countdownElement.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = exitURL;
+                }
+            }, 1000);
         }
 
         // Function to close the popup
