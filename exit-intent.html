@@ -30,12 +30,71 @@
         .form-content {
             text-align: center;
         }
+        body {
+            background-color: #222222;
+            color: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mdl-card {
+           
+       
+        }
+
+        .left-card {
+            width: 100%;
+        }
+
+        .right-card {
+            flex-grow: 1;
+        }
+
+        .mdl-textfield__input {
+            width: 100%;
+            padding-left: 40px;
+        }
+
+        .mdl-button--colored {
+            background-color: #d35400 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+            margin-left: 10px !important;
+        }
+
+        .archive-container {
+            margin-top: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .archive-item {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .archive-item canvas {
+            border: 1px solid #ffffff;
+        }
+        .mdl-textfield {
+            width:100% !important;
+            margin-top: 80px;
+        }
     </style>
 </head>
 <body>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
         <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row">
+            <div class="mdl-layout__header-row" style="background-color:#333;">
                 <span class="mdl-layout-title">Exit Intent Popup Demo</span>
             </div>
         </header>
