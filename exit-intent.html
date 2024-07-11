@@ -29,61 +29,36 @@
         }
         .form-content {
             text-align: center;
+            width: 100%;
+            max-width: 600px;
         }
         body {
             background-color: #222222;
             color: #ffffff;
         }
-
-        .container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 50px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .left-card {
-            width: 100%;
-        }
-
-        .right-card {
-            flex-grow: 1;
-        }
-
         .mdl-textfield__input {
-            width: 100%;
+            width: calc(100% - 100px);
             padding-left: 40px;
         }
-
         .mdl-button--colored {
             background-color: #d35400 !important;
             color: #ffffff !important;
             box-shadow: none !important;
-            margin-left: 10px !important;
-        }
-
-        .archive-container {
-            margin-top: 50px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .archive-item {
-            margin: 10px;
-            text-align: center;
-        }
-
-        .archive-item canvas {
-            border: 1px solid #ffffff;
         }
         .mdl-textfield {
-            width:100% !important;
-            margin-top: 80px;
-        } 
+            width: calc(100% - 100px);
+        }
+        .url-form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .mdl-textfield, .mdl-button--colored {
+            margin-top: 20px;
+        }
+        a {
+            color: #d35400;
+        }
     </style>
 </head>
 <body>
@@ -95,11 +70,11 @@
         </header>
         <main class="mdl-layout__content">
             <div class="form-container">
-            <p>Exit Intent demonstration.<br>Test by entering either an <a href='https://tylervinson.github.io/tylervinson';" target="_blank">internal</a> or external URL below.</p>
+                <p>Exit Intent demonstration.<br>Test by entering either an <a href='https://tylervinson.github.io/tylervinson' target="_blank">internal</a> or external URL below.</p>
                 <div class="form-content">
-                    <form id="url-form">
+                    <form id="url-form" class="url-form-container">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="url" id="url-input" required style="height: 30px;">
+                            <input class="mdl-textfield__input" type="url" id="url-input" required>
                             <label class="mdl-textfield__label" for="url-input">Enter a URL...</label>
                         </div>
                         <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Go</button>
