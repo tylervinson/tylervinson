@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" class="" translate="no">
+  <head>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const pathArray = window.location.pathname.split('/');
+        const lesson = pathArray[pathArray.length - 2];
+        const rootDomain = `${window.location.protocol}//${window.location.hostname}`;
+        const url = `${rootDomain}/${lesson}/story.html?utm_source=Online&utm_medium=Online&utm_campaign=${lesson}&utm_id=${lesson}`;
+        
+        // Redirect to the new URL with a 301 status (this part is simulated in client-side JS)
+        window.location.replace(url);
+      });
+    </script>
+  </head>
+  <body>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const pathArray = window.location.pathname.split('/');
+        const lesson = pathArray[pathArray.length - 2];
+        document.body.innerHTML = lesson;
+      });
+    </script>
+  </body>
+</html>
