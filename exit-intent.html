@@ -214,15 +214,39 @@
             return { currentURL, exitURL };
         }
 
-        // Function to validate URL format
-        function isValidURL(url) {
-            try {
-                new URL(url);
-                return true;
-            } catch (_) {
-                return false;
-            }
-        }
+        function normalizeURL(url) {
+    // Regular expression to match and normalize URLs
+    const pattern = /^(?:https?:\/\/)?(?:www\.)?(.*)/;
+    const match = url.match(pattern);
+    if (match) {
+        return 'https://www.' + match[1];
+    }
+    return url;
+}
+
+function isValidURL(url) {
+    try {
+        const normalizedURL = normalizeURL(url);
+        new URL(normalizedURL);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// Test cases
+const urls = [
+    'https://www.example.com',
+    'http://example.com',
+    'www.example.com',
+    'example.com',
+    'invalid_url'
+];
+
+urls.forEach(url => {
+    console.log(`${url}: ${isValidURL(url)}`);
+});
+
 
         // Handle link click to populate the form field and focus it
         document.getElementById('copy-url-link').addEventListener('click', function(event) {
