@@ -15,10 +15,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 20px;
-            background-color: #fff;
+            background-color: #333;
             z-index: 10000;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             display: none;
+            border-radius: 20px 6px;
         }
         .form-container {
             display: flex;
@@ -34,14 +35,14 @@
         }
         body {
             background-color: #222222;
-            color: #ffffff;
+            color: #333;
         }
         .mdl-textfield__input {
             width: calc(100% - 100px);
         }
         .mdl-button--colored,
         button {
-            background-color: #d35400 !important;
+            background-color: #333 !important;
             color: #ffffff !important;
             box-shadow: none !important;
         }
@@ -57,7 +58,7 @@
             margin-top: 20px;
         }
         a {
-            color: #d35400;
+            color: #fff;
         }
         body {
     display: flex;
@@ -127,11 +128,6 @@
 </head>
 <body>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row" style="background-color:#333;">
-                <span class="mdl-layout-title">Exit Intent Popup Demo</span>
-            </div>
-        </header>
         <main class="mdl-layout__content">
             <div class="form-container">
                 <div class="form-content">
