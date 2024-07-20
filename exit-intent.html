@@ -17,7 +17,7 @@
             padding: 20px;
             background-color: #333;
             z-index: 10000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: none;
             display: none;
             border-radius: 20px 6px;
         }
@@ -33,6 +33,14 @@
             width: 100%;
             max-width: 600px;
         }
+        .mdl-textfield.is-invalid .mdl-textfield__input {
+    border-color: #333;
+    box-shadow: none;
+}
+.mdl-textfield--floating-label.is-invalid .mdl-textfield__label {
+    color: #333;
+    font-size: 12px;
+}
         body {
             background-color: #222222;
             color: #333;
