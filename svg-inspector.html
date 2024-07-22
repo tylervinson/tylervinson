@@ -108,30 +108,36 @@ function resizeCard(factor) {
     }
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     // Get the source and target divs
     var sourceDiv = document.getElementById("source-div");
     var targetDiv = document.getElementById("target-div");
 
-    // Find the SVG element within the source div
-    var svgElement = sourceDiv.querySelector("svg");
+    // Find the img element within the source div
+    var imgElement = sourceDiv.querySelector("img");
 
-    if (svgElement) {
-        // Get the SVG markup as a string
-        var svgMarkup = svgElement.outerHTML;
+    if (imgElement) {
+        // Fetch the SVG file content
+        fetch(imgElement.src)
+            .then(response => response.text())
+            .then(svgMarkup => {
+                // Create a text node with the SVG markup
+                var codeNode = document.createTextNode(svgMarkup);
 
-        // Create a text node with the SVG markup
-        var codeNode = document.createTextNode(svgMarkup);
+                // Create a <pre> element to preserve formatting
+                var preElement = document.createElement("pre");
+                preElement.appendChild(codeNode);
 
-        // Create a <pre> element to preserve formatting
-        var preElement = document.createElement("pre");
-        preElement.appendChild(codeNode);
-
-        // Append the <pre> element to the target div
-        targetDiv.appendChild(preElement);
+                // Append the <pre> element to the target div
+                targetDiv.appendChild(preElement);
+            })
+            .catch(error => {
+                // Handle any errors that occur during fetch
+                targetDiv.textContent = "Error fetching SVG content: " + error;
+            });
     } else {
-        // If no SVG is found, display a message
-        targetDiv.textContent = "No SVG found in the source div.";
+        // If no img is found, display a message
+        targetDiv.textContent = "No image found in the source div.";
     }
 });
 
