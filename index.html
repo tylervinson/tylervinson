@@ -5,141 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Pages Grid of Cards</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_purple.min.css" />
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #EC6709;
-        }
-        .mdc-layout-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #EC6709;
+}
+        .mdl-grid {
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
         }
-        .mdc-layout-grid__cell {
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            border: 1px solid #ec6709;
-            margin: 0;
-        }
-        .mdc-card {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-            background-color: #333;
-            border-radius: 20px 6px;
-            color: #f9e5d3;
-        }
-        .mdc-card__primary-action {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            color: inherit;
-        }
-        .mdc-card__actions {
-            display: flex;
-            justify-content: flex-end;
-            padding: 16px;
-        }
-        .mdc-button--colored {
-            color: #EC6709;
-        }
+        .mdl-cell {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border: 1px solid #ec6709;
+    margin:0;
+}
+.mdl-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    /* margin-bottom: 20px; */
+    background-color: #333;
+    border-radius: 20px 6px;
+}
+.mdl-card__title {
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: #f9e5d3;
+    display: block;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: stretch;
+    -ms-flex-pack: stretch;
+    justify-content: stretch;
+    line-height: normal;
+    padding: 50px 16px 16px;
+    -webkit-perspective-origin: 165px 56px;
+    perspective-origin: 165px 56px;
+    -webkit-transform-origin: 165px 56px;
+    transform-origin: 165px 56px;
+    background-color: #333;
+    box-sizing: border-box;
+}
+.mdl-card__supporting-text {
+    color: #f9e5d3;
+    font-size: 1rem;
+    line-height: 18px;
+    overflow: hidden;
+    padding: 16px;
+    width: 90%;
+}
+.mdl-button.mdl-button--colored {
+    color:#EC6709;
+}
     </style>
 </head>
 <body>
-    <div class="mdc-layout-grid">
-        <div class="mdc-layout-grid__inner">
-            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                <div class="mdc-card">
-                    <div class="mdc-card__primary-action">
-                        <h2 class="mdc-typography--headline6">QR Code Generator</h2>
-                        <p class="mdc-typography--body2">Demo for a QR Code generator.</p>
-                    </div>
-                    <div class="mdc-card__actions">
-                        <button class="mdc-button mdc-button--raised mdc-ripple-upgraded">
-                            <span class="mdc-button__ripple"></span>
-                            <a href="https://tylervinson.github.io/tylervinson/qr-code.html" class="mdc-button--colored">view demo</a>
-                        </button>
-                    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">QR Code Generator</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    Demo for a QR Code generator.
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a href="https://tylervinson.github.io/tylervinson/qr-code.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        view demo
+                    </a>
                 </div>
             </div>
-            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                <div class="mdc-card">
-                    <div class="mdc-card__primary-action">
-                        <h2 class="mdc-typography--headline6">Close Modal on iFrame Form Success</h2>
-                        <p class="mdc-typography--body2">Demo for a script that closes a modal on a parent page from a form embedded in an iframe.</p>
-                    </div>
-                    <div class="mdc-card__actions">
-                        <button class="mdc-button mdc-button--raised mdc-ripple-upgraded">
-                            <span class="mdc-button__ripple"></span>
-                            <a href="https://tylervinson.github.io/tylervinson/broker-modal.html" class="mdc-button--colored">view demo</a>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4" style="width: 33.3%;">
-                <div class="mdc-card">
-                    <div class="mdc-card__primary-action">
-                        <h2 class="mdc-typography--headline6">Exit Intent Popup</h2>
-                        <p class="mdc-typography--body2">Exit intent popup demo</p>
-                    </div>
-                    <div class="mdc-card__actions">
-                        <button class="mdc-button mdc-button--raised mdc-ripple-upgraded">
-                            <span class="mdc-button__ripple"></span>
-                            <a href="https://tylervinson.github.io/tylervinson/exit-intent.html" class="mdc-button--colored">view demo</a>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                <div class="mdc-card">
-                    <div class="mdc-card__primary-action">
-                        <h2 class="mdc-typography--headline6">UTM Redirect</h2>
-                        <p class="mdc-typography--body2">Index file redirects to app main page with UTM parameters based on folder name</p>
-                    </div>
-                    <div class="mdc-card__actions">
-                        <button class="mdc-button mdc-button--raised mdc-ripple-upgraded">
-                            <span class="mdc-button__ripple"></span>
-                            <a href="asm/" class="mdc-button--colored">view demo</a>
-                        </button>
-                    </div>
-                </div>
-            </div> 
-            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
-                <div class="mdc-card">
-                    <div class="mdc-card__primary-action">
-                        <h2 class="mdc-typography--headline6">Bauhaus Wallpaper Creator</h2>
-                        <p class="mdc-typography--body2">Generates responsive Bauhaus style grid with download as png button for wallpaper with proper pixel depth and aspect ratio on any device.</p>
-                    </div>
-                    <div class="mdc-card__actions">
-                        <button class="mdc-button mdc-button--raised mdc-ripple-upgraded">
-                            <span class="mdc-button__ripple"></span>
-                            <a href="bauhaus-grid.html" class="mdc-button--colored">view demo</a>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- Add more cards as needed -->
         </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Close Modal on iFrame Form Success</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                   Demo for a script that closes a modal on a parent page from a form embedded in an iframe.
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a href="https://tylervinson.github.io/tylervinson/broker-modal.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        view demo
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-phone" style="width: 33.3%;">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Exit Intent Popup</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                   Exit intent popup demo
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a href="https://tylervinson.github.io/tylervinson/exit-intent.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        view demo
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">UTM Redirect</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    Index file redirects to app main page with UTM parameters based on folder name
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a href="asm/" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        View Demo
+                    </a>
+                </div>
+            </div>
+        </div> 
+        <div class="mdl-cell mdl-cell--8-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Bauhaus Wallpaper Creator</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    Generates responsive Bauhaus style grid with download as png button for wallpaper with proper pixel depth and aspect ration on any device.
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a href="bauhaus-grid.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        View Demo
+                    </a>
+                </div>
+            </div>
+        </div> 
+        <!-- Add more cards as needed -->
     </div>
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script>
-        const ripples = document.querySelectorAll('.mdc-button');
-        ripples.forEach((ripple) => {
-            mdc.ripple.MDCRipple.attachTo(ripple);
-        });
-    </script>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>
 </html>
