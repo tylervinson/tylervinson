@@ -83,10 +83,13 @@
 
 <div class="svg-container">
     <div class="mdl-card mdl-shadow--2dp">
-        <div class="svg-holder">
+        <div id="source-div" class="svg-holder">
             <img id="image" src="https://www.azblue.com/_next/image?url=https%3A%2F%2Fedge.sitecorecloud.io%2Fbluecross-6f8ea2ea%2Fmedia%2Fproject%2Fbcbs-az%2Fazblue%2Fimages%2Flogos%2Fbcbs-logo-header.svg%3Fh%3D40%26iar%3D0%26w%3D160&w=256&q=75" alt="SVG will appear here">
         </div>
     </div>
+</div>
+<div>
+    <div id="target-div"></div>
 </div>
 
 <script>
@@ -104,6 +107,34 @@ function resizeCard(factor) {
         image.src = imageUrl;
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Get the source and target divs
+    var sourceDiv = document.getElementById("source-div");
+    var targetDiv = document.getElementById("target-div");
 
+    // Find the SVG element within the source div
+    var svgElement = sourceDiv.querySelector("svg");
+
+    if (svgElement) {
+        // Get the SVG markup as a string
+        var svgMarkup = svgElement.outerHTML;
+
+        // Create a text node with the SVG markup
+        var codeNode = document.createTextNode(svgMarkup);
+
+        // Create a <pre> element to preserve formatting
+        var preElement = document.createElement("pre");
+        preElement.appendChild(codeNode);
+
+        // Append the <pre> element to the target div
+        targetDiv.appendChild(preElement);
+    } else {
+        // If no SVG is found, display a message
+        targetDiv.textContent = "No SVG found in the source div.";
+    }
+});
+
+</script>
 </body>
 </html>
