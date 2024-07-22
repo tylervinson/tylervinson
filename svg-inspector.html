@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Viewer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_purple.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <style>
+        body {
+            background-color: #ededed !important;
+            color: #ffffff !important;
+        }
+        .mdl-button--fab {
+            border-radius: 4px !important;
+        }
+        .svg-container {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            margin-top: 20px !important;
+        }
+        .mdl-card {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            margin: 0px !important;
+            padding: 20px !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            transition: width 0.3s ease, height 0.3s ease !important;
+            width: 400px; /* Initial width */
+            min-height: fit-content !important;
+        }
+        .svg-holder {
+            width: 100% !important;
+        }
+        .svg-holder img {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+        }
+        .controls {
+            display: flex !important;
+            justify-content: center !important;
+            margin-bottom: 10px !important;
+            margin-top: 40px !important;
+        }
+        .control-button {
+            margin: 0 2px !important;
+        }
+        .url-input {
+            margin-left: 10px !important;
+         
+            padding: 10px !important;
+            width: 250px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 0px !important;
+            box-sizing: border-box !important;
+        }
+        button{
+          height: 56px !important;
+          background-color:#0099D8 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-button--accent control-button" onclick="resizeCard(0.8)">
+        <i class="material-icons">zoom_out</i>
+    </button>
+    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-button--accent control-button" onclick="resizeCard(1.25)">
+        <i class="material-icons">zoom_in</i>
+    </button>
+    <input type="text" class="url-input" id="imageUrl" placeholder="Enter image URL" />
+    <button style="background-color:#252525;box-shadow:none;border-radius:0px"class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-button--accent" onclick="loadImage()">
+        Load Image
+    </button>
+</div>
+
+<div class="svg-container">
+    <div class="mdl-card mdl-shadow--2dp">
+        <div class="svg-holder">
+            <img id="image" src="https://www.azblue.com/_next/image?url=https%3A%2F%2Fedge.sitecorecloud.io%2Fbluecross-6f8ea2ea%2Fmedia%2Fproject%2Fbcbs-az%2Fazblue%2Fimages%2Flogos%2Fbcbs-logo-header.svg%3Fh%3D40%26iar%3D0%26w%3D160&w=256&q=75" alt="SVG will appear here">
+        </div>
+    </div>
+</div>
+
+<script>
+function resizeCard(factor) {
+        const card = document.querySelector('.mdl-card');
+        let width = parseFloat(card.getAttribute('data-width')) || card.clientWidth;
+        width *= factor;
+        card.style.width = width + 'px';
+        card.setAttribute('data-width', width);
+    }
+
+    function loadImage() {
+        const imageUrl = document.getElementById('imageUrl').value;
+        const image = document.getElementById('image');
+        image.src = imageUrl;
+    }
+</script>
+
+</body>
+</html>
