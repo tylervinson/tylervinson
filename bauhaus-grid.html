@@ -93,6 +93,10 @@
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
+          // Reset the fill style and stroke style for each cell
+          ctx.fillStyle = 'transparent';
+          ctx.strokeStyle = 'transparent';
+
           // Set random background color
           const bgColor = colors[Math.floor(Math.random() * colors.length)];
           ctx.fillStyle = getFillStyle(bgColor, col * cellSize, row * cellSize, cellSize);
