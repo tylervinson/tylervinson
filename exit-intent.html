@@ -140,14 +140,14 @@
 .mdl-button.mdl-button--colored {
     color:#EC6709;
 }
-/* Ensure the input field maintains its background color when focused */
-input:focus {
-    background-color: #EC6709; /* Replace with your desired background color */
+/* Override MDL input focus background color */
+.mdl-textfield__input:focus {
+    background-color: #ec6709 !important; /* Replace with your desired color */
 }
 
-/* Additional rule to ensure hover on URL history tooltip does not affect the input field */
-input:hover {
-    background-color: #EC6709; /* Same as above */
+/* Prevent hover interaction from changing background color */
+.mdl-textfield__input:hover {
+    background-color: #ec6709 !important; /* Same as above */
 }
 
     </style>
