@@ -95,7 +95,7 @@
         for (let col = 0; col < cols; col++) {
           // Set random background color
           const bgColor = colors[Math.floor(Math.random() * colors.length)];
-          ctx.fillStyle = bgColor;
+          ctx.fillStyle = getFillStyle(bgColor, col * cellSize, row * cellSize, cellSize);
           ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
 
           // Ensure quarter circle color is different from the background
@@ -108,28 +108,33 @@
       }
     }
 
-    // Function to draw a quarter circle in the correct position
-    function drawQuarterCircle(context, x, y, size, color) {
-      // Define the gradient for this specific cell if the color is 'useGradient'
-      let fillStyle = color;
+    // Function to get the fill style, including gradients if needed
+    function getFillStyle(color, x, y, size) {
       if (color === 'useGradient1') {
         const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
         gradient.addColorStop(0, '#9E50BE'); // Start color of the gradient
         gradient.addColorStop(1, '#D680D9'); // End color of the gradient
-        fillStyle = gradient;
+        return gradient;
       }
       if (color === 'useGradient2') {
         const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
         gradient.addColorStop(0, '#300EA1'); // Start color of the gradient
         gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
-        fillStyle = gradient;
+        return gradient;
       }
       if (color === 'useGradient3') {
         const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
         gradient.addColorStop(0, '#F2C2F4'); // Start color of the gradient
         gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
-        fillStyle = gradient;
+        return gradient;
       }
+      return color; // For solid colors, return the color directly
+    }
+
+    // Function to draw a quarter circle in the correct position
+    function drawQuarterCircle(context, x, y, size, color) {
+      // Define the gradient for this specific cell if the color is 'useGradient'
+      let fillStyle = getFillStyle(color, x, y, size);
       context.fillStyle = fillStyle;
       // Randomly choose the corner for the quarter circle
       const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
