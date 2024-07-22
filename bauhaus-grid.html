@@ -1,182 +1,182 @@
 <html>
 
-  <head>
-    <title>Bauhaus Grid</title>
-    <style>
-        body,
-html {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  /* Hide horizontal scroll */
-}
+<head>
+  <title>Bauhaus Grid</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      /* Hide horizontal scroll */
+    }
 
-canvas {
-  display: block;
-  /* Remove extra space below canvas */
-  width: 100vw;
-  /* Full viewport width */
-  background: #f0f0f0;
-  /* Optional: Canvas background color */
-}
+    canvas {
+      display: block;
+      /* Remove extra space below canvas */
+      width: 100vw;
+      /* Full viewport width */
+      background: #f0f0f0;
+      /* Optional: Canvas background color */
+    }
 
-#downloadBtn {
-  position: absolute;
-  left: 40%;
-  bottom: 40px;
-  width: 20%;
-  height: 60px;
-  border: none;
-  background-color: #821617;
-  opacity: .8;
-  color: #fff;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-family: 'open sans';
-}
-#downloadBtn:hover {
+    #downloadBtn {
+      position: absolute;
+      left: 40%;
+      bottom: 40px;
+      width: 20%;
+      height: 60px;
+      border: none;
+      background-color: #821617;
+      opacity: .8;
+      color: #fff;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 14px;
+      font-family: 'open sans';
+    }
 
-  opacity: 1;
+    #downloadBtn:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
 
-}
+<body>
+  <button id="downloadBtn">Download Image</button>
+  <canvas id="gridCanvas" width="1440" height="960"></canvas>
 
-    </style>
-  </head>
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
 
-  <body>
-    <button id="downloadBtn">Download Image</button>
-    <canvas id="gridCanvas" width="1440" height="960"></canvas>
+    let minCellsAcross = 8; // Minimum number of cells across the width
 
-    <script> const canvas = document.getElementById('gridCanvas');
-        const ctx = canvas.getContext('2d');
-       
-        let minCellsAcross = 8; // Minimum number of cells across the width
-       
-        // Color palette
-        //const colors = ['#026173', 'useGradient', '#fa8a57', '#dda850', '#e9bg9c', '#db5659', '#b5d5ca']; 
-        //const colors = ['#026173', '#fa8a57', '#dda850', '#e9bg9c', '#db5659', '#b5d5ca']; 
-        const colors = ['#D23031', '#F54337', '#B71B1C', '#FF9C00', '#FF6100']; //Red
-        //const colors = ['#9E50BE', '#D680D9', '#300EA1', '#6D28C3', '#F2C2F4','useGradient1']; //Purp
-        //const colors = ['useGradient1','useGradient2','useGradient3']; //G-Purp
-       
-        function setCanvasSize() {
-          // Set canvas width to full viewport width
-          canvas.width = window.innerWidth;
-          // Calculate the necessary canvas height based on cell size and number of rows
-          const cellSize = canvas.width / minCellsAcross; // cell size based on width
-          const rows = Math.ceil(window.innerHeight / cellSize); // number of rows needed
-          canvas.height = rows * cellSize; // Adjust canvas height to fit complete rows
+    // Color palettes
+    const colorPalettes = [
+      ['#026173', '#fa8a57', '#dda850', '#e9bg9c', '#db5659', '#b5d5ca'],
+      ['#D23031', '#F54337', '#B71B1C', '#FF9C00', '#FF6100'], // Red
+      ['#9E50BE', '#D680D9', '#300EA1', '#6D28C3', '#F2C2F4', 'useGradient1'], // Purp
+      ['useGradient1', 'useGradient2', 'useGradient3'] // G-Purp
+    ];
+
+    // Randomly select a color palette
+    const colors = colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
+
+    function setCanvasSize() {
+      // Set canvas width to full viewport width
+      canvas.width = window.innerWidth;
+      // Calculate the necessary canvas height based on cell size and number of rows
+      const cellSize = canvas.width / minCellsAcross; // cell size based on width
+      const rows = Math.ceil(window.innerHeight / cellSize); // number of rows needed
+      canvas.height = rows * cellSize; // Adjust canvas height to fit complete rows
+    }
+
+    function calculateGrid() {
+      const cellSize = canvas.width / minCellsAcross; // cell size based on width
+      const cols = Math.floor(canvas.width / cellSize);
+      const rows = Math.floor(canvas.height / cellSize);
+      return {
+        cellSize,
+        rows,
+        cols
+      };
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const {
+        cellSize,
+        rows,
+        cols
+      } = calculateGrid();
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          // Set random background color
+          const bgColor = colors[Math.floor(Math.random() * colors.length)];
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+
+          // Ensure quarter circle color is different from the background
+          const shapeColors = colors.filter(c => c !== bgColor);
+          const circleColor = shapeColors[Math.floor(Math.random() * shapeColors.length)];
+
+          // Draw quarter circle
+          drawQuarterCircle(ctx, col * cellSize, row * cellSize, cellSize, circleColor);
         }
-       
-        function calculateGrid() {
-          const cellSize = canvas.width / minCellsAcross; // cell size based on width
-          const cols = Math.floor(canvas.width / cellSize);
-          const rows = Math.floor(canvas.height / cellSize);
-          return {
-            cellSize,
-            rows,
-            cols
-          };
-        }
-       
-        function drawGrid() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          const {
-            cellSize,
-            rows,
-            cols
-          } = calculateGrid();
-       
-          for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-              // Set random background color
-              const bgColor = colors[Math.floor(Math.random() * colors.length)];
-              ctx.fillStyle = bgColor;
-              ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-       
-              // Ensure quarter circle color is different from the background
-              const shapeColors = colors.filter(c => c !== bgColor);
-              const circleColor = shapeColors[Math.floor(Math.random() * shapeColors.length)];
-       
-              // Draw quarter circle
-              drawQuarterCircle(ctx, col * cellSize, row * cellSize, cellSize, circleColor);
-            }
-          }
-        }
-       
-        // Function to draw a quarter circle in the correct position
-        function drawQuarterCircle(context, x, y, size, color) {
-          // Define the gradient for this specific cell if the color is 'useGradient'
-          let fillStyle = color;
-          if (color === 'useGradient1') {
-            const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
-            gradient.addColorStop(0, '#9E50BE'); // Start color of the gradient
-            gradient.addColorStop(1, '#D680D9'); // End color of the gradient
-            fillStyle = gradient;
-          }
-          if (color === 'useGradient2') {
-            const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
-            gradient.addColorStop(0, '#300EA1'); // Start color of the gradient
-            gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
-            fillStyle = gradient;
-          }
-          if (color === 'useGradient3') {
-            const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
-            gradient.addColorStop(0, '#F2C2F4'); // Start color of the gradient
-            gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
-            fillStyle = gradient;
-          }
-          context.fillStyle = fillStyle;
-          // Randomly choose the corner for the quarter circle
-          const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-          const corner = corners[Math.floor(Math.random() * corners.length)];
-       
-          context.beginPath();
-          switch (corner) {
-            case 'top-left':
-              context.moveTo(x, y);
-              context.arc(x, y, size + 1, 0, Math.PI / 2);
-              break;
-            case 'top-right':
-              context.moveTo(x + size, y);
-              context.arc(x + size, y, size, Math.PI / 2, Math.PI);
-              break;
-            case 'bottom-left':
-              context.moveTo(x, y + size);
-              context.arc(x, y + size, size, 1.5 * Math.PI, 0);
-              break;
-            case 'bottom-right':
-              context.moveTo(x + size, y + size);
-              context.arc(x + size, y + size, size, Math.PI, 1.5 * Math.PI);
-              break;
-          }
-          context.closePath();
-          context.fill();
-        }
-       
-        function downloadCanvasAsImage() {
-          let image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-          let link = document.createElement('a');
-          link.download = 'my-canvas.png';
-          link.href = image;
-          link.click();
-        }
-       
-        window.addEventListener('resize', () => {
-          setCanvasSize();
-          drawGrid();
-        });
-       
-        document.getElementById('downloadBtn').addEventListener('click', downloadCanvasAsImage);
-       
-        // Initialize the canvas size and draw the grid on load
-        setCanvasSize();
-        drawGrid();
-       </script>
+      }
+    }
 
+    // Function to draw a quarter circle in the correct position
+    function drawQuarterCircle(context, x, y, size, color) {
+      // Define the gradient for this specific cell if the color is 'useGradient'
+      let fillStyle = color;
+      if (color === 'useGradient1') {
+        const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
+        gradient.addColorStop(0, '#9E50BE'); // Start color of the gradient
+        gradient.addColorStop(1, '#D680D9'); // End color of the gradient
+        fillStyle = gradient;
+      }
+      if (color === 'useGradient2') {
+        const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
+        gradient.addColorStop(0, '#300EA1'); // Start color of the gradient
+        gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
+        fillStyle = gradient;
+      }
+      if (color === 'useGradient3') {
+        const gradient = ctx.createLinearGradient(x, y + size + 1, x + size + 1, y);
+        gradient.addColorStop(0, '#F2C2F4'); // Start color of the gradient
+        gradient.addColorStop(1, '#6D28C3'); // End color of the gradient
+        fillStyle = gradient;
+      }
+      context.fillStyle = fillStyle;
+      // Randomly choose the corner for the quarter circle
+      const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+      const corner = corners[Math.floor(Math.random() * corners.length)];
 
+      context.beginPath();
+      switch (corner) {
+        case 'top-left':
+          context.moveTo(x, y);
+          context.arc(x, y, size + 1, 0, Math.PI / 2);
+          break;
+        case 'top-right':
+          context.moveTo(x + size, y);
+          context.arc(x + size, y, size, Math.PI / 2, Math.PI);
+          break;
+        case 'bottom-left':
+          context.moveTo(x, y + size);
+          context.arc(x, y + size, size, 1.5 * Math.PI, 0);
+          break;
+        case 'bottom-right':
+          context.moveTo(x + size, y + size);
+          context.arc(x + size, y + size, size, Math.PI, 1.5 * Math.PI);
+          break;
+      }
+      context.closePath();
+      context.fill();
+    }
 
-  </body>
+    function downloadCanvasAsImage() {
+      let image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      let link = document.createElement('a');
+      link.download = 'my-canvas.png';
+      link.href = image;
+      link.click();
+    }
+
+    window.addEventListener('resize', () => {
+      setCanvasSize();
+      drawGrid();
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', downloadCanvasAsImage);
+
+    // Initialize the canvas size and draw the grid on load
+    setCanvasSize();
+    drawGrid();
+  </script>
+</body>
 
 </html>
