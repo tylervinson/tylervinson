@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloadable Rotating Characters Grid</title>
+    <style>
+        @import url('https://use.typekit.net/sdx3aek.css');
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #EC6709;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px;
+            background-color: #fff;
+            position: fixed;
+            left: 0;
+            width: 300px; /* Adjust this value based on the width of your controls */
+            box-shadow: 2px 2px 2px 0px #ddd;
+            z-index: 999;
+            transition: left 0.3s ease;
+            top: unset;
+            bottom: unset;
+        }
+        .controls:hover {
+            left: 0 !important;
+        }
+        .controls::before {
+            content: '❯';
+            position: absolute;
+            top: 50%;
+            right: -30px; /* Width of the visible edge */
+            width: 30px;
+            height: 30px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .button {
+            width: 48%;
+            height: 50px;
+            font-size: 16px;
+            padding: 0 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            background-color: #f3f3f3;
+            color: #666;
+            cursor: pointer;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 80vmin; /* Using viewport units to ensure the grid is square */
+            height: 80vmin; /* Using viewport units to ensure the grid is square */
+            max-width: 800px;
+            max-height: 800px;
+            background-color: #f3f3f3;
+            border: 40px solid #fff;
+            border-radius: 5px;
+        }
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #fff;
+            border: 1px solid #fff;
+            border-radius: 5px;
+        }
+        .letter {
+            display: inline-block;
+            transform-origin:left center;
+            color: #252525;
+            position: relative;
+            opacity: 0;
+            text-align: center;
+            transition: all 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        select {
+            width: 100%;
+            height: 50px;
+            font-size: 18px;
+            padding: 0 10px;
+            margin: 10px 0px 20px 0px;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        label {
+            font-size: 18px;
+            font-family: system-ui;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label for="fontSelector">Select Font Family:</label>
+        <select id="fontSelector">
+            <option value="default" disabled selected>Select an option</option>
+            <option value="brother-1816">Brother 1816</option>
+            <option value="yink">Yink</option>
+            <option value="selfie-neue-round">Selfie Neue Round</option>
+            <option value="rafaella">Rafaella</option>
+            <option value="fabiola-script">Fabiola Script</option>
+            <option value="komet">Komet</option>
+            <option value="fit">Fit</option>
+            <option value="roc-grotesk">Roc Grotesk</option>
+        </select>
+        <label for="fontSizeSelector">Select Font Size (based on width of grid cell):</label>
+        <select id="fontSizeSelector">
+            <option value="default" disabled selected>Select an option</option>
+            <option value=".3">View Characters</option>
+            <option value="2">x2</option>
+            <option value="3">x3</option>
+            <option value="4">x4</option>
+            <option value="5">x5</option>
+            <option value="6">x6</option>
+            <option value="7">x7</option>
+            <option value="8">x8</option>
+            <option value="9">x9</option>
+            <option value="10">x10</option>
+        </select>
+        <div style="margin-bottom: 20px; display: flex; align-items: center; width: 100%;">
+            <label for="fontStyleCheckbox" style="margin-right: 10px;">Italic:</label>
+            <input type="checkbox" id="fontStyleCheckbox" style="margin-right: 20px;">
+            <label for="fontWeightSelector" style="margin-right: 10px;">Weight:</label>
+            <select id="fontWeightSelector" style="flex-grow: 1; width: 100%;">
+                <option value="400">400</option>
+                <option value="500">500</option>
+                <option value="600">600</option>
+                <option value="700">700</option>
+                <option value="800">800</option>
+                <option value="900">900</option>
+            </select>
+        </div>
+        <div class="buttons">
+            <button class="button refresh-button" onclick="location.reload();">Refresh Grid</button>
+            <button class="button" id="clearLocalStorage">Clear Settings</button>
+        </div>
+    </div>
+    <div id="alphabetGrid" class="grid"></div>
+    <!-- <button id="download">Download</button> -->
+
+    <script>
+        // const characters = "abcdefghijklmnopqrstuvwxyz&ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+        const characters = "abcdegmnopqrs?&".split('');
+        //const colors = ["#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#F8E2CF", "#AAD1D9", "#FAF7F5"];
+        const colors = ["#FD665C"];
+        let fontSizeMultiplier = .3;
+
+        function getRandomFromArray(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function createAlphabetGrid(rows, columns) {
+            let grid = [];
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    let cell = document.createElement('div');
+                    cell.className = 'cell';
+                    let letterContainer = document.createElement('span');
+                    letterContainer.className = 'letter';
+                    let character = getRandomFromArray(characters);
+                    let color = getRandomFromArray(colors);
+
+                    letterContainer.textContent = character;
+                    letterContainer.style.color = color;
+
+                    cell.appendChild(letterContainer);
+                    grid.push(cell);
+                }
+            }
+            return grid;
+        }
+
+        function setFontSizes() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const letterContainer = cell.querySelector('.letter');
+                const cellWidth = cell.offsetWidth;
+                const fontSize = cellWidth * fontSizeMultiplier;
+                letterContainer.style.fontSize = `${fontSize}px`;
+            });
+        }
+
+        function applySettings() {
+            const savedFont = localStorage.getItem('selectedFont');
+            const savedFontStyle = localStorage.getItem('selectedFontStyle');
+            const savedFontWeight = localStorage.getItem('selectedFontWeight');
+            if (savedFont) {
+                changeFontFamily(savedFont);
+            }
+            if (savedFontStyle === 'italic') {
+                document.getElementById('fontStyleCheckbox').checked = true;
+                changeFontStyle('italic');
+            }
+            if (savedFontWeight) {
+                document.getElementById('fontWeightSelector').value = savedFontWeight;
+                changeFontWeight(savedFontWeight);
+            }
+            const letters = document.querySelectorAll('.letter');
+            letters.forEach((letter, index) => {
+                setTimeout(() => {
+                    letter.style.opacity = 1;
+                    letter.style.animation = "fadeIn 0.5s ease-out";
+                }, index * 100);
+            });
+        }
+
+        function loadSettings() {
+            const savedFont = localStorage.getItem('selectedFont');
+            const savedFontSize = localStorage.getItem('selectedFontSize');
+            const savedFontStyle = localStorage.getItem('selectedFontStyle');
+            const savedFontWeight = localStorage.getItem('selectedFontWeight');
+
+            console.log('Saved font:', savedFont);  // Debugging log
+            console.log('Saved font size:', savedFontSize);  // Debugging log
+            console.log('Saved font style:', savedFontStyle);  // Debugging log
+            console.log('Saved font weight:', savedFontWeight);  // Debugging log
+
+            if (savedFont) {
+                document.getElementById('fontSelector').value = savedFont;
+            }
+            if (savedFontSize) {
+                document.getElementById('fontSizeSelector').value = savedFontSize;
+                fontSizeMultiplier = parseFloat(savedFontSize);
+            }
+            if (savedFontStyle === 'italic') {
+                document.getElementById('fontStyleCheckbox').checked = true;
+            }
+            if (savedFontWeight) {
+                document.getElementById('fontWeightSelector').value = savedFontWeight;
+            }
+        }
+
+        function saveSettings() {
+            const selectedFont = document.getElementById('fontSelector').value;
+            const selectedFontSize = document.getElementById('fontSizeSelector').value;
+            const selectedFontStyle = document.getElementById('fontStyleCheckbox').checked ? 'italic' : 'normal';
+            const selectedFontWeight = document.getElementById('fontWeightSelector').value;
+
+            console.log('Saving font:', selectedFont);  // Debugging log
+            console.log('Saving font size:', selectedFontSize);  // Debugging log
+            console.log('Saving font style:', selectedFontStyle);  // Debugging log
+            console.log('Saving font weight:', selectedFontWeight);  // Debugging log
+
+            localStorage.setItem('selectedFont', selectedFont);
+            localStorage.setItem('selectedFontSize', selectedFontSize);
+            localStorage.setItem('selectedFontStyle', selectedFontStyle);
+            localStorage.setItem('selectedFontWeight', selectedFontWeight);
+        }
+
+        function clearSettings() {
+            localStorage.removeItem('selectedFont');
+            localStorage.removeItem('selectedFontSize');
+            localStorage.removeItem('selectedFontStyle');
+            localStorage.removeItem('selectedFontWeight');
+            location.reload();
+        }
+
+        function changeFontFamily(fontFamily) {
+            console.log('Changing font family to:', fontFamily);  // Debugging log
+            const letters = document.querySelectorAll('.letter');
+            letters.forEach(letter => {
+                letter.style.fontFamily = fontFamily;
+                console.log('Applied font family to letter:', letter.textContent);  // Debugging log
+            });
+            setFontSizes();
+        }
+
+        function changeFontStyle(fontStyle) {
+            console.log('Changing font style to:', fontStyle);  // Debugging log
+            const letters = document.querySelectorAll('.letter');
+            letters.forEach(letter => {
+                letter.style.fontStyle = fontStyle;
+                console.log('Applied font style to letter:', letter.textContent);  // Debugging log
+            });
+        }
+
+        function changeFontWeight(fontWeight) {
+            console.log('Changing font weight to:', fontWeight);  // Debugging log
+            const letters = document.querySelectorAll('.letter');
+            letters.forEach(letter => {
+                letter.style.fontWeight = fontWeight;
+                console.log('Applied font weight to letter:', letter.textContent);  // Debugging log
+            });
+        }
+
+        document.getElementById('fontSelector').addEventListener('change', function() {
+            const selectedFont = this.value;
+            changeFontFamily(selectedFont);
+            saveSettings();
+        });
+
+        document.getElementById('fontSizeSelector').addEventListener('change', function() {
+            fontSizeMultiplier = parseFloat(this.value);
+            setFontSizes();
+            saveSettings();
+        });
+
+        document.getElementById('fontStyleCheckbox').addEventListener('change', function() {
+            const fontStyle = this.checked ? 'italic' : 'normal';
+            changeFontStyle(fontStyle);
+            saveSettings();
+        });
+
+        document.getElementById('fontWeightSelector').addEventListener('change', function() {
+            const fontWeight = this.value;
+            changeFontWeight(fontWeight);
+            saveSettings();
+        });
+
+        document.getElementById('clearLocalStorage').addEventListener('click', clearSettings);
+
+        loadSettings();  // Ensure settings are loaded before creating the grid
+
+        const rows = 3;
+        const columns = 3;
+        const grid = createAlphabetGrid(rows, columns);
+        displayGrid(grid);  // Define and call displayGrid after loading settings
+
+        function displayGrid(grid) {
+            const gridContainer = document.getElementById('alphabetGrid');
+            grid.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.style.opacity = 1;
+                    cell.style.animation = "fadeIn 0.5s ease-out";
+                    gridContainer.appendChild(cell);
+                    if (index === grid.length - 1) {
+                        setTimeout(() => {
+                            setFontSizes();
+                            applySettings();  // Apply settings after the grid is displayed
+                        }, 0);
+                    }
+                }, index * 100);
+            });
+        }
+
+        // Check if the mouse is over the controls when the page loads
+        let mouseIsOverControls = false;
+
+        document.querySelector('.controls').addEventListener('mouseover', function() {
+            mouseIsOverControls = true;
+            this.style.left = '0';
+        });
+
+        document.querySelector('.controls').addEventListener('mouseout', function() {
+            mouseIsOverControls = false;
+            this.style.left = '-350px';
+        });
+
+        // Slide the controls out after page load if the mouse is not over the controls
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (!mouseIsOverControls) {
+                    document.querySelector('.controls').style.left = '-350px';
+                }
+            }, 300);  // Adjust the timeout as needed
+        });
+    </script>
+</body>
+</html>
