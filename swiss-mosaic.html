@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Grid</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #EAD0B6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(28, 1fr);
+            gap: 0px; /* Adjust as needed */
+            width: 100%;
+        }
+
+        .grid-item {
+            width: 100%; /* Set width to 100% to ensure it takes the full column width */
+            padding-top: 100%; /* Set padding-top to 100% to maintain aspect ratio */
+            position: relative;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .grid-item-content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .filled {
+            border-radius: 0 20px !important;
+        }
+
+        .empty {
+            border-radius: 20px 0 !important;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const predefinedColors = ['#F6A021', '#EF596C', '#F8A01A', '#F35205', '#02612E', '#046582', '#BA778B', '#F5C169', '#8AB17D', '#EBBAB1', '#F8CCA8']; // Add more colors as needed
+
+        function getRandomColor() {
+            const randomIndex = Math.floor(Math.random() * predefinedColors.length);
+            return predefinedColors[randomIndex];
+        }
+
+        function getRandomItem(arr) {
+            const randomIndex = Math.floor(Math.random() * arr.length);
+            return arr[randomIndex];
+        }
+
+        function fadeInOut(element) {
+            const fadeInTime = 1000; // 1 second fade-in
+            const visibleTime = Math.random() * 5000 + 2000; // 2-7 seconds
+            const fadeOutTime = 1000; // 1 second fade-out
+
+            element.style.transition = `opacity ${fadeInTime}ms ease-in-out, opacity ${fadeOutTime}ms ease-in-out ${visibleTime}ms`;
+            element.style.opacity = 1;
+
+            setTimeout(() => {
+                element.style.opacity = 0;
+                setTimeout(() => {
+                    resetGridItem(element);
+                    fadeInOut(element);
+                }, fadeOutTime);
+            }, fadeInTime + visibleTime);
+        }
+
+        function resetGridItem(gridItem) {
+            const content = gridItem.querySelector('.grid-item-content');
+            if (content) {
+                gridItem.removeChild(content);
+                gridItem.classList.remove('filled');
+            }
+
+            gridItem.classList.remove('empty');
+
+            if (Math.random() < 0.34) {
+                const newContent = document.createElement('div');
+                newContent.classList.add('grid-item-content');
+                gridItem.appendChild(newContent);
+                gridItem.classList.add('filled');
+            } else {
+                const bgColor = getRandomColor();
+                gridItem.style.backgroundColor = bgColor;
+                gridItem.classList.add('empty');
+            }
+
+            updateGridItemBackground(gridItem);
+        }
+
+        function updateGridItemBackground(gridItem) {
+            const grid = document.querySelector('.grid');
+            const rows = Array.from(grid.children);
+            const [rowIdx, colIdx] = getGridItemPosition(gridItem, rows);
+
+            let neighborColors = [];
+
+            // Collect colors from adjacent empty cells
+            if (colIdx > 0 && rows[rowIdx][colIdx - 1].classList.contains('empty')) {
+                neighborColors.push(rows[rowIdx][colIdx - 1].style.backgroundColor);
+            }
+            if (colIdx < rows[0].length - 1 && rows[rowIdx][colIdx + 1].classList.contains('empty')) {
+                neighborColors.push(rows[rowIdx][colIdx + 1].style.backgroundColor);
+            }
+            if (rowIdx > 0 && rows[rowIdx - 1][colIdx].classList.contains('empty')) {
+                neighborColors.push(rows[rowIdx - 1][colIdx].style.backgroundColor);
+            }
+            if (rowIdx < rows.length - 1 && rows[rowIdx + 1][colIdx].classList.contains('empty')) {
+                neighborColors.push(rows[rowIdx + 1][colIdx].style.backgroundColor);
+            }
+
+            // Update the background color of the grid-item (filled cell)
+            if (neighborColors.length > 0) {
+                const newBgColor = getRandomItem(neighborColors);
+                gridItem.style.backgroundColor = newBgColor;
+            }
+        }
+
+        function getGridItemPosition(gridItem, rows) {
+            for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+                const columns = Array.from(rows[rowIdx].children);
+                const colIdx = columns.indexOf(gridItem);
+                if (colIdx !== -1) {
+                    return [rowIdx, colIdx];
+                }
+            }
+            return [-1, -1];
+        }
+
+        function createGrid() {
+            const gridContainer = document.createElement('div');
+            gridContainer.classList.add('grid');
+            document.body.appendChild(gridContainer);
+
+            const columns = 28;
+            const cellSize = window.innerWidth / columns;
+            const rows = Math.ceil(window.innerHeight / cellSize);
+
+            const grid = [];
+
+            for (let i = 0; i < rows; i++) {
+                grid[i] = [];
+                for (let j = 0; j < columns; j++) {
+                    const gridItem = document.createElement('div');
+                    gridItem.classList.add('grid-item');
+
+                    grid[i][j] = gridItem;
+                    gridContainer.appendChild(gridItem);
+                }
+            }
+
+            /* Commented out the border-radius logic
+            // Apply border-radius logic for empty cells
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    if (grid[i][j].classList.contains('empty')) { // Empty cell
+                        let borderRadius = '20px 20px 20px 20px';
+                        if (i > 0 && grid[i - 1][j].classList.contains('filled') && grid[i - 1][j].style.backgroundColor === grid[i][j].style.backgroundColor) { // top
+                            borderRadius = borderRadius.slice(0, 0) + '0px ' + borderRadius.slice(1);
+                        }
+                        if (j < columns - 1 && grid[i][j + 1].classList.contains('filled') && grid[i][j + 1].style.backgroundColor === grid[i][j].style.backgroundColor) { // right
+                            borderRadius = borderRadius.slice(0, 1) + '0px ' + borderRadius.slice(2);
+                        }
+                        if (i < rows - 1 && grid[i + 1][j].classList.contains('filled') && grid[i + 1][j].style.backgroundColor === grid[i][j].style.backgroundColor) { // bottom
+                            borderRadius = borderRadius.slice(0, 2) + '0px ' + borderRadius.slice(3);
+                        }
+                        if (j > 0 && grid[i][j - 1].classList.contains('filled') && grid[i][j - 1].style.backgroundColor === grid[i][j].style.backgroundColor) { // left
+                            borderRadius = borderRadius.slice(0, 3) + '0px ' + borderRadius.slice(4);
+                        }
+                        grid[i][j].style.borderRadius = borderRadius;
+                    }
+                }
+            }
+            */
+
+            // Apply fade in and out animation
+            grid.forEach(row => {
+                row.forEach(cell => {
+                    fadeInOut(cell);
+                });
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            document.body.innerHTML = ''; // Clear previous grid
+            createGrid();
+        });
+
+        createGrid(); // Initial grid creation
+    </script>
+</body>
+</html>
