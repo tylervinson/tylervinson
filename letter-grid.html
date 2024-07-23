@@ -76,29 +76,29 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            width: 80vmin; /* Using viewport units to ensure the grid is square */
-            height: 80vmin; /* Using viewport units to ensure the grid is square */
-            max-width: 800px;
-            max-height: 800px;
-            background-color: #f3f3f3;
-            border: 40px solid #fff;
-            border-radius: 5px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 80vmin;
+    height: 80vmin;
+    max-width: 800px;
+    max-height: 800px;
+    background-color: #333;
+    border: 40px solid #333;
+    border-radius: 5px;
         }
         .cell {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            background-color: #fff;
-            border: 1px solid #fff;
-            border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #333;
+    border: 1px solid #333;
+    border-radius: 5px;
         }
         .letter {
             display: inline-block;
             transform-origin:left center;
-            color: #252525;
+            color: rgb(249, 229, 211);
             position: relative;
             opacity: 0;
             text-align: center;
@@ -180,7 +180,7 @@
         // const characters = "abcdefghijklmnopqrstuvwxyz&ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
         const characters = "abcdegmnopqrs?&".split('');
         //const colors = ["#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#F8E2CF", "#AAD1D9", "#FAF7F5"];
-        const colors = ["#FD665C"];
+        const colors = ["#f9e5d3"];
         let fontSizeMultiplier = .3;
 
         function getRandomFromArray(arr) {
