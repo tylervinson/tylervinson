@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>title</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .xml-output {
+            position: relative;
+            font-family: monospace;
+            background-color: #222222;
+            padding: 40px;
+            border-radius: 5px;
+            color: #EEEEEE;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-bottom: 60px;
+        }
+
+        .page {
+            color: #FFD369;
+        }
+
+        .searchtype-value {
+            color: #FFD369;
+        }
+
+        .copy-icon, .download-icon {
+            position: absolute;
+            top: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #FFD369;
+            padding: 5px;
+        }
+
+        .copy-icon {
+            right: 20px;
+        }
+
+        .download-icon {
+            right: 60px;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h4 {
+            margin: 0;
+            color: #222;
+        }
+
+        #submitButton {
+            padding: 8px 35px;
+            border-radius: 4px;
+            background-color: #FB7F64;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <h4>Coveo Sitemap Generator for azblue.com</h4>
+        <form id="urlForm">
+            <button type="submit" id="submitButton">Generate Sitemap</button>
+        </form>
+    </div>
+    <div>
+        <div>
+            <div id="sitemapOutput" class="xml-output"></div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const url = window.location.origin;
+            const sitemapOutput = document.getElementById('sitemapOutput');
+            sitemapOutput.textContent = 'Crawling...';
+        
+            try {
+                const links = await crawlURL(url);
+                const xmlSitemap = generateXMLSitemap(links);
+                sitemapOutput.innerHTML = highlightXml(xmlSitemap) +
+                    '<span id="copyIcon" class="material-icons copy-icon">content_copy</span>' +
+                    '<span id="downloadIcon" class="material-icons download-icon">download</span>';
+                document.getElementById('copyIcon').addEventListener('click', copyToClipboard);
+                document.getElementById('downloadIcon').addEventListener('click', () => downloadCSV(links));
+            } catch (error) {
+                sitemapOutput.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        async function crawlURL(url, visited = new Set(), baseUrl = new URL(url).origin) {
+            if (visited.has(url)) return [];
+        
+            visited.add(url);
+            const links = [url];
+        
+            try {
+                const response = await fetch(url);
+        
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok for URL: ${url} - Status: ${response.status} ${response.statusText}`);
+                }
+        
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const anchorElements = doc.querySelectorAll('a');
+        
+                for (let anchor of anchorElements) {
+                    const href = anchor.href;
+                    if (href.startsWith(baseUrl) && !visited.has(href)) {
+                        const newLinks = await crawlURL(href, visited, baseUrl);
+                        links.push(...newLinks);
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to fetch URL: ${url}`, error);
+            }
+        
+            return links;
+        }
+
+        function generateXMLSitemap(links) {
+            const xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+            const urlsetOpenTag = `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" 
+                xmlns:xhtml="http://www.w3.org/1999/xhtml"
+                xmlns:coveo="https://www.coveo.com/en/company/about-us">\n`;
+            const urlsetCloseTag = `</urlset>`;
+        
+            let urls = '';
+            for (let link of links) {
+                urls += `<url>\n<loc>${link}</loc>\n<coveo:metadata>\n<searchtype><span class="searchtype-value">prosano</span></searchtype>\n</coveo:metadata>\n</url>\n`;
+            }
+        
+            return xmlHeader + urlsetOpenTag + urls + urlsetCloseTag;
+        }
+
+        function highlightXml(xml) {
+            xml = xml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            const urlPattern = /(&lt;loc&gt;)(http[s]?:\/\/[^\s<]+[^\s<]*[^<])(&lt;\/loc&gt;)/g;
+            const searchtypePattern = /(&lt;searchtype&gt;)&lt;span class="searchtype-value"&gt;([^&lt;]+)&lt;\/span&gt;(&lt;\/searchtype&gt;)/g;
+        
+            return xml
+                .replace(urlPattern, '$1<span class="page">$2</span>$3')
+                .replace(searchtypePattern, '$1<span class="searchtype-value">$2</span>$3');
+        }
+
+        function copyToClipboard() {
+            const sitemapOutput = document.getElementById('sitemapOutput');
+            const text = sitemapOutput.cloneNode(true);
+            const copyIcon = text.querySelector('#copyIcon');
+            if (copyIcon) {
+                copyIcon.remove();
+            }
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(text);
+            navigator.clipboard.writeText(tempDiv.textContent).then(() => {
+                alert('Sitemap copied to clipboard!');
+            }, (err) => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function downloadCSV(links) {
+            let csvContent = "data:text/csv;charset=utf-8," 
+                + links.map(link => link).join("\n");
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "sitemap_urls.csv");
+            document.body.appendChild(link); // Required for FF
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
