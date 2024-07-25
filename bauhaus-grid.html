@@ -67,7 +67,7 @@
 <body>
   <div class="buttons">
   <button id="downloadBtn">Download Image</button>
-  <button id="refreshBtn">Refresh Image</button>
+  <button onclick="refreshPage()" id="refreshBtn">Refresh Image</button>
 </div>
   <canvas id="gridCanvas" width="1440" height="960"></canvas>
 
@@ -213,6 +213,11 @@
     setCanvasSize();
     drawGrid();
   </script>
+  <script>
+    function refreshPage() {
+        location.reload();
+    }
+</script>
 </body>
 
 </html>
