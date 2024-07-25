@@ -21,11 +21,22 @@
     }
 
     #downloadBtn {
-      position: absolute;
-      left: 40%;
-      bottom: 40px;
-      width: 20%;
-      height: 60px;
+      display: inline-block;
+      border: none;
+      background-color: #821617;
+      opacity: .8;
+      color: #fff;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 14px;
+      font-family: 'open sans';
+    }
+
+    #refreshBtn:hover {
+      opacity: 1;
+    }
+    #refreshBtn {
+     display: inline-block;
       border: none;
       background-color: #821617;
       opacity: .8;
@@ -39,11 +50,22 @@
     #downloadBtn:hover {
       opacity: 1;
     }
+    .buttons{
+      position: absolute;
+      left: 40%;
+      bottom: 40px;
+      width: 20%;
+      height: 60px;
+    }
+    
   </style>
 </head>
 
 <body>
+  <div class="buttons">
   <button id="downloadBtn">Download Image</button>
+  <button id="refreshBtn">Refresh Image</button>
+</div>
   <canvas id="gridCanvas" width="1440" height="960"></canvas>
 
   <script>
