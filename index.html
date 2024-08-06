@@ -76,8 +76,7 @@
             position: relative;
             overflow: hidden;
         }
-        .graphic-bauhaus .image,
-        .graphic-bauhaus .slider {
+        .graphic-bauhaus .image {
             position: absolute;
     width: 50%;
     height: 100%;
@@ -90,74 +89,7 @@
     top: 0px;
     overflow: hidden;
         }
-        .slider {
- overflow: hidden;
- width: 100vw;
- height: 100vh;
- position: relative;
-}
- 
-.slider .slide {
- position: absolute;
- top: 0;
- left: 0;
- width: 100%;
- height: 100%;
- background-size: cover;
- background-position: center;
- animation: slider 11s infinite;
-}
- 
-.slider .slide:nth-child(1) {
-    background-image: url('i/bg-bauhaus1.png');
-    animation-delay: 0s;
-}
-
-.slider .slide:nth-child(2) {
-    background-image: url('i/bg-bauhaus2.png');
-       animation-delay: -2.2s;
-}
-
-.slider .slide:nth-child(3) {
-    background-image: url('i/bg-bauhaus3.png');
-       animation-delay: -4.4s;
-}
-
-.slider .slide:nth-child(4) {
-    background-image: url('i/bg-bauhaus4.png');
-    animation-delay: -6.6s;
-}
-
-.slider .slide:nth-child(5) {
-   background-image: url('i/bg-bauhaus5.png');
-   animation-delay: -8.8s;
-}
-
-.slider .slide:nth-child(6) {
-   background-image: url('i/bg-bauhaus6.png');
-   animation-delay: -10.1s;
-}
-
-.slider .slide:nth-child(7) {
-   background-image: url('i/bg-bauhaus7.png');
-   animation-delay: -12.12s;
-}
-
-@keyframes slider {
- 0%, 18%, 100% {
-   transform: translateX(0);
-   animation-timing-function: ease;
- }
- 20% {
-   transform: translateX(-100%);
-   animation-timing-function: step-end;
- }
- 98% {
-   transform: translateX(100%);
-   animation-timing-function: ease;
- }
-}
-        /*.graphic-bauhaus .bg1 {
+        .graphic-bauhaus .bg1 {
             background-image: url('i/bg-bauhaus1.png');
             animation-delay: 0s;
         }
@@ -227,7 +159,7 @@
         }
         .mdl-cell--11-col, .mdl-cell--11-col-desktop.mdl-cell--11-col-desktop {
             width: 91.666666666667%;
-        }*/
+        }
         desktop.mdl-cell--12-col-desktop {
             width: 100%;
         }
@@ -313,12 +245,13 @@
                         View Demo
                     </a>
                 </div>
-                <div class="slider">
-                    <div class="slide"></div>
-                    <div class="slide"></div>
-                    <div class="slide"></div>
-                    <div class="slide"></div>
-                    <div class="slide"></div>
+                <div class="image bg1"></div>
+                <div class="image bg2"></div>
+                <div class="image bg3"></div>
+                <div class="image bg4"></div>
+                <div class="image bg5"></div>
+                <div class="image bg6"></div>
+                <div class="image bg7"></div>
             </div>
         </div> 
         <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
