@@ -238,7 +238,7 @@
         <div class="mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class="mdl-card alt mdl-shadow--2dp">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">HTTP Popup</h2>
+                    <h2 class="mdl-card__title-text">HTTP Popup Modal</h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                    Load an external domain into a modal over http
@@ -352,7 +352,7 @@
         link.onclick = function(event) {
           event.preventDefault();  // Prevent the default link behavior
           modal.style.display = "block";
-          iframe.src = "http://training.healthchoiceaz.com.s3-website-us-west-2.amazonaws.com/elc";  // Replace with the external URL you want to load
+          iframe.src = "http://training.healthchoiceaz.com.s3-website-us-west-2.amazonaws.com/elc/course.html?utm_source=Online&utm_medium=Online&utm_campaign=elc&utm_id=elc#/";  // Replace with the external URL you want to load
         }
         
         // When the user clicks on <span> (x), close the modal
