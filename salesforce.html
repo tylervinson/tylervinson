@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Script</title>
+</head>
+<body>
+    <form>
+        <input type="hidden" id="Lead.Initial_UTM_Campaign__c">
+    </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Script has started running."); // Step 1: Confirm script execution
+ 
+            // Try logging a simple message
+            console.log("Checking for the hidden input field.");
+ 
+            // Attempt to retrieve the hidden input field by its ID
+            const hiddenInputField = document.getElementById('Lead.Initial_UTM_Campaign__c');
+            console.log("Hidden input field found:", hiddenInputField); // Step 2: Log the retrieved element
+ 
+            // Populate the field with "Tyler" if it exists
+            if (hiddenInputField) {
+                hiddenInputField.value = "Tyler";
+                console.log("Field populated with 'Tyler'."); // Step 3: Confirm the value was set
+            } else {
+                console.log("Hidden input field not found."); // Step 4: Log if the field wasn't found
+            }
+        });
+    </script>
+</body>
+</html>
