@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortable Car Listings</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            cursor: pointer;
+            background-color: #f2f2f2;
+        }
+        th:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Car Listings</h2>
+<table id="carTable">
+    <thead>
+        <tr>
+            <th onclick="sortTable(0)">Title</th>
+            <th onclick="sortTable(1)">Price</th>
+            <th onclick="sortTable(2)">Mileage</th>
+            <th onclick="sortTable(3)">Location</th>
+            <th onclick="sortTable(4)">Dealer Name</th>
+            <th onclick="sortTable(5)">Link</th>
+            <th onclick="sortTable(6)">Thumbnail</th>
+        </tr>
+    </thead>
+    <tbody id="carTableBody">
+        <!-- Data will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+// URL of the external CSV file
+const csvUrl = 'carscom.csv'; // Replace with the actual URL or path to your CSV file
+
+// Function to fetch and parse CSV data
+async function fetchCSVData(url) {
+    const response = await fetch(url);
+    const data = await response.text();
+    return data;
+}
+
+// Function to parse CSV to HTML Table
+function parseCSVToTable(csv) {
+    const rows = csv.trim().split('\n').slice(1); // Skip the header row
+    const tableBody = document.getElementById('carTableBody');
+
+    rows.forEach(row => {
+        const cols = row.split(',');
+        const tr = document.createElement('tr');
+
+        // Insert title
+        const titleTd = document.createElement('td');
+        titleTd.textContent = cols[0];
+        tr.appendChild(titleTd);
+
+        // Insert price
+        const priceTd = document.createElement('td');
+        priceTd.textContent = cols[1];
+        tr.appendChild(priceTd);
+
+        // Insert mileage
+        const mileageTd = document.createElement('td');
+        mileageTd.textContent = cols[2];
+        tr.appendChild(mileageTd);
+
+        // Insert location
+        const locationTd = document.createElement('td');
+        locationTd.textContent = cols[3];
+        tr.appendChild(locationTd);
+
+        // Insert dealer name
+        const dealerNameTd = document.createElement('td');
+        dealerNameTd.textContent = cols[4];
+        tr.appendChild(dealerNameTd);
+
+        // Insert link
+        const linkTd = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = cols[5];
+        link.textContent = 'View Listing';
+        link.target = '_blank';
+        linkTd.appendChild(link);
+        tr.appendChild(linkTd);
+
+        // Insert thumbnail
+        const thumbnailTd = document.createElement('td');
+        const img = document.createElement('img');
+        img.src = cols[6];
+        img.alt = 'Thumbnail';
+        img.width = 100; // Set the thumbnail size
+        thumbnailTd.appendChild(img);
+        tr.appendChild(thumbnailTd);
+
+        tableBody.appendChild(tr);
+    });
+}
+
+// Function to sort the table
+function sortTable(n) {
+    const table = document.getElementById("carTable");
+    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    switching = true;
+    dir = "asc"; // Set the sorting direction to ascending
+
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+            if (dir === "asc") {
+                if (x.textContent.toLowerCase() > y.textContent.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir === "desc") {
+                if (x.textContent.toLowerCase() < y.textContent.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+
+// Fetch CSV data and initialize the table
+fetchCSVData(csvUrl).then(csv => parseCSVToTable(csv));
+
+</script>
+
+</body>
+</html>
