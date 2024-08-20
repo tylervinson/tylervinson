@@ -3,111 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Table</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
     <style>
-        body {
-    font-family: Arial, sans-serif;
-}
+        table.inc {
+            font-family: sans-serif;
+            width: 100%;
+            max-width: 800px;
+            border-spacing: 0;
+        }
+        table.inc th {
+            background-color: #f7f7f7;
+            border: 1px solid #f7f7f7;
+        }
+        table.inc td {
+            background-color: #fff;
+            border: 1px solid #eee;
+        }
+        table.inc th, table.inc td {
+            padding: 20px;
+            text-align: left;
+            border-left-width: 0px;
+            border-right-width: 0px;
+        }
+        table.inc th:first-of-type, table.inc td:first-of-type {
+            text-align: center;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        table.inc tr.spacer td{
+            border:none;
+            padding:4px;
+            background-color: transparent;
+        }
+     
+        table.inc td:first-child, table.inc th:first-child {
+            border-radius: 8px 0 0 8px;
+            border-right: none;
+            border-left-width: 1px;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
-}
-
-@media only screen and (max-width: 600px) {
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-        display: block;
-    }
-
-    thead tr {
-        display: none;
-    }
-
-    tr {
-        margin-bottom: 1rem;
-    }
-
-    td {
-        text-align: right;
-        position: relative;
-        padding-left: 50%;
-    }
-
-    td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 10px;
-        font-weight: bold;
-        text-align: left;
-    }
-
-    tbody tr {
-        display: flex;
-        flex-direction: column;
-    }
-}
-
+        table.inc td:last-child, table.inc th:last-child {
+            border-radius: 0 8px 8px 0;
+            border-left: none;
+            border-right-width: 1px;
+        }
+        /* Responsive styling */
+        @media screen and (max-width: 600px) {
+            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
+                display: block;
+            }
+            table.inc thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            table.inc tbody tr {
+                margin: 0 0 10px 0; /* Adds 10px space between rows */
+            }
+            table.inc td {
+                position: relative;
+                padding-left: 50%;
+                text-align: left;
+            }
+            table.inc td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 40%;
+                padding-left: 10px;
+                font-weight: bold;
+                white-space: normal;
+            }
+            table.inc th:first-of-type, table.inc td:first-of-type {
+                text-align: left;
+            }
+        }
     </style>
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-                <th>Column 3</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Row 1, Col 1</td>
-                <td>Row 1, Col 2</td>
-                <td>Row 1, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 2, Col 1</td>
-                <td>Row 2, Col 2</td>
-                <td>Row 2, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 3, Col 1</td>
-                <td>Row 3, Col 2</td>
-                <td>Row 3, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 4, Col 1</td>
-                <td>Row 4, Col 2</td>
-                <td>Row 4, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 5, Col 1</td>
-                <td>Row 5, Col 2</td>
-                <td>Row 5, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 6, Col 1</td>
-                <td>Row 6, Col 2</td>
-                <td>Row 6, Col 3</td>
-            </tr>
-        </tbody>
-    </table>
+</head>
+<body style="background-color: aliceblue;">
+
+<table class="inc">
+    <thead>
+        <tr>
+            <th>Persons in Household</th>
+            <th>Income range that qualifies for $0 plans</th>
+            <th>Income range that qualifies for subsidy</th>
+            <th>Income range that may qualify for a subsidy</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">1</td>
+            <td data-label="Income range that qualifies for $0 plans">$20,783 to $22,590</td>
+            <td data-label="Income range that qualifies for subsidy">$22,591 to $60,240</td>
+            <td data-label="Income range that may qualify for a subsidy">$60,241 and above</td>
+        </tr>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">2</td>
+            <td data-label="Income range that qualifies for $0 plans">$28,207 to $30,660</td>
+            <td data-label="Income range that qualifies for subsidy">$30,661 to $81,760</td>
+            <td data-label="Income range that may qualify for a subsidy">$81,761 and above</td>
+        </tr>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">3</td>
+            <td data-label="Income range that qualifies for $0 plans">$35,632 to $38,730</td>
+            <td data-label="Income range that qualifies for subsidy">$38,731 to $103,280</td>
+            <td data-label="Income range that may qualify for a subsidy">$103,281 and above</td>
+        </tr>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">4</td>
+            <td data-label="Income range that qualifies for $0 plans">$43,056 to $46,800</td>
+            <td data-label="Income range that qualifies for subsidy">$46,801 to $124,800</td>
+            <td data-label="Income range that may qualify for a subsidy">$124,801 and above</td>
+        </tr>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">5</td>
+            <td data-label="Income range that qualifies for $0 plans">$50,480 to $54,870</td>
+            <td data-label="Income range that qualifies for subsidy">$54,871 to $146,320</td>
+            <td data-label="Income range that may qualify for a subsidy">$146,321 and above</td>
+        </tr>
+        <tr class="spacer"><td colspan="4"></td></tr>
+        <tr>
+            <td data-label="Persons in Household">6</td>
+            <td data-label="Income range that qualifies for $0 plans">$57,905 to $62,940</td>
+            <td data-label="Income range that qualifies for subsidy">$62,941 to $167,840</td>
+            <td data-label="Income range that may qualify for a subsidy">$167,841 and above</td>
+        </tr>
+    </tbody>
+</table>
+
 </body>
 </html>
