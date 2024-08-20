@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Responsive styling */
+        @media screen and (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                margin: 0 0 1rem 0;
+                border: 1px solid #ddd;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                position: relative;
+                padding-left: 50%;
+                text-align: left;
+            }
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                padding-left: 10px;
+                font-weight: bold;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <title>Responsive Table</title>
+</head>
+<body>
+
+<table>
+    <thead>
+        <tr>
+            <th>Column 1</th>
+            <th>Column 2</th>
+            <th>Column 3</th>
+            <th>Column 4</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td data-label="Column 1">Row 1 Data 1</td>
+            <td data-label="Column 2">Row 1 Data 2</td>
+            <td data-label="Column 3">Row 1 Data 3</td>
+            <td data-label="Column 4">Row 1 Data 4</td>
+        </tr>
+        <tr>
+            <td data-label="Column 1">Row 2 Data 1</td>
+            <td data-label="Column 2">Row 2 Data 2</td>
+            <td data-label="Column 3">Row 2 Data 3</td>
+            <td data-label="Column 4">Row 2 Data 4</td>
+        </tr>
+        <tr>
+            <td data-label="Column 1">Row 3 Data 1</td>
+            <td data-label="Column 2">Row 3 Data 2</td>
+            <td data-label="Column 3">Row 3 Data 3</td>
+            <td data-label="Column 4">Row 3 Data 4</td>
+        </tr>
+        <tr>
+            <td data-label="Column 1">Row 4 Data 1</td>
+            <td data-label="Column 2">Row 4 Data 2</td>
+            <td data-label="Column 3">Row 4 Data 3</td>
+            <td data-label="Column 4">Row 4 Data 4</td>
+        </tr>
+        <tr>
+            <td data-label="Column 1">Row 5 Data 1</td>
+            <td data-label="Column 2">Row 5 Data 2</td>
+            <td data-label="Column 3">Row 5 Data 3</td>
+            <td data-label="Column 4">Row 5 Data 4</td>
+        </tr>
+        <tr>
+            <td data-label="Column 1">Row 6 Data 1</td>
+            <td data-label="Column 2">Row 6 Data 2</td>
+            <td data-label="Column 3">Row 6 Data 3</td>
+            <td data-label="Column 4">Row 6 Data 4</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
