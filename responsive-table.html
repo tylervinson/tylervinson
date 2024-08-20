@@ -7,16 +7,15 @@
         table.inc {
             width: 100%;
             max-width: 800px;
-            border-collapse: collapse; /* Default collapse style */
-            border-spacing: 0; /* Remove custom spacing */
-            border-radius: 8px;
+            border-spacing: 0;
         }
         table.inc th, table.inc td {
-            border: none;
-            padding: 8px;
-            text-align: left;
-    
-        }
+    border: 1px solid #f2f2f2;
+    padding: 8px;
+    text-align: left;
+    border-left: 0px;
+    border-right: 0px;
+}
         table.inc th:first-of-type, table.inc td:first-of-type {
             text-align: center;
     
@@ -24,25 +23,22 @@
         table.inc th {
             background-color: #f2f2f2;
         }
-        table.inc tr{
-            border:1px solid #ddd;
-            border-radius: 8px;
-        }
+        
         table.inc tr.spacer td{
             border:none;
         }
-        table.inc tr.spacer {
-            border:none;
-        }
-        table.inc td:first-child,
-        table.inc th:first-child {
-            border-radius: 8px 0 0 8px;
-        }
+     
+        table.inc td:first-child, table.inc th:first-child {
+    border: 1px solid #f2f2f2;
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+}
 
-        table.inc td:last-child,
-        table.inc th:last-child {
-            border-radius: 0 8px 8px 0;
-        }
+        table.inc td:last-child, table.inc th:last-child {
+    border-radius: 0 8px 8px 0;
+    border: 1px solid #f2f2f2;
+    border-left: none;
+}
         /* Responsive styling */
         @media screen and (max-width: 600px) {
             table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
@@ -55,10 +51,10 @@
             }
             table.inc tbody tr {
                 margin: 0 0 10px 0; /* Adds 10px space between rows */
-                border: 1px solid #ddd;
+                border: 1px solid #f2f2f2;
             }
             table.inc td {
-                border: 1px solid #ddd; /* Reverting to default border */
+                border: 1px solid #f2f2f2; /* Reverting to default border */
                 position: relative;
                 padding-left: 50%;
                 text-align: left;
