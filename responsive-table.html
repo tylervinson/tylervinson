@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Table v2</title>
+    <title>Responsive Table v3</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,7 +29,8 @@
 
         @media only screen and (max-width: 600px) {
             table {
-                display: block;
+                display: flex;
+                flex-direction: column;
             }
 
             thead {
@@ -38,57 +39,68 @@
 
             tbody {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
+                width: 100%;
             }
 
             tr {
                 display: flex;
                 flex-direction: column;
-                margin-bottom: 1rem;
+                flex: 1;
+                margin: 0;
+                border: none;
             }
 
             td {
                 display: block;
                 text-align: left;
-                padding-left: 10px;
-                padding-right: 10px;
-                border: none;
+                padding: 10px;
                 border-bottom: 1px solid #ddd;
-                position: relative;
             }
 
-            tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-
-            tr:nth-child(odd) {
-                background-color: #fff;
-            }
-
-            tbody tr {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            tbody tr td:nth-child(1)::before {
-                content: 'Column 1: ';
-                font-weight: bold;
-            }
-
-            tbody tr td:nth-child(2)::before {
-                content: 'Column 2: ';
-                font-weight: bold;
-            }
-
-            tbody tr td:nth-child(3)::before {
-                content: 'Column 3: ';
-                font-weight: bold;
+            td:last-child {
+                border-bottom: none;
             }
 
             td::before {
                 display: block;
                 text-align: left;
+                font-weight: bold;
                 margin-bottom: 5px;
+            }
+
+            tbody tr:nth-child(1) td::before {
+                content: 'Column 1';
+            }
+
+            tbody tr:nth-child(2) td::before {
+                content: 'Column 2';
+            }
+
+            tbody tr:nth-child(3) td::before {
+                content: 'Column 3';
+            }
+
+            tbody {
+                flex-direction: column;
+            }
+
+            tbody tr:nth-child(1) {
+                order: 1;
+            }
+
+            tbody tr:nth-child(2) {
+                order: 2;
+            }
+
+            tbody tr:nth-child(3) {
+                order: 3;
+            }
+
+            tr:nth-child(1) td::before,
+            tr:nth-child(2) td::before,
+            tr:nth-child(3) td::before {
+                content: attr(data-label);
             }
         }
     </style>
@@ -102,34 +114,28 @@
         </thead>
         <tbody>
             <tr>
-                <td>Row 1, Col 1</td>
-                <td>Row 1, Col 2</td>
-                <td>Row 1, Col 3</td>
+                <td data-label="Row 1">Row 1, Col 1</td>
+                <td data-label="Row 2">Row 2, Col 1</td>
+                <td data-label="Row 3">Row 3, Col 1</td>
+                <td data-label="Row 4">Row 4, Col 1</td>
+                <td data-label="Row 5">Row 5, Col 1</td>
+                <td data-label="Row 6">Row 6, Col 1</td>
             </tr>
             <tr>
-                <td>Row 2, Col 1</td>
-                <td>Row 2, Col 2</td>
-                <td>Row 2, Col 3</td>
+                <td data-label="Row 1">Row 1, Col 2</td>
+                <td data-label="Row 2">Row 2, Col 2</td>
+                <td data-label="Row 3">Row 3, Col 2</td>
+                <td data-label="Row 4">Row 4, Col 2</td>
+                <td data-label="Row 5">Row 5, Col 2</td>
+                <td data-label="Row 6">Row 6, Col 2</td>
             </tr>
             <tr>
-                <td>Row 3, Col 1</td>
-                <td>Row 3, Col 2</td>
-                <td>Row 3, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 4, Col 1</td>
-                <td>Row 4, Col 2</td>
-                <td>Row 4, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 5, Col 1</td>
-                <td>Row 5, Col 2</td>
-                <td>Row 5, Col 3</td>
-            </tr>
-            <tr>
-                <td>Row 6, Col 1</td>
-                <td>Row 6, Col 2</td>
-                <td>Row 6, Col 3</td>
+                <td data-label="Row 1">Row 1, Col 3</td>
+                <td data-label="Row 2">Row 2, Col 3</td>
+                <td data-label="Row 3">Row 3, Col 3</td>
+                <td data-label="Row 4">Row 4, Col 3</td>
+                <td data-label="Row 5">Row 5, Col 3</td>
+                <td data-label="Row 6">Row 6, Col 3</td>
             </tr>
         </tbody>
     </table>
