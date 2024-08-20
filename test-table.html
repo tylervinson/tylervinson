@@ -3,394 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-       /* EQCSS Required - http://elementqueries.com for info */
-
-/* Responsive Table Reset */
-[data-table] {
-  font-size: 12pt;
-  width: 100%;
-}
-@media [data-table] and (max-width: 500px) {
-  $this,
-  $this caption,
-  $this thead,
-  $this tbody,
-  $this tfoot,
-  $this tr,
-  $this th,
-  $this td {
-    display: block;
-    width: 100%;
-  }
-}
-@media [data-table] and (min-width: 500px) {
-  $this { display: table; width: 100%; }
-  $this caption { display: table-caption; width: auto; }
-  $this thead { display: table-header-group; width: auto; }
-  $this tbody { display: table-row-group; width: auto; }
-  $this tfoot { display: table-footer-group; width: auto; }
-  $this tr { display: table-row; width: auto; }
-  $this th,
-  $this td { display: table-cell; width: auto; }
-}
-
-/* Default Table Theme */
-@media [data-table] {
-  $this {
-    font-family: 'Source Sans Pro', sans-serif;
-    margin: 1em 0;
-    color: #333;
-    border-collapse: collapse;
-  }
-  $this thead th,
-  $this tfoot th {
-    color: #777;
-    background: rgba(0,0,0,.1);
-  }
-  $this caption {
-    padding: .5em;
-  }
-  $this th,
-  $this td {
-    padding: .5em;
-    background: white;
-    border: 1px solid #aaa;
-  }
-  $this tbody tr:nth-of-type(even) {
-    background: rgba(0,0,0,.05);
-  }
-}
-
-/* Grid Table Layout */
-@media [data-table^=col-] and (max-width: 500px) {
-  $this thead {
-    display: none;
-  }
-  $this tr:after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-  $this[data-table$=-one] td { width: 100%; }
-  $this[data-table$=-two] td { width: 50%; }
-  $this[data-table$=-three] td { width: 33.33%; }
-  $this[data-table$=-four] td { width: 25%; }
-  $this[data-table$=-five] td {width: 20%; }
-  $this[data-table$=-six] td { width: 16.66%; }
-  $this td {
-    float: left;
-    line-height: 1.4;
-    padding: .5em 0;
-    text-align: center;
-    position: relative;
-  }
-  $this td:nth-of-type(n+2) {
-    padding-bottom: 17.5pt;
-  }
-  $this td:after {
-    content: attr(data-heading);
-    display: block;
-    width: 100%;
-    position: absolute;
-    bottom: 5pt;
-    left: 0;
-    font-size: 10pt;
-    line-height: 1.2;
-    color: #999;
-  }
-  $this td:first-of-type:after {
-    display: none;
-  }
-  $this td:nth-of-type(n+2) {
-    border-top: none;
-  }
-  $this[data-table$=-two] td:nth-of-type(n+2):nth-of-type(odd),
-  $this[data-table$=-three] td:nth-of-type(n+2):nth-of-type(3n),
-  $this[data-table$=-three] td:nth-of-type(n+2):nth-of-type(3n+1),
-  $this[data-table$=-four] td:nth-of-type(n+2),
-  $this[data-table$=-five] td:nth-of-type(n+2),
-  $this[data-table$=-six] td:nth-of-type(n+2) {
-    border-left-color: transparent;
-  }
-  $this[data-table$=-four] td:nth-of-type(4n+2),
-  $this[data-table$=-five] td:nth-of-type(5n+2),
-  $this[data-table$=-six] td:nth-of-type(6n+2) {
-    border-left-color: #aaa;
-  }
-  $this td:first-of-type {
-    color: #777;
-    background: rgba(0,0,0,.1);
-    font-weight: 600;
-    width: 100%;
-  }
-}
-    </style>
+    <title>Responsive Table</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body style="background-color: aliceblue;">
-  <h1>Responsive Table Layouts</h1>
-  <h2>Grid Layout using Element Queries</h2>
-  
-  <p>These table styles are a cleaned up version of some table styles from a fantasy sports web app. The original table styles were written using regular CSS <code>@media</code> queries, but as soon as the tables needed to be added to a layout with a sidebar or other content we had to re-do the breakpoints all the time and we ended up with a lot of duplicate code.</p>
-  <p>These tables use <code>@media</code> queries instead, via <a href=http://elementqueries.com>EQCSS.js</a>, so the responsive breakpoints are based on the width of the <code>&lt;table></code> elements themselves rather than the width of the browser. This way this one set of responsive styles should be able to style a <code>&lt;table></code> placed into any layout.</p>
-  <br>
-  
-  <!-- Six Col -->
-  <table data-table="col-six">
-    <caption>&lt;table data-table=col-six&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-        <th>Time</th>
-        <th>Finish</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-        <td data-heading="Time">1:05</td>
-        <td data-heading="Finish">459</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-        <td data-heading="Time">0:45</td>
-        <td data-heading="Finish">487</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 3</td>
-        <td data-heading="X Axis">77°</td>
-        <td data-heading="Y Axis">78°</td>
-        <td data-heading="Z Axis">90°</td>
-        <td data-heading="Speed">55㎧</td>
-        <td data-heading="Time">1:20</td>
-        <td data-heading="Finish">458</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- Five Col -->
-  <table data-table="col-five">
-    <caption>&lt;table data-table=col-five&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-        <td data-heading="Time">1:05</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-        <td data-heading="Time">0:45</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 3</td>
-        <td data-heading="X Axis">77°</td>
-        <td data-heading="Y Axis">78°</td>
-        <td data-heading="Z Axis">90°</td>
-        <td data-heading="Speed">55㎧</td>
-        <td data-heading="Time">1:20</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- Four Col -->
-  <table data-table="col-four">
-    <caption>&lt;table data-table=col-four&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- Three Col -->
-  <table data-table="col-three">
-    <caption>&lt;table data-table=col-three&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-        <th>Time</th>
-        <th>Finish</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-        <td data-heading="Time">1:05</td>
-        <td data-heading="Finish">459</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-        <td data-heading="Time">0:45</td>
-        <td data-heading="Finish">487</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 3</td>
-        <td data-heading="X Axis">77°</td>
-        <td data-heading="Y Axis">78°</td>
-        <td data-heading="Z Axis">90°</td>
-        <td data-heading="Speed">55㎧</td>
-        <td data-heading="Time">1:20</td>
-        <td data-heading="Finish">458</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- Two Col -->
-  <table data-table="col-two">
-    <caption>&lt;table data-table=col-two&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-        <th>Time</th>
-        <th>Finish</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-        <td data-heading="Time">1:05</td>
-        <td data-heading="Finish">459</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-        <td data-heading="Time">0:45</td>
-        <td data-heading="Finish">18</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 3</td>
-        <td data-heading="X Axis">77°</td>
-        <td data-heading="Y Axis">78°</td>
-        <td data-heading="Z Axis">90°</td>
-        <td data-heading="Speed">55㎧</td>
-        <td data-heading="Time">1:20</td>
-        <td data-heading="Finish">458</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- One Col -->
-  <table data-table="col-one">
-    <caption>&lt;table data-table=col-one&gt;</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>X Axis</th>
-        <th>Y Axis</th>
-        <th>Z Axis</th>
-        <th>Speed</th>
-        <th>Time</th>
-        <th>Finish</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-heading="Name">Test Flight 1</td>
-        <td data-heading="X Axis">120°</td>
-        <td data-heading="Y Axis">40°</td>
-        <td data-heading="Z Axis">157°</td>
-        <td data-heading="Speed">1503㎧</td>
-        <td data-heading="Time">1:05</td>
-        <td data-heading="Finish">40</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 2</td>
-        <td data-heading="X Axis">80°</td>
-        <td data-heading="Y Axis">94°</td>
-        <td data-heading="Z Axis">30°</td>
-        <td data-heading="Speed">200㎧</td>
-        <td data-heading="Time">0:45</td>
-        <td data-heading="Finish">487</td>
-      </tr>
-      <tr>
-        <td data-heading="Name">Test Flight 3</td>
-        <td data-heading="X Axis">77°</td>
-        <td data-heading="Y Axis">78°</td>
-        <td data-heading="Z Axis">90°</td>
-        <td data-heading="Speed">55㎧</td>
-        <td data-heading="Time">1:20</td>
-        <td data-heading="Finish">458</td>
-      </tr>
-    </tbody>
-  </table>
+<body>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.responsive-table th,
+.responsive-table td {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+@media screen and (max-width: 768px) {
+    .responsive-table,
+    .responsive-table thead,
+    .responsive-table tbody,
+    .responsive-table th,
+    .responsive-table td,
+    .responsive-table tr {
+        display: block;
+    }
+
+    .responsive-table tr {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+
+    .responsive-table th:first-child,
+    .responsive-table td:first-child {
+        flex-basis: 30%;
+        min-width: 150px;
+        position: relative;
+        background-color: #f9f9f9;
+    }
+
+    .responsive-table th:not(:first-child),
+    .responsive-table td:not(:first-child) {
+        flex-basis: 70%;
+        display: block;
+        white-space: nowrap;
+        overflow-x: auto;
+    }
+
+    .responsive-table th:not(:first-child) {
+        display: none;
+    }
+
+    .responsive-table td:not(:first-child) {
+        border-top: 0;
+    }
+
+    .responsive-table tr {
+        flex-direction: column;
+        padding: 0;
+    }
+
+    .responsive-table td:not(:first-child) {
+        display: inline-block;
+    }
+}
+
+</style>
+<div class="table-wrapper">
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+                <th>Column 4</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Row 1, Col 1</td>
+                <td>Row 1, Col 2</td>
+                <td>Row 1, Col 3</td>
+                <td>Row 1, Col 4</td>
+            </tr>
+            <tr>
+                <td>Row 2, Col 1</td>
+                <td>Row 2, Col 2</td>
+                <td>Row 2, Col 3</td>
+                <td>Row 2, Col 4</td>
+            </tr>
+            <tr>
+                <td>Row 3, Col 1</td>
+                <td>Row 3, Col 2</td>
+                <td>Row 3, Col 3</td>
+                <td>Row 3, Col 4</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
 </body>
 </html>
