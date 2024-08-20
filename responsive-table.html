@@ -8,7 +8,7 @@
 </head>
 <body>
     <style>
-body {
+        body {
     font-family: Arial, sans-serif;
 }
 
@@ -38,22 +38,17 @@ th {
     }
 
     thead tr {
-        display: block;
-        position: absolute;
-        top: 0;
-        width: 100%;
+        display: none;
     }
 
     tr {
         margin-bottom: 1rem;
-        padding-top: 1.5rem;
     }
 
     td {
         text-align: right;
         position: relative;
         padding-left: 50%;
-        border-top: none;
     }
 
     td::before {
@@ -70,16 +65,7 @@ th {
         display: flex;
         flex-direction: column;
     }
-
-    tbody tr td {
-        border-top: 1px solid #ddd;
-    }
-
-    tbody tr td:first-child {
-        border-top: none;
-    }
 }
-
 
     </style>
     <table class="responsive-table">
