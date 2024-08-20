@@ -9,64 +9,88 @@
 <body>
     <style>
         body {
-    font-family: Arial, sans-serif;
-}
+            font-family: Arial, sans-serif;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
 
-th {
-    background-color: #f2f2f2;
-}
+        th {
+            background-color: #f2f2f2;
+        }
 
-@media only screen and (max-width: 600px) {
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-        display: block;
-    }
+        @media only screen and (max-width: 600px) {
+            table {
+                display: block;
+            }
 
-    thead tr {
-        display: none;
-    }
+            thead {
+                display: none;
+            }
 
-    tr {
-        margin-bottom: 1rem;
-    }
+            tbody {
+                display: flex;
+                flex-direction: column;
+            }
 
-    td {
-        text-align: right;
-        position: relative;
-        padding-left: 50%;
-    }
+            tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1rem;
+            }
 
-    td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 10px;
-        font-weight: bold;
-        text-align: left;
-    }
+            td {
+                display: block;
+                text-align: left;
+                padding-left: 10px;
+                padding-right: 10px;
+                border: none;
+                border-bottom: 1px solid #ddd;
+                position: relative;
+            }
 
-    tbody tr {
-        display: flex;
-        flex-direction: column;
-    }
-}
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
 
+            tr:nth-child(odd) {
+                background-color: #fff;
+            }
+
+            tbody tr {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            tbody tr td:nth-child(1)::before {
+                content: 'Column 1: ';
+                font-weight: bold;
+            }
+
+            tbody tr td:nth-child(2)::before {
+                content: 'Column 2: ';
+                font-weight: bold;
+            }
+
+            tbody tr td:nth-child(3)::before {
+                content: 'Column 3: ';
+                font-weight: bold;
+            }
+
+            td::before {
+                display: block;
+                text-align: left;
+                margin-bottom: 5px;
+            }
+        }
     </style>
     <table class="responsive-table">
         <thead>
