@@ -19,7 +19,7 @@
             border: 1px solid #eee;
         }
         table.inc th, table.inc td {
-    padding: 12px;
+    padding: 20px;
     text-align: left;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -69,11 +69,15 @@
                 content: attr(data-label);
                 position: absolute;
                 left: 10px;
-                width: 45%;
+                width: 40%;
                 padding-left: 10px;
                 font-weight: bold;
-                white-space: nowrap;
+                white-space: normal;
             }
+            table.inc th:first-of-type, table.inc td:first-of-type {
+            text-align: left;
+    
+        }
         }
     </style>
 </head>
