@@ -11,7 +11,7 @@
   font-size: 12pt;
   width: 100%;
 }
-@element [data-table] and (max-width: 500px) {
+@media [data-table] and (max-width: 500px) {
   $this,
   $this caption,
   $this thead,
@@ -24,7 +24,7 @@
     width: 100%;
   }
 }
-@element [data-table] and (min-width: 500px) {
+@media [data-table] and (min-width: 500px) {
   $this { display: table; width: 100%; }
   $this caption { display: table-caption; width: auto; }
   $this thead { display: table-header-group; width: auto; }
@@ -36,7 +36,7 @@
 }
 
 /* Default Table Theme */
-@element [data-table] {
+@media [data-table] {
   $this {
     font-family: 'Source Sans Pro', sans-serif;
     margin: 1em 0;
@@ -63,7 +63,7 @@
 }
 
 /* Grid Table Layout */
-@element [data-table^=col-] and (max-width: 500px) {
+@media [data-table^=col-] and (max-width: 500px) {
   $this thead {
     display: none;
   }
@@ -132,7 +132,7 @@
   <h2>Grid Layout using Element Queries</h2>
   
   <p>These table styles are a cleaned up version of some table styles from a fantasy sports web app. The original table styles were written using regular CSS <code>@media</code> queries, but as soon as the tables needed to be added to a layout with a sidebar or other content we had to re-do the breakpoints all the time and we ended up with a lot of duplicate code.</p>
-  <p>These tables use <code>@element</code> queries instead, via <a href=http://elementqueries.com>EQCSS.js</a>, so the responsive breakpoints are based on the width of the <code>&lt;table></code> elements themselves rather than the width of the browser. This way this one set of responsive styles should be able to style a <code>&lt;table></code> placed into any layout.</p>
+  <p>These tables use <code>@media</code> queries instead, via <a href=http://elementqueries.com>EQCSS.js</a>, so the responsive breakpoints are based on the width of the <code>&lt;table></code> elements themselves rather than the width of the browser. This way this one set of responsive styles should be able to style a <code>&lt;table></code> placed into any layout.</p>
   <br>
   
   <!-- Six Col -->
