@@ -4,51 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        table {
+        table.inc {
             width: 100%;
+            max-width: 800px;
             border-collapse: collapse; /* Default collapse style */
             border-spacing: 0; /* Remove custom spacing */
         }
-        th, td {
+        table.inc th, table.inc td {
             border: none;
             padding: 8px;
             text-align: center;
     
         }
-        th {
+        table.inc th {
             background-color: #f2f2f2;
         }
-        tr{
+        table.inc tr{
             border:1px solid #ddd;
             border-radius: 8px;
         }
-        tr.spacer td{
+        table.inc tr.spacer td{
             border:none;
         }
-        tr.spacer {
+        table.inc tr.spacer {
             border:none;
         }
         /* Responsive styling */
         @media screen and (max-width: 600px) {
-            table, thead, tbody, th, td, tr {
+            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
                 display: block;
             }
-            thead tr {
+            table.inc thead tr {
                 position: absolute;
                 top: -9999px;
                 left: -9999px;
             }
-            tbody tr {
+            table.inc tbody tr {
                 margin: 0 0 10px 0; /* Adds 10px space between rows */
                 border: 1px solid #ddd;
             }
-            td {
+            table.inc td {
                 border: 1px solid #ddd; /* Reverting to default border */
                 position: relative;
                 padding-left: 50%;
                 text-align: left;
             }
-            td:before {
+            table.inc td:before {
                 content: attr(data-label);
                 position: absolute;
                 left: 10px;
@@ -59,11 +60,10 @@
             }
         }
     </style>
-    <title>Responsive Table</title>
 </head>
 <body>
 
-<table>
+<table class="inc">
     <thead>
         <tr>
             <th>Persons in Household</th>
