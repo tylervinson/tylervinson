@@ -45,37 +45,41 @@
             border-left: none;
             border-right-width: 1px;
         }
-        /* Responsive styling */
-        @media screen and (max-width: 600px) {
-            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
-                display: block;
-            }
-            table.inc thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            table.inc tbody tr {
-                margin: 0 0 10px 0; /* Adds 10px space between rows */
-            }
-            table.inc td {
-                position: relative;
-                padding-left: 50%;
-                text-align: left;
-            }
-            table.inc td:before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                width: 40%;
-                padding-left: 10px;
-                font-weight: bold;
-                white-space: normal;
-            }
-            table.inc th:first-of-type, table.inc td:first-of-type {
-                text-align: left;
-            }
-        }
+       /* Responsive styling */
+@media screen and (max-width: 600px) {
+    table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
+        display: block;
+    }
+    table.inc thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    table.inc tbody tr {
+        margin: 0 0 10px 0; /* Adds 10px space between rows */
+    }
+    table.inc td {
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+        box-sizing: border-box;
+    }
+    table.inc td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 40%;
+        padding-left: 10px;
+        padding-right: 10px; /* Ensure consistent padding on both sides */
+        font-weight: bold;
+        white-space: normal;
+        box-sizing: border-box; /* Makes padding consistent when content wraps */
+    }
+    table.inc th:first-of-type, table.inc td:first-of-type {
+        text-align: left;
+    }
+}
+
     </style>
 </head>
 <body style="background-color: aliceblue;">
