@@ -9,6 +9,7 @@
             width: 100%;
             max-width: 800px;
             border-spacing: 0;
+            margin-bottom: 20px;
         }
         table.inc th {
             background-color: #f7f7f7;
@@ -48,71 +49,61 @@
 
         /* Responsive styling */
         @media screen and (max-width: 600px) {
-            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
-                display: block;
+            /* Hide the main table's header */
+            table.inc thead {
+                display: none;
             }
+            /* Style each "virtual" table */
             table.inc {
-                border: none;
-            }
-            table.inc thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            table.inc tr {
-                margin: 0 0 10px 0;
-                border: 1px solid #ccc;
-                padding: 10px;
-            }
-            table.inc td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-                text-align: left;
-            }
-            table.inc td:before {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: bold;
+                display: block;
+                margin-bottom: 20px;
             }
 
-            /* First "table" */
+            /* Show first column (Persons in Household) */
+            table.inc tr td:first-child {
+                display: table-cell;
+                font-weight: bold;
+                background-color: #f7f7f7;
+            }
+
+            /* First virtual table: 2nd column */
             table.inc tr td:nth-child(2) {
-                display: block;
+                display: table-cell;
             }
             table.inc tr td:nth-child(3),
             table.inc tr td:nth-child(4) {
                 display: none;
             }
-            table.inc td:nth-child(2):before {
-                content: attr(data-label);
-            }
 
-            /* Second "table" */
-            table.inc:nth-of-type(2) tr td:nth-child(2) {
+            /* Duplicate the table for 3rd and 4th columns */
+            table.inc:nth-of-type(2) tr td:first-child,
+            table.inc:nth-of-type(2) tr td:nth-child(3) {
+                display: table-cell;
+            }
+            table.inc:nth-of-type(2) tr td:nth-child(2),
+            table.inc:nth-of-type(2) tr td:nth-child(4) {
                 display: none;
             }
-            table.inc:nth-of-type(2) tr td:nth-child(3) {
-                display: block;
-            }
-            table.inc:nth-of-type(2) td:nth-child(3):before {
-                content: attr(data-label);
-            }
 
-            /* Third "table" */
+            table.inc:nth-of-type(3) tr td:first-child,
+            table.inc:nth-of-type(3) tr td:nth-child(4) {
+                display: table-cell;
+            }
             table.inc:nth-of-type(3) tr td:nth-child(2),
             table.inc:nth-of-type(3) tr td:nth-child(3) {
                 display: none;
             }
-            table.inc:nth-of-type(3) tr td:nth-child(4) {
-                display: block;
+
+            /* Ensure proper spacing and alignment */
+            table.inc tbody tr {
+                display: table-row;
             }
-            table.inc:nth-of-type(3) td:nth-child(4):before {
-                content: attr(data-label);
+
+            table.inc td {
+                display: table-cell;
+                padding: 10px;
+                text-align: left;
+                border: 1px solid #ddd;
             }
         }
     </style>
