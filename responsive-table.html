@@ -11,94 +11,78 @@
             border-spacing: 0;
             border-collapse: collapse;
         }
+        table.inc th, table.inc td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
         table.inc th {
             background-color: #f7f7f7;
-            border: 1px solid #f7f7f7;
+            font-weight: bold;
         }
         table.inc td {
             background-color: #fff;
-            border: 1px solid #eee;
-        }
-        table.inc th, table.inc td {
-            padding: 20px;
-            text-align: left;
-            border-left-width: 0px;
-            border-right-width: 0px;
-        }
-        table.inc th:first-of-type, table.inc td:first-of-type {
-            text-align: center;
-        }
-
-        table.inc tr.spacer td {
-            border:none;
-            padding:4px;
-            background-color: transparent;
-        }
-
-        table.inc td:first-child, table.inc th:first-child {
-            border-radius: 8px 0 0 8px;
-            border-right: none;
-            border-left-width: 1px;
-        }
-
-        table.inc td:last-child, table.inc th:last-child {
-            border-radius: 0 8px 8px 0;
-            border-left: none;
-            border-right-width: 1px;
         }
 
         /* Responsive styling */
         @media screen and (max-width: 600px) {
-            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
-                display: block;
+            table.inc {
+                border: none;
             }
-            table.inc thead tr {
-                display: none; /* Hide the original table headers */
-            }
-            table.inc tbody tr {
-                margin: 0 0 10px 0; /* Adds 10px space between rows */
-            }
-            table.inc td {
-                padding: 10px;
-                text-align: left;
-                display: block;
-                border: 1px solid #eee;
-            }
-            /* Show only two columns per "table" */
-            table.inc td:nth-of-type(2),
-            table.inc td:nth-of-type(3),
-            table.inc td:nth-of-type(4) {
+            thead {
                 display: none;
             }
-            /* First mobile "table" */
-            table.inc tbody tr td:nth-of-type(1), 
-            table.inc tbody tr td:nth-of-type(2) {
+            tbody, tr, td {
                 display: block;
+                width: 100%;
             }
-            /* Second mobile "table" */
-            table.inc tbody tr td:nth-of-type(3) {
-                display: block;
-                margin-top: 10px;
+            tr {
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
             }
-            /* Third mobile "table" */
-            table.inc tbody tr td:nth-of-type(4) {
-                display: block;
-                margin-top: 10px;
+            td {
+                padding: 10px;
+                border: none;
+                border-bottom: 1px solid #ddd;
+                position: relative;
             }
-            /* Adjusting styles for mobile view */
-            table.inc td:before {
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
                 font-weight: bold;
-                margin-bottom: 5px;
+                white-space: nowrap;
+            }
+            td:nth-of-type(1) {
+                background-color: #f7f7f7;
+                font-weight: bold;
+                border-bottom: 0;
+            }
+            td:nth-of-type(2) {
+                background-color: #fff;
+            }
+
+            /* Show each pair of columns as separate tables */
+            tr td:nth-of-type(3), tr td:nth-of-type(4) {
+                display: none;
+            }
+            tr td:nth-of-type(2) {
                 display: block;
             }
-            table.inc td:nth-of-type(2):before {
-                content: "Income range that qualifies for $0 plans";
+
+            /* Duplicate the rows for each subsequent column */
+            tr:nth-of-type(odd) + tr td:nth-of-type(3) {
+                display: block;
+                margin-top: -1px;
             }
-            table.inc td:nth-of-type(3):before {
-                content: "Income range that qualifies for subsidy";
+            tr:nth-of-type(odd) + tr td:nth-of-type(4) {
+                display: none;
             }
-            table.inc td:nth-of-type(4):before {
-                content: "Income range that may qualify for a subsidy";
+            tr:nth-of-type(even) + tr td:nth-of-type(4) {
+                display: block;
+                margin-top: -1px;
             }
         }
     </style>
@@ -116,40 +100,40 @@
     </thead>
     <tbody>
         <tr>
-            <td>1</td>
-            <td>$20,783 to $22,590</td>
-            <td>$22,591 to $60,240</td>
-            <td>$60,241 and above</td>
+            <td data-label="Persons in Household">1</td>
+            <td data-label="Income range that qualifies for $0 plans">$20,783 to $22,590</td>
+            <td data-label="Income range that qualifies for subsidy">$22,591 to $60,240</td>
+            <td data-label="Income range that may qualify for a subsidy">$60,241 and above</td>
         </tr>
         <tr>
-            <td>2</td>
-            <td>$28,207 to $30,660</td>
-            <td>$30,661 to $81,760</td>
-            <td>$81,761 and above</td>
+            <td data-label="Persons in Household">2</td>
+            <td data-label="Income range that qualifies for $0 plans">$28,207 to $30,660</td>
+            <td data-label="Income range that qualifies for subsidy">$30,661 to $81,760</td>
+            <td data-label="Income range that may qualify for a subsidy">$81,761 and above</td>
         </tr>
         <tr>
-            <td>3</td>
-            <td>$35,632 to $38,730</td>
-            <td>$38,731 to $103,280</td>
-            <td>$103,281 and above</td>
+            <td data-label="Persons in Household">3</td>
+            <td data-label="Income range that qualifies for $0 plans">$35,632 to $38,730</td>
+            <td data-label="Income range that qualifies for subsidy">$38,731 to $103,280</td>
+            <td data-label="Income range that may qualify for a subsidy">$103,281 and above</td>
         </tr>
         <tr>
-            <td>4</td>
-            <td>$43,056 to $46,800</td>
-            <td>$46,801 to $124,800</td>
-            <td>$124,801 and above</td>
+            <td data-label="Persons in Household">4</td>
+            <td data-label="Income range that qualifies for $0 plans">$43,056 to $46,800</td>
+            <td data-label="Income range that qualifies for subsidy">$46,801 to $124,800</td>
+            <td data-label="Income range that may qualify for a subsidy">$124,801 and above</td>
         </tr>
         <tr>
-            <td>5</td>
-            <td>$50,480 to $54,870</td>
-            <td>$54,871 to $146,320</td>
-            <td>$146,321 and above</td>
+            <td data-label="Persons in Household">5</td>
+            <td data-label="Income range that qualifies for $0 plans">$50,480 to $54,870</td>
+            <td data-label="Income range that qualifies for subsidy">$54,871 to $146,320</td>
+            <td data-label="Income range that may qualify for a subsidy">$146,321 and above</td>
         </tr>
         <tr>
-            <td>6</td>
-            <td>$57,905 to $62,940</td>
-            <td>$62,941 to $167,840</td>
-            <td>$167,841 and above</td>
+            <td data-label="Persons in Household">6</td>
+            <td data-label="Income range that qualifies for $0 plans">$57,905 to $62,940</td>
+            <td data-label="Income range that qualifies for subsidy">$62,941 to $167,840</td>
+            <td data-label="Income range that may qualify for a subsidy">$167,841 and above</td>
         </tr>
     </tbody>
 </table>
