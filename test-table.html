@@ -32,51 +32,48 @@
 }
 
 @media screen and (max-width: 768px) {
-    .responsive-table,
-    .responsive-table thead,
-    .responsive-table tbody,
-    .responsive-table th,
-    .responsive-table td,
-    .responsive-table tr {
-        display: block;
-    }
-
-    .responsive-table tr {
+    .table-wrapper {
         display: flex;
-        flex-wrap: nowrap;
+        flex-direction: column;
     }
 
-    .responsive-table th:first-child,
-    .responsive-table td:first-child {
-        flex-basis: 30%;
-        min-width: 150px;
-        position: relative;
-        background-color: #f9f9f9;
+    .responsive-table {
+        display: grid;
+        grid-template-columns: 30% 1fr;
     }
 
-    .responsive-table th:not(:first-child),
-    .responsive-table td:not(:first-child) {
-        flex-basis: 70%;
+    .responsive-table thead th:nth-child(2),
+    .responsive-table thead th:nth-child(3),
+    .responsive-table thead th:nth-child(4),
+    .responsive-table tbody td:nth-child(2),
+    .responsive-table tbody td:nth-child(3),
+    .responsive-table tbody td:nth-child(4) {
         display: block;
+    }
+
+    .responsive-table thead th:first-child,
+    .responsive-table tbody td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f9f9f9;
+        z-index: 1;
+    }
+
+    .responsive-table tbody {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .responsive-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .responsive-table tbody tr td:not(:first-child) {
+        display: inline-block;
         white-space: nowrap;
         overflow-x: auto;
-    }
-
-    .responsive-table th:not(:first-child) {
-        display: none;
-    }
-
-    .responsive-table td:not(:first-child) {
-        border-top: 0;
-    }
-
-    .responsive-table tr {
-        flex-direction: column;
-        padding: 0;
-    }
-
-    .responsive-table td:not(:first-child) {
-        display: inline-block;
     }
 }
 
