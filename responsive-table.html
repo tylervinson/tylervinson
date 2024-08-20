@@ -6,15 +6,24 @@
     <style>
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0 10px; /* Adds space between rows */
         }
         th, td {
-            border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
+        }
+        /* Styling for table rows with border radius */
+        tbody tr {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden; /* Ensures the border-radius is applied properly */
+        }
+        tbody td {
+            border: none; /* Remove inner borders */
         }
         /* Responsive styling */
         @media screen and (max-width: 600px) {
@@ -26,13 +35,13 @@
                 top: -9999px;
                 left: -9999px;
             }
-            tr {
+            tbody tr {
                 margin: 0 0 10px 0; /* Adds 10px space between rows */
                 border: 1px solid #ddd;
+                border-radius: 6px;
             }
             td {
                 border: none;
-                border-bottom: 1px solid #ddd;
                 position: relative;
                 padding-left: 50%;
                 text-align: left;
@@ -40,7 +49,7 @@
             td:before {
                 content: attr(data-label);
                 position: absolute;
-                left: 0;
+                left: 10px;
                 width: 45%;
                 padding-left: 10px;
                 font-weight: bold;
@@ -55,48 +64,48 @@
 <table>
     <thead>
         <tr>
-            <th>Column 1</th>
-            <th>Column 2</th>
-            <th>Column 3</th>
-            <th>Column 4</th>
+            <th>Persons in Household</th>
+            <th>Income range that qualifies for $0 plans</th>
+            <th>Income range that qualifies for subsidy</th>
+            <th>Income range that may qualify for a subsidy</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td data-label="Column 1">Row 1 Data 1</td>
-            <td data-label="Column 2">Row 1 Data 2</td>
-            <td data-label="Column 3">Row 1 Data 3</td>
-            <td data-label="Column 4">Row 1 Data 4</td>
+            <td data-label="Persons in Household">1</td>
+            <td data-label="Income range that qualifies for $0 plans">$20,783 to $22,590</td>
+            <td data-label="Income range that qualifies for subsidy">$22,591 to $60,240</td>
+            <td data-label="Income range that may qualify for a subsidy">$60,241 and above</td>
         </tr>
         <tr>
-            <td data-label="Column 1">Row 2 Data 1</td>
-            <td data-label="Column 2">Row 2 Data 2</td>
-            <td data-label="Column 3">Row 2 Data 3</td>
-            <td data-label="Column 4">Row 2 Data 4</td>
+            <td data-label="Persons in Household">2</td>
+            <td data-label="Income range that qualifies for $0 plans">$28,207 to $30,660</td>
+            <td data-label="Income range that qualifies for subsidy">$30,661 to $81,760</td>
+            <td data-label="Income range that may qualify for a subsidy">$81,761 and above</td>
         </tr>
         <tr>
-            <td data-label="Column 1">Row 3 Data 1</td>
-            <td data-label="Column 2">Row 3 Data 2</td>
-            <td data-label="Column 3">Row 3 Data 3</td>
-            <td data-label="Column 4">Row 3 Data 4</td>
+            <td data-label="Persons in Household">3</td>
+            <td data-label="Income range that qualifies for $0 plans">$35,632 to $38,730</td>
+            <td data-label="Income range that qualifies for subsidy">$38,731 to $103,280</td>
+            <td data-label="Income range that may qualify for a subsidy">$103,281 and above</td>
         </tr>
         <tr>
-            <td data-label="Column 1">Row 4 Data 1</td>
-            <td data-label="Column 2">Row 4 Data 2</td>
-            <td data-label="Column 3">Row 4 Data 3</td>
-            <td data-label="Column 4">Row 4 Data 4</td>
+            <td data-label="Persons in Household">4</td>
+            <td data-label="Income range that qualifies for $0 plans">$43,056 to $46,800</td>
+            <td data-label="Income range that qualifies for subsidy">$46,801 to $124,800</td>
+            <td data-label="Income range that may qualify for a subsidy">$124,801 and above</td>
         </tr>
         <tr>
-            <td data-label="Column 1">Row 5 Data 1</td>
-            <td data-label="Column 2">Row 5 Data 2</td>
-            <td data-label="Column 3">Row 5 Data 3</td>
-            <td data-label="Column 4">Row 5 Data 4</td>
+            <td data-label="Persons in Household">5</td>
+            <td data-label="Income range that qualifies for $0 plans">$50,480 to $54,870</td>
+            <td data-label="Income range that qualifies for subsidy">$54,871 to $146,320</td>
+            <td data-label="Income range that may qualify for a subsidy">$146,321 and above</td>
         </tr>
         <tr>
-            <td data-label="Column 1">Row 6 Data 1</td>
-            <td data-label="Column 2">Row 6 Data 2</td>
-            <td data-label="Column 3">Row 6 Data 3</td>
-            <td data-label="Column 4">Row 6 Data 4</td>
+            <td data-label="Persons in Household">6</td>
+            <td data-label="Income range that qualifies for $0 plans">$57,905 to $62,940</td>
+            <td data-label="Income range that qualifies for subsidy">$62,941 to $167,840</td>
+            <td data-label="Income range that may qualify for a subsidy">$167,841 and above</td>
         </tr>
     </tbody>
 </table>
