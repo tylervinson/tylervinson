@@ -1,116 +1,131 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Table</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Responsive Table with Fixed First Column</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            max-width: 800px;
+            overflow-x: hidden; /* No scrolling initially */
+            position: relative;
+        }
+
+        .responsive-table {
+            width: 200%; /* Set table width to 200% to allow scrolling of two columns */
+            max-width: 800px;
+            border-collapse: collapse;
+            table-layout: fixed; /* Fixed layout for equal column width */
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            text-align: left;
+            white-space: normal; /* Allow text to wrap */
+            word-wrap: break-word; /* Ensure text wraps within cells */
+            width: 50%; /* Each column takes up 50% of the screen width */
+        }
+
+        .responsive-table th:first-child,
+        .responsive-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f9f9f9; /* Background for the sticky column */
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 768px) {
+            .table-wrapper {
+                overflow-x: auto; /* Enable horizontal scrolling */
+            }
+
+            .responsive-table {
+                width: 200%; /* Set table width to 200% to allow scrolling of two columns */
+                max-width: none; /* Ignore the max-width restriction on small screens */
+                table-layout: fixed; /* Fixed layout for equal column width */
+            }
+
+            .table-wrapper::-webkit-scrollbar {
+                height: 8px; /* Adjust the height of the scrollbar */
+            }
+
+            .table-wrapper::-webkit-scrollbar-thumb {
+                background-color: #888; /* Color of the scrollbar thumb */
+                border-radius: 4px;
+            }
+
+            .table-wrapper::-webkit-scrollbar-thumb:hover {
+                background-color: #555; /* Hover color for the scrollbar thumb */
+            }
+
+            .table-wrapper::-webkit-scrollbar-track {
+                background-color: #f1f1f1; /* Color of the scrollbar track */
+            }
+        }
+    </style>
 </head>
 <body>
-<style>
-    body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-}
 
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.responsive-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.responsive-table th,
-.responsive-table td {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-
-@media screen and (max-width: 768px) {
-    .table-wrapper {
-        overflow-x: auto;
-    }
-
-    .responsive-table {
-        display: grid;
-        grid-template-columns: minmax(150px, 1fr) auto;
-        grid-template-rows: auto;
-    }
-
-    .responsive-table thead {
-        display: contents;
-    }
-
-    .responsive-table tbody {
-        display: contents;
-    }
-
-    .responsive-table th, 
-    .responsive-table td {
-        display: block;
-        text-align: left;
-    }
-
-    .responsive-table tr {
-        display: contents;
-    }
-
-    .responsive-table th:first-child,
-    .responsive-table td:first-child {
-        grid-column: 1 / 2;
-        position: sticky;
-        left: 0;
-        background-color: #f9f9f9;
-        z-index: 2;
-    }
-
-    .responsive-table th:not(:first-child),
-    .responsive-table td:not(:first-child) {
-        grid-column: 2 / 3;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    .responsive-table th:first-child {
-        background-color: #f1f1f1;
-    }
-}
-
-</style>
 <div class="table-wrapper">
     <table class="responsive-table">
         <thead>
             <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-                <th>Column 3</th>
-                <th>Column 4</th>
+                <th>Persons in Household</th>
+                <th>Income range that qualifies for $0 plans</th>
+                <th>Income range that qualifies for subsidy</th>
+                <th>Income range that may qualify for a subsidy</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Row 1, Col 1</td>
-                <td>Row 1, Col 2</td>
-                <td>Row 1, Col 3</td>
-                <td>Row 1, Col 4</td>
+                <td>1</td>
+                <td>$20,783 to $22,590</td>
+                <td>$22,591 to $60,240</td>
+                <td>$60,241 and above</td>
             </tr>
             <tr>
-                <td>Row 2, Col 1</td>
-                <td>Row 2, Col 2</td>
-                <td>Row 2, Col 3</td>
-                <td>Row 2, Col 4</td>
+                <td>2</td>
+                <td>$28,207 to $30,660</td>
+                <td>$30,661 to $81,760</td>
+                <td>$81,761 and above</td>
             </tr>
             <tr>
-                <td>Row 3, Col 1</td>
-                <td>Row 3, Col 2</td>
-                <td>Row 3, Col 3</td>
-                <td>Row 3, Col 4</td>
+                <td>3</td>
+                <td>$35,632 to $38,730</td>
+                <td>$38,731 to $103,280</td>
+                <td>$103,281 and above</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>$43,056 to $46,800</td>
+                <td>$46,801 to $124,800</td>
+                <td>$124,801 and above</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>$50,480 to $54,870</td>
+                <td>$54,871 to $146,320</td>
+                <td>$146,321 and above</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>$57,905 to $62,940</td>
+                <td>$62,941 to $167,840</td>
+                <td>$167,841 and above</td>
             </tr>
         </tbody>
     </table>
