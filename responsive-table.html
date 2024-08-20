@@ -53,7 +53,7 @@
                 display: block;
             }
             table.inc thead tr {
-                display: none; /* Hide the table headers */
+                display: none; /* Hide the original table headers */
             }
             table.inc tbody tr {
                 margin: 0 0 10px 0; /* Adds 10px space between rows */
@@ -61,30 +61,44 @@
             table.inc td {
                 padding: 10px;
                 text-align: left;
+                display: block;
                 border: 1px solid #eee;
-                display: flex;
             }
+            /* Show only two columns per "table" */
+            table.inc td:nth-of-type(2),
+            table.inc td:nth-of-type(3),
+            table.inc td:nth-of-type(4) {
+                display: none;
+            }
+            /* First mobile "table" */
+            table.inc tbody tr td:nth-of-type(1), 
+            table.inc tbody tr td:nth-of-type(2) {
+                display: block;
+            }
+            /* Second mobile "table" */
+            table.inc tbody tr td:nth-of-type(3) {
+                display: block;
+                margin-top: 10px;
+            }
+            /* Third mobile "table" */
+            table.inc tbody tr td:nth-of-type(4) {
+                display: block;
+                margin-top: 10px;
+            }
+            /* Adjusting styles for mobile view */
             table.inc td:before {
-                content: attr(data-label);
-                flex: 1;
                 font-weight: bold;
-                white-space: nowrap;
-                padding-right: 10px;
+                margin-bottom: 5px;
+                display: block;
             }
-            /* Custom layout for mobile */
-            table.inc td:nth-of-type(1):before { content: "Persons in Household"; }
-            table.inc td:nth-of-type(2):before { content: "Income range that qualifies for $0 plans"; }
-            table.inc td:nth-of-type(3):before { content: "Income range that qualifies for subsidy"; }
-            table.inc td:nth-of-type(4):before { content: "Income range that may qualify for a subsidy"; }
-            
-            /* Grouping columns for mobile view */
-            table.inc tr {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                border-bottom: 1px solid #eee;
+            table.inc td:nth-of-type(2):before {
+                content: "Income range that qualifies for $0 plans";
             }
-            table.inc tr td {
-                border-bottom: none;
+            table.inc td:nth-of-type(3):before {
+                content: "Income range that qualifies for subsidy";
+            }
+            table.inc td:nth-of-type(4):before {
+                content: "Income range that may qualify for a subsidy";
             }
         }
     </style>
@@ -102,40 +116,40 @@
     </thead>
     <tbody>
         <tr>
-            <td data-label="Persons in Household">1</td>
-            <td data-label="Income range that qualifies for $0 plans">$20,783 to $22,590</td>
-            <td data-label="Income range that qualifies for subsidy">$22,591 to $60,240</td>
-            <td data-label="Income range that may qualify for a subsidy">$60,241 and above</td>
+            <td>1</td>
+            <td>$20,783 to $22,590</td>
+            <td>$22,591 to $60,240</td>
+            <td>$60,241 and above</td>
         </tr>
         <tr>
-            <td data-label="Persons in Household">2</td>
-            <td data-label="Income range that qualifies for $0 plans">$28,207 to $30,660</td>
-            <td data-label="Income range that qualifies for subsidy">$30,661 to $81,760</td>
-            <td data-label="Income range that may qualify for a subsidy">$81,761 and above</td>
+            <td>2</td>
+            <td>$28,207 to $30,660</td>
+            <td>$30,661 to $81,760</td>
+            <td>$81,761 and above</td>
         </tr>
         <tr>
-            <td data-label="Persons in Household">3</td>
-            <td data-label="Income range that qualifies for $0 plans">$35,632 to $38,730</td>
-            <td data-label="Income range that qualifies for subsidy">$38,731 to $103,280</td>
-            <td data-label="Income range that may qualify for a subsidy">$103,281 and above</td>
+            <td>3</td>
+            <td>$35,632 to $38,730</td>
+            <td>$38,731 to $103,280</td>
+            <td>$103,281 and above</td>
         </tr>
         <tr>
-            <td data-label="Persons in Household">4</td>
-            <td data-label="Income range that qualifies for $0 plans">$43,056 to $46,800</td>
-            <td data-label="Income range that qualifies for subsidy">$46,801 to $124,800</td>
-            <td data-label="Income range that may qualify for a subsidy">$124,801 and above</td>
+            <td>4</td>
+            <td>$43,056 to $46,800</td>
+            <td>$46,801 to $124,800</td>
+            <td>$124,801 and above</td>
         </tr>
         <tr>
-            <td data-label="Persons in Household">5</td>
-            <td data-label="Income range that qualifies for $0 plans">$50,480 to $54,870</td>
-            <td data-label="Income range that qualifies for subsidy">$54,871 to $146,320</td>
-            <td data-label="Income range that may qualify for a subsidy">$146,321 and above</td>
+            <td>5</td>
+            <td>$50,480 to $54,870</td>
+            <td>$54,871 to $146,320</td>
+            <td>$146,321 and above</td>
         </tr>
         <tr>
-            <td data-label="Persons in Household">6</td>
-            <td data-label="Income range that qualifies for $0 plans">$57,905 to $62,940</td>
-            <td data-label="Income range that qualifies for subsidy">$62,941 to $167,840</td>
-            <td data-label="Income range that may qualify for a subsidy">$167,841 and above</td>
+            <td>6</td>
+            <td>$57,905 to $62,940</td>
+            <td>$62,941 to $167,840</td>
+            <td>$167,841 and above</td>
         </tr>
     </tbody>
 </table>
