@@ -53,45 +53,61 @@
             table.inc thead {
                 display: none;
             }
-            /* Style each "virtual" table */
+            
+            /* General table styling for mobile view */
             table.inc {
                 display: block;
                 margin-bottom: 20px;
             }
 
-            /* Show first column (Persons in Household) */
-            table.inc tr td:first-child {
+            /* Display the first column */
+            table.inc tr td:first-child,
+            table.inc tr th:first-child {
                 display: table-cell;
                 font-weight: bold;
                 background-color: #f7f7f7;
             }
 
-            /* First virtual table: 2nd column */
+            /* First virtual table: "Income range that qualifies for $0 plans" */
+            table.inc tr th:nth-child(2),
             table.inc tr td:nth-child(2) {
                 display: table-cell;
             }
+            table.inc tr th:nth-child(3),
             table.inc tr td:nth-child(3),
+            table.inc tr th:nth-child(4),
             table.inc tr td:nth-child(4) {
                 display: none;
             }
 
-            /* Duplicate the table for 3rd and 4th columns */
-            table.inc:nth-of-type(2) tr td:first-child,
-            table.inc:nth-of-type(2) tr td:nth-child(3) {
-                display: table-cell;
+            /* Second virtual table: "Income range that qualifies for subsidy" */
+            table.inc:nth-of-type(2) {
+                display: block;
             }
+            table.inc:nth-of-type(2) tr th:nth-child(2),
             table.inc:nth-of-type(2) tr td:nth-child(2),
+            table.inc:nth-of-type(2) tr th:nth-child(4),
             table.inc:nth-of-type(2) tr td:nth-child(4) {
                 display: none;
             }
-
-            table.inc:nth-of-type(3) tr td:first-child,
-            table.inc:nth-of-type(3) tr td:nth-child(4) {
+            table.inc:nth-of-type(2) tr th:nth-child(3),
+            table.inc:nth-of-type(2) tr td:nth-child(3) {
                 display: table-cell;
             }
+
+            /* Third virtual table: "Income range that may qualify for a subsidy" */
+            table.inc:nth-of-type(3) {
+                display: block;
+            }
+            table.inc:nth-of-type(3) tr th:nth-child(2),
             table.inc:nth-of-type(3) tr td:nth-child(2),
+            table.inc:nth-of-type(3) tr th:nth-child(3),
             table.inc:nth-of-type(3) tr td:nth-child(3) {
                 display: none;
+            }
+            table.inc:nth-of-type(3) tr th:nth-child(4),
+            table.inc:nth-of-type(3) tr td:nth-child(4) {
+                display: table-cell;
             }
 
             /* Ensure proper spacing and alignment */
