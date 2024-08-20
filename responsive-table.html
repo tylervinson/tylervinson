@@ -9,7 +9,6 @@
             width: 100%;
             max-width: 800px;
             border-spacing: 0;
-            margin-bottom: 20px;
         }
         table.inc th {
             background-color: #f7f7f7;
@@ -20,113 +19,70 @@
             border: 1px solid #eee;
         }
         table.inc th, table.inc td {
-            padding: 20px;
-            text-align: left;
-            border-left-width: 0px;
-            border-right-width: 0px;
-        }
+    padding: 20px;
+    text-align: left;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
         table.inc th:first-of-type, table.inc td:first-of-type {
             text-align: center;
+    
         }
-
-        table.inc tr.spacer td {
-            border: none;
-            padding: 4px;
+        
+        
+        table.inc tr.spacer td{
+            border:none;
+            padding:4px;
             background-color: transparent;
         }
-
+     
         table.inc td:first-child, table.inc th:first-child {
-            border-radius: 8px 0 0 8px;
-            border-right: none;
-            border-left-width: 1px;
-        }
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+    border-left-width: 1px;
+}
 
         table.inc td:last-child, table.inc th:last-child {
-            border-radius: 0 8px 8px 0;
-            border-left: none;
-            border-right-width: 1px;
-        }
-
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+    border-right-width: 1px;
+}
         /* Responsive styling */
         @media screen and (max-width: 600px) {
-            /* Hide the main table's header */
-            table.inc thead {
-                display: none;
-            }
-            
-            /* General table styling for mobile view */
-            table.inc {
-                display: block;
-                margin-bottom: 20px;
-            }
-
-            /* Display the first column */
-            table.inc tr td:first-child,
-            table.inc tr th:first-child {
-                display: table-cell;
-                font-weight: bold;
-                background-color: #f7f7f7;
-            }
-
-            /* First virtual table: "Income range that qualifies for $0 plans" */
-            table.inc tr th:nth-child(2),
-            table.inc tr td:nth-child(2) {
-                display: table-cell;
-            }
-            table.inc tr th:nth-child(3),
-            table.inc tr td:nth-child(3),
-            table.inc tr th:nth-child(4),
-            table.inc tr td:nth-child(4) {
-                display: none;
-            }
-
-            /* Second virtual table: "Income range that qualifies for subsidy" */
-            table.inc:nth-of-type(2) {
+            table.inc, table.inc thead, table.inc tbody, table.inc th, table.inc td, table.inc tr {
                 display: block;
             }
-            table.inc:nth-of-type(2) tr th:nth-child(2),
-            table.inc:nth-of-type(2) tr td:nth-child(2),
-            table.inc:nth-of-type(2) tr th:nth-child(4),
-            table.inc:nth-of-type(2) tr td:nth-child(4) {
-                display: none;
+            table.inc thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
             }
-            table.inc:nth-of-type(2) tr th:nth-child(3),
-            table.inc:nth-of-type(2) tr td:nth-child(3) {
-                display: table-cell;
-            }
-
-            /* Third virtual table: "Income range that may qualify for a subsidy" */
-            table.inc:nth-of-type(3) {
-                display: block;
-            }
-            table.inc:nth-of-type(3) tr th:nth-child(2),
-            table.inc:nth-of-type(3) tr td:nth-child(2),
-            table.inc:nth-of-type(3) tr th:nth-child(3),
-            table.inc:nth-of-type(3) tr td:nth-child(3) {
-                display: none;
-            }
-            table.inc:nth-of-type(3) tr th:nth-child(4),
-            table.inc:nth-of-type(3) tr td:nth-child(4) {
-                display: table-cell;
-            }
-
-            /* Ensure proper spacing and alignment */
             table.inc tbody tr {
-                display: table-row;
+                margin: 0 0 10px 0; /* Adds 10px space between rows */
             }
-
             table.inc td {
-                display: table-cell;
-                padding: 10px;
+                position: relative;
+                padding-left: 50%;
                 text-align: left;
-                border: 1px solid #ddd;
             }
+            table.inc td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 40%;
+                padding-left: 10px;
+                font-weight: bold;
+                white-space: normal;
+            }
+            table.inc th:first-of-type, table.inc td:first-of-type {
+            text-align: left;
+    
+        }
         }
     </style>
 </head>
-<body style="background-color: #252525;">
+<body style="background-color: aliceblue;">
 
-<!-- Single table in the markup -->
 <table class="inc">
     <thead>
         <tr>
