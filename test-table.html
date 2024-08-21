@@ -6,84 +6,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Table with Fixed First Column</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            height: 100vh;
-        }
+       .gangster-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-family: sans-serif;
+    font-size: 14px;
+}
 
-        .table-wrapper {
-            width: 100%;
-            max-width: 800px;
-            overflow-x: hidden; /* No scrolling initially */
-            position: relative;
-        }
+.table-wrapper {
+    width: 100%;
+    max-width: 800px;
+    overflow-x: hidden;
+    position: relative;
+}
 
-        .responsive-table {
-            width: 200%; /* Set table width to 200% to allow scrolling of two columns */
-            max-width: 800px;
-            border-collapse: collapse;
-            table-layout: fixed; /* Fixed layout for equal column width */
-        }
+.responsive-table {
+    width: 170%; /* Total width adjusted to 170% to accommodate the first and subsequent columns */
+    max-width: 800px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
 
-        .responsive-table th,
-        .responsive-table td {
-            background-color:#fff;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            text-align: left;
-            white-space: normal; /* Allow text to wrap */
-            word-wrap: break-word; /* Ensure text wraps within cells */
-            width: 50%; /* Each column takes up 50% of the screen width */
-        }
+.responsive-table th,
+.responsive-table td {
+    background-color: #fff;
+    padding: 8px 16px;
+    text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+    border-bottom: 1px solid #ddd;
+    padding: 20px;
+}
 
-        .responsive-table th:first-child,
-        .responsive-table td:first-child {
-            position: sticky;
-            left: 0;
-          
-            z-index: 2;
-        }
-        .responsive-table th{
-            background-color: #f9f9f9; /* Background for the sticky column */
-        }
+.responsive-table th:first-child,
+.responsive-table td:first-child {
+    width: 50%; /* First column occupies 50% of the width */
+    position: sticky;
+    left: 0;
+    text-align: center;
+    z-index: 2;
+}
 
-        @media screen and (max-width: 768px) {
-            .table-wrapper {
-                overflow-x: auto; /* Enable horizontal scrolling */
-            }
+.responsive-table th:first-child::after,
+.responsive-table td:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -2px; /* Position the shadow just on the right edge */
+    width: 2px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2); /* Create a shadow effect */
+    box-shadow: 1px 0px 3px 0px rgba(0, 0, 0, 0.2); /* Adjust shadow intensity */
+    z-index: 1; /* Ensure the shadow is below the next column */
+}
 
-            .responsive-table {
-                width: 200%; /* Set table width to 200% to allow scrolling of two columns */
-                max-width: none; /* Ignore the max-width restriction on small screens */
-                table-layout: fixed; /* Fixed layout for equal column width */
-            }
+.responsive-table th:nth-child(2),
+.responsive-table td:nth-child(2),
+.responsive-table th:nth-child(3),
+.responsive-table td:nth-child(3),
+.responsive-table th:nth-child(4),
+.responsive-table td:nth-child(4) {
+    width: 40%; /* Each subsequent column is 40% of the viewport width */
+}
 
-            .table-wrapper::-webkit-scrollbar {
-                height: 8px; /* Adjust the height of the scrollbar */
-            }
+.responsive-table th {
+    background-color: #0b3b60;
+    color: #fff;
+    font-weight: 400;
+    padding: 10px 20px;
+}
 
-            .table-wrapper::-webkit-scrollbar-thumb {
-                background-color: #888; /* Color of the scrollbar thumb */
-                border-radius: 4px;
-            }
+@media screen and (max-width: 768px) {
+    .table-wrapper {
+        overflow-x: auto;
+    }
 
-            .table-wrapper::-webkit-scrollbar-thumb:hover {
-                background-color: #555; /* Hover color for the scrollbar thumb */
-            }
+    .responsive-table {
+        width: 170%; /* Total table width is 170% to accommodate the scrolling effect */
+        max-width: none;
+        table-layout: fixed;
+    }
 
-            .table-wrapper::-webkit-scrollbar-track {
-                background-color: #f1f1f1; /* Color of the scrollbar track */
-            }
-        }
+    .table-wrapper::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 4px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb:hover {
+        background-color: #555;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+        background-color: #f1f1f1;
+    }
+
+    .responsive-table td {
+        border-left: 1px solid #ddd;
+        background-color: #f9f9f9;
+    }
+
+    .responsive-table td:first-of-type {
+        border-right: 1px solid #ddd;
+        border-left: none;
+        background-color: #fff;
+    }
+
+    .responsive-table th {
+        border-left: 1px solid #5f85a3;
+    }
+
+    .responsive-table th:first-of-type {
+        border-right: 1px solid #5f85a3;
+        border-left: none;
+    }
+}
+
     </style>
 </head>
 <body>
-
+<div class="gangster-wrapper">
 <div class="table-wrapper">
     <table class="responsive-table">
         <thead>
@@ -134,6 +180,6 @@
         </tbody>
     </table>
 </div>
-
+</div>
 </body>
 </html>
