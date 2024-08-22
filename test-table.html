@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Table with Fixed First Column</title>
     <style>
-       .gangster-wrapper {
+     .gangster-wrapper {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -17,8 +17,9 @@
 .table-wrapper {
     width: 100%;
     max-width: 800px;
-    overflow-x: hidden;
+    overflow-x: auto; /* Allow horizontal scrolling */
     position: relative;
+    scroll-snap-type: x mandatory; /* Snap scrolling */
 }
 
 .responsive-table {
@@ -26,6 +27,7 @@
     max-width: 800px;
     border-collapse: collapse;
     table-layout: fixed;
+    transition: transform 0.3s ease-out; /* Smooth movement */
 }
 
 .responsive-table th,
@@ -41,24 +43,11 @@
 
 .responsive-table th:first-child,
 .responsive-table td:first-child {
-    width: 50%; /* First column occupies 50% of the width */
+    width: 50%;
     position: sticky;
     left: 0;
     text-align: center;
     z-index: 2;
-}
-
-.responsive-table th:first-child::after,
-.responsive-table td:first-child::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -2px; /* Position the shadow just on the right edge */
-    width: 2px;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.2); /* Create a shadow effect */
-    box-shadow: 1px 0px 3px 0px rgba(0, 0, 0, 0.2); /* Adjust shadow intensity */
-    z-index: 1; /* Ensure the shadow is below the next column */
 }
 
 .responsive-table th:nth-child(2),
@@ -77,52 +66,28 @@
     padding: 10px 20px;
 }
 
-@media screen and (max-width: 768px) {
-    .table-wrapper {
-        overflow-x: auto;
-    }
+/* Scroll-triggered bounce effect */
+.table-wrapper:active .responsive-table,
+.table-wrapper:hover .responsive-table {
+    animation: bounce-effect 0.6s ease-out; /* Trigger the bounce on hover or active */
+}
 
-    .responsive-table {
-        width: 170%; /* Total table width is 170% to accommodate the scrolling effect */
-        max-width: none;
-        table-layout: fixed;
+/* Keyframes for the bounce effect */
+@keyframes bounce-effect {
+    0% {
+        transform: translateX(0);
     }
-
-    .table-wrapper::-webkit-scrollbar {
-        height: 8px;
+    25% {
+        transform: translateX(-10px); /* Move slightly left */
     }
-
-    .table-wrapper::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 4px;
+    50% {
+        transform: translateX(5px); /* Move slightly right */
     }
-
-    .table-wrapper::-webkit-scrollbar-thumb:hover {
-        background-color: #555;
+    75% {
+        transform: translateX(-2px); /* Move back left a bit */
     }
-
-    .table-wrapper::-webkit-scrollbar-track {
-        background-color: #f1f1f1;
-    }
-
-    .responsive-table td {
-        border-left: 1px solid #ddd;
-        background-color: #f9f9f9;
-    }
-
-    .responsive-table td:first-of-type {
-        border-right: 1px solid #ddd;
-        border-left: none;
-        background-color: #fff;
-    }
-
-    .responsive-table th {
-        border-left: 1px solid #5f85a3;
-    }
-
-    .responsive-table th:first-of-type {
-        border-right: 1px solid #5f85a3;
-        border-left: none;
+    100% {
+        transform: translateX(0); /* Return to original position */
     }
 }
 
