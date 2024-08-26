@@ -45,19 +45,26 @@
         }
 
         #pharmacyListContainer h3 {
-            margin-top: 0;
+            margin-top: 10px;
         }
 
         #inputContainer {
+            display: flex;
             margin-bottom: 10px;
-            text-align: center;
+            justify-content: space-between;
         }
 
-        #inputContainer input, #inputContainer button {
+        #inputContainer input {
+            flex: 1;
             padding: 10px;
             font-size: 16px;
-            margin: 5px 0;
-            width: calc(100% - 20px); /* Adjusts width considering padding */
+            margin-right: 5px;
+        }
+
+        #inputContainer button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
         }
 
         .pharmacy-item {
@@ -85,7 +92,7 @@
                 <input type="text" id="zipCode" placeholder="Enter ZIP Code">
                 <button onclick="findPharmacies()">Find Pharmacies</button>
             </div>
-            <h3>Nearby Pharmaciess</h3>
+            <h3>Nearby Pharmacies</h3>
             <div id="pharmacyList"></div>
         </div>
     </div>
