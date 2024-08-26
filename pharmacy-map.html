@@ -221,8 +221,8 @@
                     `;
 
                     pharmacyItem.addEventListener('click', () => {
-                        map.panTo(marker.getPosition());
-                        map.setZoom(15);
+                        map.panTo(marker.getPosition()); // Smoothly pans to the marker's position
+                        map.setZoom(15); // Adjust zoom level if needed
                         infowindow.setContent(`
                             <strong>${place.name}</strong><br>
                             ${place.vicinity}<br>
@@ -257,7 +257,7 @@
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
                 `);
                 infowindow.open(map, this);
-                map.panTo(marker.getPosition());
+                map.panTo(marker.getPosition()); // Smoothly pans to the marker's position
             });
 
             return marker;
