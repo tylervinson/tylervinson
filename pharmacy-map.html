@@ -18,17 +18,6 @@
             background-color: #f4f4f4;
         }
 
-        #inputContainer {
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        #inputContainer input, #inputContainer button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px;
-        }
-
         #container {
             display: flex;
             width: 90%;
@@ -51,10 +40,24 @@
             padding: 20px;
             background-color: #fafafa;
             border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
         }
 
         #pharmacyListContainer h3 {
             margin-top: 0;
+        }
+
+        #inputContainer {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #inputContainer input, #inputContainer button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px 0;
+            width: calc(100% - 20px); /* Adjusts width considering padding */
         }
 
         .pharmacy-item {
@@ -67,17 +70,21 @@
             background-color: #f0f0f0;
         }
 
+        #pharmacyList {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
     </style>
 </head>
 <body>
-    <div id="inputContainer">
-        <input type="text" id="zipCode" placeholder="Enter ZIP Code">
-        <button onclick="findPharmacies()">Find Pharmacies</button>
-    </div>
-
     <div id="container">
         <div id="map"></div>
         <div id="pharmacyListContainer">
+            <div id="inputContainer">
+                <input type="text" id="zipCode" placeholder="Enter ZIP Code">
+                <button onclick="findPharmacies()">Find Pharmacies</button>
+            </div>
             <h3>Nearby Pharmacies</h3>
             <div id="pharmacyList"></div>
         </div>
@@ -145,7 +152,7 @@
                     pharmacyItem.textContent = `${place.name} - ${place.vicinity}`;
                     pharmacyItem.addEventListener('click', () => {
                         map.panTo(marker.getPosition());
-                        map.setZoom(14);
+                        map.setZoom(15);
                         infowindow.setContent(place.name);
                         infowindow.open(map, marker);
                     });
