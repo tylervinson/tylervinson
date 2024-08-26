@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmacy Finder</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_lP5NeY2aU2pHP79V0sx3wc6F8tQRRIk&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_lP5NeY2aU2pHP79V0sx3wc6F8tQRRIk&libraries=places,directions"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -56,15 +56,30 @@
 
         #inputContainer input {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             font-size: 16px;
             margin-right: 5px;
         }
 
         #inputContainer button {
-            padding: 10px;
+            padding: 8px 12px;
+            font-size: 16px;
+            background-color: #333;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        #geolocationButton {
+            background-color: #ddd;
+            border: none;
+            padding: 4px;
             font-size: 16px;
             cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #geolocationButton.active {
+            background-color: #0099D8;
         }
 
         .pharmacy-item {
@@ -77,9 +92,32 @@
             background-color: #f0f0f0;
         }
 
+        .directions-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .directions-link:hover {
+            text-decoration: underline;
+        }
+
         #pharmacyList {
             flex-grow: 1;
             overflow-y: auto;
+        }
+
+        /* Custom styles for the infowindow close button */
+        .gm-style-iw-c {
+            padding-right: 20px !important; /* Adds some padding to reduce the impact of the close button */
+        }
+
+        .gm-ui-hover-effect {
+            top: 10px !important; /* Adjusts the position */
+            right: 10px !important; /* Adjusts the position */
+            width: 20px !important; /* Adjusts the size */
+            height: 20px !important; /* Adjusts the size */
+            margin: -5px 0 0 19px !important; /* Applies the custom margin */
         }
 
     </style>
@@ -90,7 +128,8 @@
         <div id="pharmacyListContainer">
             <div id="inputContainer">
                 <input type="text" id="zipCode" placeholder="Enter ZIP Code">
-                <button onclick="findPharmacies()">Find Pharmacies</button>
+                <button onclick="findPharmacies()">Search</button>
+                <button id="geolocationButton" onclick="toggleGeolocation()"><img src="i/geo.svg" width="auto" height="22px"></button>
             </div>
             <h3>Nearby Pharmacies</h3>
             <div id="pharmacyList"></div>
@@ -101,17 +140,28 @@
         let map;
         let service;
         let infowindow;
+        let directionsService;
+        let directionsRenderer;
         const markers = [];
+        let geolocationEnabled = false;
+        let watchID;
 
         function initializeMap(lat, lng) {
             const location = new google.maps.LatLng(lat, lng);
 
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: location,
-                zoom: 13
-            });
+            if (!map) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: location,
+                    zoom: 11
+                });
 
-            infowindow = new google.maps.InfoWindow();
+                infowindow = new google.maps.InfoWindow();
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer();
+                directionsRenderer.setMap(map);
+            } else {
+                map.panTo(location);
+            }
         }
 
         function loadDefaultMap() {
@@ -133,7 +183,7 @@
                     const location = new google.maps.LatLng(lat, lng);
                     const request = {
                         location: location,
-                        radius: '8046.72',
+                        radius: '16093.4', // Roughly 10 miles in meters
                         type: ['pharmacy']
                     };
 
@@ -156,11 +206,19 @@
 
                     const pharmacyItem = document.createElement('div');
                     pharmacyItem.className = 'pharmacy-item';
-                    pharmacyItem.textContent = `${place.name} - ${place.vicinity}`;
+                    pharmacyItem.innerHTML = `
+                        <strong>${place.name}</strong><br>
+                        <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                    `;
+
                     pharmacyItem.addEventListener('click', () => {
                         map.panTo(marker.getPosition());
                         map.setZoom(15);
-                        infowindow.setContent(place.name);
+                        infowindow.setContent(`
+                            <strong>${place.name}</strong><br>
+                            ${place.vicinity}<br>
+                            <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                        `);
                         infowindow.open(map, marker);
                     });
 
@@ -184,11 +242,59 @@
             });
 
             google.maps.event.addListener(marker, 'click', function() {
-                infowindow.setContent(place.name);
+                infowindow.setContent(`
+                    <strong>${place.name}</strong><br>
+                    ${place.vicinity}<br>
+                    <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                `);
                 infowindow.open(map, this);
+                map.panTo(marker.getPosition());
             });
 
             return marker;
+        }
+
+        function showDirections(lat, lng) {
+            const origin = map.getCenter();
+            const destination = new google.maps.LatLng(lat, lng);
+
+            const request = {
+                origin: origin,
+                destination: destination,
+                travelMode: 'DRIVING'
+            };
+
+            directionsService.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    alert('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+        function toggleGeolocation() {
+            const button = document.getElementById('geolocationButton');
+
+            if (geolocationEnabled) {
+                // Stop tracking user location
+                navigator.geolocation.clearWatch(watchID);
+                button.classList.remove('active');
+                geolocationEnabled = false;
+            } else {
+                // Start tracking user location
+                if (navigator.geolocation) {
+                    watchID = navigator.geolocation.watchPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        initializeMap(lat, lng);
+                    });
+                    button.classList.add('active');
+                    geolocationEnabled = true;
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            }
         }
 
         // Load the default map centered on Phoenix, AZ
