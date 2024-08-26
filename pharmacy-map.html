@@ -13,8 +13,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             background-color: #f4f4f4;
+        }
+
+        #inputContainer {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #inputContainer input, #inputContainer button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
         }
 
         #container {
@@ -55,22 +67,10 @@
             background-color: #f0f0f0;
         }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .controls input, .controls button {
-            margin: 5px;
-            padding: 8px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
-    <div class="controls">
+    <div id="inputContainer">
         <input type="text" id="zipCode" placeholder="Enter ZIP Code">
         <button onclick="findPharmacies()">Find Pharmacies</button>
     </div>
@@ -143,6 +143,14 @@
                         map.setZoom(15);
                         infowindow.setContent(place.name);
                         infowindow.open(map, marker);
+                    });
+
+                    pharmacyItem.addEventListener('mouseover', () => {
+                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                    });
+
+                    pharmacyItem.addEventListener('mouseout', () => {
+                        marker.setAnimation(null);
                     });
 
                     pharmacyList.appendChild(pharmacyItem);
