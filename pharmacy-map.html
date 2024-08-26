@@ -100,6 +100,11 @@
             infowindow = new google.maps.InfoWindow();
         }
 
+        function loadDefaultMap() {
+            const phoenixLatLng = { lat: 33.4484, lng: -112.0740 }; // Phoenix, Arizona
+            initializeMap(phoenixLatLng.lat, phoenixLatLng.lng);
+        }
+
         function findPharmacies() {
             const zipCode = document.getElementById('zipCode').value;
 
@@ -171,6 +176,9 @@
 
             return marker;
         }
+
+        // Load the default map centered on Phoenix, AZ
+        window.onload = loadDefaultMap;
     </script>
 </body>
 </html>
