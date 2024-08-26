@@ -159,7 +159,7 @@
                     pharmacyItem.textContent = `${place.name} - ${place.vicinity}`;
                     pharmacyItem.addEventListener('click', () => {
                         map.panTo(marker.getPosition());
-                        map.setZoom(15);
+                        map.setZoom(14);
                         infowindow.setContent(place.name);
                         infowindow.open(map, marker);
                     });
