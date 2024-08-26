@@ -127,7 +127,7 @@
         <div id="map"></div>
         <div id="pharmacyListContainer">
             <div id="inputContainer">
-                <input type="text" id="zipCode" placeholder="Enter ZIP Code">
+            <input type="text" id="zipCode" placeholder="Enter ZIP Code">
                 <button onclick="findPharmacies()">Search</button>
                 <button id="geolocationButton" onclick="toggleGeolocation()"><img src="i/geo.svg" width="auto" height="22px"></button>
             </div>
@@ -143,16 +143,14 @@
         let directionsService;
         let directionsRenderer;
         const markers = [];
-        let geolocationEnabled = false;
-        let watchID;
 
-        function initializeMap(lat, lng) {
+        function initializeMap(lat, lng, zoomLevel = 11) {
             const location = new google.maps.LatLng(lat, lng);
 
             if (!map) {
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: location,
-                    zoom: 11
+                    zoom: zoomLevel
                 });
 
                 infowindow = new google.maps.InfoWindow();
@@ -161,6 +159,7 @@
                 directionsRenderer.setMap(map);
             } else {
                 map.panTo(location);
+                map.setZoom(zoomLevel);
             }
         }
 
@@ -169,30 +168,40 @@
             initializeMap(phoenixLatLng.lat, phoenixLatLng.lng);
         }
 
-        function findPharmacies() {
-            const zipCode = document.getElementById('zipCode').value;
+        function findPharmacies(lat, lng) {
+            const location = lat && lng ? new google.maps.LatLng(lat, lng) : null;
+            const radius = 4828.03; // 3 miles in meters
+            const zoomLevel = 13;
 
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ 'address': zipCode }, function(results, status) {
-                if (status == 'OK') {
-                    const lat = results[0].geometry.location.lat();
-                    const lng = results[0].geometry.location.lng();
+            if (location) {
+                initializeMap(lat, lng, zoomLevel);
+            } else {
+                const zipCode = document.getElementById('zipCode').value;
 
-                    initializeMap(lat, lng);
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ 'address': zipCode }, function(results, status) {
+                    if (status == 'OK') {
+                        const lat = results[0].geometry.location.lat();
+                        const lng = results[0].geometry.location.lng();
+                        initializeMap(lat, lng, zoomLevel);
+                        searchNearbyPharmacies(lat, lng, radius);
+                    } else {
+                        alert('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            }
+        }
 
-                    const location = new google.maps.LatLng(lat, lng);
-                    const request = {
-                        location: location,
-                        radius: '16093.4', // Roughly 10 miles in meters
-                        type: ['pharmacy']
-                    };
+        function searchNearbyPharmacies(lat, lng, radius) {
+            const location = new google.maps.LatLng(lat, lng);
+            const request = {
+                location: location,
+                radius: radius,
+                type: ['pharmacy']
+            };
 
-                    service = new google.maps.places.PlacesService(map);
-                    service.nearbySearch(request, handleSearchResults);
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
-                }
-            });
+            service = new google.maps.places.PlacesService(map);
+            service.nearbySearch(request, handleSearchResults);
         }
 
         function handleSearchResults(results, status) {
@@ -208,7 +217,7 @@
                     pharmacyItem.className = 'pharmacy-item';
                     pharmacyItem.innerHTML = `
                         <strong>${place.name}</strong><br>
-                        <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
                     `;
 
                     pharmacyItem.addEventListener('click', () => {
@@ -217,7 +226,7 @@
                         infowindow.setContent(`
                             <strong>${place.name}</strong><br>
                             ${place.vicinity}<br>
-                            <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
                         `);
                         infowindow.open(map, marker);
                     });
@@ -245,7 +254,7 @@
                 infowindow.setContent(`
                     <strong>${place.name}</strong><br>
                     ${place.vicinity}<br>
-                    <a href="javascript:void(0);" onclick="showDirections('${place.geometry.location.lat()}', '${place.geometry.location.lng()}');" class="directions-link">Directions</a>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
                 `);
                 infowindow.open(map, this);
                 map.panTo(marker.getPosition());
@@ -254,46 +263,17 @@
             return marker;
         }
 
-        function showDirections(lat, lng) {
-            const origin = map.getCenter();
-            const destination = new google.maps.LatLng(lat, lng);
-
-            const request = {
-                origin: origin,
-                destination: destination,
-                travelMode: 'DRIVING'
-            };
-
-            directionsService.route(request, function(result, status) {
-                if (status == 'OK') {
-                    directionsRenderer.setDirections(result);
-                } else {
-                    alert('Directions request failed due to ' + status);
-                }
-            });
-        }
-
-        function toggleGeolocation() {
-            const button = document.getElementById('geolocationButton');
-
-            if (geolocationEnabled) {
-                // Stop tracking user location
-                navigator.geolocation.clearWatch(watchID);
-                button.classList.remove('active');
-                geolocationEnabled = false;
+        function useGeolocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    findPharmacies(lat, lng);
+                }, () => {
+                    alert('Geolocation failed. Please try again.');
+                });
             } else {
-                // Start tracking user location
-                if (navigator.geolocation) {
-                    watchID = navigator.geolocation.watchPosition(position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        initializeMap(lat, lng);
-                    });
-                    button.classList.add('active');
-                    geolocationEnabled = true;
-                } else {
-                    alert('Geolocation is not supported by this browser.');
-                }
+                alert('Geolocation is not supported by this browser.');
             }
         }
 
