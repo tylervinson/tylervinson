@@ -108,7 +108,7 @@
 
             map = new google.maps.Map(document.getElementById('map'), {
                 center: location,
-                zoom: 13
+                zoom: 12
             });
 
             infowindow = new google.maps.InfoWindow();
@@ -159,7 +159,7 @@
                     pharmacyItem.textContent = `${place.name} - ${place.vicinity}`;
                     pharmacyItem.addEventListener('click', () => {
                         map.panTo(marker.getPosition());
-                        map.setZoom(14);
+                        map.setZoom(13);
                         infowindow.setContent(place.name);
                         infowindow.open(map, marker);
                     });
