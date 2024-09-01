@@ -65,23 +65,35 @@
           background-color:#0099D8 !important;
         }
         /* Parent div styling */
-        #target-div {
+        #target-div-container {
+            position: relative;
             max-width: 900px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #333;
-    color: #f1f1f1;
-    border-radius: 8px;
-    font-family: monospace;
-    overflow-x: auto;
-    font-size: 12px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #333;
+            color: #f1f1f1;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+            font-size: 12px;
         }
-        /* Ensures the pre element uses the same styling */
-        #target-div pre {
+
+        #target-div-container pre {
             white-space: pre-wrap;
             word-wrap: break-word;
             height: 400px;
             padding: 20px;
+        }
+
+        /* Copy button styling */
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -108,7 +120,12 @@
     </div>
 </div>
 <div>
-    <div id="target-div"></div>
+    <div id="target-div-container">
+        <button class="copy-button" onclick="copyToClipboard()">
+            <i class="material-icons">content_copy</i>
+        </button>
+        <div id="target-div"></div>
+    </div>
 </div>
 
 <script>
@@ -142,6 +159,17 @@ function resizeCard(factor) {
             .catch(error => {
                 targetDiv.textContent = "Error fetching SVG content: " + error;
             });
+    }
+
+    function copyToClipboard() {
+        const targetDiv = document.getElementById('target-div');
+        const svgCode = targetDiv.innerText;
+
+        navigator.clipboard.writeText(svgCode).then(() => {
+            alert("SVG code copied to clipboard!");
+        }).catch(err => {
+            alert("Failed to copy text: " + err);
+        });
     }
 
     document.addEventListener("DOMContentLoaded", function() {
