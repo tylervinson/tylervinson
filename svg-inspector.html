@@ -124,42 +124,32 @@ function resizeCard(factor) {
         const imageUrl = document.getElementById('imageUrl').value;
         const image = document.getElementById('image');
         image.src = imageUrl;
+        updateSvgCode(imageUrl);
     }
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Get the source and target divs
-    var sourceDiv = document.getElementById("source-div");
-    var targetDiv = document.getElementById("target-div");
 
-    // Find the img element within the source div
-    var imgElement = sourceDiv.querySelector("img");
+    function updateSvgCode(imageUrl) {
+        const targetDiv = document.getElementById('target-div');
+        targetDiv.innerHTML = ''; // Clear previous SVG code
 
-    if (imgElement) {
-        // Fetch the SVG file content
-        fetch(imgElement.src)
+        fetch(imageUrl)
             .then(response => response.text())
             .then(svgMarkup => {
-                // Create a text node with the SVG markup
-                var codeNode = document.createTextNode(svgMarkup);
-
-                // Create a <pre> element to preserve formatting
-                var preElement = document.createElement("pre");
+                const codeNode = document.createTextNode(svgMarkup);
+                const preElement = document.createElement('pre');
                 preElement.appendChild(codeNode);
-
-                // Append the <pre> element to the target div
                 targetDiv.appendChild(preElement);
             })
             .catch(error => {
-                // Handle any errors that occur during fetch
                 targetDiv.textContent = "Error fetching SVG content: " + error;
             });
-    } else {
-        // If no img is found, display a message
-        targetDiv.textContent = "No image found in the source div.";
     }
-});
 
+    document.addEventListener("DOMContentLoaded", function() {
+        const imgElement = document.getElementById("image");
+        if (imgElement) {
+            updateSvgCode(imgElement.src);
+        }
+    });
 </script>
 </body>
 </html>
