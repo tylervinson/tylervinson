@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Grid with PDF Export for A5</title>
+    <!-- Load jsPDF and html2canvas libraries from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Printable area */
+        .print-area {
+            max-width: 1748px; /* A5 width in pixels */
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr); /* 5 columns for A5 */
+            grid-gap: 10px; /* 10px gutter */
+        }
+
+        /* Image container to ensure aspect ratio */
+        .grid-container .image-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%; /* Creates a square box for small images */
+        }
+
+        .grid-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Maintain aspect ratio, fit within the container */
+        }
+
+        /* Size Classes */
+        .grid-container .small {
+            grid-column: span 2;
+            grid-row: span 2;
+            padding-bottom: 100%; /* Square aspect ratio */
+        }
+
+        .grid-container .medium {
+            grid-column: span 3; /* Spans 2 columns */
+            grid-row: span 3;    /* Spans 2 rows */
+            padding-bottom: 100%; /* Maintain square aspect ratio */
+        }
+
+        .grid-container .large {
+            grid-column: span 4; /* Spans 3 columns */
+            grid-row: span 4;    /* Spans 3 rows */
+            padding-bottom: 100%; /* Maintain square aspect ratio */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="print-area">
+        <div class="grid-container" id="image-grid">
+            <!-- Example usage of classes for size categories -->
+            <div class="image-container small">
+                <img src="art/image1.png" alt="Image 1">
+            </div>
+            <div class="image-container small">
+                <img src="art/image2.png" alt="Image 2">
+            </div>
+            <div class="image-container large">
+                <img src="art/image3.png" alt="Image 3">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image4.png" alt="Image 4">
+            </div>
+            <div class="image-container large">
+                <img src="art/image5.png" alt="Image 5">
+            </div>
+            <div class="image-container small">
+                <img src="art/image6.png" alt="Image 6">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image7.png" alt="Image 7">
+            </div>
+            <div class="image-container small">
+                <img src="art/image8.png" alt="Image 8">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image9.png" alt="Image 9">
+            </div>
+            <div class="image-container large">
+                <img src="art/image10.png" alt="Image 10">
+            </div>
+            <div class="image-container large">
+                <img src="art/image11.png" alt="Image 11">
+            </div>
+            <div class="image-container large">
+                <img src="art/image12.png" alt="Image 12">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image13.png" alt="Image 13">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image14.png" alt="Image 14">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image15.png" alt="Image 15">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image16.png" alt="Image 16">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image17.png" alt="Image 17">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image18.png" alt="Image 18">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image19.png" alt="Image 19">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image20.png" alt="Image 20">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image21.png" alt="Image 21">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image22.png" alt="Image 22">
+            </div>
+            <div class="image-container small">
+                <img src="art/image23.png" alt="Image 23">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image24.png" alt="Image 24">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image25.png" alt="Image 25">
+            </div>
+            <div class="image-container medium">
+                <img src="art/image26.png" alt="Image 26">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const { jsPDF } = window.jspdf;
+
+            // Capture the HTML content as canvas
+            html2canvas(document.querySelector('.print-area'), { scale: 3 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+
+                // Create a jsPDF instance with A5 dimensions in points (300 DPI)
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: [1748, 2480] // A5 size at 300 DPI (width x height in points)
+                });
+
+                // Add the image data to the PDF
+                pdf.addImage(imgData, 'PNG', 0, 0, 1748, 2480); // Fit image to A5
+
+                // Save the PDF automatically
+                pdf.save('grid_output_a5.pdf');
+            });
+        };
+    </script>
+
+</body>
+</html>

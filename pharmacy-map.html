@@ -7,7 +7,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_lP5NeY2aU2pHP79V0sx3wc6F8tQRRIk&libraries=places,directions"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Roboto, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -18,10 +18,10 @@
             background-color: #f4f4f4;
         }
 
-        #container {
+        #mapContainer {
             display: flex;
             width: 90%;
-            height: 80%;
+            height: 650px;
             max-width: 1200px;
             background: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -36,12 +36,13 @@
 
         #pharmacyListContainer {
             width: 30%;
-            overflow-y: auto;
-            padding: 20px;
-            background-color: #fafafa;
-            border-left: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
+    overflow-y: auto;
+    padding: 20px 0 20px 0px;
+    background-color: #0B3B60;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
         }
 
         #pharmacyListContainer h3 {
@@ -56,17 +57,22 @@
 
         #inputContainer input {
             flex: 1;
-            padding: 8px;
-            font-size: 16px;
-            margin-right: 5px;
+    padding: 14px;
+    font-size: 16px;
+    /* margin-right: 5px; */
+    border: none;
         }
 
         #inputContainer button {
-            padding: 8px 12px;
-            font-size: 16px;
-            background-color: #333;
-            cursor: pointer;
-            color: #fff;
+            
+    font-size: 16px;
+    background-color: #FFBE5F;
+    cursor: pointer;
+    color: #0b3b60;
+    border-radius: 0 9999px 9999px 0;
+    border: none;
+    font-weight: 500;
+    padding:0 20px;
         }
 
         #geolocationButton {
@@ -83,17 +89,18 @@
         }
 
         .pharmacy-item {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            cursor: pointer;
-        }
+    padding: 10px 20px;
+    border-bottom: 1px solid #285a81;
+    border-top: 1px solid #042035;
+    cursor: pointer;
+}
 
         .pharmacy-item:hover {
-            background-color: #f0f0f0;
+            background-color: #002847;
         }
 
         .directions-link {
-            color: #0066cc;
+            color: #ffbe5f;
             text-decoration: none;
             font-size: 14px;
         }
@@ -119,166 +126,215 @@
             height: 20px !important; /* Adjusts the size */
             margin: -5px 0 0 19px !important; /* Applies the custom margin */
         }
-
+        #pharmacyListContainer h3{
+            font-weight: 400;
+        }
+.zSearchBox{
+    margin: -20px 0 0 0px;
+    background-color: #0099D8;
+    padding:20px;
+}
     </style>
-</head>
-<body>
-    <div id="container">
+
+    <div id="mapContainer">
         <div id="map"></div>
         <div id="pharmacyListContainer">
+            <div class="zSearchBox"><h3>Locate Your Nearest Pharmacy</h3>
             <div id="inputContainer">
             <input type="text" id="zipCode" placeholder="Enter ZIP Code">
-                <button onclick="findPharmacies()">Search</button>
-                <button id="geolocationButton" onclick="toggleGeolocation()"><img src="i/geo.svg" width="auto" height="22px"></button>
-            </div>
-            <h3>Nearby Pharmacies</h3>
+                <button onclick="findPharmacies()">Find</button>
+                <!-- <button id="geolocationButton" onclick="toggleGeolocation()"><img src="i/geo.svg" width="auto" height="22px"></button> -->
+            </div></div>
+            
             <div id="pharmacyList"></div>
         </div>
     </div>
 
     <script>
-        let map;
-        let service;
-        let infowindow;
-        let directionsService;
-        let directionsRenderer;
-        const markers = [];
-
-        function initializeMap(lat, lng, zoomLevel = 11) {
-            const location = new google.maps.LatLng(lat, lng);
-
+        (function() {
+          var recognizedPharmacies = [
+            'CVS', 'Walgreens', 'Rite Aid', 'Walmart', 'Target', 'Kroger',
+            'Safeway', 'Costco', 'Sam\'s Club', 'Publix', 'Albertsons',
+            'Hy-Vee', 'Meijer', 'Wegmans', 'H-E-B', 'Giant Eagle'
+          ];
+        
+          var map, service, infowindow, directionsService, directionsRenderer;
+          var markers = [];
+        
+          function initializeMap(lat, lng, zoomLevel) {
+            console.log("Initializing map...");
+            zoomLevel = zoomLevel || 11;
+            var location = new google.maps.LatLng(lat, lng);
+        
             if (!map) {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: location,
-                    zoom: zoomLevel
-                });
-
-                infowindow = new google.maps.InfoWindow();
-                directionsService = new google.maps.DirectionsService();
-                directionsRenderer = new google.maps.DirectionsRenderer();
-                directionsRenderer.setMap(map);
+              map = new google.maps.Map(document.getElementById('map'), {
+                center: location,
+                zoom: zoomLevel
+              });
+              infowindow = new google.maps.InfoWindow();
+              directionsService = new google.maps.DirectionsService();
+              directionsRenderer = new google.maps.DirectionsRenderer();
+              directionsRenderer.setMap(map);
             } else {
-                map.panTo(location);
-                map.setZoom(zoomLevel);
+              map.panTo(location);
+              map.setZoom(zoomLevel);
             }
-        }
-
-        function loadDefaultMap() {
-            const phoenixLatLng = { lat: 33.4484, lng: -112.0740 }; // Phoenix, Arizona
-            initializeMap(phoenixLatLng.lat, phoenixLatLng.lng);
-        }
-
-        function findPharmacies(lat, lng) {
-            const location = lat && lng ? new google.maps.LatLng(lat, lng) : null;
-            const radius = 4828.03; // 3 miles in meters
-            const zoomLevel = 13;
-
+          }
+        
+          function loadDefaultMap() {
+            console.log("Loading default map...");
+            initializeMap(33.4484, -112.0740); // Phoenix, Arizona
+          }
+        
+          function findPharmacies(lat, lng) {
+            var location = lat && lng ? new google.maps.LatLng(lat, lng) : null;
+            var radius = 16093.4; // 10 miles in meters
+            var zoomLevel = 11;
+        
             if (location) {
-                initializeMap(lat, lng, zoomLevel);
+              initializeMap(lat, lng, zoomLevel);
+              searchNearbyPharmacies(lat, lng, radius);
             } else {
-                const zipCode = document.getElementById('zipCode').value;
-
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ 'address': zipCode }, function(results, status) {
-                    if (status == 'OK') {
-                        const lat = results[0].geometry.location.lat();
-                        const lng = results[0].geometry.location.lng();
-                        initializeMap(lat, lng, zoomLevel);
-                        searchNearbyPharmacies(lat, lng, radius);
-                    } else {
-                        alert('Geocode was not successful for the following reason: ' + status);
-                    }
-                });
+              var zipCode = document.getElementById('zipCode').value;
+              var geocoder = new google.maps.Geocoder();
+              geocoder.geocode({ 'address': zipCode }, function(results, status) {
+                if (status == 'OK') {
+                  var lat = results[0].geometry.location.lat();
+                  var lng = results[0].geometry.location.lng();
+                  initializeMap(lat, lng, zoomLevel);
+                  searchNearbyPharmacies(lat, lng, radius);
+                } else {
+                  alert('Geocode was not successful for the following reason: ' + status);
+                }
+              });
             }
-        }
-
-        function searchNearbyPharmacies(lat, lng, radius) {
-            const location = new google.maps.LatLng(lat, lng);
-            const request = {
-                location: location,
-                radius: radius,
-                type: ['pharmacy']
+          }
+        
+          function searchNearbyPharmacies(lat, lng, radius) {
+            var location = new google.maps.LatLng(lat, lng);
+            var request = {
+              location: location,
+              radius: radius,
+              type: ['pharmacy'],
+              rankBy: google.maps.places.RankBy.PROMINENCE
             };
-
             service = new google.maps.places.PlacesService(map);
             service.nearbySearch(request, handleSearchResults);
-        }
-
-        function handleSearchResults(results, status) {
+          }
+        
+          function handleSearchResults(results, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                const pharmacyList = document.getElementById('pharmacyList');
-                pharmacyList.innerHTML = '';
-
-                results.forEach((place, index) => {
-                    const marker = createMarker(place);
-                    markers.push(marker);
-
-                    const pharmacyItem = document.createElement('div');
-                    pharmacyItem.className = 'pharmacy-item';
-                    pharmacyItem.innerHTML = `
-                        <strong>${place.name}</strong><br>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
-                    `;
-
-                    pharmacyItem.addEventListener('click', () => {
-                        map.panTo(marker.getPosition()); // Smoothly pans to the marker's position
-                        map.setZoom(15); // Adjust zoom level if needed
-                        infowindow.setContent(`
-                            <strong>${place.name}</strong><br>
-                            ${place.vicinity}<br>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
-                        `);
-                        infowindow.open(map, marker);
-                    });
-
-                    pharmacyItem.addEventListener('mouseover', () => {
-                        marker.setAnimation(google.maps.Animation.BOUNCE);
-                    });
-
-                    pharmacyItem.addEventListener('mouseout', () => {
-                        marker.setAnimation(null);
-                    });
-
-                    pharmacyList.appendChild(pharmacyItem);
+              var pharmacyList = document.getElementById('pharmacyList');
+              pharmacyList.innerHTML = '';
+              markers.forEach(function(marker) { marker.setMap(null); });
+              markers = [];
+        
+              var filteredResults = results.filter(function(place) {
+                return recognizedPharmacies.some(function(chain) {
+                  return place.name.toLowerCase().includes(chain.toLowerCase());
                 });
+              });
+        
+              filteredResults.forEach(function(place) {
+                var marker = createMarker(place);
+                markers.push(marker);
+        
+                var pharmacyItem = document.createElement('div');
+                pharmacyItem.className = 'pharmacy-item';
+                pharmacyItem.innerHTML = 
+                  '<strong>' + place.name + '</strong><br>' +
+                  place.vicinity + '<br>' +
+                  '<a href="https://www.google.com/maps/dir/?api=1&destination=' + 
+                  encodeURIComponent(place.vicinity) + 
+                  '" target="_blank" class="directions-link">Directions</a>';
+        
+                pharmacyItem.addEventListener('click', function() {
+                  map.panTo(marker.getPosition());
+                  map.setZoom(15);
+                  infowindow.setContent(
+                    '<strong>' + place.name + '</strong><br>' +
+                    place.vicinity + '<br>' +
+                    '<a href="https://www.google.com/maps/dir/?api=1&destination=' + 
+                    encodeURIComponent(place.vicinity) + 
+                    '" target="_blank" class="directions-link">Directions</a>'
+                  );
+                  infowindow.open(map, marker);
+                });
+        
+                pharmacyItem.addEventListener('mouseover', function() {
+                  marker.setAnimation(google.maps.Animation.BOUNCE);
+                });
+        
+                pharmacyItem.addEventListener('mouseout', function() {
+                  marker.setAnimation(null);
+                });
+        
+                pharmacyList.appendChild(pharmacyItem);
+              });
+        
+              if (filteredResults.length === 0) {
+                pharmacyList.innerHTML = '<p>No recognized pharmacies found in this area. Try expanding your search radius.</p>';
+              }
             }
-        }
-
-        function createMarker(place) {
-            const marker = new google.maps.Marker({
-                map: map,
-                position: place.geometry.location
+          }
+        
+          function createMarker(place) {
+            var marker = new google.maps.Marker({
+              map: map,
+              position: place.geometry.location
             });
-
+        
             google.maps.event.addListener(marker, 'click', function() {
-                infowindow.setContent(`
-                    <strong>${place.name}</strong><br>
-                    ${place.vicinity}<br>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.vicinity)}" target="_blank" class="directions-link">Directions</a>
-                `);
-                infowindow.open(map, this);
-                map.panTo(marker.getPosition()); // Smoothly pans to the marker's position
+              infowindow.setContent(
+                '<strong>' + place.name + '</strong><br>' +
+                place.vicinity + '<br>' +
+                '<a href="https://www.google.com/maps/dir/?api=1&destination=' + 
+                encodeURIComponent(place.vicinity) + 
+                '" target="_blank" class="directions-link">Directions</a>'
+              );
+              infowindow.open(map, this);
+              map.panTo(marker.getPosition());
             });
-
+        
             return marker;
-        }
-
-        function useGeolocation() {
+          }
+        
+          function useGeolocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    findPharmacies(lat, lng);
-                }, () => {
-                    alert('Geolocation failed. Please try again.');
-                });
+              navigator.geolocation.getCurrentPosition(function(position) {
+                findPharmacies(position.coords.latitude, position.coords.longitude);
+              }, function() {
+                alert('Geolocation failed. Please try again.');
+              });
             } else {
-                alert('Geolocation is not supported by this browser.');
+              alert('Geolocation is not supported by this browser.');
             }
-        }
-
-        // Load the default map centered on Phoenix, AZ
-        window.onload = loadDefaultMap;
-    </script>
+          }
+        
+          // Ensure the map div is ready before loading the map
+          function initializeMapIfDivExists() {
+            var mapDiv = document.getElementById('map');
+            if (mapDiv) {
+              console.log("Map div found, initializing map...");
+              loadDefaultMap();
+            } else {
+              console.log("Map div not found, retrying...");
+              setTimeout(initializeMapIfDivExists, 100); // Retry every 100ms
+            }
+          }
+        
+          // Expose functions to global scope
+          window.loadDefaultMap = loadDefaultMap;
+          window.findPharmacies = findPharmacies;
+          window.useGeolocation = useGeolocation;
+        
+          // Wait for Google Maps API to load and full page load
+          window.addEventListener('load', function() {
+            console.log("Window loaded, checking map initialization...");
+            initializeMapIfDivExists();
+          });
+        
+        })();
+        </script>
 </body>
 </html>
