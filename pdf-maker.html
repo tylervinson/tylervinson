@@ -183,9 +183,23 @@
     </style>
 </head>
 <body>
-    <h1>Unique Text to PDF Generator</h1>
-    <textarea id="textContent" rows="10" cols="50" placeholder="Paste your text here..."></textarea><br><br>
+    <div class="mdl-grid"></div>
+        <div class="mdl-cell" style="
+    width: 100%;
+">
+            <div class="mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Unique Text to PDF Generator</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    Save text as a plan text PDF
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <textarea id="textContent" rows="10" cols="50" placeholder="Paste your text here..."></textarea><br><br>
     <button id="downloadPdf">Download as Unique PDF</button>
+                </div>
+            </div>
+        </div>
 
     <script>
         document.getElementById('downloadPdf').addEventListener('click', function () {
@@ -202,8 +216,15 @@
             const randomSubject = `Subject_${generateRandomString(10)}`;
             const randomKeywords = `Keywords_${generateRandomString(12)}`;
 
-            // Add the text to the PDF
-            doc.text(text, 10, 10);
+            // Set the font size
+            doc.setFontSize(12);
+
+            // Split the text into lines that fit within the PDF's width
+            const pageWidth = doc.internal.pageSize.getWidth() - 20; // Width with padding
+            const splitText = doc.splitTextToSize(text, pageWidth);
+            
+            // Add the text to the PDF with line wrapping
+            doc.text(splitText, 10, 10);
 
             // Add invisible text to randomize internal structure
             doc.setTextColor(255, 255, 255); // White text color (invisible)
