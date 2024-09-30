@@ -202,65 +202,66 @@
     color: #fff;
     font-size: 16px;
 "></textarea><br><br>
-<a href="javascrip();" d="downloadPdf" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+<a href="#" d="downloadPdf" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
     Download PDF
 </a>
                 </div>
             </div>
         </div>
 </div>
-    <script>
-        document.getElementById('downloadPdf').addEventListener('click', function () {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+<script>
+    document.getElementById('downloadPdfLink').addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent default link behavior
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-            // Get text from textarea
-            const text = document.getElementById('textContent').value;
+        // Get text from textarea
+        const text = document.getElementById('textContent').value;
 
-            // Randomized metadata
-            const uniqueId = generateRandomString(8);
-            const randomAuthor = `Author_${generateRandomString(12)}`;
-            const randomTitle = `Title_${generateRandomString(15)}`;
-            const randomSubject = `Subject_${generateRandomString(10)}`;
-            const randomKeywords = `Keywords_${generateRandomString(12)}`;
+        // Randomized metadata
+        const uniqueId = generateRandomString(8);
+        const randomAuthor = `Author_${generateRandomString(12)}`;
+        const randomTitle = `Title_${generateRandomString(15)}`;
+        const randomSubject = `Subject_${generateRandomString(10)}`;
+        const randomKeywords = `Keywords_${generateRandomString(12)}`;
 
-            // Set the font size
-            doc.setFontSize(12);
+        // Set the font size
+        doc.setFontSize(12);
 
-            // Split the text into lines that fit within the PDF's width
-            const pageWidth = doc.internal.pageSize.getWidth() - 20; // Width with padding
-            const splitText = doc.splitTextToSize(text, pageWidth);
-            
-            // Add the text to the PDF with line wrapping
-            doc.text(splitText, 10, 10);
+        // Split the text into lines that fit within the PDF's width
+        const pageWidth = doc.internal.pageSize.getWidth() - 20; // Width with padding
+        const splitText = doc.splitTextToSize(text, pageWidth);
+        
+        // Add the text to the PDF with line wrapping
+        doc.text(splitText, 10, 10);
 
-            // Add invisible text to randomize internal structure
-            doc.setTextColor(255, 255, 255); // White text color (invisible)
-            doc.text(generateRandomString(50), 10, 20); // Add invisible line
+        // Add invisible text to randomize internal structure
+        doc.setTextColor(255, 255, 255); // White text color (invisible)
+        doc.text(generateRandomString(50), 10, 20); // Add invisible line
 
-            // Set random metadata properties
-            doc.setProperties({
-                title: randomTitle,
-                subject: randomSubject,
-                author: randomAuthor,
-                keywords: randomKeywords,
-                creator: `Creator_${generateRandomString(8)}`
-            });
-
-            // Download the PDF with a unique filename
-            doc.save(`unique_pdf_${uniqueId}.pdf`);
+        // Set random metadata properties
+        doc.setProperties({
+            title: randomTitle,
+            subject: randomSubject,
+            author: randomAuthor,
+            keywords: randomKeywords,
+            creator: `Creator_${generateRandomString(8)}`
         });
 
-        // Helper function to generate random strings
-        function generateRandomString(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            const charactersLength = characters.length;
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
-            }
-            return result;
+        // Download the PDF with a unique filename
+        doc.save(`unique_pdf_${uniqueId}.pdf`);
+    });
+
+    // Helper function to generate random strings
+    function generateRandomString(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
-    </script>
+        return result;
+    }
+</script>
 </body>
 </html>
