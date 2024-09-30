@@ -42,7 +42,7 @@
             background-color: #333;
             border-radius: 20px 6px;
         }
-        .alt{
+        .alt {
             border-radius: 6px 20px;
         } 
         .mdl-card:hover {
@@ -67,202 +67,96 @@
         }
         .mdl-button.mdl-button--colored {
             color: #EC6709;
-            
         }
-        
-.mdl-button {
-    border:1px solid transparent !important;
-}
-.mdl-button:hover {
-    background-color:transparent m !important;
-    border:1px solid #EC6709;
-}
-        .graphic-bauhaus {
-            position: relative;
-            overflow: hidden;
+        .mdl-button {
+            border: 1px solid transparent !important;
         }
-        .graphic-bauhaus .image {
-            position: absolute;
-    width: 50%;
-    height: 100%;
-    background-size: contain;
-    background-position: center;
-    animation: wipe 21s cubic-bezier(0.77, 0, 0.175, 1) infinite;
-    opacity: 0;
-    background-size: 155%;
-    right: 0;
-    top: 0px;
-    overflow: hidden;
+        .mdl-button:hover {
+            background-color: transparent !important;
+            border: 1px solid #EC6709;
         }
-        .graphic-bauhaus .bg1 {
-            background-image: url('i/bg-bauhaus1.png');
-            animation-delay: 0s;
-        }
-        .graphic-bauhaus .bg2 {
-            background-image: url('i/bg-bauhaus2.png');
-            animation-delay: 3s;
-        }
-        .graphic-bauhaus .bg3 {
-            background-image: url('i/bg-bauhaus3.png');
-            animation-delay: 6s;
-        }
-        .graphic-bauhaus .bg4 {
-            background-image: url('i/bg-bauhaus4.png');
-            animation-delay: 9s;
-        }
-        .graphic-bauhaus .bg5 {
-            background-image: url('i/bg-bauhaus5.png');
-            animation-delay: 12s;
-        }
-        .graphic-bauhaus .bg6 {
-            background-image: url('i/bg-bauhaus6.png');
-            animation-delay: 15s;
-        }
-        .graphic-bauhaus .bg7 {
-            background-image: url('i/bg-bauhaus7.png');
-            animation-delay: 18s;
-        }
-        
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  position: relative;
-  margin: 15% auto;
-  padding: 20px;
-  background-color: white;
-  width: 80%;
-  max-width: 800px;
-}
-
-.close {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  position: relative;
-  margin: 15% auto;
-  padding: 20px;
-  background-color: white;
-  width: 80%;
-  max-width: 800px;
-}
-
-.close {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
     </style>
 </head>
 <body>
     <div class="mdl-grid">
-        <div class="mdl-cell" style="
-    width: 100%;
-">
+        <div class="mdl-cell" style="width: 100%;">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Unique Text to PDF Generator</h2>
+                    <h2 class="mdl-card__title-text">Text to PDF Generator</h2>
                 </div>
                 <div class="mdl-card__supporting-text">
-                    Save text as a plan text PDF
+                    Save text as a plain text PDF
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                    <textarea id="textContent" rows="10" cols="50" placeholder="Paste your text here..." style="
-    width: 100%;
-    background-color: #333333;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-"></textarea><br><br>
-<a href="#" d="downloadPdf" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-    Download PDF
-</a>
+                    <textarea id="textContent" rows="20" cols="114" placeholder="Paste your text here..." style="/* width: 100%; */background-color: #333333;border: none;color: #fff;font-size: 12px;padding:20px;/* justify-content: center; */"></textarea><br><br>
+                    <button id="downloadPdf" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Download as PDF</button>
                 </div>
             </div>
         </div>
-</div>
-<script>
-    document.getElementById('downloadPdfLink').addEventListener('click', function (e) {
-        e.preventDefault(); // Prevent default link behavior
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    </div>
+    <script>
+        document.getElementById('downloadPdf').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-        // Get text from textarea
-        const text = document.getElementById('textContent').value;
+            // Get text from textarea
+            const text = document.getElementById('textContent').value;
 
-        // Randomized metadata
-        const uniqueId = generateRandomString(8);
-        const randomAuthor = `Author_${generateRandomString(12)}`;
-        const randomTitle = `Title_${generateRandomString(15)}`;
-        const randomSubject = `Subject_${generateRandomString(10)}`;
-        const randomKeywords = `Keywords_${generateRandomString(12)}`;
+            // Randomized metadata
+            const uniqueId = generateRandomString(8);
+            const randomAuthor = `Author_${generateRandomString(12)}`;
+            const randomTitle = `Title_${generateRandomString(15)}`;
+            const randomSubject = `Subject_${generateRandomString(10)}`;
+            const randomKeywords = `Keywords_${generateRandomString(12)}`;
 
-        // Set the font size
-        doc.setFontSize(12);
+            // Set the font size
+            doc.setFontSize(12);
 
-        // Split the text into lines that fit within the PDF's width
-        const pageWidth = doc.internal.pageSize.getWidth() - 20; // Width with padding
-        const splitText = doc.splitTextToSize(text, pageWidth);
-        
-        // Add the text to the PDF with line wrapping
-        doc.text(splitText, 10, 10);
+            // Split the text into lines that fit within the PDF's width
+            const pageWidth = doc.internal.pageSize.getWidth() - 20; // Width with padding
+            const pageHeight = doc.internal.pageSize.getHeight() - 20; // Height with padding
+            const margin = 10; // Margin from the edges of the page
+            const lineHeight = 7; // Adjusted line height for single-line spacing
+            let yOffset = margin; // Initial Y position
 
-        // Add invisible text to randomize internal structure
-        doc.setTextColor(255, 255, 255); // White text color (invisible)
-        doc.text(generateRandomString(50), 10, 20); // Add invisible line
+            // Split text into lines based on the width of the page
+            const splitText = doc.splitTextToSize(text, pageWidth);
 
-        // Set random metadata properties
-        doc.setProperties({
-            title: randomTitle,
-            subject: randomSubject,
-            author: randomAuthor,
-            keywords: randomKeywords,
-            creator: `Creator_${generateRandomString(8)}`
+            splitText.forEach((line) => {
+                if (yOffset + lineHeight > pageHeight) {
+                    doc.addPage(); // Add new page if the current line overflows
+                    yOffset = margin; // Reset Y position for new page
+                }
+                doc.text(line, margin, yOffset);
+                yOffset += lineHeight;
+            });
+
+            // Add invisible text to randomize internal structure, move to separate position
+            doc.setTextColor(255, 255, 255); // White text color (invisible)
+            doc.text(generateRandomString(50), 180, 290); // Position it outside the main content area
+
+            // Set random metadata properties
+            doc.setProperties({
+                title: randomTitle,
+                subject: randomSubject,
+                author: randomAuthor,
+                keywords: randomKeywords,
+                creator: `Creator_${generateRandomString(8)}`
+            });
+
+            // Download the PDF with a unique filename
+            doc.save(`unique_pdf_${uniqueId}.pdf`);
         });
 
-        // Download the PDF with a unique filename
-        doc.save(`unique_pdf_${uniqueId}.pdf`);
-    });
-
-    // Helper function to generate random strings
-    function generateRandomString(length) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        const charactersLength = characters.length;
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        // Helper function to generate random strings
+        function generateRandomString(length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
         }
-        return result;
-    }
-</script>
+    </script>
 </body>
 </html>
