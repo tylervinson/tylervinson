@@ -213,17 +213,26 @@
                 <div class="mdl-card__supporting-text">
                     Drop your embed code below.
                 </div>
-                <div>  <label for="embedCode">Paste your JS embed code here:</label><br>
-                    <textarea id="embedCode" rows="6" cols="50" placeholder="Paste your JS code..."></textarea></div>
+                <div style="
+    text-align: center;
+    padding: 0 15px;
+">  <br>
+                    <textarea id="embedCode" rows="6" cols="80" placeholder="Paste your JS code..." style="
+    width: 100%;
+    margin: 0 auto;
+    background-color: transparent;
+"></textarea></div>
                 <div class="mdl-card__actions mdl-card--border">
-                    <a href="#" id="renderCode" class="render-link mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Render Code</a>
+                    <a href="#" id="renderCode" class="render-link mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">Render Code<span class="mdl-button__ripple-container"><span class="mdl-ripple"></span></span></a>
                 </div>
             </div>
         </div>
         <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Rendered Output:</h2>
+                    <h4 class="mdl-card__title-text" style="
+    font-size: 18px;
+">Rendered Output:</h4>
                 </div>
         <div class="error" id="errorMessage"></div>
         <div id="output-container">
