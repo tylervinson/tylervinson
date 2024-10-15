@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Pages Grid of Cards</title>
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_purple.min.css" />
+    <!-- Disabled MDL and Material styles for now -->
     <style>
         body {
             display: flex;
@@ -40,166 +37,34 @@
             background-color: #333;
             border-radius: 20px 6px;
         }
-        .alt{
-            border-radius: 6px 20px;
-        } 
         .mdl-card:hover {
             background-color: #252525;
         }
         .mdl-card__title {
-            align-items: center;
             color: #f9e5d3;
-            display: flex;
-            justify-content: stretch;
-            line-height: normal;
             padding: 50px 16px 16px;
-            box-sizing: border-box;
         }
         .mdl-card__supporting-text {
             color: #f9e5d3;
-            font-size: 1rem;
-            line-height: 18px;
-            overflow: hidden;
             padding: 16px;
-            width: 90%;
         }
         .mdl-button.mdl-button--colored {
             color: #EC6709;
-            
         }
-        
-.mdl-button {
-    border:1px solid transparent !important;
-}
-.mdl-button:hover {
-    background-color:transparent m !important;
-    border:1px solid #EC6709;
-}
-        .graphic-bauhaus {
-            position: relative;
-            overflow: hidden;
+        .mdl-button {
+            border: 1px solid transparent !important;
         }
-        .graphic-bauhaus .image {
-            position: absolute;
-    width: 50%;
-    height: 100%;
-    background-size: contain;
-    background-position: center;
-    animation: wipe 21s cubic-bezier(0.77, 0, 0.175, 1) infinite;
-    opacity: 0;
-    background-size: 155%;
-    right: 0;
-    top: 0px;
-    overflow: hidden;
-        }
-        .graphic-bauhaus .bg1 {
-            background-image: url('i/bg-bauhaus1.png');
-            animation-delay: 0s;
-        }
-        .graphic-bauhaus .bg2 {
-            background-image: url('i/bg-bauhaus2.png');
-            animation-delay: 3s;
-        }
-        .graphic-bauhaus .bg3 {
-            background-image: url('i/bg-bauhaus3.png');
-            animation-delay: 6s;
-        }
-        .graphic-bauhaus .bg4 {
-            background-image: url('i/bg-bauhaus4.png');
-            animation-delay: 9s;
-        }
-        .graphic-bauhaus .bg5 {
-            background-image: url('i/bg-bauhaus5.png');
-            animation-delay: 12s;
-        }
-        .graphic-bauhaus .bg6 {
-            background-image: url('i/bg-bauhaus6.png');
-            animation-delay: 15s;
-        }
-        .graphic-bauhaus .bg7 {
-            background-image: url('i/bg-bauhaus7.png');
-            animation-delay: 18s;
-        }
-        @keyframes wipe {
-            0%, 100% {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            10%, 90% {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        .mdl-cell--1-col, .mdl-cell--1-col-desktop.mdl-cell--1-col-desktop {
-            width: 8.333333333333%;
-        }
-        .mdl-cell--2-col, .mdl-cell--2-col-desktop.mdl-cell--2-col-desktop {
-            width: 16.66666666666667%;
-        }
-        .mdl-cell--3-col, .mdl-cell--3-col-desktop.mdl-cell--3-col-desktop {
-            width: 25%;
-        }
-        .mdl-cell--4-col, .mdl-cell--4-col-desktop.mdl-cell--4-col-desktop {
-            width: 33.33333333333%;
-        }
-        .mdl-cell--5-col, .mdl-cell--5-col-desktop.mdl-cell--5-col-desktop {
-            width: 41.6666666666666%;
-        }
-        .mdl-cell--6-col, .mdl-cell--6-col-desktop.mdl-cell--6-col-desktop {
-            width: 50%;
-        }
-        .mdl-cell--7-col, .mdl-cell--7-col-desktop.mdl-cell--7-col-desktop {
-            width: 58.333333333333%;
-        }
-        .mdl-cell--8-col, .mdl-cell--8-col-desktop.mdl-cell--8-col-desktop {
-            width: 66.666666666666%;
-        }
-        .mdl-cell--9-col, .mdl-cell--9-col-desktop.mdl-cell--9-col-desktop {
-            width: 75%;
-        }
-        .mdl-cell--10-col, .mdl-cell--10-col-desktop.mdl-cell--10-col-desktop {
-            width: 83.33333333333333%;
-        }
-        .mdl-cell--11-col, .mdl-cell--11-col-desktop.mdl-cell--11-col-desktop {
-            width: 91.666666666667%;
-        }
-        desktop.mdl-cell--12-col-desktop {
-            width: 100%;
+        .mdl-button:hover {
+            background-color: transparent !important;
+            border: 1px solid #EC6709;
         }
         .mdl-card__actions {
             padding: 0 15px 16px !important;
         }
-        /* Modal styling */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  position: relative;
-  margin: 15% auto;
-  padding: 20px;
-  background-color: white;
-  width: 80%;
-  max-width: 800px;
-}
-
-.close {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -213,76 +78,92 @@
                 <div class="mdl-card__supporting-text">
                     Drop your embed code below.
                 </div>
-                <div style="
-    text-align: center;
-    padding: 0 15px;
-">  <br>
-                    <textarea id="embedCode" rows="6" cols="80" placeholder="Paste your JS code..." style="
-    width: 100%;
-    margin: 0 auto;
-    background-color: transparent;
-"></textarea></div>
+                <div style="text-align: center; padding: 0 15px;">
+                    <textarea id="embedCode" rows="6" cols="80" placeholder="Paste your JS code..." style="width: 100%; margin: 0 auto;"></textarea>
+                </div>
                 <div class="mdl-card__actions mdl-card--border">
-                    <a href="#" id="renderCode" class="render-link mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">Render Code<span class="mdl-button__ripple-container"><span class="mdl-ripple"></span></span></a>
+                    <a href="#" id="renderCode" class="render-link mdl-button mdl-button--colored">Render Code</a>
                 </div>
             </div>
         </div>
         <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
             <div class="mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
-                    <h4 class="mdl-card__title-text" style="
-    font-size: 18px;
-">Rendered Output:</h4>
+                    <h4 class="mdl-card__title-text">Rendered Output:</h4>
                 </div>
-        <div class="error" id="errorMessage"></div>
-        <div id="output-container">
-            <div id="output"></div>
-          </div>
-          </div></div>
-        <!-- Add more cards as needed -->
+                <div class="error" id="errorMessage"></div>
+                <div id="output-container">
+                    <div id="output"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
     <script type="text/javascript">
-        function isValidEmbedCode(code) {
-          // Basic validation rules:
-          // 1. Only <script> tags are allowed.
-          // 2. No event handlers like onload, onclick, etc.
-          
-          var scriptTagPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gi; // Matches <script> tags
-          var eventHandlerPattern = /\son\w+="[^"]*"/gi;  // Matches onload, onclick, etc.
-          
-          // Ensure the code has script tags and no event handlers
-          if (scriptTagPattern.test(code) && !eventHandlerPattern.test(code)) {
-            return true;
-          }
-          return false;
-        }
-     
-        document.getElementById('renderCode').addEventListener('click', function (e) {
-          // Prevent the a tag default behavior of navigating
-          e.preventDefault();
-     
-          var embedCode = document.getElementById('embedCode').value;
-          var errorMessage = document.getElementById('errorMessage');
-     
-          // Clear previous error messages
-          errorMessage.textContent = '';
-     
-          // Clear previous output
-          document.getElementById('output').innerHTML = '';
-     
-          // Validate embed code
-          if (isValidEmbedCode(embedCode)) {
-            // If valid, render the code
-            var containerDiv = document.createElement('div');
-            containerDiv.innerHTML = embedCode;
-            document.getElementById('output').appendChild(containerDiv);
-          } else {
-            // If invalid, show an error message
-            errorMessage.textContent = 'Invalid code! Only <script> tags are allowed, and event handlers are prohibited.';
-          }
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Function to safely extract <script> content
+            function extractScripts(code) {
+                var scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+                var match;
+                var scripts = [];
+
+                while (match = scriptRegex.exec(code)) {
+                    scripts.push(match[1]);
+                }
+
+                return scripts;
+            }
+
+            // Function to execute the scripts by creating new <script> elements
+            function executeScripts(scripts) {
+                scripts.forEach(function(scriptContent) {
+                    var scriptElement = document.createElement('script');
+                    scriptElement.type = 'text/javascript';
+                    scriptElement.text = scriptContent;
+                    document.body.appendChild(scriptElement); // Append script to body for execution
+                });
+            }
+
+            function isValidEmbedCode(code) {
+                // Basic validation: Allow only <script> tags
+                var scriptTagPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gi; 
+                var eventHandlerPattern = /\son\w+="[^"]*"/gi; 
+
+                // Ensure the code has script tags and no event handlers
+                if (scriptTagPattern.test(code) && !eventHandlerPattern.test(code)) {
+                    return true;
+                }
+                return false;
+            }
+
+            document.getElementById('renderCode').addEventListener('click', function (e) {
+                // Prevent default behavior of <a> tag
+                e.preventDefault();
+
+                var embedCode = document.getElementById('embedCode').value;
+                var errorMessage = document.getElementById('errorMessage');
+                var outputContainer = document.getElementById('output');
+
+                // Clear any previous error messages and output
+                errorMessage.textContent = '';
+                outputContainer.innerHTML = '';
+
+                // Validate embed code
+                if (isValidEmbedCode(embedCode)) {
+                    // Extract the scripts from the embed code
+                    var scripts = extractScripts(embedCode);
+
+                    // Execute the extracted scripts
+                    executeScripts(scripts);
+
+                } else {
+                    // Show an error message if the code is invalid
+                    errorMessage.textContent = 'Invalid code! Only <script> tags are allowed, and event handlers are prohibited.';
+                }
+            });
         });
-      </script>
+    </script>
+
 </body>
 </html>
