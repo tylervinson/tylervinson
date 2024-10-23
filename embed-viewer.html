@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages Grid of Cards</title>
-    <!-- Disabled MDL and Material styles for now -->
+    <title>Embed Code Tester with Iframe</title>
     <style>
         body {
             display: flex;
@@ -21,80 +20,61 @@
             max-width: 900px;
             margin: 0 auto;
         }
-        .mdl-cell {
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            border: 1px solid #ec6709;
-            margin: 0;
-        }
         .mdl-card {
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
             background-color: #333;
-            border-radius: 20px 6px;
-        }
-        .mdl-card:hover {
-            background-color: #252525;
-        }
-        .mdl-card__title {
             color: #f9e5d3;
-            padding: 50px 16px 16px;
+            padding: 20px;
+            border-radius: 10px;
         }
-        .mdl-card__supporting-text {
-            color: #f9e5d3;
-            padding: 16px;
+        textarea {
+            width: 100%;
+            height: 150px;
+            background-color: #f9e5d3;
+            color: #333;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
         }
-        .mdl-button.mdl-button--colored {
-            color: #EC6709;
-        }
-        .mdl-button {
-            border: 1px solid transparent !important;
-        }
-        .mdl-button:hover {
-            background-color: transparent !important;
-            border: 1px solid #EC6709;
-        }
-        .mdl-card__actions {
-            padding: 0 15px 16px !important;
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #EC6709;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .error {
             color: red;
             margin-top: 10px;
+        }
+        #output-container {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
         }
     </style>
 </head>
 <body>
 
     <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
-            <div class="mdl-card mdl-shadow--2dp">
-                <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Embed Tester</h2>
-                </div>
-                <div class="mdl-card__supporting-text">
-                    Drop your embed code below.
-                </div>
-                <div style="text-align: center; padding: 0 15px;">
-                    <textarea id="embedCode" rows="6" cols="80" placeholder="Paste your JS code..." style="width: 100%; margin: 0 auto;"></textarea>
-                </div>
-                <div class="mdl-card__actions mdl-card--border">
-                    <a href="#" id="renderCode" class="render-link mdl-button mdl-button--colored">Render Code</a>
-                </div>
-            </div>
-        </div>
-        <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-phone">
-            <div class="mdl-card mdl-shadow--2dp">
-                <div class="mdl-card__title">
-                    <h4 class="mdl-card__title-text">Rendered Output:</h4>
-                </div>
-                <div class="error" id="errorMessage"></div>
-                <div id="output-container">
-                    <div id="output"></div>
-                </div>
+        <div class="mdl-card">
+            <h2>Embed Code Tester</h2>
+            <p>Paste your embed code below (including &lt;script&gt; tags).</p>
+            <textarea id="embedCode" placeholder="Paste your embed code..."></textarea><br><br>
+            <a href="#" class="button" id="renderCode">Render Code</a>
+            <div class="error" id="errorMessage"></div>
+            <div id="output-container">
+                <h3>Rendered Output:</h3>
+                <iframe id="embedFrame"></iframe>
             </div>
         </div>
     </div>
@@ -102,64 +82,28 @@
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
 
-            // Function to safely extract <script> content
-            function extractScripts(code) {
-                var scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-                var match;
-                var scripts = [];
-
-                while (match = scriptRegex.exec(code)) {
-                    scripts.push(match[1]);
-                }
-
-                return scripts;
-            }
-
-            // Function to execute the scripts by creating new <script> elements
-            function executeScripts(scripts) {
-                scripts.forEach(function(scriptContent) {
-                    var scriptElement = document.createElement('script');
-                    scriptElement.type = 'text/javascript';
-                    scriptElement.text = scriptContent;
-                    document.body.appendChild(scriptElement); // Append script to body for execution
-                });
-            }
-
-            function isValidEmbedCode(code) {
-                // Basic validation: Allow only <script> tags
-                var scriptTagPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gi; 
-                var eventHandlerPattern = /\son\w+="[^"]*"/gi; 
-
-                // Ensure the code has script tags and no event handlers
-                if (scriptTagPattern.test(code) && !eventHandlerPattern.test(code)) {
-                    return true;
-                }
-                return false;
-            }
-
+            // Set up event listener for the "Render Code" button
             document.getElementById('renderCode').addEventListener('click', function (e) {
-                // Prevent default behavior of <a> tag
                 e.preventDefault();
 
-                var embedCode = document.getElementById('embedCode').value;
-                var errorMessage = document.getElementById('errorMessage');
-                var outputContainer = document.getElementById('output');
+                const embedCode = document.getElementById('embedCode').value;
+                const errorMessage = document.getElementById('errorMessage');
+                const iframe = document.getElementById('embedFrame').contentWindow.document;
 
-                // Clear any previous error messages and output
+                // Clear previous error messages
                 errorMessage.textContent = '';
-                outputContainer.innerHTML = '';
 
-                // Validate embed code
-                if (isValidEmbedCode(embedCode)) {
-                    // Extract the scripts from the embed code
-                    var scripts = extractScripts(embedCode);
-
-                    // Execute the extracted scripts
-                    executeScripts(scripts);
-
+                if (embedCode) {
+                    try {
+                        // Write the embed code into the iframe's document
+                        iframe.open();
+                        iframe.write(embedCode);
+                        iframe.close(); // Close the document to allow execution of scripts
+                    } catch (error) {
+                        errorMessage.textContent = 'Error rendering code: ' + error.message;
+                    }
                 } else {
-                    // Show an error message if the code is invalid
-                    errorMessage.textContent = 'Invalid code! Only <script> tags are allowed, and event handlers are prohibited.';
+                    errorMessage.textContent = 'Please enter a valid embed code.';
                 }
             });
         });

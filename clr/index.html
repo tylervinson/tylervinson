@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+  <head>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const pathArray = window.location.pathname.split('/');
+        const lesson = pathArray[pathArray.length - 2];
+        const rootDomain = `${window.location.protocol}//${window.location.hostname}`;
+        const relativePath = pathArray.slice(0, -1).join('/');
+        const url = `${rootDomain}${relativePath}/story.html?utm_source=Online&utm_medium=Online&utm_campaign=${lesson}&utm_id=${lesson}`;
+        
+        // Redirect to the new URL with a 301 status (this part is simulated in client-side JS)
+        window.location.replace(url);
+
+        // Optional: Display lesson name on the body for demonstration or debugging
+        document.body.innerHTML = `Redirecting to lesson: ${lesson}`;
+      });
+    </script>
+  </head>
+  <body>
+    <!-- The body can remain empty as the script handles redirection and optional content display -->
+  </body>
+</html>
