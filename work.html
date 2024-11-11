@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,9 +23,9 @@
     /* Card Style */
     .mdc-card {
       background-color: #fff;
-      border-radius: 8px;
       padding: 20px;
-      max-width: 500px;
+      width: 100%;
+      max-width: 600px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       margin: 16px;
     }
@@ -47,22 +48,29 @@
       gap: 10px;
     }
 
+    /* Time Fields in a Single Line */
+    .time-field-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     /* Text Field Style */
     .mdc-text-field {
       position: relative;
       display: flex;
       flex-direction: column;
       width: 100%;
-      margin-bottom: 10px;
     }
     
     .mdc-text-field__input {
       font-size: 1rem;
-      padding: 10px;
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
       outline: none;
       transition: border-color 0.3s ease;
+      width: 100%;
     }
     
     .mdc-text-field__input:focus {
@@ -81,12 +89,6 @@
     pointer-events: none;
     display: block;
     margin-bottom: 10px;
-    }
-    
-    .mdc-notched-outline {
-      border: 1px solid #6200ee;
-      border-radius: 4px;
-      pointer-events: none;
     }
 
     /* Button Style */
@@ -118,7 +120,6 @@
     border: none;
     color: #fff;
 }
-    }
     
     .mdc-button--outlined:hover {
       background-color: #f4f4f9;
@@ -155,26 +156,28 @@
     const calendarContainer = document.getElementById('calendar-container');
 
     function createTimePicker(activity, day, uniqueId) {
-      const timeField = document.createElement('div');
-      timeField.classList.add('mdc-text-field');
-      timeField.innerHTML = `
+      const timeFieldContainer = document.createElement('div');
+      timeFieldContainer.classList.add('time-field-container');
+
+      const startTimeField = document.createElement('div');
+      startTimeField.classList.add('mdc-text-field');
+      startTimeField.innerHTML = `
         <label class="mdc-floating-label">${activity} Start Time</label>
         <input type="time" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input">
       `;
       
-      const timeFieldEnd = document.createElement('div');
-      timeFieldEnd.classList.add('mdc-text-field');
-      timeFieldEnd.innerHTML = `
+      const endTimeField = document.createElement('div');
+      endTimeField.classList.add('mdc-text-field');
+      endTimeField.innerHTML = `
         <label class="mdc-floating-label">${activity} End Time</label>
         <input type="time" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
       `;
 
-      // Container for start and end time
-      const container = document.createElement('div');
-      container.appendChild(timeField);
-      container.appendChild(timeFieldEnd);
+      // Append start and end time fields side by side
+      timeFieldContainer.appendChild(startTimeField);
+      timeFieldContainer.appendChild(endTimeField);
 
-      return container;
+      return timeFieldContainer;
     }
 
     function createDaySection(day) {
@@ -288,4 +291,3 @@
   </script>
 </body>
 </html>
-
