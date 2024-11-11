@@ -4,37 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Calendar Form</title>
+  
+  <!-- Material Components for the Web CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.css">
+
+  <!-- jsPDF library for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_purple.min.css" />
 </head>
 <body>
-  <form id="weekly-calendar-form">
-    <h1>Weekly Calendar</h1>
+
+  <form id="weekly-calendar-form" class="mdc-card">
+    <h1 class="mdc-typography--headline5">Weekly Calendar</h1>
     <div id="calendar-container"></div>
-    <button type="button" onclick="generatePDF()">Submit and Generate PDF</button>
+    <button type="button" class="mdc-button mdc-button--raised" onclick="generatePDF()">Submit and Generate PDF</button>
   </form>
 
+  <!-- Material Components for the Web JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.js"></script>
+
   <script>
+    // Initialize Material Components
+    mdc.autoInit();
+
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const activities = ["School", "Art class", "Work"];
     const calendarContainer = document.getElementById('calendar-container');
 
     function createTimePicker(activity, day, uniqueId) {
       const timeField = document.createElement('div');
+      timeField.classList.add('mdc-layout-grid__cell');
       timeField.innerHTML = `
-        <label>${activity}:</label>
-        <input type="time" name="${day}-${activity}-start-${uniqueId}">
-        <input type="time" name="${day}-${activity}-end-${uniqueId}">
+        <label class="mdc-text-field mdc-text-field--outlined">
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label">${activity} Start Time</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input type="time" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input">
+        </label>
+        <label class="mdc-text-field mdc-text-field--outlined">
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label">${activity} End Time</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input type="time" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
+        </label>
       `;
       return timeField;
     }
 
     function createDaySection(day) {
       const daySection = document.createElement('div');
-      daySection.innerHTML = `<h2>${day}</h2>`;
+      daySection.classList.add('mdc-layout-grid', 'mdc-card__primary-action');
+      daySection.innerHTML = `<h2 class="mdc-typography--headline6">${day}</h2>`;
 
       activities.forEach(activity => {
         const uniqueId = `${day}-${activity}-1`;
@@ -43,7 +70,8 @@
         if (activity === "School") {
           const addButton = document.createElement('button');
           addButton.type = 'button';
-          addButton.innerText = '+';
+          addButton.classList.add('mdc-button', 'mdc-button--outlined');
+          addButton.innerHTML = '<span class="mdc-button__label">+</span>';
           addButton.onclick = () => addAdditionalTime(day);
           timeField.appendChild(addButton);
         }
@@ -55,7 +83,7 @@
     }
 
     function addAdditionalTime(day) {
-      const daySection = calendarContainer.querySelector(`div:has(h2:contains(${day}))`);
+      const daySection = calendarContainer.querySelector(`.mdc-layout-grid h2:contains(${day})`).parentElement;
       const uniqueId = `additional-${Date.now()}`;
       const additionalTimeField = createTimePicker("School", day, uniqueId);
       daySection.appendChild(additionalTimeField);
