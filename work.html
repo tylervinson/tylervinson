@@ -150,7 +150,6 @@
   </form>
 
   <script>
-    // JavaScript to create form and handle PDF generation
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const activities = ["School", "Art class", "Work"];
     const calendarContainer = document.getElementById('calendar-container');
@@ -227,7 +226,7 @@
 
     function addAdditionalTime(schoolContainer, addButtonContainer) {
       const uniqueId = `additional-${Date.now()}`;
-      const additionalTimeField = createTimePicker("School", "Monday", uniqueId); // The day is ignored here, as this is for dynamic fields
+      const additionalTimeField = createTimePicker("School", "Monday", uniqueId);
       schoolContainer.insertBefore(additionalTimeField, addButtonContainer);
     }
 
@@ -242,8 +241,51 @@
 
       doc.setFontSize(18);
       doc.text("Weekly Calendar", 10, 10);
+
+      let yPosition = 20;
+
+      daysOfWeek.forEach(day => {
+        doc.setFontSize(14);
+        doc.text(day, 10, yPosition);
+        yPosition += 10;
+
+        let entries = [];
+
+        // Collect start and end times for each activity
+        activities.forEach(activity => {
+          const startElements = document.querySelectorAll(`input[name^="${day}-${activity}-start"]`);
+          const endElements = document.querySelectorAll(`input[name^="${day}-${activity}-end"]`);
+
+          startElements.forEach((startElem, index) => {
+            const startTime = startElem.value;
+            const endTime = endElements[index] ? endElements[index].value : "N/A";
+
+            if (startTime) {
+              entries.push({
+                activity: activity,
+                startTime: startTime,
+                endTime: endTime
+              });
+            }
+          });
+        });
+
+        // Sort entries by start time
+        entries.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        // Output sorted entries for the day
+        entries.forEach(entry => {
+          doc.setFontSize(12);
+          doc.text(`${entry.activity}: ${entry.startTime} - ${entry.endTime}`, 20, yPosition);
+          yPosition += 10;
+        });
+
+        yPosition += 5; // Space between days
+      });
+
       doc.save("Weekly_Calendar.pdf");
     }
   </script>
 </body>
 </html>
+
