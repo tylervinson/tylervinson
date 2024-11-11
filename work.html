@@ -5,8 +5,135 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Calendar Form</title>
   
-  <!-- Material Components for the Web CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.css">
+  <!-- Default CSS for Material-Like Appearance -->
+  <style>
+    /* General Layout */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+    }
+    
+    /* Card Style */
+    .mdc-card {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 16px;
+    }
+
+    /* Typography */
+    .mdc-typography--headline5 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .mdc-typography--headline6 {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+
+    /* Layout Grid */
+    .mdc-layout-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Text Field Style */
+    .mdc-text-field {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    
+    .mdc-text-field__input {
+      font-size: 1rem;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+    
+    .mdc-text-field__input:focus {
+      border-color: #6200ee;
+    }
+    
+    .mdc-floating-label {
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      background-color: #fff;
+      padding: 0 4px;
+      font-size: 0.85rem;
+      color: #6200ee;
+      transition: 0.2s ease;
+      pointer-events: none;
+    }
+    
+    .mdc-notched-outline {
+      border: 1px solid #6200ee;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* Button Style */
+    .mdc-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+    
+    .mdc-button--raised {
+      background-color: #6200ee;
+      color: #fff;
+    }
+    
+    .mdc-button--raised:hover {
+      background-color: #5a00e0;
+    }
+    
+    .mdc-button--outlined {
+      background-color: transparent;
+      border: 1px solid #6200ee;
+      color: #6200ee;
+    }
+    
+    .mdc-button--outlined:hover {
+      background-color: #f4f4f9;
+    }
+
+    /* Additional Styling for Containers */
+    .activity-container {
+      margin-bottom: 20px;
+    }
+
+    /* Add Button Container Styling */
+    .add-button-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 10px;
+    }
+  </style>
 
   <!-- jsPDF library for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -15,78 +142,90 @@
 
   <form id="weekly-calendar-form" class="mdc-card">
     <h1 class="mdc-typography--headline5">Weekly Calendar</h1>
-    <div id="calendar-container"></div>
+    <div id="calendar-container" class="mdc-layout-grid"></div>
     <button type="button" class="mdc-button mdc-button--raised" onclick="generatePDF()">Submit and Generate PDF</button>
   </form>
 
-  <!-- Material Components for the Web JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.js"></script>
-
   <script>
-    // Initialize Material Components
-    mdc.autoInit();
-
+    // JavaScript to create form and handle PDF generation
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const activities = ["School", "Art class", "Work"];
     const calendarContainer = document.getElementById('calendar-container');
 
     function createTimePicker(activity, day, uniqueId) {
       const timeField = document.createElement('div');
-      timeField.classList.add('mdc-layout-grid__cell');
+      timeField.classList.add('mdc-text-field');
       timeField.innerHTML = `
-        <label class="mdc-text-field mdc-text-field--outlined">
-          <span class="mdc-notched-outline">
-            <span class="mdc-notched-outline__leading"></span>
-            <span class="mdc-notched-outline__notch">
-              <span class="mdc-floating-label">${activity} Start Time</span>
-            </span>
-            <span class="mdc-notched-outline__trailing"></span>
-          </span>
-          <input type="time" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input">
-        </label>
-        <label class="mdc-text-field mdc-text-field--outlined">
-          <span class="mdc-notched-outline">
-            <span class="mdc-notched-outline__leading"></span>
-            <span class="mdc-notched-outline__notch">
-              <span class="mdc-floating-label">${activity} End Time</span>
-            </span>
-            <span class="mdc-notched-outline__trailing"></span>
-          </span>
-          <input type="time" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
-        </label>
+        <label class="mdc-floating-label">${activity} Start Time</label>
+        <input type="time" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input">
       `;
-      return timeField;
+      
+      const timeFieldEnd = document.createElement('div');
+      timeFieldEnd.classList.add('mdc-text-field');
+      timeFieldEnd.innerHTML = `
+        <label class="mdc-floating-label">${activity} End Time</label>
+        <input type="time" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
+      `;
+
+      // Container for start and end time
+      const container = document.createElement('div');
+      container.appendChild(timeField);
+      container.appendChild(timeFieldEnd);
+
+      return container;
     }
 
     function createDaySection(day) {
       const daySection = document.createElement('div');
-      daySection.classList.add('mdc-layout-grid', 'mdc-card__primary-action');
+      daySection.classList.add('activity-container');
       daySection.innerHTML = `<h2 class="mdc-typography--headline6">${day}</h2>`;
 
       activities.forEach(activity => {
         const uniqueId = `${day}-${activity}-1`;
+
+        const activityContainer = document.createElement('div');
+        activityContainer.classList.add('activity-container');
+        activityContainer.setAttribute('data-activity', activity);
+
         const timeField = createTimePicker(activity, day, uniqueId);
 
+        // Special handling for School fields
         if (activity === "School") {
+          const schoolContainer = document.createElement('div');
+          schoolContainer.classList.add('school-container');
+          
+          schoolContainer.appendChild(timeField); // Add initial School fields
+
+          // Add a dedicated container for the + button
+          const addButtonContainer = document.createElement('div');
+          addButtonContainer.classList.add('add-button-container');
+
           const addButton = document.createElement('button');
           addButton.type = 'button';
           addButton.classList.add('mdc-button', 'mdc-button--outlined');
-          addButton.innerHTML = '<span class="mdc-button__label">+</span>';
-          addButton.onclick = () => addAdditionalTime(day);
-          timeField.appendChild(addButton);
+          addButton.innerHTML = '+';
+          addButton.onclick = () => addAdditionalTime(schoolContainer, addButtonContainer);
+          
+          addButtonContainer.appendChild(addButton);
+
+          // Append the + button container after the initial fields
+          schoolContainer.appendChild(addButtonContainer);
+
+          activityContainer.appendChild(schoolContainer);
+        } else {
+          activityContainer.appendChild(timeField);
         }
 
-        daySection.appendChild(timeField);
+        daySection.appendChild(activityContainer);
       });
 
       return daySection;
     }
 
-    function addAdditionalTime(day) {
-      const daySection = calendarContainer.querySelector(`.mdc-layout-grid h2:contains(${day})`).parentElement;
+    function addAdditionalTime(schoolContainer, addButtonContainer) {
       const uniqueId = `additional-${Date.now()}`;
-      const additionalTimeField = createTimePicker("School", day, uniqueId);
-      daySection.appendChild(additionalTimeField);
+      const additionalTimeField = createTimePicker("School", "Monday", uniqueId); // The day is ignored here, as this is for dynamic fields
+      schoolContainer.insertBefore(additionalTimeField, addButtonContainer);
     }
 
     daysOfWeek.forEach(day => {
@@ -100,33 +239,6 @@
 
       doc.setFontSize(18);
       doc.text("Weekly Calendar", 10, 10);
-
-      let yPosition = 20;
-
-      daysOfWeek.forEach(day => {
-        doc.setFontSize(14);
-        doc.text(day, 10, yPosition);
-        yPosition += 10;
-
-        activities.forEach(activity => {
-          const startElements = document.querySelectorAll(`input[name^="${day}-${activity}-start"]`);
-          const endElements = document.querySelectorAll(`input[name^="${day}-${activity}-end"]`);
-          
-          startElements.forEach((startElem, index) => {
-            const start = startElem.value || "N/A";
-            const end = endElements[index].value || "N/A";
-
-            if (start || end) {
-              doc.setFontSize(12);
-              doc.text(`${activity}: ${start} - ${end}`, 20, yPosition);
-              yPosition += 10;
-            }
-          });
-        });
-
-        yPosition += 5;
-      });
-
       doc.save("Weekly_Calendar.pdf");
     }
   </script>
