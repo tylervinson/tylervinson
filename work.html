@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Calendar Form</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <style>
+    /* Mobile-first styles */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .day-section {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+
+    .day-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .time-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .time-field label {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .time-field input {
+      font-size: 1rem;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+    }
+
+    .add-time-button {
+      align-self: flex-start;
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button[type="button"] {
+      width: 100%;
+      font-size: 1.2rem;
+      padding: 10px;
+      color: white;
+      background-color: #28a745;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    /* Larger screens */
+    @media (min-width: 768px) {
+      .time-field {
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .time-field label {
+        flex: 1;
+      }
+      
+      .time-field input {
+        flex: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form id="weekly-calendar-form">
+    <h1>Weekly Calendar</h1>
+    <div id="calendar-container"></div>
+    <button type="button" onclick="generatePDF()">Submit and Generate PDF</button>
+  </form>
+
+  <script>
+    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const activities = ["School", "Art class", "Work"];
+    const calendarContainer = document.getElementById('calendar-container');
+
+    // Function to create a time picker field for an activity
+    function createTimePicker(activity, day, uniqueId) {
+      const timeField = document.createElement('div');
+      timeField.classList.add('time-field');
+      timeField.innerHTML = `
+        <label>${activity}:</label>
+        <input type="time" name="${day}-${activity}-start-${uniqueId}" placeholder="Start time">
+        <input type="time" name="${day}-${activity}-end-${uniqueId}" placeholder="End time">
+      `;
+      return timeField;
+    }
+
+    // Function to create the daily section
+    function createDaySection(day) {
+      const daySection = document.createElement('div');
+      daySection.classList.add('day-section');
+      daySection.innerHTML = `<h2>${day}</h2>`;
+
+      activities.forEach(activity => {
+        const uniqueId = `${day}-${activity}-1`; // Unique ID for each initial field set
+        const timeField = createTimePicker(activity, day, uniqueId);
+
+        // Add button for additional School times only on the first entry
+        if (activity === "School") {
+          const addButton = document.createElement('button');
+          addButton.type = 'button';
+          addButton.classList.add('add-time-button');
+          addButton.innerText = '+';
+          addButton.onclick = () => addAdditionalTime(day);
+          timeField.appendChild(addButton);
+        }
+
+        daySection.appendChild(timeField);
+      });
+
+      return daySection;
+    }
+
+    // Function to add an additional School time entry for a day
+    function addAdditionalTime(day) {
+      const daySection = calendarContainer.querySelector(`.day-section h2:contains(${day})`).parentElement;
+      const uniqueId = `additional-${Date.now()}`; // Unique ID for each new entry to avoid conflicts
+      const additionalTimeField = createTimePicker("School", day, uniqueId);
+      daySection.appendChild(additionalTimeField);
+    }
+
+    // Initialize form by creating sections for each day
+    daysOfWeek.forEach(day => {
+      const daySection = createDaySection(day);
+      calendarContainer.appendChild(daySection);
+    });
+
+    // Function to generate PDF
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("Weekly Calendar", 10, 10);
+
+      let yPosition = 20;
+
+      daysOfWeek.forEach(day => {
+        doc.setFontSize(14);
+        doc.text(day, 10, yPosition);
+        yPosition += 10;
+
+        activities.forEach(activity => {
+          const startElements = document.querySelectorAll(`input[name^="${day}-${activity}-start"]`);
+          const endElements = document.querySelectorAll(`input[name^="${day}-${activity}-end"]`);
+          
+          startElements.forEach((startElem, index) => {
+            const start = startElem.value || "N/A";
+            const end = endElements[index].value || "N/A";
+
+            if (start || end) {
+              doc.setFontSize(12);
+              doc.text(`${activity}: ${start} - ${end}`, 20, yPosition);
+              yPosition += 10;
+            }
+          });
+        });
+
+        yPosition += 5;
+      });
+
+      doc.save("Weekly_Calendar.pdf");
+    }
+  </script>
+</body>
+</html>
