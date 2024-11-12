@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Calendar Form</title>
   
-  <!-- Default CSS for Material-Like Appearance -->
   <style>
-    /* General Layout */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -19,8 +16,7 @@
       min-height: 100vh;
       background-color: #f4f4f9;
     }
-    
-    /* Card Style */
+
     .mdc-card {
       background-color: #fff;
       padding: 20px;
@@ -30,7 +26,6 @@
       margin: 16px;
     }
 
-    /* Typography */
     .mdc-typography--headline5 {
       font-size: 1.5rem;
       margin-bottom: 1rem;
@@ -41,57 +36,35 @@
       margin-top: 1rem;
     }
 
-    /* Layout Grid */
     .mdc-layout-grid {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    /* Time Fields in a Single Line */
     .time-field-container {
       display: flex;
       justify-content: space-between;
       gap: 10px;
     }
 
-    /* Text Field Style */
     .mdc-text-field {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    margin-top: 10px;
-}
-    
-.mdc-text-field__input {
-    font-size: 1rem;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.3s ease;
-    width: 90%;
-}
-    
-    .mdc-text-field__input:focus {
-      border-color: #6200ee;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
     }
     
-    .mdc-floating-label {
-    top: -10px;
-    left: 10px;
-    background-color: #fff;
-    padding: 0 4px;
-    font-size: 14px;
-    color: #333;
-    transition: 0.2s ease;
-    pointer-events: none;
-    display: block;
-    margin-bottom: 10px;
+    .mdc-text-field__input {
+      font-size: 1rem;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.3s ease;
+      width: 100%;
     }
-
-    /* Button Style */
+    
     .mdc-button {
       display: inline-flex;
       align-items: center;
@@ -110,36 +83,34 @@
       background-color: #6200ee;
       color: #fff;
     }
-    
-    .mdc-button--raised:hover {
-      background-color: #5a00e0;
-    }
-    
-    .mdc-button--outlined {
-        background-color: #49c6ff;
-    border: none;
-    color: #fff;
-}
-    
-    .mdc-button--outlined:hover {
-      background-color: #f4f4f9;
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    /* Additional Styling for Containers */
     .activity-container {
       margin-bottom: 20px;
     }
 
-    /* Add Button Container Styling */
     .add-button-container {
       display: flex;
       justify-content: center;
       width: 100%;
       margin-top: 10px;
     }
+
+    /* Hide non-current step */
+    .step {
+      display: none;
+    }
+    .step.active {
+      display: block;
+    }
   </style>
 
-  <!-- jsPDF library for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -147,13 +118,20 @@
   <form id="weekly-calendar-form" class="mdc-card">
     <h1 class="mdc-typography--headline5">Weekly Calendar</h1>
     <div id="calendar-container" class="mdc-layout-grid"></div>
-    <button type="button" class="mdc-button mdc-button--raised" onclick="generatePDF()">Submit and Generate PDF</button>
+
+    <div class="button-container">
+      <button type="button" class="mdc-button mdc-button--outlined" id="backButton" onclick="prevStep()" style="display:none;">Back</button>
+      <button type="button" class="mdc-button mdc-button--raised" id="nextButton" onclick="nextStep()">Next</button>
+      <button type="button" class="mdc-button mdc-button--raised" id="submitButton" onclick="generatePDF()" style="display:none;">Submit</button>
+    </div>
   </form>
 
   <script>
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const activities = ["School", "Art class", "Work"];
     const calendarContainer = document.getElementById('calendar-container');
+
+    let currentStep = 0;
 
     function createTimePicker(activity, day, uniqueId) {
       const timeFieldContainer = document.createElement('div');
@@ -173,7 +151,6 @@
         <input type="time" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
       `;
 
-      // Append start and end time fields side by side
       timeFieldContainer.appendChild(startTimeField);
       timeFieldContainer.appendChild(endTimeField);
 
@@ -182,7 +159,7 @@
 
     function createDaySection(day) {
       const daySection = document.createElement('div');
-      daySection.classList.add('activity-container');
+      daySection.classList.add('activity-container', 'step');
       daySection.innerHTML = `<h2 class="mdc-typography--headline6">${day}</h2>`;
 
       activities.forEach(activity => {
@@ -194,14 +171,12 @@
 
         const timeField = createTimePicker(activity, day, uniqueId);
 
-        // Special handling for School fields
         if (activity === "School") {
           const schoolContainer = document.createElement('div');
           schoolContainer.classList.add('school-container');
           
-          schoolContainer.appendChild(timeField); // Add initial School fields
+          schoolContainer.appendChild(timeField);
 
-          // Add a dedicated container for the + button
           const addButtonContainer = document.createElement('div');
           addButtonContainer.classList.add('add-button-container');
 
@@ -213,9 +188,7 @@
           
           addButtonContainer.appendChild(addButton);
 
-          // Append the + button container after the initial fields
           schoolContainer.appendChild(addButtonContainer);
-
           activityContainer.appendChild(schoolContainer);
         } else {
           activityContainer.appendChild(timeField);
@@ -238,6 +211,35 @@
       calendarContainer.appendChild(daySection);
     });
 
+    // Show the first step
+    updateStep();
+
+    function updateStep() {
+      const steps = document.querySelectorAll('.step');
+      steps.forEach((step, index) => {
+        step.classList.toggle('active', index === currentStep);
+      });
+
+      document.getElementById('backButton').style.display = currentStep === 0 ? 'none' : 'inline';
+      document.getElementById('nextButton').style.display = currentStep === steps.length - 1 ? 'none' : 'inline';
+      document.getElementById('submitButton').style.display = currentStep === steps.length - 1 ? 'inline' : 'none';
+    }
+
+    function nextStep() {
+      const steps = document.querySelectorAll('.step');
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        updateStep();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        updateStep();
+      }
+    }
+
     function generatePDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -254,7 +256,6 @@
 
         let entries = [];
 
-        // Collect start and end times for each activity
         activities.forEach(activity => {
           const startElements = document.querySelectorAll(`input[name^="${day}-${activity}-start"]`);
           const endElements = document.querySelectorAll(`input[name^="${day}-${activity}-end"]`);
@@ -273,10 +274,8 @@
           });
         });
 
-        // Sort entries by start time
         entries.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-        // Output sorted entries for the day
         entries.forEach(entry => {
           doc.setFontSize(12);
           doc.text(`${entry.activity}: ${entry.startTime} - ${entry.endTime}`, 20, yPosition);
