@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weekly Calendar Form</title>
+  <title>Weekly Calendar Form with Materialize Time Picker</title>
+  
+  <!-- Materialize CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   
   <style>
     /* ========== Original Unmodified CSS ========== */
@@ -155,8 +158,6 @@
 }
 
   </style>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -171,12 +172,25 @@
     </div>
   </form>
 
+  <!-- Materialize JS (required for timepicker) and jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
   <script>
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const activities = ["School", "Art class", "Work"];
     const calendarContainer = document.getElementById('calendar-container');
 
     let currentStep = 0;
+
+    // Initialize Materialize Time Pickers
+    function initializeTimePicker(element) {
+      M.Timepicker.init(element, {
+        twelveHour: false, // Set to true for 12-hour format with AM/PM
+        autoClose: true,
+        onCloseEnd: () => element.blur() // Remove focus to avoid keeping the field highlighted
+      });
+    }
 
     function createTimePicker(activity, day, uniqueId) {
       const timeFieldContainer = document.createElement('div');
@@ -186,18 +200,24 @@
       startTimeField.classList.add('mdc-text-field');
       startTimeField.innerHTML = `
         <label class="mdc-floating-label">${activity} Start Time</label>
-        <input type="time" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input">
+        <input type="text" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input timepicker">
       `;
       
       const endTimeField = document.createElement('div');
       endTimeField.classList.add('mdc-text-field');
       endTimeField.innerHTML = `
         <label class="mdc-floating-label">${activity} End Time</label>
-        <input type="time" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input">
+        <input type="text" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input timepicker">
       `;
 
       timeFieldContainer.appendChild(startTimeField);
       timeFieldContainer.appendChild(endTimeField);
+
+      setTimeout(() => {
+        // Initialize Materialize time pickers on the start and end time fields
+        initializeTimePicker(document.getElementById(`${day}-${activity}-start-${uniqueId}`));
+        initializeTimePicker(document.getElementById(`${day}-${activity}-end-${uniqueId}`));
+      });
 
       return timeFieldContainer;
     }
@@ -255,9 +275,6 @@
       const daySection = createDaySection(day);
       calendarContainer.appendChild(daySection);
     });
-
-    // Show the first step
-    updateStep();
 
     function updateStep() {
       const steps = document.querySelectorAll('.step');
@@ -332,6 +349,9 @@
 
       doc.save("Weekly_Calendar.pdf");
     }
+
+    // Initialize the first step
+    updateStep();
   </script>
 </body>
 </html>
