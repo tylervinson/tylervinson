@@ -198,6 +198,7 @@ const svgTemplates = [
   <path d="M130,16.4v51.7c0,34.2-27.7,61.9-61.9,61.9H16.4C7.4,130,0,122.6,0,113.6V61.9C0,27.7,27.7,0,61.9,0l51.7,0
 	C122.6,0,130,7.4,130,16.4z"/>
 </svg>`,
+`<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="COLOR_PLACEHOLDER"><rect class="cls-1" x="106.28" y="35.79" transform="translate(-100.46 149.02) rotate(-45)"/><rect class="cls-1" x="172.4" y="-30.33" transform="translate(-34.34 176.41) rotate(-45)"/></svg>`,
 //`<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="COLOR_PLACEHOLDER"><path class="cls-1" d="M100.28,33.73C100.28,15.1,85.18,0,66.56,0s-33.72,15.1-33.72,33.73,15.09,33.73,33.72,33.73,33.71-15.1,33.71-33.73Z"/><path class="cls-1" d="M65.69,67.44c-18.22-.46-32.85-15.38-32.85-33.71,0,18.33-14.63,33.25-32.85,33.71h65.69Z"/></svg>`,
 //`<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="COLOR_PLACEHOLDER"><path class="cls-1" d="M100.28,33.73c0,18.63-15.1,33.73-33.71,33.73s-33.72-15.1-33.72-33.73S47.94,0,66.56,0s33.71,15.1,33.71,33.73Z"/><path class="cls-1" d="M65.69.01c-18.22.46-32.85,15.38-32.85,33.71C32.85,15.4,18.22.48,0,.01h65.69Z"/></svg>`,
 //`<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="COLOR_PLACEHOLDER"><path class="cls-1" d="M33.73,0c18.63,0,33.73,15.1,33.73,33.71s-15.1,33.72-33.73,33.72C15.1,67.43,0,52.34,0,33.71S15.1,0,33.73,0Z"/><path class="cls-1" d="M.01,34.58c.46,18.22,15.38,32.85,33.71,32.85-18.33,0-33.25,14.63-33.71,32.85V34.58Z"/></svg>`,
@@ -336,7 +337,7 @@ function generateGrid(containerId, numRows, numCols) {
         const svgContent = svgTemplate.replace('COLOR_PLACEHOLDER', svgColor);
         const svgElement = new DOMParser().parseFromString(svgContent, 'image/svg+xml').documentElement;
         
-        svgElement.style.transform = `rotate(${rotation}deg)`;
+        svgElement.setAttribute('transform', `rotate(${rotation} 50 50)`);
         cell.appendChild(svgElement);
 
         cellStates[row][col] = true;
