@@ -186,7 +186,7 @@
     // Initialize Materialize Time Pickers
     function initializeTimePicker(element) {
       M.Timepicker.init(element, {
-        twelveHour: false, // Set to true for 12-hour format with AM/PM
+        twelveHour: true, // Set to true for 12-hour format with AM/PM
         autoClose: true,
         onCloseEnd: () => element.blur() // Remove focus to avoid keeping the field highlighted
       });
