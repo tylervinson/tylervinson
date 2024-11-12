@@ -6,6 +6,8 @@
   <title>Weekly Calendar Form</title>
   
   <style>
+    /* ========== Original Unmodified CSS ========== */
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -16,7 +18,8 @@
       min-height: 100vh;
       background-color: #f4f4f9;
     }
-
+    
+    /* Card Style */
     .mdc-card {
       background-color: #fff;
       padding: 20px;
@@ -26,6 +29,7 @@
       margin: 16px;
     }
 
+    /* Typography */
     .mdc-typography--headline5 {
       font-size: 1.5rem;
       margin-bottom: 1rem;
@@ -36,35 +40,50 @@
       margin-top: 1rem;
     }
 
+    /* Layout Grid */
     .mdc-layout-grid {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .time-field-container {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+    /* Text Field Style */
+    .mdc-text-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin-top: 10px;
+}
+    
+.mdc-text-field__input {
+    font-size: 1rem;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 90%;
+}
+    
+    .mdc-text-field__input:focus {
+      border-color: #6200ee;
+    }
+    
+    .mdc-floating-label {
+    top: -10px;
+    left: 10px;
+    background-color: #fff;
+    padding: 0 4px;
+    font-size: 14px;
+    color: #333;
+    transition: 0.2s ease;
+    pointer-events: none;
+    display: block;
+    margin-bottom: 10px;
     }
 
-    .mdc-text-field {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-    
-    .mdc-text-field__input {
-      font-size: 1rem;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      outline: none;
-      transition: border-color 0.3s ease;
-      width: 100%;
-    }
-    
+    /* Button Style */
     .mdc-button {
       display: inline-flex;
       align-items: center;
@@ -83,32 +102,58 @@
       background-color: #6200ee;
       color: #fff;
     }
-
-    .button-container {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 20px;
+    
+    .mdc-button--raised:hover {
+      background-color: #5a00e0;
+    }
+    
+    .mdc-button--outlined {
+        background-color: #49c6ff;
+    border: none;
+    color: #fff;
+}
+    
+    .mdc-button--outlined:hover {
+      background-color: #f4f4f9;
     }
 
+    /* Additional Styling for Containers */
     .activity-container {
       margin-bottom: 20px;
     }
 
+    /* Add Button Container Styling */
     .add-button-container {
       display: flex;
       justify-content: center;
       width: 100%;
       margin-top: 10px;
     }
+/* ========== New/Modified CSS for Multi-Step Form ========== */
 
-    /* Hide non-current step */
-    .step {
-      display: none;
-    }
-    .step.active {
-      display: block;
-    }
+/* Time Fields in a Single Line */
+.time-field-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Button Container for Multi-Step Form */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Multi-Step Form: Hide Non-Active Steps */
+.step {
+  display: none;
+}
+.step.active {
+  display: block;
+}
+
   </style>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -290,3 +335,4 @@
   </script>
 </body>
 </html>
+
