@@ -11,7 +11,7 @@
     grid-template-columns: repeat(4, 1fr); /* Square grid with 6 columns */
     gap: 0; 
     width: min-content;
-    background-color: #fb4c29;
+    background-color: #0099D8;
 }
 
 .cell {
@@ -21,17 +21,17 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    border: 1px solid #fb4c29; /* Set border for all cells */
+    border: 1px solid #0099D8; /* Set border for all cells */
     border-right: none; /* Remove right border */
     border-bottom: none; /* Remove bottom border */
 }
 
 /* Add bottom and right borders only to the last row and column cells */
 .grid-container > .cell:nth-child(6n) { /* Last cell in each row */
-    border-right: 1px solid #fb4c29;
+    border-right: 1px solid #0099D8;
 }
 .grid-container > .cell:nth-last-child(-n+6) { /* Cells in the last row */
-    border-bottom: 1px solid #fb4c29;
+    border-bottom: 1px solid #0099D8;
 }
   .cell svg {
     display: block;
@@ -47,7 +47,8 @@
 <script>
 // const hexColors = ['#0858a1', '#05afc8', '#eb5a79', '#e9b309', '#85cedf', '#e2aaab'];
 // const hexColors = ['#F7CAA4', '#F79975', '#F36A4A', '#BC3921', '#860000', '#550000'];
- const hexColors = ['#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3'];
+ // const hexColors = ['#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3', '#fcf5f3'];
+ const hexColors = ['#F58220', '#FBB24C', '#0099D8', '#FFFFFF', '#E7EAF1'], // AZ Blue
 //const hexColors = ['#F58220', '#FBB24C', '#0099D8', '#FFFFFF', '#E7EAF1'];
 // const hexColors = ['#FF6F3C', '#FCE2CF', '#FFD159', '#3E3C3C'];
 const rotationDegrees = [0, 90, 180, 270];
@@ -85,8 +86,8 @@ function generateGrid(containerId, numRows, numCols) {
         // This includes your existing logic for setting the SVG content and background color
         const svgColor = hexColors[Math.floor(Math.random() * hexColors.length)];
         const remainingColors = hexColors.filter(color => color !== svgColor);
-        const backgroundColor = '#fb4c29';
-        //const backgroundColor = remainingColors[Math.floor(Math.random() * remainingColors.length)];
+        //const backgroundColor = '#fb4c29';
+        const backgroundColor = remainingColors[Math.floor(Math.random() * remainingColors.length)];
         cell.style.backgroundColor = backgroundColor;
 
         const rotation = rotationDegrees[Math.floor(Math.random() * rotationDegrees.length)];
