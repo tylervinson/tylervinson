@@ -172,7 +172,7 @@
     </div>
   </form>
 
-  <!-- Materialize JS (required for timepicker) and jsPDF -->
+  <!-- Materialize JS and jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 
@@ -183,12 +183,11 @@
 
     let currentStep = 0;
 
-    // Initialize Materialize Time Pickers
     function initializeTimePicker(element) {
       M.Timepicker.init(element, {
-        twelveHour: true, // Set to true for 12-hour format with AM/PM
+        twelveHour: false,
         autoClose: true,
-        onCloseEnd: () => element.blur() // Remove focus to avoid keeping the field highlighted
+        onCloseEnd: () => element.blur()
       });
     }
 
@@ -202,7 +201,7 @@
         <label class="mdc-floating-label">${activity} Start Time</label>
         <input type="text" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input timepicker">
       `;
-      
+
       const endTimeField = document.createElement('div');
       endTimeField.classList.add('mdc-text-field');
       endTimeField.innerHTML = `
@@ -214,7 +213,6 @@
       timeFieldContainer.appendChild(endTimeField);
 
       setTimeout(() => {
-        // Initialize Materialize time pickers on the start and end time fields
         initializeTimePicker(document.getElementById(`${day}-${activity}-start-${uniqueId}`));
         initializeTimePicker(document.getElementById(`${day}-${activity}-end-${uniqueId}`));
       });
@@ -239,7 +237,7 @@
         if (activity === "School") {
           const schoolContainer = document.createElement('div');
           schoolContainer.classList.add('school-container');
-          
+
           schoolContainer.appendChild(timeField);
 
           const addButtonContainer = document.createElement('div');
@@ -249,8 +247,8 @@
           addButton.type = 'button';
           addButton.classList.add('mdc-button', 'mdc-button--outlined');
           addButton.innerHTML = '+';
-          addButton.onclick = () => addAdditionalTime(schoolContainer, addButtonContainer);
-          
+          addButton.onclick = () => addAdditionalTime(schoolContainer, addButtonContainer, day);
+
           addButtonContainer.appendChild(addButton);
 
           schoolContainer.appendChild(addButtonContainer);
@@ -265,9 +263,9 @@
       return daySection;
     }
 
-    function addAdditionalTime(schoolContainer, addButtonContainer) {
+    function addAdditionalTime(schoolContainer, addButtonContainer, day) {
       const uniqueId = `additional-${Date.now()}`;
-      const additionalTimeField = createTimePicker("School", "Monday", uniqueId);
+      const additionalTimeField = createTimePicker("School", day, uniqueId);
       schoolContainer.insertBefore(additionalTimeField, addButtonContainer);
     }
 
@@ -350,8 +348,7 @@
       doc.save("Weekly_Calendar.pdf");
     }
 
-    // Initialize the first step
-    updateStep();
+    updateStep(); // Initialize the first step
   </script>
 </body>
 </html>
