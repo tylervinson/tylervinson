@@ -21,6 +21,17 @@
   font-style: normal;
 }
 
+button:focus {
+    outline: none;
+    background-color: #fff;
+}
+.mdc-button--outlined:hover {
+    /* background-color: #f4f4f9; */
+    /* color: #fff; */
+    background-color: #42266d;
+    color: #fff;
+}
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -42,6 +53,9 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       margin: 16px;
       height: calc(100vh - 40px);
+      display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures space between content and footer */
     }
 
     /* Typography */
@@ -156,7 +170,7 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: auto; /* Pushes the button container to the bottom */
 }
 
 /* Multi-Step Form: Hide Non-Active Steps */
