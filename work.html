@@ -51,7 +51,7 @@
     margin-top: 10px;
     }
     .mdc-typography--headline6 {
-      font-size: 1.2rem;
+      font-size: 1.6rem;
       margin-top: 1rem;
     }
 
@@ -131,9 +131,7 @@
     }
 
     /* Additional Styling for Containers */
-    .activity-container {
-      margin-bottom: 20px;
-    }
+   
 
     /* Add Button Container Styling */
     .add-button-container {
@@ -141,6 +139,7 @@
       justify-content: center;
       width: 100%;
       margin-top: 10px;
+      margin-bottom: 20px;
     }
 /* ========== New/Modified CSS for Multi-Step Form ========== */
 
@@ -240,14 +239,14 @@ html {
       const startTimeField = document.createElement('div');
       startTimeField.classList.add('mdc-text-field');
       startTimeField.innerHTML = `
-        <label class="mdc-floating-label">${activity} Start Time</label>
+        <label class="mdc-floating-label">${activity} In</label>
         <input type="text" id="${day}-${activity}-start-${uniqueId}" name="${day}-${activity}-start-${uniqueId}" class="mdc-text-field__input timepicker">
       `;
 
       const endTimeField = document.createElement('div');
       endTimeField.classList.add('mdc-text-field');
       endTimeField.innerHTML = `
-        <label class="mdc-floating-label">${activity} End Time</label>
+        <label class="mdc-floating-label">${activity} Out</label>
         <input type="text" id="${day}-${activity}-end-${uniqueId}" name="${day}-${activity}-end-${uniqueId}" class="mdc-text-field__input timepicker">
       `;
 
@@ -265,7 +264,7 @@ html {
     function createDaySection(day) {
       const daySection = document.createElement('div');
       daySection.classList.add('activity-container', 'step');
-      daySection.innerHTML = `<h2 class="mdc-typography--headline6">${day}</h2>`;
+      daySection.innerHTML = `<h2 class="mdc-typography--headline6 parkinsans-title">${day}</h2>`;
 
       activities.forEach(activity => {
         const uniqueId = `${day}-${activity}-1`;
