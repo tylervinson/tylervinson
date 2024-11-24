@@ -23,7 +23,7 @@
 
 button:focus {
     outline: none;
-    background-color: #fff;
+    background-color: #0f0f13;
 }
 .mdc-button--outlined:hover {
     /* background-color: #f4f4f9; */
@@ -185,6 +185,7 @@ button:focus {
  <style>
   button, html [type="button"], [type="reset"], [type="submit"] {
     -webkit-appearance: button;
+    appearance: button;
     height: 46px;
 }
 input:not([type]), input[type=text]:not(.browser-default), input[type=password]:not(.browser-default), input[type=email]:not(.browser-default), input[type=url]:not(.browser-default), input[type=time]:not(.browser-default), input[type=date]:not(.browser-default), input[type=datetime]:not(.browser-default), input[type=datetime-local]:not(.browser-default), input[type=tel]:not(.browser-default), input[type=number]:not(.browser-default), input[type=search]:not(.browser-default), textarea.materialize-textarea {
@@ -213,21 +214,50 @@ html {
 .mdc-button--raised:hover {
     background-color: #fff;
 }
+
+/* #form-wrapper {
+  background: url(m.svg) no-repeat center center;
+    background-size: cover;
+    background-blend-mode: overlay;
+    background-size: 110%;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #9e0549;
+} */
+
+.mdc-card {
+  /* Retain the gradient on the form */
+  background: linear-gradient(180deg, rgba(61, 36, 104, 1) 0%, rgba(187, 88, 233, 1) 100%);
+  padding: 60px;
+  width: 100%;
+  max-width: 475px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 16px;
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
  </style>
 </head>
 <body>
 
-  <form id="weekly-calendar-form" class="mdc-card">
-    <h1 class="mdc-typography--headline5 parkinsans-title">Ein Kalender<br>für Morgan</h1>
-    <div id="calendar-container" class="mdc-layout-grid"></div>
+  <div id="form-wrapper">
+    <form id="weekly-calendar-form" class="mdc-card">
+      <h1 class="mdc-typography--headline5 parkinsans-title">Ein Kalender<br>für Morgan</h1>
+      <div id="calendar-container" class="mdc-layout-grid"></div>
 
-    <div class="button-container">
-      <button type="button" class="mdc-button mdc-button--outlined" id="backButton" onclick="prevStep()" style="display:none;">Back</button>
-      <button type="button" class="mdc-button mdc-button--raised" id="nextButton" onclick="nextStep()">Next</button>
-      <button type="button" class="mdc-button mdc-button--raised" id="submitButton" onclick="generatePDF()" style="display:none;">Submit</button>
-    </div>
-  </form>
-
+      <div class="button-container">
+        <button type="button" class="mdc-button mdc-button--outlined" id="backButton" onclick="prevStep()" style="display:none;">Back</button>
+        <button type="button" class="mdc-button mdc-button--raised" id="nextButton" onclick="nextStep()">Next</button>
+        <button type="button" class="mdc-button mdc-button--raised" id="submitButton" onclick="generatePDF()" style="display:none;">Submit</button>
+      </div>
+    </form>
+  </div>
   <!-- Materialize JS and jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
