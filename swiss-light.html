@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bauhaus Grid - Dynamic Colors</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      background: #f0f0f0;
+    }
+
+    .buttons {
+      position: absolute;
+      left: 2%;
+      bottom: 0px;
+    }
+
+    button {
+      background-color: #fff;
+      display: inline-block;
+      padding: 8px 20px;
+      margin-right: 5px;
+      cursor: pointer;
+      border: 1px solid aliceblue;
+      font-family: 'open sans';
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    button:hover {
+      background-color: aliceblue;
+    }
+  </style>
+</head>
+<body>
+  <div class="buttons">
+    <button id="downloadBtn">Download</button>
+    <button id="refreshBtn">Refresh</button>
+  </div>
+  <canvas id="gridCanvas" width="1440" height="960"></canvas>
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const colorsMap = [
+      { bg: '#37F7F6', svg: '#0E01F7' },
+      { bg: '#F200F6', svg: '#EC0018' },
+      { bg: '#F7F713', svg: '#39F718' },
+      { bg: '#fff', svg: '#000' },
+      { bg: '#000', svg: '#fff' },
+    ];
+
+    const minCellsAcross = 8;
+
+    function setCanvasSize() {
+      canvas.width = window.innerWidth;
+      const cellSize = canvas.width / minCellsAcross;
+      const rows = Math.ceil(window.innerHeight / cellSize);
+      canvas.height = rows * cellSize;
+    }
+
+    function calculateGrid() {
+      const cellSize = canvas.width / minCellsAcross;
+      const cols = Math.floor(canvas.width / cellSize);
+      const rows = Math.floor(canvas.height / cellSize);
+      return { cellSize, rows, cols };
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const { cellSize, rows, cols } = calculateGrid();
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const colorPair = colorsMap[Math.floor(Math.random() * colorsMap.length)];
+          const x = col * cellSize;
+          const y = row * cellSize;
+
+          // Draw background
+          ctx.fillStyle = colorPair.bg;
+          ctx.fillRect(x, y, cellSize, cellSize);
+
+          // Draw SVG element (quarter circle) with dependent color
+          drawQuarterCircle(ctx, x, y, cellSize, colorPair.svg);
+        }
+      }
+    }
+
+    function drawQuarterCircle(context, x, y, size, color) {
+      context.fillStyle = color;
+      const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+      const corner = corners[Math.floor(Math.random() * corners.length)];
+
+      context.beginPath();
+      switch (corner) {
+        case 'top-left':
+          context.moveTo(x, y);
+          context.arc(x, y, size / 2, 0, Math.PI / 2);
+          break;
+        case 'top-right':
+          context.moveTo(x + size, y);
+          context.arc(x + size, y, size / 2, Math.PI / 2, Math.PI);
+          break;
+        case 'bottom-left':
+          context.moveTo(x, y + size);
+          context.arc(x, y + size, size / 2, 1.5 * Math.PI, 0);
+          break;
+        case 'bottom-right':
+          context.moveTo(x + size, y + size);
+          context.arc(x + size, y + size, size / 2, Math.PI, 1.5 * Math.PI);
+          break;
+      }
+      context.closePath();
+      context.fill();
+    }
+
+    function downloadCanvasAsImage() {
+      const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      const link = document.createElement('a');
+      link.download = 'grid-image.png';
+      link.href = image;
+      link.click();
+    }
+
+    function refreshGrid() {
+      setCanvasSize();
+      drawGrid();
+    }
+
+    window.addEventListener('resize', refreshGrid);
+    document.getElementById('downloadBtn').addEventListener('click', downloadCanvasAsImage);
+    document.getElementById('refreshBtn').addEventListener('click', refreshGrid);
+
+    setCanvasSize();
+    drawGrid();
+  </script>
+</body>
+</html>

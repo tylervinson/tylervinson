@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Excel Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>PDF to Excel Converter</h1>
+    <p>Select PDF files and click "Process PDFs" to extract data and download it as an Excel file.</p>
+    <input type="file" id="pdfInput" multiple accept=".pdf" />
+    <button id="processPDFs">Process PDFs</button>
+    <p id="status"></p>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
+
+        document.getElementById('processPDFs').addEventListener('click', () => {
+            const pdfFiles = document.getElementById('pdfInput').files;
+            const statusElement = document.getElementById('status');
+
+            if (!pdfFiles.length) {
+                alert("Please select PDF files first.");
+                return;
+            }
+
+            statusElement.textContent = "Processing PDFs...";
+
+            const results = [];
+            const splitTextIntoChunks = (text, chunkSize) => {
+                const chunks = [];
+                for (let i = 0; i < text.length; i += chunkSize) {
+                    chunks.push(text.slice(i, i + chunkSize));
+                }
+                return chunks;
+            };
+
+            const processFile = (file) => {
+                return new Promise((resolve, reject) => {
+                    const fileReader = new FileReader();
+                    fileReader.onload = function () {
+                        const typedArray = new Uint8Array(this.result);
+                        pdfjsLib.getDocument(typedArray).promise
+                            .then(pdf => {
+                                const promises = [];
+                                for (let i = 1; i <= pdf.numPages; i++) {
+                                    promises.push(
+                                        pdf.getPage(i).then(page => {
+                                            return page.getTextContent().then(textContent => {
+                                                return textContent.items.map(item => item.str).join(' ');
+                                            });
+                                        })
+                                    );
+                                }
+                                return Promise.all(promises);
+                            })
+                            .then(pages => resolve(pages.join('\n')))
+                            .catch(err => reject(err));
+                    };
+                    fileReader.readAsArrayBuffer(file);
+                });
+            };
+
+            const allPromises = Array.from(pdfFiles).map(file => processFile(file));
+
+            Promise.all(allPromises)
+                .then(contents => {
+                    contents.forEach((content, index) => {
+                        const chunks = splitTextIntoChunks(content, 30000);
+                        chunks.forEach((chunk, chunkIndex) => {
+                            results.push({
+                                FileName: pdfFiles[index].name + (chunks.length > 1 ? ` (Part ${chunkIndex + 1})` : ''),
+                                Content: chunk,
+                            });
+                        });
+                    });
+
+                    const worksheet = XLSX.utils.json_to_sheet(results);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "PDF Data");
+                    XLSX.writeFile(workbook, "PDF_Data.xlsx");
+
+                    statusElement.textContent = "Processing complete. Excel file downloaded!";
+                })
+                .catch(err => {
+                    console.error("Error processing PDFs:", err);
+                    statusElement.textContent = "An error occurred. Check console for details.";
+                });
+        });
+    </script>
+</body>
+</html>

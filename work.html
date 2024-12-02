@@ -23,13 +23,13 @@
 
 button:focus {
     outline: none;
-    background-color: #0f0f13;
+    background-color: #fff;
 }
 .mdc-button--outlined:hover {
     /* background-color: #f4f4f9; */
     /* color: #fff; */
-    background-color: #42266d;
-    color: #fff;
+    background-color: #fff;
+    color: #42266d;
 }
 
     body {
@@ -52,7 +52,7 @@ button:focus {
       max-width: 475px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       margin: 16px;
-      height: calc(100vh - 80px);
+      min-height: calc(100vh - 80px);
       display: flex;
   flex-direction: column;
   justify-content: space-between; /* Ensures space between content and footer */
@@ -127,22 +127,22 @@ button:focus {
     }
     
     .mdc-button--raised {
-      background-color: #6200ee;
-      color: #fff;
+      background-color: #fff;
+      color: #42266d;
     }
     
     .mdc-button--raised:hover {
-      background-color: #5a00e0;
+      background-color: #fff;
     }
     
     .mdc-button--outlined {
-        background-color: #49c6ff;
+        background-color: #fff;
     border: none;
-    color: #fff;
+    color: #42266d;
 }
     
     .mdc-button--outlined:hover {
-      background-color: #f4f4f9;
+      background-color: #fff;
     }
 
     /* Additional Styling for Containers */
@@ -198,7 +198,7 @@ html {
 }
 .mdc-button--raised {
     background-color: #fff;
-    color: #333;
+    color: #42266d;
 }
 .timepicker-digital-display {
     background-color: #3d2468;
@@ -209,12 +209,15 @@ html {
 .mdc-button--outlined {
     background-color: #fff;
     border: none;
-    color: #333;
+    color: #42266d;
 }
 .mdc-button--raised:hover {
     background-color: #fff;
 }
-
+.addSchool{
+  background-color:#000 !important;
+  color:#fff !important;
+}
 /* #form-wrapper {
   background: url(m.svg) no-repeat center center;
     background-size: cover;
@@ -237,11 +240,19 @@ html {
   max-width: 475px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 16px;
-  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
+#nextButton,
+#backButton,
+#submitButton{
+  margin-top:20px;
+}
+ </style>
+ <style>
+  
  </style>
 </head>
 <body>
@@ -264,7 +275,7 @@ html {
 
   <script>
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const activities = ["School", "Art class", "Work"];
+    const activities = ["Work", "School", "Art Class"];
     const calendarContainer = document.getElementById('calendar-container');
 
     let currentStep = 0;
@@ -321,27 +332,58 @@ html {
         const timeField = createTimePicker(activity, day, uniqueId);
 
         if (activity === "School") {
-          const schoolContainer = document.createElement('div');
-          schoolContainer.classList.add('school-container');
+  const schoolContainer = document.createElement('div');
+  schoolContainer.classList.add('school-container');
 
-          schoolContainer.appendChild(timeField);
+  schoolContainer.appendChild(timeField);
 
-          const addButtonContainer = document.createElement('div');
-          addButtonContainer.classList.add('add-button-container');
+  const addButtonContainer = document.createElement('div');
+  addButtonContainer.classList.add('add-button-container');
 
-          const addButton = document.createElement('button');
-          addButton.type = 'button';
-          addButton.classList.add('mdc-button', 'mdc-button--outlined');
-          addButton.innerHTML = '+';
-          addButton.onclick = () => addAdditionalTime(schoolContainer, addButtonContainer, day);
+  const addButton = document.createElement('button');
+  addButton.type = 'button';
+  addButton.classList.add('mdc-button', 'mdc-button--outlined', 'addSchool');
 
-          addButtonContainer.appendChild(addButton);
+  // Add a span for the label
+  const labelSpan = document.createElement('span');
+  labelSpan.classList.add('button-label');
+  labelSpan.innerHTML = '+';
 
-          schoolContainer.appendChild(addButtonContainer);
-          activityContainer.appendChild(schoolContainer);
-        } else {
-          activityContainer.appendChild(timeField);
-        }
+  addButton.appendChild(labelSpan);
+  addButton.onclick = () => addAdditionalTime(schoolContainer, addButtonContainer, day);
+
+  addButtonContainer.appendChild(addButton);
+
+  schoolContainer.appendChild(addButtonContainer);
+  activityContainer.appendChild(schoolContainer);
+
+  // Add spinning animation CSS
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .add-button-container .mdc-button .button-label {
+      display: inline-block;
+      font-size:22px;
+      transition: transform 0.5s ease-out;
+    }
+
+    .add-button-container .mdc-button:hover .button-label {
+      animation: spin 0.2s linear forwards;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+} else {
+  activityContainer.appendChild(timeField);
+}
+
 
         daySection.appendChild(activityContainer);
       });
@@ -438,4 +480,3 @@ html {
   </script>
 </body>
 </html>
-
