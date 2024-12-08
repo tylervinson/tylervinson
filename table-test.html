@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populated Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .nested-table {
+            width: 100%;
+            border: none;
+            table-layout: fixed;
+        }
+        .nested-table td {
+            border: none;
+            padding: 4px;
+        }
+        .checkbox {
+            text-align: center;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <!-- Table Header -->
+        <tr>
+            <th>Plan</th>
+            <th>Pediatric Care Options</th>
+            <th>Explore Other In-Network Options</th>
+        </tr>
+        
+        <!-- Row 1 -->
+        <tr>
+            <td>Individual and Families<br>Grandfathered/Grandmothered</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                </table>
+            </td>
+            <td rowspan="7">
+                AZ Blue has thousands of in-network doctors to provide quality care for you.<br><br>
+                To learn more about other in-network pediatric providers in your area:<br>
+                Visit <a href="https://azblue.com/find-a-doctor">azblue.com/find-a-doctor</a> or sign into your account at <a href="https://azblue.com/member">azblue.com/member</a> and click on Find a Doctor.<br><br>
+                Members with specific questions around continuity of care or transitioning to an in-network provider can call Care Management at 602-544-8982 or email <a href="mailto:cm@azblue.com">cm@azblue.com</a>.<br><br>
+                Call Member Services at the number on the back of your member ID card.<br>
+                Email <a href="mailto:MemberHelp@azblue.com">MemberHelp@azblue.com</a>
+            </td>
+        </tr>
+        
+        <!-- Row 2 -->
+        <tr>
+            <td>Individual and Families<br>ACA HMO</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                    <tr>
+                        <td>x</td>
+                        <td>Phoenix Children’s is out of network for MaricopaFocus members on Jan. 1, 2025.* </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>*If MaricopaFocus members would like to access Banner Children’s before 1-1-25, AZ Blue will make special arrangements. Members can contact our care team at 602-544-8982 or cm@azblue.com. <br><br>
+
+                            PCH is not a part of the Neighborhood or PimaFocus networks.</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Row 3 -->
+        <tr>
+            <td>Individual and Families<br>ACA PPO plan</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox">x</td>
+                        <td>Phoenix Children’s is out of network on Jan. 1, 2025.</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Row 4 -->
+        <tr>
+            <td>Employer provided plan</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Row 5 -->
+        <tr>
+            <td>Federal Employee Program</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                    <tr>
+                        <td>x</td>
+                        <td>Phoenix Children’s is out of network Jan. 1, 2025.</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Row 6 -->
+        <tr>
+            <td>Individual and Families<br>Affordable Care Act (ACA) Health Choice</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Phoenix Children’s</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Row 7 -->
+        <tr>
+            <td>Health Choice (Medicaid)</td>
+            <td>
+                <table class="nested-table">
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Banner Children’s</td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox">✔</td>
+                        <td>Phoenix Children’s</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

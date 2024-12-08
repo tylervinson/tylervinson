@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Map with Marker Clusters</title>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCBmLs7TrvGd92P_XRJ8t_KO3V7a7E7t7U&callback=initMap&libraries=places"
+    async
+    defer
+  ></script>
+  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Google Map with Marker Clusters</h1>
+  <div id="map"></div>
+  <script>
+    function initMap() {
+      const center = { lat: 37.7749, lng: -122.4194 }; // San Francisco coordinates
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 10,
+        center: center,
+      });
+
+      // Define markers
+      const markersCluster1 = [
+        new google.maps.Marker({ position: { lat: 37.7749, lng: -122.4194 }, title: "Marker 1A" }),
+        new google.maps.Marker({ position: { lat: 37.7849, lng: -122.4294 }, title: "Marker 1B" }),
+      ];
+
+      const markersCluster2 = [
+        new google.maps.Marker({ position: { lat: 37.7649, lng: -122.4094 }, title: "Marker 2A" }),
+        new google.maps.Marker({ position: { lat: 37.7549, lng: -122.3994 }, title: "Marker 2B" }),
+      ];
+
+      // Combine markers into a single array
+      const allMarkers = markersCluster1.concat(markersCluster2);
+
+      // Use MarkerClusterer for clustering
+      new markerClusterer.MarkerClusterer({
+        map,
+        markers: allMarkers,
+      });
+    }
+  </script>
+</body>
+</html>
