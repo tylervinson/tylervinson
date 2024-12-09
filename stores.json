@@ -1,0 +1,83 @@
+[
+    {
+        "name": "Peoria",
+        "status": "Now Open",
+        "lat": 33.61050996309501,
+        "lng": -112.24750178465449,
+        "address": "9000 W. Thunderbird, Ste. 110 Peoria, AZ 85381",
+        "url": "https://maps.app.goo.gl/qc4u8ujB8DU8Pm2G6",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Scottsdale",
+        "status": "Now Open",
+        "lat": 33.54510056532687,
+        "lng": -111.92508327116363,
+        "address": "7373 N Scottsdale, Ste. A178 Scottsdale, AZ 85253",
+        "url": "https://maps.app.goo.gl/7756Cgg2ErX5Hwrh8",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Phoenix/Avondale",
+        "status": "Now Open",
+        "lat": 33.47886254738019,
+        "lng": -112.26182348754007,
+        "address": "9321 W Thomas, Ste. 420 Phoenix, AZ 85037",
+        "url": "https://maps.app.goo.gl/mwA8Bhdpxji7wwvG6",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Chandler/Gilbert",
+        "status": "Now Open",
+        "lat": 33.286143092713786,
+        "lng": -111.75725984232724,
+        "address": "3530 S Val Vista, Ste. B105 Gilbert, AZ 85297",
+        "url": "https://maps.app.goo.gl/6yrZuVLNtrJXv7W49",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Deer Valley",
+        "status": "Now Open",
+        "lat": 33.665908,
+        "lng": -112.0866411,
+        "address": "19810 N 7th Ave, Ste. 150 Phoenix, AZ 85027",
+        "url": "https://maps.app.goo.gl/YusxXN5FnAFsqQud8",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Mesa",
+        "status": "Now Open",
+        "lat": 33.3806134,
+        "lng": -111.8089692,
+        "address": "1910 S Stapley Dr, Mesa, AZ 85204",
+        "url": "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "Phoenix – Cotton Center",
+        "status": "Coming Soon",
+        "lat": 33.4126956,
+        "lng": -111.9968573,
+        "address": "4039 E. Raymond St. Ste. 120 Phoenix, AZ 85040",
+        "url": "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "‍River & Campbell",
+        "status": "Coming Soon",
+        "lat": 32.2867493,
+        "lng": -110.9477774,
+        "address": "1790 E. River Rd. Ste. 200 Tucson, AZ 85718",
+        "url": "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+        "secondUrl": "tel:18557767266"
+    },
+    {
+        "name": "‍Williams Centre",
+        "status": "Coming Soon",
+        "lat": 32.2202358,
+        "lng": -110.8840298,
+        "address": "5210 E. Williams Cir. Ste. 120 Tucson, AZ 85711",
+        "url": "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+        "secondUrl": "tel:18557767266"
+    }
+]

@@ -1,0 +1,10 @@
+name,status,lat,lng,address,url,secondUrl
+Peoria,Now Open,33.61050996309501,-112.24750178465449,"9000 W. Thunderbird, Ste. 110 Peoria, AZ 85381",https://maps.app.goo.gl/qc4u8ujB8DU8Pm2G6,tel:18557767266
+Scottsdale,Now Open,33.54510056532687,-111.92508327116363,"7373 N Scottsdale, Ste. A178 Scottsdale, AZ 85253",https://maps.app.goo.gl/7756Cgg2ErX5Hwrh8,tel:18557767266
+Phoenix/Avondale,Now Open,33.47886254738019,-112.26182348754007,"9321 W Thomas, Ste. 420 Phoenix, AZ 85037",https://maps.app.goo.gl/mwA8Bhdpxji7wwvG6,tel:18557767266
+Chandler/Gilbert,Now Open,33.286143092713786,-111.75725984232724,"3530 S Val Vista, Ste. B105 Gilbert, AZ 85297",https://maps.app.goo.gl/6yrZuVLNtrJXv7W49,tel:18557767266
+Deer Valley,Now Open,33.665908,-112.0866411,"19810 N 7th Ave, Ste. 150 Phoenix, AZ 85027",https://maps.app.goo.gl/YusxXN5FnAFsqQud8,tel:18557767266
+Mesa,Now Open,33.3806134,-111.8089692,"1910 S Stapley Dr, Mesa, AZ 85204",https://maps.app.goo.gl/2bAGfy38UdU23NF3A,tel:18557767266
+Phoenix – Cotton Center,Coming Soon,33.4126956,-111.9968573,"4039 E. Raymond St. Ste. 120 Phoenix, AZ 85040",https://maps.app.goo.gl/2bAGfy38UdU23NF3A,tel:18557767266
+‍River & Campbell,Coming Soon,32.2867493,-110.9477774,"1790 E. River Rd. Ste. 200 Tucson, AZ 85718",https://maps.app.goo.gl/2bAGfy38UdU23NF3A,tel:18557767266
+‍Williams Centre,Coming Soon,32.2202358,-110.8840298,"5210 E. Williams Cir. Ste. 120 Tucson, AZ 85711",https://maps.app.goo.gl/2bAGfy38UdU23NF3A,tel:18557767266

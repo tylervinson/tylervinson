@@ -3,51 +3,228 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Map with Marker Clusters</title>
-  <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCBmLs7TrvGd92P_XRJ8t_KO3V7a7E7t7U&callback=initMap&libraries=places"
-    async
-    defer
-  ></script>
-  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+  <title>Google Map with Custom Clusters</title>
   <style>
     #map {
-      height: 500px;
+      height: 650px;
       width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>Google Map with Marker Clusters</h1>
-  <div id="map"></div>
-  <script>
-    function initMap() {
-      const center = { lat: 37.7749, lng: -122.4194 }; // San Francisco coordinates
-      const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 10,
-        center: center,
-      });
-
-      // Define markers
-      const markersCluster1 = [
-        new google.maps.Marker({ position: { lat: 37.7749, lng: -122.4194 }, title: "Marker 1A" }),
-        new google.maps.Marker({ position: { lat: 37.7849, lng: -122.4294 }, title: "Marker 1B" }),
-      ];
-
-      const markersCluster2 = [
-        new google.maps.Marker({ position: { lat: 37.7649, lng: -122.4094 }, title: "Marker 2A" }),
-        new google.maps.Marker({ position: { lat: 37.7549, lng: -122.3994 }, title: "Marker 2B" }),
-      ];
-
-      // Combine markers into a single array
-      const allMarkers = markersCluster1.concat(markersCluster2);
-
-      // Use MarkerClusterer for clustering
-      new markerClusterer.MarkerClusterer({
-        map,
-        markers: allMarkers,
-      });
+  <h1>Google Map with Custom Clusters</h1>
+  <div id="map-wrapper">
+    <!-- The map will be initialized here -->
+  </div>
+  <style>
+    @media (min-width: 1344px) {
+      #__next > div.flex.flex-col.min-h-screen > main > div:nth-child(2) > div > div{
+      max-width:none !important;
+      }
+      #__next > div.flex.flex-col.min-h-screen > main > div:nth-child(2) > div > div > div{
+      padding:0 !important;
+      }
     }
+    #map {
+    width: 100%; /* Full width of the container */
+    height: 50vh; /* Height relative to the viewport */
+    min-height: 300px; /* Minimum height for usability */
+    max-height: 80vh; /* Optional: limit height for very large screens */
+  }
+  
+  @media (max-width: 768px) {
+    #map {
+      height: 40vh; /* Adjust height for smaller screens */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #map {
+      height: 30vh; /* Further adjust for very small screens */
+    }
+  }
+  
+    .marker-cluster-large,
+    .marker-cluster-medium,
+    .marker-cluster-small { background-color: #0099d8; }
+    #__next > div.flex.flex-col.min-h-screen > main > div:nth-child(2) > div{
+    padding-bottom:0 !important;
+      padding-top: 0 !important;
+    }
+  #map > div > div.gm-style > div:nth-child(1) > div:nth-child(2) > div > div:nth-child(4) > div > div > div > div.gm-style-iw.gm-style-iw-c > div.gm-style-iw-chr > button {
+    position: absolute !important;
+    right: 20px !important;
+    max-width: 24px !important;
+  }
+  .map-left {
+    width: 100% !important;
+  }
+    .map-hidden{
+    display:none;
+    }
+  </style>  
+   <script>
+    console.log("Script loaded");
+  
+    var stores = [];
+  
+    fetch("https://assets.azblue.com/m/5624f286234dcdf4/original/stores.json")
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        stores = data;
+        initializeClusters(); // Ensure clusters are reinitialized after loading stores
+      })
+      .catch(function (error) {
+        console.error("Error loading stores:", error);
+      });
+  
+    var map = null;
+    var infoWindow = null;
+  
+    function loadGoogleMapsAPI() {
+      if (typeof google === "undefined" || !google.maps) {
+        if (!document.getElementById("google-maps-script")) {
+          console.log("Loading Google Maps API script...");
+          var script = document.createElement("script");
+          script.id = "google-maps-script";
+          script.src =
+            "https://maps.googleapis.com/maps/api/js?key=AIzaSyCBmLs7TrvGd92P_XRJ8t_KO3V7a7E7t7U&callback=initializeMap";
+          script.async = true;
+          script.defer = true;
+          document.head.appendChild(script);
+        }
+      } else {
+        console.log("Google Maps API already loaded, initializing map directly.");
+        initializeMap();
+      }
+    }
+  
+    window.initializeMap = function () {
+      ensureMapInitialized();
+    };
+  
+    function ensureMapInitialized(attempts) {
+      attempts = attempts || 0;
+      var mapWrapper = document.getElementById("map-wrapper");
+  
+      if (mapWrapper) {
+        if (!document.getElementById("map")) {
+          var mapDiv = document.createElement("div");
+          mapDiv.id = "map";
+          mapDiv.style.width = "100%";
+          mapDiv.style.height = "650px";
+          mapWrapper.appendChild(mapDiv);
+        }
+  
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 33.4484, lng: -112.0740 },
+          zoom: 8,
+        });
+  
+        infoWindow = new google.maps.InfoWindow();
+        initializeClusters();
+      } else if (attempts < 5) {
+        setTimeout(function () {
+          ensureMapInitialized(attempts + 1);
+        }, 500);
+      }
+    }
+  
+    function initializeClusters() {
+      var cluster1Markers = stores.map(function (store) {
+        var marker = new google.maps.Marker({
+          position: { lat: store.lat, lng: store.lng },
+          map: map,
+          title: store.name,
+        });
+  
+        marker.addListener("click", function () {
+          var addressParts = store.address.split(",");
+          var firstLine = addressParts[0].trim();
+          var secondLine = addressParts.slice(1).join(",").trim();
+  
+          var infoWindowContent =
+            '<div>' +
+            '<h4 style="margin-bottom:0;">' +
+            store.name +
+            "</h4>" +
+            '<p style="margin-bottom:10px; font-weight: bold; color: #2d7a1f;">' +
+            store.status +
+            "</p>" +
+            '<p style="margin-bottom:0;">' +
+            firstLine +
+            "<br>" +
+            secondLine +
+            "</p>" +
+            '<a href="' +
+            store.url +
+            '" target="_blank">Get Directions</a> | ' +
+            '<a href="' +
+            store.secondUrl +
+            '" target="_blank">Call Us</a>' +
+            "</div>";
+  
+          infoWindow.setContent(infoWindowContent);
+          infoWindow.open(map, marker);
+        });
+  
+        return marker;
+      });
+  
+      var allMarkers = cluster1Markers;
+  
+      var clustererScript = document.createElement("script");
+      clustererScript.src =
+        "https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js";
+      clustererScript.onload = function () {
+        var customRenderer = {
+          render: function (params) {
+            var count = params.count;
+            var position = params.position;
+  
+            return new google.maps.Marker({
+              position: position,
+              icon: {
+                url:
+                  "data:image/svg+xml;charset=UTF-8," +
+                  encodeURIComponent(
+                    '<?xml version="1.0" encoding="UTF-8"?>' +
+                      '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53.16 53.16">' +
+                      '<defs>' +
+                      '<style>' +
+                      ".cls-1{fill:rgba(0,153,217,.36);}.cls-2{fill:rgba(1,162,241,.2);}.cls-3{fill:#0099d8;}" +
+                      ".cls-4{fill:rgba(0,153,216,.62);}.cls-5{fill:none;stroke:rgba(0,153,216,.81);stroke-width:2px;}" +
+                      ".cls-6{fill:white;font-size:14px;font-family:Arial;font-weight:bold;}" +
+                      "</style>" +
+                      "</defs>" +
+                      '<circle class="cls-3" cx="26.58" cy="26.58" r="13.48"/>' +
+                      '<text class="cls-6" x="26.58" y="31" text-anchor="middle">' +
+                      count +
+                      "</text>" +
+                      "</svg>"
+                  ),
+                scaledSize: new google.maps.Size(53, 53),
+              },
+            });
+          },
+        };
+  
+        new markerClusterer.MarkerClusterer({
+          map: map,
+          markers: allMarkers,
+          renderer: customRenderer,
+        });
+  
+        console.log("Clusters initialized with custom ES5 renderer.");
+      };
+      document.head.appendChild(clustererScript);
+    }
+  
+    loadGoogleMapsAPI();
   </script>
+  
+  
 </body>
 </html>
