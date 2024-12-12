@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort Links and Render</title>
+</head>
+<body>
+    <h1>Sort Links by Last 3 Characters</h1>
+    <textarea id="inputText" rows="10" cols="50" placeholder="Enter your links here, one per line"></textarea>
+    <br><br>
+    <button onclick="sortLinks()">Sort Links</button>
+    <br><br>
+    <div id="outputLinks" style="border: 1px solid #ccc; padding: 10px; width: 50%;"></div>
+    <br><br>
+    <button onclick="copyHTML()">Copy HTML</button>
+
+    <script>
+        function sortLinks() {
+            var inputText = document.getElementById('inputText').value;
+            var lines = inputText.split('\n'); // Split text into lines
+
+            // Sort lines by the last three characters
+            lines.sort(function(a, b) {
+                var lastThreeA = a.slice(-3);
+                var lastThreeB = b.slice(-3);
+                return lastThreeA.localeCompare(lastThreeB);
+            });
+
+            // Generate clickable links
+            var html = lines.map(function(line) {
+                return '<a href="' + line + '" target="_blank">' + line + '</a>';
+            }).join('<br>');
+
+            // Render the HTML output
+            document.getElementById('outputLinks').innerHTML = html;
+        }
+
+        function copyHTML() {
+            var outputDiv = document.getElementById('outputLinks');
+            var tempTextarea = document.createElement('textarea');
+            tempTextarea.value = outputDiv.innerHTML; // Get the HTML content
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            tempTextarea.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
+            alert('HTML copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
