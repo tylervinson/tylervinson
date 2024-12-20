@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tabbed Navigation with Preloaded Tables</title>
+<style>
+    .tabs {
+        display: flex;
+        cursor: pointer;
+        margin-bottom: 20px;
+        /* border-bottom: 2px solid #ddd; */
+    }
+    
+    .tab {
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        /* border-bottom: none; */
+        background-color: transparent;
+        margin-right: 5px;
+        text-align: center;
+        font-weight: normal;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .tab.active {
+        background-color: aliceblue;
+        color: #003040;
+        /* border-color: #6c6160; */
+        /* border-bottom: none; */
+        /* color: aliceblue; */
+    }
+    
+    .tab:hover {
+        background-color: aliceblue;
+        /* color: aliceblue; */
+    }
+    
+    .table-container {
+        display: none;
+    }
+    
+    .table-container.active {
+        display: block;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin: 20px;
+    }
+    
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        /* margin-top: 20px; */
+        word-break: break-word;
+    }
+    
+    #dataTable {
+        margin-top: 20px;
+    }
+    
+    .table-container th {
+        padding: 10px;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        font-size: 14px;
+    }
+    
+    #tableBody td {
+        padding: 10px;
+    }
+    
+    th, td {
+        text-align: left;
+        width: 7%;
+        padding: 10px;
+    }
+    
+    th {
+        background-color: #2273ba;
+        cursor: pointer;
+        color: aliceblue;
+        font-weight: normal;
+    }
+    
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    
+    tr.group-header {
+        background-color: aliceblue;
+        color: #333333;
+        border-bottom: 1px solid #d6d6d6;
+    }
+    
+    tr.group-header:hover {
+        background-color: #f7f9fb;
+        /* color: aliceblue; */
+    }
+    
+    tr.group-header td {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    
+    a {
+        color: #0066cc;
+        text-decoration: none;
+        word-wrap: break-word;
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+    
+    .group-header {
+        text-align: center;
+        background-color: #e0e0e0;
+        cursor: pointer;
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    .styled-button {
+        background-color: #FFBE5F;
+        border-radius: 50px;
+        padding: 0px 40px;
+        line-height: 45px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        color: #000;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .styled-button:hover {
+        background-color: #FFA34D;
+    }
+    
+    .file-input-wrapper {
+        display: inline-block;
+        position: relative;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .file-input-wrapper .styled-button {
+        pointer-events: none;
+    }
+    
+    .button-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    #group-0, #group-1, #group-2, #group-3, #group-4 {
+        background-color: #0b3b60;
+        color: aliceblue;
+        border-bottom: 1px solid #082840;
+    }
+    
+    tr.group-header#group-0:hover, tr.group-header#group-1:hover, tr.group-header#group-2:hover, tr.group-header#group-3:hover, tr.group-header#group-4:hover {
+        background-color: #0c4672;
+        color: aliceblue;
+    }
+    
+    th.tableHead-cell:nth-child(1),
+    th.tableHead-cell:nth-child(3),
+    th.tableHead-cell:nth-child(7),
+    th.tableHead-cell:nth-child(8),
+    th.tableHead-cell:nth-child(12),
+    th.tableHead-cell:nth-child(13),
+    th.tableHead-cell:nth-child(14) {
+        display: none;
+    }
+    
+    td.tableBody-cell:nth-child(8),
+    td.tableBody-cell:nth-child(1),
+    td.tableBody-cell:nth-child(9),
+    td.tableBody-cell:nth-child(3),
+    td.tableBody-cell:nth-child(4),
+    td.tableBody-cell:nth-child(13),
+    td.tableBody-cell:nth-child(14),
+    td.tableBody-cell:nth-child(15) {
+        display: none;
+    }
+    
+    .table-container > thead > tr > th:nth-child(2) {
+        width: 89px;
+    }
+    
+    .table-container > thead > tr > th:nth-child(4),
+    .table-container > tbody > tr > td:nth-child(5) {
+        width: 140px;
+    }
+    
+    .table-container > thead > tr > th:nth-child(5),
+    .table-container > tbody > tr > td:nth-child(6) {
+        width: 440px;
+    }
+    
+    .table-container > thead > tr > th:nth-child(6),
+    .table-container > tbody > tr > td:nth-child(7) {
+        width: 100px;
+    }
+    
+    .table-container > thead > tr > th:nth-child(11),
+    .table-container > tbody > tr > td:nth-child(12) {
+        width: 417px;
+    }
+    
+    .table-container > tbody > tr > td:nth-child(11) {
+        width: 390px;
+    }
+    
+    .group-header-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .group-header-content .tableBody-cell:first-child {
+        width: 60px;
+        flex-shrink: 0;
+        text-align: center;
+    }
+    
+    .group-header-content .tableBody-cell:last-child {
+        flex-grow: 1;
+        text-align: left;
+    }
+    
+    .level-AA-row td {
+        font-size: 12px;
+        font-style: italic;
+        color: #888888;
+    }
+    
+    .level-AA-row td a {
+        color: #888888;
+    }
+    
+    </style>
+</head>
+<body>
+
+    <h1 style="
+    font-size: 51px;
+    margin-bottom: 10px;
+">CQ Fluency Fails</h1>
+<p style="
+font-size: 20px;
+margin-top: 0px;
+">Grouped by order of occurrence, click item row to expand.</p>
+<p>&nbsp;</p>
+
+<!-- Tabs for navigation -->
+<div class="tabs">
+  <div class="tab active" data-tab="tab1">Members.xlsx</div>
+  <div class="tab" data-tab="tab2">Programs.xlsx</div>
+  <!-- <div class="tab" data-tab="tab3">Table 3</div> -->
+</div>
+
+<!-- Tab content containers -->
+<div id="tab1" class="table-container active">
+  <table id="dataTable1">
+    <thead id="tableHead1"></thead>
+    <tbody id="tableBody1"></tbody>
+  </table>
+</div>
+
+<div id="tab2" class="table-container">
+  <table id="dataTable2">
+    <thead id="tableHead2"></thead>
+    <tbody id="tableBody2"></tbody>
+  </table>
+</div>
+
+<!-- <div id="tab3" class="table-container">
+  <table id="dataTable3">
+    <thead id="tableHead3"></thead>
+    <tbody id="tableBody3"></tbody>
+  </table>
+</div> -->
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+    (function () {
+        const tabElements = document.querySelectorAll('.tab');
+        const tableContainers = document.querySelectorAll('.table-container');
+
+        tabElements.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+
+                // Update active tab
+                tabElements.forEach((t) => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update active table
+                tableContainers.forEach((tc) => tc.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // Map each tab to its respective Excel file and table IDs
+        const tableMapping = {
+            tab1: { file: 'members.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
+            tab2: { file: 'programs.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
+            tab3: { file: 'members3.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
+        };
+
+        // Preload Excel files for each tab
+        Object.keys(tableMapping).forEach((tab) => {
+            const { file, tableHead, tableBody } = tableMapping[tab];
+            preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15], 5); // Update excluded rows and group column as needed
+        });
+    })();
+
+    // Functions for processing Excel files, creating tables, etc.
+    function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
+        fetch(file)
+            .then((response) => response.arrayBuffer())
+            .then((data) => {
+                const workbook = XLSX.read(data, { type: 'array' });
+                const allRows = [];
+                let headers = null;
+
+                workbook.SheetNames.forEach((sheetName) => {
+                    const worksheet = workbook.Sheets[sheetName];
+                    const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (sheetRows.length === 0) return;
+
+                    if (!headers) headers = sheetRows[0];
+                    sheetRows.slice(1).forEach((row, index) => {
+                        if (!excludedRows.includes(index)) {
+                            if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
+                                allRows.push(row);
+                            }
+                        }
+                    });
+                });
+
+                const groupedData = groupAndSortData(allRows, groupColumnIndex);
+                createTable(headers, groupedData, tableHeadId, tableBodyId);
+            })
+            .catch((error) => console.error(`Error loading ${file}:`, error));
+    }
+
+    function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+  const tableHead = document.getElementById(tableHeadId);
+  const tableBody = document.getElementById(tableBodyId);
+
+  tableHead.innerHTML = '';
+  tableBody.innerHTML = '';
+
+  if (!headers) {
+    console.error('No headers found.');
+    return;
+  }
+
+  // Populate headers
+  const headerRow = document.createElement('tr');
+  headers.forEach((header, index) => {
+    if (![6, 7, 8].includes(index)) { // Skip hidden columns
+      const th = document.createElement('th');
+      th.textContent = index === 2 ? `${header} (spans)` : header;
+      th.classList.add('tableHead-cell'); // Add the class to header cells
+      headerRow.appendChild(th);
+    }
+  });
+  tableHead.appendChild(headerRow);
+
+  // Populate grouped data
+  groupedData.forEach(([group, rows], groupIndex) => {
+    const groupTr = document.createElement('tr');
+    groupTr.className = 'group-header';
+    groupTr.id = `group-${groupIndex}`;
+    groupTr.addEventListener('click', () => toggleGroupVisibility(groupIndex));
+
+    const groupTdWrapper = document.createElement('td'); // Wrapper for the group header
+    groupTdWrapper.setAttribute('colspan', headers.length);
+
+    const groupContent = document.createElement('div');
+    groupContent.className = 'group-header-content';
+
+    const occurrencesTd = document.createElement('div');
+    occurrencesTd.textContent = rows.length;
+    occurrencesTd.classList.add('tableBody-cell');
+    groupContent.appendChild(occurrencesTd);
+
+    const groupTd = document.createElement('div');
+    groupTd.textContent = `${group}`;
+    groupTd.classList.add('tableBody-cell');
+    groupContent.appendChild(groupTd);
+
+    groupTdWrapper.appendChild(groupContent);
+    groupTr.appendChild(groupTdWrapper);
+    tableBody.appendChild(groupTr);
+
+    // Add rows for the group
+    rows.forEach((row) => {
+      const tr = document.createElement('tr');
+      tr.className = `group-${groupIndex} hidden`;
+
+      let isLevelAA = false; // Flag to track if "Level AA" is in column 5
+
+      row.forEach((cell, cellIndex) => {
+        if (![6, 7, 8].includes(cellIndex)) { // Skip hidden columns
+          const td = document.createElement('td');
+          if (isValidURL(cell)) {
+            const link = document.createElement('a');
+            link.href = cell;
+            link.textContent = cell;
+            link.target = '_blank';
+            td.appendChild(link);
+          } else {
+            td.textContent = cell || '';
+          }
+
+          td.classList.add('tableBody-cell'); // Add the class to body cells
+          tr.appendChild(td);
+
+          // Check if cell in column 5 contains "Level AA"
+          if (cellIndex === 4 && cell === 'Level AA') {
+            isLevelAA = true;
+          }
+        }
+      });
+
+      // Add a class to the row if "Level AA" is found in column 5
+      if (isLevelAA) {
+        tr.classList.add('level-AA-row');
+      }
+
+      tableBody.appendChild(tr);
+    });
+  });
+}
+
+
+
+
+    function groupAndSortData(rows, columnIndex) {
+        const groupedData = rows.reduce((groups, row) => {
+            const key = row[columnIndex] || 'Undefined';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(row);
+            return groups;
+        }, {});
+
+        return Object.entries(groupedData).sort((a, b) => b[1].length - a[1].length);
+    }
+
+    function toggleGroupVisibility(groupIndex) {
+        const rows = document.querySelectorAll(`.group-${groupIndex}`);
+        rows.forEach((row) => {
+            row.classList.toggle('hidden');
+        });
+    }
+
+    function isValidURL(str) {
+        const pattern = new RegExp(
+            '^(https?:\\/\\/)?' + 
+            '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
+            'localhost|' +
+            '\\d{1,3}(\\.\\d{1,3}){3})' + 
+            '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?$', 
+            'i'
+        );
+        return pattern.test(str);
+    }
+</script>
+
+
+
+</body>
+</html>

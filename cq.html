@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Combine and Filter Multiple Sheets with Grouping</title>
+<style>
+      /* #tableBody > tr > td:nth-child(1){
+      visibility:hidden;
+  }
+    #tableBody > tr:nth-child(1) > td:nth-child(1){
+        visibility:visible;
+    }
+    #tableHead > tr > th:nth-child(1){
+        visibility:hidden;
+    } */
+    
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  table { 
+    border-collapse: collapse; 
+    width: 100%; 
+  }
+  #dataTable{
+    margin-top: 20px; 
+  }
+  #tableHead th{
+    padding: 10px;
+
+    border-left: 1px solid #d2d2d2;
+    border-right: 1px solid #d2d2d2;
+    border-top: 1px solid #ece5e5;
+
+  }
+  #tableBody td{
+    padding: 10px;
+  }
+  th, td { 
+    border: 1px solid #ddd; 
+    text-align: left; 
+    /* max-width: 200px; */
+  }
+  th { 
+    background-color: #f4f4f4; 
+    cursor: pointer; 
+    font-weight: normal;
+  }
+  tr:nth-child(even) { 
+    background-color: #f9f9f9; 
+  }
+  tr:hover { 
+    background-color: #f1f1f1; 
+  }
+  tr.group-header{
+    background-color: #003040;
+    color: #ffbe5f;
+    border-bottom: 1px solid #2a4b55;
+  }
+  tr.group-header:hover{
+    background-color: #034d65 !important;
+  }
+  tr.group-header td{
+padding-top:15px;
+padding-bottom: 15px;
+  }
+  a { 
+    color: #0066cc; 
+    text-decoration: none; 
+    word-wrap: break-word;
+  }
+  a:hover { 
+    text-decoration: underline; 
+  }
+  .group-header {
+    text-align: center;
+    background-color: #e0e0e0;
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
+  table,
+  th,
+  tr,
+  td{
+    border: none;
+    word-wrap: break-word;
+  }
+ /* Styles for the buttons */
+/* Styling for buttons */
+.styled-button {
+    background-color: #FFBE5F;
+    border-radius: 50px;
+    padding: 0px 40px;
+    line-height: 45px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #000;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+  }
+  .styled-button:hover {
+    background-color: #FFA34D;
+  }
+
+  /* Styling for the file input wrapper */
+  .file-input-wrapper {
+    display: inline-block;
+    position: relative;
+  }
+  .file-input-wrapper input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  .file-input-wrapper .styled-button {
+    pointer-events: none; /* Ensure the click passes to the file input */
+  }
+
+  /* Align buttons inline */
+  .button-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  #group-0, #group-1, #group-2, #group-3, #group-4 {
+    background-color: #ffbe5f;
+    border-bottom: 1px solid #cd8f35;
+    color: #003040;
+  }
+  tr.group-header#group-0:hover, tr.group-header#group-1:hover, tr.group-header#group-2:hover, tr.group-header#group-3:hover, tr.group-header#group-4:hover {
+    /* background-color: #ffaf5c; */
+    color: #ffbe5f;
+    border-bottom: 1px solid #2a4b55;
+
+}
+
+#tableHead > tr > th:nth-child(1),
+#tableHead > tr > th:nth-child(3),
+#tableHead > tr > th:nth-child(7),
+#tableHead > tr > th:nth-child(8),
+#tableHead > tr > th:nth-child(12),
+#tableHead > tr > th:nth-child(13),
+#tableHead > tr > th:nth-child(14){
+    display: none;
+}
+
+#tableBody > tr > td:nth-child(1),
+#tableBody > tr > td:nth-child(9),
+#tableBody > tr > td:nth-child(3),
+#tableBody > tr > td:nth-child(4),
+#tableBody > tr > td:nth-child(8),
+    #tableBody > tr > td:nth-child(13)
+/* #tableBody > tr > td:nth-child(12),
+#tableBody > tr > td:nth-child(13) */
+    {
+        display: none;
+}
+    #tableHead > tr > th:nth-child(2){ width:89px; }
+#tableHead > tr > th:nth-child(4){ width:140px; }
+#tableHead > tr > th:nth-child(5){ width: 440px;}
+#tableHead > tr > th:nth-child(6){ width: 100px;}
+#tableHead > tr > th:nth-child(9){ width: 140px;}
+#tableHead > tr > th:nth-child(11){ width: 417px;}
+
+#tableBody > tr > td:nth-child(2){ width:89px; }
+#tableBody > tr > td:nth-child(5){ width:140px; }
+#tableBody > tr > td:nth-child(6){ width: 440px;}
+#tableBody > tr > td:nth-child(7){ width: 100px;}
+#tableBody > tr > td:nth-child(11){ width: 390px;}
+#tableBody > tr > td:nth-child(12){ width: 417px;}
+</style>
+</head>
+<body>
+
+<!-- Include the SheetJS library -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<h1>Combine and Filter Multiple Sheets</h1>
+<p>Select one or more Excel files to display grouped data:</p>
+
+<div class="file-input-wrapper">
+  <button class="styled-button">Choose File</button>
+  <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
+</div>
+<div class="file-input-wrapper">
+    <button class="styled-button">Select Files to Merge</button>
+    <input type="file" id="mergeInput" accept=".xlsx,.xls" multiple>
+  </div>
+  <script>
+    document.getElementById("mergeInput").addEventListener("change", function (event) {
+      const selectedFiles = Array.from(event.target.files);
+      if (selectedFiles.length === 0) {
+        alert("No files selected for merging.");
+        return;
+      }
+    
+      const mergedWorkbook = XLSX.utils.book_new();
+    
+      Promise.all(
+        selectedFiles.map((file) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+    
+                workbook.SheetNames.forEach((sheetName) => {
+                  const worksheet = workbook.Sheets[sheetName];
+                  XLSX.utils.book_append_sheet(
+                    mergedWorkbook,
+                    worksheet,
+                    `${file.name}_${sheetName}`.substring(0, 31) // Sheet name limit
+                  );
+                });
+    
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+          })
+        )
+      )
+        .then(() => {
+          XLSX.writeFile(mergedWorkbook, "merged_files.xlsx");
+          alert("Merged file has been downloaded.");
+        })
+        .catch((error) => {
+          console.error("Error merging files:", error);
+          alert("An error occurred while merging the files.");
+        });
+    });
+    </script>
+<table id="dataTable">
+    <tr>
+        <td>
+            <table> <thead id="tableHead"></thead></table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table><tbody id="tableBody"></tbody></table>
+        </td>
+    </tr>
+</table>
+<script>
+/* version-2024-12-15-016 */
+(function() {
+  const fileInput = document.getElementById('fileInput');
+  const tableHead = document.getElementById('tableHead');
+  const tableBody = document.getElementById('tableBody');
+  const excludedRows = [6, 7, 11, 15]; // Rows to exclude (0-based indices)
+  const allRows = [];
+  let headers = null;
+
+  fileInput.addEventListener('change', function(event) {
+    const selectedFiles = Array.from(fileInput.files);
+    if (selectedFiles.length === 0) {
+      return; // No files selected
+    }
+
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+    headers = null;
+    allRows.length = 0;
+
+    Promise.all(selectedFiles.map(file => processFile(file)))
+      .then(() => {
+        const groupedData = groupAndSortData(allRows, 5); // Group data by column 6 (index 5)
+        createTable(headers, groupedData);
+      })
+      .catch(error => {
+        console.error("Error processing files:", error);
+        alert("An error occurred while processing the files.");
+      });
+  });
+
+  function processFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          workbook.SheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (sheetRows.length === 0) return; // Skip empty sheets
+
+            if (!headers) headers = sheetRows[0]; // Set headers from the first row
+
+            sheetRows.forEach((row, index) => {
+              if (!excludedRows.includes(index)) {
+                // Only append rows where the 10th column is "FAIL"
+                if (row[9] && row[9].toString().trim().toUpperCase() === "FAIL") {
+                  allRows.push(row);
+                }
+              }
+            });
+          });
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function groupAndSortData(rows, columnIndex) {
+    const groupedData = rows.reduce((groups, row) => {
+      const key = row[columnIndex] || "Undefined";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(row);
+      return groups;
+    }, {});
+
+    // Convert to array, sort by occurrences, and return
+    return Object.entries(groupedData).sort((a, b) => b[1].length - a[1].length);
+  }
+
+  function createTable(headers, groupedData) {
+    if (!headers) {
+      alert("No data found in the selected files.");
+      return;
+    }
+
+    // Create table headers
+    const headerRow = document.createElement('tr');
+    headers.forEach((header, index) => {
+      if (![6, 7, 8].includes(index)) { // Skip hidden columns
+        const th = document.createElement('th');
+        th.textContent = index === 2 ? `${header} (spans)` : header; // Handle special header span
+        if (index === 2) th.setAttribute('colspan', 2);
+        headerRow.appendChild(th);
+      }
+    });
+    tableHead.appendChild(headerRow);
+
+    // Create table body
+    groupedData.forEach(([group, rows], groupIndex) => {
+      // Add group header row
+      const groupTr = document.createElement('tr');
+      groupTr.className = 'group-header';
+      groupTr.id = `group-${groupIndex}`;
+      groupTr.addEventListener('click', () => toggleGroupVisibility(groupIndex));
+
+      const occurrencesTd = document.createElement('td');
+      occurrencesTd.textContent = rows.length; // Occurrence count
+      groupTr.appendChild(occurrencesTd);
+
+      const groupTd = document.createElement('td');
+      groupTd.textContent = `Group: ${group}`;
+      groupTd.colSpan = headers.length - 4; // Adjust for hidden columns
+      groupTr.appendChild(groupTd);
+
+      tableBody.appendChild(groupTr);
+
+      // Add rows for the group
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = `group-${groupIndex} hidden`; // Initially hidden
+        row.forEach((cell, cellIndex) => {
+          if (![6, 7, 8].includes(cellIndex)) { // Skip hidden columns
+            const td = document.createElement('td');
+            if (isValidURL(cell)) {
+              const link = document.createElement('a');
+              link.href = cell;
+              link.textContent = cell;
+              link.target = "_blank";
+              td.appendChild(link);
+            } else {
+              td.textContent = cell || '';
+            }
+            tr.appendChild(td);
+          }
+        });
+        tableBody.appendChild(tr);
+      });
+    });
+  }
+
+  function toggleGroupVisibility(groupIndex) {
+    const rows = document.querySelectorAll(`.group-${groupIndex}`);
+    rows.forEach(row => {
+      row.classList.toggle('hidden');
+    });
+  }
+
+  function isValidURL(str) {
+  const pattern = new RegExp(
+    '^(https?:\\/\\/)?' + // protocol
+    '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' + // domain name
+    'localhost|' + // localhost
+    '\\d{1,3}(\\.\\d{1,3}){3})' + // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?$', // port and path
+    'i'
+  );
+  if (pattern.test(str)) {
+    updateTableLinks(); // Add this line to call the new function
+    return true;
+  }
+  return false;
+}
+})();
+</script>
+<script>
+    // Function to update links in the table
+    function updateTableLinks() {
+      const table = document.getElementById('dataTable');
+      const links = table.querySelectorAll('a'); // Find all links in the table
+  
+      links.forEach(link => {
+        link.textContent = 'Click here'; // Update the link text
+      });
+  
+      console.log('All links updated to "Click here".');
+    }
+  </script>
+</body>
+</html>

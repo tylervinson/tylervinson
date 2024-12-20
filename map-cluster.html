@@ -62,168 +62,222 @@
     .map-hidden{
     display:none;
     }
-  </style>  
-   <script>
-    console.log("Script loaded");
-  
-    var stores = [];
-  
-    fetch("https://assets.azblue.com/m/5624f286234dcdf4/original/stores.json")
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        stores = data;
-        initializeClusters(); // Ensure clusters are reinitialized after loading stores
-      })
-      .catch(function (error) {
-        console.error("Error loading stores:", error);
-      });
-  
-    var map = null;
-    var infoWindow = null;
-  
+    .gm-style-iw-d p,
+    .gm-style-iw-d h4{
+    margin-bottom:0px !important;
+    }
+    .gm-style-iw-d{
+    min-width:300px;
+    }
+  </style> 
+  <script>
     function loadGoogleMapsAPI() {
       if (typeof google === "undefined" || !google.maps) {
-        if (!document.getElementById("google-maps-script")) {
-          console.log("Loading Google Maps API script...");
-          var script = document.createElement("script");
-          script.id = "google-maps-script";
-          script.src =
-            "https://maps.googleapis.com/maps/api/js?key=AIzaSyCBmLs7TrvGd92P_XRJ8t_KO3V7a7E7t7U&callback=initializeMap";
-          script.async = true;
-          script.defer = true;
-          document.head.appendChild(script);
-        }
+          if (!document.getElementById("google-maps-script")) {
+              console.log("Loading Google Maps API script...");
+              var script = document.createElement("script");
+              script.id = "google-maps-script";
+              script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCBmLs7TrvGd92P_XRJ8t_KO3V7a7E7t7U&callback=initializeMap";
+              script.async = true;
+              script.defer = true;
+              document.head.appendChild(script);
+          }
       } else {
-        console.log("Google Maps API already loaded, initializing map directly.");
-        initializeMap();
+          console.log("Google Maps API already loaded, initializing map directly.");
+          initializeMap();
       }
-    }
+  }
   
-    window.initializeMap = function () {
-      ensureMapInitialized();
-    };
+  </script>
+  <script>
+      console.log("Script loaded");
   
-    function ensureMapInitialized(attempts) {
-      attempts = attempts || 0;
-      var mapWrapper = document.getElementById("map-wrapper");
-  
-      if (mapWrapper) {
-        if (!document.getElementById("map")) {
-          var mapDiv = document.createElement("div");
-          mapDiv.id = "map";
-          mapDiv.style.width = "100%";
-          mapDiv.style.height = "650px";
-          mapWrapper.appendChild(mapDiv);
+      var stores = [
+        {
+          name: "Peoria",
+          status: "Now Open",
+          lat: 33.61050996309501,
+          lng: -112.24750178465449,
+          address: "9000 W. Thunderbird, Ste. 110 Peoria, AZ 85381",
+          url: "https://maps.app.goo.gl/qc4u8ujB8DU8Pm2G6",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "Scottsdale",
+          status: "Now Open",
+          lat: 33.54510056532687,
+          lng: -111.92508327116363,
+          address: "7373 N Scottsdale, Ste. A178 Scottsdale, AZ 85253",
+          url: "https://maps.app.goo.gl/7756Cgg2ErX5Hwrh8",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "Phoenix/Avondale",
+          status: "Now Open",
+          lat: 33.47886254738019,
+          lng: -112.26182348754007,
+          address: "9321 W Thomas, Ste. 420 Phoenix, AZ 85037",
+          url: "https://maps.app.goo.gl/mwA8Bhdpxji7wwvG6",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "Chandler/Gilbert",
+          status: "Now Open",
+          lat: 33.286143092713786,
+          lng: -111.75725984232724,
+          address: "3530 S Val Vista, Ste. B105 Gilbert, AZ 85297",
+          url: "https://maps.app.goo.gl/6yrZuVLNtrJXv7W49",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "Deer Valley",
+          status: "Now Open",
+          lat: 33.665908,
+          lng: -112.0866411,
+          address: "19810 N 7th Ave, Ste. 150 Phoenix, AZ 85027",
+          url: "https://maps.app.goo.gl/YusxXN5FnAFsqQud8",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "Mesa",
+          status: "Now Open",
+          lat: 33.3806134,
+          lng: -111.8089692,
+          address: "1910 S Stapley Dr, Mesa, AZ 85204",
+          url: "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "‍River & Campbell",
+          status: "Coming Soon",
+          lat: 32.2867493,
+          lng: -110.9477774,
+          address: "1790 E. River Rd. Ste. 200 Tucson, AZ 85718",
+          url: "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+          secondUrl: "tel:18557767266"
+        },
+        {
+          name: "‍Williams Centre",
+          status: "Coming Soon",
+          lat: 32.2202358,
+          lng: -110.8840298,
+          address: "5210 E. Williams Cir. Ste. 120 Tucson, AZ 85711",
+          url: "https://maps.app.goo.gl/2bAGfy38UdU23NF3A",
+          secondUrl: "tel:18557767266"
         }
+      ];
   
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat: 33.4484, lng: -112.0740 },
-          zoom: 8,
-        });
+      var map = null;
+      var infoWindow = null;
   
-        infoWindow = new google.maps.InfoWindow();
-        initializeClusters();
-      } else if (attempts < 5) {
-        setTimeout(function () {
-          ensureMapInitialized(attempts + 1);
-        }, 500);
+  function initializeMap() {
+    ensureMapInitialized();
+  }
+  
+  function ensureMapInitialized(attempts) {
+    attempts = attempts || 0;
+    var mapWrapper = document.getElementById("map-wrapper");
+  
+    if (mapWrapper) {
+      console.log("#map-wrapper found.");
+      if (!document.getElementById("map")) {
+        console.log("Creating #map div inside #map-wrapper.");
+        var mapDiv = document.createElement("div");
+        mapDiv.id = "map";
+        mapDiv.style.width = "100%";
+        mapDiv.style.height = "650px";
+        mapWrapper.appendChild(mapDiv);
       }
-    }
   
-    function initializeClusters() {
-      var cluster1Markers = stores.map(function (store) {
-        var marker = new google.maps.Marker({
-          position: { lat: store.lat, lng: store.lng },
-          map: map,
-          title: store.name,
-        });
-  
-        marker.addListener("click", function () {
-          var addressParts = store.address.split(",");
-          var firstLine = addressParts[0].trim();
-          var secondLine = addressParts.slice(1).join(",").trim();
-  
-          var infoWindowContent =
-            '<div>' +
-            '<h4 style="margin-bottom:0;">' +
-            store.name +
-            "</h4>" +
-            '<p style="margin-bottom:10px; font-weight: bold; color: #2d7a1f;">' +
-            store.status +
-            "</p>" +
-            '<p style="margin-bottom:0;">' +
-            firstLine +
-            "<br>" +
-            secondLine +
-            "</p>" +
-            '<a href="' +
-            store.url +
-            '" target="_blank">Get Directions</a> | ' +
-            '<a href="' +
-            store.secondUrl +
-            '" target="_blank">Call Us</a>' +
-            "</div>";
-  
-          infoWindow.setContent(infoWindowContent);
-          infoWindow.open(map, marker);
-        });
-  
-        return marker;
+      console.log("Initializing Google Map.");
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 33.4484, lng: -112.0740 },
+        zoom: 8,
+        mapId: "8d90fbfc8f7a5179"
       });
   
-      var allMarkers = cluster1Markers;
-  
-      var clustererScript = document.createElement("script");
-      clustererScript.src =
-        "https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js";
-      clustererScript.onload = function () {
-        var customRenderer = {
-          render: function (params) {
-            var count = params.count;
-            var position = params.position;
-  
-            return new google.maps.Marker({
-              position: position,
-              icon: {
-                url:
-                  "data:image/svg+xml;charset=UTF-8," +
-                  encodeURIComponent(
-                    '<?xml version="1.0" encoding="UTF-8"?>' +
-                      '<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53.16 53.16">' +
-                      '<defs>' +
-                      '<style>' +
-                      ".cls-1{fill:rgba(0,153,217,.36);}.cls-2{fill:rgba(1,162,241,.2);}.cls-3{fill:#0099d8;}" +
-                      ".cls-4{fill:rgba(0,153,216,.62);}.cls-5{fill:none;stroke:rgba(0,153,216,.81);stroke-width:2px;}" +
-                      ".cls-6{fill:white;font-size:14px;font-family:Arial;font-weight:bold;}" +
-                      "</style>" +
-                      "</defs>" +
-                      '<circle class="cls-3" cx="26.58" cy="26.58" r="13.48"/>' +
-                      '<text class="cls-6" x="26.58" y="31" text-anchor="middle">' +
-                      count +
-                      "</text>" +
-                      "</svg>"
-                  ),
-                scaledSize: new google.maps.Size(53, 53),
-              },
-            });
-          },
-        };
-  
-        new markerClusterer.MarkerClusterer({
-          map: map,
-          markers: allMarkers,
-          renderer: customRenderer,
-        });
-  
-        console.log("Clusters initialized with custom ES5 renderer.");
-      };
-      document.head.appendChild(clustererScript);
+      infoWindow = new google.maps.InfoWindow();
+      initializeClusters();
+    } else if (attempts < 5) {
+      console.log("Attempting to find #map-wrapper, attempt:", attempts + 1);
+      setTimeout(function () {
+        ensureMapInitialized(attempts + 1);
+      }, 500);
+    } else {
+      console.error("#map-wrapper not found after multiple attempts.");
     }
+  }
   
-    loadGoogleMapsAPI();
+  function initializeClusters() {
+    var markers = stores.map(function (store) {
+      var marker = new google.maps.Marker({
+        position: { lat: store.lat, lng: store.lng },
+        map: map,
+        title: store.name
+      });
+  
+      marker.addListener("click", function () {
+        var addressWithBreak = store.address.replace(/,(.*)/, ",<br>$1");
+        var infoWindowContent =
+          '<div>' +
+          '<h4>' + store.name + '</h4>' +
+          '<p>' + store.status + '</p>' +
+          '<p>' + addressWithBreak + '</p>' +
+          '<a href="' + store.url + '" target="_blank">Get Directions</a> | ' +
+          '<a href="' + store.secondUrl + '" target="_blank">Call Us</a>' +
+          '</div>';
+  
+        infoWindow.setContent(infoWindowContent);
+        infoWindow.open(map, marker);
+      });
+  
+      return marker;
+    });
+  
+    var bounds = new google.maps.LatLngBounds();
+    markers.forEach(function (marker) {
+      bounds.extend(marker.getPosition());
+    });
+  
+    map.fitBounds(bounds);
+  
+    var clustererScript = document.createElement("script");
+    clustererScript.src = "https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js";
+    clustererScript.onload = function () {
+      console.log("MarkerClusterer script loaded.");
+  
+      var customClusterIcon = [
+        {
+          textSize: 14,
+          textColor: "white",
+          height: 53,
+          width: 53,
+          url: "https://www.tylervinson.com/cluster.png"
+        }
+      ];
+  
+      var clusterer = new markerClusterer.MarkerClusterer({
+        map: map,
+        markers: markers,
+        gridSize: 60,
+        maxZoom: 15,
+        styles: customClusterIcon
+      });
+  
+      console.log("Clusters initialized with inline SVG icons.");
+    };
+    document.head.appendChild(clustererScript);
+  }
+  
+  loadGoogleMapsAPI();
   </script>
+  
+  
+  
+  
+  
+  
+  
   
   
 </body>
