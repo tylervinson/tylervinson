@@ -258,20 +258,29 @@
     .level-AA-row td a {
         color: #888888;
     }
-    
+    thead {
+    position: sticky;
+    top: 0; /* Adjust this value based on your design */
+    z-index: 2; /* Ensure it stays above other elements */
+}
+.table-container{
+    position: relative;
+    height: 70vh;
+    overflow: auto;
+}
+ 
     </style>
 </head>
 <body>
-
+<div style="height: 20vh;">
     <h1 style="
-    font-size: 51px;
+    font-size: 2.5rem;
     margin-bottom: 10px;
 ">CQ Fluency Fails</h1>
 <p style="
 font-size: 20px;
 margin-top: 0px;
 ">Grouped by order of occurrence, click item row to expand.</p>
-<p>&nbsp;</p>
 
 <!-- Tabs for navigation -->
 <div class="tabs">
@@ -279,7 +288,7 @@ margin-top: 0px;
   <div class="tab" data-tab="tab2">Programs.xlsx</div>
   <!-- <div class="tab" data-tab="tab3">Table 3</div> -->
 </div>
-
+</div>
 <!-- Tab content containers -->
 <div id="tab1" class="table-container active">
   <table id="dataTable1">
