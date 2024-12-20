@@ -13,21 +13,22 @@
     
     .tab {
         padding: 10px 20px;
-        border: 1px solid #ddd;
+        /* border: 1px solid #ddd; */
         /* border-bottom: none; */
         background-color: transparent;
-        margin-right: 5px;
+        margin-right: 10px;
         text-align: center;
         font-weight: normal;
         color: #333;
+        /* box-shadow: 0px 1px 3px 3px #00000017; */
         transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     .tab.active {
-        background-color: aliceblue;
+        /* background-color: aliceblue; */
         color: #003040;
         /* border-color: #6c6160; */
-        /* border-bottom: none; */
+        border-bottom: 1px solid #2273ba;
         /* color: aliceblue; */
     }
     
@@ -403,24 +404,24 @@ margin-top: 0px;
   // Populate grouped data
   groupedData.forEach(([group, rows], groupIndex) => {
     const groupTr = document.createElement('tr');
-    groupTr.className = 'group-header';
-    groupTr.id = `group-${groupIndex}`;
-    groupTr.addEventListener('click', () => toggleGroupVisibility(groupIndex));
+    groupTr.className = 'group-header'; // Keep the original class
+    groupTr.id = `group-${groupIndex}`; // Use the original ID pattern
+    groupTr.addEventListener('click', () => toggleGroupVisibility(groupIndex, tableBodyId));
 
-    const groupTdWrapper = document.createElement('td'); // Wrapper for the group header
-    groupTdWrapper.setAttribute('colspan', headers.length);
+    const groupTdWrapper = document.createElement('td');
+    groupTdWrapper.setAttribute('colspan', headers.length); // Spans full table width
 
     const groupContent = document.createElement('div');
-    groupContent.className = 'group-header-content';
+    groupContent.className = 'group-header-content'; // Wrapper for group content
 
     const occurrencesTd = document.createElement('div');
     occurrencesTd.textContent = rows.length;
-    occurrencesTd.classList.add('tableBody-cell');
+    occurrencesTd.classList.add('tableBody-cell'); // Add the class for styling
     groupContent.appendChild(occurrencesTd);
 
     const groupTd = document.createElement('div');
-    groupTd.textContent = `${group}`;
-    groupTd.classList.add('tableBody-cell');
+    groupTd.textContent = `Group: ${group}`;
+    groupTd.classList.add('tableBody-cell'); // Add the class for styling
     groupContent.appendChild(groupTd);
 
     groupTdWrapper.appendChild(groupContent);
@@ -430,9 +431,9 @@ margin-top: 0px;
     // Add rows for the group
     rows.forEach((row) => {
       const tr = document.createElement('tr');
-      tr.className = `group-${groupIndex} hidden`;
+      tr.className = `group-${groupIndex} hidden`; // Use the original class for rows
 
-      let isLevelAA = false; // Flag to track if "Level AA" is in column 5
+      let isLevelAA = false; // Flag to check for "Level AA"
 
       row.forEach((cell, cellIndex) => {
         if (![6, 7, 8].includes(cellIndex)) { // Skip hidden columns
@@ -446,26 +447,27 @@ margin-top: 0px;
           } else {
             td.textContent = cell || '';
           }
-
-          td.classList.add('tableBody-cell'); // Add the class to body cells
+          td.classList.add('tableBody-cell'); // Add the tableBody-cell class
           tr.appendChild(td);
 
-          // Check if cell in column 5 contains "Level AA"
+          // Check for "Level AA" in column 5
           if (cellIndex === 4 && cell === 'Level AA') {
             isLevelAA = true;
           }
         }
       });
 
-      // Add a class to the row if "Level AA" is found in column 5
       if (isLevelAA) {
-        tr.classList.add('level-AA-row');
+        tr.classList.add('level-AA-row'); // Add row-specific class
       }
 
       tableBody.appendChild(tr);
     });
   });
 }
+
+
+
 
 
 
@@ -481,12 +483,15 @@ margin-top: 0px;
         return Object.entries(groupedData).sort((a, b) => b[1].length - a[1].length);
     }
 
-    function toggleGroupVisibility(groupIndex) {
-        const rows = document.querySelectorAll(`.group-${groupIndex}`);
-        rows.forEach((row) => {
-            row.classList.toggle('hidden');
-        });
-    }
+    function toggleGroupVisibility(groupIndex, tableBodyId) {
+  const tableBody = document.getElementById(tableBodyId);
+  const rows = tableBody.querySelectorAll(`.group-${groupIndex}`); // Restrict to rows in the specific table body
+  rows.forEach((row) => {
+    row.classList.toggle('hidden'); // Use the hidden class for toggling
+  });
+}
+
+
 
     function isValidURL(str) {
         const pattern = new RegExp(
