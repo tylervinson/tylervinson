@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tippy.js Debugging Test</title>
+  <!-- Tippy.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+  <style>
+    .highlight {
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tippy.js Debugging Test</h1>
+  <p class="highlight" id="step1">Step 1: Welcome to this walkthrough!</p>
+  <p class="highlight" id="step2">Step 2: Learn about this feature here.</p>
+  <p class="highlight" id="step3">Step 3: This is the final step of the walkthrough.</p>
+  
+  <!-- Tippy.js JS -->
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+
+  <script>
+    // Ensure the Tippy.js library is loaded
+    if (typeof tippy === 'undefined') {
+      console.error('Tippy.js is not loaded. Check the script URL or network.');
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        const steps = [
+          { element: '#step1', content: 'Step 1: Welcome to this walkthrough!' },
+          { element: '#step2', content: 'Step 2: Learn about this feature here.' },
+          { element: '#step3', content: 'Step 3: This is the final step.' },
+        ];
+
+        let currentStep = 0;
+        let instance;
+
+        function showStep(index) {
+          const step = steps[index];
+          if (!step) return;
+
+          // Destroy previous tooltip instance if it exists
+          if (instance) instance.destroy();
+
+          const target = document.querySelector(step.element);
+          if (!target) {
+            console.error(`Element ${step.element} not found`);
+            return;
+          }
+
+          instance = tippy(target, {
+            content: `
+              <div>
+                <p>${step.content}</p>
+                <button id="back-btn" ${index === 0 ? 'disabled' : ''}>Back</button>
+                <button id="next-btn">${index === steps.length - 1 ? 'Finish' : 'Next'}</button>
+              </div>
+            `,
+            trigger: 'manual',
+            allowHTML: true,
+            interactive: true,
+            placement: 'top',
+            onShow(instance) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+          });
+
+          instance.show();
+
+          // Attach event listeners to navigation buttons
+          setTimeout(() => {
+            document.getElementById('back-btn')?.addEventListener('click', () => {
+              if (index > 0) {
+                showStep(index - 1);
+              }
+            });
+
+            document.getElementById('next-btn')?.addEventListener('click', () => {
+              if (index < steps.length - 1) {
+                showStep(index + 1);
+              } else {
+                instance.destroy();
+                alert('Walkthrough completed!');
+              }
+            });
+          }, 10);
+        }
+
+        // Start the walkthrough
+        showStep(currentStep);
+      });
+    }
+  </script>
+</body>
+</html>
