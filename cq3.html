@@ -283,33 +283,57 @@
 .group-header-content>div:nth-child(2){
     padding-left: 20px;
 }
+.group-header > td > div > div:nth-child(1){
+  margin: -15px;
+    padding: 15px;
+    background-color: #FFBE5F;
+    color: #333;
+}
+
+ .table-container{
+  position: relative; 
+  overflow: auto;
+ }
+ .hidden {
+    display: none;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.visible {
+    display: table-row;
+    opacity: 1;
+    height: auto;
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
 
 
- 
     </style>
 </head>
 <body>
     <div style="display: flex; align-items: flex-start;">
 
         <!-- First div: original content -->
-        <div style="width: 100%;margin-right: 20px; margin-left: 2%;">
-          <div style="height: 20vh;">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">CQ Fluency Fails</h1>
-            <p style="font-size: 20px; margin-top: 0px;">
-              Grouped by total occurrence, click item row to expand.
+        <div style="width: 100%;margin-right: 20px;">
+          <div style="height: 23vh;">
+            <h1 style="font-size: 2rem; margin-bottom: 10px;margin-top:10px;">CQ Fluency Fails</h1>
+            <p style="font-size: 14px; margin-top: 0px; max-width:1000px;">
+This table displays failures identified in the CQ Fluency accessability report, filtered to show only rows marked as "failed." Failures are grouped by type (e.g., "Missing Alt Text" or "Color Contrast Issues") and sorted by total occurrences, with the most frequent failures at the top. Click a group header to expand and view detailed rows for that failure type, or collapse it when done. Only relevant columns are displayed, and links in cells open related resources. 
             </p>
       
             <!-- Tabs for navigation -->
             <div class="tabs">
-              <div class="tab active" data-tab="tab1">Members.xlsx</div>
-              <div class="tab" data-tab="tab2">Programs.xlsx</div>
+              <div class="tab active" data-tab="tab1">Members</div>
+              <div class="tab" data-tab="tab2">Programs</div>
               <!-- <div class="tab" data-tab="tab3">Table 3</div> -->
             </div>
           </div>
         </div>
       
         <!-- Second div: legend with four text style examples -->
-        <div style="margin-bottom:30px;width:30%;padding: 5px 20px;border: 1px solid #eee;/* margin-right: 10%; */">
+        <!-- <div style="margin-bottom:30px;width:30%;padding: 5px 20px;border: 1px solid #eee;/* margin-right: 10%; */">
           <h2>Legend</h2>
           
           <div style="margin-bottom: 10px;">
@@ -329,17 +353,17 @@
             <span style="/* text-decoration: line-through; */font-size: 12px;font-style: italic;color: #888888;">Example Text</span>
           </div>
         </div>
-      
+       -->
       </div>
 
-<div id="tab1" class="table-container active"style="position: relative; height: 65vh; overflow: auto;">
+<div id="tab1" class="table-container active">
   <table id="dataTable1">
     <thead id="tableHead1"></thead>
     <tbody id="tableBody1"></tbody>
   </table>
 </div>
 
-<div id="tab2" class="table-container"style="position: relative; height: 70vh; overflow: auto;">
+<div id="tab2" class="table-container">
   <table id="dataTable2">
     <thead id="tableHead2"></thead>
     <tbody id="tableBody2"></tbody>
@@ -512,32 +536,30 @@
   });
 }
 
-
 function toggleGroupVisibility(groupIndex, tableBodyId) {
-  const tableBody = document.getElementById(tableBodyId);
+    const tableBody = document.getElementById(tableBodyId);
 
-  // Get all rows
-  const allGroupRows = tableBody.querySelectorAll('tr');
-  const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
-  const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
+    // Get all rows and rows for the specific group
+    const allGroupRows = tableBody.querySelectorAll('tr');
+    const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
+    const isGroupCurrentlyOpen = groupRows[0]?.classList.contains('visible');
 
-  // Close all groups
-  allGroupRows.forEach((row) => {
-    if (!row.classList.contains('group-header')) {
-      row.classList.add('hidden');
-      row.classList.remove('sticky'); // Remove sticky from all headers
-    }
-  });
-
-  // Open the clicked group, or close it if already open
-  if (!isGroupCurrentlyOpen) {
-    groupRows.forEach((row) => {
-      row.classList.remove('hidden');
-      if (row.classList.contains('header-row')) {
-        row.classList.add('sticky'); // Make the header row sticky
-      }
+    // Close all groups
+    allGroupRows.forEach((row) => {
+        if (!row.classList.contains('group-header')) {
+            row.classList.add('hidden');
+            row.classList.remove('visible');
+        }
     });
-  }
+
+    // Open the clicked group if it wasn't already open
+    if (!isGroupCurrentlyOpen) {
+        groupRows.forEach((row) => {
+            row.classList.remove('hidden');
+            // Use a slight timeout to allow transition to work
+            setTimeout(() => row.classList.add('visible'), 10);
+        });
+    }
 }
 
 
@@ -575,6 +597,61 @@ function toggleGroupVisibility(groupIndex, tableBodyId) {
         );
         return pattern.test(str);
     }
+
+
+    // Unique ID: truncateTextScript_v2
+
+(function () {
+  /**
+   * Truncate text content of elements matching a selector.
+   * @param {string} selector - The CSS selector for elements to truncate.
+   * @param {number} maxLength - The maximum number of characters to keep.
+   */
+  function truncateText(selector, maxLength) {
+    if (typeof maxLength !== 'number' || maxLength <= 0) {
+      console.error('Invalid maxLength. It must be a positive number.');
+      return;
+    }
+
+    var elements = document.querySelectorAll(selector);
+
+    Array.prototype.forEach.call(elements, function (element) {
+      var originalText = element.textContent.trim();
+      if (originalText.length > maxLength) {
+        var truncatedText = originalText.substring(0, maxLength) + '...';
+        element.textContent = truncatedText;
+      }
+    });
+  }
+
+  /**
+   * Observe changes to the DOM and apply truncation dynamically.
+   * @param {string} selector - The CSS selector for elements to truncate.
+   * @param {number} maxLength - The maximum number of characters to keep.
+   */
+  function observeDynamicText(selector, maxLength) {
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'childList' || mutation.type === 'subtree') {
+          truncateText(selector, maxLength);
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Initial truncation in case content is already present
+    truncateText(selector, maxLength);
+  }
+
+  // Example usage
+  observeDynamicText('.group-header > td > div > div.tableBody-cell', 200);
+})();
+
+
 </script>
 
 
