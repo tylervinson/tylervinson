@@ -695,49 +695,37 @@ function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRow
            });
        });
 
-       // Set up real-time listener for this group's priority
-       database.ref('priorities/' + sanitizedGroupName).on('value', async (snapshot) => {
-           const data = snapshot.val();
-           if (data && data.priority) {
-               prioritySelect.value = data.priority;
-               prioritySelect.className = 'priority-select priority-' + data.priority;
+    // Set up real-time listener for this group's priority
+database.ref('priorities/' + sanitizedGroupName).on('value', async (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.priority) {
+        // Only update if the value is different to prevent loops
+        if (prioritySelect.value !== data.priority) {
+            prioritySelect.value = data.priority;
+            prioritySelect.className = 'priority-select priority-' + data.priority;
+        }
+    } else {
+        prioritySelect.value = 'low';
+        prioritySelect.className = 'priority-select priority-low';
+    }
+});
 
-               // Refresh the entire table to update ordering
-               const activeTab = document.querySelector('.tab.active').dataset.tab;
-               const { file, tableHead, tableBody } = tableMapping[activeTab];
-               const storedExcludedRows = JSON.parse(document.getElementById(tableBody).dataset.excludedRows || '[]');
-               
-               const response = await fetch(file);
-               const arrayBuffer = await response.arrayBuffer();
-               const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-               
-               const allRows = [];
-               let headers = null;
-               
-               workbook.SheetNames.forEach((sheetName) => {
-                   const worksheet = workbook.Sheets[sheetName];
-                   const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                   
-                   if (sheetRows.length === 0) return;
-                   
-                   if (!headers) headers = sheetRows[0];
-                   
-                   sheetRows.slice(1).forEach((row, index) => {
-                       if (!storedExcludedRows.includes(index)) {
-                           if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                               allRows.push(row);
-                           }
-                       }
-                   });
-               });
-
-               const groupedData = await groupAndSortData(allRows, 5);
-               createTable(headers, groupedData, tableHead, tableBody, storedExcludedRows);
-           } else {
-               prioritySelect.value = 'low';
-               prioritySelect.className = 'priority-select priority-low';
-           }
-       });
+// Modify the change event listener to prevent double updates
+prioritySelect.addEventListener('change', (e) => {
+    e.stopPropagation();
+    const selectedPriority = e.target.value;
+    
+    // Update Firebase
+    database.ref('priorities/' + sanitizedGroupName).set({
+        originalName: group,
+        priority: selectedPriority
+    }).then(() => {
+        // After Firebase update is complete, refresh the entire table once
+        const activeTab = document.querySelector('.tab.active').dataset.tab;
+        const { file, tableHead, tableBody } = tableMapping[activeTab];
+        preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15], 5);
+    });
+});
 
        priorityContainer.appendChild(prioritySelect);
 

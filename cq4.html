@@ -321,10 +321,9 @@
     color: #ffffff;
 }
 .priority-select {
-    /* ... existing styles ... */
     padding: 8px;
     border: none;
-    border-radius: 2px;
+    border-radius: 4px;
     font-weight: bold;
 }
 
@@ -621,7 +620,6 @@ function sanitizeForFirebase(str) {
         .substring(0, 100);
 }
 
-// The createTable function
 function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows) {
    const tableBody = document.getElementById(tableBodyId);
    tableBody.innerHTML = '';
@@ -667,75 +665,50 @@ function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRow
        groupLabel.classList.add('tableBody-cell');
 
        // Create priority selection
-       const priorityContainer = document.createElement('div');
-       priorityContainer.className = 'priority-container';
-       
-       const prioritySelect = document.createElement('select');
-       prioritySelect.className = 'priority-select priority-low';
-       prioritySelect.value = 'low';
+const priorityContainer = document.createElement('div');
+priorityContainer.className = 'priority-container';
 
-       ['High', 'Medium', 'Low'].forEach(priority => {
-           const option = document.createElement('option');
-           option.value = priority.toLowerCase();
-           option.textContent = priority;
-           prioritySelect.appendChild(option);
-       });
+const prioritySelect = document.createElement('select');
+prioritySelect.className = 'priority-select';
 
-       const sanitizedGroupName = sanitizeForFirebase(group);
+// Don't set any default class or value yet
+['High', 'Medium', 'Low'].forEach(priority => {
+    const option = document.createElement('option');
+    option.value = priority.toLowerCase();
+    option.textContent = priority;
+    prioritySelect.appendChild(option);
+});
 
-       // Add event listener for priority changes
-       prioritySelect.addEventListener('change', (e) => {
-           e.stopPropagation();
-           const selectedPriority = e.target.value;
-           prioritySelect.className = 'priority-select priority-' + selectedPriority;
-           
-           database.ref('priorities/' + sanitizedGroupName).set({
-               originalName: group,
-               priority: selectedPriority
-           });
-       });
+const sanitizedGroupName = sanitizeForFirebase(group);
+
+// Set up real-time listener for this group's priority first
+database.ref('priorities').child(sanitizedGroupName).once('value').then((snapshot) => {
+    const data = snapshot.val();
+    if (data && data.priority) {
+        const savedPriority = data.priority.toLowerCase();
+        prioritySelect.value = savedPriority;
+        prioritySelect.className = 'priority-select';
+        prioritySelect.classList.add(`priority-${savedPriority}`);
+    } else {
+        // If no priority is set in Firebase, default to low
+        prioritySelect.value = 'low';
+        prioritySelect.className = 'priority-select';
+        prioritySelect.classList.add('priority-low');
+    }
+});
 
        // Set up real-time listener for this group's priority
-       database.ref('priorities/' + sanitizedGroupName).on('value', async (snapshot) => {
+       database.ref('priorities').child(sanitizedGroupName).on('value', (snapshot) => {
            const data = snapshot.val();
+           console.log('Firebase listener - Received data:', data, 'for group:', sanitizedGroupName);
+           
            if (data && data.priority) {
-               prioritySelect.value = data.priority;
-               prioritySelect.className = 'priority-select priority-' + data.priority;
-
-               // Refresh the entire table to update ordering
-               const activeTab = document.querySelector('.tab.active').dataset.tab;
-               const { file, tableHead, tableBody } = tableMapping[activeTab];
-               const storedExcludedRows = JSON.parse(document.getElementById(tableBody).dataset.excludedRows || '[]');
+               const newPriority = data.priority.toLowerCase();
+               console.log('Setting select value to:', newPriority);
                
-               const response = await fetch(file);
-               const arrayBuffer = await response.arrayBuffer();
-               const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-               
-               const allRows = [];
-               let headers = null;
-               
-               workbook.SheetNames.forEach((sheetName) => {
-                   const worksheet = workbook.Sheets[sheetName];
-                   const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                   
-                   if (sheetRows.length === 0) return;
-                   
-                   if (!headers) headers = sheetRows[0];
-                   
-                   sheetRows.slice(1).forEach((row, index) => {
-                       if (!storedExcludedRows.includes(index)) {
-                           if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                               allRows.push(row);
-                           }
-                       }
-                   });
-               });
-
-               const groupedData = await groupAndSortData(allRows, 5);
-               createTable(headers, groupedData, tableHead, tableBody, storedExcludedRows);
-           } else {
-               prioritySelect.value = 'low';
-               prioritySelect.className = 'priority-select priority-low';
+               prioritySelect.value = newPriority;
+               prioritySelect.className = 'priority-select';
+               prioritySelect.classList.add(`priority-${newPriority}`);
            }
        });
 
