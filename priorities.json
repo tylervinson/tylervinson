@@ -1,0 +1,7 @@
+{
+  "Missing Alt Text": "medium",
+  "Color Contrast Issues": "high",
+  "Missing Form Labels": "high",
+  "Keyboard Navigation Issues": "medium",
+  "ARIA Usage Errors": "low"
+}
