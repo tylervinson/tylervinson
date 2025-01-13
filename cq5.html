@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tabbed Navigation with Preloaded Tables</title>
+<style>
+    .tabs {
+        display: flex;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .tab {
+        padding: 10px 20px;
+        background-color: transparent;
+        margin-right: 10px;
+        text-align: center;
+        font-weight: normal;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .tab.active {
+        color: #003040;
+        border-bottom: 1px solid #2273ba;
+    }
+    .tab:hover {
+        background-color: aliceblue;
+    }
+    .table-container {
+        display: none;
+    }
+    .table-container.active {
+        display: block;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin: 20px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        word-break: break-word;
+    }
+    #dataTable {
+        margin-top: 20px;
+    }
+    .table-container th {
+        padding: 10px;
+        font-size: 14px;
+    }
+    #tableBody td {
+        padding: 10px;
+    }
+    th, td {
+        text-align: left;
+        width: 7%;
+        padding: 10px;
+    }
+    th {
+        background-color: #0a0a0a;
+        color: aliceblue;
+        font-weight: normal;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr.group-header {
+        background-color: #2c70a3;
+        color: aliceblue;
+        border-bottom: 1px solid #235b86;
+    }
+    tr.group-header:hover {
+        background-color: #307bb4;
+    }
+    a {
+        color: #0066cc;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+    .hidden {
+        display: none;
+    }
+    .priority-select {
+        padding: 5px;
+        margin-left: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+        color: #333;
+    }
+    .priority-high {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+    .priority-medium {
+        background-color: #fff3e0;
+        color: #ef6c00;
+    }
+    .priority-low {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+</style>
+</head>
+<body>
+    <div style="display: flex; align-items: flex-start;">
+        <div style="width: 100%;margin-right: 20px;">
+          <div style="height: 23vh;">
+            <h1 style="font-size: 2rem; margin-bottom: 10px;margin-top:10px;">CQ Fluency Fails</h1>
+            <p style="font-size: 14px; margin-top: 0px; max-width:1000px;">
+                This table displays failures identified in the CQ Fluency accessibility report, filtered to show only rows marked as "failed." Failures are grouped by type (e.g., "Missing Alt Text" or "Color Contrast Issues") and sorted by total occurrences, with the most frequent failures at the top. Click a group header to expand and view detailed rows for that failure type, or collapse it when done. Only relevant columns are displayed, and links in cells open related resources.
+            </p>
+            <div class="tabs">
+              <div class="tab active" data-tab="tab1">Members</div>
+              <div class="tab" data-tab="tab2">Programs</div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+<div id="tab1" class="table-container active">
+  <table id="dataTable1">
+    <thead id="tableHead1"></thead>
+    <tbody id="tableBody1"></tbody>
+  </table>
+</div>
+
+<div id="tab2" class="table-container">
+  <table id="dataTable2">
+    <thead id="tableHead2"></thead>
+    <tbody id="tableBody2"></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
+  authDomain: "cq-priorities.firebaseapp.com",
+  databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
+  projectId: "cq-priorities",
+  storageBucket: "cq-priorities.firebasestorage.app",
+  messagingSenderId: "1023528003950",
+  appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+function sanitizeForFirebase(str) {
+    return str.replace(/[.#$[\]/]/g, '_').replace(/\s+/g, '_').substring(0, 100);
+}
+
+async function groupAndSortData(rows, columnIndex) {
+    const groupedData = rows.reduce((groups, row) => {
+        const key = row[columnIndex] || 'Undefined';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+        return groups;
+    }, {});
+
+    const prioritiesSnapshot = await database.ref('priorities').once('value');
+    const priorities = prioritiesSnapshot.val() || {};
+
+    return Object.entries(groupedData).sort((a, b) => {
+        const priorityOrder = { high: 2, medium: 1, low: 0 };
+        const priorityA = (priorities[sanitizeForFirebase(a[0])]?.priority || 'low').toLowerCase();
+        const priorityB = (priorities[sanitizeForFirebase(b[0])]?.priority || 'low').toLowerCase();
+
+        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
+            return priorityOrder[priorityB] - priorityOrder[priorityA];
+        }
+        return b[1].length - a[1].length;
+    });
+}
+
+function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
+    fetch(file)
+        .then((response) => response.arrayBuffer())
+        .then(async (data) => {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const allRows = [];
+            let headers = null;
+
+            workbook.SheetNames.forEach((sheetName) => {
+                const worksheet = workbook.Sheets[sheetName];
+                const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (sheetRows.length === 0) return;
+
+                if (!headers) headers = sheetRows[0];
+
+                sheetRows.slice(1).forEach((row, index) => {
+                    if (!excludedRows.includes(index) && row[9]?.toString().trim().toUpperCase() === 'FAIL') {
+                        allRows.push(row);
+                    }
+                });
+            });
+
+            const groupedData = await groupAndSortData(allRows, groupColumnIndex);
+            createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows);
+        })
+        .catch((error) => console.error(`Error loading ${file}:`, error));
+}
+
+function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows) {
+    const tableBody = document.getElementById(tableBodyId);
+    tableBody.innerHTML = '';
+
+    if (!headers) {
+        console.error('No headers found.');
+        return;
+    }
+
+    groupedData.forEach(([group, rows], groupIndex) => {
+        const sanitizedGroupName = sanitizeForFirebase(group);
+
+        const groupTr = document.createElement('tr');
+        groupTr.className = 'group-header';
+        groupTr.id = `group-${groupIndex}`;
+
+        const groupTdWrapper = document.createElement('td');
+        groupTdWrapper.setAttribute('colspan', headers.length);
+
+        const groupContent = document.createElement('div');
+        groupContent.className = 'group-header-content';
+
+        const occurrencesDiv = document.createElement('div');
+        const occurrencesCount = document.createElement('div');
+        occurrencesCount.textContent = rows.length;
+        occurrencesDiv.appendChild(occurrencesCount);
+
+        const groupLabel = document.createElement('div');
+        groupLabel.textContent = group;
+
+        const priorityContainer = document.createElement('div');
+        const prioritySelect = document.createElement('select');
+        prioritySelect.className = 'priority-select priority-low';
+
+        ['High', 'Medium', 'Low'].forEach(priority => {
+            const option = document.createElement('option');
+            option.value = priority.toLowerCase();
+            option.textContent = priority;
+            prioritySelect.appendChild(option);
+        });
+
+        database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data?.priority) {
+                prioritySelect.value = data.priority;
+                prioritySelect.className = 'priority-select priority-' + data.priority;
+            } else {
+                prioritySelect.value = 'low';
+                prioritySelect.className = 'priority-select priority-low';
+            }
+        });
+
+        database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
+            const data = snapshot.val();
+            const firebasePriority = data?.priority || 'low';
+
+            if (prioritySelect.value !== firebasePriority) {
+                prioritySelect.value = firebasePriority;
+                prioritySelect.className = 'priority-select priority-' + firebasePriority;
+            }
+        });
+
+        let debounceTimeout;
+        prioritySelect.addEventListener('change', (e) => {
+            const selectedPriority = e.target.value;
+
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                database.ref('priorities/' + sanitizedGroupName).set({
+                    originalName: group,
+                    priority: selectedPriority,
+                });
+            }, 300);
+        });
+
+        priorityContainer.appendChild(prioritySelect);
+        groupContent.appendChild(occurrencesDiv);
+        groupContent.appendChild(groupLabel);
+        groupContent.appendChild(priorityContainer);
+
+        groupTdWrapper.appendChild(groupContent);
+        groupTr.appendChild(groupTdWrapper);
+        tableBody.appendChild(groupTr);
+    });
+}
+
+Object.keys({ tab1: {}, tab2: {} }).forEach((tab) => {
+    const { file, tableHead, tableBody } = tableMapping[tab];
+    preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15], 5);
+});
+// Text truncation
+(function () {
+    function truncateText(selector, maxLength) {
+        if (typeof maxLength !== 'number' || maxLength <= 0) {
+            console.error('Invalid maxLength. It must be a positive number.');
+            return;
+        }
+
+        var elements = document.querySelectorAll(selector);
+        Array.prototype.forEach.call(elements, function (element) {
+            var originalText = element.textContent.trim();
+            if (originalText.length > maxLength) {
+                var truncatedText = originalText.substring(0, maxLength) + '...';
+                element.textContent = truncatedText;
+            }
+        });
+    }
+
+    function observeDynamicText(selector, maxLength) {
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'childList' || mutation.type === 'subtree') {
+                    truncateText(selector, maxLength);
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+
+        truncateText(selector, maxLength);
+    }
+
+    observeDynamicText('.group-header > td > div > div.tableBody-cell', 200);
+})();
+
+</script>
+</body>
+</html>

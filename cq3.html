@@ -56,6 +56,8 @@
         width: 100%;
         /* margin-top: 20px; */
         word-break: break-word;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 14px;
     }
     
     #dataTable {
@@ -67,7 +69,11 @@
         border-left: none;
         border-right: none;
         border-top: none;
-        font-size: 14px;
+        font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: left;
+    height: 29px;
     }
     
     #tableBody td {
@@ -78,17 +84,23 @@
         text-align: left;
         width: 7%;
         padding: 10px;
+        border-collapse: collapse;
+        letter-spacing: 0.02em;
+        border-bottom: 1px solid #ddd;
     }
     
     th {
-        background-color: #0a0a0a;
+        background-color: #0b3b60;
     /* cursor: pointer; */
     color: aliceblue;
     font-weight: normal;
+    text-transform: uppercase;
+    font-weight: bold;
+    
     }
     
     tr:nth-child(even) {
-        background-color: #f9f9f9;
+        /* background-color: #f9f9f9; */
     }
     
     /* tr:hover {
@@ -96,16 +108,24 @@
     } */
     
     tr.group-header {
-        background-color: #2c70a3;
+    /* background-color: #0099d9;
     color: aliceblue;
-    border-bottom: 1px solid #235b86;
-    }
+    border-bottom: 1px solid #20b0ec; */
+    background-color: #fafafa;
+
+}
+tr.group-header.open {
+    background-color: #eee; /* Highlighted background color for open group */
+}
     
     tr.group-header:hover {
-        background-color: #307bb4;
-        /* color: aliceblue; */
+        background-color: #eee;
+        cursor: pointer;
+    /* color: aliceblue; */
+}
+tr.group-header.level-aa-group{
+        /* background-color: #6e56a2; */
     }
-    
     tr.group-header td {
         padding-top: 15px;
         padding-bottom: 15px;
@@ -123,7 +143,6 @@
     
     .group-header {
         text-align: center;
-        background-color: #e0e0e0;
         cursor: pointer;
     }
     
@@ -278,7 +297,8 @@
 .group-header > td > div > div:nth-child(1){
   margin: -15px;
     padding: 15px;
-    background-color: #307bb4;
+    /* background-color: #307bb4; */
+    border-right: 1px solid #ddd;
    
 }
 
@@ -342,6 +362,17 @@
     background-color: #e8f5e9;
     color: #2e7d32;
 }
+.tableHead{
+    background-color: #04a7eb;
+    color: #fff;
+}
+.tableHead .group-header-content{
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    height: 30px;
+}
+
     </style>
 </head>
 <body>
@@ -390,14 +421,24 @@ This table displays failures identified in the CQ Fluency accessability report, 
 
 <div id="tab1" class="table-container active">
   <table id="dataTable1">
-    <thead id="tableHead1"></thead>
+    <thead id="tableHead1" class="tableHead">
+        <tr>
+        <td colspan="16">
+            <div class="group-header-content">
+                <div style="width: 5%; text-align: center;">Count</div>
+                <div style="width: 87%;">Description</div>
+                <div style="width: 8%;">Priority Level</div>
+            </div>
+        </td>
+    </tr>
+    </thead>
     <tbody id="tableBody1"></tbody>
   </table>
 </div>
 
 <div id="tab2" class="table-container">
   <table id="dataTable2">
-    <thead id="tableHead2"></thead>
+    <thead id="tableHead2" class="tableHead"></thead>
     <tbody id="tableBody2"></tbody>
   </table>
 </div>
@@ -477,37 +518,7 @@ async function loadPriorities() {
     }
 }
 
-        // Update your preloadExcelData function
-        function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
-    fetch(file)
-        .then((response) => response.arrayBuffer())
-        .then(async (data) => {
-            const workbook = XLSX.read(data, { type: 'array' });
-            const allRows = [];
-            let headers = null;
-
-            workbook.SheetNames.forEach((sheetName) => {
-                const worksheet = workbook.Sheets[sheetName];
-                const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                if (sheetRows.length === 0) return;
-                
-                if (!headers) headers = sheetRows[0];
-                
-                sheetRows.slice(1).forEach((row, index) => {
-                    if (!excludedRows.includes(index)) {
-                        if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                            allRows.push(row);
-                        }
-                    }
-                });
-            });
-
-            const groupedData = await groupAndSortData(allRows, groupColumnIndex);
-            createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows);  // Pass excludedRows
-        })
-        .catch((error) => console.error(`Error loading ${file}:`, error));
-}
+        
 
       // This function needs to be placed above the preloadExcelData function
 async function groupAndSortData(rows, columnIndex) {
@@ -545,49 +556,17 @@ async function groupAndSortData(rows, columnIndex) {
     });
 }
 
-// This function needs to be placed above the preloadExcelData function
-async function groupAndSortData(rows, columnIndex) {
-    // First group the data as before
-    const groupedData = rows.reduce((groups, row) => {
-        const key = row[columnIndex] || 'Undefined';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(row);
-        return groups;
-    }, {});
-
-    // Get all priorities from Firebase
-    const prioritiesSnapshot = await database.ref('priorities').once('value');
-    const priorities = prioritiesSnapshot.val() || {};
-
-    // Convert to array and sort with priority consideration
-    return Object.entries(groupedData).sort((a, b) => {
-        const groupA = a[0];
-        const groupB = b[0];
-        
-        // Get priorities, default to 'low' if not set
-        const priorityA = (priorities[sanitizeForFirebase(groupA)]?.priority || 'low').toLowerCase();
-        const priorityB = (priorities[sanitizeForFirebase(groupB)]?.priority || 'low').toLowerCase();
-        
-        // Define priority order (high = 2, medium = 1, low = 0)
-        const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
-        
-        // First compare by priority
-        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
-            return priorityOrder[priorityB] - priorityOrder[priorityA];
-        }
-        
-        // If priorities are equal, sort by number of items
-        return b[1].length - a[1].length;
-    });
-}
+let groupColumnIndex = 5; // Define the column index globally
 
 // Update your preloadExcelData function
-function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
+// Define allRows globally
+let allRows = []; 
+
+function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
     fetch(file)
         .then((response) => response.arrayBuffer())
         .then(async (data) => {
             const workbook = XLSX.read(data, { type: 'array' });
-            const allRows = [];
             let headers = null;
 
             workbook.SheetNames.forEach((sheetName) => {
@@ -595,23 +574,24 @@ function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupCol
                 const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
                 if (sheetRows.length === 0) return;
-                
+
                 if (!headers) headers = sheetRows[0];
-                
+
                 sheetRows.slice(1).forEach((row, index) => {
                     if (!excludedRows.includes(index)) {
                         if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                            allRows.push(row);
+                            allRows.push(row); // Global allRows
                         }
                     }
                 });
             });
 
-            const groupedData = await groupAndSortData(allRows, groupColumnIndex);
+            const groupedData = await groupAndSortData(allRows, groupColumnIndex); // Use global groupColumnIndex
             createTable(headers, groupedData, tableHeadId, tableBodyId);
         })
         .catch((error) => console.error(`Error loading ${file}:`, error));
 }
+
 
 // Helper function for Firebase safe keys
 function sanitizeForFirebase(str) {
@@ -621,169 +601,181 @@ function sanitizeForFirebase(str) {
         .substring(0, 100);
 }
 
-// The createTable function
-function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows) {
-   const tableBody = document.getElementById(tableBodyId);
-   tableBody.innerHTML = '';
+function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+    const tableBody = document.getElementById(tableBodyId);
+    tableBody.innerHTML = '';
 
-   // Store excludedRows for this table
-   tableBody.dataset.excludedRows = JSON.stringify(excludedRows || []);
-
-   if (!headers) {
-       console.error('No headers found.');
-       return;
-   }
-
-   groupedData.forEach(([group, rows], groupIndex) => {
-       const groupTr = document.createElement('tr');
-       groupTr.className = 'group-header';
-       groupTr.id = `group-${groupIndex}`;
-       
-       const groupTdWrapper = document.createElement('td');
-       groupTdWrapper.setAttribute('colspan', headers.length);
-       
-       const groupContent = document.createElement('div');
-       groupContent.className = 'group-header-content';
-
-       // Create occurrences count
-       const occurrencesDiv = document.createElement('div');
-       occurrencesDiv.style.textAlign = 'center';
-       const occurrencesCount = document.createElement('div');
-       occurrencesCount.textContent = rows.length;
-       occurrencesCount.classList.add('tableBody-cell');
-
-       const instancesLabel = document.createElement('div');
-       instancesLabel.textContent = 'INSTANCES';
-       instancesLabel.style.fontSize = '10px';
-       instancesLabel.style.fontWeight = 'bold';
-       instancesLabel.style.marginTop = '5px';
-
-       occurrencesDiv.appendChild(occurrencesCount);
-       occurrencesDiv.appendChild(instancesLabel);
-
-       // Add group label
-       const groupLabel = document.createElement('div');
-       groupLabel.textContent = group;
-       groupLabel.classList.add('tableBody-cell');
-
-       // Create priority selection
-       const priorityContainer = document.createElement('div');
-       priorityContainer.className = 'priority-container';
-       
-       const prioritySelect = document.createElement('select');
-       prioritySelect.className = 'priority-select priority-low';
-       prioritySelect.value = 'low';
-
-       ['High', 'Medium', 'Low'].forEach(priority => {
-           const option = document.createElement('option');
-           option.value = priority.toLowerCase();
-           option.textContent = priority;
-           prioritySelect.appendChild(option);
-       });
-
-       const sanitizedGroupName = sanitizeForFirebase(group);
-
-       // Add event listener for priority changes
-       prioritySelect.addEventListener('change', (e) => {
-           e.stopPropagation();
-           const selectedPriority = e.target.value;
-           prioritySelect.className = 'priority-select priority-' + selectedPriority;
-           
-           database.ref('priorities/' + sanitizedGroupName).set({
-               originalName: group,
-               priority: selectedPriority
-           });
-       });
-
-    // Set up real-time listener for this group's priority
-database.ref('priorities/' + sanitizedGroupName).on('value', async (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.priority) {
-        // Only update if the value is different to prevent loops
-        if (prioritySelect.value !== data.priority) {
-            prioritySelect.value = data.priority;
-            prioritySelect.className = 'priority-select priority-' + data.priority;
-        }
-    } else {
-        prioritySelect.value = 'low';
-        prioritySelect.className = 'priority-select priority-low';
+    if (!headers) {
+        console.error('No headers found.');
+        return;
     }
-});
 
-// Modify the change event listener to prevent double updates
-prioritySelect.addEventListener('change', (e) => {
-    e.stopPropagation();
-    const selectedPriority = e.target.value;
-    
-    // Update Firebase
-    database.ref('priorities/' + sanitizedGroupName).set({
-        originalName: group,
-        priority: selectedPriority
-    }).then(() => {
-        // After Firebase update is complete, refresh the entire table once
-        const activeTab = document.querySelector('.tab.active').dataset.tab;
-        const { file, tableHead, tableBody } = tableMapping[activeTab];
-        preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15], 5);
+    groupedData.forEach(([group, rows], groupIndex) => {
+        const sanitizedGroupName = sanitizeForFirebase(group);
+
+        // Check if any row in the group has "Level AA" in the Conformance Level column
+        const hasLevelAA = rows.some(row => {
+            const conformanceLevel = row[headers.indexOf("Conformance Level")]; // Adjust index if needed
+            return conformanceLevel && conformanceLevel.trim() === "Level AA";
+        });
+
+        // Create group header row
+        const groupTr = document.createElement('tr');
+        groupTr.className = 'group-header';
+        if (hasLevelAA) {
+            groupTr.classList.add('level-aa-group'); // Add additional class for Level AA
+        }
+        groupTr.id = `group-${groupIndex}`;
+
+        const groupTdWrapper = document.createElement('td');
+        groupTdWrapper.setAttribute('colspan', headers.length);
+
+        const groupContent = document.createElement('div');
+        groupContent.className = 'group-header-content';
+
+        // Create occurrences count
+        const occurrencesDiv = document.createElement('div');
+        occurrencesDiv.style.textAlign = 'center';
+        const occurrencesCount = document.createElement('div');
+        occurrencesCount.textContent = rows.length;
+        occurrencesCount.classList.add('tableBody-cell');
+
+        const instancesLabel = document.createElement('div');
+        instancesLabel.textContent = 'INSTANCES';
+        instancesLabel.style.fontSize = '10px';
+        instancesLabel.style.fontWeight = 'bold';
+        instancesLabel.style.marginTop = '5px';
+
+        occurrencesDiv.appendChild(occurrencesCount);
+        occurrencesDiv.appendChild(instancesLabel);
+
+        // Add group label
+        const groupLabel = document.createElement('div');
+        groupLabel.textContent = group;
+        groupLabel.classList.add('tableBody-cell');
+
+        // Create priority selection dropdown
+        const priorityContainer = document.createElement('div');
+        priorityContainer.className = 'priority-container';
+
+        const prioritySelect = document.createElement('select');
+        prioritySelect.className = 'priority-select priority-low';
+        prioritySelect.value = 'low';
+
+        ['High', 'Medium', 'Low'].forEach(priority => {
+            const option = document.createElement('option');
+            option.value = priority.toLowerCase();
+            option.textContent = priority;
+            prioritySelect.appendChild(option);
+        });
+
+        // Initialize Firebase value for priority dropdown
+        database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data?.priority) {
+                prioritySelect.value = data.priority;
+                prioritySelect.className = `priority-select priority-${data.priority}`;
+            }
+        });
+
+        // Real-time listener for Firebase priority updates
+        database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
+            const data = snapshot.val();
+            const firebasePriority = data?.priority || 'low';
+
+            if (prioritySelect.value !== firebasePriority) {
+                prioritySelect.value = firebasePriority;
+                prioritySelect.className = `priority-select priority-${firebasePriority}`;
+            }
+        });
+
+        // Add event listener for dropdown change
+        let debounceTimeout;
+        prioritySelect.addEventListener('change', (e) => {
+            const selectedPriority = e.target.value;
+
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(async () => {
+                try {
+                    // Save updated priority to Firebase
+                    await database.ref('priorities/' + sanitizedGroupName).set({
+                        originalName: group,
+                        priority: selectedPriority,
+                    });
+
+                    // Update dropdown class
+                    prioritySelect.className = `priority-select priority-${selectedPriority}`;
+
+                    // Re-sort and re-render the table dynamically
+                    const updatedGroupedData = await groupAndSortData(allRows, groupColumnIndex);
+                    createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
+                } catch (error) {
+                    console.error('Error updating priority:', error);
+                }
+            }, 300); // Adjust debounce delay as necessary
+        });
+
+        priorityContainer.appendChild(prioritySelect);
+
+        groupContent.appendChild(occurrencesDiv);
+        groupContent.appendChild(groupLabel);
+        groupContent.appendChild(priorityContainer);
+
+        groupTdWrapper.appendChild(groupContent);
+        groupTr.appendChild(groupTdWrapper);
+
+        groupTr.addEventListener('click', (e) => {
+            if (!e.target.closest('.priority-container')) {
+                toggleGroupVisibility(groupIndex, tableBodyId);
+            }
+        });
+
+        tableBody.appendChild(groupTr);
+
+        // Create header row for group
+        const headerRow = document.createElement('tr');
+        headerRow.className = `group-${groupIndex} header-row hidden`;
+        headers.forEach((header, index) => {
+            if (![6, 7, 8].includes(index)) { // Exclude specific columns
+                const th = document.createElement('th');
+                th.textContent = header;
+                th.classList.add('tableHead-cell');
+                headerRow.appendChild(th);
+            }
+        });
+
+        tableBody.appendChild(headerRow);
+
+        // Add data rows for the group
+        rows.forEach((row) => {
+            const tr = document.createElement('tr');
+            tr.className = `group-${groupIndex} hidden`;
+
+            row.forEach((cell, cellIndex) => {
+                if (![6, 7, 8].includes(cellIndex)) { // Exclude specific columns
+                    const td = document.createElement('td');
+                    if (isValidURL(cell)) {
+                        const link = document.createElement('a');
+                        link.href = cell;
+                        link.textContent = cell;
+                        link.target = '_blank';
+                        td.appendChild(link);
+                    } else {
+                        td.textContent = cell || '';
+                    }
+                    td.classList.add('tableBody-cell');
+                    tr.appendChild(td);
+                }
+            });
+
+            tableBody.appendChild(tr);
+        });
     });
-});
-
-       priorityContainer.appendChild(prioritySelect);
-
-       groupContent.appendChild(occurrencesDiv);
-       groupContent.appendChild(groupLabel);
-       groupContent.appendChild(priorityContainer);
-
-       groupTdWrapper.appendChild(groupContent);
-       groupTr.appendChild(groupTdWrapper);
-
-       groupTr.addEventListener('click', (e) => {
-           if (!e.target.closest('.priority-container')) {
-               toggleGroupVisibility(groupIndex, tableBodyId);
-           }
-       });
-
-       tableBody.appendChild(groupTr);
-
-       // Create header row for the group
-       const headerRow = document.createElement('tr');
-       headerRow.className = `group-${groupIndex} header-row hidden`;
-       headers.forEach((header, index) => {
-           if (![6, 7, 8].includes(index)) {
-               const th = document.createElement('th');
-               th.textContent = header;
-               th.classList.add('tableHead-cell');
-               headerRow.appendChild(th);
-           }
-       });
-
-       tableBody.appendChild(headerRow);
-
-       // Add data rows for the group
-       rows.forEach((row) => {
-           const tr = document.createElement('tr');
-           tr.className = `group-${groupIndex} hidden`;
-
-           row.forEach((cell, cellIndex) => {
-               if (![6, 7, 8].includes(cellIndex)) {
-                   const td = document.createElement('td');
-                   if (isValidURL(cell)) {
-                       const link = document.createElement('a');
-                       link.href = cell;
-                       link.textContent = cell;
-                       link.target = '_blank';
-                       td.appendChild(link);
-                   } else {
-                       td.textContent = cell || '';
-                   }
-                   td.classList.add('tableBody-cell');
-                   tr.appendChild(td);
-               }
-           });
-
-           tableBody.appendChild(tr);
-       });
-   });
 }
+
+
+
+
 
 
 function sanitizeForFirebase(str) {
@@ -796,28 +788,44 @@ function sanitizeForFirebase(str) {
 }
 
 
-        function toggleGroupVisibility(groupIndex, tableBodyId) {
-            const tableBody = document.getElementById(tableBodyId);
-            const allGroupRows = tableBody.querySelectorAll('tr');
-            const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
-            const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
+function toggleGroupVisibility(groupIndex, tableBodyId) {
+    const tableBody = document.getElementById(tableBodyId);
+    const allGroupRows = tableBody.querySelectorAll('tr');
+    const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
+    const groupHeader = document.querySelector(`tr.group-header#group-${groupIndex}`);
+    const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
 
-            allGroupRows.forEach((row) => {
-                if (!row.classList.contains('group-header')) {
-                    row.classList.add('hidden');
-                    row.classList.remove('sticky');
-                }
-            });
-
-            if (!isGroupCurrentlyOpen) {
-                groupRows.forEach((row) => {
-                    row.classList.remove('hidden');
-                    if (row.classList.contains('header-row')) {
-                        row.classList.add('sticky');
-                    }
-                });
-            }
+    // Close all groups
+    allGroupRows.forEach((row) => {
+        if (!row.classList.contains('group-header')) {
+            row.classList.add('hidden');
+            row.classList.remove('sticky');
         }
+    });
+
+    // Remove "open" class from all headers
+    allGroupRows.forEach((row) => {
+        if (row.classList.contains('group-header')) {
+            row.classList.remove('open');
+        }
+    });
+
+    // If the group is not already open, open it and add the "open" class
+    if (!isGroupCurrentlyOpen) {
+        groupRows.forEach((row) => {
+            row.classList.remove('hidden');
+            if (row.classList.contains('header-row')) {
+                row.classList.add('sticky');
+            }
+        });
+
+        // Add "open" class to the group header
+        if (groupHeader) {
+            groupHeader.classList.add('open');
+        }
+    }
+}
+
 
         function isValidURL(str) {
             if (!str || typeof str !== 'string') return false;

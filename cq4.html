@@ -278,8 +278,8 @@
 .group-header > td > div > div:nth-child(1){
   margin: -15px;
     padding: 15px;
-    background-color: #307bb4;
-   
+    background-color: #FFBE5F;
+    color: #333;
 }
 
  .table-container{
@@ -311,7 +311,7 @@
 .priority-container {
     display: flex;
     align-items: center;
-    margin-right: 10px;
+    margin-right: 20px;
     margin-left: auto;
 }
 
@@ -321,6 +321,7 @@
     color: #ffffff;
 }
 .priority-select {
+    /* ... existing styles ... */
     padding: 8px;
     border: none;
     border-radius: 4px;
@@ -424,14 +425,6 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
-
-  // Helper function for Firebase safe keys - put it here
-  function sanitizeForFirebase(str) {
-        return str
-            .replace(/[.#$[\]/]/g, '_')
-            .replace(/\s+/g, '_')
-            .substring(0, 100);
-    }
 </script>
 <script>
     (function () {
@@ -477,7 +470,7 @@ async function loadPriorities() {
 }
 
         // Update your preloadExcelData function
-        function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
+function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
     fetch(file)
         .then((response) => response.arrayBuffer())
         .then(async (data) => {
@@ -503,7 +496,7 @@ async function loadPriorities() {
             });
 
             const groupedData = await groupAndSortData(allRows, groupColumnIndex);
-            createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows);  // Pass excludedRows
+            createTable(headers, groupedData, tableHeadId, tableBodyId);
         })
         .catch((error) => console.error(`Error loading ${file}:`, error));
 }
@@ -544,230 +537,153 @@ async function groupAndSortData(rows, columnIndex) {
     });
 }
 
-// This function needs to be placed above the preloadExcelData function
-async function groupAndSortData(rows, columnIndex) {
-    // First group the data as before
-    const groupedData = rows.reduce((groups, row) => {
-        const key = row[columnIndex] || 'Undefined';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(row);
-        return groups;
-    }, {});
+        function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+    const tableBody = document.getElementById(tableBodyId);
+    tableBody.innerHTML = '';
 
-    // Get all priorities from Firebase
-    const prioritiesSnapshot = await database.ref('priorities').once('value');
-    const priorities = prioritiesSnapshot.val() || {};
+    if (!headers) {
+        console.error('No headers found.');
+        return;
+    }
 
-    // Convert to array and sort with priority consideration
-    return Object.entries(groupedData).sort((a, b) => {
-        const groupA = a[0];
-        const groupB = b[0];
+    groupedData.forEach(([group, rows], groupIndex) => {
+        const groupTr = document.createElement('tr');
+        groupTr.className = 'group-header';
+        groupTr.id = `group-${groupIndex}`;
         
-        // Get priorities, default to 'low' if not set
-        const priorityA = (priorities[sanitizeForFirebase(groupA)]?.priority || 'low').toLowerCase();
-        const priorityB = (priorities[sanitizeForFirebase(groupB)]?.priority || 'low').toLowerCase();
+        const groupTdWrapper = document.createElement('td');
+        groupTdWrapper.setAttribute('colspan', headers.length);
         
-        // Define priority order (high = 2, medium = 1, low = 0)
-        const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
+        const groupContent = document.createElement('div');
+        groupContent.className = 'group-header-content';
+
+        // Create occurrences count
+        const occurrencesDiv = document.createElement('div');
+        occurrencesDiv.style.textAlign = 'center';
+        const occurrencesCount = document.createElement('div');
+        occurrencesCount.textContent = rows.length;
+        occurrencesCount.classList.add('tableBody-cell');
+
+        const instancesLabel = document.createElement('div');
+        instancesLabel.textContent = 'INSTANCES';
+        instancesLabel.style.fontSize = '10px';
+        instancesLabel.style.fontWeight = 'bold';
+        instancesLabel.style.marginTop = '5px';
+
+        occurrencesDiv.appendChild(occurrencesCount);
+        occurrencesDiv.appendChild(instancesLabel);
+
+        // Add group label
+        const groupLabel = document.createElement('div');
+        groupLabel.textContent = group;
+        groupLabel.classList.add('tableBody-cell');
+
+        // Create priority selection
+        const priorityContainer = document.createElement('div');
+        priorityContainer.className = 'priority-container';
         
-        // First compare by priority
-        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
-            return priorityOrder[priorityB] - priorityOrder[priorityA];
-        }
+       
         
-        // If priorities are equal, sort by number of items
-        return b[1].length - a[1].length;
+        const prioritySelect = document.createElement('select');
+prioritySelect.className = 'priority-select priority-low';  // Add default class
+prioritySelect.value = 'low';  // Set default value
+
+        ['High', 'Medium', 'Low'].forEach(priority => {
+            const option = document.createElement('option');
+            option.value = priority.toLowerCase();
+            option.textContent = priority;
+            prioritySelect.appendChild(option);
+        });
+
+        // Firebase integration - use sanitized group name
+        const sanitizedGroupName = group
+            .replace(/[.#$[\]/]/g, '_')
+            .replace(/\s+/g, '_')
+            .substring(0, 100);
+
+       // Add event listener for priority changes
+prioritySelect.addEventListener('change', (e) => {
+    e.stopPropagation();
+    const selectedPriority = e.target.value;
+    
+    // Update select styling
+    prioritySelect.className = 'priority-select priority-' + selectedPriority;
+    
+    database.ref('priorities/' + sanitizedGroupName).set({
+        originalName: group,
+        priority: selectedPriority
     });
-}
-
-// Update your preloadExcelData function
-function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows, groupColumnIndex) {
-    fetch(file)
-        .then((response) => response.arrayBuffer())
-        .then(async (data) => {
-            const workbook = XLSX.read(data, { type: 'array' });
-            const allRows = [];
-            let headers = null;
-
-            workbook.SheetNames.forEach((sheetName) => {
-                const worksheet = workbook.Sheets[sheetName];
-                const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                if (sheetRows.length === 0) return;
-                
-                if (!headers) headers = sheetRows[0];
-                
-                sheetRows.slice(1).forEach((row, index) => {
-                    if (!excludedRows.includes(index)) {
-                        if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                            allRows.push(row);
-                        }
-                    }
-                });
-            });
-
-            const groupedData = await groupAndSortData(allRows, groupColumnIndex);
-            createTable(headers, groupedData, tableHeadId, tableBodyId);
-        })
-        .catch((error) => console.error(`Error loading ${file}:`, error));
-}
-
-// Helper function for Firebase safe keys
-function sanitizeForFirebase(str) {
-    return str
-        .replace(/[.#$[\]/]/g, '_')
-        .replace(/\s+/g, '_')
-        .substring(0, 100);
-}
-
-function createTable(headers, groupedData, tableHeadId, tableBodyId, excludedRows) {
-   const tableBody = document.getElementById(tableBodyId);
-   tableBody.innerHTML = '';
-
-   // Store excludedRows for this table
-   tableBody.dataset.excludedRows = JSON.stringify(excludedRows || []);
-
-   if (!headers) {
-       console.error('No headers found.');
-       return;
-   }
-
-   groupedData.forEach(([group, rows], groupIndex) => {
-       const groupTr = document.createElement('tr');
-       groupTr.className = 'group-header';
-       groupTr.id = `group-${groupIndex}`;
-       
-       const groupTdWrapper = document.createElement('td');
-       groupTdWrapper.setAttribute('colspan', headers.length);
-       
-       const groupContent = document.createElement('div');
-       groupContent.className = 'group-header-content';
-
-       // Create occurrences count
-       const occurrencesDiv = document.createElement('div');
-       occurrencesDiv.style.textAlign = 'center';
-       const occurrencesCount = document.createElement('div');
-       occurrencesCount.textContent = rows.length;
-       occurrencesCount.classList.add('tableBody-cell');
-
-       const instancesLabel = document.createElement('div');
-       instancesLabel.textContent = 'INSTANCES';
-       instancesLabel.style.fontSize = '10px';
-       instancesLabel.style.fontWeight = 'bold';
-       instancesLabel.style.marginTop = '5px';
-
-       occurrencesDiv.appendChild(occurrencesCount);
-       occurrencesDiv.appendChild(instancesLabel);
-
-       // Add group label
-       const groupLabel = document.createElement('div');
-       groupLabel.textContent = group;
-       groupLabel.classList.add('tableBody-cell');
-
-       // Create priority selection
-const priorityContainer = document.createElement('div');
-priorityContainer.className = 'priority-container';
-
-const prioritySelect = document.createElement('select');
-prioritySelect.className = 'priority-select';
-
-// Don't set any default class or value yet
-['High', 'Medium', 'Low'].forEach(priority => {
-    const option = document.createElement('option');
-    option.value = priority.toLowerCase();
-    option.textContent = priority;
-    prioritySelect.appendChild(option);
 });
-
-const sanitizedGroupName = sanitizeForFirebase(group);
-
-// Set up real-time listener for this group's priority first
-database.ref('priorities').child(sanitizedGroupName).once('value').then((snapshot) => {
+       // Set up real-time listener for this group's priority
+database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
     const data = snapshot.val();
     if (data && data.priority) {
-        const savedPriority = data.priority.toLowerCase();
-        prioritySelect.value = savedPriority;
-        prioritySelect.className = 'priority-select';
-        prioritySelect.classList.add(`priority-${savedPriority}`);
+        prioritySelect.value = data.priority;
+        prioritySelect.className = 'priority-select priority-' + data.priority;
     } else {
-        // If no priority is set in Firebase, default to low
+        // Set default to low if no priority is set
         prioritySelect.value = 'low';
-        prioritySelect.className = 'priority-select';
-        prioritySelect.classList.add('priority-low');
+        prioritySelect.className = 'priority-select priority-low';
     }
 });
 
-       // Set up real-time listener for this group's priority
-       database.ref('priorities').child(sanitizedGroupName).on('value', (snapshot) => {
-           const data = snapshot.val();
-           console.log('Firebase listener - Received data:', data, 'for group:', sanitizedGroupName);
-           
-           if (data && data.priority) {
-               const newPriority = data.priority.toLowerCase();
-               console.log('Setting select value to:', newPriority);
-               
-               prioritySelect.value = newPriority;
-               prioritySelect.className = 'priority-select';
-               prioritySelect.classList.add(`priority-${newPriority}`);
-           }
-       });
+      
+        priorityContainer.appendChild(prioritySelect);
 
-       priorityContainer.appendChild(prioritySelect);
+        groupContent.appendChild(occurrencesDiv);
+        groupContent.appendChild(groupLabel);
+        groupContent.appendChild(priorityContainer);
 
-       groupContent.appendChild(occurrencesDiv);
-       groupContent.appendChild(groupLabel);
-       groupContent.appendChild(priorityContainer);
+        groupTdWrapper.appendChild(groupContent);
+        groupTr.appendChild(groupTdWrapper);
 
-       groupTdWrapper.appendChild(groupContent);
-       groupTr.appendChild(groupTdWrapper);
+        groupTr.addEventListener('click', (e) => {
+            if (!e.target.closest('.priority-container')) {
+                toggleGroupVisibility(groupIndex, tableBodyId);
+            }
+        });
 
-       groupTr.addEventListener('click', (e) => {
-           if (!e.target.closest('.priority-container')) {
-               toggleGroupVisibility(groupIndex, tableBodyId);
-           }
-       });
+        tableBody.appendChild(groupTr);
 
-       tableBody.appendChild(groupTr);
+        // Create header row for the group
+        const headerRow = document.createElement('tr');
+        headerRow.className = `group-${groupIndex} header-row hidden`;
+        headers.forEach((header, index) => {
+            if (![6, 7, 8].includes(index)) {
+                const th = document.createElement('th');
+                th.textContent = header;
+                th.classList.add('tableHead-cell');
+                headerRow.appendChild(th);
+            }
+        });
 
-       // Create header row for the group
-       const headerRow = document.createElement('tr');
-       headerRow.className = `group-${groupIndex} header-row hidden`;
-       headers.forEach((header, index) => {
-           if (![6, 7, 8].includes(index)) {
-               const th = document.createElement('th');
-               th.textContent = header;
-               th.classList.add('tableHead-cell');
-               headerRow.appendChild(th);
-           }
-       });
+        tableBody.appendChild(headerRow);
 
-       tableBody.appendChild(headerRow);
+        // Add data rows for the group
+        rows.forEach((row) => {
+            const tr = document.createElement('tr');
+            tr.className = `group-${groupIndex} hidden`;
 
-       // Add data rows for the group
-       rows.forEach((row) => {
-           const tr = document.createElement('tr');
-           tr.className = `group-${groupIndex} hidden`;
+            row.forEach((cell, cellIndex) => {
+                if (![6, 7, 8].includes(cellIndex)) {
+                    const td = document.createElement('td');
+                    if (isValidURL(cell)) {
+                        const link = document.createElement('a');
+                        link.href = cell;
+                        link.textContent = cell;
+                        link.target = '_blank';
+                        td.appendChild(link);
+                    } else {
+                        td.textContent = cell || '';
+                    }
+                    td.classList.add('tableBody-cell');
+                    tr.appendChild(td);
+                }
+            });
 
-           row.forEach((cell, cellIndex) => {
-               if (![6, 7, 8].includes(cellIndex)) {
-                   const td = document.createElement('td');
-                   if (isValidURL(cell)) {
-                       const link = document.createElement('a');
-                       link.href = cell;
-                       link.textContent = cell;
-                       link.target = '_blank';
-                       td.appendChild(link);
-                   } else {
-                       td.textContent = cell || '';
-                   }
-                   td.classList.add('tableBody-cell');
-                   tr.appendChild(td);
-               }
-           });
-
-           tableBody.appendChild(tr);
-       });
-   });
+            tableBody.appendChild(tr);
+        });
+    });
 }
 
 
