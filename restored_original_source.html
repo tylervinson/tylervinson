@@ -72,6 +72,7 @@
         font-size: 12px;
     text-transform: uppercase;
     font-weight: bold;
+    text-align: left;
     height: 29px;
     }
     
@@ -80,6 +81,7 @@
     }
     
     th, td {
+        text-align: left;
         width: 7%;
         padding: 10px;
         border-collapse: collapse;
@@ -96,12 +98,9 @@
     font-weight: bold;
     
     }
-    tr.group-row{
-        background-color: #fff;
-    }
     
-    tr.group-row:nth-child(even) {
-         background-color: #f9f9f9; 
+    tr:nth-child(even) {
+        /* background-color: #f9f9f9; */
     }
     
     /* tr:hover {
@@ -278,7 +277,7 @@ tr.group-header.level-aa-group{
 }
 .table-container{
     position: relative;
-    height: 76vh;
+    height: 70vh;
     overflow: auto;
 }
 .sticky {
@@ -375,178 +374,92 @@ tr.group-header.level-aa-group{
 }
 
     </style>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
     <div style="display: flex; align-items: flex-start;">
 
         <!-- First div: original content -->
         <div style="width: 100%;margin-right: 20px;">
-          <div style="height: 18vh;">
+          <div style="height: 23vh;">
             <h1 style="font-size: 2rem; margin-bottom: 10px;margin-top:10px;">CQ Fluency Fails</h1>
-            <!-- <p style="font-size: 14px; margin-top: 0px; max-width:1000px;">
+            <p style="font-size: 14px; margin-top: 0px; max-width:1000px;">
 This table displays failures identified in the CQ Fluency accessability report, filtered to show only rows marked as "failed." Failures are grouped by type (e.g., "Missing Alt Text" or "Color Contrast Issues") and sorted by total occurrences, with the most frequent failures at the top. Click a group header to expand and view detailed rows for that failure type, or collapse it when done. Only relevant columns are displayed, and links in cells open related resources. 
-            </p> -->
-          
+            </p>
+      
             <!-- Tabs for navigation -->
             <div class="tabs">
-                <div class="tab active" data-tab="tab1">Members</div>
-                <div class="tab" data-tab="tab2">Providers</div>
-                <div class="tab" data-tab="tab3">Individuals & Families</div>
-                <div class="tab" data-tab="tab4">Medicare</div>
-                <div class="tab" data-tab="tab5">Employers</div>
-                <div class="tab" data-tab="tab6">Programs</div>
-                <div class="tab" data-tab="tab7">Other</div>
-                <div class="tab" data-tab="tab8">Other 2</div>
-                <div class="tab" data-tab="tab9">Header / Footer</div>
-              </div></div>
-              <!-- Add this loading animation container above the table-container -->
-               <div>
-                <div id="loading" style="text-align: center;margin: 20px;position: absolute;/* top: 50%; *//* display: none; *//* left: 50%; */z-index: 999;width: 100vw;height: 600px;">
-                   <div style="position:relative;">
-                    <lottie-player src="loading.json" background="transparent" speed="1" style="width: 500px;height: auto;margin: auto;position: absolute; top:270px;left: 35%;" loop="" autoplay="">
-                    </lottie-player>
+              <div class="tab active" data-tab="tab1">Members</div>
+              <div class="tab" data-tab="tab2">Programs</div>
+              <!-- <div class="tab" data-tab="tab3">Table 3</div> -->
+            </div>
+          </div>
+        </div>
+      
+        <!-- Second div: legend with four text style examples -->
+        <!-- <div style="margin-bottom:30px;width:30%;padding: 5px 20px;border: 1px solid #eee;/* margin-right: 10%; */">
+          <h2>Legend</h2>
+          
+          <div style="margin-bottom: 10px;">
+            <label style="display: inline-block;width: 120px;">Top Five Issues</label>
+            <span style="/* font-style: italic; */color: aliceblue;background-color: #0b3b60;padding: 5px;">Example Text</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label style="display: inline-block;width: 120px;">Lesser Issues</label>
+            <span style="/* text-decoration: underline; */background-color:#2c70a3;padding: 5px;color: aliceblue;">Example Text</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label style="display: inline-block;width: 120px;">Column Labels:</label>
+            <span style="font-weight: normal;color: aliceblue;background-color: #0a0a0a;padding: 5px;width: 100%;">Example Text</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label style="display: inline-block;width: 120px;">AA Fails<br></label>
+            <span style="/* text-decoration: line-through; */font-size: 12px;font-style: italic;color: #888888;">Example Text</span>
+          </div>
+        </div>
+       -->
+      </div>
+
+<div id="tab1" class="table-container active">
+  <table id="dataTable1">
+    <thead id="tableHead1" class="tableHead">
+        <tr>
+        <td colspan="16">
+            <div class="group-header-content">
+                <div style="width: 5%; text-align: center;">Count</div>
+                <div style="width: 87%;">Description</div>
+                <div style="width: 8%;">Priority Level</div>
+            </div>
+        </td>
+    </tr>
+    </thead>
+    <tbody id="tableBody1"></tbody>
+  </table>
+</div>
+
+<div id="tab2" class="table-container">
+  <table id="dataTable2">
+    <thead id="tableHead2" class="tableHead">
+        <tr>
+            <td colspan="16">
+                <div class="group-header-content">
+                    <div style="width: 5%; text-align: center;">Count</div>
+                    <div style="width: 87%;">Description</div>
+                    <div style="width: 8%;">Priority Level</div>
                 </div>
-                </div>
-              <div id="tab1" class="table-container active">
-                <table id="dataTable1">
-                  <thead id="tableHead1" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-                   
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody1"></tbody>
-                </table>
-                <!-- <div class="lottie-container">
-                    <lottie-player
-                    src="loading.json"
-                    background="transparent"
-                    speed="1"
-                    style="width:300px;"
-                    loop
-                    autoplay>
-                  </lottie-player>
-                </div> -->
-              </div>
-              <div id="tab2" class="table-container">
-                <table id="dataTable2">
-                  <thead id="tableHead2" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody2"></tbody>
-                </table>
-              </div>
-              <div id="tab3" class="table-container">
-                <table id="dataTable3">
-                  <thead id="tableHead3" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody3"></tbody>
-                </table>
-              </div>
-              <div id="tab4" class="table-container">
-                <table id="dataTable4">
-                  <thead id="tableHead4" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody4"></tbody>
-                </table>
-              </div>
-              <div id="tab5" class="table-container">
-                <table id="dataTable5">
-                  <thead id="tableHead5" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody5"></tbody>
-                </table>
-              </div>
-              <div id="tab6" class="table-container">
-                <table id="dataTable6">
-                  <thead id="tableHead6" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody6"></tbody>
-                </table>
-              </div>
-              <div id="tab7" class="table-container">
-                <table id="dataTable7">
-                  <thead id="tableHead7" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody7"></tbody>
-                </table>
-              </div>
-              <div id="tab8" class="table-container">
-                <table id="dataTable8">
-                  <thead id="tableHead8" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody8"></tbody>
-                </table>
-              </div>
-             
-              <div id="tab9" class="table-container">
-                <table id="dataTable9">
-                  <thead id="tableHead9" class="tableHead"> <tr>
-                    <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
-               </tr></thead>
-                  <tbody id="tableBody9"></tbody>
-                </table>
-              </div>
-              
+            </td>
+        </tr>
+    </thead>
+    <tbody id="tableBody2"></tbody>
+  </table>
+</div>
+
+
+<!-- <div id="tab3" class="table-container">
+  <table id="dataTable3">
+    <thead id="tableHead3"></thead>
+    <tbody id="tableBody3"></tbody>
+  </table>
+</div> -->
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -572,7 +485,8 @@ firebase.initializeApp(firebaseConfig);
             .replace(/\s+/g, '_')
             .substring(0, 100);
     }
-
+</script>
+<script>
     (function () {
         const tabElements = document.querySelectorAll('.tab');
         const tableContainers = document.querySelectorAll('.table-container');
@@ -589,16 +503,9 @@ firebase.initializeApp(firebaseConfig);
         });
 
         const tableMapping = {
-  tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
-  tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
-  tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
-  tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
-  tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
-  tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
-  tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
-  tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
-  tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
-};
+            tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' }
+            // tab2: { file: 'members-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' }
+        }
         function savePriority(groupName, priority) {
     try {
         const sanitizedGroupName = sanitizeForFirebase(groupName);
@@ -663,25 +570,19 @@ let groupColumnIndex = 5; // Define the column index globally
 
 // Update your preloadExcelData function
 // Define allRows globally
+let allRows = []; 
 
-const tabData = {}; // Object to store data for each tab
-const loadingElement = document.getElementById('loading');
-
-// Modify the preloadExcelData function to show/hide the loader
 function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
-    let allRows = []; 
-    loadingElement.style.display = 'block'; // Show loading animation
     fetch(file)
         .then((response) => response.arrayBuffer())
         .then(async (data) => {
             const workbook = XLSX.read(data, { type: 'array' });
             let headers = null;
-            const rows = [];
 
             workbook.SheetNames.forEach((sheetName) => {
                 const worksheet = workbook.Sheets[sheetName];
                 const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
+                
                 if (sheetRows.length === 0) return;
 
                 if (!headers) headers = sheetRows[0];
@@ -689,22 +590,17 @@ function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
                 sheetRows.slice(1).forEach((row, index) => {
                     if (!excludedRows.includes(index)) {
                         if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                            rows.push(row);
+                            allRows.push(row); // Global allRows
                         }
                     }
                 });
             });
 
-            tabData[tableBodyId] = rows;
-            const groupedData = await groupAndSortData(rows, groupColumnIndex);
+            const groupedData = await groupAndSortData(allRows, groupColumnIndex); // Use global groupColumnIndex
             createTable(headers, groupedData, tableHeadId, tableBodyId);
         })
-        .catch((error) => console.error(`Error loading ${file}:`, error))
-        .finally(() => {
-            loadingElement.style.display = 'none'; // Hide loading animation
-        });
+        .catch((error) => console.error(`Error loading ${file}:`, error));
 }
-
 
 
 // Helper function for Firebase safe keys
@@ -806,29 +702,28 @@ function createTable(headers, groupedData, tableHeadId, tableBodyId) {
         // Add event listener for dropdown change
         let debounceTimeout;
         prioritySelect.addEventListener('change', (e) => {
-    const selectedPriority = e.target.value;
+            const selectedPriority = e.target.value;
 
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(async () => {
-        try {
-            // Save updated priority to Firebase
-            await database.ref('priorities/' + sanitizedGroupName).set({
-                originalName: group,
-                priority: selectedPriority,
-            });
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(async () => {
+                try {
+                    // Save updated priority to Firebase
+                    await database.ref('priorities/' + sanitizedGroupName).set({
+                        originalName: group,
+                        priority: selectedPriority,
+                    });
 
-            // Update dropdown class
-            prioritySelect.className = `priority-select priority-${selectedPriority}`;
+                    // Update dropdown class
+                    prioritySelect.className = `priority-select priority-${selectedPriority}`;
 
-            // Re-sort and re-render the table dynamically
-            const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex); // Use tabData
-            createTable(headers, updatedGroupedData, tableHeadId, tableBodyId); // Ensure correct tab-specific data is used
-        } catch (error) {
-            console.error('Error updating priority:', error);
-        }
-    }, 300); // Adjust debounce delay as necessary
-});
-
+                    // Re-sort and re-render the table dynamically
+                    const updatedGroupedData = await groupAndSortData(allRows, groupColumnIndex);
+                    createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
+                } catch (error) {
+                    console.error('Error updating priority:', error);
+                }
+            }, 300); // Adjust debounce delay as necessary
+        });
 
         priorityContainer.appendChild(prioritySelect);
 
@@ -864,7 +759,7 @@ function createTable(headers, groupedData, tableHeadId, tableBodyId) {
         // Add data rows for the group
         rows.forEach((row) => {
             const tr = document.createElement('tr');
-            tr.className = `group-${groupIndex} hidden group-row`;
+            tr.className = `group-${groupIndex} hidden`;
 
             row.forEach((cell, cellIndex) => {
                 if (![6, 7, 8].includes(cellIndex)) { // Exclude specific columns
@@ -1002,6 +897,6 @@ function toggleGroupVisibility(groupIndex, tableBodyId) {
 </script>
 
 
-          </div></div>
+
 </body>
 </html>

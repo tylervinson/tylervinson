@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verified Source HTML</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 10px;
+        }
+
+        .tab.active {
+            background-color: #fff;
+            font-weight: bold;
+            border-color: #ddd;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab:hover {
+            background-color: #e7e7e7;
+        }
+
+        .table-container {
+            display: none;
+        }
+
+        .table-container.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0b3b60;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .group-header {
+            background-color: #fafafa;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .priority-select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .priority-high {
+            background-color: #ffe5e5;
+            color: #d32f2f;
+        }
+
+        .priority-medium {
+            background-color: #fff8e1;
+            color: #f57c00;
+        }
+
+        .priority-low {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Accessibility Report</h1>
+    <div class="tabs">
+        <div class="tab" data-tab="tab1">Members</div>
+        <div class="tab" data-tab="tab2">Programs</div>
+    </div>
+
+    <div id="tab1" class="table-container active">
+        <table>
+            <thead id="tableHead1"></thead>
+            <tbody id="tableBody1"></tbody>
+        </table>
+    </div>
+
+    <div id="tab2" class="table-container">
+        <table>
+            <thead id="tableHead2"></thead>
+            <tbody id="tableBody2"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
+          authDomain: "cq-priorities.firebaseapp.com",
+          databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
+          projectId: "cq-priorities",
+          storageBucket: "cq-priorities.appspot.com",
+          messagingSenderId: "1023528003950",
+          appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let groupColumnIndex = 5; // Column index used for grouping data
+
+        // Helper function to sanitize strings for Firebase keys
+        function sanitizeForFirebase(str) {
+            return str
+                .replace(/[.#$[\]/]/g, '_')
+                .replace(/\s+/g, '_')
+                .substring(0, 100);
+        }
+
+        // Save priority to Firebase
+        function savePriority(groupName, priority) {
+            try {
+                const sanitizedGroupName = sanitizeForFirebase(groupName);
+                return database.ref('priorities/' + sanitizedGroupName).set({
+                    originalName: groupName,
+                    priority: priority
+                });
+            } catch (error) {
+                console.error('Error saving priority:', error);
+            }
+        }
+
+        // Load all priorities from Firebase
+        async function loadPriorities() {
+            try {
+                const snapshot = await database.ref('priorities').once('value');
+                return snapshot.val() || {};
+            } catch (error) {
+                console.error('Error loading priorities:', error);
+                return {};
+            }
+        }
+
+        // Group and sort data by priority and occurrences
+        async function groupAndSortData(rows, columnIndex) {
+            const groupedData = rows.reduce((groups, row) => {
+                const key = row[columnIndex] || 'Undefined';
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(row);
+                return groups;
+            }, {});
+
+            const prioritiesSnapshot = await database.ref('priorities').once('value');
+            const priorities = prioritiesSnapshot.val() || {};
+
+            return Object.entries(groupedData).sort((a, b) => {
+                const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
+                const priorityA = priorityOrder[(priorities[sanitizeForFirebase(a[0])]?.priority || 'low').toLowerCase()];
+                const priorityB = priorityOrder[(priorities[sanitizeForFirebase(b[0])]?.priority || 'low').toLowerCase()];
+                return priorityB - priorityA || b[1].length - a[1].length;
+            });
+        }
+
+        // Load data from an Excel file
+        function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
+            fetch(file)
+                .then(response => response.arrayBuffer())
+                .then(async data => {
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    let headers = null;
+                    const rows = [];
+
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        if (!headers) headers = sheetRows[0];
+                        sheetRows.slice(1).forEach((row, index) => {
+                            if (!excludedRows.includes(index) && row[9]?.toString().trim().toUpperCase() === 'FAIL') {
+                                rows.push(row);
+                            }
+                        });
+                    });
+
+                    tabData[tableBodyId] = rows; // Store rows for this tab
+                    const groupedData = await groupAndSortData(rows, groupColumnIndex);
+                    createTable(headers, groupedData, tableHeadId, tableBodyId);
+                })
+                .catch(error => console.error(`Error loading ${file}:`, error));
+        }
+
+        // Create and render the table
+        function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+
+            if (!headers || !groupedData) {
+                console.error('Headers or grouped data is missing.');
+                return;
+            }
+
+            groupedData.forEach(([group, rows], groupIndex) => {
+                const sanitizedGroupName = sanitizeForFirebase(group);
+
+                const groupTr = document.createElement('tr');
+                groupTr.className = 'group-header';
+                groupTr.id = `group-${groupIndex}`;
+
+                const groupTdWrapper = document.createElement('td');
+                groupTdWrapper.setAttribute('colspan', headers.length);
+
+                const groupContent = document.createElement('div');
+                groupContent.className = 'group-header-content';
+
+                const occurrencesDiv = document.createElement('div');
+                occurrencesDiv.style.textAlign = 'center';
+                const occurrencesCount = document.createElement('div');
+                occurrencesCount.textContent = rows.length;
+                occurrencesCount.classList.add('tableBody-cell');
+                occurrencesDiv.appendChild(occurrencesCount);
+
+                const groupLabel = document.createElement('div');
+                groupLabel.textContent = group;
+                groupLabel.classList.add('tableBody-cell');
+
+                const priorityContainer = document.createElement('div');
+                priorityContainer.className = 'priority-container';
+
+                const prioritySelect = document.createElement('select');
+                prioritySelect.className = 'priority-select priority-low';
+                ['High', 'Medium', 'Low'].forEach(priority => {
+                    const option = document.createElement('option');
+                    option.value = priority.toLowerCase();
+                    option.textContent = priority;
+                    prioritySelect.appendChild(option);
+                });
+
+                database.ref('priorities/' + sanitizedGroupName).on('value', snapshot => {
+                    const data = snapshot.val();
+                    const firebasePriority = (data?.priority || 'low').toLowerCase();
+                    prioritySelect.value = firebasePriority;
+                    prioritySelect.className = `priority-select priority-${firebasePriority}`;
+                });
+
+                prioritySelect.addEventListener('change', (e) => {
+                    const selectedPriority = e.target.value;
+                    savePriority(group, selectedPriority);
+                    prioritySelect.className = `priority-select priority-${selectedPriority}`;
+                    groupAndSortData(tabData[tableBodyId], groupColumnIndex)
+                        .then(updatedGroupedData => createTable(headers, updatedGroupedData, tableHeadId, tableBodyId))
+                        .catch(error => console.error('Error updating table:', error));
+                });
+
+                priorityContainer.appendChild(prioritySelect);
+                groupContent.appendChild(occurrencesDiv);
+                groupContent.appendChild(groupLabel);
+                groupContent.appendChild(priorityContainer);
+                groupTdWrapper.appendChild(groupContent);
+                groupTr.appendChild(groupTdWrapper);
+
+                groupTr.addEventListener('click', () => toggleGroupVisibility(groupIndex, tableBodyId));
+                tableBody.appendChild(groupTr);
+
+                rows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = `group-${groupIndex}`;
+                    headers.forEach((header, index) => {
+                        const td = document.createElement('td');
+                        td.textContent = row[index] || '';
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            });
+        }
+
+        // Toggle group visibility
+        function toggleGroupVisibility(groupIndex, tableBodyId) {
+            const groupRows = document.querySelectorAll(`.group-${groupIndex}`);
+            groupRows.forEach(row => row.classList.toggle('hidden'));
+        }
+
+        // Initialize tabs and preload data
+        const tabData = {};
+        const tableMapping = {
+            tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
+            tab2: { file: 'programs-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
+        };
+
+        Object.values(tableMapping).forEach(({ file, tableHead, tableBody }) => {
+            preloadExcelData(file, tableHead, tableBody, []);
+        });
+    </script>
+</body>
+</html>
