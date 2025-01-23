@@ -257,6 +257,26 @@ tr.group-header.level-aa-group{
         gap: 10px;
     }
     
+    .group-header-content > div:nth-child(1) {
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.group-header-content > div:nth-child(2) {
+    flex-grow: 1;
+}
+
+.toggle-container, .priority-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    min-width: fit-content;
+}
+
+.toggle-container {
+    margin-right: 10px;
+}
+
     .group-header-content .tableBody-cell:first-child {
         width: 60px;
         flex-shrink: 0;
@@ -379,6 +399,71 @@ tr.group-header.level-aa-group{
     text-transform: uppercase;
     height: 30px;
 }
+.toggle-container {
+    margin-left: auto;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    pointer-events: none;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    pointer-events: auto;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+.switch input[type="checkbox"] {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
 
     </style>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -418,13 +503,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable1">
                   <thead id="tableHead1" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-                   
-               </td>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </tr></thead>
                   <tbody id="tableBody1"></tbody>
                 </table>
@@ -443,12 +528,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable2">
                   <thead id="tableHead2" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </tr></thead>
                   <tbody id="tableBody2"></tbody>
                 </table>
@@ -457,12 +543,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable3">
                   <thead id="tableHead3" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </tr></thead>
                   <tbody id="tableBody3"></tbody>
                 </table>
@@ -471,11 +558,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable4">
                   <thead id="tableHead4" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </td>
                </tr></thead>
                   <tbody id="tableBody4"></tbody>
@@ -485,11 +574,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable5">
                   <thead id="tableHead5" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </td>
                </tr></thead>
                   <tbody id="tableBody5"></tbody>
@@ -499,11 +590,12 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable6">
                   <thead id="tableHead6" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
                </td>
                </tr></thead>
                   <tbody id="tableBody6"></tbody>
@@ -513,11 +605,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable7">
                   <thead id="tableHead7" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </td>
                </tr></thead>
                   <tbody id="tableBody7"></tbody>
@@ -527,12 +621,13 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable8">
                   <thead id="tableHead8" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </tr></thead>
                   <tbody id="tableBody8"></tbody>
                 </table>
@@ -542,471 +637,418 @@ This table displays failures identified in the CQ Fluency accessability report, 
                 <table id="dataTable9">
                   <thead id="tableHead9" class="tableHead"> <tr>
                     <td colspan="16">
-                   <div class="group-header-content">
-                       <div style="width: 4%; padding-left: 15px;">Count</div>
-                       <div style="width: 87%; text-align: center;">Description</div>
-                       <div style="width: 8%; text-align: right; padding-right: 20px;">Priority</div>
-                   </div>
-               </td>
+                        <div class="group-header-content">
+                            <div style="width: 60px; margin-left:10px">Count</div>
+                            <div style="flex-grow: 1; text-align: center;">Description</div>
+                            <div style="width: 80px; text-align: center;">Nexus</div>
+                            <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                          </div>
+                      </td>
                </tr></thead>
                   <tbody id="tableBody9"></tbody>
                 </table>
               </div>
               
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
-  authDomain: "cq-priorities.firebaseapp.com",
-  databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
-  projectId: "cq-priorities",
-  storageBucket: "cq-priorities.firebasestorage.app",
-  messagingSenderId: "1023528003950",
-  appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-
-  // Helper function for Firebase safe keys - put it here
-  function sanitizeForFirebase(str) {
-        return str
-            .replace(/[.#$[\]/]/g, '_')
-            .replace(/\s+/g, '_')
-            .substring(0, 100);
-    }
-
-    (function () {
-        const tabElements = document.querySelectorAll('.tab');
-        const tableContainers = document.querySelectorAll('.table-container');
-
-        // Event listeners for tabs
-        tabElements.forEach((tab) => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.tab;
-                tabElements.forEach((t) => t.classList.remove('active'));
-                tab.classList.add('active');
-                tableContainers.forEach((tc) => tc.classList.remove('active'));
-                document.getElementById(target).classList.add('active');
-            });
-        });
-
-        const tableMapping = {
-  tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
-  tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
-  tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
-  tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
-  tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
-  tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
-  tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
-  tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
-  tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
-};
-        function savePriority(groupName, priority) {
-    try {
-        const sanitizedGroupName = sanitizeForFirebase(groupName);
-        return database.ref('priorities/' + sanitizedGroupName).set({
-            originalName: groupName,  // Store original name for reference
-            priority: priority
-        });
-    } catch (error) {
-        console.error('Error saving priority:', error);
-    }
-}
-
-async function loadPriorities() {
-    try {
-        const snapshot = await database.ref('priorities').once('value');
-        return snapshot.val() || {};
-    } catch (e) {
-        console.log('No priorities found');
-        return {};
-    }
-}
-
-        
-
-      // This function needs to be placed above the preloadExcelData function
-async function groupAndSortData(rows, columnIndex) {
-    // First group the data as before
-    const groupedData = rows.reduce((groups, row) => {
-        const key = row[columnIndex] || 'Undefined';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(row);
-        return groups;
-    }, {});
-
-    // Get all priorities from Firebase
-    const prioritiesSnapshot = await database.ref('priorities').once('value');
-    const priorities = prioritiesSnapshot.val() || {};
-
-    // Convert to array and sort with priority consideration
-    return Object.entries(groupedData).sort((a, b) => {
-        const groupA = a[0];
-        const groupB = b[0];
-        
-        // Get priorities, default to 'low' if not set
-        const priorityA = (priorities[sanitizeForFirebase(groupA)]?.priority || 'low').toLowerCase();
-        const priorityB = (priorities[sanitizeForFirebase(groupB)]?.priority || 'low').toLowerCase();
-        
-        // Define priority order (high = 2, medium = 1, low = 0)
-        const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
-        
-        // First compare by priority
-        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
-            return priorityOrder[priorityB] - priorityOrder[priorityA];
-        }
-        
-        // If priorities are equal, sort by number of items
-        return b[1].length - a[1].length;
-    });
-}
-
-let groupColumnIndex = 5; // Define the column index globally
-
-// Update your preloadExcelData function
-// Define allRows globally
-
-const tabData = {}; // Object to store data for each tab
-const loadingElement = document.getElementById('loading');
-
-// Modify the preloadExcelData function to show/hide the loader
-function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
-    let allRows = []; 
-    loadingElement.style.display = 'block'; // Show loading animation
-    fetch(file)
-        .then((response) => response.arrayBuffer())
-        .then(async (data) => {
-            const workbook = XLSX.read(data, { type: 'array' });
-            let headers = null;
-            const rows = [];
-
-            workbook.SheetNames.forEach((sheetName) => {
-                const worksheet = workbook.Sheets[sheetName];
-                const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (sheetRows.length === 0) return;
-
-                if (!headers) headers = sheetRows[0];
-
-                sheetRows.slice(1).forEach((row, index) => {
-                    if (!excludedRows.includes(index)) {
-                        if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                            rows.push(row);
-                        }
-                    }
-                });
-            });
-
-            tabData[tableBodyId] = rows;
-            const groupedData = await groupAndSortData(rows, groupColumnIndex);
-            createTable(headers, groupedData, tableHeadId, tableBodyId);
-        })
-        .catch((error) => console.error(`Error loading ${file}:`, error))
-        .finally(() => {
-            loadingElement.style.display = 'none'; // Hide loading animation
-        });
-}
-
-
-
-// Helper function for Firebase safe keys
-function sanitizeForFirebase(str) {
-    return str
-        .replace(/[.#$[\]/]/g, '_')
-        .replace(/\s+/g, '_')
-        .substring(0, 100);
-}
-
-function createTable(headers, groupedData, tableHeadId, tableBodyId) {
-    const tableBody = document.getElementById(tableBodyId);
-    tableBody.innerHTML = '';
-
-    if (!headers) {
-        console.error('No headers found.');
-        return;
-    }
-
-    groupedData.forEach(([group, rows], groupIndex) => {
-        const sanitizedGroupName = sanitizeForFirebase(group);
-
-        // Check if any row in the group has "Level AA" in the Conformance Level column
-        const hasLevelAA = rows.some(row => {
-            const conformanceLevel = row[headers.indexOf("Conformance Level")]; // Adjust index if needed
-            return conformanceLevel && conformanceLevel.trim() === "Level AA";
-        });
-
-        // Create group header row
-        const groupTr = document.createElement('tr');
-        groupTr.className = 'group-header';
-        if (hasLevelAA) {
-            groupTr.classList.add('level-aa-group'); // Add additional class for Level AA
-        }
-        groupTr.id = `group-${groupIndex}`;
-
-        const groupTdWrapper = document.createElement('td');
-        groupTdWrapper.setAttribute('colspan', headers.length);
-
-        const groupContent = document.createElement('div');
-        groupContent.className = 'group-header-content';
-
-        // Create occurrences count
-        const occurrencesDiv = document.createElement('div');
-        occurrencesDiv.style.textAlign = 'center';
-        const occurrencesCount = document.createElement('div');
-        occurrencesCount.textContent = rows.length;
-        occurrencesCount.classList.add('tableBody-cell');
-
-        const instancesLabel = document.createElement('div');
-        instancesLabel.textContent = 'INSTANCES';
-        instancesLabel.style.fontSize = '10px';
-        instancesLabel.style.fontWeight = 'bold';
-        instancesLabel.style.marginTop = '5px';
-
-        occurrencesDiv.appendChild(occurrencesCount);
-        occurrencesDiv.appendChild(instancesLabel);
-
-        // Add group label
-        const groupLabel = document.createElement('div');
-        groupLabel.textContent = group;
-        groupLabel.classList.add('tableBody-cell');
-
-        // Create priority selection dropdown
-        const priorityContainer = document.createElement('div');
-        priorityContainer.className = 'priority-container';
-
-        const prioritySelect = document.createElement('select');
-        prioritySelect.className = 'priority-select priority-low';
-        prioritySelect.value = 'low';
-
-        ['High', 'Medium', 'Low'].forEach(priority => {
-            const option = document.createElement('option');
-            option.value = priority.toLowerCase();
-            option.textContent = priority;
-            prioritySelect.appendChild(option);
-        });
-
-        // Initialize Firebase value for priority dropdown
-        database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data?.priority) {
-                prioritySelect.value = data.priority;
-                prioritySelect.className = `priority-select priority-${data.priority}`;
-            }
-        });
-
-        // Real-time listener for Firebase priority updates
-        database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
-            const data = snapshot.val();
-            const firebasePriority = data?.priority || 'low';
-
-            if (prioritySelect.value !== firebasePriority) {
-                prioritySelect.value = firebasePriority;
-                prioritySelect.className = `priority-select priority-${firebasePriority}`;
-            }
-        });
-
-        // Add event listener for dropdown change
-        let debounceTimeout;
-        prioritySelect.addEventListener('change', (e) => {
-    const selectedPriority = e.target.value;
-
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(async () => {
-        try {
-            // Save updated priority to Firebase
-            await database.ref('priorities/' + sanitizedGroupName).set({
-                originalName: group,
-                priority: selectedPriority,
-            });
-
-            // Update dropdown class
-            prioritySelect.className = `priority-select priority-${selectedPriority}`;
-
-            // Re-sort and re-render the table dynamically
-            const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex); // Use tabData
-            createTable(headers, updatedGroupedData, tableHeadId, tableBodyId); // Ensure correct tab-specific data is used
-        } catch (error) {
-            console.error('Error updating priority:', error);
-        }
-    }, 300); // Adjust debounce delay as necessary
-});
-
-
-        priorityContainer.appendChild(prioritySelect);
-
-        groupContent.appendChild(occurrencesDiv);
-        groupContent.appendChild(groupLabel);
-        groupContent.appendChild(priorityContainer);
-
-        groupTdWrapper.appendChild(groupContent);
-        groupTr.appendChild(groupTdWrapper);
-
-        groupTr.addEventListener('click', (e) => {
-            if (!e.target.closest('.priority-container')) {
-                toggleGroupVisibility(groupIndex, tableBodyId);
-            }
-        });
-
-        tableBody.appendChild(groupTr);
-
-        // Create header row for group
-        const headerRow = document.createElement('tr');
-        headerRow.className = `group-${groupIndex} header-row hidden`;
-        headers.forEach((header, index) => {
-            if (![6, 7, 8].includes(index)) { // Exclude specific columns
-                const th = document.createElement('th');
-                th.textContent = header;
-                th.classList.add('tableHead-cell');
-                headerRow.appendChild(th);
-            }
-        });
-
-        tableBody.appendChild(headerRow);
-
-        // Add data rows for the group
-        rows.forEach((row) => {
-            const tr = document.createElement('tr');
-            tr.className = `group-${groupIndex} hidden group-row`;
-
-            row.forEach((cell, cellIndex) => {
-                if (![6, 7, 8].includes(cellIndex)) { // Exclude specific columns
-                    const td = document.createElement('td');
-                    if (isValidURL(cell)) {
-                        const link = document.createElement('a');
-                        link.href = cell;
-                        link.textContent = cell;
-                        link.target = '_blank';
-                        td.appendChild(link);
-                    } else {
-                        td.textContent = cell || '';
-                    }
-                    td.classList.add('tableBody-cell');
-                    tr.appendChild(td);
-                }
-            });
-
-            tableBody.appendChild(tr);
-        });
-    });
-}
-
-
-
-
-
-
-function sanitizeForFirebase(str) {
-    // Create a valid key for Firebase by replacing invalid characters with '_'
-    // and limiting the length
-    return str
-        .replace(/[.#$[\]/]/g, '_')  // Replace invalid characters
-        .replace(/\s+/g, '_')        // Replace spaces with underscores
-        .substring(0, 100);          // Limit length to avoid extremely long keys
-}
-
-
-function toggleGroupVisibility(groupIndex, tableBodyId) {
-    const tableBody = document.getElementById(tableBodyId);
-    const allGroupRows = tableBody.querySelectorAll('tr');
-    const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
-    const groupHeader = document.querySelector(`tr.group-header#group-${groupIndex}`);
-    const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
-
-    // Close all groups
-    allGroupRows.forEach((row) => {
-        if (!row.classList.contains('group-header')) {
-            row.classList.add('hidden');
-            row.classList.remove('sticky');
-        }
-    });
-
-    // Remove "open" class from all headers
-    allGroupRows.forEach((row) => {
-        if (row.classList.contains('group-header')) {
-            row.classList.remove('open');
-        }
-    });
-
-    // If the group is not already open, open it and add the "open" class
-    if (!isGroupCurrentlyOpen) {
-        groupRows.forEach((row) => {
-            row.classList.remove('hidden');
-            if (row.classList.contains('header-row')) {
-                row.classList.add('sticky');
-            }
-        });
-
-        // Add "open" class to the group header
-        if (groupHeader) {
-            groupHeader.classList.add('open');
-        }
-    }
-}
-
-
-        function isValidURL(str) {
-            if (!str || typeof str !== 'string') return false;
-            const pattern = new RegExp(
-                '^(https?:\\/\\/)?' + 
-                '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
-                'localhost|' +
-                '\\d{1,3}(\\.\\d{1,3}){3})' + 
-                '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?$', 
-                'i'
-            );
-            return pattern.test(str);
-        }
-
-        // Initialize tables
-        Object.keys(tableMapping).forEach((tab) => {
-            const { file, tableHead, tableBody } = tableMapping[tab];
-            preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15], 5);
-        });
-
-        // Text truncation
-        (function () {
-            function truncateText(selector, maxLength) {
-                if (typeof maxLength !== 'number' || maxLength <= 0) {
-                    console.error('Invalid maxLength. It must be a positive number.');
-                    return;
-                }
-
-                var elements = document.querySelectorAll(selector);
-                Array.prototype.forEach.call(elements, function (element) {
-                    var originalText = element.textContent.trim();
-                    if (originalText.length > maxLength) {
-                        var truncatedText = originalText.substring(0, maxLength) + '...';
-                        element.textContent = truncatedText;
-                    }
-                });
-            }
-
-            function observeDynamicText(selector, maxLength) {
-                var observer = new MutationObserver(function (mutations) {
-                    mutations.forEach(function (mutation) {
-                        if (mutation.type === 'childList' || mutation.type === 'subtree') {
-                            truncateText(selector, maxLength);
-                        }
-                    });
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true,
-                });
-
+              <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+              <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+              <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+              <script>
+              const firebaseConfig = {
+               apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
+               authDomain: "cq-priorities.firebaseapp.com",
+               databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
+               projectId: "cq-priorities",
+               storageBucket: "cq-priorities.firebasestorage.app",
+               messagingSenderId: "1023528003950",
+               appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+              };
+              
+              firebase.initializeApp(firebaseConfig);
+              const database = firebase.database();
+              const tabData = {};
+              let groupColumnIndex = 5;
+              
+              async function groupAndSortData(rows, columnIndex) {
+                 const groupedData = rows.reduce((groups, row) => {
+                     const key = row[columnIndex] || 'Undefined';
+                     if (!groups[key]) groups[key] = [];
+                     groups[key].push(row);
+                     return groups;
+                 }, {});
+              
+                 const prioritiesSnapshot = await database.ref('priorities').once('value');
+                 const priorities = prioritiesSnapshot.val() || {};
+              
+                 return Object.entries(groupedData).sort((a, b) => {
+                     const groupA = a[0];
+                     const groupB = b[0];
+                     
+                     const priorityA = (priorities[sanitizeForFirebase(groupA)]?.priority || 'low').toLowerCase();
+                     const priorityB = (priorities[sanitizeForFirebase(groupB)]?.priority || 'low').toLowerCase();
+                     
+                     const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
+                     
+                     if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
+                         return priorityOrder[priorityB] - priorityOrder[priorityA];
+                     }
+                     
+                     return b[1].length - a[1].length;
+                 });
+              }
+              
+              function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
+                 const loadingElement = document.getElementById('loading');
+                 loadingElement.style.display = 'block';
+                 
+                 fetch(file)
+                     .then((response) => response.arrayBuffer())
+                     .then(async (data) => {
+                         const workbook = XLSX.read(data, { type: 'array' });
+                         let headers = null;
+                         const rows = [];
+              
+                         workbook.SheetNames.forEach((sheetName) => {
+                             const worksheet = workbook.Sheets[sheetName];
+                             const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+              
+                             if (sheetRows.length === 0) return;
+              
+                             if (!headers) headers = sheetRows[0];
+              
+                             sheetRows.slice(1).forEach((row, index) => {
+                                 if (!excludedRows.includes(index)) {
+                                     if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
+                                         rows.push(row);
+                                     }
+                                 }
+                             });
+                         });
+              
+                         tabData[tableBodyId] = rows;
+                         const groupedData = await groupAndSortData(rows, groupColumnIndex);
+                         createTable(headers, groupedData, tableHeadId, tableBodyId);
+                     })
+                     .catch((error) => console.error(`Error loading ${file}:`, error))
+                     .finally(() => {
+                         loadingElement.style.display = 'none';
+                     });
+              }
+              
+              function sanitizeForFirebase(str) {
+                 return str
+                     .replace(/[.#$[\]/]/g, '_')
+                     .replace(/\s+/g, '_')
+                     .substring(0, 100);
+              }
+              
+              function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+                 const tableBody = document.getElementById(tableBodyId);
+                 tableBody.innerHTML = '';
+              
+                 if (!headers) {
+                     console.error('No headers found.');
+                     return;
+                 }
+              
+                 groupedData.forEach(([group, rows], groupIndex) => {
+                     const sanitizedGroupName = sanitizeForFirebase(group);
+              
+                     const hasLevelAA = rows.some(row => {
+                         const conformanceLevel = row[headers.indexOf("Conformance Level")];
+                         return conformanceLevel && conformanceLevel.trim() === "Level AA";
+                     });
+              
+                     const groupTr = document.createElement('tr');
+                     groupTr.className = 'group-header';
+                     if (hasLevelAA) {
+                         groupTr.classList.add('level-aa-group');
+                     }
+                     groupTr.id = `group-${groupIndex}`;
+              
+                     const groupTdWrapper = document.createElement('td');
+                     groupTdWrapper.setAttribute('colspan', headers.length);
+              
+                     const groupContent = document.createElement('div');
+                     groupContent.className = 'group-header-content';
+              
+                     const occurrencesDiv = document.createElement('div');
+                     occurrencesDiv.style.textAlign = 'center';
+                     const occurrencesCount = document.createElement('div');
+                     occurrencesCount.textContent = rows.length;
+                     occurrencesCount.classList.add('tableBody-cell');
+              
+                     const instancesLabel = document.createElement('div');
+                     instancesLabel.textContent = 'INSTANCES';
+                     instancesLabel.style.fontSize = '10px';
+                     instancesLabel.style.fontWeight = 'bold';
+                     instancesLabel.style.marginTop = '5px';
+              
+                     occurrencesDiv.appendChild(occurrencesCount);
+                     occurrencesDiv.appendChild(instancesLabel);
+              
+                     const groupLabel = document.createElement('div');
+                     groupLabel.textContent = group;
+                     groupLabel.classList.add('tableBody-cell');
+              
+                     const toggleContainer = document.createElement('div');
+                     toggleContainer.className = 'toggle-container';
+              
+                     const toggleLabel = document.createElement('label');
+                     toggleLabel.className = 'switch';
+              
+                     const nexusToggle = document.createElement('input');
+                     nexusToggle.type = 'checkbox';
+              
+                     const slider = document.createElement('span');
+                     slider.className = 'slider round';
+              
+                     database.ref('toggles/' + sanitizedGroupName).on('value', (snapshot) => {
+                         const data = snapshot.val();
+                         nexusToggle.checked = data?.isEnabled || false;
+                     });
+              
+                     nexusToggle.addEventListener('change', () => {
+                         const isEnabled = nexusToggle.checked;
+                         database.ref('toggles/' + sanitizedGroupName).set({ isEnabled });
+                     });
+              
+                     toggleLabel.appendChild(nexusToggle);
+                     toggleLabel.appendChild(slider);
+                     toggleContainer.appendChild(toggleLabel);
+              
+                     const priorityContainer = document.createElement('div');
+                     priorityContainer.className = 'priority-container';
+              
+                     const prioritySelect = document.createElement('select');
+                     prioritySelect.className = 'priority-select priority-low';
+                     prioritySelect.value = 'low';
+              
+                     ['High', 'Medium', 'Low'].forEach(priority => {
+                         const option = document.createElement('option');
+                         option.value = priority.toLowerCase();
+                         option.textContent = priority;
+                         prioritySelect.appendChild(option);
+                     });
+              
+                     database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+                         const data = snapshot.val();
+                         if (data?.priority) {
+                             prioritySelect.value = data.priority;
+                             prioritySelect.className = `priority-select priority-${data.priority}`;
+                         }
+                     });
+              
+                     database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
+                         const data = snapshot.val();
+                         const firebasePriority = data?.priority || 'low';
+              
+                         if (prioritySelect.value !== firebasePriority) {
+                             prioritySelect.value = firebasePriority;
+                             prioritySelect.className = `priority-select priority-${firebasePriority}`;
+                         }
+                     });
+              
+                     let debounceTimeout;
+                     prioritySelect.addEventListener('change', (e) => {
+                         const selectedPriority = e.target.value;
+              
+                         clearTimeout(debounceTimeout);
+                         debounceTimeout = setTimeout(async () => {
+                             try {
+                                 await database.ref('priorities/' + sanitizedGroupName).set({
+                                     originalName: group,
+                                     priority: selectedPriority,
+                                 });
+              
+                                 prioritySelect.className = `priority-select priority-${selectedPriority}`;
+              
+                                 const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex);
+                                 createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
+                             } catch (error) {
+                                 console.error('Error updating priority:', error);
+                             }
+                         }, 300);
+                     });
+              
+                     priorityContainer.appendChild(prioritySelect);
+              
+                     groupContent.appendChild(occurrencesDiv);
+                     groupContent.appendChild(groupLabel);
+                     groupContent.appendChild(toggleContainer);
+                     groupContent.appendChild(priorityContainer);
+              
+                     groupTdWrapper.appendChild(groupContent);
+                     groupTr.appendChild(groupTdWrapper);
+              
+                     groupTr.addEventListener('click', (e) => {
+                         if (!e.target.closest('.priority-container') && !e.target.closest('.toggle-container')) {
+                             toggleGroupVisibility(groupIndex, tableBodyId);
+                         }
+                     });
+              
+                     tableBody.appendChild(groupTr);
+              
+                     const headerRow = document.createElement('tr');
+                     headerRow.className = `group-${groupIndex} header-row hidden`;
+                     headers.forEach((header, index) => {
+                         if (![6, 7, 8].includes(index)) {
+                             const th = document.createElement('th');
+                             th.textContent = header;
+                             th.classList.add('tableHead-cell');
+                             headerRow.appendChild(th);
+                         }
+                     });
+              
+                     tableBody.appendChild(headerRow);
+              
+                     rows.forEach((row) => {
+                         const tr = document.createElement('tr');
+                         tr.className = `group-${groupIndex} hidden group-row`;
+              
+                         row.forEach((cell, cellIndex) => {
+                             if (![6, 7, 8].includes(cellIndex)) {
+                                 const td = document.createElement('td');
+                                 if (isValidURL(cell)) {
+                                     const link = document.createElement('a');
+                                     link.href = cell;
+                                     link.textContent = cell;
+                                     link.target = '_blank';
+                                     td.appendChild(link);
+                                 } else {
+                                     td.textContent = cell || '';
+                                 }
+                                 td.classList.add('tableBody-cell');
+                                 tr.appendChild(td);
+                             }
+                         });
+              
+                         tableBody.appendChild(tr);
+                     });
+                 });
+              }
+              
+              function toggleGroupVisibility(groupIndex, tableBodyId) {
+                 const tableBody = document.getElementById(tableBodyId);
+                 const allGroupRows = tableBody.querySelectorAll('tr');
+                 const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
+                 const groupHeader = document.querySelector(`tr.group-header#group-${groupIndex}`);
+                 const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
+              
+                 allGroupRows.forEach((row) => {
+                     if (!row.classList.contains('group-header')) {
+                         row.classList.add('hidden');
+                         row.classList.remove('sticky');
+                     }
+                 });
+              
+                 allGroupRows.forEach((row) => {
+                     if (row.classList.contains('group-header')) {
+                         row.classList.remove('open');
+                     }
+                 });
+              
+                 if (!isGroupCurrentlyOpen) {
+                     groupRows.forEach((row) => {
+                         row.classList.remove('hidden');
+                         if (row.classList.contains('header-row')) {
+                             row.classList.add('sticky');
+                         }
+                     });
+              
+                     if (groupHeader) {
+                         groupHeader.classList.add('open');
+                     }
+                 }
+              }
+              
+              function isValidURL(str) {
+                 if (!str || typeof str !== 'string') return false;
+                 const pattern = new RegExp(
+                     '^(https?:\\/\\/)?' + 
+                     '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
+                     'localhost|' +
+                     '\\d{1,3}(\\.\\d{1,3}){3})' + 
+                     '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?$', 
+                     'i'
+                 );
+                 return pattern.test(str);
+              }
+              
+              (function () {
+                 const tabElements = document.querySelectorAll('.tab');
+                 const tableContainers = document.querySelectorAll('.table-container');
+                
+                 const tableMapping = {
+                     tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
+                     tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
+                     tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
+                     tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
+                     tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
+                     tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
+                     tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
+                     tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
+                     tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
+                 };
+              
+                 preloadExcelData('members-clean.xlsx', 'tableHead1', 'tableBody1', [6, 7, 11, 15]);
+              
+                 const loadedTabs = new Set(['tab1']);
+              
+                 tabElements.forEach((tab) => {
+                     tab.addEventListener('click', () => {
+                         const target = tab.dataset.tab;
+                         if (!loadedTabs.has(target)) {
+                             const { file, tableHead, tableBody } = tableMapping[target];
+                             preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15]);
+                             loadedTabs.add(target);
+                         }
+                         
+                         tabElements.forEach((t) => t.classList.remove('active'));
+                         tab.classList.add('active');
+                         tableContainers.forEach((tc) => tc.classList.remove('active'));
+                         document.getElementById(target).classList.add('active');
+                     });
+                 });
+              
+                 (function () {
+                     function truncateText(selector, maxLength) {
+                         if (typeof maxLength !== 'number' || maxLength <= 0) {
+                             console.error('Invalid maxLength. It must be a positive number.');
+                             return;
+                         }
+              
+                         var elements = document.querySelectorAll(selector);
+                         Array.prototype.forEach.call(elements, function (element) {
+                             var originalText = element.textContent.trim();
+                             if (originalText.length > maxLength) {
+                                 var truncatedText = originalText.substring(0, maxLength) + '...';
+                                 element.textContent = truncatedText;
+                             }
+                         });
+                     }
+              
+                     function observeDynamicText(selector, maxLength) {
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'subtree') {
                 truncateText(selector, maxLength);
             }
+        });
+    });
 
-            observeDynamicText('.group-header > td > div > div.tableBody-cell', 200);
-        })();
-    })();
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+
+    truncateText(selector, maxLength);
+}
+
+observeDynamicText('.group-header > td > div > div.tableBody-cell', 200);
+   })();
+})();
 </script>
-
 
           </div></div>
 </body>
