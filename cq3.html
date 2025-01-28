@@ -465,6 +465,11 @@ input:checked + .slider:before {
     position: absolute;
     z-index: -1;
 }
+.strikethrough {
+    text-decoration: line-through;
+    color: #888;
+}
+
 
     </style>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -671,32 +676,37 @@ This table displays failures identified in the CQ Fluency accessability report, 
               let groupColumnIndex = 5;
               
               async function groupAndSortData(rows, columnIndex) {
-                 const groupedData = rows.reduce((groups, row) => {
-                     const key = row[columnIndex] || 'Undefined';
-                     if (!groups[key]) groups[key] = [];
-                     groups[key].push(row);
-                     return groups;
-                 }, {});
-              
-                 const prioritiesSnapshot = await database.ref('priorities').once('value');
-                 const priorities = prioritiesSnapshot.val() || {};
-              
-                 return Object.entries(groupedData).sort((a, b) => {
-                     const groupA = a[0];
-                     const groupB = b[0];
-                     
-                     const priorityA = (priorities[sanitizeForFirebase(groupA)]?.priority || 'low').toLowerCase();
-                     const priorityB = (priorities[sanitizeForFirebase(groupB)]?.priority || 'low').toLowerCase();
-                     
-                     const priorityOrder = { 'high': 2, 'medium': 1, 'low': 0 };
-                     
-                     if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
-                         return priorityOrder[priorityB] - priorityOrder[priorityA];
-                     }
-                     
-                     return b[1].length - a[1].length;
-                 });
-              }
+    // Group data by the specified column index
+    const groupedData = rows.reduce((groups, row) => {
+        const key = row[columnIndex] || 'Undefined';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+        return groups;
+    }, {});
+
+    // Fetch priorities from Firebase once
+    const prioritiesSnapshot = await database.ref('priorities').once('value');
+    const priorities = prioritiesSnapshot.val() || {};
+
+    // Define priority order
+    const priorityOrder = { high: 3, medium: 2, low: 1, fixed: 0 };
+
+    // Sort the grouped data
+    return Object.entries(groupedData).sort((a, b) => {
+        const priorityA = priorities[sanitizeForFirebase(a[0])]?.priority || 'low';
+        const priorityB = priorities[sanitizeForFirebase(b[0])]?.priority || 'low';
+
+        // Sort by priority
+        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
+            return priorityOrder[priorityB] - priorityOrder[priorityA];
+        }
+
+        // Then sort by group size (number of rows)
+        return b[1].length - a[1].length;
+    });
+}
+
+
               
               function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
                  const loadingElement = document.getElementById('loading');
@@ -822,57 +832,53 @@ This table displays failures identified in the CQ Fluency accessability report, 
                      priorityContainer.className = 'priority-container';
               
                      const prioritySelect = document.createElement('select');
-                     prioritySelect.className = 'priority-select priority-low';
-                     prioritySelect.value = 'low';
-              
-                     ['High', 'Medium', 'Low'].forEach(priority => {
-                         const option = document.createElement('option');
-                         option.value = priority.toLowerCase();
-                         option.textContent = priority;
-                         prioritySelect.appendChild(option);
-                     });
-              
-                     database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
-                         const data = snapshot.val();
-                         if (data?.priority) {
-                             prioritySelect.value = data.priority;
-                             prioritySelect.className = `priority-select priority-${data.priority}`;
-                         }
-                     });
-              
-                     database.ref('priorities/' + sanitizedGroupName).on('value', (snapshot) => {
-                         const data = snapshot.val();
-                         const firebasePriority = data?.priority || 'low';
-              
-                         if (prioritySelect.value !== firebasePriority) {
-                             prioritySelect.value = firebasePriority;
-                             prioritySelect.className = `priority-select priority-${firebasePriority}`;
-                         }
-                     });
-              
-                     let debounceTimeout;
-                     prioritySelect.addEventListener('change', (e) => {
-                         const selectedPriority = e.target.value;
-              
-                         clearTimeout(debounceTimeout);
-                         debounceTimeout = setTimeout(async () => {
-                             try {
-                                 await database.ref('priorities/' + sanitizedGroupName).set({
-                                     originalName: group,
-                                     priority: selectedPriority,
-                                 });
-              
-                                 prioritySelect.className = `priority-select priority-${selectedPriority}`;
-              
-                                 const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex);
-                                 createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
-                             } catch (error) {
-                                 console.error('Error updating priority:', error);
-                             }
-                         }, 300);
-                     });
-              
-                     priorityContainer.appendChild(prioritySelect);
+prioritySelect.className = 'priority-select priority-low';
+prioritySelect.value = 'low';
+
+// Add "High", "Medium", "Low", and "Fixed" options
+['High', 'Medium', 'Low', 'Fixed'].forEach(priority => {
+    const option = document.createElement('option');
+    option.value = priority.toLowerCase();
+    option.textContent = priority;
+    prioritySelect.appendChild(option);
+});
+
+// Initialize Firebase value for priority dropdown
+database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data?.priority) {
+        prioritySelect.value = data.priority;
+        prioritySelect.className = `priority-select priority-${data.priority}`;
+        if (data.priority === 'fixed') {
+            groupLabel.classList.add('strikethrough');
+        }
+    }
+});
+
+// Event listener to handle priority changes
+prioritySelect.addEventListener('change', async (e) => {
+    const selectedPriority = e.target.value;
+
+    await database.ref('priorities/' + sanitizedGroupName).set({
+        originalName: group,
+        priority: selectedPriority,
+    });
+
+    prioritySelect.className = `priority-select priority-${selectedPriority}`;
+
+    if (selectedPriority === 'fixed') {
+        groupLabel.classList.add('strikethrough');
+    } else {
+        groupLabel.classList.remove('strikethrough');
+    }
+
+    // Re-sort and re-render the table dynamically
+    const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex);
+    createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
+});
+
+priorityContainer.appendChild(prioritySelect);
+
               
                      groupContent.appendChild(occurrencesDiv);
                      groupContent.appendChild(groupLabel);
@@ -1011,7 +1017,37 @@ This table displays failures identified in the CQ Fluency accessability report, 
                          document.getElementById(target).classList.add('active');
                      });
                  });
-              
+              document.addEventListener('DOMContentLoaded', () => {
+    // Existing functionality (e.g., preloadExcelData)
+
+    // Sticky header logic
+    const tableContainers = document.querySelectorAll('.table-container');
+
+    tableContainers.forEach(container => {
+        const tableHead = container.querySelector('thead');
+        const tableBodyRows = container.querySelectorAll('tbody tr');
+
+        if (tableHead && tableBodyRows.length) {
+            const lastRow = tableBodyRows[tableBodyRows.length - 1];
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting) {
+                        tableHead.style.position = 'sticky';
+                        tableHead.style.top = '0';
+                    } else {
+                        tableHead.style.position = 'relative';
+                        tableHead.style.top = 'unset';
+                    }
+                },
+                { root: container, threshold: 1.0 }
+            );
+
+            observer.observe(lastRow);
+        }
+    });
+});
+
                  (function () {
                      function truncateText(selector, maxLength) {
                          if (typeof maxLength !== 'number' || maxLength <= 0) {
