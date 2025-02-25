@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest identifier="_6SjjM11oDPg" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+    <lom xmlns="http://www.imsglobal.org/xsd/imsmd_rootv1p2p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd">
+      <general>
+        <title>
+          <langstring xml:lang="x-none">Cultural and Language Requirements for Delivering Care</langstring>
+        </title>
+      </general>
+      <lifecycle>
+        <version>
+          <langstring xml:lang="x-none">1</langstring>
+        </version>
+        <status>
+          <source>
+            <langstring xml:lang="x-none">LOMv1.0</langstring>
+          </source>
+          <value>
+            <langstring xml:lang="x-none">Final</langstring>
+          </value>
+        </status>
+      </lifecycle>
+      <metametadata>
+        <metadatascheme>ADL SCORM 1.2</metadatascheme>
+      </metametadata>
+      <educational>
+        <typicallearningtime>
+          <datetime>PT0H0M0S</datetime>
+        </typicallearningtime>
+      </educational>
+      <rights>
+        <cost>
+          <source>
+            <langstring xml:lang="x-none">LOMv1.0</langstring>
+          </source>
+          <value>
+            <langstring xml:lang="x-none">yes</langstring>
+          </value>
+        </cost>
+        <copyrightandotherrestrictions>
+          <source>
+            <langstring xml:lang="x-none">LOMv1.0</langstring>
+          </source>
+          <value>
+            <langstring xml:lang="x-none">yes</langstring>
+          </value>
+        </copyrightandotherrestrictions>
+      </rights>
+    </lom>
+  </metadata>
+  <organizations default="Cultural_and_Language_Requirements_for_Delivering_Care_ORG">
+    <organization identifier="Cultural_and_Language_Requirements_for_Delivering_Care_ORG">
+      <title>Cultural and Language Requirements for Delivering Care</title>
+      <item identifier="COPD_SCO" isvisible="true" identifierref="__6SjjM11oDPg_RES">
+        <title>Cultural and Language Requirements for Delivering Care</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="__6SjjM11oDPg_RES" type="webcontent" href="index_lms.html" adlcp:scormtype="sco">
+      <file href="story_content/thumbnail.jpg" />
+      <file href="mobile/5fziR4HugjT_P_355_386_1430_761.jpg" />
+      <file href="mobile/5bfh5HZZrGT.png" />
+      <file href="story_content/video_6b9pVYZng7B_18_160_960x540.mp4" />
+      <file href="mobile/poster_6q3Oiknk7X1_video_6b9pVYZng7B_18_160_960x540.jpg" />
+      <file href="story_content/6cVlqvcxrsF_44100_160_0.mp3" />
+      <file href="mobile/5phMblJXGUX_P_323_195_1458_1013.jpg" />
+      <file href="story_content/6TRBNBy3kGp_44100_160_0.mp3" />
+      <file href="story_content/62ywDNMEPGb_44100_160_1.mp3" />
+      <file href="mobile/5fziR4HugjT_P_351_419_340_728.jpg" />
+      <file href="mobile/5rFYzfgkEaJ_P_341_0_1357_1364.jpg" />
+      <file href="mobile/6VqndeM8bip_P_944_180_926_1171.jpg" />
+      <file href="mobile/5x3fs36tByT.png" />
+      <file href="mobile/6nK9PJHt3Fv.png" />
+      <file href="story_content/6eppeYTYIne_44100_160_1.mp3" />
+      <file href="mobile/5euluh3izOX.png" />
+      <file href="mobile/5o6bw93iNn1.png" />
+      <file href="mobile/5n37s80M3wE.png" />
+      <file href="mobile/6J7aTAetp4h.png" />
+      <file href="mobile/6bVEMCsQ4oE_P_0_99_2048_1166.jpg" />
+      <file href="mobile/6YDzFW5Ybfn_P_-7_518_1365_777.jpg" />
+      <file href="mobile/6mbaKU2Efqn_X_P_6_187_2048_1166.jpg" />
+      <file href="mobile/6PdREEHNNmS_P_710_254_1324_776.jpg" />
+      <file href="meta.xml" />
+      <file href="story_content/6QrqVJjrbOy.png" />
+      <file href="story_content/6kPV8uO50Hc.png" />
+      <file href="story_content/6dneAlIYrk9.png" />
+      <file href="story_content/triggers.js" />
+      <file href="story_content/user.js" />
+      <file href="story_content/external_files/Provider_Resources.pdf" />
+      <file href="story_content/external_files/CLAS_Standards.pdf" />
+      <file href="story_content/external_files/1664210-24 BCBSAZ-HC_2024_HCA_Conversation_Starters_Tip_Sheet_For_Providers_v2.pdf" />
+      <file href="mobile/Shape6DsWbLsVJLc.png" />
+      <file href="mobile/Shape6NVVpGRh7RI.png" />
+      <file href="mobile/Shape6AYk3aPs0GS.png" />
+      <file href="mobile/Shape5dzg5lWI8MI.png" />
+      <file href="mobile/Shape5wOlwaMo7Bn.png" />
+      <file href="html5/data/css/output.min.css" />
+      <file href="html5/data/js/5aMYIn2E1Ss.js" />
+      <file href="html5/data/js/5cqHxwZGafu.js" />
+      <file href="html5/data/js/5dsnBzc7zYF.js" />
+      <file href="html5/data/js/5dyB8qSXAv3.js" />
+      <file href="html5/data/js/5fB0lXKDOFm.js" />
+      <file href="html5/data/js/5hjAP3dDodN.js" />
+      <file href="html5/data/js/5i9bGZTpv3n.js" />
+      <file href="html5/data/js/5lrmfKR1S4L.js" />
+      <file href="html5/data/js/5tQxi8QLvBj.js" />
+      <file href="html5/data/js/5uOzzEGZMn1.js" />
+      <file href="html5/data/js/5vqpDYXIfaD.js" />
+      <file href="html5/data/js/5y4YqDAzYEd.js" />
+      <file href="html5/data/js/5zJxVQOVaon.js" />
+      <file href="html5/data/js/6gDHRYtfeIG.js" />
+      <file href="html5/data/js/6iETxfQ0b6E.js" />
+      <file href="html5/data/js/6Iz4q5GxkZt.js" />
+      <file href="html5/data/js/6l2eJJDvKxn.js" />
+      <file href="html5/data/js/6pakr4fOXwU.js" />
+      <file href="html5/data/js/6V7GfTC4l10.js" />
+      <file href="html5/data/js/6VX1APhhHHC.js" />
+      <file href="html5/data/js/6WdHxX2A7an.js" />
+      <file href="html5/data/js/data.js" />
+      <file href="html5/data/js/frame.js" />
+      <file href="html5/data/js/paths.js" />
+      <file href="html5/lib/scripts/bootstrapper.min.js" />
+      <file href="html5/lib/scripts/frame.desktop.min.js" />
+      <file href="html5/lib/scripts/frame.mobile.min.js" />
+      <file href="html5/lib/scripts/slides.min.js" />
+      <file href="html5/lib/stylesheets/desktop.min.css" />
+      <file href="html5/lib/stylesheets/mobile.min.css" />
+      <file href="html5/lib/stylesheets/mobile-fonts/open-sans-bold.woff" />
+      <file href="html5/lib/stylesheets/mobile-fonts/open-sans-light.woff" />
+      <file href="html5/lib/stylesheets/mobile-fonts/open-sans-regular.woff" />
+      <file href="analytics-frame.html" />
+      <file href="story.html" />
+      <file href="index_lms.html" />
+      <file href="lms/AICCComm.html" />
+      <file href="lms/blank.html" />
+      <file href="lms/browsersniff.js" />
+      <file href="lms/goodbye.html" />
+      <file href="lms/scormdriver.js" />
+    </resource>
+  </resources>
+</manifest>
