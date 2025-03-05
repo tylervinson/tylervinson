@@ -139,6 +139,38 @@
             display: none;
         }
         
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        .pdf-links-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .pdf-links-table th,
+        .pdf-links-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        
+        .pdf-links-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        .pdf-links-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .pdf-links-table tr:hover {
+            background-color: #f0f0f0;
+        }
+        
         footer {
             margin-top: 30px;
             text-align: center;
@@ -178,6 +210,25 @@
     <div id="outputContainer" class="container" style="display: none;">
         <h2>Results</h2>
         <div id="urlCount" class="url-count"></div>
+        
+        <!-- Added table for displaying clickable links -->
+        <div class="output-section">
+            <h3>PDF Links</h3>
+            <div class="table-container">
+                <table id="linksTable" class="pdf-links-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>PDF URL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linksTableBody">
+                        <!-- Links will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
         <div class="output-section">
             <label for="result"><strong>XML Output:</strong></label>
             <pre id="result"></pre>
@@ -329,10 +380,35 @@
             // Generate XML
             const xmlOutput = createXmlOutput(pdfUrls);
             
-            // Display results
+            // Display results in the XML output area
             const resultElement = document.getElementById('result');
             resultElement.textContent = xmlOutput;
             resultElement.style.display = 'block';
+            
+            // Populate the table with clickable links
+            const tableBody = document.getElementById('linksTableBody');
+            tableBody.innerHTML = ''; // Clear previous results
+            
+            pdfUrls.forEach((url, index) => {
+                const row = document.createElement('tr');
+                
+                // Number column
+                const numCell = document.createElement('td');
+                numCell.textContent = index + 1;
+                row.appendChild(numCell);
+                
+                // URL column with clickable link
+                const urlCell = document.createElement('td');
+                const link = document.createElement('a');
+                link.href = url;
+                link.textContent = url;
+                link.target = '_blank'; // Open in new tab
+                link.rel = 'noopener noreferrer'; // Security best practice
+                urlCell.appendChild(link);
+                row.appendChild(urlCell);
+                
+                tableBody.appendChild(row);
+            });
             
             // Show output container and download button
             document.getElementById('outputContainer').style.display = 'block';
