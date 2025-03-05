@@ -64,7 +64,7 @@
         
         button {
             background-color: var(--primary-color);
-         
+           
             border: none;
             padding: 10px 20px;
             font-size: 16px;
@@ -230,9 +230,10 @@
         </div>
         
         <div class="output-section">
-            <label for="result"><strong>XML Output:</strong></label>
-            <pre id="result"></pre>
-            <button id="downloadBtn" class="download-btn" onclick="downloadXml()">Download XML</button>
+            <button id="downloadBtn" class="download-btn" onclick="downloadXml()">Download XML File</button>
+            <div id="xmlSuccess" style="display: none; color: var(--success-color); margin-top: 10px;">
+                XML file ready for download
+            </div>
         </div>
     </div>
     
@@ -366,6 +367,9 @@
             reader.readAsText(file);
         }
 
+        // Store XML content globally for download
+        let generatedXmlContent = '';
+        
         /**
          * Process input text and display results
          * @param {string} text - Text to process
@@ -377,13 +381,8 @@
             // Update UI with results
             document.getElementById('urlCount').textContent = `Found ${pdfUrls.length} PDF URLs`;
             
-            // Generate XML
-            const xmlOutput = createXmlOutput(pdfUrls);
-            
-            // Display results in the XML output area
-            const resultElement = document.getElementById('result');
-            resultElement.textContent = xmlOutput;
-            resultElement.style.display = 'block';
+            // Generate XML and store it for download
+            generatedXmlContent = createXmlOutput(pdfUrls);
             
             // Populate the table with clickable links
             const tableBody = document.getElementById('linksTableBody');
@@ -412,6 +411,7 @@
             
             // Show output container and download button
             document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('xmlSuccess').style.display = 'none';
             
             if (pdfUrls.length > 0) {
                 document.getElementById('downloadBtn').style.display = 'inline-block';
@@ -424,13 +424,15 @@
          * Download the XML output as a file
          */
         function downloadXml() {
-            const xmlContent = document.getElementById('result').textContent;
-            const blob = new Blob([xmlContent], { type: 'application/xml' });
+            const blob = new Blob([generatedXmlContent], { type: 'application/xml' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'pdf_links.xml';
             link.click();
             URL.revokeObjectURL(link.href);
+            
+            // Show success message
+            document.getElementById('xmlSuccess').style.display = 'block';
         }
 
         /**
