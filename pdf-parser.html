@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF URL Parser</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1, h2 {
+            color: var(--primary-color);
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .input-section, .output-section {
+            margin-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            margin-bottom: 10px;
+            resize: vertical;
+        }
+        
+        .file-upload {
+            margin-bottom: 15px;
+        }
+        
+        .file-upload label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        #result {
+            background-color: #f5f5f5;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            overflow-x: auto;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--success-color);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .url-count {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .download-btn {
+            background-color: var(--success-color);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF URL Parser</h1>
+    
+    <div class="container">
+        <p>This tool extracts URLs ending with .pdf from text and generates an XML file with numbered, clickable links.</p>
+        
+        <div class="tab-container">
+            <button class="tab active" onclick="openTab(event, 'textTab')">Enter Text</button>
+            <button class="tab" onclick="openTab(event, 'fileTab')">Upload File</button>
+        </div>
+        
+        <div id="textTab" class="tab-content active">
+            <div class="input-section">
+                <label for="inputText"><strong>Paste your text containing PDF URLs:</strong></label>
+                <textarea id="inputText" placeholder="Paste text containing PDF URLs here..."></textarea>
+                <button onclick="processText()">Extract PDF URLs</button>
+            </div>
+        </div>
+        
+        <div id="fileTab" class="tab-content">
+            <div class="file-upload">
+                <label for="inputFile"><strong>Upload a text file containing PDF URLs:</strong></label>
+                <input type="file" id="inputFile" accept=".txt,.html,.md,.csv,.json">
+                <button onclick="processFile()">Extract PDF URLs</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="outputContainer" class="container" style="display: none;">
+        <h2>Results</h2>
+        <div id="urlCount" class="url-count"></div>
+        <div class="output-section">
+            <label for="result"><strong>XML Output:</strong></label>
+            <pre id="result"></pre>
+            <button id="downloadBtn" class="download-btn" onclick="downloadXml()">Download XML</button>
+        </div>
+    </div>
+    
+    <footer>
+        PDF URL Parser - Extract and organize PDF links easily
+    </footer>
+
+    <script>
+        /**
+         * Extract all URLs ending with .pdf from the given text
+         * @param {string} text - The text to parse for PDF URLs
+         * @returns {string[]} Array of PDF URLs found in the text
+         */
+        function extractPdfUrls(text) {
+            // Regular expression to match URLs ending with .pdf
+            const pattern = /https?:\/\/[^\s<>"]+\.pdf\b/g;
+            
+            // Find all matches in the text
+            const pdfUrls = text.match(pattern) || [];
+            
+            return pdfUrls;
+        }
+
+        /**
+         * Create an XML document with numbered, clickable PDF links
+         * @param {string[]} pdfUrls - Array of PDF URLs to include in the XML
+         * @returns {string} XML document as a string
+         */
+        function createXmlOutput(pdfUrls) {
+            // Create XML document
+            const xmlDoc = document.implementation.createDocument(null, "PDFLinks");
+            const root = xmlDoc.documentElement;
+            
+            // Add each PDF URL as a numbered link element
+            pdfUrls.forEach((url, index) => {
+                const linkElement = xmlDoc.createElement("Link");
+                
+                // Add number attribute
+                linkElement.setAttribute("number", (index + 1).toString());
+                
+                // Add URL attribute
+                linkElement.setAttribute("url", url);
+                
+                // Add clickable text content
+                const linkText = xmlDoc.createTextNode(`PDF Link ${index + 1}: ${url}`);
+                linkElement.appendChild(linkText);
+                
+                // Add to root element
+                root.appendChild(linkElement);
+            });
+            
+            // Format the XML with proper indentation
+            const serializer = new XMLSerializer();
+            const xmlString = serializer.serializeToString(xmlDoc);
+            
+            // Format the XML with proper indentation
+            return formatXml(xmlString);
+        }
+
+        /**
+         * Basic XML formatter to add indentation
+         * @param {string} xml - XML string to format
+         * @returns {string} Formatted XML string
+         */
+        function formatXml(xml) {
+            let formatted = '';
+            let indent = '';
+            const tab = '  '; // 2 spaces for indentation
+            
+            xml.split(/>\s*</).forEach(node => {
+                if (node.match(/^\/\w/)) { 
+                    // Closing tag
+                    indent = indent.substring(tab.length);
+                }
+                
+                formatted += indent + '<' + node + '>\n';
+                
+                if (node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith("?")) { 
+                    // Opening tag and not self-closing
+                    indent += tab;
+                }
+            });
+            
+            // Clean up the result
+            return formatted
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/<\?/g, '<?')
+                .replace(/\?>/g, '?>')
+                .replace(/<\//g, '</')
+                .replace(/^\s*[\r\n]/gm, '');
+        }
+
+        /**
+         * Process text input and generate XML
+         */
+        function processText() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                alert('Please enter some text to parse.');
+                return;
+            }
+            
+            processInput(text);
+        }
+
+        /**
+         * Process file input and generate XML
+         */
+        function processFile() {
+            const fileInput = document.getElementById('inputFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                processInput(text);
+            };
+            reader.onerror = function() {
+                alert('Error reading the file.');
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * Process input text and display results
+         * @param {string} text - Text to process
+         */
+        function processInput(text) {
+            // Extract PDF URLs
+            const pdfUrls = extractPdfUrls(text);
+            
+            // Update UI with results
+            document.getElementById('urlCount').textContent = `Found ${pdfUrls.length} PDF URLs`;
+            
+            // Generate XML
+            const xmlOutput = createXmlOutput(pdfUrls);
+            
+            // Display results
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = xmlOutput;
+            resultElement.style.display = 'block';
+            
+            // Show output container and download button
+            document.getElementById('outputContainer').style.display = 'block';
+            
+            if (pdfUrls.length > 0) {
+                document.getElementById('downloadBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('downloadBtn').style.display = 'none';
+            }
+        }
+
+        /**
+         * Download the XML output as a file
+         */
+        function downloadXml() {
+            const xmlContent = document.getElementById('result').textContent;
+            const blob = new Blob([xmlContent], { type: 'application/xml' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'pdf_links.xml';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        /**
+         * Switch between tabs
+         */
+        function openTab(evt, tabName) {
+            // Hide all tab content
+            const tabContent = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContent.length; i++) {
+                tabContent[i].classList.remove('active');
+            }
+            
+            // Deactivate all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // Show the selected tab content and activate the tab
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
