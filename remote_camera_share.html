@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Remote Camera Share</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    video { width: 90%; max-width: 600px; border: 1px solid #ccc; margin-top: 20px; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Remote Camera Share</h1>
+  <p>This demo streams your front camera using WebRTC in-browser.</p>
+  <button onclick="startCamera()">Start Front Camera</button>
+  <video id="localVideo" autoplay playsinline muted></video>
+
+  <script>
+    async function startCamera() {
+      try {
+        const constraints = {
+          video: {
+            facingMode: "user"
+          },
+          audio: false
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('localVideo').srcObject = stream;
+      } catch (err) {
+        alert("Error accessing camera: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
