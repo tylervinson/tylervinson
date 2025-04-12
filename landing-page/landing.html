@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animated Landing Page</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="logo">logo</div>
+    <button class="try-btn">TRY FREE</button>
+    <div class="menu-icon">&#9776;</div>
+  </header>
+
+  <section class="cards" id="cardSection">
+    <div class="card" data-page="experience">
+      <img src="https://img.icons8.com/ios-filled/50/000000/combo-chart.png" class="icon" alt="chart" />
+      <h2>Provide personalized experiences.</h2>
+      <p>Guide people through complex data with real-time, interactive dashboards crafted to tell data stories.</p>
+    </div>
+    <div class="card" data-page="insights">
+      <img src="https://img.icons8.com/ios-filled/50/000000/pie-chart--v1.png" class="icon" alt="pie" />
+      <h2>Deliver visual insights to teams anywhere.</h2>
+      <p>Use data visualizations to spark real-time insights and on-the-fly analytics on any desktop or mobile device.</p>
+    </div>
+    <div class="card" data-page="decisions">
+      <img src="https://img.icons8.com/ios-filled/50/000000/idea.png" class="icon" alt="idea" />
+      <h2>Empower smart decisions.</h2>
+      <p>Help teams make a measurable business impact by showing them what the data is saying—and what to do about it.</p>
+    </div>
+  </section>
+
+  <div class="detail-page" id="detailPage">
+    <div id="detailContent"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
