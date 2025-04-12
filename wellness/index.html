@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Behavioral Health Journey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Scene 1: Welcome -->
+    <section id="scene-welcome" class="scene active">
+      <h1>Welcome to Your Behavioral Health Journey</h1>
+      <p>Embark on a mindful journey to explore and enrich your well-being.</p>
+      <button id="btn-start">Begin Your Journey</button>
+    </section>
+
+    <!-- Scene 2: Self-Awareness & Reflection -->
+    <section id="scene-reflection" class="scene">
+      <h2>How are you feeling today?</h2>
+      <div class="choices">
+        <button class="choice" data-feeling="Calm">Calm</button>
+        <button class="choice" data-feeling="Tense">Tense</button>
+        <button class="choice" data-feeling="Overwhelmed">Overwhelmed</button>
+      </div>
+    </section>
+
+    <!-- Additional scenes would follow a similar structure -->
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

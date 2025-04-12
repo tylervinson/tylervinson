@@ -1,0 +1,19 @@
+[
+    {
+      "side": "left",
+      "message": "Hi, how are you?"
+    },
+    {
+      "side": "right",
+      "message": "I'm doing great, thanks! <strong>How about you?</strong>"
+    },
+    {
+      "side": "left",
+      "message": "I'm fine too, just busy with work."
+    },
+    {
+      "side": "right",
+      "message": "That sounds challenging—hope you find some time to relax! <em>Take care.</em>"
+    }
+  ]
+  

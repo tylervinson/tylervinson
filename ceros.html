@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Ceros Animation with Split Background</title>
+                <style>
+                    /* Reset Styles */
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+            
+                    /* Full-width wrapper with fixed height */
+                    .hero-wrapper {
+                        position: relative;
+                        width: 100%;
+                        height: 565px; /* Fixed height */
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        overflow: hidden;
+                    }
+            
+                    /* Pseudo-elements for background colors */
+                    .hero-wrapper::before,
+                    .hero-wrapper::after {
+                        content: "";
+                        position: absolute;
+                        top: 0;
+                        width: 50vw; /* Each covers half the viewport width */
+                        height: 565px; /* Match the hero section height */
+                        z-index: -1; /* Behind the content */
+                    }
+            
+                    .hero-wrapper::before {
+                        left: 0;
+                        background-color: #ff0000; /* Left background color */
+                    }
+            
+                    .hero-wrapper::after {
+                        right: 0;
+                        background-color: #0000ff; /* Right background color */
+                    }
+            
+                    /* Centered content area */
+                    .hero-content {
+                        width: 1280px; /* Fixed width */
+                        max-width: 100%;
+                        height: 565px; /* Fixed height to match */
+                        position: relative;
+                        z-index: 1;
+                        background-color: white; /* Optional: adds contrast */
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        text-align: center;
+                        padding: 20px;
+                        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+                    }
+            
+                    /* Example Ceros iframe */
+                    .ceros-animation {
+                        width: 100%;
+                        height: 556px; /* Adjust as needed */
+                        border: none;
+                        background: lightgray; /* Placeholder color */
+                    }
+                </style>
+            </head>
+            <body>
+            
+                <div class="hero-wrapper">
+                    <div class="hero-content">
+                        <div style='position: relative;width: auto;padding: 0 0 56.25%;height: 0;top: 0;left: 0;bottom: 0;right: 0;margin: 0;border: 0 none' id="experience-67d494d229058" data-aspectRatio="1.77777778"><iframe allowfullscreen src='https://view.ceros.com/az-blue/hero' style='position: absolute;top: 0;left: 0;bottom: 0;right: 0;margin: 0;padding: 0;border: 0 none;height: 1px;width: 1px;min-height: 100%;min-width: 100%' frameborder='0' class='ceros-experience' title='Hero' scrolling='no'></iframe></div><script type="text/javascript" src="https://view.ceros.com/scroll-proxy.min.js" data-ceros-origin-domains="view.ceros.com"></script>
+                    </div>
+                </div>
+            
+            </body>
+            </html>
+            

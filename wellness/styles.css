@@ -1,0 +1,34 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f0f8ff;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  #app {
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+  }
+  
+  .scene {
+    display: none;
+    transition: opacity 0.5s ease;
+  }
+  
+  .scene.active {
+    display: block;
+    opacity: 1;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 1em;
+    margin: 10px;
+    cursor: pointer;
+  }
+  
