@@ -1,40 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Animated Landing Page</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="header">
-    <div class="logo">logo</div>
-    <button class="try-btn">TRY FREE</button>
-    <div class="menu-icon">&#9776;</div>
-  </header>
-
-  <section class="cards" id="cardSection">
-    <div class="card" data-page="experience">
-      <img src="https://img.icons8.com/ios-filled/50/000000/combo-chart.png" class="icon" alt="chart" />
-      <h2>Provide personalized experiences.</h2>
-      <p>Guide people through complex data with real-time, interactive dashboards crafted to tell data stories.</p>
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing Page</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <img src="logo-light.svg" class="logo" id="siteLogo" alt="Logo" />
+      </div>
+      
+      <!-- <button class="try-btn desktop-only">24/7 Help</button> -->
+      <div class="menu-icon" id="menuToggle">&#9776;</div>
+    </header>
+    
+    <nav class="mobile-menu" id="mobileMenu">
+      <!-- <button class="try-btn mobile-only">24/7 Help</button> -->
+      <div class="theme-switch">
+        <input type="checkbox" id="themeToggle" />
+        <label for="themeToggle" class="switch"></label>
+        <span style="margin-left: 0.5rem;">Dark Mode</span>
+      </div>
+    </nav>
+    
+    
+  
+    <section class="cards" id="cardSection">
+      <div class="card" data-page="experience">
+        <img src="1.svg" class="icon" alt="chart" />
+        <h2>Your Benefits</h2>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
+      </div>
+      <div class="card" data-page="insights">
+        <img src="2.svg" class="icon" alt="pie" />
+        <h2>Rapid Help</h2>
+        <p>Integer id leo accumsan, feugiat quam vitae, porttitor sem.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="3.svg" class="icon" alt="idea" />
+        <h2>Health Advisor</h2>
+        <p>Mauris non erat vel sem auctor lacinia eget ut risus.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="4.svg" class="icon" alt="idea" />
+        <h2>Prosano Circle</h2>
+        <p>Vestibulum efficitur lectus at orci fermentum, a molestie mi viverra.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="5.svg" class="icon" alt="idea" />
+        <h2>Pharmacy Help</h2>
+        <p>Nunc eget dui quis risus pellentesque fermentum quis non tellus.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="6.svg" class="icon" alt="idea" />
+        <h2>Get Care</h2>
+        <p>Vivamus efficitur tortor vitae arcu vulputate feugiat.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="7.svg" class="icon" alt="idea" />
+        <h2>Your Plan</h2>
+        <p>In nec dui cursus, facilisis dui a, mattis urna.</p>
+      </div>
+      <div class="card" data-page="decisions">
+        <img src="8.svg" class="icon" alt="idea" />
+        <h2>Wellness</h2>
+        <p>Etiam commodo ex at porttitor sagittis.</p>
+      </div>
+    </section>
+  
+    <div class="detail-page" id="detailPage">
+      <div id="detailContent"></div>
     </div>
-    <div class="card" data-page="insights">
-      <img src="https://img.icons8.com/ios-filled/50/000000/pie-chart--v1.png" class="icon" alt="pie" />
-      <h2>Deliver visual insights to teams anywhere.</h2>
-      <p>Use data visualizations to spark real-time insights and on-the-fly analytics on any desktop or mobile device.</p>
-    </div>
-    <div class="card" data-page="decisions">
-      <img src="https://img.icons8.com/ios-filled/50/000000/idea.png" class="icon" alt="idea" />
-      <h2>Empower smart decisions.</h2>
-      <p>Help teams make a measurable business impact by showing them what the data is saying—and what to do about it.</p>
-    </div>
-  </section>
+  
+    <script src="script.js"></script>
+  </body>
+  </html>
+  
 
-  <div class="detail-page" id="detailPage">
-    <div id="detailContent"></div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
-</html>
+
+  
