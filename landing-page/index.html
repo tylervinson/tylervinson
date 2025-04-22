@@ -1,84 +1,154 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Landing Page</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="header">
-      <div class="logo">
-        <img src="logo-light.svg" class="logo" id="siteLogo" alt="Logo" />
-      </div>
-      
-      <!-- <button class="try-btn desktop-only">24/7 Help</button> -->
-      <div class="menu-icon" id="menuToggle">&#9776;</div>
-    </header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landing Page</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div>
+  <header class="header">
+    <div class="logo">
+      <img src="logo-light.svg" class="logo" id="siteLogo" alt="Logo" />
+    </div>
+    <div class="menu-icon" id="menuToggle">&#9776;</div>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="theme-switch">
+      <input type="checkbox" id="themeToggle" />
+      <label for="themeToggle" class="switch"></label>
+      <span style="margin-left: 0.5rem;">Dark Mode</span>
+    </div>
+  </nav>
+
+  <section class="cards" id="cardSection">
+    <div class="card" data-page="wellness">
+      <img src="8.svg" class="icon" alt="idea" />
+      <h2>Wellness</h2>
+      <p>Etiam commodo ex at porttitor sagittis.</p>
+    </div>
+    <div class="card disabled">
+      <img src="1.svg" class="icon" alt="chart" />
+      <h2>Your Benefits</h2>
+      <p>Curabitur venenatis velit nec mattis sagittis.</p>
+    </div>
+    <div class="card disabled">
+      <img src="2.svg" class="icon" alt="pie" />
+      <h2>Rapid Help</h2>
+      <p>Integer id leo accumsan, feugiat quam vitae, porttitor sem.</p>
+    </div>
+    <div class="card disabled">
+      <img src="3.svg" class="icon" alt="idea" />
+      <h2>Health Advisor</h2>
+      <p>Mauris non erat vel sem auctor lacinia eget ut risus.</p>
+    </div>
+    <div class="card disabled">
+      <img src="4.svg" class="icon" alt="idea" />
+      <h2>Prosano Circle</h2>
+      <p>Vestibulum efficitur lectus at orci fermentum, a molestie mi viverra.</p>
+    </div>
+    <div class="card disabled">
+      <img src="5.svg" class="icon" alt="idea" />
+      <h2>Pharmacy Help</h2>
+      <p>Nunc eget dui quis risus pellentesque fermentum quis non tellus.</p>
+    </div>
+    <div class="card disabled">
+      <img src="6.svg" class="icon" alt="idea" />
+      <h2>Get Care</h2>
+      <p>Vivamus efficitur tortor vitae arcu vulputate feugiat.</p>
+    </div>
+    <div class="card disabled">
+      <img src="7.svg" class="icon" alt="idea" />
+      <h2>Your Plan</h2>
+      <p>In nec dui cursus, facilisis dui a, mattis urna.</p>
+    </div>
     
-    <nav class="mobile-menu" id="mobileMenu">
-      <!-- <button class="try-btn mobile-only">24/7 Help</button> -->
-      <div class="theme-switch">
-        <input type="checkbox" id="themeToggle" />
-        <label for="themeToggle" class="switch"></label>
-        <span style="margin-left: 0.5rem;">Dark Mode</span>
-      </div>
-    </nav>
-    
-    
+  </section>
   
-    <section class="cards" id="cardSection">
-      <div class="card" data-page="experience">
-        <img src="1.svg" class="icon" alt="chart" />
+
+  <div class="detail-page" id="detailPage">
+    <div id="detailContent">
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Your Benefits</h2>
         <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="insights">
-        <img src="2.svg" class="icon" alt="pie" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Rapid Help</h2>
-        <p>Integer id leo accumsan, feugiat quam vitae, porttitor sem.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="3.svg" class="icon" alt="idea" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Health Advisor</h2>
-        <p>Mauris non erat vel sem auctor lacinia eget ut risus.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="4.svg" class="icon" alt="idea" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Prosano Circle</h2>
-        <p>Vestibulum efficitur lectus at orci fermentum, a molestie mi viverra.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="5.svg" class="icon" alt="idea" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Pharmacy Help</h2>
-        <p>Nunc eget dui quis risus pellentesque fermentum quis non tellus.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="6.svg" class="icon" alt="idea" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Get Care</h2>
-        <p>Vivamus efficitur tortor vitae arcu vulputate feugiat.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="7.svg" class="icon" alt="idea" />
+      <div id="detail-experience" class="detail-block" style="display: none;">
         <h2>Your Plan</h2>
-        <p>In nec dui cursus, facilisis dui a, mattis urna.</p>
+        <p>Curabitur venenatis velit nec mattis sagittis.</p>
       </div>
-      <div class="card" data-page="decisions">
-        <img src="8.svg" class="icon" alt="idea" />
-        <h2>Wellness</h2>
-        <p>Etiam commodo ex at porttitor sagittis.</p>
+      <!-- Repeat for each card -->
+      
+      <div id="step1" class="step-section" style="background-image: url('step1.png')">
+        <h2 class="stat-title">2x</h2>
+        <p class="stat-sub">By age 30 smokers report a 2x increase in respiratory infections.</p>
+        <div class="stat-box" id="tooltip">
+          <p>Your lungs are working at peak capacity. You skipped the sick days and weekend couch time most smokers deal with.</p>
+          <div class="nav">
+            <span>1 of 4</span>
+            <button onclick="goToStep(2)">&#9660;</button>
+          </div>
+        </div>
       </div>
-    </section>
-  
-    <div class="detail-page" id="detailPage">
-      <div id="detailContent"></div>
+
+      <div id="step2" class="step-section" style="background-image: url('step2.png'); display: none;">
+        <h2 class="stat-title">50%</h2>
+        <p class="stat-sub">By age 50, 50% of long-term smokers experience smoking-related illnesses.</p>
+        <div class="stat-box" id="tooltip2">
+          <p>You avoided chronic disease by this point — more energy, fewer appointments, stronger health every year.</p>
+          <div class="nav">
+            <span>2 of 4</span>
+            <button onclick="goToStep(3)">&#9660;</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="step3" class="step-section" style="background-image: url('step3.png'); display: none;">
+        <h2 class="stat-title">90%</h2>
+        <p class="stat-sub">Quitting before age 40 reduces risk of death from smoking-related disease by 90%.</p>
+        <div class="stat-box" id="tooltip3">
+          <p>You're not just surviving, you're thriving — heart and lungs are strong, and life feels full.</p>
+          <div class="nav">
+            <span>3 of 4</span>
+            <button onclick="goToStep(4)">&#9660;</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="step4" class="step-section" style="background-image: url('step4.png'); display: none;">
+        <h2 class="stat-title">+10 yrs</h2>
+        <p class="stat-sub">Quitting smoking early can add up to 10 years of healthy life.</p>
+        <div class="stat-box" id="tooltip4">
+          <p>All this extra time — with family, outdoors, or just living well — came from one powerful decision.</p>
+          <div class="nav">
+            <span>4 of 4</span>
+          </div>
+        </div>
+      </div>
     </div>
-  
-    <script src="script.js"></script>
-  </body>
-  </html>
-  
+  </div>
 
-
-
-  
+  <script src="script.js"></script>
+</body>
+</html>

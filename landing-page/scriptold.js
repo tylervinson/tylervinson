@@ -1,4 +1,4 @@
-// ID: landingScript_v2.4
+// ID: landingScript_v2.1
 
 window.addEventListener('load', function () {
   const cards = document.querySelectorAll('.card');
@@ -9,6 +9,10 @@ window.addEventListener('load', function () {
   const mobileMenu = document.getElementById('mobileMenu');
   const themeToggleCheckbox = document.getElementById('themeToggle');
   const siteLogo = document.getElementById('siteLogo');
+
+  // === Dark Mode Toggle + Logo Swap ===
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const savedTheme = localStorage.getItem('theme');
 
   function setThemeMode(isDark) {
     if (isDark) {
@@ -24,9 +28,6 @@ window.addEventListener('load', function () {
     }
   }
 
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const savedTheme = localStorage.getItem('theme');
-
   if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
     setThemeMode(true);
   } else {
@@ -37,12 +38,14 @@ window.addEventListener('load', function () {
     setThemeMode(this.checked);
   });
 
+  // === Hamburger Menu Toggle ===
   if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', function () {
       mobileMenu.classList.toggle('show');
     });
   }
 
+  // === Card Reset Animation ===
   function animateCardsIn() {
     cards.forEach(function (card) {
       card.classList.remove('slide-out', 'show', 'start');
@@ -57,24 +60,22 @@ window.addEventListener('load', function () {
     });
   }
 
+  // === Card Click → Detail View ===
   function onCardClick(e) {
     const clickedCard = e.currentTarget;
     const clickedIndex = Array.from(cards).indexOf(clickedCard);
+
+    const icon = clickedCard.querySelector('.icon').outerHTML;
     const title = clickedCard.querySelector('h2').textContent;
-    const dataPage = clickedCard.getAttribute('data-page');
+    const paragraph = clickedCard.querySelector('p').textContent;
 
-    let closeBtn;
+    const detailHTML = `
+      <button class="close-btn" aria-label="Close">×</button>
+      ${icon}
+      <h2>${title}</h2>
+      <p>${paragraph}</p>
+    `;
 
-    // Determine source of content
-    if (title === 'Wellness') {
-      const step1 = document.getElementById('step1');
-      detailContent.innerHTML = step1 ? step1.outerHTML : '';
-    } else {
-      const detailBlock = document.getElementById('detail-' + dataPage);
-      detailContent.innerHTML = detailBlock ? detailBlock.innerHTML : '';
-    }
-
-    // Animate out cards
     cards.forEach(function (card, index) {
       const delay = Math.abs(index - clickedIndex) * 150;
       setTimeout(function () {
@@ -85,37 +86,33 @@ window.addEventListener('load', function () {
     const maxDelay = (cards.length - 1) * 150 + 200;
     setTimeout(function () {
       detailPage.classList.add('show');
+      detailContent.innerHTML = detailHTML;
 
-      // Set up close button
-      closeBtn = document.querySelector('.close-btn');
-      if (!closeBtn) {
-        closeBtn = document.createElement('button');
-        closeBtn.className = 'close-btn';
-        closeBtn.setAttribute('aria-label', 'Close');
-        closeBtn.innerHTML = '&times;';
-        detailContent.appendChild(closeBtn);
-      }
+      setTimeout(function () {
+        const closeBtn = document.querySelector('.close-btn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            detailPage.classList.remove('show');
 
-      closeBtn.addEventListener('click', function () {
-        detailPage.classList.remove('show');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Reset inline styles before animating cards back in
+            cards.forEach(function (card) {
+              card.classList.remove('show', 'slide-out');
+              card.classList.add('start');
+            });
 
-        cards.forEach(function (card) {
-          card.classList.remove('show', 'slide-out');
-          card.classList.add('start');
-        });
+            void document.body.offsetHeight;
 
-        void document.body.offsetHeight;
-
-        setTimeout(function () {
-          cards.forEach(function (card, index) {
             setTimeout(function () {
-              card.classList.remove('start');
-              card.classList.add('show');
-            }, index * 200);
+              cards.forEach(function (card, index) {
+                setTimeout(function () {
+                  card.classList.remove('start');
+                  card.classList.add('show');
+                }, index * 200);
+              });
+            }, 400);
           });
-        }, 400);
-      });
+        }
+      }, 50);
     }, maxDelay);
   }
 
@@ -123,9 +120,11 @@ window.addEventListener('load', function () {
     card.addEventListener('click', onCardClick);
   });
 
+  // === Initial Animation
   animateCardsIn();
 });
 
+// === Timeline Step Navigation ===
 function goToStep(stepNumber) {
   var current = document.querySelector('.step-section:not([style*="display: none"])');
   var next = document.getElementById('step' + stepNumber);
@@ -139,4 +138,4 @@ function goToStep(stepNumber) {
     next.style.display = 'flex';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 400);
-} // End landingScript_v2.4
+}
