@@ -1,5 +1,3 @@
-// ID: landingScript_v2.4
-
 window.addEventListener('load', function () {
   const cards = document.querySelectorAll('.card');
   const detailPage = document.getElementById('detailPage');
@@ -65,16 +63,15 @@ window.addEventListener('load', function () {
 
     let closeBtn;
 
-    // Determine source of content
     if (title === 'Wellness') {
-      const step1 = document.getElementById('step1');
-      detailContent.innerHTML = step1 ? step1.outerHTML : '';
+      const steps = document.querySelectorAll('.step-section');
+      detailContent.innerHTML = '';
+      steps.forEach(step => detailContent.appendChild(step.cloneNode(true)));
     } else {
       const detailBlock = document.getElementById('detail-' + dataPage);
       detailContent.innerHTML = detailBlock ? detailBlock.innerHTML : '';
     }
 
-    // Animate out cards
     cards.forEach(function (card, index) {
       const delay = Math.abs(index - clickedIndex) * 150;
       setTimeout(function () {
@@ -86,7 +83,6 @@ window.addEventListener('load', function () {
     setTimeout(function () {
       detailPage.classList.add('show');
 
-      // Set up close button
       closeBtn = document.querySelector('.close-btn');
       if (!closeBtn) {
         closeBtn = document.createElement('button');
@@ -120,18 +116,21 @@ window.addEventListener('load', function () {
   }
 
   cards.forEach(function (card) {
-    card.addEventListener('click', onCardClick);
+    if (!card.classList.contains('disabled')) {
+      card.addEventListener('click', onCardClick);
+    }
   });
 
   animateCardsIn();
 });
 
 function goToStep(stepNumber) {
-  var current = document.querySelector('.step-section:not([style*="display: none"])');
-  var next = document.getElementById('step' + stepNumber);
+  const current = document.querySelector('.step-section:not([style*="display: none"])');
+  const next = document.getElementById('step' + stepNumber);
+  const prev = document.getElementById('step' + (stepNumber - 2));
   if (!next) return;
 
-  var tooltip = current.querySelector('.stat-box');
+  const tooltip = current.querySelector('.stat-box');
   tooltip.style.animation = 'fadeOutDown 0.4s ease both';
 
   setTimeout(function () {
@@ -139,4 +138,4 @@ function goToStep(stepNumber) {
     next.style.display = 'flex';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 400);
-} // End landingScript_v2.4
+} // End landingScript_v2.5
