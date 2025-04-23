@@ -1,3 +1,5 @@
+// ID: landingScript_v2.5
+
 window.addEventListener('load', function () {
   const cards = document.querySelectorAll('.card');
   const detailPage = document.getElementById('detailPage');
