@@ -660,675 +660,432 @@ This table displays failures identified in the CQ Fluency accessability report, 
               <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
               <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
               <script>
-                // Debug utilities
-                function log(message) {
-                    const debugLog = document.getElementById('debug-log');
-                    const timestamp = new Date().toLocaleTimeString();
-                    debugLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
-                    debugLog.scrollTop = debugLog.scrollHeight;
-                    console.log(`[${timestamp}] ${message}`);
-                }
+              const firebaseConfig = {
+               apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
+               authDomain: "cq-priorities.firebaseapp.com",
+               databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
+               projectId: "cq-priorities",
+               storageBucket: "cq-priorities.firebasestorage.app",
+               messagingSenderId: "1023528003950",
+               appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+              };
+              
+              firebase.initializeApp(firebaseConfig);
+              const database = firebase.database();
+              const tabData = {};
+              let groupColumnIndex = 5;
+              
+              async function groupAndSortData(rows, columnIndex) {
+    // Group data by the specified column index
+    const groupedData = rows.reduce((groups, row) => {
+        const key = row[columnIndex] || 'Undefined';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+        return groups;
+    }, {});
 
-                function logError(error) {
-                    log(`ERROR: ${error.message}`);
-                    console.error(error);
-                }
-                
-                // Toggle debug panel
-                document.getElementById('toggleDebug').addEventListener('click', () => {
-                    const debugPanel = document.getElementById('debug-panel');
-                    debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
-                });
+    // Fetch priorities from Firebase once
+    const prioritiesSnapshot = await database.ref('priorities').once('value');
+    const priorities = prioritiesSnapshot.val() || {};
 
-                // Firebase configuration
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
-                    authDomain: "cq-priorities.firebaseapp.com",
-                    databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
-                    projectId: "cq-priorities",
-                    storageBucket: "cq-priorities.firebasestorage.app",
-                    messagingSenderId: "1023528003950",
-                    appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
-                };
+    // Define priority order
+    const priorityOrder = { high: 3, medium: 2, low: 1, fixed: 0 };
+
+    // Sort the grouped data
+    return Object.entries(groupedData).sort((a, b) => {
+        const priorityA = priorities[sanitizeForFirebase(a[0])]?.priority || 'low';
+        const priorityB = priorities[sanitizeForFirebase(b[0])]?.priority || 'low';
+
+        // Sort by priority
+        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
+            return priorityOrder[priorityB] - priorityOrder[priorityA];
+        }
+
+        // Then sort by group size (number of rows)
+        return b[1].length - a[1].length;
+    });
+}
+
+
+              
+              function preloadExcelData(file, tableHeadId, tableBodyId, excludedRows) {
+                 const loadingElement = document.getElementById('loading');
+                 loadingElement.style.display = 'block';
+                 
+                 fetch(file)
+                     .then((response) => response.arrayBuffer())
+                     .then(async (data) => {
+                         const workbook = XLSX.read(data, { type: 'array' });
+                         let headers = null;
+                         const rows = [];
+              
+                         workbook.SheetNames.forEach((sheetName) => {
+                             const worksheet = workbook.Sheets[sheetName];
+                             const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+              
+                             if (sheetRows.length === 0) return;
+              
+                             if (!headers) headers = sheetRows[0];
+              
+                             sheetRows.slice(1).forEach((row, index) => {
+                                 if (!excludedRows.includes(index)) {
+                                     if (row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
+                                         rows.push(row);
+                                     }
+                                 }
+                             });
+                         });
+              
+                         tabData[tableBodyId] = rows;
+                         const groupedData = await groupAndSortData(rows, groupColumnIndex);
+                         createTable(headers, groupedData, tableHeadId, tableBodyId);
+                     })
+                     .catch((error) => console.error(`Error loading ${file}:`, error))
+                     .finally(() => {
+                         loadingElement.style.display = 'none';
+                     });
+              }
+              
+              function sanitizeForFirebase(str) {
+                 return str
+                     .replace(/[.#$[\]/]/g, '_')
+                     .replace(/\s+/g, '_')
+                     .substring(0, 100);
+              }
+              
+              function createTable(headers, groupedData, tableHeadId, tableBodyId) {
+                 const tableBody = document.getElementById(tableBodyId);
+                 tableBody.innerHTML = '';
+              
+                 if (!headers) {
+                     console.error('No headers found.');
+                     return;
+                 }
+              
+                 groupedData.forEach(([group, rows], groupIndex) => {
+                     const sanitizedGroupName = sanitizeForFirebase(group);
+              
+                     const hasLevelAA = rows.some(row => {
+                         const conformanceLevel = row[headers.indexOf("Conformance Level")];
+                         return conformanceLevel && conformanceLevel.trim() === "Level AA";
+                     });
+              
+                     const groupTr = document.createElement('tr');
+                     groupTr.className = 'group-header';
+                     if (hasLevelAA) {
+                         groupTr.classList.add('level-aa-group');
+                     }
+                     groupTr.id = `group-${groupIndex}`;
+              
+                     const groupTdWrapper = document.createElement('td');
+                     groupTdWrapper.setAttribute('colspan', headers.length);
+              
+                     const groupContent = document.createElement('div');
+                     groupContent.className = 'group-header-content';
+              
+                     const occurrencesDiv = document.createElement('div');
+                     occurrencesDiv.style.textAlign = 'center';
+                     const occurrencesCount = document.createElement('div');
+                     occurrencesCount.textContent = rows.length;
+                     occurrencesCount.classList.add('tableBody-cell');
+              
+                     const instancesLabel = document.createElement('div');
+                     instancesLabel.textContent = 'INSTANCES';
+                     instancesLabel.style.fontSize = '10px';
+                     instancesLabel.style.fontWeight = 'bold';
+                     instancesLabel.style.marginTop = '5px';
+              
+                     occurrencesDiv.appendChild(occurrencesCount);
+                     occurrencesDiv.appendChild(instancesLabel);
+              
+                     const groupLabel = document.createElement('div');
+                     groupLabel.textContent = group;
+                     groupLabel.classList.add('tableBody-cell');
+              
+                     const toggleContainer = document.createElement('div');
+                     toggleContainer.className = 'toggle-container';
+              
+                     const toggleLabel = document.createElement('label');
+                     toggleLabel.className = 'switch';
+              
+                     const nexusToggle = document.createElement('input');
+                     nexusToggle.type = 'checkbox';
+              
+                     const slider = document.createElement('span');
+                     slider.className = 'slider round';
+              
+                     database.ref('toggles/' + sanitizedGroupName).on('value', (snapshot) => {
+                         const data = snapshot.val();
+                         nexusToggle.checked = data?.isEnabled || false;
+                     });
+              
+                     nexusToggle.addEventListener('change', () => {
+                         const isEnabled = nexusToggle.checked;
+                         database.ref('toggles/' + sanitizedGroupName).set({ isEnabled });
+                     });
+              
+                     toggleLabel.appendChild(nexusToggle);
+                     toggleLabel.appendChild(slider);
+                     toggleContainer.appendChild(toggleLabel);
+              
+                     const priorityContainer = document.createElement('div');
+                     priorityContainer.className = 'priority-container';
+              
+                     const prioritySelect = document.createElement('select');
+prioritySelect.className = 'priority-select priority-low';
+prioritySelect.value = 'low';
+
+// Add "High", "Medium", "Low", and "Fixed" options
+['High', 'Medium', 'Low', 'Fixed'].forEach(priority => {
+    const option = document.createElement('option');
+    option.value = priority.toLowerCase();
+    option.textContent = priority;
+    prioritySelect.appendChild(option);
+});
+
+// Initialize Firebase value for priority dropdown
+database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data?.priority) {
+        prioritySelect.value = data.priority;
+        prioritySelect.className = `priority-select priority-${data.priority}`;
+        if (data.priority === 'fixed') {
+            groupLabel.classList.add('strikethrough');
+        }
+    }
+});
+
+// Event listener to handle priority changes
+prioritySelect.addEventListener('change', async (e) => {
+    const selectedPriority = e.target.value;
+
+    await database.ref('priorities/' + sanitizedGroupName).set({
+        originalName: group,
+        priority: selectedPriority,
+    });
+
+    prioritySelect.className = `priority-select priority-${selectedPriority}`;
+
+    if (selectedPriority === 'fixed') {
+        groupLabel.classList.add('strikethrough');
+    } else {
+        groupLabel.classList.remove('strikethrough');
+    }
+
+    // Re-sort and re-render the table dynamically
+    const updatedGroupedData = await groupAndSortData(tabData[tableBodyId], groupColumnIndex);
+    createTable(headers, updatedGroupedData, tableHeadId, tableBodyId);
+});
+
+priorityContainer.appendChild(prioritySelect);
+
+              
+                     groupContent.appendChild(occurrencesDiv);
+                     groupContent.appendChild(groupLabel);
+                     groupContent.appendChild(toggleContainer);
+                     groupContent.appendChild(priorityContainer);
+              
+                     groupTdWrapper.appendChild(groupContent);
+                     groupTr.appendChild(groupTdWrapper);
+              
+                     groupTr.addEventListener('click', (e) => {
+                         if (!e.target.closest('.priority-container') && !e.target.closest('.toggle-container')) {
+                             toggleGroupVisibility(groupIndex, tableBodyId);
+                         }
+                     });
+              
+                     tableBody.appendChild(groupTr);
+              
+                     const headerRow = document.createElement('tr');
+                     headerRow.className = `group-${groupIndex} header-row hidden`;
+                     headers.forEach((header, index) => {
+                         if (![6, 7, 8].includes(index)) {
+                             const th = document.createElement('th');
+                             th.textContent = header;
+                             th.classList.add('tableHead-cell');
+                             headerRow.appendChild(th);
+                         }
+                     });
+              
+                     tableBody.appendChild(headerRow);
+              
+                     rows.forEach((row) => {
+                         const tr = document.createElement('tr');
+                         tr.className = `group-${groupIndex} hidden group-row`;
+              
+                         row.forEach((cell, cellIndex) => {
+                             if (![6, 7, 8].includes(cellIndex)) {
+                                 const td = document.createElement('td');
+                                 if (isValidURL(cell)) {
+                                     const link = document.createElement('a');
+                                     link.href = cell;
+                                     link.textContent = cell;
+                                     link.target = '_blank';
+                                     td.appendChild(link);
+                                 } else {
+                                     td.textContent = cell || '';
+                                 }
+                                 td.classList.add('tableBody-cell');
+                                 tr.appendChild(td);
+                             }
+                         });
+              
+                         tableBody.appendChild(tr);
+                     });
+                 });
+              }
+              
+              function toggleGroupVisibility(groupIndex, tableBodyId) {
+                 const tableBody = document.getElementById(tableBodyId);
+                 const allGroupRows = tableBody.querySelectorAll('tr');
+                 const groupRows = tableBody.querySelectorAll(`.group-${groupIndex}`);
+                 const groupHeader = document.querySelector(`tr.group-header#group-${groupIndex}`);
+                 const isGroupCurrentlyOpen = !groupRows[0]?.classList.contains('hidden');
+              
+                 allGroupRows.forEach((row) => {
+                     if (!row.classList.contains('group-header')) {
+                         row.classList.add('hidden');
+                         row.classList.remove('sticky');
+                     }
+                 });
+              
+                 allGroupRows.forEach((row) => {
+                     if (row.classList.contains('group-header')) {
+                         row.classList.remove('open');
+                     }
+                 });
+              
+                 if (!isGroupCurrentlyOpen) {
+                     groupRows.forEach((row) => {
+                         row.classList.remove('hidden');
+                         if (row.classList.contains('header-row')) {
+                             row.classList.add('sticky');
+                         }
+                     });
+              
+                     if (groupHeader) {
+                         groupHeader.classList.add('open');
+                     }
+                 }
+              }
+              
+              function isValidURL(str) {
+                 if (!str || typeof str !== 'string') return false;
+                 const pattern = new RegExp(
+    '^(https?:\\/\\/)?' + 
+    '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
+    'localhost|' +
+    '\\d{1,3}(\\.\\d{1,3}){3})' + 
+    '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?$',
+    'i'
+);
+                 return pattern.test(str);
+              }
+              
+              (function () {
+                 const tabElements = document.querySelectorAll('.tab');
+                 const tableContainers = document.querySelectorAll('.table-container');
                 
-                // Initialize Firebase with error handling
-                let database;
-                try {
-                    firebase.initializeApp(firebaseConfig);
-                    database = firebase.database();
-                    log('Firebase initialized successfully');
-                } catch (error) {
-                    logError(new Error('Failed to initialize Firebase: ' + error.message));
-                    setStatus('Warning: Firebase connection failed. Some features may not work.');
-                }
-                
-                // Tab data storage and pagination state
-                const tabData = {};
-                const paginationState = {};
-                const ITEMS_PER_PAGE = 50; // Show 50 items per page
-                const groupColumnIndex = 5;
-                
-                // Set status message
-                function setStatus(message) {
-                    const statusElement = document.getElementById('status-message');
-                    statusElement.textContent = message;
-                }
-                
-                // Show/hide loading indicator
-                function setLoading(isLoading) {
-                    const loadingElement = document.getElementById('loading');
-                    loadingElement.style.display = isLoading ? 'flex' : 'none';
-                }
-                
-                // Load Excel file with timeout and error handling
-                async function loadExcelFile(file, tableBodyId) {
-                    log(`Loading Excel file: ${file}`);
-                    setLoading(true);
-                    setStatus(`Loading ${file}...`);
-                    
-                    try {
-                        // Set a timeout for the fetch operation
-                        const timeoutPromise = new Promise((_, reject) => {
-                            setTimeout(() => reject(new Error(`Loading ${file} timed out after 15 seconds`)), 15000);
-                        });
-                        
-                        // Fetch the file
-                        const fetchPromise = fetch(file)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`Failed to fetch ${file}: ${response.status} ${response.statusText}`);
-                                }
-                                return response.arrayBuffer();
-                            })
-                            .then(data => {
-                                log(`Processing Excel data (${data.byteLength} bytes)...`);
-                                
-                                // Process the Excel file
-                                const workbook = XLSX.read(data, { type: 'array' });
-                                let headers = null;
-                                const rows = [];
-                                
-                                // Process all sheets in the workbook
-                                workbook.SheetNames.forEach(sheetName => {
-                                    const worksheet = workbook.Sheets[sheetName];
-                                    const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                                    
-                                    if (sheetRows.length === 0) return;
-                                    
-                                    if (!headers) headers = sheetRows[0];
-                                    
-                                    // Filter for rows with FAIL status
-                                    sheetRows.slice(1).forEach(row => {
-                                        if (row.length > 9 && row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
-                                            rows.push(row);
-                                        }
-                                    });
-                                });
-                                
-                                // Store data and initialize pagination
-                                tabData[tableBodyId] = { 
-                                    headers: headers,
-                                    rows: rows 
-                                };
-                                
-                                initPagination(tableBodyId);
-                                
-                                log(`Excel file ${file} processed. Found ${rows.length} rows with FAIL status.`);
-                                setStatus(`Loaded ${rows.length} issues from ${file}`);
-                                return rows;
-                            });
-                        
-                        // Race between fetch and timeout
-                        return await Promise.race([fetchPromise, timeoutPromise]);
-                        
-                    } catch (error) {
-                        logError(error);
-                        setStatus(`Error loading ${file}: ${error.message}`);
-                        return null;
-                    } finally {
-                        setLoading(false);
+                 const tableMapping = {
+                     tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
+                     tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
+                     tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
+                     tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
+                     tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
+                     tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
+                     tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
+                     tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
+                     tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
+                 };
+              
+                 preloadExcelData('members-clean.xlsx', 'tableHead1', 'tableBody1', [6, 7, 11, 15]);
+              
+                 const loadedTabs = new Set(['tab1']);
+              
+                 tabElements.forEach((tab) => {
+                     tab.addEventListener('click', () => {
+                         const target = tab.dataset.tab;
+                         if (!loadedTabs.has(target)) {
+                             const { file, tableHead, tableBody } = tableMapping[target];
+                             preloadExcelData(file, tableHead, tableBody, [6, 7, 11, 15]);
+                             loadedTabs.add(target);
+                         }
+                         
+                         tabElements.forEach((t) => t.classList.remove('active'));
+                         tab.classList.add('active');
+                         tableContainers.forEach((tc) => tc.classList.remove('active'));
+                         document.getElementById(target).classList.add('active');
+                     });
+                 });
+              document.addEventListener('DOMContentLoaded', () => {
+    // Existing functionality (e.g., preloadExcelData)
+
+    // Sticky header logic
+    const tableContainers = document.querySelectorAll('.table-container');
+
+    tableContainers.forEach(container => {
+        const tableHead = container.querySelector('thead');
+        const tableBodyRows = container.querySelectorAll('tbody tr');
+
+        if (tableHead && tableBodyRows.length) {
+            const lastRow = tableBodyRows[tableBodyRows.length - 1];
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting) {
+                        tableHead.style.position = 'sticky';
+                        tableHead.style.top = '0';
+                    } else {
+                        tableHead.style.position = 'relative';
+                        tableHead.style.top = 'unset';
                     }
-                }
-                
-                // Initialize pagination for a tab
-                function initPagination(tableBodyId) {
-                    const tabId = tableBodyId.replace('tableBody', '');
-                    const rows = tabData[tableBodyId]?.rows || [];
-                    
-                    paginationState[tableBodyId] = {
-                        currentPage: 1,
-                        totalPages: Math.ceil(rows.length / ITEMS_PER_PAGE) || 1
-                    };
-                    
-                    // Update pagination controls
-                    updatePaginationControls(tabId);
-                    
-                    // Render the first page
-                    renderCurrentPage(tableBodyId);
-                }
-                
-                // Update pagination button states
-                function updatePaginationControls(tabId) {
-                    const prevButton = document.getElementById(`prevPage${tabId}`);
-                    const nextButton = document.getElementById(`nextPage${tabId}`);
-                    const pageIndicator = document.getElementById(`pageIndicator${tabId}`);
-                    const tableBodyId = `tableBody${tabId}`;
-                    const state = paginationState[tableBodyId];
-                    
-                    if (!state) return;
-                    
-                    prevButton.disabled = state.currentPage <= 1;
-                    nextButton.disabled = state.currentPage >= state.totalPages;
-                    pageIndicator.textContent = `Page ${state.currentPage} of ${state.totalPages}`;
-                    
-                    // Add event listeners (after removing any existing ones)
-                    prevButton.replaceWith(prevButton.cloneNode(true));
-                    nextButton.replaceWith(nextButton.cloneNode(true));
-                    
-                    document.getElementById(`prevPage${tabId}`).addEventListener('click', () => {
-                        if (state.currentPage > 1) {
-                            state.currentPage--;
-                            renderCurrentPage(tableBodyId);
-                            updatePaginationControls(tabId);
-                        }
-                    });
-                    
-                    document.getElementById(`nextPage${tabId}`).addEventListener('click', () => {
-                        if (state.currentPage < state.totalPages) {
-                            state.currentPage++;
-                            renderCurrentPage(tableBodyId);
-                            updatePaginationControls(tabId);
-                        }
-                    });
-                }
-                
-                // Render the current page of data
-                async function renderCurrentPage(tableBodyId) {
-                    const tabId = tableBodyId.replace('tableBody', '');
-                    const state = paginationState[tableBodyId];
-                    const data = tabData[tableBodyId];
-                    
-                    if (!state || !data || !data.rows) {
-                        log(`No data available for ${tableBodyId}`);
-                        return;
-                    }
-                    
-                    log(`Rendering page ${state.currentPage} for ${tableBodyId}`);
-                    setLoading(true);
-                    
-                    try {
-                        // Calculate page bounds
-                        const startIndex = (state.currentPage - 1) * ITEMS_PER_PAGE;
-                        const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, data.rows.length);
-                        const pageRows = data.rows.slice(startIndex, endIndex);
-                        
-                        // Group and sort the page data
-                        let groupedData;
-                        
-                        // We use a worker for data processing to avoid UI freezing
-                        if (window.Worker) {
-                            groupedData = await processDataInWorker(pageRows, groupColumnIndex);
-                        } else {
-                            // Fallback to synchronous processing
-                            groupedData = await groupAndSortData(pageRows, groupColumnIndex);
-                        }
-                        
-                        // Render the grouped data
-                        await renderGroupedData(data.headers, groupedData, tableBodyId);
-                        
-                        log(`Rendered ${pageRows.length} rows for ${tableBodyId} (page ${state.currentPage})`);
-                        
-                    } catch (error) {
-                        logError(error);
-                        setStatus(`Error rendering data: ${error.message}`);
-                    } finally {
-                        setLoading(false);
-                    }
-                }
-                
-                // Process data in a Web Worker
-                function processDataInWorker(rows, columnIndex) {
-                    return new Promise((resolve, reject) => {
-                        // Create a worker blob
-                        const workerCode = `
-                            self.onmessage = function(e) {
-                                const { rows, columnIndex } = e.data;
-                                
-                                // Group data
-                                const groupedData = rows.reduce((groups, row) => {
-                                    const key = row[columnIndex] || 'Undefined';
-                                    if (!groups[key]) groups[key] = [];
-                                    groups[key].push(row);
-                                    return groups;
-                                }, {});
-                                
-                                // Sort by group size
-                                const sortedGroups = Object.entries(groupedData)
-                                    .sort((a, b) => b[1].length - a[1].length);
-                                
-                                self.postMessage(sortedGroups);
-                            };
-                        `;
-                        
-                        const blob = new Blob([workerCode], { type: 'application/javascript' });
-                        const worker = new Worker(URL.createObjectURL(blob));
-                        
-                        worker.onmessage = function(e) {
-                            resolve(e.data);
-                            worker.terminate();
-                        };
-                        
-                        worker.onerror = function(error) {
-                            reject(error);
-                            worker.terminate();
-                        };
-                        
-                        worker.postMessage({ rows, columnIndex });
-                    });
-                }
-                
-                // Group and sort data (fallback for when Web Workers aren't available)
-                async function groupAndSortData(rows, columnIndex) {
-                    // Group data by the specified column index
-                    const groupedData = rows.reduce((groups, row) => {
-                        const key = row[columnIndex] || 'Undefined';
-                        if (!groups[key]) groups[key] = [];
-                        groups[key].push(row);
-                        return groups;
-                    }, {});
-                    
-                    // Fetch priorities from Firebase if available
-                    let priorities = {};
-                    if (database) {
-                        try {
-                            const prioritiesSnapshot = await database.ref('priorities').once('value');
-                            priorities = prioritiesSnapshot.val() || {};
-                        } catch (error) {
-                            logError(new Error('Error fetching priorities: ' + error.message));
-                        }
-                    }
-                    
-                    // Define priority order
-                    const priorityOrder = { high: 3, medium: 2, low: 1, fixed: 0 };
-                    
-                    // Sort the grouped data
-                    return Object.entries(groupedData).sort((a, b) => {
-                        const priorityA = priorities[sanitizeForFirebase(a[0])]?.priority || 'low';
-                        const priorityB = priorities[sanitizeForFirebase(b[0])]?.priority || 'low';
-                        
-                        // Sort by priority
-                        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
-                            return priorityOrder[priorityB] - priorityOrder[priorityA];
-                        }
-                        
-                        // Then sort by group size (number of rows)
-                        return b[1].length - a[1].length;
-                    });
-                }
-                
-                // Render grouped data with efficient DOM methods
-                async function renderGroupedData(headers, groupedData, tableBodyId) {
-                    const tableBody = document.getElementById(tableBodyId);
-                    
-                    // Clear existing content
-                    tableBody.innerHTML = '';
-                    
-                    // Use DocumentFragment for better performance
-                    const fragment = document.createDocumentFragment();
-                    
-                    // Process in chunks to avoid UI freezing
-                    const chunkSize = 3; // Process 3 groups at a time
-                    
-                    for (let i = 0; i < groupedData.length; i += chunkSize) {
-                        // Process a chunk of groups
-                        const chunk = groupedData.slice(i, i + chunkSize);
-                        
-                        await new Promise(resolve => {
-                            // Use setTimeout to give UI a chance to breathe
-                            setTimeout(() => {
-                                chunk.forEach(([group, rows], groupIndex) => {
-                                    const actualGroupIndex = i + groupIndex;
-                                    const sanitizedGroupName = sanitizeForFirebase(group);
-                                    
-                                    // Create group header
-                                    const groupTr = document.createElement('tr');
-                                    groupTr.className = 'group-header';
-                                    groupTr.id = `group-${actualGroupIndex}`;
-                                    
-                                    const groupTdWrapper = document.createElement('td');
-                                    groupTdWrapper.setAttribute('colspan', '16');
-                                    
-                                    const groupContent = document.createElement('div');
-                                    groupContent.className = 'group-header-content';
-                                    
-                                    // Count element
-                                    const occurrencesDiv = document.createElement('div');
-                                    occurrencesDiv.style.textAlign = 'center';
-                                    occurrencesDiv.style.width = '60px';
-                                    occurrencesDiv.style.flexShrink = '0';
-                                    
-                                    const occurrencesCount = document.createElement('div');
-                                    occurrencesCount.textContent = rows.length;
-                                    occurrencesCount.classList.add('tableBody-cell');
-                                    
-                                    const instancesLabel = document.createElement('div');
-                                    instancesLabel.textContent = 'INSTANCES';
-                                    instancesLabel.style.fontSize = '10px';
-                                    instancesLabel.style.fontWeight = 'bold';
-                                    instancesLabel.style.marginTop = '5px';
-                                    
-                                    occurrencesDiv.appendChild(occurrencesCount);
-                                    occurrencesDiv.appendChild(instancesLabel);
-                                    
-                                    // Description element
-                                    const groupLabel = document.createElement('div');
-                                    groupLabel.textContent = group;
-                                    groupLabel.classList.add('tableBody-cell');
-                                    
-                                    // Toggle container
-                                    const toggleContainer = document.createElement('div');
-                                    toggleContainer.className = 'toggle-container';
-                                    
-                                    const toggleLabel = document.createElement('label');
-                                    toggleLabel.className = 'switch';
-                                    
-                                    const nexusToggle = document.createElement('input');
-                                    nexusToggle.type = 'checkbox';
-                                    
-                                    const slider = document.createElement('span');
-                                    slider.className = 'slider round';
-                                    
-                                    toggleLabel.appendChild(nexusToggle);
-                                    toggleLabel.appendChild(slider);
-                                    toggleContainer.appendChild(toggleLabel);
-                                    
-                                    // Priority container
-                                    const priorityContainer = document.createElement('div');
-                                    priorityContainer.className = 'priority-container';
-                                    
-                                    const prioritySelect = document.createElement('select');
-                                    prioritySelect.className = 'priority-select priority-low';
-                                    
-                                    // Add priority options
-                                    ['High', 'Medium', 'Low', 'Fixed'].forEach(priority => {
-                                        const option = document.createElement('option');
-                                        option.value = priority.toLowerCase();
-                                        option.textContent = priority;
-                                        prioritySelect.appendChild(option);
-                                    });
-                                    
-                                    priorityContainer.appendChild(prioritySelect);
-                                    
-                                    // Assemble group header
-                                    groupContent.appendChild(occurrencesDiv);
-                                    groupContent.appendChild(groupLabel);
-                                    groupContent.appendChild(toggleContainer);
-                                    groupContent.appendChild(priorityContainer);
-                                    
-                                    groupTdWrapper.appendChild(groupContent);
-                                    groupTr.appendChild(groupTdWrapper);
-                                    
-                                    // Add the group header to fragment
-                                    fragment.appendChild(groupTr);
-                                });
-                                
-                                resolve();
-                            }, 0);
-                        });
-                    }
-                    
-                    // Append all the created elements to the DOM at once
-                    tableBody.appendChild(fragment);
-                    
-                    // Add event listeners after DOM is updated
-                    document.querySelectorAll(`#${tableBodyId} .group-header`).forEach((header, index) => {
-                        // Toggle event for group expansion
-                        header.addEventListener('click', (e) => {
-                            if (!e.target.closest('.priority-container') && !e.target.closest('.toggle-container')) {
-                                toggleGroupVisibility(index, tableBodyId, groupedData);
-                            }
-                        });
-                        
-                        // Firebase sync for toggle switches
-                        const toggleInput = header.querySelector('input[type="checkbox"]');
-                        const groupName = header.querySelector('.tableBody-cell').textContent;
-                        const sanitizedGroupName = sanitizeForFirebase(groupName);
-                        
-                        // Only set up Firebase listeners if database is available
-                        if (database) {
-                            try {
-                                // Limit the number of simultaneous listeners
-                                database.ref('toggles/' + sanitizedGroupName).once('value', (snapshot) => {
-                                    const data = snapshot.val();
-                                    toggleInput.checked = data?.isEnabled || false;
-                                });
-                                
-                                toggleInput.addEventListener('change', () => {
-                                    const isEnabled = toggleInput.checked;
-                                    database.ref('toggles/' + sanitizedGroupName).set({ isEnabled });
-                                });
-                                
-                                // Priority select handling
-                                const prioritySelect = header.querySelector('.priority-select');
-                                
-                                database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
-                                    const data = snapshot.val();
-                                    if (data?.priority) {
-                                        prioritySelect.value = data.priority;
-                                        prioritySelect.className = `priority-select priority-${data.priority}`;
-                                        
-                                        if (data.priority === 'fixed') {
-                                            header.querySelector('.tableBody-cell').classList.add('strikethrough');
-                                        }
-                                    }
-                                });
-                                
-                                prioritySelect.addEventListener('change', (e) => {
-                                    const selectedPriority = e.target.value;
-                                    
-                                    database.ref('priorities/' + sanitizedGroupName).set({
-                                        originalName: groupName,
-                                        priority: selectedPriority
-                                    });
-                                    
-                                    prioritySelect.className = `priority-select priority-${selectedPriority}`;
-                                    
-                                    if (selectedPriority === 'fixed') {
-                                        header.querySelector('.tableBody-cell').classList.add('strikethrough');
-                                    } else {
-                                        header.querySelector('.tableBody-cell').classList.remove('strikethrough');
-                                    }
-                                });
-                            } catch (error) {
-                                logError(new Error('Firebase error: ' + error.message));
-                            }
-                        }
-                    });
-                }
-                
-                // Toggle group visibility with lazy loading of rows
-                function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
-                    const tableBody = document.getElementById(tableBodyId);
-                    const groupHeader = tableBody.querySelector(`#group-${groupIndex}`);
-                    
-                    // Check if group is already open
-                    const isGroupOpen = groupHeader.classList.contains('open');
-                    
-                    // Close all open groups first
-                    tableBody.querySelectorAll('.group-header').forEach(header => {
-                        header.classList.remove('open');
-                    });
-                    
-                    // Remove all detail rows
-                    tableBody.querySelectorAll('.group-row').forEach(row => {
-                        row.remove();
-                    });
-                    
-                    // If the group wasn't open, open it now
-                    if (!isGroupOpen) {
-                        groupHeader.classList.add('open');
-                        
-                        // Get the group data
-                        const [group, rows] = groupedData[groupIndex];
-                        
-                        // Create a document fragment for better performance
-                        const fragment = document.createDocumentFragment();
-                        
-                        // Add header row first
-                        const headerRow = document.createElement('tr');
-                        headerRow.className = 'group-row header-row';
-                        
-                        // Add relevant column headers
-                        const relevantColumns = [2, 4, 5, 9, 10]; // Example column indices
-                        relevantColumns.forEach(colIndex => {
-                            const th = document.createElement('th');
-                            const data = tabData[tableBodyId]; // Get data for the current tab
-                            th.textContent = data?.headers?.[colIndex] || `Column ${colIndex}`;
-                            headerRow.appendChild(th);
-                        });
-                        
-                        fragment.appendChild(headerRow);
-                        
-                        // Limit to 20 rows for performance
-                        const rowsToShow = Math.min(20, rows.length);
-                        
-                        // Create row elements
-                        for (let i = 0; i < rowsToShow; i++) {
-                            const row = rows[i];
-                            const tr = document.createElement('tr');
-                            tr.className = 'group-row';
-                            
-                            // Add only relevant columns
-                            relevantColumns.forEach(colIndex => {
-                                const td = document.createElement('td');
-                                const cellValue = row[colIndex];
-                                
-                                if (typeof cellValue === 'string' && isValidURL(cellValue)) {
-                                    const link = document.createElement('a');
-                                    link.href = cellValue;
-                                    link.textContent = cellValue;
-                                    link.target = '_blank';
-                                    td.appendChild(link);
-                                } else {
-                                    td.textContent = cellValue || '';
-                                }
-                                
-                                tr.appendChild(td);
-                            });
-                            
-                            fragment.appendChild(tr);
-                        }
-                        
-                        // Add "more rows" message if needed
-                        if (rows.length > rowsToShow) {
-                            const moreRow = document.createElement('tr');
-                            moreRow.className = 'group-row';
-                            
-                            const moreCell = document.createElement('td');
-                            moreCell.colSpan = relevantColumns.length;
-                            moreCell.textContent = `${rows.length - rowsToShow} more rows not shown. Use pagination to see more.`;
-                            moreCell.style.textAlign = 'center';
-                            moreCell.style.fontStyle = 'italic';
-                            moreCell.style.padding = '10px';
-                            
-                            moreRow.appendChild(moreCell);
-                            fragment.appendChild(moreRow);
-                        }
-                        
-                        // Insert after the group header
-                        groupHeader.after(fragment);
-                    }
-                }
-                
-                // URL validation
-                function isValidURL(str) {
-                    if (!str || typeof str !== 'string') return false;
-                    const pattern = new RegExp(
-                        '^(https?:\\/\\/)?' + 
-                        '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
-                        'localhost|' +
-                        '\\d{1,3}(\\.\\d{1,3}){3})' + 
-                        '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?'
-                ,
-                        'i'
-                    );
-                    return pattern.test(str);
-                }
-                
-                // Firebase-safe string conversion
-                function sanitizeForFirebase(str) {
-                    if (!str || typeof str !== 'string') return 'undefined';
-                    return str
-                        .replace(/[.#$[\]/]/g, '_')
-                        .replace(/\s+/g, '_')
-                        .substring(0, 100);
-                }
-                
-                // Tab mapping configuration
-                const tableMapping = {
-                    tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
-                    tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
-                    tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
-                    tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
-                    tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
-                    tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
-                    tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
-                    tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
-                    tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
-                };
-                
-                // Initialize the application with error handling
-                (function init() {
-                    try {
-                        log('Initializing application...');
-                        
-                        // Get all tab elements
-                        const tabElements = document.querySelectorAll('.tab');
-                        const tableContainers = document.querySelectorAll('.table-container');
-                        
-                        // Track loaded tabs
-                        const loadedTabs = new Set();
-                        
-                        // Set up tab switching with lazy loading
-                        tabElements.forEach(tab => {
-                            tab.addEventListener('click', async () => {
-                                const targetId = tab.dataset.tab;
-                                const { file, tableHead, tableBody } = tableMapping[targetId];
-                                
-                                // Switch active tab
-                                tabElements.forEach(t => t.classList.remove('active'));
-                                tab.classList.add('active');
-                                
-                                tableContainers.forEach(tc => tc.classList.remove('active'));
-                                document.getElementById(targetId).classList.add('active');
-                                
-                                // Load data if not already loaded
-                                if (!loadedTabs.has(targetId)) {
-                                    await loadExcelFile(file, tableBody);
-                                    loadedTabs.add(targetId);
-                                }
-                            });
-                        });
-                        
-                        // Load first tab data
-                        loadExcelFile('members-clean.xlsx', 'tableBody1')
-                            .then(() => {
-                                loadedTabs.add('tab1');
-                                log('Initial data loaded successfully');
-                            })
-                            .catch(error => {
-                                logError(error);
-                                setStatus('Error loading initial data. Please refresh the page.');
-                            });
-                        
-                        log('Application initialized');
-                        
-                    } catch (error) {
-                        logError(error);
-                        setStatus('Error initializing application: ' + error.message);
-                    }
-                })();
-            </script>
+                },
+                { root: container, threshold: 1.0 }
+            );
+
+            observer.observe(lastRow);
+        }
+    });
+});
+
+                 (function () {
+                     function truncateText(selector, maxLength) {
+                         if (typeof maxLength !== 'number' || maxLength <= 0) {
+                             console.error('Invalid maxLength. It must be a positive number.');
+                             return;
+                         }
+              
+                         var elements = document.querySelectorAll(selector);
+                         Array.prototype.forEach.call(elements, function (element) {
+                             var originalText = element.textContent.trim();
+                             if (originalText.length > maxLength) {
+                                 var truncatedText = originalText.substring(0, maxLength) + '...';
+                                 element.textContent = truncatedText;
+                             }
+                         });
+                     }
+              
+                     function observeDynamicText(selector, maxLength) {
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'subtree') {
+                truncateText(selector, maxLength);
+            }
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+
+    truncateText(selector, maxLength);
+}
+
+observeDynamicText('.group-header > td > div > div.tableBody-cell', 200);
+   })();
+})();
+</script>
 
           </div></div>
 </body>

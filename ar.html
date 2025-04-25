@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Aspect Ratio Visualization</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      width: 100%;
+      align-items: center;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .examples-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      max-width: 800px;
+    }
+    
+    .example {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .width-display {
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    
+    .example-container {
+      position: relative;
+      background-color: #f9fafb;
+      border: 1px solid #333;
+      overflow: visible;
+      height: 300px;
+      width: 100%;
+    }
+    
+    .aspect-ratio-box-contained {
+      border: 2px dashed #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-repeat: no-repeat;
+      background-size: 100%;
+    }
+    
+    .aspect-ratio-box-overflow {
+      border: 2px dashed #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-repeat: no-repeat;
+      background-size: 100%;
+    }
+    
+    .box-content {
+      text-align: center;
+      white-space: nowrap;
+    }
+    
+    .box-title {
+      font-weight: 600;
+    }
+    
+    .box-stat {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    
+    .blue-text {
+      color: #333;
+    }
+    
+    .green-text {
+      color: #333;
+    }
+    
+    .instructions {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #fefce8;
+      border: 1px solid #fef08a;
+      border-radius: 0.375rem;
+      max-width: 900px;
+      width: 100%;
+    }
+    
+    .instruction-list {
+      margin-top: 0.5rem;
+      padding-left: 1.5rem;
+    }
+    
+    .note {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+    
+    .slider-container {
+      width: 100%;
+      max-width: 900px;
+      margin-top: 1rem;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .slider {
+      width: 100%;
+      cursor: pointer;
+    }
+    
+    .slider-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    
+    .slider-button {
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .slider-button:hover {
+      background-color: #333333;
+    }
+    
+    .slider-label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    
+    /* Tab styles */
+    .tabs {
+      display: flex;
+      gap: 5px;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 1rem;
+    }
+    
+    .tab-button {
+      background-color: #e5e7eb;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .tab-button.active {
+      background-color: #333333;
+      color: white;
+      border-color: #333333;
+    }
+    
+    .tab-button:hover:not(.active) {
+      background-color: #d1d5db;
+    }
+    
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    @media (max-width: 900px) {
+      .slider-container {
+        width: 90%;
+      }
+      
+      .tabs {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fixed Aspect Ratio in Responsive Containers</h1>
+    <p> The solid line represents the browser content area. The dashed line represents the embedded media. The gray box represents the area that is viewable to the user.</p>
+    <!-- Tab buttons -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="example1">Example 1: Contained</button>
+      <button class="tab-button" data-tab="example2">Example 2: Overflow</button>
+    </div>
+    
+    <div class="examples-container">
+      <!-- Tab 1: Example 1 -->
+      <div class="tab-content active" id="example1-content">
+        <div class="example">
+          <div class="example-container" id="container1">
+            <div id="box1" class="aspect-ratio-box-contained">
+              <div class="box-content">
+                <h2>Example 1: Contained</h2>
+                <div class="box-title blue-text">16:9 Aspect Ratio</div>
+                <div class="box-stat blue-text" id="box1-width">Width: 532px</div>
+                <div class="box-stat blue-text" id="box1-height">Height: 299px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab 2: Example 2 -->
+      <div class="tab-content" id="example2-content">
+        <div class="example">
+          <div class="example-container" id="container2">
+            <div id="box2" class="aspect-ratio-box-overflow">
+              <div class="box-content">
+                <h2>Example 2: Overflow</h2>
+                <div class="box-title green-text">16:9 Aspect Ratio</div>
+                <div class="box-stat green-text">Always fills container</div>
+                <div class="box-stat green-text">Overflow in any direction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab 3: Both Examples -->
+      <div class="tab-content" id="both-content">
+        <div class="example">
+          <div class="example-container" id="container3">
+            <div id="box3" class="aspect-ratio-box-contained">
+              <div class="box-content">
+                <h2>Example 1: Contained</h2>
+                <div class="box-title blue-text">16:9 Aspect Ratio</div>
+                <div class="box-stat blue-text" id="box3-width">Width: 532px</div>
+                <div class="box-stat blue-text" id="box3-height">Height: 299px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="example">
+          <div class="example-container" id="container4">
+            <div id="box4" class="aspect-ratio-box-overflow">
+              <div class="box-content">
+                <h2>Example 2: Overflow</h2>
+                <div class="box-title green-text">16:9 Aspect Ratio</div>
+                <div class="box-stat green-text">Always fills container</div>
+                <div class="box-stat green-text">Overflow in any direction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="slider-container">
+      <div class="width-display">Container Width: <span id="width-value">532</span>px</div>
+      <div class="slider-controls">
+        <button class="slider-button" id="decrease-width">-</button>
+        <input type="range" min="200" max="800" value="532" class="slider" id="width-slider">
+        <button class="slider-button" id="increase-width">+</button>
+      </div>
+    </div>
+    
+  </div>
+
+  <script>
+    // Constants
+    const ASPECT_RATIO = 16/9;
+    const MIN_WIDTH = 200;
+    const MAX_WIDTH = 800;
+    const CONTAINER_HEIGHT = 300;
+    const WIDTH_STEP = 50;
+    const INITIAL_WIDTH = 532;
+    
+    // DOM Elements
+    const widthValue = document.getElementById('width-value');
+    const containers = [
+      document.getElementById('container1'),
+      document.getElementById('container2'),
+      document.getElementById('container3'),
+      document.getElementById('container4')
+    ];
+    const boxes = [
+      document.getElementById('box1'),
+      document.getElementById('box2'),
+      document.getElementById('box3'),
+      document.getElementById('box4')
+    ];
+    const boxWidths = [
+      document.getElementById('box1-width'),
+      document.getElementById('box3-width')
+    ];
+    const boxHeights = [
+      document.getElementById('box1-height'),
+      document.getElementById('box3-height')
+    ];
+    const widthSlider = document.getElementById('width-slider');
+    const decreaseWidthButton = document.getElementById('decrease-width');
+    const increaseWidthButton = document.getElementById('increase-width');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // Tab functionality
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons and contents
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to current button
+        button.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(`${tabId}-content`).classList.add('active');
+        
+        // Update all containers and boxes after tab switch
+        updateContainerWidth(parseInt(widthSlider.value));
+      });
+    });
+    
+    // Update container widths
+    function updateContainerWidth(width) {
+      const validWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width));
+      
+      // Update containers
+      containers.forEach(container => {
+        if (container) container.style.width = `${validWidth}px`;
+      });
+      
+      // Update slider and display
+      widthSlider.value = validWidth;
+      widthValue.textContent = validWidth;
+      
+      // Update boxes
+      updateContainedBoxes(validWidth);
+      updateOverflowBoxes(validWidth);
+    }
+    
+    function updateContainedBoxes(width) {
+      // Calculate dimensions that maintain aspect ratio within container bounds
+      let boxWidth = width;
+      let boxHeight = boxWidth / ASPECT_RATIO;
+      
+      // If height exceeds container, scale down
+      if (boxHeight > CONTAINER_HEIGHT) {
+        boxHeight = CONTAINER_HEIGHT;
+        boxWidth = boxHeight * ASPECT_RATIO;
+      }
+      
+      // Update box dimensions for contained boxes (box1 and box3)
+      if (boxes[0]) {
+        boxes[0].style.width = `${boxWidth}px`;
+        boxes[0].style.height = `${boxHeight}px`;
+      }
+      
+      if (boxes[2]) {
+        boxes[2].style.width = `${boxWidth}px`;
+        boxes[2].style.height = `${boxHeight}px`;
+      }
+      
+      // Update display text
+      const displayWidth = Math.round(boxWidth);
+      const displayHeight = Math.round(boxHeight);
+      
+      boxWidths.forEach(el => {
+        if (el) el.textContent = `Width: ${displayWidth}px`;
+      });
+      
+      boxHeights.forEach(el => {
+        if (el) el.textContent = `Height: ${displayHeight}px`;
+      });
+    }
+    
+    function updateOverflowBoxes(width) {
+      const containerAspectRatio = width / CONTAINER_HEIGHT;
+      
+      // Update box dimensions for overflow boxes (box2 and box4)
+      if (containerAspectRatio > ASPECT_RATIO) {
+        // Container is wider than the aspect ratio
+        // Fill width and overflow height
+        const requiredHeight = width / ASPECT_RATIO;
+        
+        if (boxes[1]) {
+          boxes[1].style.width = `${width}px`;
+          boxes[1].style.height = `${requiredHeight}px`;
+        }
+        
+        if (boxes[3]) {
+          boxes[3].style.width = `${width}px`;
+          boxes[3].style.height = `${requiredHeight}px`;
+        }
+      } else {
+        // Container is taller/narrower than the aspect ratio
+        // Fill height and overflow width
+        const requiredWidth = CONTAINER_HEIGHT * ASPECT_RATIO;
+        
+        if (boxes[1]) {
+          boxes[1].style.width = `${requiredWidth}px`;
+          boxes[1].style.height = `${CONTAINER_HEIGHT}px`;
+        }
+        
+        if (boxes[3]) {
+          boxes[3].style.width = `${requiredWidth}px`;
+          boxes[3].style.height = `${CONTAINER_HEIGHT}px`;
+        }
+      }
+    }
+    
+    // Event Listeners
+    widthSlider.addEventListener('input', function() {
+      updateContainerWidth(parseInt(this.value));
+    });
+    
+    decreaseWidthButton.addEventListener('click', function() {
+      const currentWidth = parseInt(widthSlider.value);
+      updateContainerWidth(currentWidth - WIDTH_STEP);
+    });
+    
+    increaseWidthButton.addEventListener('click', function() {
+      const currentWidth = parseInt(widthSlider.value);
+      updateContainerWidth(currentWidth + WIDTH_STEP);
+    });
+    
+    // Initialize
+    updateContainerWidth(INITIAL_WIDTH);
+  </script>
+</body>
+</html>
