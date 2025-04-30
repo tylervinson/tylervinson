@@ -8,7 +8,7 @@
      body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.5;
-      color: #fff;
+   
       margin: 0;
       padding: 20px;
       /* max-width: 1200px; */
@@ -17,7 +17,7 @@
       justify-content: center;
       width: 100vw;
       height: 100vh;
-      background-color: #1f3450;
+      
     }
     
     .container {
@@ -71,15 +71,14 @@
     
     .example-container {
       position: relative;
-      background-color: #090f1750;
-      border: 1px solid #abe888;
+      border: 1px solid #333;
       overflow: visible;
       height: 300px;
       width: 100%;
     }
     
     .aspect-ratio-box-contained {
-      border: 2px dashed #abe888;
+      border: 2px dashed #333;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -89,11 +88,10 @@
       transform: translate(-50%, -50%);
       background-repeat: no-repeat;
       background-size: 100%;
-      background-color: #090f1750;
     }
     
     .aspect-ratio-box-overflow {
-      border: 2px dashed #abe888;
+      border: 2px dashed #333;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -103,7 +101,6 @@
       transform: translate(-50%, -50%);
       background-repeat: no-repeat;
       background-size: 100%;
-      background-color: #090f1750;
     }
     
     .box-content {
@@ -121,11 +118,9 @@
     }
     
     .blue-text {
-      color: #fff;
     }
     
     .green-text {
-      color: #fff;
     }
     
     .instructions {
@@ -247,7 +242,7 @@
 <body>
   <div class="container">
     <h1 style="padding:0px; margin:0px;">Visualizing fixed aspect ratios in responsive environments</h1>
-    <p> The solid line represents the browser content area. The dashed line represents the embedded media. The gray box represents the area that is viewable by the user.</p>
+    <p> The solid line represents the browser content area. The dashed line represents the embedded media.</p>
     <!-- Tab buttons -->
     <div class="tabs">
       <button class="tab-button active" data-tab="example1">Example 1: Contained</button>

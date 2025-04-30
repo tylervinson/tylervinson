@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belief Divergence Logic Model (BDLM) Prototype</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    h1 { color: #003366; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    textarea, input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px 15px; font-size: 16px; }
+    #result { margin-top: 30px; padding: 15px; background: #eef; border-left: 4px solid #003366; }
+  </style>
+</head>
+<body>
+  <h1>BDLM Diagnostic Prototype</h1>
+
+  <label for="entity">Entity Identifier:</label>
+  <input type="text" id="entity" placeholder="e.g., Patient K, AI Agent 7">
+
+  <label for="belief">Belief (Bₓ(P)):</label>
+  <textarea id="belief" rows="3" placeholder="e.g., I have three arms."></textarea>
+
+  <label for="reality">Is P (belief) objectively true?</label>
+  <select id="reality">
+    <option value="">--Select--</option>
+    <option value="true">Yes (P is true)</option>
+    <option value="false">No (¬P)</option>
+  </select>
+
+  <label for="duration">Duration of Belief:</label>
+  <input type="text" id="duration" placeholder="e.g., 3 years, 6 months">
+
+  <label for="impact">Functional Impact:</label>
+  <select id="impact">
+    <option value="none">None</option>
+    <option value="mild">Mild (minor disruption)</option>
+    <option value="moderate">Moderate (visible impairment)</option>
+    <option value="severe">Severe (risk, dysfunction)</option>
+  </select>
+
+  <button onclick="analyzeBelief()">Analyze</button>
+
+  <div id="result"></div>
+
+  <script>
+    function analyzeBelief() {
+      const entity = document.getElementById('entity').value.trim();
+      const belief = document.getElementById('belief').value.trim();
+      const reality = document.getElementById('reality').value;
+      const duration = document.getElementById('duration').value.trim();
+      const impact = document.getElementById('impact').value;
+
+      let divergence = (reality === "false");
+      let stable = duration && duration.match(/\d+/);
+      let impactful = (impact === "moderate" || impact === "severe");
+
+      let result = `<strong>Entity:</strong> ${entity}<br>`;
+      result += `<strong>Belief:</strong> ${belief}<br>`;
+      result += `<strong>Reality Status:</strong> ${reality === "true" ? 'Belief aligned' : 'Belief diverges'}<br>`;
+      result += `<strong>Persistence:</strong> ${stable ? 'Stable over time' : 'Not stable'}<br>`;
+      result += `<strong>Impact:</strong> ${impact}<br><br>`;
+
+      if (!divergence) {
+        result += `<strong>Conclusion:</strong> Belief aligned with reality. No divergence detected.`;
+      } else if (!stable && !impactful) {
+        result += `<strong>Conclusion:</strong> Transient belief divergence. No significant concern.`;
+      } else if (stable && impactful) {
+        result += `<strong>Conclusion:</strong> Persistent and impactful belief divergence detected. Diagnostic review advised.`;
+      } else {
+        result += `<strong>Conclusion:</strong> Belief divergence detected. Monitor for stability and functional impact.`;
+      }
+
+      document.getElementById('result').innerHTML = result;
+    }
+  </script>
+</body>
+</html>

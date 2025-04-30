@@ -129,7 +129,7 @@ body.dark .card .icon {
   padding: 2rem;
   background: white;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
+  /* overflow-y: auto; */
   opacity: 0;
   pointer-events: none;
   transition: left 0.5s ease, opacity 0.4s ease;
@@ -314,16 +314,22 @@ nav{
 .step-section {
   position: relative;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   background-size: cover;
   background-position: center bottom;
-  padding:2rem 2rem 140px 2rem;
+  padding: 2rem 2rem 140px 2rem;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
+.step-section::-webkit-scrollbar {
+  display: none;
+}
 .stat-box {
   position: relative;
   background: white;
@@ -398,3 +404,145 @@ nav{
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(40px); }
 }
+
+/* Wellness Interstitial Form Styles */
+.wellness-interstitial {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  /* padding: 2rem; */
+}
+.wellness-interstitial::-webkit-scrollbar {
+  display: none;
+}
+.form-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  animation: fadeInUp 0.6s ease both;
+  width: 90%;
+  margin: 70px auto;
+}
+
+body.dark .form-container {
+  background: #1e1e1e;
+  color: #f0f0f0;
+}
+
+.form-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form-container p {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #555;
+}
+
+body.dark .form-container p {
+  color: #ccc;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+body.dark .form-group input,
+body.dark .form-group select {
+  background: #333;
+  border-color: #444;
+  color: #f0f0f0;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  background: #ffbe5f;
+  color: #333;
+  border: none;
+  border-radius: 56px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #FFD495;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .form-container {
+    padding: 1.5rem;
+  }
+  
+  .form-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.fraunces-italic {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: italic;
+  font-variation-settings:
+    "SOFT" 0,
+    "WONK" 0;
+}
+
+.fraunces-manual {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: none; /* Turn off automatic optical sizing */
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings:
+    "opsz" 36, /* Manually set optical size to 36pt */
+    "SOFT" 0,
+    "WONK" 0;
+}
+
+/* Additional variations */
+.fraunces-soft {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings:
+      "SOFT" 100,
+      "WONK" 0;
+}
+
+.fraunces-wonky {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings:
+      "SOFT" 0,
+      "WONK" 1;
