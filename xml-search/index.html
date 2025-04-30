@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap Search Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sitemap Search Tool</h1>
+            <p>Search through sitemap XML files to find URLs matching your criteria</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="url-tab">Search by URL</button>
+            <button class="tab-button" data-tab="file-tab">Upload XML File</button>
+        </div>
+        
+        <div class="tab-content">
+            <div id="url-tab" class="tab-pane active">
+                <form id="url-form">
+                    <div class="form-group">
+                        <label for="sitemap-url">Sitemap URL:</label>
+                        <input type="url" id="sitemap-url" name="sitemap-url" placeholder="https://example.com/sitemap.xml" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="url-search-term">Search Term:</label>
+                        <input type="text" id="url-search-term" name="url-search-term" placeholder="Enter search term or regex" required>
+                    </div>
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="url-case-sensitive" name="url-case-sensitive">
+                        <label for="url-case-sensitive">Case Sensitive</label>
+                    </div>
+                    <button type="submit" class="submit-button">Search</button>
+                </form>
+            </div>
+            
+            <div id="file-tab" class="tab-pane">
+                <form id="file-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="sitemap-file">Upload Sitemap XML:</label>
+                        <input type="file" id="sitemap-file" name="file" accept=".xml" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="file-search-term">Search Term:</label>
+                        <input type="text" id="file-search-term" name="searchTerm" placeholder="Enter search term or regex" required>
+                    </div>
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="file-case-sensitive" name="caseSensitive">
+                        <label for="file-case-sensitive">Case Sensitive</label>
+                    </div>
+                    <button type="submit" class="submit-button">Search</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <div class="results-header">
+                <h2>Results <span id="result-count" class="result-count">(0)</span></h2>
+                <div>
+                    <button id="copy-results" class="copy-button" disabled>Copy All</button>
+                    <button id="download-results" class="download-button" disabled>Download as TXT</button>
+                </div>
+            </div>
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Searching...</p>
+            </div>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sitemap Search Tool - &copy; 2025</p>
+    </footer>
+    
+    <script src="app.js"></script>
+</body>
+</html>
