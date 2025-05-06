@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Tabbed Navigation with Preloaded Tables - Optimized</title>
 <style>
-    /* Main layout and tab styles */
+ /* Main layout and tab styles */
 .tabs {
     display: flex;
     cursor: pointer;
@@ -36,7 +36,7 @@
 .table-container {
     display: none;
     position: relative;
-    height: 76vh;
+    height: 80vh;
     overflow: auto;
 }
 
@@ -47,7 +47,8 @@
 body {
     font-family: Arial, sans-serif;
     font-size: 14px;
-    margin: 20px;
+    margin: 0px;
+    padding-top: 6vh;
 }
 
 /* Table styling */
@@ -103,7 +104,27 @@ tr.group-row:nth-child(even) {
     background-color: #f9f9f9; 
 }
 
+/* Fix for header row */
+.header-row {
+    position: sticky;
+    top: 50px;
+    background-color: #0b3b60;
+    color: aliceblue;
+    z-index: 2;
+    text-align: left;
+}
+
+/* If this header row is the second-to-last child, 
+   make it non-sticky so it scrolls away */
+.header-row:nth-last-child(2) {
+    position: relative;
+}
+
+/* Group header styling */
 tr.group-header {
+    position: sticky;
+    /* top: 0; */
+    z-index: 3;
     background-color: #fafafa;
 }
 
@@ -185,28 +206,6 @@ a:hover {
     gap: 10px;
     align-items: center;
 }
-
-/* Column visibility */
-/* th.tableHead-cell:nth-child(1),
-th.tableHead-cell:nth-child(3),
-th.tableHead-cell:nth-child(7),
-th.tableHead-cell:nth-child(8),
-th.tableHead-cell:nth-child(12),
-th.tableHead-cell:nth-child(13),
-th.tableHead-cell:nth-child(14) {
-    display: none;
-}
-
-td.tableBody-cell:nth-child(8),
-td.tableBody-cell:nth-child(1),
-td.tableBody-cell:nth-child(9),
-td.tableBody-cell:nth-child(3),
-td.tableBody-cell:nth-child(4),
-td.tableBody-cell:nth-child(13),
-td.tableBody-cell:nth-child(14),
-td.tableBody-cell:nth-child(15) {
-    display: none;
-} */
 
 /* Column widths */
 .table-container > thead > tr > th:nth-child(2) {
@@ -296,10 +295,11 @@ td.tableBody-cell:nth-child(15) {
 }
 
 /* Sticky headers */
-thead {
+thead, .tableHead {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 4;
+    background-color: #c7e5f1;
 }
 
 .sticky {
@@ -462,27 +462,8 @@ input:checked + .slider:before {
     color: #666;
     display: none;
 }
-/* Fix #1: Make header row sticky to the bottom of tableHead */
-.header-row {
-    position: sticky;
-    top: 40px;  /* Adjust this value based on the height of your tableHead */
-    background-color: #0b3b60;
-    color: aliceblue;
-    z-index: 1;
-    text-align: left;
-}
 
-/* Additional styles to ensure header visibility */
-thead {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background-color: #c7e5f1;
-}
-
-.table-container {
-    overflow-y: auto;
-}
+/* Column specific widths */
 .table-container > tbody > tr > td:nth-child(1) {
     width: 150px; /* Adjust width as needed */
 }
@@ -502,6 +483,7 @@ thead {
 .table-container > tbody > tr > td:nth-child(5) {
     width: 200px; /* Adjust width as needed */
 }
+
 /* Recommended widths for each column */
 .header-row th:nth-child(1), /* Page URL */
 .group-row td:nth-child(1) {
@@ -535,15 +517,14 @@ thead {
 .group-row td:nth-child(6) {
     width: 200px;
 }
-*/
 </style>
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
-    <div style="display: flex; align-items: flex-start;">
-        <div style="width: 100%;margin-right: 20px;">
-            <div style="height: 18vh;">
-                <h1 style="font-size: 2rem; margin-bottom: 10px;margin-top:10px;text-align: center;">CQ Fluency Fails</h1>
+    <div style="display: flex;align-items: flex-start;height: 94vh;">
+        <div style="width: 100%;/* margin-right: 20px; */height: 100%;">
+            <div style="height: 14vh;">
+                <h1 style="font-size: 2rem; margin:0px;text-align: center;">CQ Fluency Fails</h1>
                 
                 <!-- Tabs for navigation -->
                 <div class="tabs">
@@ -742,7 +723,7 @@ thead {
             <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
             <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
             <script>
-                // Global object to store toggle states across tabs
+         // Global object to store toggle states across tabs
 const globalToggleStates = {};
 
 // Set status message
@@ -765,7 +746,7 @@ const firebaseConfig = {
     projectId: "cq-priorities",
     storageBucket: "cq-priorities.firebasestorage.app",
     messagingSenderId: "1023528003950",
-    appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+    appId: "1:1023528003950:web:b5aeacb3bf5311b97f"
 };
 
 // Initialize Firebase with error handling
@@ -1005,7 +986,7 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
                     const prioritySelect = document.createElement('select');
                     prioritySelect.className = 'priority-select priority-low';
                     
-                    // Add priority options with "Low" selected by default (Fix #2)
+                    // Add priority options with "Low" selected by default
                     ['High', 'Medium', 'Low', 'Fixed'].forEach(priority => {
                         const option = document.createElement('option');
                         option.value = priority.toLowerCase();
@@ -1049,7 +1030,7 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
             }
         });
         
-        // Firebase sync for toggle switches (Fix #3)
+        // Firebase sync for toggle switches with global state
         const toggleInput = header.querySelector('input[type="checkbox"]');
         const groupName = header.querySelector('.tableBody-cell').textContent;
         const sanitizedGroupName = sanitizeForFirebase(groupName);
@@ -1076,7 +1057,7 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
             }
         }
         
-        // Add change event listener
+        // Add change event listener for toggle
         toggleInput.addEventListener('change', () => {
             const isEnabled = toggleInput.checked;
             
@@ -1106,8 +1087,9 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
             });
         }
         
-        prioritySelect.addEventListener('change', (e) => {
-            const selectedPriority = e.target.value;
+        // Priority select change handler with reordering
+        prioritySelect.addEventListener('change', function(e) {
+            const selectedPriority = this.value;
             
             if (database) {
                 database.ref('priorities/' + sanitizedGroupName).set({
@@ -1116,20 +1098,27 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
                 });
             }
             
-            prioritySelect.className = `priority-select priority-${selectedPriority}`;
+            this.className = `priority-select priority-${selectedPriority}`;
             
             if (selectedPriority === 'fixed') {
                 header.querySelector('.tableBody-cell').classList.add('strikethrough');
             } else {
                 header.querySelector('.tableBody-cell').classList.remove('strikethrough');
             }
+            
+            // Trigger reordering after a short delay to allow Firebase to update
+            setTimeout(() => {
+                const activeTabId = document.querySelector('.tab.active').dataset.tab;
+                const { tableBody } = tableMapping[activeTabId];
+                
+                // Re-render the current tab with the updated priority
+                renderAllData(tableBody);
+            }, 300);
         });
     });
 }
 
-// Replace the toggleGroupVisibility function with this version
-// that identifies columns by their labels rather than indices
-
+// Toggle group visibility with lazy loading of rows - show all rows
 function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
     const tableBody = document.getElementById(tableBodyId);
     const groupHeader = tableBody.querySelector(`#group-${groupIndex}`);
@@ -1157,9 +1146,17 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
         // Create a document fragment for better performance
         const fragment = document.createDocumentFragment();
         
+        // Create a wrapper div for the expanded content
+        const contentWrapper = document.createElement('tr');
+        contentWrapper.className = 'content-wrapper';
+        contentWrapper.id = `content-wrapper-${groupIndex}`;
+        contentWrapper.style.display = 'none'; // Hide initially
+        
         // Add header row first
         const headerRow = document.createElement('tr');
         headerRow.className = 'group-row header-row';
+        headerRow.id = `header-row-${groupIndex}`;
+        headerRow.dataset.group = groupIndex;
         
         // Get data for the current tab
         const data = tabData[tableBodyId];
@@ -1207,14 +1204,24 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
         
         fragment.appendChild(headerRow);
         
-        // Limit to 20 rows for performance
-        const rowsToShow = Math.min(20, rows.length);
+        // Create a container for all rows
+        const rowsContainer = document.createElement('tbody');
+        rowsContainer.className = 'group-content';
+        rowsContainer.dataset.groupIndex = groupIndex;
+        rowsContainer.id = `group-content-${groupIndex}`;
         
-        // Create row elements
-        for (let i = 0; i < rowsToShow; i++) {
+        // Show ALL rows, no limit
+        for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             const tr = document.createElement('tr');
             tr.className = 'group-row';
+            tr.dataset.group = groupIndex;
+            
+            // If this is the last row, mark it
+            if (i === rows.length - 1) {
+                tr.id = `last-row-${groupIndex}`;
+                tr.dataset.lastRow = true;
+            }
             
             // Add only relevant columns
             relevantColumns.forEach(column => {
@@ -1237,30 +1244,56 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
             fragment.appendChild(tr);
         }
         
-        // Add "more rows" message if needed
-        if (rows.length > rowsToShow) {
-            const moreRow = document.createElement('tr');
-            moreRow.className = 'group-row';
-            
-            const moreCell = document.createElement('td');
-            moreCell.colSpan = relevantColumns.length;
-            moreCell.textContent = `${rows.length - rowsToShow} more rows not shown`;
-            moreCell.style.textAlign = 'center';
-            moreCell.style.fontStyle = 'italic';
-            moreCell.style.padding = '10px';
-            
-            moreRow.appendChild(moreCell);
-            fragment.appendChild(moreRow);
-        }
-        
         // Insert after the group header
         groupHeader.after(fragment);
+        
+        // Add special class to the header row initially
+        headerRow.classList.add('sticky-active');
+        
+        // Add scroll event listener to handle sticky header
+        setupHeaderScroll(tableBodyId, groupIndex);
         
         // Log the column mappings for debugging
         console.log('Using column mappings:', relevantColumns);
     }
 }
 
+// Simplified scroll handling
+function setupHeaderScroll(tableBodyId, groupIndex) {
+    const container = document.getElementById(tableBodyId).closest('.table-container');
+    const headerRow = document.getElementById(`header-row-${groupIndex}`);
+    const lastRow = document.getElementById(`last-row-${groupIndex}`);
+    
+    if (!container || !headerRow || !lastRow) {
+        console.warn('Missing elements for scroll handling');
+        return;
+    }
+    
+    // Create a new Intersection Observer
+    const observer = new IntersectionObserver(
+        (entries) => {
+            // The callback is executed when the observed element's
+            // visibility changes (enters or exits viewport)
+            entries.forEach(entry => {
+                // If the last row is visible (entering viewport)
+                if (entry.isIntersecting) {
+                    // Remove sticky positioning from header
+                    headerRow.classList.remove('sticky-active');
+                } else {
+                    // Add sticky positioning back when last row is not visible
+                    headerRow.classList.add('sticky-active');
+                }
+            });
+        },
+        {
+            root: container, // The container is the viewport
+            threshold: 0.1    // Fire when 10% of the target is visible
+        }
+    );
+    
+    // Start observing the last row
+    observer.observe(lastRow);
+}
 
 // URL validation
 function isValidURL(str) {
