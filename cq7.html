@@ -187,7 +187,7 @@ a:hover {
 }
 
 /* Column visibility */
-th.tableHead-cell:nth-child(1),
+/* th.tableHead-cell:nth-child(1),
 th.tableHead-cell:nth-child(3),
 th.tableHead-cell:nth-child(7),
 th.tableHead-cell:nth-child(8),
@@ -206,7 +206,7 @@ td.tableBody-cell:nth-child(13),
 td.tableBody-cell:nth-child(14),
 td.tableBody-cell:nth-child(15) {
     display: none;
-}
+} */
 
 /* Column widths */
 .table-container > thead > tr > th:nth-child(2) {
@@ -481,6 +481,59 @@ thead {
 .table-container {
     overflow-y: auto;
 }
+.table-container > tbody > tr > td:nth-child(1) {
+    width: 150px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(2) {
+    width: 250px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(3) {
+    width: 250px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(4) {
+    width: 200px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(5) {
+    width: 200px; /* Adjust width as needed */
+}
+/* Recommended widths for each column */
+.header-row th:nth-child(1), /* Page URL */
+.group-row td:nth-child(1) {
+    width: 200px;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-row th:nth-child(2), /* Conformance Level */
+.group-row td:nth-child(2) {
+    width: 120px;
+}
+
+.header-row th:nth-child(3), /* Suggested Resolution */
+.group-row td:nth-child(3) {
+    width: 250px;
+}
+
+.header-row th:nth-child(4), /* Summary */
+.group-row td:nth-child(4) {
+    width: 250px;
+}
+
+.header-row th:nth-child(5), /* Test Result */
+.group-row td:nth-child(5) {
+    width: 150px;
+}
+
+.header-row th:nth-child(6), /* Screenshot / Video */
+.group-row td:nth-child(6) {
+    width: 200px;
+}
+*/
 </style>
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
@@ -1072,7 +1125,9 @@ async function renderGroupedData(headers, groupedData, tableBodyId) {
     });
 }
 
-// Toggle group visibility with lazy loading of rows
+// Replace the toggleGroupVisibility function with this version
+// that identifies columns by their labels rather than indices
+
 function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
     const tableBody = document.getElementById(tableBodyId);
     const groupHeader = tableBody.querySelector(`#group-${groupIndex}`);
@@ -1100,16 +1155,51 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
         // Create a document fragment for better performance
         const fragment = document.createDocumentFragment();
         
-        // Add header row first (Fix #1: will be made sticky via CSS)
+        // Add header row first
         const headerRow = document.createElement('tr');
         headerRow.className = 'group-row header-row';
         
+        // Get data for the current tab
+        const data = tabData[tableBodyId];
+        
+        // Define the column labels we want to include
+        const requiredLabels = [
+            "Page URL",
+            "Conformance Level",
+            "Suggested Resolution",
+            "Summary", 
+            "Test Result",
+            "Screenshot / Video"
+        ];
+        
+        // Find the indices of these columns in the headers
+        const relevantColumns = [];
+        if (data && data.headers) {
+            data.headers.forEach((header, index) => {
+                if (requiredLabels.includes(header)) {
+                    relevantColumns.push({
+                        index: index,
+                        label: header
+                    });
+                }
+            });
+        }
+        
+        // If no matching columns were found, fall back to specific indices that may match
+        if (relevantColumns.length === 0) {
+            console.warn('No matching column headers found. Falling back to default indices.');
+            [1, 5, 6, 10, 11].forEach(index => {
+                relevantColumns.push({
+                    index: index,
+                    label: data?.headers?.[index] || `Column ${index}`
+                });
+            });
+        }
+        
         // Add relevant column headers
-        const relevantColumns = [2, 4, 5, 9, 10]; // Example column indices
-        relevantColumns.forEach(colIndex => {
+        relevantColumns.forEach(column => {
             const th = document.createElement('th');
-            const data = tabData[tableBodyId]; // Get data for the current tab
-            th.textContent = data?.headers?.[colIndex] || `Column ${colIndex}`;
+            th.textContent = column.label;
             headerRow.appendChild(th);
         });
         
@@ -1125,9 +1215,9 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
             tr.className = 'group-row';
             
             // Add only relevant columns
-            relevantColumns.forEach(colIndex => {
+            relevantColumns.forEach(column => {
                 const td = document.createElement('td');
-                const cellValue = row[colIndex];
+                const cellValue = row[column.index];
                 
                 if (typeof cellValue === 'string' && isValidURL(cellValue)) {
                     const link = document.createElement('a');
@@ -1163,8 +1253,12 @@ function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
         
         // Insert after the group header
         groupHeader.after(fragment);
+        
+        // Log the column mappings for debugging
+        console.log('Using column mappings:', relevantColumns);
     }
 }
+
 
 // URL validation
 function isValidURL(str) {
