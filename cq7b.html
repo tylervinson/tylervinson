@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tabbed Navigation with Preloaded Tables - Optimized</title>
+<style>
+    /* Main layout and tab styles */
+.tabs {
+    display: flex;
+    cursor: pointer;
+    margin-bottom: 20px;
+    margin-top: 40px;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab {
+    padding: 10px 20px;
+    background-color: transparent;
+    margin-right: 10px;
+    text-align: center;
+    font-weight: normal;
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab.active {
+    color: #003040;
+    border-bottom: 1px solid #2273ba;
+}
+
+.tab:hover {
+    background-color: aliceblue;
+}
+
+.table-container {
+    display: none;
+    position: relative;
+    height: 76vh;
+    overflow: auto;
+}
+
+.table-container.active {
+    display: block;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin: 20px;
+}
+
+/* Table styling */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    word-break: break-word;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+}
+
+#dataTable {
+    margin-top: 20px;
+}
+
+.table-container th {
+    padding: 10px;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+    height: 29px;
+}
+
+#tableBody td {
+    padding: 10px;
+}
+
+th, td {
+    width: 7%;
+    padding: 10px;
+    border-collapse: collapse;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #0b3b60;
+    color: aliceblue;
+    font-weight: normal;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Row styling */
+tr.group-row {
+    background-color: #fff;
+}
+
+tr.group-row:nth-child(even) {
+    background-color: #f9f9f9; 
+}
+
+tr.group-header {
+    background-color: #fafafa;
+}
+
+tr.group-header.open {
+    background-color: #eee;
+}
+
+tr.group-header:hover {
+    background-color: #eee;
+    cursor: pointer;
+}
+
+tr.group-header td {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+/* Link styling */
+a {
+    color: #0066cc;
+    text-decoration: none;
+    word-wrap: break-word;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Header styling */
+.group-header {
+    text-align: center;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Button styling */
+.styled-button {
+    background-color: #FFBE5F;
+    border-radius: 50px;
+    padding: 0px 40px;
+    line-height: 45px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #000;
+    text-align: center;
+    text-decoration: none;
+}
+
+.styled-button:hover {
+    background-color: #FFA34D;
+}
+
+/* File input styling */
+.file-input-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+.file-input-wrapper input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-input-wrapper .styled-button {
+    pointer-events: none;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Column visibility */
+/* th.tableHead-cell:nth-child(1),
+th.tableHead-cell:nth-child(3),
+th.tableHead-cell:nth-child(7),
+th.tableHead-cell:nth-child(8),
+th.tableHead-cell:nth-child(12),
+th.tableHead-cell:nth-child(13),
+th.tableHead-cell:nth-child(14) {
+    display: none;
+}
+
+td.tableBody-cell:nth-child(8),
+td.tableBody-cell:nth-child(1),
+td.tableBody-cell:nth-child(9),
+td.tableBody-cell:nth-child(3),
+td.tableBody-cell:nth-child(4),
+td.tableBody-cell:nth-child(13),
+td.tableBody-cell:nth-child(14),
+td.tableBody-cell:nth-child(15) {
+    display: none;
+} */
+
+/* Column widths */
+.table-container > thead > tr > th:nth-child(2) {
+    width: 89px;
+}
+
+.table-container > thead > tr > th:nth-child(4),
+.table-container > tbody > tr > td:nth-child(5) {
+    width: 140px;
+}
+
+.table-container > thead > tr > th:nth-child(5),
+.table-container > tbody > tr > td:nth-child(6) {
+    width: 440px;
+}
+
+.table-container > thead > tr > th:nth-child(6),
+.table-container > tbody > tr > td:nth-child(7) {
+    width: 100px;
+}
+
+.table-container > thead > tr > th:nth-child(11),
+.table-container > tbody > tr > td:nth-child(12) {
+    width: 417px;
+}
+
+.table-container > tbody > tr > td:nth-child(11) {
+    width: 390px;
+}
+
+/* Group header styling */
+.group-header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.group-header-content > div:nth-child(1) {
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.group-header-content > div:nth-child(2) {
+    flex-grow: 1;
+    padding-left: 20px;
+    text-align: left;
+}
+
+.group-header > td > div > div:nth-child(1) {
+    margin: -15px;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+}
+
+.toggle-container, .priority-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    min-width: fit-content;
+}
+
+.toggle-container {
+    margin-right: 10px;
+    margin-left: auto;
+}
+
+.group-header-content .tableBody-cell:first-child {
+    width: 60px;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.group-header-content .tableBody-cell:last-child {
+    flex-grow: 1;
+    text-align: left;
+}
+
+/* Level AA styling */
+.level-AA-row td {
+    font-size: 12px;
+    font-style: italic;
+    color: #888888;
+}
+
+.level-AA-row td a {
+    color: #888888;
+}
+
+/* Sticky headers */
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation effects */
+.hidden {
+    display: none;
+    opacity: 0;
+    height: 0;
+    transition: all 0.3s ease;
+}
+
+.row-visible {
+    display: table-row;
+    opacity: 1;
+    height: auto;
+    transition: all 0.3s ease;
+}
+
+/* Priority styling */
+.priority-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    margin-left: auto;
+}
+
+.priority-label {
+    margin-right: 5px;
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.priority-select {
+    padding: 8px;
+    border: none;
+    border-radius: 2px;
+    font-weight: bold;
+    margin-left: 10px;
+    background-color: white;
+    color: #333;
+}
+
+.priority-high {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.priority-medium {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.priority-low {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* Table head styling */
+.tableHead {
+    background-color: #c7e5f1;
+}
+
+.tableHead .group-header-content {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    height: 30px;
+}
+
+/* Toggle switch styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    pointer-events: none;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    pointer-events: auto;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.switch input[type="checkbox"] {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+    color: #888;
+}
+
+/* Loading and status message styling */
+#loading {
+    text-align: center;
+    margin: 20px;
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-message {
+    text-align: center;
+    margin: 10px 0;
+    font-style: italic;
+    color: #666;
+    display: none;
+}
+/* Fix #1: Make header row sticky to the bottom of tableHead */
+.header-row {
+    position: sticky;
+    top: 40px;  /* Adjust this value based on the height of your tableHead */
+    background-color: #0b3b60;
+    color: aliceblue;
+    z-index: 1;
+    text-align: left;
+}
+
+/* Additional styles to ensure header visibility */
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #c7e5f1;
+}
+
+.table-container {
+    overflow-y: auto;
+}
+.table-container > tbody > tr > td:nth-child(1) {
+    width: 150px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(2) {
+    width: 250px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(3) {
+    width: 250px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(4) {
+    width: 200px; /* Adjust width as needed */
+}
+
+.table-container > tbody > tr > td:nth-child(5) {
+    width: 200px; /* Adjust width as needed */
+}
+/* Recommended widths for each column */
+.header-row th:nth-child(1), /* Page URL */
+.group-row td:nth-child(1) {
+    width: 200px;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-row th:nth-child(2), /* Conformance Level */
+.group-row td:nth-child(2) {
+    width: 120px;
+}
+
+.header-row th:nth-child(3), /* Suggested Resolution */
+.group-row td:nth-child(3) {
+    width: 250px;
+}
+
+.header-row th:nth-child(4), /* Summary */
+.group-row td:nth-child(4) {
+    width: 250px;
+}
+
+.header-row th:nth-child(5), /* Test Result */
+.group-row td:nth-child(5) {
+    width: 150px;
+}
+
+.header-row th:nth-child(6), /* Screenshot / Video */
+.group-row td:nth-child(6) {
+    width: 200px;
+}
+*/
+</style>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+    <div style="display: flex; align-items: flex-start;">
+        <div style="width: 100%;margin-right: 20px;">
+            <div style="height: 18vh;">
+                <h1 style="font-size: 2rem; margin-bottom: 10px;margin-top:10px;text-align: center;">CQ Fluency Fails</h1>
+                
+                <!-- Tabs for navigation -->
+                <div class="tabs">
+                    <div class="tab active" data-tab="tab1">Members</div>
+                    <div class="tab" data-tab="tab2">Providers</div>
+                    <div class="tab" data-tab="tab3">Individuals & Families</div>
+                    <div class="tab" data-tab="tab4">Medicare</div>
+                    <div class="tab" data-tab="tab5">Employers</div>
+                    <div class="tab" data-tab="tab6">Programs</div>
+                    <div class="tab" data-tab="tab7">Other</div>
+                    <div class="tab" data-tab="tab8">Other 2</div>
+                    <div class="tab" data-tab="tab9">Header / Footer</div>
+                </div>
+            </div>
+            
+            <!-- Loading animation container -->
+            <div id="loading">
+                <lottie-player src="loading.json" background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay></lottie-player>
+            </div>
+            
+            <!-- Status message -->
+            <div id="status-message" class="status-message"></div>
+            
+            <!-- Table containers -->
+            <div id="tab1" class="table-container active">
+                <table id="dataTable1">
+                    <thead id="tableHead1" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody1"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab2 -->
+            <div id="tab2" class="table-container">
+                <table id="dataTable2">
+                    <thead id="tableHead2" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody2"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab3 -->
+            <div id="tab3" class="table-container">
+                <table id="dataTable3">
+                    <thead id="tableHead3" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody3"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab4 -->
+            <div id="tab4" class="table-container">
+                <table id="dataTable4">
+                    <thead id="tableHead4" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody4"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab5 -->
+            <div id="tab5" class="table-container">
+                <table id="dataTable5">
+                    <thead id="tableHead5" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody5"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab6 -->
+            <div id="tab6" class="table-container">
+                <table id="dataTable6">
+                    <thead id="tableHead6" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody6"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab7 -->
+            <div id="tab7" class="table-container">
+                <table id="dataTable7">
+                    <thead id="tableHead7" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody7"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab8 -->
+            <div id="tab8" class="table-container">
+                <table id="dataTable8">
+                    <thead id="tableHead8" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody8"></tbody>
+                </table>
+            </div>
+            
+            <!-- Table for tab9 -->
+            <div id="tab9" class="table-container">
+                <table id="dataTable9">
+                    <thead id="tableHead9" class="tableHead">
+                        <tr>
+                            <td colspan="16">
+                                <div class="group-header-content">
+                                    <div style="width: 60px; margin-left:10px">Count</div>
+                                    <div style="flex-grow: 1; text-align: center;">Description</div>
+                                    <div style="width: 80px; text-align: center;">Nexus</div>
+                                    <div style="width: 80px; text-align: right; margin-right:20px;">Priority</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody9"></tbody>
+                </table>
+            </div>
+            
+            <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+            <script>
+                // Global object to store toggle states across tabs
+const globalToggleStates = {};
+
+// Set status message
+function setStatus(message) {
+    const statusElement = document.getElementById('status-message');
+    statusElement.textContent = message;
+}
+
+// Show/hide loading indicator
+function setLoading(isLoading) {
+    const loadingElement = document.getElementById('loading');
+    loadingElement.style.display = isLoading ? 'flex' : 'none';
+}
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyCnlib6iWIKdcQHu1tY6q7jOhbCMZe4T2E",
+    authDomain: "cq-priorities.firebaseapp.com",
+    databaseURL: "https://cq-priorities-default-rtdb.firebaseio.com",
+    projectId: "cq-priorities",
+    storageBucket: "cq-priorities.firebasestorage.app",
+    messagingSenderId: "1023528003950",
+    appId: "1:1023528003950:web:b5aeacb3bf8b3f5311b97f"
+};
+
+// Initialize Firebase with error handling
+let database;
+try {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Failed to initialize Firebase: ' + error.message);
+    setStatus('Warning: Firebase connection failed. Some features may not work.');
+}
+
+// Tab data storage
+const tabData = {};
+const groupColumnIndex = 5;
+
+// Load Excel file with timeout and error handling
+async function loadExcelFile(file, tableBodyId) {
+    console.log(`Loading Excel file: ${file}`);
+    setLoading(true);
+    setStatus(`Loading ${file}...`);
+    
+    try {
+        // Set a timeout for the fetch operation
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(`Loading ${file} timed out after 15 seconds`)), 15000);
+        });
+        
+        // Fetch the file
+        const fetchPromise = fetch(file)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${file}: ${response.status} ${response.statusText}`);
+                }
+                return response.arrayBuffer();
+            })
+            .then(data => {
+                console.log(`Processing Excel data (${data.byteLength} bytes)...`);
+                
+                // Process the Excel file
+                const workbook = XLSX.read(data, { type: 'array' });
+                let headers = null;
+                const rows = [];
+                
+                // Process all sheets in the workbook
+                workbook.SheetNames.forEach(sheetName => {
+                    const worksheet = workbook.Sheets[sheetName];
+                    const sheetRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (sheetRows.length === 0) return;
+                    
+                    if (!headers) headers = sheetRows[0];
+                    
+                    // Filter for rows with FAIL status
+                    sheetRows.slice(1).forEach(row => {
+                        if (row.length > 9 && row[9] && row[9].toString().trim().toUpperCase() === 'FAIL') {
+                            rows.push(row);
+                        }
+                    });
+                });
+                
+                // Store data
+                tabData[tableBodyId] = { 
+                    headers: headers,
+                    rows: rows 
+                };
+                
+                // Render the data directly without pagination
+                renderAllData(tableBodyId);
+                
+                console.log(`Excel file ${file} processed. Found ${rows.length} rows with FAIL status.`);
+                setStatus(`Loaded ${rows.length} issues from ${file}`);
+                return rows;
+            });
+        
+        // Race between fetch and timeout
+        return await Promise.race([fetchPromise, timeoutPromise]);
+        
+    } catch (error) {
+        console.error(error);
+        setStatus(`Error loading ${file}: ${error.message}`);
+        return null;
+    } finally {
+        setLoading(false);
+    }
+}
+
+// Render all data without pagination
+async function renderAllData(tableBodyId) {
+    const data = tabData[tableBodyId];
+    
+    if (!data || !data.rows) {
+        console.log(`No data available for ${tableBodyId}`);
+        return;
+    }
+    
+    console.log(`Rendering all data for ${tableBodyId}`);
+    setLoading(true);
+    
+    try {
+        // Group and sort all data
+        const groupedData = await groupAndSortData(data.rows, groupColumnIndex);
+        
+        // Render the grouped data
+        await renderGroupedData(data.headers, groupedData, tableBodyId);
+        
+        console.log(`Rendered ${data.rows.length} rows for ${tableBodyId}`);
+        
+    } catch (error) {
+        console.error(error);
+        setStatus(`Error rendering data: ${error.message}`);
+    } finally {
+        setLoading(false);
+    }
+}
+
+// Group and sort data
+async function groupAndSortData(rows, columnIndex) {
+    // Group data by the specified column index
+    const groupedData = rows.reduce((groups, row) => {
+        const key = row[columnIndex] || 'Undefined';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+        return groups;
+    }, {});
+    
+    // Fetch priorities from Firebase if available
+    let priorities = {};
+    if (database) {
+        try {
+            const prioritiesSnapshot = await database.ref('priorities').once('value');
+            priorities = prioritiesSnapshot.val() || {};
+        } catch (error) {
+            console.error('Error fetching priorities: ' + error.message);
+        }
+    }
+    
+    // Define priority order
+    const priorityOrder = { high: 3, medium: 2, low: 1, fixed: 0 };
+    
+    // Sort the grouped data
+    return Object.entries(groupedData).sort((a, b) => {
+        const priorityA = priorities[sanitizeForFirebase(a[0])]?.priority || 'low';
+        const priorityB = priorities[sanitizeForFirebase(b[0])]?.priority || 'low';
+        
+        // Sort by priority
+        if (priorityOrder[priorityA] !== priorityOrder[priorityB]) {
+            return priorityOrder[priorityB] - priorityOrder[priorityA];
+        }
+        
+        // Then sort by group size (number of rows)
+        return b[1].length - a[1].length;
+    });
+}
+
+// Render grouped data with efficient DOM methods
+async function renderGroupedData(headers, groupedData, tableBodyId) {
+    const tableBody = document.getElementById(tableBodyId);
+    
+    // Clear existing content
+    tableBody.innerHTML = '';
+    
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+    
+    // Process in chunks to avoid UI freezing
+    const chunkSize = 5; // Process 5 groups at a time
+    
+    for (let i = 0; i < groupedData.length; i += chunkSize) {
+        // Process a chunk of groups
+        const chunk = groupedData.slice(i, i + chunkSize);
+        
+        await new Promise(resolve => {
+            // Use setTimeout to give UI a chance to breathe
+            setTimeout(() => {
+                chunk.forEach(([group, rows], groupIndex) => {
+                    const actualGroupIndex = i + groupIndex;
+                    const sanitizedGroupName = sanitizeForFirebase(group);
+                    
+                    // Create group header
+                    const groupTr = document.createElement('tr');
+                    groupTr.className = 'group-header';
+                    groupTr.id = `group-${actualGroupIndex}`;
+                    
+                    const groupTdWrapper = document.createElement('td');
+                    groupTdWrapper.setAttribute('colspan', '16');
+                    
+                    const groupContent = document.createElement('div');
+                    groupContent.className = 'group-header-content';
+                    
+                    // Count element
+                    const occurrencesDiv = document.createElement('div');
+                    occurrencesDiv.style.textAlign = 'center';
+                    occurrencesDiv.style.width = '60px';
+                    occurrencesDiv.style.flexShrink = '0';
+                    
+                    const occurrencesCount = document.createElement('div');
+                    occurrencesCount.textContent = rows.length;
+                    occurrencesCount.classList.add('tableBody-cell');
+                    
+                    const instancesLabel = document.createElement('div');
+                    instancesLabel.textContent = 'INSTANCES';
+                    instancesLabel.style.fontSize = '10px';
+                    instancesLabel.style.fontWeight = 'bold';
+                    instancesLabel.style.marginTop = '5px';
+                    
+                    occurrencesDiv.appendChild(occurrencesCount);
+                    occurrencesDiv.appendChild(instancesLabel);
+                    
+                    // Description element
+                    const groupLabel = document.createElement('div');
+                    groupLabel.textContent = group;
+                    groupLabel.classList.add('tableBody-cell');
+                    
+                    // Toggle container
+                    const toggleContainer = document.createElement('div');
+                    toggleContainer.className = 'toggle-container';
+                    
+                    const toggleLabel = document.createElement('label');
+                    toggleLabel.className = 'switch';
+                    
+                    const nexusToggle = document.createElement('input');
+                    nexusToggle.type = 'checkbox';
+                    
+                    const slider = document.createElement('span');
+                    slider.className = 'slider round';
+                    
+                    toggleLabel.appendChild(nexusToggle);
+                    toggleLabel.appendChild(slider);
+                    toggleContainer.appendChild(toggleLabel);
+                    
+                    // Priority container
+                    const priorityContainer = document.createElement('div');
+                    priorityContainer.className = 'priority-container';
+                    
+                    const prioritySelect = document.createElement('select');
+                    prioritySelect.className = 'priority-select priority-low';
+                    
+                    // Add priority options with "Low" selected by default (Fix #2)
+                    ['High', 'Medium', 'Low', 'Fixed'].forEach(priority => {
+                        const option = document.createElement('option');
+                        option.value = priority.toLowerCase();
+                        option.textContent = priority;
+                        // Set "Low" as the default selected option
+                        if (priority === 'Low') {
+                            option.selected = true;
+                        }
+                        prioritySelect.appendChild(option);
+                    });
+                    
+                    priorityContainer.appendChild(prioritySelect);
+                    
+                    // Assemble group header
+                    groupContent.appendChild(occurrencesDiv);
+                    groupContent.appendChild(groupLabel);
+                    groupContent.appendChild(toggleContainer);
+                    groupContent.appendChild(priorityContainer);
+                    
+                    groupTdWrapper.appendChild(groupContent);
+                    groupTr.appendChild(groupTdWrapper);
+                    
+                    // Add the group header to fragment
+                    fragment.appendChild(groupTr);
+                });
+                
+                resolve();
+            }, 0);
+        });
+    }
+    
+    // Append all the created elements to the DOM at once
+    tableBody.appendChild(fragment);
+    
+    // Add event listeners after DOM is updated
+    document.querySelectorAll(`#${tableBodyId} .group-header`).forEach((header, index) => {
+        // Toggle event for group expansion
+        header.addEventListener('click', (e) => {
+            if (!e.target.closest('.priority-container') && !e.target.closest('.toggle-container')) {
+                toggleGroupVisibility(index, tableBodyId, groupedData);
+            }
+        });
+        
+        // Firebase sync for toggle switches (Fix #3)
+        const toggleInput = header.querySelector('input[type="checkbox"]');
+        const groupName = header.querySelector('.tableBody-cell').textContent;
+        const sanitizedGroupName = sanitizeForFirebase(groupName);
+        
+        // Check if we already have a global state for this group
+        if (globalToggleStates.hasOwnProperty(groupName)) {
+            toggleInput.checked = globalToggleStates[groupName];
+        } else {
+            // Only set up Firebase listeners if database is available
+            if (database) {
+                try {
+                    // Limit the number of simultaneous listeners
+                    database.ref('toggles/' + sanitizedGroupName).once('value', (snapshot) => {
+                        const data = snapshot.val();
+                        const isEnabled = data?.isEnabled || false;
+                        toggleInput.checked = isEnabled;
+                        
+                        // Store in global state
+                        globalToggleStates[groupName] = isEnabled;
+                    });
+                } catch (error) {
+                    console.error('Firebase error: ' + error.message);
+                }
+            }
+        }
+        
+        // Add change event listener
+        toggleInput.addEventListener('change', () => {
+            const isEnabled = toggleInput.checked;
+            
+            // Update global state
+            globalToggleStates[groupName] = isEnabled;
+            
+            // Update in Firebase
+            if (database) {
+                database.ref('toggles/' + sanitizedGroupName).set({ isEnabled });
+            }
+        });
+        
+        // Priority select handling
+        const prioritySelect = header.querySelector('.priority-select');
+        
+        if (database) {
+            database.ref('priorities/' + sanitizedGroupName).once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data?.priority) {
+                    prioritySelect.value = data.priority;
+                    prioritySelect.className = `priority-select priority-${data.priority}`;
+                    
+                    if (data.priority === 'fixed') {
+                        header.querySelector('.tableBody-cell').classList.add('strikethrough');
+                    }
+                }
+            });
+        }
+        
+        prioritySelect.addEventListener('change', (e) => {
+            const selectedPriority = e.target.value;
+            
+            if (database) {
+                database.ref('priorities/' + sanitizedGroupName).set({
+                    originalName: groupName,
+                    priority: selectedPriority
+                });
+            }
+            
+            prioritySelect.className = `priority-select priority-${selectedPriority}`;
+            
+            if (selectedPriority === 'fixed') {
+                header.querySelector('.tableBody-cell').classList.add('strikethrough');
+            } else {
+                header.querySelector('.tableBody-cell').classList.remove('strikethrough');
+            }
+        });
+    });
+}
+
+// Replace the toggleGroupVisibility function with this version
+// that identifies columns by their labels rather than indices
+
+function toggleGroupVisibility(groupIndex, tableBodyId, groupedData) {
+    const tableBody = document.getElementById(tableBodyId);
+    const groupHeader = tableBody.querySelector(`#group-${groupIndex}`);
+    
+    // Check if group is already open
+    const isGroupOpen = groupHeader.classList.contains('open');
+    
+    // Close all open groups first
+    tableBody.querySelectorAll('.group-header').forEach(header => {
+        header.classList.remove('open');
+    });
+    
+    // Remove all detail rows
+    tableBody.querySelectorAll('.group-row').forEach(row => {
+        row.remove();
+    });
+    
+    // If the group wasn't open, open it now
+    if (!isGroupOpen) {
+        groupHeader.classList.add('open');
+        
+        // Get the group data
+        const [group, rows] = groupedData[groupIndex];
+        
+        // Create a document fragment for better performance
+        const fragment = document.createDocumentFragment();
+        
+        // Add header row first
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'group-row header-row';
+        
+        // Get data for the current tab
+        const data = tabData[tableBodyId];
+        
+        // Define the column labels we want to include
+        const requiredLabels = [
+            "Page URL",
+            "Conformance Level",
+            "Suggested Resolution",
+            "Summary", 
+            "Test Result",
+            "Screenshot / Video"
+        ];
+        
+        // Find the indices of these columns in the headers
+        const relevantColumns = [];
+        if (data && data.headers) {
+            data.headers.forEach((header, index) => {
+                if (requiredLabels.includes(header)) {
+                    relevantColumns.push({
+                        index: index,
+                        label: header
+                    });
+                }
+            });
+        }
+        
+        // If no matching columns were found, fall back to specific indices that may match
+        if (relevantColumns.length === 0) {
+            console.warn('No matching column headers found. Falling back to default indices.');
+            [1, 5, 6, 10, 11].forEach(index => {
+                relevantColumns.push({
+                    index: index,
+                    label: data?.headers?.[index] || `Column ${index}`
+                });
+            });
+        }
+        
+        // Add relevant column headers
+        relevantColumns.forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column.label;
+            headerRow.appendChild(th);
+        });
+        
+        fragment.appendChild(headerRow);
+        
+        // Limit to 20 rows for performance
+        const rowsToShow = Math.min(20, rows.length);
+        
+        // Create row elements
+        for (let i = 0; i < rowsToShow; i++) {
+            const row = rows[i];
+            const tr = document.createElement('tr');
+            tr.className = 'group-row';
+            
+            // Add only relevant columns
+            relevantColumns.forEach(column => {
+                const td = document.createElement('td');
+                const cellValue = row[column.index];
+                
+                if (typeof cellValue === 'string' && isValidURL(cellValue)) {
+                    const link = document.createElement('a');
+                    link.href = cellValue;
+                    link.textContent = cellValue;
+                    link.target = '_blank';
+                    td.appendChild(link);
+                } else {
+                    td.textContent = cellValue || '';
+                }
+                
+                tr.appendChild(td);
+            });
+            
+            fragment.appendChild(tr);
+        }
+        
+        // Add "more rows" message if needed
+        if (rows.length > rowsToShow) {
+            const moreRow = document.createElement('tr');
+            moreRow.className = 'group-row';
+            
+            const moreCell = document.createElement('td');
+            moreCell.colSpan = relevantColumns.length;
+            moreCell.textContent = `${rows.length - rowsToShow} more rows not shown`;
+            moreCell.style.textAlign = 'center';
+            moreCell.style.fontStyle = 'italic';
+            moreCell.style.padding = '10px';
+            
+            moreRow.appendChild(moreCell);
+            fragment.appendChild(moreRow);
+        }
+        
+        // Insert after the group header
+        groupHeader.after(fragment);
+        
+        // Log the column mappings for debugging
+        console.log('Using column mappings:', relevantColumns);
+    }
+}
+
+
+// URL validation
+function isValidURL(str) {
+    if (!str || typeof str !== 'string') return false;
+    const pattern = new RegExp(
+        '^(https?:\\/\\/)?' + 
+        '(([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|' +
+        'localhost|' +
+        '\\d{1,3}(\\.\\d{1,3}){3})' + 
+        '(\\:\\d+)?(\\/[-a-zA-Z0-9@:%_+.~#?&//=]*)?'
+    ,
+        'i'
+    );
+    return pattern.test(str);
+}
+
+// Firebase-safe string conversion
+function sanitizeForFirebase(str) {
+    if (!str || typeof str !== 'string') return 'undefined';
+    return str
+        .replace(/[.#$[\]/]/g, '_')
+        .replace(/\s+/g, '_')
+        .substring(0, 100);
+}
+
+// Tab mapping configuration
+const tableMapping = {
+    tab1: { file: 'members-clean.xlsx', tableHead: 'tableHead1', tableBody: 'tableBody1' },
+    tab2: { file: 'provider-clean.xlsx', tableHead: 'tableHead2', tableBody: 'tableBody2' },
+    tab3: { file: 'IU65-clean.xlsx', tableHead: 'tableHead3', tableBody: 'tableBody3' },
+    tab4: { file: 'medicare-clean.xlsx', tableHead: 'tableHead4', tableBody: 'tableBody4' },
+    tab5: { file: 'employer-clean.xlsx', tableHead: 'tableHead5', tableBody: 'tableBody5' },
+    tab6: { file: 'programs-clean.xlsx', tableHead: 'tableHead6', tableBody: 'tableBody6' },
+    tab7: { file: 'other-clean.xlsx', tableHead: 'tableHead7', tableBody: 'tableBody7' },
+    tab8: { file: 'other2-clean.xlsx', tableHead: 'tableHead8', tableBody: 'tableBody8' },
+    tab9: { file: 'header-footer-clean.xlsx', tableHead: 'tableHead9', tableBody: 'tableBody9' },
+};
+
+// Initialize the application with error handling
+(function init() {
+    try {
+        console.log('Initializing application...');
+        
+        // Get all tab elements
+        const tabElements = document.querySelectorAll('.tab');
+        const tableContainers = document.querySelectorAll('.table-container');
+        
+        // Track loaded tabs
+        const loadedTabs = new Set();
+        
+        // Set up tab switching with lazy loading
+        tabElements.forEach(tab => {
+            tab.addEventListener('click', async () => {
+                const targetId = tab.dataset.tab;
+                const { file, tableHead, tableBody } = tableMapping[targetId];
+                
+                // Switch active tab
+                tabElements.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                tableContainers.forEach(tc => tc.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+                
+                // Load data if not already loaded
+                if (!loadedTabs.has(targetId)) {
+                    await loadExcelFile(file, tableBody);
+                    loadedTabs.add(targetId);
+                }
+            });
+        });
+        
+        // Load first tab data
+        loadExcelFile('members-clean.xlsx', 'tableBody1')
+            .then(() => {
+                loadedTabs.add('tab1');
+                console.log('Initial data loaded successfully');
+            })
+            .catch(error => {
+                console.error(error);
+                setStatus('Error loading initial data. Please refresh the page.');
+            });
+        
+        console.log('Application initialized');
+        
+    } catch (error) {
+        console.error(error);
+        setStatus('Error initializing application: ' + error.message);
+    }
+})();
+            </script>
+        </div>
+    </div>
+</body>
+</html>
