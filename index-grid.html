@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+    body {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+    }
+    body button {
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 0;
+      margin: 0;
+      position: relative;
+      cursor: pointer;
+      transition: filter 0.3s;
+    }
+    body button .label {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      font-size: 0.9em;
+      color: #ffffff;
+    }
+    body button:hover {
+      filter: brightness(1.1);
+      box-shadow: 0px 2px 20px 0px #ffffff;
+      z-index: 99999;
+    }
+    /* Unique background colors for each button */
+    body button:nth-child(1)  { background-color: #1abc9c; }
+    body button:nth-child(2)  { background-color: #2ecc71; }
+    body button:nth-child(3)  { background-color: #3498db; }
+    body button:nth-child(4)  { background-color: #9b59b6; }
+    body button:nth-child(5)  { background-color: #34495e; }
+    body button:nth-child(6)  { background-color: #16a085; }
+    body button:nth-child(7)  { background-color: #27ae60; }
+    body button:nth-child(8)  { background-color: #2980b9; }
+    body button:nth-child(9)  { background-color: #8e44ad; }
+    body button:nth-child(10) { background-color: #2c3e50; }
+    body button:nth-child(11) { background-color: #f1c40f; }
+    body button:nth-child(12) { background-color: #e67e22; }
+    body button:nth-child(13) { background-color: #e74c3c; }
+    body button:nth-child(14) { background-color: #ecf0f1; }
+    body button:nth-child(15) { background-color: #95a5a6; }
+    body button:nth-child(16) { background-color: #f39c12; }
+    body button:nth-child(17) { background-color: #d35400; }
+    body button:nth-child(18) { background-color: #c0392b; }
+    body button:nth-child(19) { background-color: #bdc3c7; }
+    body button:nth-child(20) { background-color: #7f8c8d; }
+  </style>
+</head>
+<body>
+  <button><span class="label">Button 1</span></button>
+  <button><span class="label">Button 2</span></button>
+  <button><span class="label">Button 3</span></button>
+  <button><span class="label">Button 4</span></button>
+  <button><span class="label">Button 5</span></button>
+  <button><span class="label">Button 6</span></button>
+  <button><span class="label">Button 7</span></button>
+  <button><span class="label">Button 8</span></button>
+  <button><span class="label">Button 9</span></button>
+  <button><span class="label">Button 10</span></button>
+  <button><span class="label">Button 11</span></button>
+  <button><span class="label">Button 12</span></button>
+  <button><span class="label">Button 13</span></button>
+  <button><span class="label">Button 14</span></button>
+  <button><span class="label">Button 15</span></button>
+  <button><span class="label">Button 16</span></button>
+  <button><span class="label">Button 17</span></button>
+  <button><span class="label">Button 18</span></button>
+  <button><span class="label">Button 19</span></button>
+  <button><span class="label">Button 20</span></button>
+  <!-- Code ID: gridPage_v1.0 -->
+</body>
+</html>
