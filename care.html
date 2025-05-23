@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Tabs Transformation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        /* Mobile-first accordion styles */
+        @media (max-width: 768px) {
+            /* Transform tabs into accordion */
+            .border-gray-medium.md\\:border-b.md\\:overflow-x-visible.md\\:pl-3.md\\:space-x-2.overflow-x-scroll.grid.grid-flow-col.hide-scroll-bar.space-x-2 {
+                display: flex !important;
+                flex-direction: column !important;
+                overflow-x: visible !important;
+                border: none !important;
+                gap: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Style tab buttons as accordion headers */
+            .border-t.border-l.border-r.group.rounded-t-md.transition-all.whitespace-pre {
+                border: none !important;
+                border-bottom: 1px solid #e5e7eb !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            
+            /* Tab button content styling */
+            .hover\\:\\!no-underline.h-full.flex.justify-center.items-center.px-4.py-3.space-x-3.cursor-pointer.rounded-t-md.transition-all {
+                justify-content: flex-start !important;
+                padding: 1rem !important;
+                border-radius: 0 !important;
+                position: relative !important;
+                background: white !important;
+            }
+            
+            /* Active tab styling */
+            .border-gray-medium.bg-white .hover\\:\\!no-underline {
+                background-color: #f0f9ff !important;
+                color: #0284c7 !important;
+            }
+            
+            /* Inactive tab styling */
+            .border-gray.bg-gray-light .hover\\:\\!no-underline {
+                background-color: white !important;
+                color: #374151 !important;
+            }
+            
+            /* Add chevron icon to accordion buttons */
+            .hover\\:\\!no-underline.h-full.flex.justify-center.items-center.px-4.py-3.space-x-3.cursor-pointer.rounded-t-md.transition-all::after {
+                content: '\\e5cf';
+                font-family: 'Material Icons';
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                transition: transform 0.3s ease;
+                font-size: 24px;
+            }
+            
+            /* Rotate chevron for active tab */
+            .border-gray-medium.bg-white .hover\\:\\!no-underline::after {
+                transform: translateY(-50%) rotate(180deg);
+            }
+            
+            /* Hide tab content by default on mobile */
+            .mx-auto.w-full.bg-white.p-5 {
+                display: none !important;
+            }
+            
+            /* Show active tab content */
+            .mx-auto.w-full.bg-white.p-5.active {
+                display: block !important;
+                padding: 1.5rem !important;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            /* Style the main container */
+            .mx-auto.relative {
+                background: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                max-width: 28rem;
+                margin: 0 auto;
+            }
+            
+            /* Remove desktop-specific spacing */
+            .md\\:divide-x.divide-y.md\\:divide-y-0.divide-gray.py-5.md\\:py-10.grid-flow-row.sm\\:grid.mx-auto.md\\:grid-cols-3.sm\\:gap-5 {
+                display: block !important;
+                padding: 0 !important;
+                gap: 0 !important;
+                grid-template-columns: none !important;
+            }
+            
+            /* Style list items */
+            .flex.flex-col.flex-grow.h-auto.h-full.items-center.md\\:pl-9.first\\:pl-0.shrink-0.py-5.md\\:py-0 {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* Improve link styling */
+            .flex.hover-arrow-icon.items-center {
+                color: #0284c7 !important;
+                text-decoration: none !important;
+                transition: color 0.2s ease !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .flex.hover-arrow-icon.items-center:hover {
+                color: #0369a1 !important;
+            }
+            
+            /* Style section headings */
+            .heading-2xs .rte strong,
+            .heading-2xs .rte b {
+                font-size: 1.125rem !important;
+                color: #1f2937 !important;
+                margin-bottom: 0.5rem !important;
+                display: block !important;
+            }
+            
+            /* Style descriptions */
+            .p-0.rte.mb-8.text-base {
+                color: #6b7280 !important;
+                margin-bottom: 0.75rem !important;
+                line-height: 1.5 !important;
+            }
+            
+            /* Space out sections */
+            .flex.flex-col.h-full.w-full {
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .flex.flex-col.h-full.w-full:last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+        
+        /* Desktop styles remain unchanged */
+        @media (min-width: 769px) {
+            .mx-auto.w-full.bg-white.p-5 {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+
+<!-- Original markup from tabs.txt with minimal modifications -->
+<div data-coveo-no-index="true" class="relative overflow-x-hidden md:overflow-x-visible anchorIdIndentifier" data-component="authorable/toggles/tabviews" id="dab7c291-d049-47aa-8b0a-b03db70dfc4d">
+    <div class="mx-auto w-full">
+        <div class="mx-auto w-full container-content-width">
+            <ul class="border-gray-medium md:border-b md:overflow-x-visible md:pl-3 md:space-x-2 overflow-x-scroll grid grid-flow-col hide-scroll-bar space-x-2">
+                <li role="button" class="block border-t border-l border-r group rounded-t-md transition-all whitespace-pre border-gray-medium bg-white font-bolder" data-tab="get-care">
+                    <div class="hover:!no-underline h-full flex justify-center items-center px-4 py-3 space-x-3 cursor-pointer rounded-t-md transition-all shadow-underline text-blue">
+                        <span style="box-sizing:border-box;display:inline-block;overflow:hidden;width:initial;height:initial;background:none;opacity:1;border:0;margin:0;padding:0;position:relative;max-width:100%">
+                            <span class="material-icons" style="color: inherit; font-size: 24px;">monitor_heart</span>
+                        </span>
+                        <span class="group-hover:underline">GET CARE</span>
+                    </div>
+                </li>
+                <li role="button" class="block border-t border-l border-r group rounded-t-md transition-all whitespace-pre border-gray bg-gray-light" data-tab="crisis-support">
+                    <div class="hover:!no-underline h-full flex justify-center items-center px-4 py-3 space-x-3 cursor-pointer rounded-t-md transition-all text-gray-darkest">
+                        <span class="material-icons" style="color: inherit; font-size: 24px;">medical_services</span>
+                        <span class="group-hover:underline">CRISIS SUPPORT</span>
+                    </div>
+                </li>
+                <li role="button" class="block border-t border-l border-r group rounded-t-md transition-all whitespace-pre border-gray bg-gray-light" data-tab="community-resources">
+                    <div class="hover:!no-underline h-full flex justify-center items-center px-4 py-3 space-x-3 cursor-pointer rounded-t-md transition-all text-gray-darkest">
+                        <span class="material-icons" style="color: inherit; font-size: 24px;">people</span>
+                        <span class="group-hover:underline">COMMUNITY RESOURCES</span>
+                    </div>
+                </li>
+                <li role="button" class="block border-t border-l border-r group rounded-t-md transition-all whitespace-pre border-gray bg-gray-light" data-tab="member-services">
+                    <div class="hover:!no-underline h-full flex justify-center items-center px-4 py-3 space-x-3 cursor-pointer rounded-t-md transition-all text-gray-darkest">
+                        <span class="material-icons" style="color: inherit; font-size: 24px;">phone</span>
+                        <span class="group-hover:underline">MEMBER SERVICES</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="mx-auto relative">
+        <!-- GET CARE Tab Content -->
+        <div class="mx-auto w-full bg-white p-5 active" data-component="authorable/card-listings/actioncardlisting" id="ca1f9d84-dd85-4319-8bb6-eb1dc0de67b0" data-content="get-care">
+            <div class="mx-auto w-full container-content-width">
+                <ul class="divide-y divide-gray">
+                    <li>
+                        <div class="mx-auto w-full" data-component="helpers/xup">
+                            <div class="mx-auto w-full container-content-width">
+                                <ul class="md:divide-x divide-y md:divide-y-0 divide-gray py-5 md:py-10 grid-flow-row sm:grid mx-auto md:grid-cols-3 sm:gap-5">
+                                    <li class="flex flex-col flex-grow h-auto h-full items-center md:pl-9 first:pl-0 shrink-0 py-5 md:py-0">
+                                        <div class="flex flex-col h-full w-full">
+                                            <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                                                <div>
+                                                    <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                                        <div class="rte"><strong>TELEHEALTH 24/7</strong></div>
+                                                    </h4>
+                                                    <div class="p-0 rte mb-8 text-base">
+                                                        <div class="rte">Connect with a board-certified medical professional–any day, anytime, anywhere.</div>
+                                                    </div>
+                                                </div>
+                                                <ul class="flex flex-col gap-2">
+                                                    <li class="flex gap-4 text-gray-darkest">
+                                                        <span class="flex items-center">
+                                                            <span class="material-icons" style="color: inherit; font-size: 24px;">smartphone</span>
+                                                        </span>
+                                                        <span class="flex-grow shrink-0">
+                                                            <a class="flex hover-arrow-icon items-center" href="#">
+                                                                Start Telehealth Visit
+                                                                <span class="material-icons ml-1 text-lg">chevron_right</span>
+                                                            </a>
+                                                        </span>
+                                                    </li>
+                                                    <li class="flex gap-4 text-gray-darkest">
+                                                        <span class="flex items-center">
+                                                            <span class="material-icons" style="color: inherit; font-size: 24px;">info</span>
+                                                        </span>
+                                                        <div class="rte">
+                                                            <em>For medical emergencies, always call 911.</em>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="flex flex-col flex-grow h-auto h-full items-center md:pl-9 first:pl-0 shrink-0 py-5 md:py-0">
+                                        <div class="flex flex-col h-full w-full">
+                                            <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                                                <div>
+                                                    <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                                        <div class="rte"><strong>FREE NURSE ON CALL 24/7</strong></div>
+                                                    </h4>
+                                                    <div class="p-0 rte mb-8 text-base">
+                                                        <div class="rte">Speak with an experienced, registered nurse by phone or online.</div>
+                                                    </div>
+                                                </div>
+                                                <ul class="flex flex-col gap-2">
+                                                    <li class="flex gap-4 text-gray-darkest">
+                                                        <span class="flex items-center">
+                                                            <span class="material-icons" style="color: inherit; font-size: 24px;">phone</span>
+                                                        </span>
+                                                        <div class="rte">
+                                                            <a href="tel:18882679037" class="rte-link">1-888-267-9037</a> TTY: 711
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="flex flex-col flex-grow h-auto h-full items-center md:pl-9 first:pl-0 shrink-0 py-5 md:py-0">
+                                        <div class="flex flex-col h-full w-full">
+                                            <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                                                <div>
+                                                    <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                                        <div class="rte"><b>FIND A DOCTOR OR PHARMACY</b></div>
+                                                    </h4>
+                                                    <div class="p-0 rte mb-8 text-base">
+                                                        <div class="rte">Find a doctor near you, compare costs and more.</div>
+                                                    </div>
+                                                </div>
+                                                <ul class="flex flex-col gap-2">
+                                                    <li class="flex gap-4 text-gray-darkest">
+                                                        <span class="flex items-center">
+                                                            <span class="material-icons" style="color: inherit; font-size: 24px;">search</span>
+                                                        </span>
+                                                        <span class="flex-grow shrink-0">
+                                                            <a href="#" class="flex hover-arrow-icon items-center">
+                                                                Online Provider Directory
+                                                                <span class="material-icons ml-1 text-lg">open_in_new</span>
+                                                            </a>
+                                                        </span>
+                                                    </li>
+                                                    <li class="flex gap-4 text-gray-darkest">
+                                                        <span class="flex items-center">
+                                                            <span class="material-icons" style="color: inherit; font-size: 24px;">phone</span>
+                                                        </span>
+                                                        <div class="rte">
+                                                            <a href="tel:8003228670" class="rte-link">1-800-322-8670</a> TTY: 711
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- CRISIS SUPPORT Tab Content -->
+        <div class="mx-auto w-full bg-white p-5" data-content="crisis-support">
+            <div class="mx-auto w-full container-content-width">
+                <div class="space-y-6">
+                    <div class="flex flex-col h-full w-full">
+                        <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                            <div>
+                                <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                    <div class="rte"><strong>24/7 CRISIS SUPPORT</strong></div>
+                                </h4>
+                                <div class="p-0 rte mb-8 text-base">
+                                    <div class="rte">Get immediate help when you need it most. Our crisis support team is available around the clock.</div>
+                                </div>
+                            </div>
+                            <ul class="flex flex-col gap-2">
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">phone</span>
+                                    </span>
+                                    <div class="rte">
+                                        <a href="tel:988" class="rte-link">988 Suicide & Crisis Lifeline</a>
+                                    </div>
+                                </li>
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">chat</span>
+                                    </span>
+                                    <span class="flex-grow shrink-0">
+                                        <a href="#" class="flex hover-arrow-icon items-center">
+                                            Online Crisis Chat
+                                            <span class="material-icons ml-1 text-lg">chevron_right</span>
+                                        </a>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMMUNITY RESOURCES Tab Content -->
+        <div class="mx-auto w-full bg-white p-5" data-content="community-resources">
+            <div class="mx-auto w-full container-content-width">
+                <div class="space-y-6">
+                    <div class="flex flex-col h-full w-full">
+                        <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                            <div>
+                                <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                    <div class="rte"><strong>COMMUNITY RESOURCES</strong></div>
+                                </h4>
+                                <div class="p-0 rte mb-8 text-base">
+                                    <div class="rte">Find local resources and support in your community.</div>
+                                </div>
+                            </div>
+                            <ul class="flex flex-col gap-2">
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">location_on</span>
+                                    </span>
+                                    <span class="flex-grow shrink-0">
+                                        <a href="#" class="flex hover-arrow-icon items-center">
+                                            Find Local Resources
+                                            <span class="material-icons ml-1 text-lg">chevron_right</span>
+                                        </a>
+                                    </span>
+                                </li>
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">support</span>
+                                    </span>
+                                    <span class="flex-grow shrink-0">
+                                        <a href="#" class="flex hover-arrow-icon items-center">
+                                            Support Groups
+                                            <span class="material-icons ml-1 text-lg">chevron_right</span>
+                                        </a>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MEMBER SERVICES Tab Content -->
+        <div class="mx-auto w-full bg-white p-5" data-content="member-services">
+            <div class="mx-auto w-full container-content-width">
+                <div class="space-y-6">
+                    <div class="flex flex-col h-full w-full">
+                        <div class="flex flex-col flex-grow shrink-0 text-gray-darkest">
+                            <div>
+                                <h4 class="max-w-prose mb-2 font-regular text-gray-darkest heading-2xs">
+                                    <div class="rte"><strong>MEMBER SERVICES</strong></div>
+                                </h4>
+                                <div class="p-0 rte mb-8 text-base">
+                                    <div class="rte">Get help with your account, benefits, and more.</div>
+                                </div>
+                            </div>
+                            <ul class="flex flex-col gap-2">
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">phone</span>
+                                    </span>
+                                    <div class="rte">
+                                        <a href="tel:8002322345" class="rte-link">1-800-232-2345</a>
+                                    </div>
+                                </li>
+                                <li class="flex gap-4 text-gray-darkest">
+                                    <span class="flex items-center">
+                                        <span class="material-icons" style="color: inherit; font-size: 24px;">email</span>
+                                    </span>
+                                    <span class="flex-grow shrink-0">
+                                        <a href="#" class="flex hover-arrow-icon items-center">
+                                            Email Support
+                                            <span class="material-icons ml-1 text-lg">chevron_right</span>
+                                        </a>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('[data-tab]');
+    const tabContents = document.querySelectorAll('[data-content]');
+    
+    // Function to show/hide tabs
+    function showTab(targetTab) {
+        // Hide all tab contents
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Remove active styling from all tab buttons
+        tabButtons.forEach(button => {
+            const li = button.closest('li');
+            li.classList.remove('border-gray-medium', 'bg-white', 'font-bolder');
+            li.classList.add('border-gray', 'bg-gray-light');
+            
+            const buttonContent = button.querySelector('.hover\\:\\!no-underline');
+            if (buttonContent) {
+                buttonContent.classList.remove('text-blue');
+                buttonContent.classList.add('text-gray-darkest');
+            }
+        });
+        
+        // Show target tab content
+        const targetContent = document.querySelector(`[data-content="${targetTab}"]`);
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+        
+        // Add active styling to clicked tab button
+        const activeButton = document.querySelector(`[data-tab="${targetTab}"]`);
+        if (activeButton) {
+            const li = activeButton.closest('li');
+            li.classList.add('border-gray-medium', 'bg-white', 'font-bolder');
+            li.classList.remove('border-gray', 'bg-gray-light');
+            
+            const buttonContent = activeButton.querySelector('.hover\\:\\!no-underline');
+            if (buttonContent) {
+                buttonContent.classList.add('text-blue');
+                buttonContent.classList.remove('text-gray-darkest');
+            }
+        }
+    }
+    
+    // Add click event listeners to tab buttons
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Check if we're on mobile (accordion mode)
+            if (window.innerWidth <= 768) {
+                const targetContent = document.querySelector(`[data-content="${targetTab}"]`);
+                const isCurrentlyActive = targetContent && targetContent.classList.contains('active');
+                
+                if (isCurrentlyActive) {
+                    // If clicking on active tab, close it
+                    targetContent.classList.remove('active');
+                    
+                    const li = button.closest('li');
+                    li.classList.remove('border-gray-medium', 'bg-white', 'font-bolder');
+                    li.classList.add('border-gray', 'bg-gray-light');
+                    
+                    const buttonContent = button.querySelector('.hover\\:\\!no-underline');
+                    if (buttonContent) {
+                        buttonContent.classList.remove('text-blue');
+                        buttonContent.classList.add('text-gray-darkest');
+                    }
+                } else {
+                    // Show the selected tab
+                    showTab(targetTab);
+                }
+            } else {
+                // Desktop behavior - always show tab
+                showTab(targetTab);
+            }
+        });
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            // On desktop, ensure at least one tab is always active
+            const hasActiveTab = document.querySelector('[data-content].active');
+            if (!hasActiveTab) {
+                showTab('get-care');
+            }
+        }
+    });
+    
+    // Initialize - show first tab on desktop, hide all on mobile
+    if (window.innerWidth > 768) {
+        showTab('get-care');
+    } else {
+        // On mobile, start with all tabs closed
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+    }
+});
+</script>
+
+</body>
+</html>
