@@ -1,34 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Accessibility Adjuster</title>
-<link rel="stylesheet" href="https://unpkg.com/boltcss/bolt.min.css" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<script>
+// Listen for form submission from the iframe
+window.addEventListener('message', function(event) {
+    if (event.data === 'exitIntentFormSubmitted') {
+        document.cookie = "newExitIntentSubmitted=true; path=/; max-age=" + 60*60*24*365;
+        hideExitIntentPopup();
+    }
+    // Handle height change messages for iframe resizing
+    else if (event.data && typeof event.data === 'object') {
+        if (event.data.type === 'formstackHeight' && event.data.height) {
+            handleCrossOriginHeight(event.data.height);
+        }
+    }
+}, false);
 
-</head>
-<body>
-<!-- Buttons for adjusting font size -->
-<div class="button-container">
-<button id="decreaseSize">-</button>
-<button id="increaseSize">+</button>
+// Store last height to detect changes
+var lastIframeHeight = 0;
+
+// Enhanced message handler for cross-origin height updates
+function handleCrossOriginHeight(height) {
+    if (height && typeof height === 'number' && height > 0) {
+        var iframe = document.querySelector('#exit-intent-popup iframe');
+        if (iframe) {
+            // Use the exact height from Formstack (no buffer needed since we're hard-coding)
+            iframe.style.height = height + 'px';
+            lastIframeHeight = height;
+        }
+    }
+}
+
+// Initialize iframe height monitoring
+function initializeIframeHeightAdjuster() {
+    var iframe = document.querySelector('#exit-intent-popup iframe');
+    if (!iframe) {
+        return;
+    }
     
-    <button id="clearStorage"><span class="material-symbols-outlined">
-restart_alt
-</span></button>
+    // Request initial height after iframe loads
+    iframe.addEventListener('load', function() {
+        setTimeout(function() {
+            if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ 
+                    type: 'requestHeight',
+                    id: 'exitIntentPopup'
+                }, '*');
+            }
+        }, 500);
+    });
+    
+    // Periodic height check for cross-origin iframe
+    var heightCheckInterval = setInterval(function() {
+        var container = document.getElementById('exit-intent-popup-email-capture');
+        if (!container || container.style.display === 'none') {
+            return;
+        }
+        
+        if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ 
+                type: 'requestHeight',
+                id: 'exitIntentPopup'
+            }, '*');
+        }
+    }, 1000);
+    
+    window.exitIntentHeightInterval = heightCheckInterval;
+}
+
+// Hide popup function
+function hideExitIntentPopup() {
+    var container = document.getElementById('exit-intent-popup-email-capture');
+    var popup = document.getElementById('exit-intent-popup');
+    if (popup && container) {
+        popup.classList.remove('show');
+        setTimeout(function() { 
+            container.style.display = 'none'; 
+        }, 500);
+        document.body.style.overflow = '';
+        
+        if (window.exitIntentHeightInterval) {
+            clearInterval(window.exitIntentHeightInterval);
+            window.exitIntentHeightInterval = null;
+        }
+        
+        lastIframeHeight = 0;
+    }
+}
+
+// Make hideExitIntentPopup globally accessible
+window.hideExitIntentPopup = hideExitIntentPopup;
+
+// Form detection logic
+function getFormConfig() {
+    var currentPath = window.location.pathname.toLowerCase();
+    var isSpanish = currentPath.indexOf('/es/') === 0;
+    
+    // Check which page and return appropriate form
+    if (currentPath === '/health-choice-az/members' || currentPath === '/es/health-choice-az/members') {
+        return isSpanish ? 
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_spanish' :
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_members';
+    }
+    
+    if (currentPath === '/health-choice-az/members/member-services' || currentPath === '/es/health-choice-az/members/member-services') {
+        return isSpanish ? 
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_spanish_member_services' :
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_member_services';
+    }
+    
+    if (currentPath === '/health-choice-pathway/members/member-information' || currentPath === '/es/health-choice-pathway/members/member-information') {
+        return isSpanish ? 
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_spanish_pathway_member_information' :
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_members_pathway_member_information';
+    }
+
+    if (currentPath === '/health-choice-pathway/members/prior-authorization-clinical-guidelines' || currentPath === '/es/health-choice-pathway/members/prior-authorization-clinical-guidelines') {
+        return isSpanish ? 
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_spanish_member_pathway_pa_clinical_guidelines' :
+            'https://bcbsarizona.formstack.com/forms/nonahcccs_survey_members_pathway_paclinical_guidelines';
+    }
+}
+</script>
+
+<!-- Popup Markup -->
+<div id="exit-intent-popup-email-capture" style="display: none;">
+    <div id="exit-intent-popup">
+        <div class="popup-content">
+            <button id="exit-intent-close-button" style="float: right;">X</button>
+            <script type="text/javascript">
+(function() {
+    var iframeContainer = document.createElement('div');
+    iframeContainer.style.width = '100%';
+    
+    // Get the appropriate form URL based on current page and language
+    var formUrl = getFormConfig();
+    
+    // Create iframe with the determined form URL
+    iframeContainer.innerHTML = '<iframe scrolling="no" src="' + formUrl + '" title="Formstack Form" width="100%" height="480" style="border: none; overflow: hidden; min-height: 480px;"></iframe>';
+
+    var target = document.querySelector('#exit-intent-popup .popup-content');
+    if (target) {
+        target.appendChild(iframeContainer);
+    }
+})();
+            </script>
+        </div>
+    </div>
 </div>
-    
-    <!-- Example HTML content -->
-    <h1>Accessibility Font Resizer</h1>
-    <h2>This is a proof of concept</h2>
-    <p><strong>Script operations:</strong></p>
-    <ul>
-        <li>Identifies text elements on page</li>
-        <li>Adds "accessibility" class</li>
-        <li>Adds event listeners for buttons which increase or decrease the font size of classes respectively</li>
-        <li>Stores font size value in session storage.</li>
-    </ul>
-<blockquote>Script does not allow font sizes to go below 12px or above 5px higher than initial value.</blockquote>
-    
-</body>
-</html>
+
+<!-- Cookie Reset Buttons for Testing -->
+<button onclick="document.cookie='newExitIntentSubmitted=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';">Clear Submission Cookie</button>
+<button onclick="document.cookie='newExitIntentClosed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';">Clear Closed Cookie</button>
+
+<style>
+/* Modal Container Overlay */
+#exit-intent-popup-email-capture {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none;
+    justify-content: center !important;
+    align-items: center !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 9999 !important;
+    overflow-y: auto !important;
+}
+
+/* Modal Content */
+#exit-intent-popup {
+    background-color: #fff;
+    max-width: 600px;
+    width: 90%;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    margin: auto;
+    max-height: 90vh;
+    position: relative;
+}
+
+#exit-intent-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#exit-intent-close-button {
+    background-color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10001;
+    cursor: pointer;
+}
+
+/* Iframe specific styles */
+#exit-intent-popup iframe {
+    border: none;
+    overflow: hidden;
+}
+</style>
+
+<script>
+(function() {
+    var popupShown = false;
+
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
+    }
+
+    function showPopup() {
+        if (document.cookie.indexOf('newExitIntentSubmitted=true') !== -1) {
+            console.log('[DEBUG] Popup blocked: submission cookie found.');
+            return;
+        }
+        if (getCookie('newExitIntentClosed') === 'true') {
+            console.log('[DEBUG] Popup blocked: closed cookie found.');
+            return;
+        }
+        if (popupShown) {
+            console.log('[DEBUG] Popup already shown.');
+            return;
+        }
+
+        var container = document.getElementById('exit-intent-popup-email-capture');
+        var popup = document.getElementById('exit-intent-popup');
+        if (popup && container) {
+            console.log('[DEBUG] Showing popup modal.');
+            container.style.display = 'flex';
+            setTimeout(function() { 
+                popup.classList.add('show'); 
+                initializeIframeHeightAdjuster();
+            }, 60);
+            document.body.style.overflow = 'hidden';
+            popupShown = true;
+        }
+    }
+
+    function closePopupAndSetCookie() {
+        hideExitIntentPopup();
+        document.cookie = "newExitIntentClosed=true; path=/; max-age=" + 60*60*24;
+    }
+
+    function setupDelayedPopup() {
+        console.log('[DEBUG] Setting up delayed popup.');
+
+        if (popupShown) {
+            console.log('[DEBUG] Popup already shown.');
+            return;
+        }
+        if (getCookie('newExitIntentClosed') === 'true') {
+            console.log('[DEBUG] Closed cookie found. Skipping popup.');
+            return;
+        }
+
+        var closeButton = document.getElementById('exit-intent-close-button');
+        if (closeButton) {
+            closeButton.removeEventListener('click', closePopupAndSetCookie);
+            closeButton.addEventListener('click', closePopupAndSetCookie);
+            console.log('[DEBUG] Close button listener attached.');
+        }
+
+        console.log('[DEBUG] Timer started. Popup will show in 10 seconds.');
+        setTimeout(showPopup, 10 * 1000);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        console.log('[DEBUG] DOM ready. Setting up delayed popup.');
+        setupDelayedPopup();
+    } else {
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOMContentLoaded. Setting up delayed popup.');
+            setupDelayedPopup();
+        });
+    }
+})();
+</script>
+<script>
+    Cognito.prefill({"Page URL":window.location.href});
+</script>

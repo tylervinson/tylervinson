@@ -1,148 +1,253 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8"/>
-  <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
-  <link as="style"
-        href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Public+Sans%3Awght%40400%3B500%3B700%3B900"
-        onload="this.rel='stylesheet'"
-        rel="stylesheet"/>
-  <title>SecureLife - Feature Comparison</title>
-  <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
-  <style>
-    /* Your existing CSS */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: "Public Sans", "Noto Sans", sans-serif; background-color: white; line-height: 1.5; }
-    .container { display: flex; min-height: 100vh; flex-direction: column; }
-    .main-content { flex: 1; background-color: #F0F9FC; padding: 48px 16px; }
-    .content-wrapper { max-width: 1200px; margin: 0 auto; }
-    .layout { display: flex; gap: 32px; flex-direction: column; }
-    @media (min-width: 1024px) { .layout { flex-direction: row; } }
-    .sidebar { flex: 0 0 25%; display: flex; flex-direction: column; gap: 10px; }
-    .content-area { flex: 0 0 75%; }
-    .plan-button { width:100%; display:flex; align-items:center; gap:16px; padding:15px 20px; border-radius:5px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; transition:all .3s ease; text-align:left; }
-    .plan-button:hover { background-color: #E6F5FD; }
-    .plan-button:focus { outline: none; }
-    .plan-button.active { background-color:#0099D8; color:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-    .plan-button.active:hover { background-color:#0099D8; }
-    .plan-text { text-align:left; }
-    .plan-title { font-size:18px; font-weight:600; color:#003366; }
-    .plan-button.active .plan-title { color:#fff; }
-    .plan-description { font-size:14px; color:#6b7280; }
-    .plan-button.active .plan-description { color:rgba(255,255,255,0.8); }
-    /* Single animatable feature-box */
-    .feature-wrapper { overflow: hidden; }
-    .feature-box {
-      display: flex;
-      background-color: white;
-      padding: 32px;
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e5e7eb;
-      gap: 32px;
-      flex-direction: column;
-      overflow: hidden;
-      transition: height 0.4s ease;
-    }
-    @media (min-width: 640px) { .feature-box { flex-direction: row; } }
-    .feature-left { flex:1; display:flex; flex-direction:column; padding-right:0; border-right:none; }
-    @media (min-width: 640px) { .feature-left { padding-right:32px; border-right:1px solid #e5e7eb; } }
-    .feature-right { flex:1; display:flex; flex-direction:column; padding-left:0; }
-    @media (min-width: 640px) { .feature-right { padding-left:32px; } }
-    .feature-title { font-size:20px; font-weight:bold; color:#0099D8; margin-bottom:8px; }
-    .feature-description { color:#374151; margin-bottom:24px; font-size:14px; flex-grow:1; }
-    .benefits-list { list-style:none; margin-bottom:24px; font-size:14px; flex-grow:1; }
-    .benefit-item { display:flex; align-items:center; color:#6b7280; margin-bottom:8px; }
-    .check-icon { width:16px; height:16px; color:#0099D8; margin-right:8px; flex-shrink:0; }
-    .button-secondary { width:100%; background-color:#FFBE5F; color:#003366; font-weight:600; padding:15px 20px; border-radius:50px; border:none; cursor:pointer; font-size:14px; transition:opacity .3s ease; }
-    .button-secondary:hover { opacity:.9; }
-    /* Footer */
-    .footer { background:#fff; border-top:1px solid #e5e7eb; padding:32px 16px; text-align:center; color:#6b7280; font-size:14px; }
-    .footer-content { max-width:1200px; margin:0 auto; }
-    .footer-link { color:#0099D8; text-decoration:none; }
-    .footer-link:hover { text-decoration:underline; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <main class="main-content">
-      <div class="content-wrapper">
-        <div class="layout">
-          <div class="sidebar">
-            <button class="plan-button active" data-target="feature-plan1"><div class="plan-text"><p class="plan-title">Annual checkup</p></div></button>
-            <button class="plan-button" data-target="feature-plan2"><div class="plan-text"><p class="plan-title">Immunizations</p></div></button>
-            <button class="plan-button" data-target="feature-plan3"><div class="plan-text"><p class="plan-title">Diabetes screenings</p></div></button>
-            <button class="plan-button" data-target="feature-plan4"><div class="plan-text"><p class="plan-title">Nutrition counseling</p></div></button>
-            <button class="plan-button" data-target="feature-plan5"><div class="plan-text"><p class="plan-title">Colonoscopy</p></div></button>
-            <button class="plan-button" data-target="feature-plan6"><div class="plan-text"><p class="plan-title">Mammogram</p></div></button>
-          </div>
-          <div class="content-area">
-            <!-- hidden templates -->
-            <div class="feature-templates" style="display:none">
-              <div id="feature-plan1-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">During this yearly visit, your PCP checks your physical and mental health, can help you stay up-to-date on vaccinations, and more.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><p class="feature-description">If you see your PCP for a sick visit, to address a specific symptom, or for any other non-preventive care.</p><div></div></div></div>
-              <div id="feature-plan2-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">The Comprehensive Plus Plan offers extensive coverage for a wide range of medical services, giving you and your family complete peace of mind and access to premium healthcare options.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><ul class="benefits-list"><li class="benefit-item">Unlimited primary care & specialist visits</li><li class="benefit-item">Hospitalization & emergency services</li><li class="benefit-item">Full prescription drug coverage</li><li class="benefit-item">Advanced diagnostic tests</li><li class="benefit-item">Mental health coverage</li><li class="benefit-item">Dental & vision coverage</li></ul><div></div></div></div>
-              <div id="feature-plan3-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">Specifically designed for families with children, this plan provides comprehensive pediatric care.</p><p class="feature-description">Family wellness programs, and coverage that grows with your family's changing needs.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><ul class="benefits-list"><li class="benefit-item">Pediatric & adolescent care</li><li class="benefit-item">Family wellness programs</li><li class="benefit-item">Maternity & prenatal care</li><li class="benefit-item">Vaccination & immunization programs</li><li class="benefit-item">24/7 nurse hotline</li></ul><div></div></div></div>
-              <div id="feature-plan4-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">Premium healthcare coverage designed for busy professionals and executives who need flexible, high-quality care with minimal wait times and access to top specialists. Premium healthcare coverage designed for busy professionals and executives who need flexible, high-quality care with minimal wait times.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><ul class="benefits-list"><li class="benefit-item">Same-day appointments</li><li class="benefit-item">Concierge medical services</li><li class="benefit-item">Executive health screenings</li><li class="benefit-item">Travel medical coverage</li><li class="benefit-item">Priority specialist referrals</li></ul><div></div></div></div>
-              <div id="feature-plan5-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">Comprehensive healthcare coverage tailored specifically for seniors 65 and older</p><p class="feature-description">Enhanced benefits for chronic condition management, preventive care, and age-specific health services.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><ul class="benefits-list"><li class="benefit-item">Geriatric specialist care</li><li class="benefit-item">Chronic disease management</li><li class="benefit-item">Home health services</li><li class="benefit-item">Medicare supplement coverage</li><li class="benefit-item">Wellness & fitness programs</li></ul><div></div></div></div>
-              <div id="feature-plan6-content"><div class="feature-left"><h3 class="feature-title">Covered at no cost under most plans</h3><p class="feature-description">A holistic approach to healthcare that emphasizes preventive care, wellness coaching, and integrative health services to keep you healthy and minimize the need for reactive medical interventions.</p><div><button class="button-secondary">Learn More</button></div></div><div class="feature-right"><h3 class="feature-title">You may pay some out-of-pocket costs</h3><ul class="benefits-list"><li class="benefit-item">Personal wellness coaching</li><li class="benefit-item">Nutrition & dietitian services</li><li class="benefit-item">Alternative therapy coverage</li><li class="benefit-item">Fitness center memberships</li><li class="benefit-item">Stress management programs</li></ul><div></div></div></div>
-            </div>
-            <div class="feature-wrapper">
-              <div class="feature-box" id="feature-box"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var buttons = document.querySelectorAll('.plan-button');
-      var box     = document.getElementById('feature-box');
-
-      function swapContent(targetId) {
-        var tpl = document.getElementById(targetId + '-content');
-        if (!tpl) { return; }
-
-        // snapshot current height
-        var oldH = box.offsetHeight;
-        box.style.height = oldH + 'px';
-
-        // swap innerHTML
-        box.innerHTML = tpl.innerHTML;
-
-        // measure new true height
-        box.style.height = 'auto';
-        var newH = box.offsetHeight;
-
-        // reset to old height and force reflow
-        box.style.height = oldH + 'px';
-        void box.offsetWidth;
-
-        // animate to new height
-        box.style.height = newH + 'px';
-      }
-
-      // clear inline height after transition
-      box.addEventListener('transitionend', function(e) {
-        if (e.propertyName === 'height') {
-          box.style.height = '';
+    <meta charset="utf-8" />
+    <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect" />
+    <link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Public+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet" />
+    <title>SecureLife - Feature Comparison</title>
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon" />
+    <style>
+        /* Your existing CSS */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Public Sans", "Noto Sans", sans-serif; background-color: white; line-height: 1.5; }
+        .container { display: flex; min-height: 100vh; flex-direction: column; }
+        .main-content { flex: 1; background-color: #F0F9FC; padding: 48px 16px; }
+        .content-wrapper { max-width: 1200px; margin: 0 auto; }
+        .layout { display: flex; gap: 32px; flex-direction: column; }
+        @media (min-width: 1024px) { .layout { flex-direction: row; } }
+        .sidebar { flex: 0 0 25%; display: flex; flex-direction: column; gap: 10px; }
+        .content-area { flex: 0 0 75%; }
+        .plan-button { width:100%; display:flex; align-items:center; gap:16px; padding:15px 20px; border-radius:5px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; transition:all .3s ease; text-align:left; }
+        .plan-button:hover { background-color: #E6F5FD; }
+        .plan-button:focus { outline: none; }
+        .plan-button.active { background-color:#FBB34C; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+        .plan-button.active:hover { background-color:#FBB34C; }
+        .plan-text { text-align:left; }
+        .plan-title { font-size:18px; font-weight:600; color:#003366; }
+        /* .plan-button.active .plan-title { } */
+        .plan-description { font-size:14px; color:#6b7280; }
+        .plan-button.active .plan-description { color:rgba(255,255,255,0.8); }
+        /* Single animatable feature-box */
+        .feature-wrapper { overflow: hidden; }
+        .feature-box {
+          display: flex;
+          background-color: white;
+          padding: 32px;
+          border-radius: 12px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          border: 1px solid #e5e7eb;
+          gap: 32px;
+          flex-direction: column;
+          overflow: hidden;
+          transition: height 0.4s ease;
         }
-      });
+        @media (min-width: 640px) { .feature-box { flex-direction: row; } }
+        .feature-left { flex:1; display:flex; flex-direction:column; padding-right:0; border-right:none; }
+        @media (min-width: 640px) { .feature-left { padding-right:32px; border-right:1px solid #e5e7eb; } }
+        .feature-right { flex:1; display:flex; flex-direction:column; padding-left:0; }
+        @media (min-width: 640px) { .feature-right { padding-left:32px; } }
+        .feature-title { font-size:20px; font-weight:bold; color:#0099D8; margin-bottom:8px; }
+        .feature-description { color:#374151; margin-bottom:24px; font-size:14px; flex-grow:1; }
+        .benefits-list { list-style:none; margin-bottom:24px; font-size:14px; flex-grow:1; }
+        .benefit-item { display:flex; align-items:center; color:#6b7280; margin-bottom:8px; }
+        .check-icon { width:16px; height:16px; color:#0099D8; margin-right:8px; flex-shrink:0; }
+        .button-secondary { width:100%; background-color:#FFBE5F; color:#003366; font-weight:600; padding:15px 20px; border-radius:50px; border:none; cursor:pointer; font-size:14px; transition:opacity .3s ease; }
+        .button-secondary:hover { opacity:.9; }
+        /* Footer */
+        .footer { background:#fff; border-top:1px solid #e5e7eb; padding:32px 16px; text-align:center; color:#6b7280; font-size:14px; }
+        .footer-content { max-width:1200px; margin:0 auto; }
+        .footer-link { color:#0099D8; text-decoration:none; }
+        .footer-link:hover { text-decoration:underline; }
+    </style>
+</head>
 
-      // initialize with plan1
-      swapContent('feature-plan1');
-
-      for (var i = 0; i < buttons.length; i++) {
-        (function(btn) {
-          btn.addEventListener('mouseenter', function() {
-            var activeBtn = document.querySelector('.plan-button.active');
-            if (activeBtn) { activeBtn.classList.remove('active'); }
-            btn.classList.add('active');
-            swapContent(btn.getAttribute('data-target'));
+<body>
+    <div class="container">
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="layout">
+                    <div class="sidebar">
+                        <button class="plan-button active" data-target="feature-plan1">
+                            <div class="plan-text">
+                                <p class="plan-title">Annual checkup</p>
+                            </div>
+                        </button>
+                        <button class="plan-button" data-target="feature-plan2">
+                            <div class="plan-text">
+                                <p class="plan-title">Immunizations</p>
+                            </div>
+                        </button>
+                        <button class="plan-button" data-target="feature-plan3">
+                            <div class="plan-text">
+                                <p class="plan-title">Diabetes screenings</p>
+                            </div>
+                        </button>
+                        <button class="plan-button" data-target="feature-plan4">
+                            <div class="plan-text">
+                                <p class="plan-title">Nutrition counseling</p>
+                            </div>
+                        </button>
+                        <button class="plan-button" data-target="feature-plan5">
+                            <div class="plan-text">
+                                <p class="plan-title">Colonoscopy</p>
+                            </div>
+                        </button>
+                        <button class="plan-button" data-target="feature-plan6">
+                            <div class="plan-text">
+                                <p class="plan-title">Mammogram</p>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="content-area">
+                        <!-- hidden templates -->
+                        <div class="feature-templates" style="display:none">
+                            <div id="feature-plan1-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">During this yearly visit, your PCP checks your physical and mental health, can help you stay up-to-date on vaccinations, and more.</p>
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <p class="feature-description">If you see your PCP for a sick visit, to address a specific symptom, or for any other non-preventive care.</p>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div id="feature-plan2-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">Shots for flu, Measles, Mumps, Rubella, chickenpox, and more.</p>
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <ul class="benefits-list">
+                                        <p class="feature-description"></p>If you get the vaccine from a provider or pharmacy that's not in your health plan's network.</p>
+                                    </ul>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div id="feature-plan3-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">If you meet certain age and risk guidelines. Most plans cover diabetes screenings for adults ages 40-70 with risk factors like being overweight.  </p>
+                                    
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <p class="feature-description">If your doctor orders the screening because you're having symptoms like fatigue or excessive thirst, it may be considered diagnostic, not preventive. </p>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div id="feature-plan4-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">If you <a href="https://www.azblue.com/inspire-health/blog/q-and-a-with-a-dietitian" target="_blank">have a qualifying condition</a> like high blood pressure, hypertension, high cholesterol, prediabetes, diabetes, or heart disease. </p>
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <p class="feature-description">If you do not have a qualifying condition or risk factor. </p>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div id="feature-plan5-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">If you don't have any symptoms and are getting a colonoscopy as part of a routine screening, usually starting at age 45.</p>
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <p class="feature-description">If you're having a colonoscopy because of symptoms like bleeding or pain. The screening may be considered diagnostic, not preventive.</p>
+                                    <div></div>
+                                </div>
+                            </div>
+                            <div id="feature-plan6-content">
+                                <div class="feature-left">
+                                    <h3 class="feature-title">Covered at no cost under most plans</h3>
+                                    <p class="feature-description">If you don't have any symptoms and are getting a routine screening mammogram, usually starting at age 40. </p>
+                                    <div>
+                                        <!-- <button class="button-secondary">Learn More</button> -->
+                                    </div>
+                                </div>
+                                <div class="feature-right">
+                                    <h3 class="feature-title">You may pay some out-of-pocket costs</h3>
+                                    <p class="feature-description">If you're getting a mammogram because you found a lump. It may be considered diagnostic, not preventive. </p>
+                                    <div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-wrapper">
+                            <div class="feature-box" id="feature-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var buttons = document.querySelectorAll('.plan-button');
+          var box     = document.getElementById('feature-box');
+    
+          function swapContent(targetId) {
+            var tpl = document.getElementById(targetId + '-content');
+            if (!tpl) { return; }
+    
+            // snapshot current height
+            var oldH = box.offsetHeight;
+            box.style.height = oldH + 'px';
+    
+            // swap innerHTML
+            box.innerHTML = tpl.innerHTML;
+    
+            // measure new true height
+            box.style.height = 'auto';
+            var newH = box.offsetHeight;
+    
+            // reset to old height and force reflow
+            box.style.height = oldH + 'px';
+            void box.offsetWidth;
+    
+            // animate to new height
+            box.style.height = newH + 'px';
+          }
+    
+          // clear inline height after transition
+          box.addEventListener('transitionend', function(e) {
+            if (e.propertyName === 'height') {
+              box.style.height = '';
+            }
           });
-        })(buttons[i]);
-      }
-    });
-  </script>
+    
+          // initialize with plan1
+          swapContent('feature-plan1');
+    
+          for (var i = 0; i < buttons.length; i++) {
+            (function(btn) {
+              btn.addEventListener('mouseenter', function() {
+                var activeBtn = document.querySelector('.plan-button.active');
+                if (activeBtn) { activeBtn.classList.remove('active'); }
+                btn.classList.add('active');
+                swapContent(btn.getAttribute('data-target'));
+              });
+            })(buttons[i]);
+          }
+        });
+    </script>
 </body>
+
 </html>
