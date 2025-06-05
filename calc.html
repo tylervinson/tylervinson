@@ -51,6 +51,12 @@
       margin-bottom: 30px;
     }
 
+    .theme-toggle-container {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+    }
+
     .toggle-switch {
       position: relative;
       width: 50px;
@@ -88,7 +94,7 @@
     }
 
     .toggle-switch input:checked + .slider-toggle {
-      background-color: var(--cta-bg);
+      background-color:#FFBE5F;
     }
 
     .toggle-switch input:checked + .slider-toggle:before {
@@ -116,58 +122,51 @@
       margin-bottom: 8px;
     }
 
-    .group-size-slider {
-      position: relative;
-    }
-
-    .group-slider-track {
-      position: relative;
-      height: 6px;
-      background-color: var(--slider-track);
-      border-radius: 3px;
-      margin: 40px 0 10px;
-    }
-
-    .group-size-options {
+    .group-size-pillset {
       display: flex;
-      justify-content: space-between;
-      position: relative;
-      margin-top: -35px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 12px;
+      margin-top: 16px;
     }
 
-    .group-size-options label {
+    .group-size-pillset label {
       position: relative;
-      display: flex;
-      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .group-size-pillset input[type="radio"] {
+      display: none;
+    }
+
+    .pill {
+      display: inline-flex;
       align-items: center;
-      flex: 1;
-      font-size: 12px;
-      cursor: pointer;
-      z-index: 2;
+      border: 2px solid var(--text-color);
+      border-radius: 9999px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--text-color);
+      background: transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
-    .group-size-options input[type="radio"] {
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--slider-fill);
-      background: var(--thumb-color);
-      border-radius: 50%;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      margin-top:15px;
+    .pill .check {
+      display: none;
+      margin-right: 8px;
     }
 
-    .group-size-options input[type="radio"]:checked {
-      transform: scale(1.3);
-      background: var(--slider-fill);
+    .group-size-pillset input[type="radio"]:checked + .pill {
+   border-color: #0099D8;
+    background-color: #0099D8;
+      color: #fff;
+      font-weight: bold;
     }
 
-    .group-size-options input[type="radio"]:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px #93c5fd;
+    .group-size-pillset input[type="radio"]:checked + .pill .check {
+      display: inline-block;
     }
 
     input[type="range"] {
@@ -206,8 +205,8 @@
       color: var(--panel-text);
       border-radius: 16px;
       padding: 30px;
-      flex: 0 0 320px;
-      min-width: 280px;
+      flex: 0 0 280px;
+      min-width: 260px;
     }
 
     .estimate-panel h2 {
@@ -222,7 +221,7 @@
     }
 
     .cta {
-      background-color: var(--cta-bg);
+      background-color: #FFBE5F;
       border: none;
       padding: 12px 20px;
       font-size: 16px;
@@ -239,7 +238,13 @@
       .estimate-panel, .controls {
         width: 100%;
       }
+      .group-size-pillset {
+        flex-wrap: wrap;
+      }
     }
+    :root {
+    --slider-fill: #0099D8;
+}
   </style>
 </head>
 <body>
@@ -247,41 +252,35 @@
 <div class="wrapper">
   <div class="top-bar">
     <h1>See how much you can save with Prosano Health</h1>
-    <label class="toggle-switch">
-      <input type="checkbox" id="toggleMode" />
-      <span class="slider-toggle"></span>
-    </label>
   </div>
 
   <div class="container">
     <div class="controls">
       <div class="control-group">
         <label for="groupSize">Group Size</label>
-        <div class="group-size-slider">
-          <div class="group-slider-track"></div>
-          <div class="group-size-options" id="groupSelector">
-            <label>
-              <input type="radio" name="groupSize" value="under10" checked>
-              Under 10
-            </label>
-            <label>
-              <input type="radio" name="groupSize" value="10to50">
-              10–50
-            </label>
-            <label>
-              <input type="radio" name="groupSize" value="50to100">
-              50–100
-            </label>
-            <label>
-              <input type="radio" name="groupSize" value="100to300">
-              100–300
-            </label>
-            <label>
-              <input type="radio" name="groupSize" value="300plus">
-              300+
-            </label>
-          </div>
+        <div class="group-size-pillset">
+          <label>
+            <input type="radio" name="groupSize" value="under10" checked />
+            <span class="pill"><span class="check">&#10003;</span>Under 10</span>
+          </label>
+          <label>
+            <input type="radio" name="groupSize" value="10to50" />
+            <span class="pill"><span class="check">&#10003;</span>10–50</span>
+          </label>
+          <label>
+            <input type="radio" name="groupSize" value="50to100" />
+            <span class="pill"><span class="check">&#10003;</span>50–100</span>
+          </label>
+          <label>
+            <input type="radio" name="groupSize" value="100to300" />
+            <span class="pill"><span class="check">&#10003;</span>100–300</span>
+          </label>
+          <label>
+            <input type="radio" name="groupSize" value="300plus" />
+            <span class="pill"><span class="check">&#10003;</span>300+</span>
+          </label>
         </div>
+        <p>How big is your group?</p>
       </div>
 
       <div class="control-group">
@@ -302,45 +301,46 @@
   </div>
 </div>
 
+<!-- Toggle moved here -->
+<div class="theme-toggle-container">
+  <label class="toggle-switch">
+    <input type="checkbox" id="toggleMode" />
+    <span class="slider-toggle"></span>
+  </label>
+</div>
+
 <script>
-  var utilizationSlider = document.getElementById('utilization');
-  var utilizationDisplay = document.getElementById('utilizationDisplay');
-  var savingsAmount = document.getElementById('savingsAmount');
-  var toggleMode = document.getElementById('toggleMode');
+  const utilizationSlider = document.getElementById('utilization');
+  const utilizationDisplay = document.getElementById('utilizationDisplay');
+  const savingsAmount = document.getElementById('savingsAmount');
+  const toggleMode = document.getElementById('toggleMode');
 
   function getGroupEstimate(category, utilization) {
-    var u = utilization / 100;
+    const u = utilization / 100;
     switch (category) {
-      case "under10":
-        return Math.round(130 * 10 * u); // 1300 max
-      case "10to50":
-        return Math.round(130 * 50 * u); // 6500 max
-      case "50to100":
-        return Math.round(150000 * u);   // 150k max
-      case "100to300":
-        return Math.round(300000 * u);   // 300k max
-      case "300plus":
-        return Math.round(650000 * u);   // 650k est
-      default:
-        return 0;
+      case "under10": return Math.round(130 * 10 * u);
+      case "10to50": return Math.round(130 * 50 * u);
+      case "50to100": return Math.round(150000 * u);
+      case "100to300": return Math.round(300000 * u);
+      case "300plus": return Math.round(650000 * u);
+      default: return 0;
     }
   }
 
   function updateDisplay() {
-    var utilization = parseInt(utilizationSlider.value, 10);
+    const utilization = parseInt(utilizationSlider.value, 10);
     utilizationDisplay.textContent = utilization + '%';
-
-    var groupValue = document.querySelector('input[name="groupSize"]:checked').value;
-    var estimated = getGroupEstimate(groupValue, utilization);
+    const groupValue = document.querySelector('input[name="groupSize"]:checked').value;
+    const estimated = getGroupEstimate(groupValue, utilization);
     savingsAmount.textContent = '$' + estimated.toLocaleString();
   }
 
   utilizationSlider.addEventListener('input', updateDisplay);
-  document.querySelectorAll('input[name="groupSize"]').forEach(input => {
-    input.addEventListener('change', updateDisplay);
-  });
+  document.querySelectorAll('input[name="groupSize"]').forEach(input =>
+    input.addEventListener('change', updateDisplay)
+  );
 
-  toggleMode.addEventListener('change', function () {
+  toggleMode.addEventListener('change', () => {
     document.body.classList.toggle('dark');
   });
 
