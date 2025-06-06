@@ -11,9 +11,9 @@
       --panel-bg: #0c2f53;
       --panel-text: #fff;
       --slider-track: #cbd5e1;
-      --slider-fill: #2563eb;
+      --slider-fill: #FBBF24;
       --thumb-color: #fff;
-      --cta-bg: #fbbf24;
+      --cta-bg: #FBBF24;
     }
 
     body.dark {
@@ -22,9 +22,9 @@
       --panel-bg: #e2e8f0;
       --panel-text: #0c2f53;
       --slider-track: #64748b;
-      --slider-fill: #3b82f6;
+      --slider-fill: #FBBF24;
       --thumb-color: #fff;
-      --cta-bg: #facc15;
+      --cta-bg: #FBBF24;
     }
 
     body {
@@ -94,7 +94,7 @@
     }
 
     .toggle-switch input:checked + .slider-toggle {
-      background-color:#FFBE5F;
+      background-color: var(--cta-bg);
     }
 
     .toggle-switch input:checked + .slider-toggle:before {
@@ -114,12 +114,6 @@
 
     .control-group {
       margin-bottom: 40px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
     }
 
     .group-size-pillset {
@@ -159,8 +153,8 @@
     }
 
     .group-size-pillset input[type="radio"]:checked + .pill {
-   border-color: #0099D8;
-    background-color: #0099D8;
+      border-color: #0099D8;
+      background-color: #0099D8;
       color: #fff;
       font-weight: bold;
     }
@@ -169,35 +163,61 @@
       display: inline-block;
     }
 
-    input[type="range"] {
-      width: 100%;
-      appearance: none;
-      height: 6px;
-      background: var(--slider-track);
-      border-radius: 3px;
-      outline: none;
-      margin-top: 10px;
+    .slider-container {
+      position: relative;
+      padding-top: 48px;
     }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-top: 6px;
+      color: var(--text-color);
+      padding: 0 2px;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: none;
+  border-radius: 4px;
+}
 
     input[type="range"]::-webkit-slider-thumb {
       appearance: none;
       width: 20px;
       height: 20px;
       background: var(--thumb-color);
-      border: 2px solid var(--slider-fill);
+      border: 3px solid var(--slider-fill);
       border-radius: 50%;
       cursor: pointer;
+      margin-top: -6px;
+      position: relative;
+      z-index: 2;
     }
 
     .value-display {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
       background: #fff;
       color: #000;
-      padding: 6px 12px;
-      display: inline-block;
-      border-radius: 6px;
+      padding: 10px 18px;
+      font-size: 18px;
       font-weight: bold;
-      margin-left: 10px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 3;
     }
 
     .estimate-panel {
@@ -221,7 +241,7 @@
     }
 
     .cta {
-      background-color: #FFBE5F;
+      background-color: var(--cta-bg);
       border: none;
       padding: 12px 20px;
       font-size: 16px;
@@ -238,13 +258,7 @@
       .estimate-panel, .controls {
         width: 100%;
       }
-      .group-size-pillset {
-        flex-wrap: wrap;
-      }
     }
-    :root {
-    --slider-fill: #0099D8;
-}
   </style>
 </head>
 <body>
@@ -256,38 +270,29 @@
 
   <div class="container">
     <div class="controls">
-      <div class="control-group">
-        <label for="groupSize">Group Size</label>
+      <div style="margin-top:20px" class="control-group">
+        <label style="font-weight:bold;" for="groupSize">Group Size</label>
         <div class="group-size-pillset">
-          <label>
-            <input type="radio" name="groupSize" value="under10" checked />
-            <span class="pill"><span class="check">&#10003;</span>Under 10</span>
-          </label>
-          <label>
-            <input type="radio" name="groupSize" value="10to50" />
-            <span class="pill"><span class="check">&#10003;</span>10–50</span>
-          </label>
-          <label>
-            <input type="radio" name="groupSize" value="50to100" />
-            <span class="pill"><span class="check">&#10003;</span>50–100</span>
-          </label>
-          <label>
-            <input type="radio" name="groupSize" value="100to300" />
-            <span class="pill"><span class="check">&#10003;</span>100–300</span>
-          </label>
-          <label>
-            <input type="radio" name="groupSize" value="300plus" />
-            <span class="pill"><span class="check">&#10003;</span>300+</span>
-          </label>
+          <label><input type="radio" name="groupSize" value="under10" checked><span class="pill"><span class="check">&#10003;</span>Under 10</span></label>
+          <label><input type="radio" name="groupSize" value="10to50"><span class="pill"><span class="check">&#10003;</span>10–50</span></label>
+          <label><input type="radio" name="groupSize" value="50to100"><span class="pill"><span class="check">&#10003;</span>50–100</span></label>
+          <label><input type="radio" name="groupSize" value="100to300"><span class="pill"><span class="check">&#10003;</span>100–300</span></label>
+          <label><input type="radio" name="groupSize" value="300plus"><span class="pill"><span class="check">&#10003;</span>300+</span></label>
         </div>
-        <p>How big is your group?</p>
+       
       </div>
 
-      <div class="control-group">
-        <label for="utilization">Prosano Utilization</label>
-        <input type="range" id="utilization" min="10" max="100" step="1" value="50">
-        <span class="value-display" id="utilizationDisplay">50%</span>
-        <p>Percentage of employees actively using the Prosano Plan</p>
+      <div style="margin-top:70px;" class="control-group">
+        <label style="font-weight:bold;" for="utilization">Prosano Utilization</label>
+        <div class="slider-container">
+          <input type="range" id="utilization" min="10" max="100" step="1" value="50">
+          <div class="value-display" id="utilizationDisplay">50%</div>
+          <div class="slider-labels">
+            <span>10%</span>
+            <span>100%</span>
+          </div>
+        </div>
+        <p style="font-size: 14px;">Percentage of employees actively using the Prosano Plan</p>
       </div>
     </div>
 
@@ -301,7 +306,6 @@
   </div>
 </div>
 
-<!-- Toggle moved here -->
 <div class="theme-toggle-container">
   <label class="toggle-switch">
     <input type="checkbox" id="toggleMode" />
@@ -328,11 +332,23 @@
   }
 
   function updateDisplay() {
-    const utilization = parseInt(utilizationSlider.value, 10);
-    utilizationDisplay.textContent = utilization + '%';
+    const value = parseInt(utilizationSlider.value, 10);
+    utilizationDisplay.textContent = value + '%';
+
     const groupValue = document.querySelector('input[name="groupSize"]:checked').value;
-    const estimated = getGroupEstimate(groupValue, utilization);
+    const estimated = getGroupEstimate(groupValue, value);
     savingsAmount.textContent = '$' + estimated.toLocaleString();
+
+    const min = parseInt(utilizationSlider.min, 10);
+    const max = parseInt(utilizationSlider.max, 10);
+    const percent = (value - min) / (max - min);
+    const sliderWidth = utilizationSlider.offsetWidth;
+    const offset = percent * sliderWidth;
+    utilizationDisplay.style.left = `${offset}px`;
+    utilizationDisplay.style.transform = 'translateX(-50%)';
+
+    const fillPercent = percent * 100;
+    utilizationSlider.style.background = `linear-gradient(to right, var(--slider-fill) 0%, var(--slider-fill) ${fillPercent}%, var(--slider-track) ${fillPercent}%, var(--slider-track) 100%)`;
   }
 
   utilizationSlider.addEventListener('input', updateDisplay);
@@ -344,7 +360,8 @@
     document.body.classList.toggle('dark');
   });
 
-  updateDisplay();
+  window.addEventListener('load', updateDisplay);
+  window.addEventListener('resize', updateDisplay);
 </script>
 
 </body>
