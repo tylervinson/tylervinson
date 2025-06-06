@@ -11,20 +11,20 @@
       --panel-bg: #0c2f53;
       --panel-text: #fff;
       --slider-track: #cbd5e1;
-      --slider-fill: #FBBF24;
+      --slider-fill: #f6c06f;
       --thumb-color: #fff;
-      --cta-bg: #FBBF24;
+      --cta-bg: #f6c06f;
     }
 
     body.dark {
-      --bg-color: #1e293b;
-      --text-color: #f8fafc;
-      --panel-bg: #e2e8f0;
-      --panel-text: #0c2f53;
-      --slider-track: #64748b;
-      --slider-fill: #FBBF24;
-      --thumb-color: #fff;
-      --cta-bg: #FBBF24;
+        --bg-color: #1e293b;
+    --text-color: #f8fafc;
+    --panel-bg: #e2e8f0;
+    --panel-text: #252525;
+    --slider-track: #64748b;
+    --slider-fill: #f6c06f;
+    --thumb-color: #fff;
+    --cta-bg: #f6c06f;
     }
 
     body {
@@ -40,7 +40,7 @@
       margin: auto;
       background: var(--bg-color);
       border-radius: 12px;
-      padding: 30px;
+      padding: 30px 60px 50px;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
     }
 
@@ -278,7 +278,7 @@ body.dark .pill {
   <div class="container">
     <div class="controls">
       <div style="margin-top:40px" class="control-group">
-        <label style="font-weight:bold;" for="groupSize">Group Size</label>
+        <label style="font-weight:bold;font-size: 14px;" for="groupSize">Group Size</label>
         <div class="group-size-pillset">
           <label><input type="radio" name="groupSize" value="under10" checked><span class="pill"><span class="check">&#10003;</span>Under 10</span></label>
           <label><input type="radio" name="groupSize" value="10to50"><span class="pill"><span class="check">&#10003;</span>10–50</span></label>
@@ -292,7 +292,7 @@ body.dark .pill {
       <div style="margin-top:40px;" class="control-group">
         
         <div class="slider-container">
-            <label style="font-weight:bold;" for="utilization">Prosano Utilization</label>
+            <label style="font-weight:bold;font-size: 14px;" for="utilization">Prosano Utilization</label>
           <input type="range" id="utilization" min="10" max="100" step="1" value="50">
           <div class="value-display" id="utilizationDisplay">50%</div>
           <div class="slider-labels">
@@ -300,15 +300,16 @@ body.dark .pill {
             <span>100%</span>
           </div>
         </div>
-        <p style="font-size: 14px;">Percentage of employees actively using the Prosano Plan</p>
+        <p style="font-size: 12px;">Percentage of employees actively using the Prosano Plan</p>
       </div>
     </div>
 
     <div class="estimate-panel">
-      <h2>Estimated Savings</h2>
+      <h2 style="font-size:18px;">Estimated Savings</h2>
       <div class="savings" id="savingsAmount">$3,250</div>
-      <h3>Save Big with Prosano</h3>
-      <p>Lorem ipsum dolor sit amet, ius ei dicat altera. Error moderatius eu mei. Te etiam putant sed.</p>
+      <p style="font-size: 12px;">Estimated Annual Savings</p>
+      <h3 style="font-size: 24px; margin-bottom:0;margin-top:50px">Save Big with Prosano</h3>
+      <p style="font-size: 14px;line-height: 22px;">Lorem ipsum dolor sit amet, ius ei dicat altera. Error moderatius eu mei. Te etiam putant sed.</p>
       <button class="cta">Shop Plans</button>
     </div>
   </div>
