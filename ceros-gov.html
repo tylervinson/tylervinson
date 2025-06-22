@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ceros Element Naming Conventions</title>
+  <style>
+    @media print {
+      body { 
+        margin: 0; 
+        background-color: #ffffff !important;
+        color: #252525 !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .page-break { page-break-before: always; }
+      table, th, td {
+        background-color: #f8f9fa !important;
+        border-color: #dee2e6 !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      th {
+        background-color: #e9ecef !important;
+        color: #252525 !important;
+      }
+    code {
+      background-color: #e3f2fd;
+      color: #252525;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      font-weight: 500;
+      border: 1px solid #0093ff;
+    }
+    
+    pre {
+      background-color: #f8f9fa;
+      padding: 16px;
+      overflow-x: auto;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+    
+    pre code {
+      background-color: transparent;
+      color: #252525;
+      padding: 0;
+      border-radius: 0;
+      border: none;
+    }
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      margin: 40px;
+      color: #252525;
+      background-color: #ffffff;
+      max-width: none;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    
+    h1, h2, h3 {
+      margin-top: 2em;
+      color: #252525;
+      font-weight: 400;
+    }
+    
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 0.5em;
+      border-bottom: 2px solid #dee2e6;
+      padding-bottom: 0.5em;
+    }
+    
+    h2 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+      color: #252525;
+    }
+    
+    h3 {
+      font-size: 1.2em;
+      margin-bottom: 0.8em;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #f8f9fa;
+    }
+    
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    
+    th {
+      background-color: #e9ecef;
+      font-weight: 600;
+      color: #252525;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #ffffff;
+    }
+    
+    code {
+      background-color: #e3f2fd;
+      color: #252525;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      font-weight: 500;
+      border: 1px solid #0093ff;
+    }
+    
+    pre {
+      background-color: #f8f9fa;
+      padding: 16px;
+      overflow-x: auto;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+    
+    pre code {
+      background-color: transparent;
+      color: #252525;
+      padding: 0;
+      border-radius: 0;
+      border: none;
+    }
+    
+    ul, ol {
+      margin: 1em 0;
+      padding-left: 2em;
+    }
+    
+    li {
+      margin: 0.5em 0;
+    }
+    
+    p {
+      margin: 1em 0;
+    }
+    
+    strong {
+      color: #252525;
+      font-weight: 600;
+    }
+    
+    .header-info {
+      background-color: #e9ecef;
+      padding: 1em;
+      border-radius: 4px;
+      margin-bottom: 2em;
+      border-left: 4px solid #2c5aa0;
+    }
+    
+    .warning {
+      background-color: #3d2914;
+      border: 1px solid #8b6914;
+      padding: 1em;
+      border-radius: 4px;
+      margin: 1em 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+<h1>Ceros Element Naming Conventions</h1>
+
+<div class="header-info">
+<p><strong>Internal Governance for SDK-Compatible Templates</strong><br>
+<strong>Version</strong>: 1.0<br>
+<strong>Date</strong>: 2025-06-11</p>
+</div>
+
+<h2>1. Purpose</h2>
+<ul>
+  <li>Enable robust interaction via Ceros SDK</li>
+  <li>Facilitate modular SDK code</li>
+  <li>Support Studio-based edits without developer involvement</li>
+  <li>Improve readability, maintainability, and collaboration</li>
+</ul>
+
+<h2>2. Scope</h2>
+<ul>
+  <li>Custom JavaScript via the Ceros SDK</li>
+  <li>Embedded JSON configuration</li>
+  <li>Event tracking or analytics</li>
+  <li>Reusable templates</li>
+</ul>
+<div class="page-break"></div>
+<h2>3. Naming Syntax</h2>
+<table>
+  <tr><th>Attribute</th><th>Convention</th></tr>
+  <tr><td><strong>Element Name</strong></td><td>Lowercase kebab-case (<code>carousel-slide-1</code>)</td></tr>
+  <tr><td><strong>Prefix Convention</strong></td><td><code>type-role-index</code> (e.g., <code>button-cta-1</code>)</td></tr>
+  <tr><td><strong>Delimiters</strong></td><td>Use <code>-</code> for word separation</td></tr>
+  <tr><td><strong>Dynamic Element Flags</strong></td><td>Append <code>--interactive</code>, <code>--trackable</code>, <code>--conditional</code> as needed</td></tr>
+</table>
+
+<h2>4. Element Type Prefixes</h2>
+<table>
+  <tr><th>Prefix</th><th>Meaning</th></tr>
+  <tr><td><code>img-</code></td><td>Static or dynamic image</td></tr>
+  <tr><td><code>txt-</code></td><td>Text block</td></tr>
+  <tr><td><code>btn-</code></td><td>Button or interactive element</td></tr>
+  <tr><td><code>grp-</code></td><td>Group container</td></tr>
+  <tr><td><code>vid-</code></td><td>Video element</td></tr>
+  <tr><td><code>bg-</code></td><td>Background asset</td></tr>
+  <tr><td><code>nav-</code></td><td>Navigation container or trigger</td></tr>
+</table>
+<div class="page-break"></div>
+<h2>5. Role-Based Suffixes</h2>
+<table>
+  <tr><th>Suffix</th><th>Meaning</th></tr>
+  <tr><td><code>-cta</code></td><td>Call-to-action</td></tr>
+  <tr><td><code>-container</code></td><td>Parent group or holder</td></tr>
+  <tr><td><code>-slide</code></td><td>Carousel or slideshow frame</td></tr>
+  <tr><td><code>-trigger</code></td><td>Behavior activation</td></tr>
+  <tr><td><code>-target</code></td><td>Dynamic content target</td></tr>
+  <tr><td><code>-stateX</code></td><td>Visual state indicator (e.g., <code>state1</code>, <code>state2</code>)</td></tr>
+</table>
+
+<h2>6. Dynamic Behavior Flags</h2>
+<ul>
+  <li><code>--interactive</code>: JS binds interactivity to this element</li>
+  <li><code>--trackable</code>: Tracked for analytics</li>
+  <li><code>--auto-hide</code>: Hidden on load unless triggered</li>
+  <li><code>--conditional</code>: Appears only under logic conditions</li>
+</ul>
+<p><strong>Example:</strong> <code>btn-download-1--interactive--trackable</code></p>
+<div class="page-break"></div>
+<h2>7. Metadata Tagging (Alt Text / Notes Usage)</h2>
+<table>
+  <tr><th>Field</th><th>Use Case</th></tr>
+  <tr><td><strong>Notes</strong></td><td>JSON-like key-value pairs for config (<code>{"event":"cta-click", "target":"modal-1"}</code>)</td></tr>
+  <tr><td><strong>Alt Text</strong></td><td>Descriptive or fallback content</td></tr>
+  <tr><td><strong>Object Name</strong></td><td>Primary selector for SDK behavior</td></tr>
+</table>
+
+<h2>8. ID Uniqueness & Version Control</h2>
+<ul>
+  <li>Every interactive element must have a <strong>unique name</strong></li>
+  <li>Append experience-specific namespaces if needed</li>
+</ul>
+
+<h2>9. Reserved Terms</h2>
+<p>Avoid using the following terms:</p>
+<ul>
+  <li><code>header</code>, <code>footer</code>, <code>nav</code></li>
+  <li><code>main</code>, <code>content</code></li>
+  <li><code>test</code>, <code>temp</code>, <code>draft</code></li>
+</ul>
+<div class="page-break"></div>
+<h2>10. Examples</h2>
+<table>
+  <tr><th>Element Type</th><th>Name</th><th>Notes</th></tr>
+  <tr><td>CTA Button</td><td><code>btn-cta-download-1--interactive--trackable</code></td><td>Triggers download modal</td></tr>
+  <tr><td>Carousel Slide</td><td><code>grp-carousel-slide-2</code></td><td>Controlled by SDK</td></tr>
+  <tr><td>Modal Container</td><td><code>grp-modal-1--conditional</code></td><td>Hidden on load</td></tr>
+  <tr><td>Tracking Element</td><td><code>img-product-shot-1--trackable</code></td><td>Image view tracking</td></tr>
+</table>
+<div class="page-break"></div>
+<h2>Appendices</h2>
+<h3>Appendix A: Ceros Element Naming Reference</h3>
+
+<h4>Button Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>btn-cta-primary-1--interactive--trackable</code></td><td>Main call-to-action with click tracking</td></tr>
+  <tr><td><code>btn-cta-secondary-1--interactive</code></td><td>Secondary action button</td></tr>
+  <tr><td><code>btn-nav-next-1--interactive</code></td><td>Advance carousel/slideshow</td></tr>
+  <tr><td><code>btn-nav-prev-1--interactive</code></td><td>Go back in carousel/slideshow</td></tr>
+  <tr><td><code>btn-modal-close-1--interactive</code></td><td>Close modal or overlay</td></tr>
+  <tr><td><code>btn-toggle-menu-1--interactive</code></td><td>Show/hide mobile menu</td></tr>
+</table>
+<h4>Video Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>vid-hero-autoplay-1--trackable</code></td><td>Auto-playing background video with analytics</td></tr>
+  <tr><td><code>vid-product-demo-1--interactive--trackable</code></td><td>Click-to-play demo with tracking</td></tr>
+  <tr><td><code>vid-background-ambient-1</code></td><td>Decorative background video</td></tr>
+</table>
+<div class="page-break"></div>
+<h4>Image Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>img-hero-banner-1--trackable</code></td><td>Hero image with view tracking</td></tr>
+  <tr><td><code>img-product-main-1</code></td><td>Static product photo</td></tr>
+  <tr><td><code>img-gallery-thumb-1--interactive</code></td><td>Clickable thumbnail that triggers action</td></tr>
+  <tr><td><code>img-logo-header-1</code></td><td>Brand logo in header</td></tr>
+  <tr><td><code>img-background-section-1</code></td><td>Decorative background image</td></tr>
+</table>
+
+<h4>Text Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>txt-headline-primary-1</code></td><td>Main page/section heading</td></tr>
+  <tr><td><code>txt-subhead-1</code></td><td>Secondary heading</td></tr>
+  <tr><td><code>txt-body-content-1</code></td><td>Standard paragraph text</td></tr>
+  <tr><td><code>txt-dynamic-price-1--target</code></td><td>Price updated by SDK</td></tr>
+  <tr><td><code>txt-counter-display-1--target</code></td><td>Number/counter updated by SDK</td></tr>
+</table>
+<div class="page-break"></div>
+<h4>Group/Container Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>grp-carousel-container-1</code></td><td>Wrapper for entire carousel</td></tr>
+  <tr><td><code>grp-carousel-slide-1</code></td><td>Individual slide content</td></tr>
+  <tr><td><code>grp-carousel-slide-2</code></td><td>Individual slide content</td></tr>
+  <tr><td><code>grp-modal-overlay-1--conditional</code></td><td>Modal that appears on trigger</td></tr>
+  <tr><td><code>grp-section-hero-1</code></td><td>Page section wrapper</td></tr>
+  <tr><td><code>grp-gallery-container-1</code></td><td>Image gallery wrapper</td></tr>
+</table>
+<h4>Background Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>bg-page-main-1</code></td><td>Main page background</td></tr>
+  <tr><td><code>bg-section-alternate-1</code></td><td>Section background color/image</td></tr>
+  <tr><td><code>bg-overlay-dark-1--conditional</code></td><td>Modal backdrop (hidden by default)</td></tr>
+</table>
+<div class="page-break"></div>
+<h4>Shape Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>shp-divider-section-1</code></td><td>Visual separator between sections</td></tr>
+  <tr><td><code>shp-accent-decoration-1</code></td><td>Decorative graphic element</td></tr>
+  <tr><td><code>shp-button-custom-1--interactive</code></td><td>Custom-styled clickable shape</td></tr>
+  <tr><td><code>shp-progress-bar-1--target</code></td><td>Progress indicator updated by SDK</td></tr>
+</table>
+<h4>Navigation Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>nav-menu-main-1--interactive</code></td><td>Primary site navigation</td></tr>
+  <tr><td><code>nav-breadcrumb-1</code></td><td>Breadcrumb trail</td></tr>
+  <tr><td><code>nav-pagination-1--interactive</code></td><td>Page navigation controls</td></tr>
+</table>
+<h4>Interactive/State Elements</h4>
+<table>
+  <tr><th>Element Name</th><th>Purpose</th></tr>
+  <tr><td><code>btn-state-toggle-1--interactive</code></td><td>Toggle between show/hide states</td></tr>
+  <tr><td><code>grp-state-active-1--conditional</code></td><td>Content shown in active state</td></tr>
+  <tr><td><code>grp-state-inactive-1--conditional</code></td><td>Content shown in inactive state</td></tr>
+</table>
+<div class="page-break"></div>
+<h4>Common Patterns by Use Case</h4>
+
+<h5>Carousel/Slideshow</h5>
+<pre><code>grp-carousel-container-1
+├── grp-carousel-slide-1
+├── grp-carousel-slide-2  
+├── grp-carousel-slide-3
+├── btn-nav-prev-1--interactive
+└── btn-nav-next-1--interactive</code></pre>
+
+<h5>Modal/Overlay</h5>
+<pre><code>grp-modal-overlay-1--conditional
+├── grp-modal-content-1
+├── btn-modal-close-1--interactive
+└── bg-overlay-dark-1--conditional</code></pre>
+
+<h5>Product Showcase</h5>
+<pre><code>grp-product-container-1
+├── img-product-main-1--trackable
+├── txt-product-title-1
+├── txt-dynamic-price-1--target
+└── btn-cta-purchase-1--interactive--trackable</code></pre>
+<div class="page-break"></div>
+<h3>Appendix B: Sample Config Object in Notes Field</h3>
+<pre><code>{
+  "event": "cta-click",
+  "target": "modal-1",
+  "analytics": {
+    "category": "engagement",
+    "label": "download"
+  }
+}</code></pre>
+<p><strong>Minified:</strong> <code>{"event":"cta-click","target":"modal-1","analytics":{"category":"engagement","label":"download"}}</code></p>
+
+<h3>Appendix C: Linter Tool (optional JS validator)</h3>
+<pre><code>function validateElementNames(experience) {
+  const elements = experience.getAllElements();
+  elements.forEach(el => {
+    if (!/^[a-z]+-[a-z]+(-[0-9]+)?(--[a-z]+)*$/.test(el.name)) {
+      console.warn("Naming violation:", el.name);
+    }
+  });
+}</code></pre>
+</div>
+
+<script>
+// Auto-print functionality for PDF generation
+window.addEventListener('load', function() {
+  setTimeout(() => {
+    if (confirm('Would you like to print/save this document as PDF?')) {
+      window.print();
+    }
+  }, 1000);
+});
+</script>
+</body>
+</html>

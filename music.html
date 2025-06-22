@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musical Personality Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone.js/14.8.49/Tone.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: #ff5757;
+            border-radius: 0;
+            padding: 40px 30px;
+            margin-bottom: 0;
+            text-align: center;
+            color: white;
+            box-shadow: none;
+        }
+        
+        .header h1 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .keys-panel {
+            background: white;
+            border-radius: 0;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .personality-panel {
+            background: white;
+            border-radius: 0;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .panel-title {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #4a4a4a;
+            border-bottom: 3px solid #ff5757;
+            padding-bottom: 15px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .key-section {
+            margin-bottom: 30px;
+        }
+        
+        .key-section h3 {
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .key-button {
+            background: #f8f8f8;
+            border: none;
+            border-radius: 0;
+            padding: 20px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .key-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: #f0f0f0;
+        }
+        
+        .key-button.active {
+            background: #ff5757;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 87, 87, 0.4);
+        }
+        
+        .key-button.major.active {
+            background: #ff5757;
+            box-shadow: 0 5px 15px rgba(255, 87, 87, 0.4);
+        }
+        
+        .key-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .key-type {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .personality-display {
+            min-height: 400px;
+        }
+        
+        .personality-result {
+            background: #f8f8f8;
+            border-radius: 0;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .personality-title {
+            font-size: 1.6em;
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 300;
+        }
+        
+        .trait-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .trait-tag {
+            background: #ff5757;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 0;
+            font-size: 0.9em;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .trait-tag.major {
+            background: #ff5757;
+        }
+        
+        .trait-tag.minor {
+            background: #4a4a4a;
+        }
+        
+        .personality-description {
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+        
+        .big-five-bars {
+            margin-top: 20px;
+        }
+        
+        .big-five-item {
+            margin-bottom: 15px;
+        }
+        
+        .big-five-label {
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: #4a4a4a;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+        
+        .big-five-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        .big-five-fill {
+            height: 100%;
+            background: #ff5757;
+            transition: width 0.5s ease;
+            border-radius: 0;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .control-button {
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: #ff5757;
+        }
+        
+        .active-keys {
+            background: rgba(255, 87, 87, 0.1);
+            border: 2px solid #ff5757;
+            border-radius: 0;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .active-keys h4 {
+            color: #4a4a4a;
+            margin-bottom: 15px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .active-key-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .active-key-tag {
+            background: #ff5757;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 0;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 300;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .key-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Musical Personality Explorer</h1>
+            <p>Toggle musical keys to discover your combined personality profile</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="keys-panel">
+                <h2 class="panel-title">Musical Keys</h2>
+                
+                <div class="controls">
+                    <button class="control-button" onclick="startAudio()">🎵 Start Audio</button>
+                    <button class="control-button" onclick="stopAll()">⏹️ Stop All</button>
+                    <button class="control-button" onclick="clearAll()">🔄 Clear All</button>
+                </div>
+                
+                <div class="key-section">
+                    <h3>Major Keys (Expressive/Outward)</h3>
+                    <div class="key-grid" id="majorKeys"></div>
+                </div>
+                
+                <div class="key-section">
+                    <h3>Minor Keys (Reflective/Inward)</h3>
+                    <div class="key-grid" id="minorKeys"></div>
+                </div>
+            </div>
+            
+            <div class="personality-panel">
+                <h2 class="panel-title">Personality Analysis</h2>
+                
+                <div class="active-keys">
+                    <h4>Currently Active Keys:</h4>
+                    <div class="active-key-list" id="activeKeysList">
+                        <span style="color: #7f8c8d; font-style: italic;">No keys selected</span>
+                    </div>
+                </div>
+                
+                <div class="personality-display" id="personalityDisplay">
+                    <div class="personality-result">
+                        <div class="personality-title">Select keys to reveal your personality profile</div>
+                        <div class="personality-description">
+                            Choose one or more musical keys from the left panel to see how they combine to create a unique personality interpretation. The analysis will blend the traits associated with each key to provide insights into cognitive style, emotional tendencies, and behavioral patterns.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Musical key data
+        const keyData = {
+            major: {
+                'C': { name: 'C Major', type: 'Pure Realist', traits: ['Practical', 'Grounded', 'Clear', 'Balanced'], freq: 261.63 },
+                'G': { name: 'G Major', type: 'Optimistic Idealist', traits: ['Confident', 'Social', 'Forward-moving', 'Energetic'], freq: 196.00 },
+                'D': { name: 'D Major', type: 'Charismatic Leader', traits: ['Dynamic', 'Commanding', 'Bold', 'Triumphant'], freq: 146.83 },
+                'A': { name: 'A Major', type: 'Visionary Thinker', traits: ['Imaginative', 'Expressive', 'Open', 'Expansive'], freq: 220.00 },
+                'E': { name: 'E Major', type: 'Adventurous Analyst', traits: ['Curious', 'Analytical', 'Vivid', 'Intense'], freq: 164.81 },
+                'B': { name: 'B Major', type: 'Structured Intellectual', traits: ['Perfectionist', 'Controlled', 'Sharp', 'Bright'], freq: 123.47 },
+                'F#': { name: 'F♯ Major', type: 'Intense Romantic', traits: ['Passionate', 'Transcendent', 'Rare', 'Luminous'], freq: 185.00 },
+                'C#': { name: 'C♯ Major', type: 'Uncompromising Visionary', traits: ['Unconventional', 'Bold', 'Rare', 'Visionary'], freq: 138.59 },
+                'F': { name: 'F Major', type: 'Empathetic Diplomat', traits: ['Calm', 'Nurturing', 'Warm', 'Pastoral'], freq: 174.61 },
+                'Bb': { name: 'B♭ Major', type: 'Stable Strategist', traits: ['Wise', 'Methodical', 'Confident', 'Restrained'], freq: 116.54 },
+                'Eb': { name: 'E♭ Major', type: 'Philosophical Dreamer', traits: ['Deep-thinking', 'Moral', 'Noble', 'Contemplative'], freq: 155.56 },
+                'Ab': { name: 'A♭ Major', type: 'Elegant Traditionalist', traits: ['Aesthetic', 'Conventional', 'Lush', 'Ordered'], freq: 207.65 }
+            },
+            minor: {
+                'A': { name: 'A Minor', type: 'Stoic Observer', traits: ['Introspective', 'Neutral', 'Observant', 'Reserved'], freq: 220.00 },
+                'E': { name: 'E Minor', type: 'Melancholic Realist', traits: ['Emotionally aware', 'Grounded', 'Somber', 'Deep'], freq: 164.81 },
+                'B': { name: 'B Minor', type: 'Sensitive Strategist', traits: ['Deep thinker', 'Emotional control', 'Elegant', 'Tragic'], freq: 123.47 },
+                'F#': { name: 'F♯ Minor', type: 'Haunted Idealist', traits: ['Artistic', 'Visionary', 'Despairing', 'Dark'], freq: 185.00 },
+                'C#': { name: 'C♯ Minor', type: 'Existential Analyst', traits: ['Abstract', 'Complex', 'Profound', 'Introverted'], freq: 138.59 },
+                'G#': { name: 'G♯ Minor', type: 'Mystic Outsider', traits: ['Spiritual', 'Esoteric', 'Dissonant', 'Rare'], freq: 207.65 },
+                'D#': { name: 'D♯ Minor', type: 'Tortured Romantic', traits: ['Intense', 'Vulnerable', 'Beautiful', 'Distressed'], freq: 155.56 },
+                'D': { name: 'D Minor', type: 'Wounded Hero', traits: ['Grace under pressure', 'Tragic', 'Classical', 'Noble'], freq: 146.83 },
+                'G': { name: 'G Minor', type: 'Principled Rebel', traits: ['Bold', 'Moral', 'Ethical', 'Challenging'], freq: 196.00 },
+                'C': { name: 'C Minor', type: 'Disciplined Melancholic', traits: ['Structured', 'Rigorous', 'Emotional', 'Controlled'], freq: 261.63 },
+                'F': { name: 'F Minor', type: 'Inner Fire', traits: ['Passionate', 'Restrained', 'Deep', 'Strong exterior'], freq: 174.61 }
+            }
+        };
+
+        let activeKeys = new Set();
+        let synths = {};
+        let audioStarted = false;
+
+        // Initialize the interface
+        function init() {
+            createKeyButtons();
+            updatePersonalityDisplay();
+        }
+
+        function createKeyButtons() {
+            const majorContainer = document.getElementById('majorKeys');
+            const minorContainer = document.getElementById('minorKeys');
+
+            // Create major key buttons
+            Object.entries(keyData.major).forEach(([key, data]) => {
+                const button = createKeyButton(key, data, 'major');
+                majorContainer.appendChild(button);
+            });
+
+            // Create minor key buttons
+            Object.entries(keyData.minor).forEach(([key, data]) => {
+                const button = createKeyButton(key, data, 'minor');
+                minorContainer.appendChild(button);
+            });
+        }
+
+        function createKeyButton(key, data, mode) {
+            const button = document.createElement('div');
+            button.className = `key-button ${mode}`;
+            button.onclick = () => toggleKey(key, mode);
+            
+            button.innerHTML = `
+                <div class="key-name">${data.name}</div>
+                <div class="key-type">${data.type}</div>
+            `;
+            
+            return button;
+        }
+
+        async function startAudio() {
+            if (!audioStarted) {
+                await Tone.start();
+                audioStarted = true;
+            }
+        }
+
+        function toggleKey(key, mode) {
+            const keyId = `${key}-${mode}`;
+            const button = event.currentTarget;
+            
+            if (activeKeys.has(keyId)) {
+                // Deactivate key
+                activeKeys.delete(keyId);
+                button.classList.remove('active');
+                if (synths[keyId]) {
+                    synths[keyId].triggerRelease();
+                    delete synths[keyId];
+                }
+            } else {
+                // Activate key
+                activeKeys.add(keyId);
+                button.classList.add('active');
+                playKey(key, mode, keyId);
+            }
+            
+            updateActiveKeysList();
+            updatePersonalityDisplay();
+        }
+
+        function playKey(key, mode, keyId) {
+            if (!audioStarted) return;
+            
+            const keyInfo = keyData[mode][key];
+            if (!keyInfo) return;
+            
+            // Create a synth for this key
+            const synth = new Tone.Synth({
+                oscillator: {
+                    type: mode === 'major' ? 'triangle' : 'sine'
+                },
+                envelope: {
+                    attack: 0.1,
+                    decay: 0.3,
+                    sustain: 0.4,
+                    release: 2
+                }
+            }).toDestination();
+            
+            synths[keyId] = synth;
+            synth.triggerAttack(keyInfo.freq);
+        }
+
+        function stopAll() {
+            Object.values(synths).forEach(synth => {
+                synth.triggerRelease();
+            });
+            synths = {};
+        }
+
+        function clearAll() {
+            stopAll();
+            activeKeys.clear();
+            document.querySelectorAll('.key-button.active').forEach(button => {
+                button.classList.remove('active');
+            });
+            updateActiveKeysList();
+            updatePersonalityDisplay();
+        }
+
+        function updateActiveKeysList() {
+            const container = document.getElementById('activeKeysList');
+            
+            if (activeKeys.size === 0) {
+                container.innerHTML = '<span style="color: #7f8c8d; font-style: italic;">No keys selected</span>';
+                return;
+            }
+            
+            const keyTags = Array.from(activeKeys).map(keyId => {
+                const [key, mode] = keyId.split('-');
+                const data = keyData[mode][key];
+                return `<span class="active-key-tag">${data.name}</span>`;
+            });
+            
+            container.innerHTML = keyTags.join('');
+        }
+
+        function updatePersonalityDisplay() {
+            const container = document.getElementById('personalityDisplay');
+            
+            if (activeKeys.size === 0) {
+                container.innerHTML = `
+                    <div class="personality-result">
+                        <div class="personality-title">Select keys to reveal your personality profile</div>
+                        <div class="personality-description">
+                            Choose one or more musical keys from the left panel to see how they combine to create a unique personality interpretation. The analysis will blend the traits associated with each key to provide insights into cognitive style, emotional tendencies, and behavioral patterns.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const analysis = analyzePersonality();
+            container.innerHTML = `
+                <div class="personality-result">
+                    <div class="personality-title">${analysis.title}</div>
+                    <div class="trait-list">
+                        ${analysis.traits.map(trait => `<span class="trait-tag ${trait.type}">${trait.name}</span>`).join('')}
+                    </div>
+                    <div class="personality-description">${analysis.description}</div>
+                    <div class="big-five-bars">
+                        ${Object.entries(analysis.bigFive).map(([trait, value]) => `
+                            <div class="big-five-item">
+                                <div class="big-five-label">${trait}</div>
+                                <div class="big-five-bar">
+                                    <div class="big-five-fill" style="width: ${value}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function analyzePersonality() {
+            const activeKeyData = Array.from(activeKeys).map(keyId => {
+                const [key, mode] = keyId.split('-');
+                return { key, mode, data: keyData[mode][key] };
+            });
+            
+            // Combine all traits
+            const allTraits = [];
+            const typeNames = [];
+            
+            activeKeyData.forEach(({ mode, data }) => {
+                typeNames.push(data.type);
+                data.traits.forEach(trait => {
+                    allTraits.push({ name: trait, type: mode });
+                });
+            });
+            
+            // Create composite personality title
+            const title = createCompositeTitle(typeNames, activeKeyData);
+            
+            // Create description
+            const description = createCompositeDescription(activeKeyData);
+            
+            // Calculate Big Five scores
+            const bigFive = calculateBigFive(activeKeyData);
+            
+            return {
+                title,
+                traits: allTraits,
+                description,
+                bigFive
+            };
+        }
+
+        function createCompositeTitle(typeNames, activeKeyData) {
+            if (typeNames.length === 1) {
+                return `The ${typeNames[0]}`;
+            }
+            
+            const majorCount = activeKeyData.filter(k => k.mode === 'major').length;
+            const minorCount = activeKeyData.filter(k => k.mode === 'minor').length;
+            
+            if (majorCount > minorCount) {
+                return `The Expressive ${getCompositeAdjective(activeKeyData)}`;
+            } else if (minorCount > majorCount) {
+                return `The Introspective ${getCompositeAdjective(activeKeyData)}`;
+            } else {
+                return `The Balanced ${getCompositeAdjective(activeKeyData)}`;
+            }
+        }
+
+        function getCompositeAdjective(activeKeyData) {
+            const traits = activeKeyData.flatMap(k => k.data.traits);
+            
+            if (traits.includes('Visionary') || traits.includes('Imaginative')) return 'Visionary';
+            if (traits.includes('Analytical') || traits.includes('Deep thinker')) return 'Analyst';
+            if (traits.includes('Bold') || traits.includes('Dynamic')) return 'Leader';
+            if (traits.includes('Artistic') || traits.includes('Aesthetic')) return 'Artist';
+            if (traits.includes('Spiritual') || traits.includes('Esoteric')) return 'Mystic';
+            if (traits.includes('Passionate') || traits.includes('Intense')) return 'Romantic';
+            
+            return 'Individualist';
+        }
+
+        function createCompositeDescription(activeKeyData) {
+            const majorKeys = activeKeyData.filter(k => k.mode === 'major');
+            const minorKeys = activeKeyData.filter(k => k.mode === 'minor');
+            
+            let description = 'This unique personality blend combines ';
+            
+            if (majorKeys.length > 0) {
+                const majorTypes = majorKeys.map(k => k.data.type.toLowerCase()).join(', ');
+                description += `expressive qualities of ${majorTypes}`;
+            }
+            
+            if (majorKeys.length > 0 && minorKeys.length > 0) {
+                description += ' with ';
+            }
+            
+            if (minorKeys.length > 0) {
+                const minorTypes = minorKeys.map(k => k.data.type.toLowerCase()).join(', ');
+                description += `reflective aspects of ${minorTypes}`;
+            }
+            
+            description += '. This creates a complex individual who ';
+            
+            // Add behavioral predictions based on the combination
+            const allTraits = activeKeyData.flatMap(k => k.data.traits);
+            
+            if (allTraits.includes('Visionary') && allTraits.includes('Analytical')) {
+                description += 'combines big-picture thinking with detailed analysis, able to see both forest and trees. ';
+            }
+            
+            if (allTraits.includes('Bold') && allTraits.includes('Introspective')) {
+                description += 'balances confident action with deep reflection, leading to well-considered decisions. ';
+            }
+            
+            if (allTraits.includes('Passionate') && allTraits.includes('Controlled')) {
+                description += 'channels intense emotions through disciplined expression, creating powerful but measured responses. ';
+            }
+            
+            description += 'The combination suggests someone who draws from multiple cognitive and emotional resources to navigate complex situations.';
+            
+            return description;
+        }
+
+        function calculateBigFive(activeKeyData) {
+            let openness = 30, conscientiousness = 30, extraversion = 30, agreeableness = 30, neuroticism = 30;
+            
+            activeKeyData.forEach(({ key, mode, data }) => {
+                // Openness - rare keys and visionary types
+                if (['C#', 'G#', 'D#'].includes(key) || data.traits.includes('Visionary') || data.traits.includes('Unconventional')) {
+                    openness += 20;
+                }
+                if (data.traits.includes('Imaginative') || data.traits.includes('Artistic')) {
+                    openness += 15;
+                }
+                
+                // Conscientiousness - structured types
+                if (['B', 'C'].includes(key) || data.traits.includes('Structured') || data.traits.includes('Controlled')) {
+                    conscientiousness += 20;
+                }
+                if (data.traits.includes('Methodical') || data.traits.includes('Disciplined')) {
+                    conscientiousness += 15;
+                }
+                
+                // Extraversion - major keys and social traits
+                if (mode === 'major') {
+                    extraversion += 15;
+                }
+                if (data.traits.includes('Social') || data.traits.includes('Bold') || data.traits.includes('Dynamic')) {
+                    extraversion += 20;
+                }
+                if (mode === 'minor') {
+                    extraversion -= 10;
+                }
+                
+                // Agreeableness - warm, nurturing types
+                if (data.traits.includes('Nurturing') || data.traits.includes('Empathetic') || data.traits.includes('Warm')) {
+                    agreeableness += 20;
+                }
+                if (data.traits.includes('Moral') || data.traits.includes('Ethical')) {
+                    agreeableness += 15;
+                }
+                
+                // Neuroticism - minor keys and emotional traits
+                if (mode === 'minor') {
+                    neuroticism += 10;
+                }
+                if (data.traits.includes('Melancholic') || data.traits.includes('Vulnerable') || data.traits.includes('Intense')) {
+                    neuroticism += 15;
+                }
+                if (data.traits.includes('Stable') || data.traits.includes('Calm')) {
+                    neuroticism -= 15;
+                }
+            });
+            
+            // Normalize to 0-100 range
+            return {
+                'Openness': Math.max(0, Math.min(100, openness)),
+                'Conscientiousness': Math.max(0, Math.min(100, conscientiousness)),
+                'Extraversion': Math.max(0, Math.min(100, extraversion)),
+                'Agreeableness': Math.max(0, Math.min(100, agreeableness)),
+                'Neuroticism': Math.max(0, Math.min(100, neuroticism))
+            };
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
