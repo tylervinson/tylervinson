@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS-1500 Health Insurance Claim Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 8px;
+            line-height: 1.1;
+            background: white;
+            padding: 10px;
+        }
+
+        .form-container {
+            max-width: 850px;
+            margin: 0 auto;
+            border: 2px solid black;
+            background: white;
+        }
+
+        .form-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 8px;
+            border-bottom: 1px solid black;
+            background: #f0f0f0;
+        }
+
+        .form-subheader {
+            text-align: center;
+            font-size: 8px;
+            padding: 4px;
+            border-bottom: 1px solid black;
+        }
+
+        .insurance-types {
+            display: flex;
+            border-bottom: 1px solid black;
+            background: #f8f8f8;
+        }
+
+        .insurance-type {
+            flex: 1;
+            text-align: center;
+            font-size: 7px;
+            font-weight: bold;
+            padding: 4px 2px;
+            border-right: 1px solid black;
+            position: relative;
+        }
+
+        .insurance-type:last-child {
+            border-right: none;
+        }
+
+        .insurance-type input[type="checkbox"] {
+            margin-right: 2px;
+            transform: scale(0.8);
+        }
+
+        .form-row {
+            display: flex;
+            border-bottom: 1px solid black;
+            min-height: 25px;
+        }
+
+        .form-field {
+            border-right: 1px solid black;
+            padding: 2px 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .form-field:last-child {
+            border-right: none;
+        }
+
+        .field-label {
+            font-size: 6px;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 1px;
+        }
+
+        .field-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 8px;
+            width: 100%;
+            height: 14px;
+        }
+
+        .field-input-small {
+            font-size: 7px;
+            height: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 6px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            transform: scale(0.7);
+        }
+
+        .date-input {
+            width: 20px;
+            text-align: center;
+            border-bottom: 1px solid #999;
+            margin: 0 1px;
+        }
+
+        .service-lines {
+            border-bottom: 1px solid black;
+        }
+
+        .service-header {
+            display: flex;
+            background: #f8f8f8;
+            border-bottom: 1px solid black;
+            font-size: 6px;
+            font-weight: bold;
+        }
+
+        .service-col {
+            border-right: 1px solid black;
+            padding: 2px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 20px;
+        }
+
+        .service-col:last-child {
+            border-right: none;
+        }
+
+        .service-line {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            min-height: 18px;
+        }
+
+        .service-line:last-child {
+            border-bottom: 1px solid black;
+        }
+
+        .service-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 7px;
+            width: 100%;
+            height: 16px;
+            text-align: center;
+        }
+
+        .signature-section {
+            display: flex;
+            border-bottom: 1px solid black;
+            min-height: 35px;
+        }
+
+        .signature-field {
+            border-right: 1px solid black;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .signature-field:last-child {
+            border-right: none;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid black;
+            margin-top: auto;
+            height: 15px;
+        }
+
+        .small-text {
+            font-size: 5px;
+            line-height: 1.1;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        /* Specific field widths */
+        .w-10 { flex: 0 0 10%; }
+        .w-15 { flex: 0 0 15%; }
+        .w-20 { flex: 0 0 20%; }
+        .w-25 { flex: 0 0 25%; }
+        .w-30 { flex: 0 0 30%; }
+        .w-35 { flex: 0 0 35%; }
+        .w-40 { flex: 0 0 40%; }
+        .w-50 { flex: 0 0 50%; }
+        .w-60 { flex: 0 0 60%; }
+        .w-70 { flex: 0 0 70%; }
+
+        @media print {
+            body { padding: 0; }
+            .form-container { max-width: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Header -->
+        <div class="form-header">
+            HEALTH INSURANCE CLAIM FORM
+        </div>
+        <div class="form-subheader">
+            APPROVED BY NATIONAL UNIFORM CLAIM COMMITTEE (NUCC) 02/12
+        </div>
+
+        <!-- Insurance Types Row -->
+        <div class="insurance-types">
+            <div class="insurance-type">
+                <input type="checkbox" id="medicare"> MEDICARE<br>
+                <span class="small-text">(Medicare#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="medicaid"> MEDICAID<br>
+                <span class="small-text">(Medicaid#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="tricare"> TRICARE<br>
+                <span class="small-text">(ID# / DoD#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="champva"> CHAMPVA<br>
+                <span class="small-text">(Member ID#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="group"> GROUP<br>HEALTH PLAN<br>
+                <span class="small-text">(ID#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="feca"> FECA<br>BLK LUNG<br>
+                <span class="small-text">(ID#)</span>
+            </div>
+            <div class="insurance-type">
+                <input type="checkbox" id="other"> OTHER<br>
+                <span class="small-text">(ID#)</span>
+            </div>
+        </div>
+
+        <!-- Row 1: ID Number -->
+        <div class="form-row">
+            <div class="form-field w-100">
+                <div class="field-label">1a. INSURED'S ID NUMBER (For Program in Item 1)</div>
+                <input type="text" class="field-input">
+            </div>
+        </div>
+
+        <!-- Row 2-4: Patient and Insured Info -->
+        <div class="form-row">
+            <div class="form-field w-40">
+                <div class="field-label">2. PATIENT'S NAME (Last Name, First Name, Middle Initial)</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-20">
+                <div class="field-label">3. PATIENT'S BIRTH DATE</div>
+                <div style="display: flex; align-items: center; gap: 2px;">
+                    <input type="text" class="date-input" placeholder="MM" maxlength="2">
+                    <input type="text" class="date-input" placeholder="DD" maxlength="2">
+                    <input type="text" class="date-input" placeholder="YY" maxlength="2">
+                </div>
+                <div class="checkbox-group" style="margin-top: 4px;">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sex-m"> <label for="sex-m">M</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sex-f"> <label for="sex-f">F</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-field w-40">
+                <div class="field-label">4. INSURED'S NAME (Last Name, First Name, Middle Initial)</div>
+                <input type="text" class="field-input">
+            </div>
+        </div>
+
+        <!-- Row 5-8: Addresses -->
+        <div class="form-row">
+            <div class="form-field w-40">
+                <div class="field-label">5. PATIENT'S ADDRESS (No., Street)</div>
+                <input type="text" class="field-input">
+                <div style="display: flex; gap: 4px; margin-top: 2px;">
+                    <div style="flex: 2;">
+                        <div class="field-label">CITY</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">STATE</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 2px;">
+                    <div style="flex: 1;">
+                        <div class="field-label">ZIP CODE</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">TELEPHONE (Include Area Code)</div>
+                        <input type="text" class="field-input-small" placeholder="( )">
+                    </div>
+                </div>
+            </div>
+            <div class="form-field w-20">
+                <div class="field-label">6. PATIENT RELATIONSHIP TO INSURED</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> Self</div>
+                    <div class="checkbox-item"><input type="checkbox"> Spouse</div>
+                    <div class="checkbox-item"><input type="checkbox"> Child</div>
+                    <div class="checkbox-item"><input type="checkbox"> Other</div>
+                </div>
+                <div class="field-label" style="margin-top: 8px;">8. RESERVED FOR NUCC USE</div>
+            </div>
+            <div class="form-field w-40">
+                <div class="field-label">7. INSURED'S ADDRESS (No., Street)</div>
+                <input type="text" class="field-input">
+                <div style="display: flex; gap: 4px; margin-top: 2px;">
+                    <div style="flex: 2;">
+                        <div class="field-label">CITY</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">STATE</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 2px;">
+                    <div style="flex: 1;">
+                        <div class="field-label">ZIP CODE</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">TELEPHONE (Include Area Code)</div>
+                        <input type="text" class="field-input-small" placeholder="( )">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 9-11: Other Insured Info -->
+        <div class="form-row">
+            <div class="form-field w-30">
+                <div class="field-label">9. OTHER INSURED'S NAME (Last Name, First Name, Middle Initial)</div>
+                <input type="text" class="field-input">
+                <div class="field-label" style="margin-top: 4px;">a. OTHER INSURED'S POLICY OR GROUP NUMBER</div>
+                <input type="text" class="field-input-small">
+                <div class="field-label" style="margin-top: 4px;">b. RESERVED FOR NUCC USE</div>
+                <div class="field-label" style="margin-top: 4px;">c. RESERVED FOR NUCC USE</div>
+                <div class="field-label" style="margin-top: 4px;">d. INSURANCE PLAN NAME OR PROGRAM NAME</div>
+                <input type="text" class="field-input-small">
+            </div>
+            <div class="form-field w-30">
+                <div class="field-label">10. IS PATIENT'S CONDITION RELATED TO:</div>
+                <div class="checkbox-group" style="margin-top: 4px;">
+                    <div class="field-label">a. EMPLOYMENT? (Current or Previous)</div>
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                </div>
+                <div class="checkbox-group" style="margin-top: 4px;">
+                    <div class="field-label">b. AUTO ACCIDENT?</div>
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                    <div class="field-label">PLACE (State)</div>
+                    <input type="text" class="field-input-small" style="width: 30px;">
+                </div>
+                <div class="checkbox-group" style="margin-top: 4px;">
+                    <div class="field-label">c. OTHER ACCIDENT?</div>
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                </div>
+                <div class="field-label" style="margin-top: 4px;">10d. CLAIM CODES (Designated by NUCC)</div>
+            </div>
+            <div class="form-field w-40">
+                <div class="field-label">11. INSURED'S POLICY GROUP OR FECA NUMBER</div>
+                <input type="text" class="field-input">
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="field-label">a. INSURED'S DATE OF BIRTH</div>
+                        <div style="display: flex; gap: 2px;">
+                            <input type="text" class="date-input" placeholder="MM">
+                            <input type="text" class="date-input" placeholder="DD">
+                            <input type="text" class="date-input" placeholder="YY">
+                        </div>
+                        <div class="checkbox-group" style="margin-top: 2px;">
+                            <div class="checkbox-item"><input type="checkbox"> M</div>
+                            <div class="checkbox-item"><input type="checkbox"> F</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-label" style="margin-top: 4px;">b. OTHER CLAIM ID (Designated by NUCC)</div>
+                <div class="field-label" style="margin-top: 4px;">c. INSURANCE PLAN NAME OR PROGRAM NAME</div>
+                <input type="text" class="field-input-small">
+                <div class="checkbox-group" style="margin-top: 4px;">
+                    <div class="field-label">d. IS THERE ANOTHER HEALTH BENEFIT PLAN?</div>
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                </div>
+                <div class="small-text">If yes, complete items 9, 9a, and 9d.</div>
+            </div>
+        </div>
+
+        <!-- Row 12-13: Signatures -->
+        <div class="form-row">
+            <div class="form-field w-50">
+                <div class="field-label">12. PATIENT'S OR AUTHORIZED PERSON'S SIGNATURE</div>
+                <div class="small-text">I authorize the release of any medical or other information necessary to process this claim. I also request payment of government benefits either to myself or to the party who accepts assignment below.</div>
+                <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 60%; border-bottom: 1px solid black; height: 15px;"></span>
+                    <span style="margin-left: 10px;">DATE</span>
+                    <span style="display: inline-block; width: 20%; border-bottom: 1px solid black; height: 15px; margin-left: 5px;"></span>
+                </div>
+                <div style="margin-top: 2px;">SIGNED</div>
+            </div>
+            <div class="form-field w-50">
+                <div class="field-label">13. INSURED'S OR AUTHORIZED PERSON'S SIGNATURE</div>
+                <div class="small-text">I authorize payment of medical benefits to the undersigned physician or supplier for services described below.</div>
+                <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 70%; border-bottom: 1px solid black; height: 15px;"></span>
+                </div>
+                <div style="margin-top: 2px;">SIGNED</div>
+            </div>
+        </div>
+
+        <!-- Row 14-16: Dates -->
+        <div class="form-row">
+            <div class="form-field w-25">
+                <div class="field-label">14. DATE OF CURRENT ILLNESS, INJURY OR PREGNANCY (LMP)</div>
+                <div style="display: flex; gap: 2px;">
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                </div>
+                <div class="field-label" style="margin-top: 4px;">QUAL.</div>
+            </div>
+            <div class="form-field w-25">
+                <div class="field-label">15. OTHER DATE</div>
+                <div style="display: flex; gap: 2px;">
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                </div>
+                <div class="field-label" style="margin-top: 4px;">QUAL.</div>
+            </div>
+            <div class="form-field w-50">
+                <div class="field-label">16. DATES PATIENT UNABLE TO WORK IN CURRENT OCCUPATION</div>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                    <span>FROM</span>
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                    <span style="margin-left: 10px;">TO</span>
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 17-18: Referring Provider -->
+        <div class="form-row">
+            <div class="form-field w-50">
+                <div class="field-label">17. NAME OF REFERRING PROVIDER OR OTHER SOURCE</div>
+                <input type="text" class="field-input">
+                <div style="margin-top: 4px;">
+                    <span class="field-label">17a.</span>
+                    <input type="text" class="field-input-small" style="width: 150px; display: inline-block; margin-left: 10px;">
+                </div>
+                <div style="margin-top: 4px;">
+                    <span class="field-label">17b. NPI</span>
+                    <input type="text" class="field-input-small" style="width: 150px; display: inline-block; margin-left: 10px;">
+                </div>
+            </div>
+            <div class="form-field w-50">
+                <div class="field-label">18. HOSPITALIZATION DATES RELATED TO CURRENT SERVICES</div>
+                <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
+                    <span>FROM</span>
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                    <span style="margin-left: 10px;">TO</span>
+                    <input type="text" class="date-input" placeholder="MM">
+                    <input type="text" class="date-input" placeholder="DD">
+                    <input type="text" class="date-input" placeholder="YY">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 19-20: Additional Info -->
+        <div class="form-row">
+            <div class="form-field w-70">
+                <div class="field-label">19. ADDITIONAL CLAIM INFORMATION (Designated by NUCC)</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-30">
+                <div class="field-label">20. OUTSIDE LAB?</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                    <span style="margin-left: 10px;">$ CHARGES</span>
+                    <input type="text" class="field-input-small" style="width: 60px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 21-23: Diagnosis -->
+        <div class="form-row">
+            <div class="form-field w-60">
+                <div class="field-label">21. DIAGNOSIS OR NATURE OF ILLNESS OR INJURY Relate A-L to service line below (24E)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
+                    <div>A. <input type="text" class="field-input-small"></div>
+                    <div>B. <input type="text" class="field-input-small"></div>
+                    <div>C. <input type="text" class="field-input-small"></div>
+                    <div>D. <input type="text" class="field-input-small"></div>
+                    <div>E. <input type="text" class="field-input-small"></div>
+                    <div>F. <input type="text" class="field-input-small"></div>
+                    <div>G. <input type="text" class="field-input-small"></div>
+                    <div>H. <input type="text" class="field-input-small"></div>
+                    <div>I. <input type="text" class="field-input-small"></div>
+                    <div>J. <input type="text" class="field-input-small"></div>
+                    <div>K. <input type="text" class="field-input-small"></div>
+                    <div>L. <input type="text" class="field-input-small"></div>
+                </div>
+                <div class="field-label" style="margin-top: 4px;">ICD Ind.</div>
+            </div>
+            <div class="form-field w-20">
+                <div class="field-label">22. RESUBMISSION CODE</div>
+                <input type="text" class="field-input">
+                <div class="field-label" style="margin-top: 4px;">ORIGINAL REF. NO.</div>
+                <input type="text" class="field-input-small">
+            </div>
+            <div class="form-field w-20">
+                <div class="field-label">23. PRIOR AUTHORIZATION NUMBER</div>
+                <input type="text" class="field-input">
+            </div>
+        </div>
+
+        <!-- Service Lines Header -->
+        <div class="service-header">
+            <div class="service-col w-15">24. A. DATE(S) OF SERVICE<br>FROM<br>MM DD YY</div>
+            <div class="service-col w-15">TO<br>MM DD YY</div>
+            <div class="service-col w-8">B.<br>PLACE OF<br>SERVICE</div>
+            <div class="service-col w-5">C.<br>EMG</div>
+            <div class="service-col w-25">D. PROCEDURES, SERVICES, OR SUPPLIES<br>CPT/HCPCS MODIFIER</div>
+            <div class="service-col w-8">E.<br>DIAGNOSIS<br>POINTER</div>
+            <div class="service-col w-10">F.<br>$ CHARGES</div>
+            <div class="service-col w-8">G.<br>DAYS OR<br>UNITS</div>
+            <div class="service-col w-8">H.<br>EPSDT<br>FAMILY<br>PLAN</div>
+            <div class="service-col w-8">I.<br>ID.<br>QUAL</div>
+            <div class="service-col w-15">J.<br>RENDERING<br>PROVIDER ID. #</div>
+        </div>
+
+        <!-- Service Lines -->
+        <div class="service-lines">
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+
+            <!-- Service lines 2-6 -->
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+
+            <div class="service-line">
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input date-input" placeholder="MM">
+                    <input type="text" class="service-input date-input" placeholder="DD">
+                    <input type="text" class="service-input date-input" placeholder="YY">
+                </div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-5"><input type="text" class="service-input"></div>
+                <div class="service-col w-25"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-10"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-8"><input type="text" class="service-input"></div>
+                <div class="service-col w-15">
+                    <input type="text" class="service-input">
+                    <div class="small-text" style="margin-top: 2px;">NPI</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom section -->
+        <div class="form-row">
+            <div class="form-field w-15">
+                <div class="field-label">25. FEDERAL TAX I.D. NUMBER</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> SSN</div>
+                    <div class="checkbox-item"><input type="checkbox"> EIN</div>
+                </div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-15">
+                <div class="field-label">26. PATIENT'S ACCOUNT NO.</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-15">
+                <div class="field-label">27. ACCEPT ASSIGNMENT?</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox"> YES</div>
+                    <div class="checkbox-item"><input type="checkbox"> NO</div>
+                </div>
+                <div class="small-text">(For govt. claims, see back)</div>
+            </div>
+            <div class="form-field w-15">
+                <div class="field-label">28. TOTAL CHARGE</div>
+                <div style="margin-top: 4px;">$</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-15">
+                <div class="field-label">29. AMOUNT PAID</div>
+                <div style="margin-top: 4px;">$</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="form-field w-25">
+                <div class="field-label">30. Rsvd for NUCC Use</div>
+                <input type="text" class="field-input">
+            </div>
+        </div>
+
+        <!-- Final signature row -->
+        <div class="form-row">
+            <div class="form-field w-40">
+                <div class="field-label">31. SIGNATURE OF PHYSICIAN OR SUPPLIER INCLUDING DEGREES OR CREDENTIALS</div>
+                <div class="small-text">(I certify that the statements on the reverse apply to this bill and are made a part thereof.)</div>
+                <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 60%; border-bottom: 1px solid black; height: 15px;"></span>
+                    <span style="margin-left: 10px;">DATE</span>
+                    <div style="display: flex; gap: 2px; margin-top: 2px;">
+                        <input type="text" class="date-input" placeholder="MM">
+                        <input type="text" class="date-input" placeholder="DD">
+                        <input type="text" class="date-input" placeholder="YY">
+                    </div>
+                </div>
+                <div style="margin-top: 2px;">SIGNED</div>
+            </div>
+            <div class="form-field w-30">
+                <div class="field-label">32. SERVICE FACILITY LOCATION INFORMATION</div>
+                <input type="text" class="field-input">
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="field-label">a.</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">b.</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                </div>
+            </div>
+            <div class="form-field w-30">
+                <div class="field-label">33. BILLING PROVIDER INFO & PHONE #</div>
+                <input type="text" class="field-input">
+                <div style="margin-top: 4px;">
+                    <span>( )</span>
+                    <input type="text" class="field-input-small" style="width: 120px; margin-left: 5px;">
+                </div>
+                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="field-label">a.</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="field-label">b.</div>
+                        <input type="text" class="field-input-small">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer note -->
+        <div style="text-align: center; padding: 4px; font-size: 6px; border-top: 1px solid black;">
+            READ BACK OF FORM BEFORE COMPLETING & SIGNING THIS FORM.
+        </div>
+    </div>
+</body>
+</html>
