@@ -247,17 +247,13 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .container{
-            max-width: 600px;
-            margin: auto;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>URL 404 Checker</h1>
-            <p>Upload or paste URLs to check for 404 errors. Spaces will be automatically replaced with dashes.</p>
+            <p>Upload or paste URLs to check for 404 errors. Spaces will be automatically replaced with dashes. Uses CORS proxy for actual URL testing.</p>
         </div>
         
         <div class="content">
@@ -379,22 +375,41 @@
 
             for (const url of urls) {
                 try {
-                    const response = await fetch(url, {
-                        method: 'HEAD',
-                        mode: 'no-cors',
-                        cache: 'no-cache'
+                    // Use a CORS proxy service for actual URL checking
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                    
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        signal: controller.signal
                     });
                     
-                    // Note: Due to CORS, we can't actually read the status code
-                    // This is a limitation of browser-based checking
-                    // In a real-world scenario, you'd need a backend service
+                    clearTimeout(timeoutId);
                     
-                } catch (error) {
-                    // For demonstration purposes, we'll simulate some 404s
-                    // In reality, most requests will fail due to CORS
-                    if (Math.random() < 0.1) { // 10% chance to simulate a 404
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Check if the proxy detected a 404 or connection error
+                        if (data.status && data.status.http_code === 404) {
+                            urls404.push(url);
+                        } else if (!data.contents || data.contents.includes('404') || data.contents.includes('Not Found')) {
+                            // Additional heuristic check for 404 content
+                            if (data.contents && data.contents.length < 1000 && 
+                                (data.contents.toLowerCase().includes('404') || 
+                                 data.contents.toLowerCase().includes('not found') ||
+                                 data.contents.toLowerCase().includes('page not found'))) {
+                                urls404.push(url);
+                            }
+                        }
+                    } else {
+                        // If proxy request fails, consider it a potential 404
                         urls404.push(url);
                     }
+                    
+                } catch (error) {
+                    // Network error, timeout, or other issue - likely a 404 or unreachable
+                    urls404.push(url);
                 }
 
                 completed++;
@@ -402,8 +417,8 @@
                 progressBar.style.width = percentage + '%';
                 progressText.textContent = `Checking URLs... ${completed}/${totalUrls}`;
 
-                // Small delay to show progress
-                await new Promise(resolve => setTimeout(resolve, 50));
+                // Small delay to show progress and avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
             // Hide progress and show results
@@ -468,11 +483,7 @@
 
         // Add some demo data on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const demoUrls = `https://example.com/page with spaces
-https://httpstat.us/404
-https://google.com/valid page
-https://httpstat.us/200
-https://test site.com/another page`;
+            const demoUrls = ``;
             
             document.getElementById('urlTextarea').value = demoUrls;
         });
