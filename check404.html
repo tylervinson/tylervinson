@@ -256,7 +256,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>URL 404 Checker v18</h1>
+            <h1>URL 404 Checker v19</h1>
             <p>Upload or paste URLs to check for 404 errors. Spaces will be automatically replaced with dashes. Note: Browser limitations mean this detects network errors and timeouts as potential 404s.</p>
         </div>
         
@@ -380,116 +380,91 @@
             for (const url of urls) {
                 let hasError = false;
                 
-                // Method 1: Try to load as image (will fail for 404s)
+                // Method 1: Try fetch and capture any errors (including 404s)
                 try {
-                    await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        let resolved = false;
-                        
-                        const timeout = setTimeout(() => {
-                            if (!resolved) {
-                                resolved = true;
-                                resolve(); // Timeout - assume it might be valid but slow
-                            }
-                        }, 3000);
-                        
-                        img.onload = () => {
-                            if (!resolved) {
-                                resolved = true;
-                                clearTimeout(timeout);
-                                resolve(); // Successfully loaded as image
-                            }
-                        };
-                        
-                        img.onerror = () => {
-                            if (!resolved) {
-                                resolved = true;
-                                clearTimeout(timeout);
-                                reject(new Error('Image load failed')); // Failed to load
-                            }
-                        };
-                        
-                        img.src = url;
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(url, {
+                        method: 'HEAD',
+                        cache: 'no-cache',
+                        signal: controller.signal
                     });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    // Check if we got a 404 or other error status
+                    if (!response.ok) {
+                        console.log(`URL returned status ${response.status}: ${url}`);
+                        if (response.status === 404) {
+                            hasError = true;
+                        }
+                    }
+                    
                 } catch (error) {
-                    // Image failed to load - could be 404 or just not an image
-                    // Try another method to verify
-                }
-
-                // Method 2: Try iframe load (more reliable for HTML pages)
-                try {
-                    await new Promise((resolve, reject) => {
-                        const iframe = document.createElement('iframe');
-                        iframe.style.position = 'absolute';
-                        iframe.style.left = '-9999px';
-                        iframe.style.width = '1px';
-                        iframe.style.height = '1px';
-                        iframe.style.visibility = 'hidden';
-                        
-                        let resolved = false;
-                        
-                        const cleanup = () => {
-                            if (iframe.parentNode) {
-                                iframe.parentNode.removeChild(iframe);
-                            }
-                        };
-                        
-                        const timeout = setTimeout(() => {
-                            if (!resolved) {
-                                resolved = true;
-                                cleanup();
-                                resolve(); // Timeout - assume valid but slow
-                            }
-                        }, 4000);
-                        
-                        iframe.onload = () => {
-                            if (!resolved) {
-                                resolved = true;
-                                clearTimeout(timeout);
-                                cleanup();
-                                resolve(); // Successfully loaded
-                            }
-                        };
-                        
-                        iframe.onerror = () => {
-                            if (!resolved) {
-                                resolved = true;
-                                clearTimeout(timeout);
-                                cleanup();
-                                reject(new Error('Iframe load failed')); // Failed to load
-                            }
-                        };
-                        
-                        document.body.appendChild(iframe);
-                        iframe.src = url;
-                    });
-                } catch (error) {
+                    console.log(`Fetch error for ${url}:`, error.message);
+                    // Network error, CORS error, timeout, or other issue
                     hasError = true;
                 }
 
-                // Method 3: Try fetch with no-cors (will catch network errors)
+                // Method 2: Try iframe load as backup (for CORS-blocked requests)
                 if (!hasError) {
                     try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 3000);
-                        
-                        await fetch(url, {
-                            method: 'HEAD',
-                            mode: 'no-cors',
-                            cache: 'no-cache',
-                            signal: controller.signal
+                        await new Promise((resolve, reject) => {
+                            const iframe = document.createElement('iframe');
+                            iframe.style.position = 'absolute';
+                            iframe.style.left = '-9999px';
+                            iframe.style.width = '1px';
+                            iframe.style.height = '1px';
+                            iframe.style.visibility = 'hidden';
+                            
+                            let resolved = false;
+                            
+                            const cleanup = () => {
+                                if (iframe.parentNode) {
+                                    iframe.parentNode.removeChild(iframe);
+                                }
+                            };
+                            
+                            const timeout = setTimeout(() => {
+                                if (!resolved) {
+                                    resolved = true;
+                                    cleanup();
+                                    resolve(); // Timeout - assume valid but slow
+                                }
+                            }, 4000);
+                            
+                            iframe.onload = () => {
+                                if (!resolved) {
+                                    resolved = true;
+                                    clearTimeout(timeout);
+                                    cleanup();
+                                    resolve(); // Successfully loaded
+                                }
+                            };
+                            
+                            iframe.onerror = () => {
+                                if (!resolved) {
+                                    resolved = true;
+                                    clearTimeout(timeout);
+                                    cleanup();
+                                    reject(new Error('Iframe load failed')); // Failed to load
+                                }
+                            };
+                            
+                            document.body.appendChild(iframe);
+                            iframe.src = url;
                         });
-                        
-                        clearTimeout(timeoutId);
                     } catch (error) {
+                        console.log(`Iframe load failed for ${url}:`, error.message);
                         hasError = true;
                     }
                 }
 
-                // If any method failed, consider it a 404
+                // If any method failed, consider it a 404 or error
                 if (hasError) {
                     urls404.push(url);
-                    console.log(`Detected 404 or error for: ${url}`);
+                    console.log(`Added to 404 list: ${url}`);
                 }
 
                 completed++;
@@ -506,7 +481,8 @@
             checkButton.disabled = false;
             checkButton.textContent = 'Check URLs for 404s';
 
-            console.log(`Total URLs checked: ${totalUrls}, 404s found: ${urls404.length}`);
+            console.log(`Final results - Total URLs: ${totalUrls}, 404s found: ${urls404.length}`);
+            console.log('404 URLs:', urls404);
             showResults();
         }
 
