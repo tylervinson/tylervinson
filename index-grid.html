@@ -1,86 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-    }
-    body {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-    }
-    body button {
-      width: 100%;
-      height: 100%;
-      border: none;
-      padding: 0;
-      margin: 0;
-      position: relative;
-      cursor: pointer;
-      transition: filter 0.3s;
-    }
-    body button .label {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      font-size: 0.9em;
-      color: #ffffff;
-    }
-    body button:hover {
-      filter: brightness(1.1);
-      /* box-shadow: 0px 2px 20px 0px #ffffff;
-      z-index: 99999; */
-    }
-    /* Unique background colors for each button */
-    body button:nth-child(1)  { background-color: #55EFC4; }
-    body button:nth-child(2)  { background-color: #81ECEC; }
-    body button:nth-child(3)  { background-color: #74B9FF; }
-    body button:nth-child(4)  { background-color: #A29BFE; }
-    body button:nth-child(5)  { background-color: #dfe6e9; }
-    body button:nth-child(6)  { background-color: #00B894; }
-    body button:nth-child(7)  { background-color: #00CEC9; }
-    body button:nth-child(8)  { background-color: #0984E3; }
-    body button:nth-child(9)  { background-color: #6C5CE7; }
-    body button:nth-child(10) { background-color: #b2bec3; }
-    body button:nth-child(11) { background-color: #FFEAA7; }
-    body button:nth-child(12) { background-color: #FAB1A0; }
-    body button:nth-child(13) { background-color: #FF7675; }
-    body button:nth-child(14) { background-color: #FD79A8; }
-    body button:nth-child(15) { background-color: #636e72; }
-    body button:nth-child(16) { background-color: #FDCB6E; }
-    body button:nth-child(17) { background-color: #E17055; }
-    body button:nth-child(18) { background-color: #d63031; }
-    body button:nth-child(19) { background-color: #e84393; }
-    body button:nth-child(20) { background-color: #2d3436; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  html, body { margin:0; padding:0; height:100vh; }
+  body {
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    grid-template-rows:repeat(4, 1fr);
+    overflow:hidden;
+    position:relative;
+  }
+  body button {
+    width:100%; height:100%;
+    border:0; margin:0; padding:0; cursor:pointer; position:relative;
+    transition:filter .2s;
+  }
+  .label{ position:absolute; bottom:5px; right:5px; font-size:.9em; color:#fff; }
+  body button:hover{ filter:brightness(1.1); }
 
-    /* body button:nth-child(1)  { background-color: #f5b977; }
-    body button:nth-child(2)  { background-color: #f6b266; }
-    body button:nth-child(3)  { background-color: #f5aa56; }
-    body button:nth-child(4)  { background-color: #f7a14d; }
-    body button:nth-child(5)  { background-color: #f9974d; }
-    body button:nth-child(6)  { background-color: #f6b169; }
-    body button:nth-child(7)  { background-color: #f6a85a; }
-    body button:nth-child(8)  { background-color: #f7a151; }
-    body button:nth-child(9)  { background-color: #f9974d; }
-    body button:nth-child(10) { background-color: #fb8d51; }
-    body button:nth-child(11) { background-color: #f7a65f; }
-    body button:nth-child(12) { background-color: #f89e55; }
-    body button:nth-child(13) { background-color: #f99551; }
-    body button:nth-child(14) { background-color: #fb8d53; }
-    body button:nth-child(15) { background-color: #fd8759; }
-    body button:nth-child(16) { background-color: #f99a5c; }
-    body button:nth-child(17) { background-color: #fa9257; }
-    body button:nth-child(18) { background-color: #fc8c56; }
-    body button:nth-child(19) { background-color: #fb845c; }
-    body button:nth-child(20) { background-color: #fc8162; } */
-  </style>
+  /* colors (unchanged) */
+  body button:nth-child(1){background:#55EFC4;} body button:nth-child(2){background:#81ECEC;}
+  body button:nth-child(3){background:#74B9FF;} body button:nth-child(4){background:#A29BFE;}
+  body button:nth-child(5){background:#dfe6e9;} body button:nth-child(6){background:#00B894;}
+  body button:nth-child(7){background:#00CEC9;} body button:nth-child(8){background:#0984E3;}
+  body button:nth-child(9){background:#6C5CE7;} body button:nth-child(10){background:#b2bec3;}
+  body button:nth-child(11){background:#FFEAA7;} body button:nth-child(12){background:#FAB1A0;}
+  body button:nth-child(13){background:#FF7675;} body button:nth-child(14){background:#FD79A8;}
+  body button:nth-child(15){background:#636e72;} body button:nth-child(16){background:#FDCB6E;}
+  body button:nth-child(17){background:#E17055;} body button:nth-child(18){background:#d63031;}
+  body button:nth-child(19){background:#e84393;} body button:nth-child(20){background:#2d3436;}
+
+  /* Full-height vertical accordion panel */
+  :root { --panel-w: 360px; }
+  .side-panel {
+    position:fixed; top:0; height:100vh; width:var(--panel-w);
+    left:0; background:#111; color:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform .22s ease, opacity .22s ease;
+    opacity:0; z-index:1001; overflow:auto;
+  }
+  .side-panel.open{ transform:scaleX(1); opacity:1; }
+  .side-panel .hd{ display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; font-weight:700; border-bottom:1px solid #222; }
+  .side-panel .bd{ padding:16px; font:14px/1.45 system-ui, sans-serif; }
+  .side-panel .close{ background:transparent; border:0; color:#fff; font-size:20px; cursor:pointer; }
+
+  /* seam accent at the opening edge */
+  .side-panel::before{
+    content:""; position:absolute; top:0; bottom:0; width:2px; left:-2px;
+    background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,0));
+    pointer-events:none;
+  }
+
+  /* backdrop */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:1000;
+  }
+  .backdrop.show{ opacity:1; pointer-events:auto; }
+</style>
 </head>
 <body>
+  <!-- 20 grid cells -->
   <button><span class="label">Button 1</span></button>
   <button><span class="label">Button 2</span></button>
   <button><span class="label">Button 3</span></button>
@@ -101,6 +85,88 @@
   <button><span class="label">Button 18</span></button>
   <button><span class="label">Button 19</span></button>
   <button><span class="label">Button 20</span></button>
-  <!-- Code ID: gridPage_v1.0 -->
+
+  <!-- vertical accordion panel + backdrop -->
+  <div class="backdrop" id="backdrop"></div>
+  <aside id="sidePanel" class="side-panel" aria-hidden="true">
+    <div class="hd">
+      <div id="panelTitle">Details</div>
+      <button class="close" aria-label="Close">&times;</button>
+    </div>
+    <div class="bd" id="panelBody">
+      Replace with real content.
+    </div>
+  </aside>
+
+<script>
+  const panel = document.getElementById('sidePanel');
+  const backdrop = document.getElementById('backdrop');
+  const title = document.getElementById('panelTitle');
+  const bodyEl = document.getElementById('panelBody');
+  const closeBtn = panel.querySelector('.close');
+  let anchorBtn = null;
+
+  document.querySelectorAll('body > button').forEach(btn=>{
+    btn.addEventListener('click', ()=> openFrom(btn));
+  });
+
+  closeBtn.addEventListener('click', closePanel);
+  backdrop.addEventListener('click', closePanel);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+  function openFrom(btn){
+    const r = btn.getBoundingClientRect();
+    const panelW = parseFloat(getComputedStyle(panel).width);
+    const leftDist = r.left;
+    const rightDist = window.innerWidth - r.right;
+    const openToRight = leftDist <= rightDist; // closer to left ⇒ open right
+
+    // place panel so it spans full height and hinges at the button edge
+    let left;
+    if (openToRight){
+      left = r.right;                     // hinge at button’s right edge
+      panel.style.transformOrigin = 'left center';
+      panel.style.setProperty('--seam-x', left + 'px');
+      panel.style.setProperty('--seam-side', 'left');
+    } else {
+      left = r.left - panelW;             // hinge at button’s left edge
+      panel.style.transformOrigin = 'right center';
+      panel.style.setProperty('--seam-x', (left + panelW) + 'px');
+      panel.style.setProperty('--seam-side', 'right');
+    }
+
+    // clamp to viewport
+    left = Math.max(0, Math.min(left, window.innerWidth - panelW));
+    panel.style.left = left + 'px';
+
+    // content
+    const label = btn.querySelector('.label')?.textContent || 'Details';
+    title.textContent = label;
+    bodyEl.innerHTML = `
+      <p>This is the full-height panel for <strong>${label}</strong>.</p>
+      <p>Add any HTML, forms, or media here.</p>
+    `;
+
+    anchorBtn = btn;
+    backdrop.classList.add('show');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+  }
+
+  function closePanel(){
+    if (!panel.classList.contains('open')) return;
+    panel.classList.remove('open');
+    backdrop.classList.remove('show');
+    panel.setAttribute('aria-hidden','true');
+    anchorBtn = null;
+  }
+
+  // keep aligned on resize
+  window.addEventListener('resize', ()=>{
+    if (!anchorBtn || !panel.classList.contains('open')) return;
+    openFrom(anchorBtn);
+  });
+</script>
+<!-- Code ID: gridPage_v2.0 -->
 </body>
 </html>
