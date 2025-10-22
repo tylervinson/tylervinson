@@ -394,22 +394,6 @@
             cursor: pointer;
         }
         
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .radio-item {
-            display: flex;
-            align-items: center;
-        }
-        
-        .radio-item input[type="radio"] {
-            margin-right: 8px;
-            cursor: pointer;
-        }
-        
         .button-group {
             display: flex;
             gap: 15px;
@@ -910,27 +894,6 @@
                     <div class="form-section">
                         <h2>Additional Information</h2>
                         <div class="form-group">
-                            <label>Priority Level</label>
-                            <div class="radio-group">
-                                <div class="radio-item">
-                                    <input type="radio" name="priority" value="critical" id="${pageId}_critical">
-                                    <label for="${pageId}_critical">Critical</label>
-                                </div>
-                                <div class="radio-item">
-                                    <input type="radio" name="priority" value="high" id="${pageId}_high">
-                                    <label for="${pageId}_high">High</label>
-                                </div>
-                                <div class="radio-item">
-                                    <input type="radio" name="priority" value="normal" id="${pageId}_normal" checked>
-                                    <label for="${pageId}_normal">Normal</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Requested Live Date</label>
-                            <input type="date" name="targetDate">
-                        </div>
-                        <div class="form-group">
                             <label>Additional Notes</label>
                             <textarea name="additionalNotes" rows="4" placeholder="Any other context, dependencies, or special instructions..."></textarea>
                         </div>
@@ -1026,12 +989,6 @@
             const nameField = form.querySelector('input[name="submitterName"]');
             if (nameField) {
                 nameField.value = '';
-            }
-            
-            // Reset radio buttons to default (normal priority)
-            const normalRadio = form.querySelector('input[name="priority"][value="normal"]');
-            if (normalRadio) {
-                normalRadio.checked = true;
             }
             
             // Navigate to dashboard after a brief moment
@@ -1138,8 +1095,7 @@
                     status: item.status,
                     submitterName: item.name,
                     contentUpdates: 'Sample updates for AEP 2026',
-                    approvalStatus: item.status === 'completed' ? 'approved' : 'draft',
-                    priority: 'normal'
+                    approvalStatus: item.status === 'completed' ? 'approved' : 'draft'
                 };
                 
                 // Add checkboxes - all for completed, some for in-progress
