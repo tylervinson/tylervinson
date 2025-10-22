@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare AEP Content Tracker - DEMO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 30px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .countdown {
+            display: flex;
+            gap: 15px;
+            align-items: baseline;
+        }
+        
+        .countdown-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-right: 5px;
+        }
+        
+        .countdown-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+        
+        .countdown-number {
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .countdown-unit {
+            font-size: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        
+        .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: #ff9800;
+            height: 100%;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            font-size: 13px;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            padding: 0 20px;
+        }
+        
+        .tab-button {
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            white-space: nowrap;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+        
+        .tab-button.active {
+            color: #333;
+            background: white;
+            border-bottom: 3px solid #333;
+        }
+        
+        .tab-button.completed::after {
+            content: '✓';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #5a6c7d;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .tab-button.in-progress::after {
+            content: '○';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #ff9800;
+            color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .status-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .status-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .status-card.completed {
+            border-color: #5a6c7d;
+            background: #f5f6f7;
+        }
+        
+        .status-card.in-progress {
+            border-color: #ff9800;
+            background: #fff8f0;
+        }
+        
+        .status-card.not-started {
+            border-color: #ddd;
+            background: white;
+        }
+        
+        .status-card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .status-badge.completed {
+            background: #5a6c7d;
+            color: white;
+        }
+        
+        .status-badge.in-progress {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .status-badge.not-started {
+            background: #999;
+            color: white;
+        }
+        
+        .status-details {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .card-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .card-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .view-btn {
+            background: #333;
+            color: white;
+        }
+        
+        .view-btn:hover {
+            background: #222;
+        }
+        
+        .edit-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            background: #5a6268;
+        }
+        
+        /* Form Styles */
+        .info-box {
+            background: #e7e9eb;
+            border-left: 4px solid #333;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #222;
+        }
+        
+        .production-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .production-note strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .form-section {
+            margin-bottom: 35px;
+        }
+        
+        .form-section h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        label .required {
+            color: #d32f2f;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            background: #fafafa;
+        }
+        
+        .checkbox-group {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        
+        .checkbox-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item label {
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-item input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .name-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .name-input-wrapper input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            width: 250px;
+        }
+        
+        .submit-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button[type="submit"] {
+            background: #333;
+            color: white;
+        }
+        
+        button[type="submit"]:hover {
+            background: #222;
+        }
+        
+        .save-draft {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .helper-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .success-message {
+            background: #5a6c7d;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Medicare AEP Content Submission & Tracking</h1>
+            <div class="header-info">
+                <p>Annual Enrollment Period 2026 | Content Deadline: September 18, 2026</p>
+                <div class="countdown">
+                    <span class="countdown-label">Time Remaining:</span>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="days">--</span>
+                        <span class="countdown-unit">Days</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="hours">--</span>
+                        <span class="countdown-unit">Hours</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="minutes">--</span>
+                        <span class="countdown-unit">Minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="seconds">--</span>
+                        <span class="countdown-unit">Seconds</span>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 12 pages completed</div>
+        </div>
+        
+        <div class="tabs" id="tabContainer">
+            <button class="tab-button active" onclick="openTab(event, 'dashboard')">📊 Dashboard</button>
+            <button class="tab-button" onclick="openTab(event, 'homepage')" data-page="homepage">Homepage</button>
+            <button class="tab-button" onclick="openTab(event, 'advantage')" data-page="advantage">Medicare Advantage</button>
+            <button class="tab-button" onclick="openTab(event, 'supplement')" data-page="supplement">Supplement Plans</button>
+            <button class="tab-button" onclick="openTab(event, 'partd')" data-page="partd">Part D (Rx)</button>
+            <button class="tab-button" onclick="openTab(event, 'supplemental')" data-page="supplemental">Supplemental Benefits</button>
+            <button class="tab-button" onclick="openTab(event, 'enrollment')" data-page="enrollment">Enrollment</button>
+            <button class="tab-button" onclick="openTab(event, 'provider')" data-page="provider">Provider Directory</button>
+            <button class="tab-button" onclick="openTab(event, 'pharmacy')" data-page="pharmacy">Pharmacy Locator</button>
+            <button class="tab-button" onclick="openTab(event, 'comparison')" data-page="comparison">Plan Comparison</button>
+            <button class="tab-button" onclick="openTab(event, 'resources')" data-page="resources">FAQs/Resources</button>
+            <button class="tab-button" onclick="openTab(event, 'members')" data-page="members">Current Members</button>
+            <button class="tab-button" onclick="openTab(event, 'contact')" data-page="contact">Contact Us</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Content Submission Overview</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="loadSampleData()" style="padding: 8px 16px; font-size: 14px; background: white; border: 1px solid #ddd; color: #333;">Load Sample Data</button>
+                    <button onclick="resetDemo()" style="padding: 8px 16px; font-size: 14px; background: white; border: 1px solid #ddd; color: #333;">Reset All Data</button>
+                </div>
+            </div>
+            
+            <div class="stats-summary">
+                <div class="stat-box">
+                    <div class="stat-number" id="completedCount">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="inProgressCount">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="notStartedCount">12</div>
+                    <div class="stat-label">Not Started</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid" id="dashboardGrid"></div>
+        </div>
+        
+        <!-- Form Templates for Each Page -->
+        <div id="homepage" class="tab-content"></div>
+        <div id="advantage" class="tab-content"></div>
+        <div id="supplement" class="tab-content"></div>
+        <div id="partd" class="tab-content"></div>
+        <div id="supplemental" class="tab-content"></div>
+        <div id="enrollment" class="tab-content"></div>
+        <div id="provider" class="tab-content"></div>
+        <div id="pharmacy" class="tab-content"></div>
+        <div id="comparison" class="tab-content"></div>
+        <div id="resources" class="tab-content"></div>
+        <div id="members" class="tab-content"></div>
+        <div id="contact" class="tab-content"></div>
+    </div>
+    
+    <script>
+        const pages = [
+            { id: 'homepage', name: 'Medicare Homepage' },
+            { id: 'advantage', name: 'Medicare Advantage Plans' },
+            { id: 'supplement', name: 'Medicare Supplement Plans' },
+            { id: 'partd', name: 'Part D (Prescription Drug)' },
+            { id: 'supplemental', name: 'Supplemental Benefits' },
+            { id: 'enrollment', name: 'Enrollment/How to Enroll' },
+            { id: 'provider', name: 'Provider Directory' },
+            { id: 'pharmacy', name: 'Pharmacy Locator' },
+            { id: 'comparison', name: 'Plan Comparison Tool' },
+            { id: 'resources', name: 'FAQs & Resources' },
+            { id: 'members', name: 'Current Members' },
+            { id: 'contact', name: 'Contact Us' }
+        ];
+        
+        const pageContentItems = {
+            homepage: [
+                'Hero banner image',
+                'AEP enrollment dates and messaging',
+                'Premium callouts',
+                'Star ratings badge',
+                'Summary of Benefits (SOB) document link',
+                'Evidence of Coverage (EOC) document link',
+                'Annual Notice of Change (ANOC) document link',
+                'Enrollment CTA buttons',
+                'Plan highlights section',
+                'Testimonials/reviews (if applicable)'
+            ],
+            advantage: [
+                'Plan overview copy',
+                'Premium pricing table',
+                'Medical benefits summary',
+                'Provider network information',
+                'Coverage area/service area details',
+                'Plan comparison chart',
+                'Member materials PDFs',
+                'Enrollment form link',
+                'Plan brochure',
+                'Benefits at-a-glance graphic'
+            ],
+            supplement: [
+                'Supplement plans overview',
+                'Plan options and pricing',
+                'Coverage details by plan type',
+                'Eligibility requirements',
+                'Enrollment information',
+                'Plan comparison tool',
+                'Member materials',
+                'Application forms',
+                'Contact information for questions'
+            ],
+            partd: [
+                'Formulary document (drug list)',
+                'Drug tier pricing structure',
+                'Pharmacy network list',
+                'Coverage gap (donut hole) information',
+                'Preferred pharmacy details',
+                'Mail-order pharmacy information',
+                'Copay amounts',
+                'Prior authorization requirements',
+                'Drug cost estimator tool'
+            ],
+            supplemental: [
+                'Dental coverage details',
+                'Vision coverage details',
+                'Hearing aid benefits',
+                'Fitness/gym membership benefits',
+                'Over-the-counter (OTC) allowance',
+                'Transportation benefits',
+                'Meal delivery program',
+                'Telehealth services',
+                'In-home support services'
+            ],
+            enrollment: [
+                'Enrollment period dates',
+                'Step-by-step enrollment instructions',
+                'Eligibility checklist',
+                'Online enrollment tool',
+                'Paper enrollment form',
+                'Required documentation list',
+                'Agent/broker locator',
+                'Contact information and hours',
+                'FAQ section'
+            ],
+            provider: [
+                'Provider search tool',
+                'Provider directory PDF',
+                'Network information',
+                'How to find a doctor instructions',
+                'PCP selection requirements',
+                'Specialist referral information',
+                'Out-of-network coverage details',
+                'Provider network updates/changes'
+            ],
+            pharmacy: [
+                'Pharmacy finder tool',
+                'Pharmacy network list PDF',
+                'Preferred pharmacy locations',
+                'Mail-order pharmacy information',
+                'Pharmacy network changes',
+                'How to use your pharmacy benefit',
+                'Prescription transfer information'
+            ],
+            comparison: [
+                'Plan comparison tool functionality',
+                'Side-by-side benefit comparison',
+                'Premium calculator',
+                'Total cost estimator',
+                'Drug cost comparison',
+                'Coverage comparison charts',
+                'Plan decision guide'
+            ],
+            resources: [
+                'AEP FAQs',
+                'Enrollment FAQs',
+                'General Medicare FAQs',
+                'Glossary of terms',
+                'Understanding Medicare guides',
+                'Educational videos',
+                'Downloadable resources',
+                'Medicare rights and protections',
+                'Contact information'
+            ],
+            members: [
+                'Auto-renewal information',
+                'What\'s changing for 2026 summary',
+                'How to switch plans',
+                'Member portal login',
+                'ID card information',
+                'Member services contact',
+                'Claims information',
+                'Benefits usage guides'
+            ],
+            contact: [
+                'Phone numbers',
+                'Email addresses',
+                'Office locations',
+                'Hours of operation (including AEP extended hours)',
+                'Online chat availability',
+                'TTY/TDD numbers',
+                'Language assistance information',
+                'Contact form',
+                'Agent/broker information'
+            ]
+        };
+        
+        function getFormStatus(pageId) {
+            const saved = JSON.parse(localStorage.getItem(`aep_${pageId}`) || '{}');
+            return saved.status || 'not-started';
+        }
+        
+        function setFormStatus(pageId, status) {
+            const saved = JSON.parse(localStorage.getItem(`aep_${pageId}`) || '{}');
+            saved.status = status;
+            localStorage.setItem(`aep_${pageId}`, JSON.stringify(saved));
+            updateDashboard();
+            updateTabStatus();
+        }
+        
+        function updateDashboard() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = '';
+            
+            let completed = 0;
+            let inProgress = 0;
+            let notStarted = 0;
+            
+            pages.forEach(page => {
+                const status = getFormStatus(page.id);
+                const saved = JSON.parse(localStorage.getItem(`aep_${page.id}`) || '{}');
+                
+                if (status === 'completed') completed++;
+                else if (status === 'in-progress') inProgress++;
+                else notStarted++;
+                
+                const card = document.createElement('div');
+                card.className = `status-card ${status}`;
+                
+                let statusText = 'Not Started';
+                let detailText = 'No content submitted yet';
+                
+                if (status === 'completed') {
+                    statusText = 'Completed';
+                    detailText = `<strong>Submitted:</strong> ${saved.submittedDate || 'N/A'}<br><strong>By:</strong> ${saved.submitterName || 'N/A'}`;
+                } else if (status === 'in-progress') {
+                    statusText = 'In Progress';
+                    detailText = `<strong>Last saved:</strong> ${saved.lastSaved || 'N/A'}<br><strong>By:</strong> ${saved.submitterName || 'N/A'}`;
+                }
+                
+                card.innerHTML = `
+                    <span class="status-badge ${status}">${statusText}</span>
+                    <h3>${page.name}</h3>
+                    <div class="status-details">${detailText}</div>
+                    <div class="card-actions">
+                        <button class="view-btn" onclick="openTab(event, '${page.id}')">
+                            ${status === 'completed' ? 'View Details' : 'Start Form'}
+                        </button>
+                        ${status !== 'not-started' ? `<button class="edit-btn" onclick="openTab(event, '${page.id}')">Edit</button>` : ''}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('inProgressCount').textContent = inProgress;
+            document.getElementById('notStartedCount').textContent = notStarted;
+            
+            const progress = (completed / pages.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${completed} of ${pages.length} pages completed`;
+        }
+        
+        function updateTabStatus() {
+            pages.forEach(page => {
+                const status = getFormStatus(page.id);
+                const tabButton = document.querySelector(`[data-page="${page.id}"]`);
+                if (tabButton) {
+                    tabButton.classList.remove('completed', 'in-progress');
+                    if (status === 'completed') {
+                        tabButton.classList.add('completed');
+                    } else if (status === 'in-progress') {
+                        tabButton.classList.add('in-progress');
+                    }
+                }
+            });
+        }
+        
+        function createForm(pageId, pageName) {
+            const items = pageContentItems[pageId] || [];
+            
+            const checkboxes = items.map((item, index) => `
+                <div class="checkbox-item">
+                    <input type="checkbox" name="contentItems" value="${item}" id="${pageId}_item_${index}">
+                    <label for="${pageId}_item_${index}">${item}</label>
+                </div>
+            `).join('');
+            
+            return `
+                <div class="production-note">
+                    <strong>🔗 Production Note:</strong>
+                    In production, this page would link to a Formstack form. Users would fill out the Formstack form, which would then update the SharePoint list and refresh this dashboard automatically.
+                </div>
+                
+                <div class="info-box">
+                    <strong>Instructions:</strong>
+                    Check off all content items that need to be updated for the ${pageName} page for AEP 2026. Upload supporting files and add any notes. In production, this would be handled through Formstack.
+                </div>
+                
+                <form id="form_${pageId}" onsubmit="submitForm(event, '${pageId}')">
+                    <div class="form-section">
+                        <h2>Content Items to Update</h2>
+                        <div class="form-group">
+                            <label>Select all items that need updating:</label>
+                            <div class="checkbox-group">
+                                ${checkboxes}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>Update Details</h2>
+                        <div class="form-group">
+                            <label>Additional details or special instructions</label>
+                            <textarea name="contentUpdates" placeholder="Provide specific details about the updates, any dependencies, or special requirements..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Approval Status</label>
+                            <select name="approvalStatus">
+                                <option value="">Select status...</option>
+                                <option value="approved">Content approved and ready</option>
+                                <option value="pending-cms">Pending CMS approval</option>
+                                <option value="pending-legal">Pending legal review</option>
+                                <option value="pending-compliance">Pending compliance review</option>
+                                <option value="draft">Still in draft</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>Supporting Files</h2>
+                        <div class="form-group">
+                            <label>Upload files (Demo only - files not actually uploaded)</label>
+                            <input type="file" name="files" multiple>
+                            <div class="helper-text">In production, Formstack would handle file uploads and store links in SharePoint.</div>
+                        </div>
+                        <div class="form-group">
+                            <label>File descriptions</label>
+                            <textarea name="fileDescription" rows="3" placeholder="Describe each uploaded file and how it should be used..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>Additional Information</h2>
+                        <div class="form-group">
+                            <label>Priority Level</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="priority" value="critical" id="${pageId}_critical">
+                                    <label for="${pageId}_critical">Critical</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="priority" value="high" id="${pageId}_high">
+                                    <label for="${pageId}_high">High</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="priority" value="normal" id="${pageId}_normal" checked>
+                                    <label for="${pageId}_normal">Normal</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Requested Live Date</label>
+                            <input type="date" name="targetDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Notes</label>
+                            <textarea name="additionalNotes" rows="4" placeholder="Any other context, dependencies, or special instructions..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <div class="name-input-wrapper">
+                            <label style="margin: 0; font-weight: normal;">Your Name:</label>
+                            <input type="text" name="submitterName" placeholder="Enter your name" required>
+                        </div>
+                        <div class="submit-actions">
+                            <button type="button" class="save-draft" onclick="saveDraft('${pageId}')">Save Draft</button>
+                            <button type="submit">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            `;
+        }
+        
+        function saveDraft(pageId) {
+            const form = document.getElementById(`form_${pageId}`);
+            const formData = new FormData(form);
+            const data = { status: 'in-progress', lastSaved: new Date().toLocaleString() };
+            
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            localStorage.setItem(`aep_${pageId}`, JSON.stringify(data));
+            setFormStatus(pageId, 'in-progress');
+            
+            // Show brief success feedback
+            const saveButton = event.target;
+            const originalText = saveButton.textContent;
+            saveButton.textContent = '✓ Saved!';
+            saveButton.style.background = '#5a6c7d';
+            setTimeout(() => {
+                saveButton.textContent = originalText;
+                saveButton.style.background = '';
+            }, 2000);
+        }
+        
+        function submitForm(e, pageId) {
+            e.preventDefault();
+            
+            const form = document.getElementById(`form_${pageId}`);
+            const formData = new FormData(form);
+            
+            // Check if all checkboxes are checked
+            const allCheckboxes = form.querySelectorAll('input[name="contentItems"]');
+            const checkedCheckboxes = form.querySelectorAll('input[name="contentItems"]:checked');
+            const allChecked = allCheckboxes.length === checkedCheckboxes.length && allCheckboxes.length > 0;
+            
+            const data = { 
+                status: allChecked ? 'completed' : 'in-progress',
+                submittedDate: new Date().toLocaleString()
+            };
+            
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            localStorage.setItem(`aep_${pageId}`, JSON.stringify(data));
+            setFormStatus(pageId, allChecked ? 'completed' : 'in-progress');
+            
+            // Clear all fields except checkboxes
+            const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="file"], textarea, select');
+            inputs.forEach(input => {
+                if (input.type === 'select-one') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Explicitly clear the name field
+            const nameField = form.querySelector('input[name="submitterName"]');
+            if (nameField) {
+                nameField.value = '';
+            }
+            
+            // Reset radio buttons to default (normal priority)
+            const normalRadio = form.querySelector('input[name="priority"][value="normal"]');
+            if (normalRadio) {
+                normalRadio.checked = true;
+            }
+            
+            // Show feedback message
+            if (!allChecked) {
+                alert('Form saved as "In Progress". To mark as completed, all content items must be checked.');
+            }
+            
+            // Navigate to dashboard after a brief moment
+            setTimeout(() => {
+                openTab({ currentTarget: document.querySelector('[onclick*="dashboard"]') }, 'dashboard');
+            }, 500);
+        }
+        
+        function loadFormData(pageId) {
+            const saved = JSON.parse(localStorage.getItem(`aep_${pageId}`) || '{}');
+            const form = document.getElementById(`form_${pageId}`);
+            
+            if (form && Object.keys(saved).length > 1) {
+                for (let key in saved) {
+                    if (key === 'status' || key === 'lastSaved' || key === 'submittedDate') continue;
+                    
+                    const elements = form.elements[key];
+                    if (elements) {
+                        if (elements.length > 1) {
+                            const values = Array.isArray(saved[key]) ? saved[key] : [saved[key]];
+                            Array.from(elements).forEach(el => {
+                                if (el.type === 'checkbox') {
+                                    el.checked = values.includes(el.value);
+                                } else if (el.type === 'radio') {
+                                    el.checked = el.value === saved[key];
+                                }
+                            });
+                        } else {
+                            // Skip file inputs - they cannot be set programmatically
+                            if (elements.type !== 'file') {
+                                elements.value = saved[key];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+            
+            if (tabName !== 'dashboard') {
+                loadFormData(tabName);
+            }
+        }
+        
+        function resetDemo() {
+            if (confirm('Reset all demo data? This will clear all forms and start fresh.')) {
+                pages.forEach(page => {
+                    localStorage.removeItem(`aep_${page.id}`);
+                });
+                updateDashboard();
+                updateTabStatus();
+            }
+        }
+        
+        function loadSampleData() {
+            const sampleData = [
+                { page: 'homepage', status: 'completed', name: 'Sarah Johnson', date: '9/15/2025', allChecked: true },
+                { page: 'advantage', status: 'completed', name: 'Mike Chen', date: '9/18/2025', allChecked: true },
+                { 
+                    page: 'supplement', 
+                    status: 'in-progress', 
+                    name: 'Emily Rodriguez', 
+                    date: '9/20/2025', 
+                    allChecked: false,
+                    checkedItems: [
+                        'Supplement plans overview',
+                        'Plan options and pricing',
+                        'Coverage details by plan type',
+                        'Eligibility requirements'
+                    ]
+                },
+                { 
+                    page: 'partd', 
+                    status: 'in-progress', 
+                    name: 'David Kim', 
+                    date: '9/19/2025', 
+                    allChecked: false,
+                    checkedItems: [
+                        'Formulary document (drug list)',
+                        'Drug tier pricing structure',
+                        'Pharmacy network list'
+                    ]
+                },
+                { page: 'enrollment', status: 'completed', name: 'Jennifer Williams', date: '9/16/2025', allChecked: true }
+            ];
+            
+            sampleData.forEach(item => {
+                const data = {
+                    status: item.status,
+                    submitterName: item.name,
+                    contentUpdates: 'Sample updates for AEP 2026',
+                    approvalStatus: item.status === 'completed' ? 'approved' : 'draft',
+                    priority: 'normal'
+                };
+                
+                // Add checkboxes - all for completed, some for in-progress
+                if (item.allChecked && pageContentItems[item.page]) {
+                    data.contentItems = pageContentItems[item.page];
+                } else if (item.checkedItems) {
+                    data.contentItems = item.checkedItems;
+                }
+                
+                if (item.status === 'completed') {
+                    data.submittedDate = item.date;
+                } else {
+                    data.lastSaved = item.date;
+                }
+                
+                localStorage.setItem(`aep_${item.page}`, JSON.stringify(data));
+            });
+            
+            updateDashboard();
+            updateTabStatus();
+        }
+        
+        
+        // Countdown Timer
+        function updateCountdown() {
+            const deadline = new Date('September 18, 2026 23:59:59').getTime();
+            const now = new Date().getTime();
+            const distance = deadline - now;
+            
+            if (distance < 0) {
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                document.getElementById('seconds').textContent = '0';
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            pages.forEach(page => {
+                const container = document.getElementById(page.id);
+                container.innerHTML = createForm(page.id, page.name);
+            });
+            
+            updateDashboard();
+            updateTabStatus();
+            
+            // Start countdown timer
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+    </script>
+</body>
+</html>
