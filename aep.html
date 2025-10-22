@@ -1034,11 +1034,6 @@
                 normalRadio.checked = true;
             }
             
-            // Show feedback message
-            if (!allChecked) {
-                alert('Form saved as "In Progress". To mark as completed, all content items must be checked.');
-            }
-            
             // Navigate to dashboard after a brief moment
             setTimeout(() => {
                 openTab({ currentTarget: document.querySelector('[onclick*="dashboard"]') }, 'dashboard');
