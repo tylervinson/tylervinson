@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Browser Detection Grid – Dark Mode</title>
+
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #1a1a1a;
+    color: #e6e6e6;
+    padding: 20px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    background: #111;
+  }
+
+  th, td {
+    border: 1px solid #333;
+    padding: 10px 12px;
+    text-align: left;
+  }
+
+  th {
+    background: #222;
+    cursor: pointer;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  /* Sorting arrows */
+  th.sort-asc::after { content: " ⌃"; }
+  th.sort-desc::after { content: " ⌄"; }
+
+  tr:nth-child(even) { background: #181818; }
+  tr:nth-child(odd) { background: #141414; }
+
+  /* Divider groups */
+  .divider-row td {
+    background: #242424 !important;
+    color: #ccc;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid #333 !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Color-coding supported/unsupported */
+  .supported { color: #8ef08e; font-weight: bold; }
+  .unsupported { color: #ff7f7f; font-weight: bold; }
+
+</style>
+
+<script>
+function sortTable(colIndex, forcedDirection = null) {
+  const table = document.getElementById("browserGrid");
+  const tbody = table.tBodies[0];
+
+  // Remove divider rows
+  tbody.querySelectorAll(".divider-row").forEach(row => row.remove());
+
+  const rows = Array.from(tbody.querySelectorAll("tr"))
+    .filter(row => !row.classList.contains("divider-row"));
+
+  const th = table.querySelectorAll("th")[colIndex];
+  let isAscending = forcedDirection ? forcedDirection === "asc"
+                                   : !th.classList.contains("sort-asc");
+
+  // Reset arrows
+  table.querySelectorAll("th").forEach(th => th.classList.remove("sort-asc", "sort-desc"));
+
+  // Sort rows
+  rows.sort((a, b) => {
+    let x = a.children[colIndex].textContent.trim().toLowerCase();
+    let y = b.children[colIndex].textContent.trim().toLowerCase();
+
+    // Try numeric comparison
+    let xNum = parseFloat(x.replace(/[^0-9.]/g, ""));
+    let yNum = parseFloat(y.replace(/[^0-9.]/g, ""));
+    const bothNums = !isNaN(xNum) && !isNaN(yNum);
+
+    if (bothNums) return isAscending ? xNum - yNum : yNum - xNum;
+    if (x < y) return isAscending ? -1 : 1;
+    if (x > y) return isAscending ? 1 : -1;
+    return 0;
+  });
+
+  tbody.innerHTML = "";
+
+  // Rebuild table with divider groups
+  let lastVal = null;
+  rows.forEach(row => {
+    const currentVal = row.children[colIndex].textContent.trim();
+
+    if (lastVal !== null && currentVal !== lastVal) {
+      const divider = document.createElement("tr");
+      divider.classList.add("divider-row");
+
+      const td = document.createElement("td");
+      td.colSpan = row.children.length;
+      td.textContent = currentVal;
+
+      divider.appendChild(td);
+      tbody.appendChild(divider);
+    }
+
+    tbody.appendChild(row);
+    lastVal = currentVal;
+  });
+
+  // Add arrow to sorted column
+  th.classList.add(isAscending ? "sort-asc" : "sort-desc");
+}
+
+// Default sort by OS on load
+document.addEventListener("DOMContentLoaded", () => sortTable(0, "asc"));
+</script>
+
+</head>
+<body>
+
+<h2 style="color:white;">Browser Detection & Action Grid</h2>
+
+<table id="browserGrid">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">OS</th>
+      <th onclick="sortTable(1)">Browser</th>
+      <th onclick="sortTable(2)">Version Detection</th>
+      <th onclick="sortTable(3)">Min Version</th>
+      <th onclick="sortTable(4)">Supported</th>
+      <th onclick="sortTable(5)">User Action / Message</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    <!-- iOS -->
+    <tr><td>iOS</td><td>Chrome iOS</td><td>No</td><td>N/A</td><td class="unsupported">No</td><td>No modal shown</td></tr>
+    <tr><td>iOS</td><td>Edge iOS</td><td>No</td><td>N/A</td><td class="unsupported">No</td><td>No modal shown</td></tr>
+    <tr><td>iOS</td><td>Firefox iOS</td><td>No</td><td>N/A</td><td class="unsupported">No</td><td>No modal shown</td></tr>
+    <tr><td>iOS</td><td>Safari iOS</td><td>Partial</td><td>N/A</td><td class="unsupported">No</td><td>No modal shown</td></tr>
+    <tr><td>iOS</td><td>Other</td><td>No</td><td>N/A</td><td class="unsupported">No</td><td>No modal shown</td></tr>
+
+    <!-- Windows -->
+    <tr><td>Windows</td><td>Chrome</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Chrome modal</td></tr>
+    <tr><td>Windows</td><td>Edge</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Edge modal</td></tr>
+    <tr><td>Windows</td><td>Firefox</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>Windows</td><td>Safari</td><td>N/A</td><td>N/A</td><td class="unsupported">No</td><td>Not available</td></tr>
+    <tr><td>Windows</td><td>Opera</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>Windows</td><td>Other</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+
+    <!-- macOS -->
+    <tr><td>macOS</td><td>Chrome</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Chrome modal</td></tr>
+    <tr><td>macOS</td><td>Edge</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Edge modal</td></tr>
+    <tr><td>macOS</td><td>Firefox</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>macOS</td><td>Safari</td><td>Yes</td><td>18</td><td class="supported">Yes</td><td>Show Update Safari modal</td></tr>
+    <tr><td>macOS</td><td>Opera</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>macOS</td><td>Other</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+
+    <!-- Android -->
+    <tr><td>Android</td><td>Chrome</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Chrome modal</td></tr>
+    <tr><td>Android</td><td>Edge</td><td>Yes</td><td>130</td><td class="supported">Yes</td><td>Show Update Edge modal</td></tr>
+    <tr><td>Android</td><td>Firefox</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>Android</td><td>Safari</td><td>N/A</td><td>N/A</td><td class="unsupported">No</td><td>Not available</td></tr>
+    <tr><td>Android</td><td>Opera</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+    <tr><td>Android</td><td>Other</td><td>Yes</td><td>N/A</td><td class="unsupported">No</td><td>Switch to Chrome</td></tr>
+
+  </tbody>
+</table>
+
+</body>
+</html>
