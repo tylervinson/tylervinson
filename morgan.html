@@ -213,7 +213,7 @@ I am a dedicated Computer Science student with a passion for developing scalable
 <section class="py-16 sm:py-24" id="coursework">
 <h2 class="text-text-primary dark:text-slate-100 text-3xl font-semibold tracking-tight text-center mb-4">Coursework & Projects</h2>
 <p class="text-text-secondary dark:text-slate-400 text-center mb-12 max-w-2xl mx-auto">A selection of my academic projects and technical work</p>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 </div>
 </section>
 </div>
@@ -314,7 +314,7 @@ function addProjectCard(project) {
     // Determine background
     let bgStyle = '';
     if (project.thumbnailUrl) {
-        bgStyle = `background-image: url('${project.thumbnailUrl}'); background-size: cover; background-position: center;`;
+        bgStyle = `background-image: url('${project.thumbnailUrl}'); background-size: cover; background-position: top;`;
     } else {
         const gradients = [
             'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
