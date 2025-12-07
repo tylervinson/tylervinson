@@ -22,40 +22,49 @@
         }
     </script>
     <style>
+        .tab-button {
+            border-color: transparent;
+            color: #6B7280;
+        }
         .tab-button.active {
-            border-color: #5B9A9E;
-            color: #5B9A9E;
+            border-color: #5B9A9E !important;
+            color: #5B9A9E !important;
+        }
+        .tab-button:hover:not(.active) {
+            color: #374151;
         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-2xl w-full">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Portfolio Management</h1>
-                <p class="text-gray-600">Update your portfolio content and add projects</p>
-            </div>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header - Fixed at top -->
+        <div class="text-center py-8 bg-white border-b border-gray-200">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Portfolio Management</h1>
+            <p class="text-gray-600">Update your portfolio content and add projects</p>
+        </div>
 
-            <!-- Tabs -->
-            <div class="bg-white rounded-2xl shadow-lg mb-6">
-                <div class="border-b border-gray-200">
-                    <nav class="flex -mb-px">
-                        <button onclick="switchTab('content')" id="contentTab" class="tab-button active py-4 px-6 text-sm font-semibold border-b-2 border-primary text-primary">
-                            Portfolio Content
-                        </button>
-                        <button onclick="switchTab('upload')" id="uploadTab" class="tab-button py-4 px-6 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700">
-                            Upload Project
-                        </button>
-                        <button onclick="switchTab('manage')" id="manageTab" class="tab-button py-4 px-6 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700">
-                            Manage Projects
-                        </button>
-                    </nav>
-                </div>
+        <!-- Tabs - Sticky below header -->
+        <div class="sticky top-0 bg-white border-b border-gray-200 shadow-sm z-10">
+            <div class="max-w-4xl mx-auto">
+                <nav class="flex -mb-px">
+                    <button onclick="switchTab('content')" id="contentTab" class="tab-button active flex-1 py-4 px-6 text-sm font-semibold border-b-2">
+                        Portfolio Content
+                    </button>
+                    <button onclick="switchTab('upload')" id="uploadTab" class="tab-button flex-1 py-4 px-6 text-sm font-semibold border-b-2">
+                        Upload Project
+                    </button>
+                    <button onclick="switchTab('manage')" id="manageTab" class="tab-button flex-1 py-4 px-6 text-sm font-semibold border-b-2">
+                        Manage Projects
+                    </button>
+                </nav>
             </div>
+        </div>
 
-            <!-- Content Tab -->
-            <div id="contentSection" class="bg-white rounded-2xl shadow-lg p-8">
+        <!-- Content Area - Fixed height -->
+        <div class="flex-1 py-8 px-4">
+            <div class="max-w-2xl mx-auto">
+                <!-- Content Tab -->
+                <div id="contentSection" class="bg-white rounded-2xl shadow-lg p-8 min-h-[600px]">
                 <h2 class="text-xl font-bold text-gray-900 mb-6">Update Portfolio Text</h2>
                 
                 <form id="contentForm" class="space-y-6">
@@ -116,7 +125,7 @@
             </div>
 
             <!-- Upload Tab -->
-            <div id="uploadSection" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+            <div id="uploadSection" class="bg-white rounded-2xl shadow-lg p-8 min-h-[600px] hidden">
                 <h2 class="text-xl font-bold text-gray-900 mb-6">Upload New Project</h2>
                 
                 <form id="uploadForm" class="space-y-6">
@@ -228,7 +237,7 @@
             </div>
 
             <!-- Manage Projects Tab -->
-            <div id="manageSection" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+            <div id="manageSection" class="bg-white rounded-2xl shadow-lg p-8 min-h-[600px] hidden">
                 <h2 class="text-xl font-bold text-gray-900 mb-2">Manage Projects</h2>
                 <p class="text-gray-600 text-sm mb-6">View and delete projects from your portfolio</p>
                 
@@ -238,13 +247,14 @@
                     <p class="text-gray-500 text-center py-8">Loading projects...</p>
                 </div>
             </div>
-
-            <!-- Link back to portfolio -->
-            <div class="text-center mt-6">
-                <a href="morgan.html" class="text-sm text-gray-600 hover:text-primary transition">
-                    ← Back to Portfolio
-                </a>
             </div>
+        </div>
+
+        <!-- Link back to portfolio - Fixed at bottom -->
+        <div class="text-center py-6 border-t border-gray-200 bg-white">
+            <a href="morgan-vinson-portfolio.html" class="text-sm text-gray-600 hover:text-primary transition">
+                ← Back to Portfolio
+            </a>
         </div>
     </div>
 
@@ -253,7 +263,7 @@
         // Configure PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // =================================================================
+       // =================================================================
         // ENCRYPTED GITHUB CONFIGURATION
         // =================================================================
         // The token is encrypted. Your wife enters a password to decrypt it.
@@ -325,7 +335,7 @@
             const password = prompt('Enter admin password:');
             if (!password) {
                 alert('Password required to access admin panel');
-                window.location.href = 'morgan.html';
+                window.location.href = 'morgan-vinson-portfolio.html';
                 return;
             }
             
@@ -334,7 +344,7 @@
             
             if (!config) {
                 alert('Incorrect password');
-                window.location.href = 'morgan.html';
+                window.location.href = 'morgan-vinson-portfolio.html';
                 return;
             }
             
