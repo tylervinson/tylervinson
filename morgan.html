@@ -69,7 +69,7 @@
 <section class="py-20 sm:py-32">
 <div class="text-center">
 <h1 class="text-text-primary dark:text-slate-50 text-5xl sm:text-6xl font-semibold tracking-tight mb-6">Welcome to my portfolio!</h1>
-<p class="text-text-secondary dark:text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+<p class="text-text-secondary dark:text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">Aspiring Software Engineer focused on building innovative solutions.</p>
 <a class="inline-flex items-center justify-center px-8 py-3.5 bg-primary hover:bg-primary-dark text-white text-base font-medium rounded-lg transition-colors shadow-sm" href="#coursework">
 <span>View Coursework</span>
 <span class="ml-2">→</span>
@@ -80,12 +80,12 @@
 <section class="py-16 sm:py-24" id="about">
 <div class="flex flex-col md:flex-row items-center gap-12 bg-white dark:bg-slate-900 rounded-xl p-8 sm:p-12 shadow-sm">
 <div class="w-40 h-40 md:w-48 md:h-48 flex-shrink-0">
-<img class="w-full h-full object-cover rounded-full shadow-md" alt="Morgan Vinson" src="morgan.png"/>
+<img class="w-full h-full object-cover rounded-full shadow-md" alt="Morgan Vinson" src="file:///mnt/user-data/uploads/IMG_20210601_1224438781.jpg"/>
 </div>
 <div class="flex flex-col gap-4 text-center md:text-left">
 <h2 class="text-text-primary dark:text-slate-100 text-2xl font-semibold tracking-tight">About Me</h2>
 <p class="text-text-secondary dark:text-slate-300 text-base leading-relaxed">
-Integer vel magna nec purus auctor aliquam. Nunc felis ex, vestibulum id ultrices quis, ullamcorper sit amet ante. Suspendisse vitae magna porta lectus vehicula tempus vestibulum vitae felis. Duis odio lorem, iaculis eget pellentesque eget, cursus ut urna. Sed pellentesque, dolor at facilisis vestibulum, eros orci porta quam, ac mollis dui massa laoreet sem. Nulla mollis enim at augue lobortis, eget porttitor magna pellentesque.
+I am a dedicated Computer Science student with a passion for developing scalable software and working with cutting-edge technologies. My academic journey has equipped me with a strong foundation in algorithms, data structures, and machine learning. I am proficient in languages such as Python, Java, and C++, and I am always eager to learn new skills. My goal is to contribute to impactful projects that solve real-world problems and push the boundaries of technology.
 </p>
 </div>
 </div>
@@ -166,9 +166,40 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 // Load projects when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    loadPortfolioContent();
     loadProjectsFromJSON();
     loadProjectsFromLocalStorage();
 });
+
+// Load portfolio content (hero text, about text)
+async function loadPortfolioContent() {
+    try {
+        const response = await fetch('portfolio-content.json');
+        if (response.ok) {
+            const content = await response.json();
+            
+            // Update hero heading
+            if (content.heroHeading) {
+                const heroHeading = document.querySelector('section.py-20 h1');
+                if (heroHeading) heroHeading.textContent = content.heroHeading;
+            }
+            
+            // Update hero subheading
+            if (content.heroSubheading) {
+                const heroSubheading = document.querySelector('section.py-20 p');
+                if (heroSubheading) heroSubheading.textContent = content.heroSubheading;
+            }
+            
+            // Update about text
+            if (content.aboutText) {
+                const aboutText = document.querySelector('#about p');
+                if (aboutText) aboutText.textContent = content.aboutText;
+            }
+        }
+    } catch (error) {
+        console.log('No portfolio-content.json found, using default content');
+    }
+}
 
 // Load projects from projects.json (static projects added via admin page)
 async function loadProjectsFromJSON() {
