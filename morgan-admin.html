@@ -47,6 +47,9 @@
                         <button onclick="switchTab('upload')" id="uploadTab" class="tab-button py-4 px-6 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700">
                             Upload Project
                         </button>
+                        <button onclick="switchTab('manage')" id="manageTab" class="tab-button py-4 px-6 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Manage Projects
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -114,6 +117,8 @@
 
             <!-- Upload Tab -->
             <div id="uploadSection" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Upload New Project</h2>
+                
                 <form id="uploadForm" class="space-y-6">
                     <div>
                         <label for="projectTitle" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -222,6 +227,18 @@
                 </div>
             </div>
 
+            <!-- Manage Projects Tab -->
+            <div id="manageSection" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">Manage Projects</h2>
+                <p class="text-gray-600 text-sm mb-6">View and delete projects from your portfolio</p>
+                
+                <div id="manageStatus" class="hidden p-4 rounded-lg mb-4"></div>
+                
+                <div id="projectsList" class="space-y-4">
+                    <p class="text-gray-500 text-center py-8">Loading projects...</p>
+                </div>
+            </div>
+
             <!-- Link back to portfolio -->
             <div class="text-center mt-6">
                 <a href="morgan-vinson-portfolio.html" class="text-sm text-gray-600 hover:text-primary transition">
@@ -308,7 +325,7 @@
             const password = prompt('Enter admin password:');
             if (!password) {
                 alert('Password required to access admin panel');
-                window.location.href = 'morgan.html';
+                window.location.href = 'morgan-vinson-portfolio.html';
                 return;
             }
             
@@ -330,19 +347,32 @@
         function switchTab(tab) {
             const contentSection = document.getElementById('contentSection');
             const uploadSection = document.getElementById('uploadSection');
+            const manageSection = document.getElementById('manageSection');
             const contentTab = document.getElementById('contentTab');
             const uploadTab = document.getElementById('uploadTab');
+            const manageTab = document.getElementById('manageTab');
 
+            // Hide all sections
+            contentSection.classList.add('hidden');
+            uploadSection.classList.add('hidden');
+            manageSection.classList.add('hidden');
+            
+            // Remove active from all tabs
+            contentTab.classList.remove('active');
+            uploadTab.classList.remove('active');
+            manageTab.classList.remove('active');
+
+            // Show selected section
             if (tab === 'content') {
                 contentSection.classList.remove('hidden');
-                uploadSection.classList.add('hidden');
                 contentTab.classList.add('active');
-                uploadTab.classList.remove('active');
-            } else {
-                contentSection.classList.add('hidden');
+            } else if (tab === 'upload') {
                 uploadSection.classList.remove('hidden');
-                contentTab.classList.remove('active');
                 uploadTab.classList.add('active');
+            } else if (tab === 'manage') {
+                manageSection.classList.remove('hidden');
+                manageTab.classList.add('active');
+                loadProjectsForManagement();
             }
         }
 
@@ -702,6 +732,173 @@
             document.getElementById('successMessage').classList.add('hidden');
             document.getElementById('progressContainer').classList.add('hidden');
             document.getElementById('uploadStatus').classList.add('hidden');
+        }
+
+        // ===================================================================
+        // MANAGE PROJECTS FUNCTIONS
+        // ===================================================================
+
+        async function loadProjectsForManagement() {
+            const GITHUB_CONFIG = getGitHubConfig();
+            if (!GITHUB_CONFIG) {
+                document.getElementById('projectsList').innerHTML = '<p class="text-red-600 text-center py-8">Configuration error</p>';
+                return;
+            }
+
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/projects.json?ref=${GITHUB_CONFIG.branch}`;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `token ${GITHUB_CONFIG.token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const projects = JSON.parse(atob(data.content));
+                    
+                    if (projects.length === 0) {
+                        document.getElementById('projectsList').innerHTML = '<p class="text-gray-500 text-center py-8">No projects yet</p>';
+                        return;
+                    }
+
+                    displayProjects(projects);
+                } else {
+                    document.getElementById('projectsList').innerHTML = '<p class="text-gray-500 text-center py-8">No projects yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                document.getElementById('projectsList').innerHTML = '<p class="text-red-600 text-center py-8">Error loading projects</p>';
+            }
+        }
+
+        function displayProjects(projects) {
+            const container = document.getElementById('projectsList');
+            
+            if (projects.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No projects yet</p>';
+                return;
+            }
+
+            container.innerHTML = projects.map(project => `
+                <div class="border border-gray-200 rounded-lg p-4 flex items-center gap-4 hover:border-primary transition">
+                    <div class="flex-shrink-0 w-24 h-24 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-900 truncate">${escapeHtml(project.title)}</h3>
+                        <p class="text-sm text-gray-600 line-clamp-2 mb-2">${escapeHtml(project.description)}</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${project.tags.map(tag => `
+                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">${escapeHtml(tag)}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button 
+                            onclick="deleteProject(${project.id})"
+                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition flex items-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+                return;
+            }
+
+            const GITHUB_CONFIG = getGitHubConfig();
+            if (!GITHUB_CONFIG) {
+                showManageStatus('Configuration error', 'error');
+                return;
+            }
+
+            try {
+                showManageStatus('Deleting project...', 'info');
+
+                // Get current projects.json
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/projects.json?ref=${GITHUB_CONFIG.branch}`;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `token ${GITHUB_CONFIG.token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load projects');
+                }
+
+                const data = await response.json();
+                const currentSHA = data.sha;
+                let projects = JSON.parse(atob(data.content));
+
+                // Remove the project
+                const projectToDelete = projects.find(p => p.id === projectId);
+                projects = projects.filter(p => p.id !== projectId);
+
+                // Update projects.json
+                const newContent = btoa(JSON.stringify(projects, null, 2));
+                
+                const updateResponse = await fetch(url.split('?')[0], {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: `Delete project: ${projectToDelete.title}`,
+                        content: newContent,
+                        sha: currentSHA,
+                        branch: GITHUB_CONFIG.branch
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('Failed to update projects.json');
+                }
+
+                showManageStatus('✓ Project deleted successfully!', 'success');
+                
+                // Reload the list
+                setTimeout(() => {
+                    loadProjectsForManagement();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Delete error:', error);
+                showManageStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showManageStatus(message, type) {
+            const statusDiv = document.getElementById('manageStatus');
+            
+            const colors = {
+                success: 'bg-green-50 text-green-800 border border-green-200',
+                error: 'bg-red-50 text-red-800 border border-red-200',
+                info: 'bg-blue-50 text-blue-800 border border-blue-200'
+            };
+            
+            statusDiv.className = `p-4 rounded-lg ${colors[type] || colors.info}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
