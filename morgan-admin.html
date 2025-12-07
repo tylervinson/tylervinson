@@ -236,15 +236,95 @@
         // Configure PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-         // =================================================================
-        // GITHUB CONFIGURATION - UPDATE THESE VALUES
         // =================================================================
-        const GITHUB_CONFIG = {
-            token: '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',           // Replace with your actual token
-            repo: 'tylervinson/tylervinson',                 // Replace with your repo (e.g., 'morganvinson/portfolio')
-            branch: 'main'                              // Usually 'main' or 'gh-pages'
+        // ENCRYPTED GITHUB CONFIGURATION
+        // =================================================================
+        // The token is encrypted. Your wife enters a password to decrypt it.
+        // Password: (you'll set this below)
+        const ENCRYPTED_CONFIG = {
+            encryptedToken: 'U2FsdGVkX1+CgcCODEAVRoKNQghLBYfV1EqKRpFNVUNBFYFPzIEKgQYAFVWWwYrLA==',  // Will be replaced
+            repo: 'tylervinson/tylervinson',
+            branch: 'main',
+            password: null  // Will be set after user enters it
         };
         // =================================================================
+
+        // Simple encryption/decryption functions
+        function encryptToken(token, password) {
+            // Simple XOR encryption (not super secure but prevents casual viewing)
+            let result = '';
+            for (let i = 0; i < token.length; i++) {
+                result += String.fromCharCode(token.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+            }
+            return btoa(result); // Base64 encode
+        }
+
+        function decryptToken(encrypted, password) {
+            try {
+                const decoded = atob(encrypted); // Base64 decode
+                let result = '';
+                for (let i = 0; i < decoded.length; i++) {
+                    result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+                }
+                return result;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Get GitHub config (decrypt token if needed)
+        function getGitHubConfig() {
+            if (!ENCRYPTED_CONFIG.password) {
+                return null;
+            }
+            
+            const token = decryptToken(ENCRYPTED_CONFIG.encryptedToken, ENCRYPTED_CONFIG.password);
+            if (!token || !token.startsWith('ghp_')) {
+                return null;
+            }
+            
+            return {
+                token: token,
+                repo: ENCRYPTED_CONFIG.repo,
+                branch: ENCRYPTED_CONFIG.branch
+            };
+        }
+
+        // Prompt for password on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if password is already saved in session
+            const savedPassword = sessionStorage.getItem('adminPassword');
+            
+            if (savedPassword) {
+                ENCRYPTED_CONFIG.password = savedPassword;
+                const config = getGitHubConfig();
+                if (config) {
+                    loadExistingContent();
+                    return;
+                }
+            }
+            
+            // Prompt for password
+            const password = prompt('Enter admin password:');
+            if (!password) {
+                alert('Password required to access admin panel');
+                window.location.href = 'morgan-vinson-portfolio.html';
+                return;
+            }
+            
+            ENCRYPTED_CONFIG.password = password;
+            const config = getGitHubConfig();
+            
+            if (!config) {
+                alert('Incorrect password');
+                window.location.href = 'morgan-vinson-portfolio.html';
+                return;
+            }
+            
+            // Save password for this session
+            sessionStorage.setItem('adminPassword', password);
+            loadExistingContent();
+        });
 
         // Tab switching
         function switchTab(tab) {
@@ -270,7 +350,8 @@
         document.addEventListener('DOMContentLoaded', loadExistingContent);
 
         async function loadExistingContent() {
-            if (GITHUB_CONFIG.token === 'YOUR_GITHUB_TOKEN_HERE') return;
+            const GITHUB_CONFIG = getGitHubConfig();
+            if (!GITHUB_CONFIG) return;
 
             try {
                 const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/portfolio-content.json?ref=${GITHUB_CONFIG.branch}`;
@@ -295,8 +376,9 @@
         document.getElementById('contentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (GITHUB_CONFIG.token === 'YOUR_GITHUB_TOKEN_HERE' || GITHUB_CONFIG.repo === 'username/repo-name') {
-                showContentStatus('⚠️ GitHub configuration is not set up. Please edit the admin-upload.html file and add your GitHub credentials.', 'error');
+            const GITHUB_CONFIG = getGitHubConfig();
+            if (!GITHUB_CONFIG) {
+                showContentStatus('⚠️ Configuration error. Please reload the page and enter your password.', 'error');
                 return;
             }
 
@@ -311,7 +393,7 @@
                     lastUpdated: new Date().toISOString()
                 };
 
-                await updateContentJSON(content);
+                await updateContentJSON(content, GITHUB_CONFIG);
                 showContentStatus('✓ Portfolio content updated successfully! Changes will appear in ~1 minute.', 'success');
             } catch (error) {
                 showContentStatus('Error: ' + error.message, 'error');
@@ -320,15 +402,15 @@
             }
         });
 
-        async function updateContentJSON(content) {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/portfolio-content.json`;
+        async function updateContentJSON(content, config) {
+            const url = `https://api.github.com/repos/${config.repo}/contents/portfolio-content.json`;
             
             let currentSHA = null;
             
             // Get current file SHA if it exists
             try {
-                const response = await fetch(url + `?ref=${GITHUB_CONFIG.branch}`, {
-                    headers: { 'Authorization': `token ${GITHUB_CONFIG.token}` }
+                const response = await fetch(url + `?ref=${config.branch}`, {
+                    headers: { 'Authorization': `token ${config.token}` }
                 });
                 
                 if (response.ok) {
@@ -345,14 +427,14 @@
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Authorization': `token ${config.token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     message: 'Update portfolio content',
                     content: newContent,
                     sha: currentSHA,
-                    branch: GITHUB_CONFIG.branch
+                    branch: config.branch
                 })
             });
             
@@ -383,9 +465,9 @@
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Validate GitHub config
-            if (GITHUB_CONFIG.token === 'YOUR_GITHUB_TOKEN_HERE' || GITHUB_CONFIG.repo === 'username/repo-name') {
-                showStatus('⚠️ GitHub configuration is not set up. Please edit the admin-upload.html file and add your GitHub credentials.', 'error');
+            const GITHUB_CONFIG = getGitHubConfig();
+            if (!GITHUB_CONFIG) {
+                showStatus('⚠️ Configuration error. Please reload the page and enter your password.', 'error');
                 return;
             }
             
@@ -412,7 +494,7 @@
             document.getElementById('uploadForm').classList.add('opacity-50', 'pointer-events-none');
             
             try {
-                await uploadToGitHub(file, title, description, tags);
+                await uploadToGitHub(file, title, description, tags, GITHUB_CONFIG);
             } catch (error) {
                 showStatus('Upload failed: ' + error.message, 'error');
                 console.error('Upload error:', error);
@@ -422,7 +504,7 @@
             }
         });
 
-        async function uploadToGitHub(file, title, description, tags) {
+        async function uploadToGitHub(file, title, description, tags, config) {
             updateProgress(0, 'Reading PDF file...');
             
             // Convert file to base64
@@ -442,7 +524,7 @@
             updateProgress(40, 'Uploading PDF to repository...');
             
             // Upload PDF
-            await uploadFileToGitHub(pdfPath, pdfContent, `Add PDF: ${title}`);
+            await uploadFileToGitHub(pdfPath, pdfContent, `Add PDF: ${title}`, config);
             
             // Upload thumbnail
             let thumbnailPath = null;
@@ -450,7 +532,7 @@
                 updateProgress(60, 'Uploading thumbnail...');
                 thumbnailPath = `thumbnails/${timestamp}_${safeName.replace('.pdf', '.jpg')}`;
                 const thumbnailContent = thumbnail.split(',')[1];
-                await uploadFileToGitHub(thumbnailPath, thumbnailContent, `Add thumbnail for: ${title}`);
+                await uploadFileToGitHub(thumbnailPath, thumbnailContent, `Add thumbnail for: ${title}`, config);
             }
             
             updateProgress(80, 'Updating projects list...');
@@ -467,7 +549,7 @@
             };
             
             // Update projects.json
-            await updateProjectsJSON(project);
+            await updateProjectsJSON(project, config);
             
             updateProgress(100, 'Complete!');
             
@@ -479,19 +561,19 @@
             }, 500);
         }
 
-        async function uploadFileToGitHub(path, content, message) {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/${path}`;
+        async function uploadFileToGitHub(path, content, message, config) {
+            const url = `https://api.github.com/repos/${config.repo}/contents/${path}`;
             
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Authorization': `token ${config.token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     message: message,
                     content: content,
-                    branch: GITHUB_CONFIG.branch
+                    branch: config.branch
                 })
             });
             
@@ -503,17 +585,17 @@
             return await response.json();
         }
 
-        async function updateProjectsJSON(newProject) {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.repo}/contents/projects.json`;
+        async function updateProjectsJSON(newProject, config) {
+            const url = `https://api.github.com/repos/${config.repo}/contents/projects.json`;
             
             let currentSHA = null;
             let currentProjects = [];
             
             // Get current file
             try {
-                const response = await fetch(url + `?ref=${GITHUB_CONFIG.branch}`, {
+                const response = await fetch(url + `?ref=${config.branch}`, {
                     headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Authorization': `token ${config.token}`,
                     }
                 });
                 
@@ -536,14 +618,14 @@
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
+                    'Authorization': `token ${config.token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     message: `Add project: ${newProject.title}`,
                     content: newContent,
                     sha: currentSHA,
-                    branch: GITHUB_CONFIG.branch
+                    branch: config.branch
                 })
             });
             
