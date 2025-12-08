@@ -151,38 +151,53 @@
         ---------------------------- */
         main {
             flex: 1;
+        }
+
+        /* Section wrapper for full-width backgrounds */
+        .section-wrapper {
+            width: 100%;
+        }
+
+        /* Background color options for sections */
+        .bg-white {
+            background-color: var(--white);
+        }
+
+        .bg-light {
+            background-color: var(--background-light);
+        }
+
+        .bg-subtle {
+            background-color: #FAFAFA;
+        }
+
+        .bg-primary-subtle {
+            background-color: rgba(91, 154, 158, 0.05);
+        }
+
+        .section-inner {
+            margin: 0 auto;
+            max-width: 64rem;
             padding: 3rem 1.5rem;
         }
 
         @media (min-width: 640px) {
-            main {
+            .section-inner {
                 padding: 5rem 3rem;
             }
         }
 
         @media (min-width: 1024px) {
-            main {
+            .section-inner {
                 padding: 5rem 6rem;
             }
-        }
-
-        .content-inner {
-            margin: 0 auto;
-            max-width: 64rem;
         }
 
         /* ---------------------------
            HERO SECTION
         ---------------------------- */
         .hero-section {
-            padding: 5rem 0;
             text-align: center;
-        }
-
-        @media (min-width: 640px) {
-            .hero-section {
-                padding: 8rem 0;
-            }
         }
 
         .hero-section h1 {
@@ -229,16 +244,6 @@
         /* ---------------------------
            ABOUT SECTION
         ---------------------------- */
-        .about-section {
-            padding: 4rem 0;
-        }
-
-        @media (min-width: 640px) {
-            .about-section {
-                padding: 6rem 0;
-            }
-        }
-
         .about-content {
             display: flex;
             flex-direction: column;
@@ -305,16 +310,6 @@
         /* ---------------------------
            PROJECTS SECTION
         ---------------------------- */
-        .projects-section {
-            padding: 4rem 0;
-        }
-
-        @media (min-width: 640px) {
-            .projects-section {
-                padding: 6rem 0;
-            }
-        }
-
         .section-header {
             text-align: center;
             margin-bottom: 3rem;
@@ -452,10 +447,11 @@
         footer {
             background-color: var(--white);
             border-top: 1px solid var(--border-color);
-            margin-top: 5rem;
         }
 
         .footer-content {
+            margin: 0 auto;
+            max-width: 64rem;
             padding: 2.5rem 1.5rem;
         }
 
@@ -531,50 +527,59 @@
 
                 <!-- Main Content -->
                 <main>
-                    <div class="content-inner">
-                        <!-- Hero Section -->
-                        <section class="hero-section">
-                            <h1>Welcome to my portfolio!</h1>
-                            <p>Aspiring Software Engineer focused on building innovative solutions.</p>
-                            <a href="#coursework" class="cta-button">
-                                <span>View Coursework</span>
-                                <span>→</span>
-                            </a>
-                        </section>
+                    <!-- Hero Section -->
+                    <div class="section-wrapper bg-white">
+                        <div class="section-inner">
+                            <section class="hero-section">
+                                <h1>Welcome to my portfolio!</h1>
+                                <p>Aspiring Software Engineer focused on building innovative solutions.</p>
+                                <a href="#coursework" class="cta-button">
+                                    <span>View Coursework</span>
+                                    <span>→</span>
+                                </a>
+                            </section>
+                        </div>
+                    </div>
 
-                        <!-- About Me Section -->
-                        <section class="about-section" id="about">
-                            <div class="about-content">
-                                <div class="about-image">
-                                    <img src="morgan.jpg" alt="Morgan Vinson">
+                    <!-- About Me Section -->
+                    <div class="section-wrapper bg-light" id="about">
+                        <div class="section-inner">
+                            <section class="about-section">
+                                <div class="about-content">
+                                    <div class="about-image">
+                                        <img src="morgan.jpg" alt="Morgan Vinson">
+                                    </div>
+                                    <div class="about-text">
+                                        <h2>About Me</h2>
+                                        <p>I am a dedicated Computer Science student with a passion for developing scalable software and working with cutting-edge technologies. My academic journey has equipped me with a strong foundation in algorithms, data structures, and machine learning. I am proficient in languages such as Python, Java, and C++, and I am always eager to learn new skills. My goal is to contribute to impactful projects that solve real-world problems and push the boundaries of technology.</p>
+                                    </div>
                                 </div>
-                                <div class="about-text">
-                                    <h2>About Me</h2>
-                                    <p>I am a dedicated Computer Science student with a passion for developing scalable software and working with cutting-edge technologies. My academic journey has equipped me with a strong foundation in algorithms, data structures, and machine learning. I am proficient in languages such as Python, Java, and C++, and I am always eager to learn new skills. My goal is to contribute to impactful projects that solve real-world problems and push the boundaries of technology.</p>
-                                </div>
-                            </div>
-                        </section>
+                            </section>
+                        </div>
+                    </div>
 
-                        <!-- Coursework & Projects Section -->
-                        <section class="projects-section" id="coursework">
-                            <div class="section-header">
-                                <h2>Coursework & Projects</h2>
-                                <p>A selection of my academic projects and technical work</p>
-                            </div>
-                            <div class="projects-grid">
-                                <!-- Projects will be dynamically loaded here -->
-                            </div>
-                        </section>
+                    <!-- Coursework & Projects Section -->
+                    <div class="section-wrapper bg-white" id="coursework">
+                        <div class="section-inner">
+                            <section class="projects-section">
+                                <div class="section-header">
+                                    <h2>Coursework & Projects</h2>
+                                    <p>A selection of my academic projects and technical work</p>
+                                </div>
+                                <div class="projects-grid">
+                                    <!-- Projects will be dynamically loaded here -->
+                                </div>
+                            </section>
+                        </div>
                     </div>
                 </main>
 
                 <!-- Footer -->
                 <footer id="contact">
-                    <div class="max-width-container">
-                        <div class="footer-content">
-                            <div class="footer-inner">
-                                <p>© 2024 Morgan Vinson. All Rights Reserved.</p>
-                                <div class="social-links">
+                    <div class="footer-content">
+                        <div class="footer-inner">
+                            <p>© 2024 Morgan Vinson. All Rights Reserved.</p>
+                            <div class="social-links">
                                     <a href="#" aria-label="LinkedIn">
                                         <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                                     </a>
