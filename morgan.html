@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
-    <style>
+<style>
         
         /* ---------------------------
            CSS RESET & BASE
@@ -150,7 +150,6 @@
         ---------------------------- */
         main {
             flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         /* Section wrapper for full-width backgrounds */
@@ -245,13 +244,17 @@
            ABOUT SECTION
         ---------------------------- */
         #about{
-    
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .about-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 3rem;
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
 
         @media (min-width: 768px) {
@@ -268,16 +271,17 @@
         }
 
         @media (min-width: 768px) {
-    .about-image {
-        width: 32rem;
-        height: 42rem;
-    }
-}
+            .about-image {
+                width: 12rem;
+                height: 12rem;
+            }
+        }
 
         .about-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 50%;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
@@ -530,8 +534,8 @@
                     <div class="section-wrapper" style="padding: 100px 0;background: linear-gradient(to right, #FDB99B, #CF8BF3, #A770EF);">
                         <div class="section-inner">
                             <section class="hero-section">
-                                <h1>Welcome to my portfolio!</h1>
-                                <p>Aspiring Software Engineer focused on building innovative solutions.</p>
+                                <h1>Morgan Vinson Research Archive</h1>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
                                 <a href="#coursework" class="cta-button">
                                     <span>View Coursework</span>
                                     <span>→</span>
@@ -541,7 +545,7 @@
                     </div>
 
                     <!-- About Me Section -->
-                    <div class="section-wrapper" id="about">
+                    <div class="section-wrapper bg-light" id="about">
                         <div class="section-inner">
                             <section class="about-section">
                                 <div class="about-content">
@@ -550,7 +554,7 @@
                                     </div>
                                     <div class="about-text">
                                         <h2>About Me</h2>
-                                        <p>I am a dedicated Computer Science student with a passion for developing scalable software and working with cutting-edge technologies. My academic journey has equipped me with a strong foundation in algorithms, data structures, and machine learning. I am proficient in languages such as Python, Java, and C++, and I am always eager to learn new skills. My goal is to contribute to impactful projects that solve real-world problems and push the boundaries of technology.</p>
+                                        <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur rutrum, lectus sed faucibus scelerisque, ipsum quam dapibus velit, et elementum turpis orci convallis est. In urna sem, lacinia vitae justo vitae, laoreet accumsan diam. Pellentesque efficitur vehicula libero, vel venenatis ex tempor eu. </p>
                                     </div>
                                 </div>
                             </section>
