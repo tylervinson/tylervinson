@@ -150,6 +150,7 @@
         ---------------------------- */
         main {
             flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         /* Section wrapper for full-width backgrounds */
@@ -244,17 +245,13 @@
            ABOUT SECTION
         ---------------------------- */
         #about{
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
         }
         .about-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 3rem;
-            background-color: var(--white);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
 
         @media (min-width: 768px) {
@@ -271,17 +268,16 @@
         }
 
         @media (min-width: 768px) {
-            .about-image {
-                width: 12rem;
-                height: 12rem;
-            }
-        }
+    .about-image {
+        width: 32rem;
+        height: 42rem;
+    }
+}
 
         .about-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 50%;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
@@ -531,7 +527,7 @@
                 <!-- Main Content -->
                 <main>
                     <!-- Hero Section -->
-                    <div class="section-wrapper bg-white">
+                    <div class="section-wrapper" style="padding: 100px 0;background: linear-gradient(to right, #FDB99B, #CF8BF3, #A770EF);">
                         <div class="section-inner">
                             <section class="hero-section">
                                 <h1>Welcome to my portfolio!</h1>
@@ -545,7 +541,7 @@
                     </div>
 
                     <!-- About Me Section -->
-                    <div class="section-wrapper bg-light" id="about">
+                    <div class="section-wrapper" id="about">
                         <div class="section-inner">
                             <section class="about-section">
                                 <div class="about-content">
