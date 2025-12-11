@@ -47,5 +47,16 @@
     "pdfUrl": "pdfs/1765417511354_CCC_Midterm_Presentation_-_Team_1.pdf",
     "thumbnailUrl": "thumbnails/1765417511354_CCC_Midterm_Presentation_-_Team_1.jpg",
     "uploadDate": "2025-12-11"
+  },
+  {
+    "id": 1765417590407,
+    "title": "Mindmap",
+    "description": "This is a photo capture of the mindmap our group developed during ARE546.",
+    "tags": [
+      "PDF"
+    ],
+    "pdfUrl": "pdfs/1765417590407_Morgan_Vinson_ARE546_Mind_Map.pdf",
+    "thumbnailUrl": "thumbnails/1765417590407_Morgan_Vinson_ARE546_Mind_Map.jpg",
+    "uploadDate": "2025-12-11"
   }
 ]
