@@ -53,5 +53,16 @@
     "pdfUrl": "pdfs/1765422819520_Morgan_Vinson_ARE546_Final_Paper.pdf",
     "thumbnailUrl": "thumbnails/1765422819520_Morgan_Vinson_ARE546_Final_Paper.jpg",
     "uploadDate": "2025-12-11"
+  },
+  {
+    "id": 1765422883730,
+    "title": "ARE546 Final Project Presentation Notes",
+    "description": "These are the notes for the ARE546 final project presentation.",
+    "tags": [
+      "PDF"
+    ],
+    "pdfUrl": "pdfs/1765422883730_Morgan_Vinson_ARE546_Final_Project_Presentation_Notes.pdf",
+    "thumbnailUrl": "thumbnails/1765422883730_Morgan_Vinson_ARE546_Final_Project_Presentation_Notes.jpg",
+    "uploadDate": "2025-12-11"
   }
 ]
