@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Broadcaster</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      text-align: center; 
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    video { 
+      width: 100%; 
+      max-width: 640px; 
+      border: 2px solid #333; 
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    button { 
+      margin: 10px; 
+      padding: 12px 24px; 
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .stop-btn {
+      background: #f44336;
+    }
+    .stop-btn:hover {
+      background: #da190b;
+    }
+    .status {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.waiting {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    .room-info {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e7f3ff;
+      border-radius: 5px;
+    }
+    .room-code {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0066cc;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📹 Camera Broadcaster</h1>
+    <p>Stream your laptop camera to remote viewers</p>
+    
+    <button id="startBtn" onclick="startBroadcast()">Start Broadcasting</button>
+    <button id="stopBtn" onclick="stopBroadcast()" style="display:none;" class="stop-btn">Stop Broadcasting</button>
+    
+    
+    <div id="status" class="status waiting" style="display:none;"></div>
+    
+    <video id="localVideo" autoplay playsinline muted></video>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+  <script>
+    let peer;
+    let localStream;
+    let activeConnections = [];
+
+    // Set your permanent room code here
+    const PERMANENT_ROOM_CODE = 'cam';
+
+    async function startBroadcast() {
+      try {
+        // Get camera stream
+        const constraints = {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: true
+        };
+        
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('localVideo').srcObject = localStream;
+        
+        // Create peer connection with permanent room code
+        peer = new Peer(PERMANENT_ROOM_CODE, {
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+          }
+        });
+
+        peer.on('open', (id) => {
+          document.getElementById('status').textContent = '⏳ Waiting for viewers to connect...';
+          document.getElementById('status').style.display = 'block';
+          document.getElementById('startBtn').style.display = 'none';
+          document.getElementById('stopBtn').style.display = 'inline-block';
+        });
+
+        peer.on('call', (call) => {
+          // Answer the call with our stream
+          call.answer(localStream);
+          activeConnections.push(call);
+          
+          document.getElementById('status').textContent = `✅ Connected! ${activeConnections.length} viewer(s) watching`;
+          document.getElementById('status').className = 'status connected';
+          
+          call.on('close', () => {
+            activeConnections = activeConnections.filter(c => c !== call);
+            if (activeConnections.length === 0) {
+              document.getElementById('status').textContent = '⏳ Waiting for viewers to connect...';
+              document.getElementById('status').className = 'status waiting';
+            } else {
+              document.getElementById('status').textContent = `✅ Connected! ${activeConnections.length} viewer(s) watching`;
+            }
+          });
+        });
+
+        peer.on('error', (err) => {
+          console.error('PeerJS error:', err);
+          alert('Connection error: ' + err.message);
+        });
+
+      } catch (err) {
+        alert("Error accessing camera: " + err.message);
+      }
+    }
+
+    function stopBroadcast() {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (peer) {
+        peer.destroy();
+      }
+      activeConnections = [];
+      
+      document.getElementById('localVideo').srcObject = null;
+      document.getElementById('status').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('stopBtn').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

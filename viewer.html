@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Viewer</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      text-align: center; 
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    video { 
+      width: 100%; 
+      max-width: 640px; 
+      border: 2px solid #333; 
+      margin-top: 20px;
+      border-radius: 5px;
+      background: #000;
+    }
+    button { 
+      margin: 10px; 
+      padding: 12px 24px; 
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #2196F3;
+      color: white;
+    }
+    button:hover {
+      background: #0b7dda;
+    }
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .disconnect-btn {
+      background: #f44336;
+    }
+    .disconnect-btn:hover {
+      background: #da190b;
+    }
+    input {
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      width: 200px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    .status {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.connecting {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📺 Camera Viewer</h1>
+    <p>Enter the room code to view the camera stream</p>
+    
+    <div id="connectSection">
+      <input type="text" id="roomCodeInput" placeholder="ROOM CODE" maxlength="6" value="MYCAM1">
+      <br>
+      <button onclick="connectToStream()">Connect</button>
+      <p style="font-size: 12px; color: #666; margin-top: 10px;">
+        Default room code is pre-filled. Change if needed.
+      </p>
+    </div>
+    
+    <div id="disconnectSection" style="display:none;">
+      <button onclick="disconnect()" class="disconnect-btn">Disconnect</button>
+    </div>
+    
+    <div id="status" class="status" style="display:none;"></div>
+    
+    <video id="remoteVideo" autoplay playsinline></video>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+  <script>
+    let peer;
+    let call;
+
+    function connectToStream() {
+      const roomCode = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+      
+      if (!roomCode) {
+        alert('Please enter a room code');
+        return;
+      }
+
+      document.getElementById('status').textContent = '🔄 Connecting...';
+      document.getElementById('status').className = 'status connecting';
+      document.getElementById('status').style.display = 'block';
+
+      // Create peer
+      peer = new Peer({
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ]
+        }
+      });
+
+      peer.on('open', (id) => {
+        // Call the broadcaster
+        call = peer.call(roomCode, null);
+
+        call.on('stream', (remoteStream) => {
+          document.getElementById('remoteVideo').srcObject = remoteStream;
+          document.getElementById('status').textContent = '✅ Connected! Viewing live stream';
+          document.getElementById('status').className = 'status connected';
+          document.getElementById('connectSection').style.display = 'none';
+          document.getElementById('disconnectSection').style.display = 'block';
+        });
+
+        call.on('close', () => {
+          disconnect();
+        });
+
+        call.on('error', (err) => {
+          document.getElementById('status').textContent = '❌ Connection error: ' + err.message;
+          document.getElementById('status').className = 'status error';
+        });
+      });
+
+      peer.on('error', (err) => {
+        let errorMsg = 'Connection failed';
+        if (err.type === 'peer-unavailable') {
+          errorMsg = 'Room code not found. Please check the code and try again.';
+        } else {
+          errorMsg = 'Error: ' + err.message;
+        }
+        document.getElementById('status').textContent = '❌ ' + errorMsg;
+        document.getElementById('status').className = 'status error';
+      });
+    }
+
+    function disconnect() {
+      if (call) {
+        call.close();
+      }
+      if (peer) {
+        peer.destroy();
+      }
+      
+      document.getElementById('remoteVideo').srcObject = null;
+      document.getElementById('status').style.display = 'none';
+      document.getElementById('connectSection').style.display = 'block';
+      document.getElementById('disconnectSection').style.display = 'none';
+      document.getElementById('roomCodeInput').value = '';
+    }
+
+    // Allow Enter key to connect
+    document.getElementById('roomCodeInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        connectToStream();
+      }
+    });
+  </script>
+</body>
+</html>
