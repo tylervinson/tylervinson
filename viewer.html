@@ -54,7 +54,6 @@
       border: 2px solid #ddd;
       border-radius: 5px;
       width: 200px;
-      text-transform: uppercase;
       letter-spacing: 2px;
       text-align: center;
     }
@@ -84,7 +83,7 @@
     <p>Enter the room code to view the camera stream</p>
     
     <div id="connectSection">
-      <input type="text" id="roomCodeInput" placeholder="ROOM CODE" maxlength="6" value="MYCAM1">
+      <input type="text" id="roomCodeInput" placeholder="ROOM CODE" maxlength="6" value="cam">
       <br>
       <button onclick="connectToStream()">Connect</button>
       <p style="font-size: 12px; color: #666; margin-top: 10px;">
@@ -107,7 +106,7 @@
     let call;
 
     function connectToStream() {
-      const roomCode = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+      const roomCode = document.getElementById('roomCodeInput').value.trim();
       
       if (!roomCode) {
         alert('Please enter a room code');
@@ -129,25 +128,39 @@
       });
 
       peer.on('open', (id) => {
-        // Call the broadcaster
-        call = peer.call(roomCode, null);
+        // Create a dummy stream to call the broadcaster
+        // The broadcaster will send us their stream
+        navigator.mediaDevices.getUserMedia({ video: false, audio: false })
+          .catch(() => {
+            // If we can't get media, create an empty stream
+            return new MediaStream();
+          })
+          .then((stream) => {
+            // Call the broadcaster with our (empty) stream
+            call = peer.call(roomCode, stream);
 
-        call.on('stream', (remoteStream) => {
-          document.getElementById('remoteVideo').srcObject = remoteStream;
-          document.getElementById('status').textContent = '✅ Connected! Viewing live stream';
-          document.getElementById('status').className = 'status connected';
-          document.getElementById('connectSection').style.display = 'none';
-          document.getElementById('disconnectSection').style.display = 'block';
-        });
+            if (call) {
+              call.on('stream', (remoteStream) => {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+                document.getElementById('status').textContent = '✅ Connected! Viewing live stream';
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('connectSection').style.display = 'none';
+                document.getElementById('disconnectSection').style.display = 'block';
+              });
 
-        call.on('close', () => {
-          disconnect();
-        });
+              call.on('close', () => {
+                disconnect();
+              });
 
-        call.on('error', (err) => {
-          document.getElementById('status').textContent = '❌ Connection error: ' + err.message;
-          document.getElementById('status').className = 'status error';
-        });
+              call.on('error', (err) => {
+                document.getElementById('status').textContent = '❌ Connection error: ' + err.message;
+                document.getElementById('status').className = 'status error';
+              });
+            } else {
+              document.getElementById('status').textContent = '❌ Failed to connect. Broadcaster may not be online.';
+              document.getElementById('status').className = 'status error';
+            }
+          });
       });
 
       peer.on('error', (err) => {
