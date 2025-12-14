@@ -80,22 +80,9 @@
 <body>
   <div class="container">
     <h1>📺 Camera Viewer</h1>
-    <p>Enter the room code to view the camera stream</p>
+    <p>Connecting to camera stream...</p>
     
-    <div id="connectSection">
-      <input type="text" id="roomCodeInput" placeholder="ROOM CODE" maxlength="6" value="cam">
-      <br>
-      <button onclick="connectToStream()">Connect</button>
-      <p style="font-size: 12px; color: #666; margin-top: 10px;">
-        Default room code is pre-filled. Change if needed.
-      </p>
-    </div>
-    
-    <div id="disconnectSection" style="display:none;">
-      <button onclick="disconnect()" class="disconnect-btn">Disconnect</button>
-    </div>
-    
-    <div id="status" class="status" style="display:none;"></div>
+    <div id="status" class="status connecting" style="display:block;">🔄 Connecting...</div>
     
     <video id="remoteVideo" autoplay playsinline></video>
   </div>
@@ -104,15 +91,14 @@
   <script>
     let peer;
     let call;
+    const ROOM_CODE = 'cam';
+
+    // Auto-connect on page load
+    window.addEventListener('load', () => {
+      connectToStream();
+    });
 
     function connectToStream() {
-      const roomCode = document.getElementById('roomCodeInput').value.trim();
-      
-      if (!roomCode) {
-        alert('Please enter a room code');
-        return;
-      }
-
       document.getElementById('status').textContent = '🔄 Connecting...';
       document.getElementById('status').className = 'status connecting';
       document.getElementById('status').style.display = 'block';
@@ -137,19 +123,18 @@
           })
           .then((stream) => {
             // Call the broadcaster with our (empty) stream
-            call = peer.call(roomCode, stream);
+            call = peer.call(ROOM_CODE, stream);
 
             if (call) {
               call.on('stream', (remoteStream) => {
                 document.getElementById('remoteVideo').srcObject = remoteStream;
                 document.getElementById('status').textContent = '✅ Connected! Viewing live stream';
                 document.getElementById('status').className = 'status connected';
-                document.getElementById('connectSection').style.display = 'none';
-                document.getElementById('disconnectSection').style.display = 'block';
               });
 
               call.on('close', () => {
-                disconnect();
+                document.getElementById('status').textContent = '❌ Connection closed. Refresh to reconnect.';
+                document.getElementById('status').className = 'status error';
               });
 
               call.on('error', (err) => {
@@ -166,7 +151,7 @@
       peer.on('error', (err) => {
         let errorMsg = 'Connection failed';
         if (err.type === 'peer-unavailable') {
-          errorMsg = 'Room code not found. Please check the code and try again.';
+          errorMsg = 'Broadcaster is not online. Make sure broadcasting is started.';
         } else {
           errorMsg = 'Error: ' + err.message;
         }
