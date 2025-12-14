@@ -159,28 +159,6 @@
         document.getElementById('status').className = 'status error';
       });
     }
-
-    function disconnect() {
-      if (call) {
-        call.close();
-      }
-      if (peer) {
-        peer.destroy();
-      }
-      
-      document.getElementById('remoteVideo').srcObject = null;
-      document.getElementById('status').style.display = 'none';
-      document.getElementById('connectSection').style.display = 'block';
-      document.getElementById('disconnectSection').style.display = 'none';
-      document.getElementById('roomCodeInput').value = '';
-    }
-
-    // Allow Enter key to connect
-    document.getElementById('roomCodeInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        connectToStream();
-      }
-    });
   </script>
 </body>
 </html>
