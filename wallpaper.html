@@ -326,7 +326,9 @@
     document.getElementById('downloadBtn').addEventListener('click', downloadCanvasAsImage);
 
     function refreshPage() {
-      location.reload();
+      colors = colorPalettes[0]; // AZ Blue palette
+      isChristmasMode = false;
+      drawGrid();
     }
 
     setCanvasSize();
