@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Viewer</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      text-align: center; 
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    video { 
+      width: 100%; 
+      max-width: 640px; 
+      border: 2px solid #333; 
+      margin-top: 20px;
+      border-radius: 5px;
+      background: #000;
+    }
+    button { 
+      margin: 10px; 
+      padding: 12px 24px; 
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #2196F3;
+      color: white;
+    }
+    button:hover {
+      background: #0b7dda;
+    }
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .disconnect-btn {
+      background: #f44336;
+    }
+    .disconnect-btn:hover {
+      background: #da190b;
+    }
+    input {
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      width: 200px;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    .status {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.connecting {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📺 Camera Viewer</h1>
+    <p>Connecting to camera stream...</p>
+    
+    <div id="status" class="status connecting" style="display:block;">🔄 Connecting...</div>
+    
+    <video id="remoteVideo" autoplay playsinline></video>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+  <script>
+    let peer;
+    let call;
+    const ROOM_CODE = 'cam';
+    let retryCount = 0;
+    const MAX_RETRIES = 10;
+
+    // Auto-connect on page load
+    window.addEventListener('load', () => {
+      connectToStream();
+    });
+
+    function connectToStream() {
+      retryCount++;
+      
+      if (retryCount > MAX_RETRIES) {
+        document.getElementById('status').textContent = '❌ Failed to connect after multiple attempts. Make sure the broadcaster is running.';
+        document.getElementById('status').className = 'status error';
+        return;
+      }
+
+      document.getElementById('status').textContent = `🔄 Connecting... (attempt ${retryCount}/${MAX_RETRIES})`;
+      document.getElementById('status').className = 'status connecting';
+      document.getElementById('status').style.display = 'block';
+
+      // Create peer
+      peer = new Peer({
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ]
+        },
+        debug: 2 // Add debug logging
+      });
+
+      peer.on('open', (id) => {
+        console.log('Peer connection opened, calling broadcaster...');
+        
+        // Create a dummy stream to call the broadcaster
+        navigator.mediaDevices.getUserMedia({ video: false, audio: false })
+          .catch(() => {
+            return new MediaStream();
+          })
+          .then((stream) => {
+            // Call the broadcaster with our (empty) stream
+            call = peer.call(ROOM_CODE, stream);
+
+            if (call) {
+              console.log('Call initiated to:', ROOM_CODE);
+              
+              call.on('stream', (remoteStream) => {
+                console.log('Received remote stream!');
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+                document.getElementById('status').textContent = '✅ Connected! Viewing live stream';
+                document.getElementById('status').className = 'status connected';
+                retryCount = 0; // Reset retry count on success
+              });
+
+              call.on('close', () => {
+                console.log('Call closed');
+                document.getElementById('status').textContent = '❌ Connection closed. Refresh to reconnect.';
+                document.getElementById('status').className = 'status error';
+              });
+
+              call.on('error', (err) => {
+                console.error('Call error:', err);
+                document.getElementById('status').textContent = '❌ Connection error: ' + err.message;
+                document.getElementById('status').className = 'status error';
+              });
+            } else {
+              console.error('Failed to create call');
+              document.getElementById('status').textContent = '❌ Failed to create call. Retrying...';
+              document.getElementById('status').className = 'status error';
+              setTimeout(() => {
+                peer.destroy();
+                connectToStream();
+              }, 2000);
+            }
+          });
+      });
+
+      peer.on('error', (err) => {
+        console.error('Peer error:', err);
+        let errorMsg = 'Connection failed';
+        
+        if (err.type === 'peer-unavailable') {
+          errorMsg = 'Broadcaster is not online. Retrying...';
+          // Retry after a delay
+          setTimeout(() => {
+            peer.destroy();
+            connectToStream();
+          }, 3000);
+        } else if (err.type === 'network') {
+          errorMsg = 'Network error. Retrying...';
+          setTimeout(() => {
+            peer.destroy();
+            connectToStream();
+          }, 3000);
+        } else {
+          errorMsg = 'Error: ' + err.type + ' - ' + err.message;
+        }
+        
+        document.getElementById('status').textContent = '❌ ' + errorMsg;
+        document.getElementById('status').className = 'status error';
+      });
+
+      peer.on('disconnected', () => {
+        console.log('Peer disconnected');
+        document.getElementById('status').textContent = '⚠️ Disconnected. Attempting to reconnect...';
+        document.getElementById('status').className = 'status connecting';
+        peer.reconnect();
+      });
+    }
+  </script>
+</body>
+</html>
