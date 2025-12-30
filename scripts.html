@@ -140,6 +140,39 @@
             margin-bottom: 16px;
             white-space: pre-wrap;
             word-break: break-all;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .script-code.collapsed {
+            max-height: 0;
+            padding: 0 16px;
+            border: none;
+            margin-bottom: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .expand-btn:hover {
+            color: #1a1a1a;
+        }
+
+        .expand-btn.collapsed {
+            transform: rotate(-90deg);
         }
 
         .script-footer {
@@ -405,14 +438,17 @@
                     ${filtered.map(script => `
                         <div class="script-card">
                             <div class="script-header">
-                                <h3 class="script-title">${escapeHtml(script.name)}</h3>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <button class="expand-btn" onclick="toggleScript('${escapeHtml(script.id)}')">▼</button>
+                                    <h3 class="script-title">${escapeHtml(script.name)}</h3>
+                                </div>
                                 <div class="script-actions">
                                     <button class="btn btn-small" onclick="copyScript('${escapeHtml(script.id)}')">Copy</button>
                                     <button class="btn btn-small btn-danger" onclick="deleteScript('${escapeHtml(script.id)}')">Delete</button>
                                 </div>
                             </div>
                             <p class="script-description">${escapeHtml(script.description)}</p>
-                            <div class="script-code">${escapeHtml(script.code)}</div>
+                            <div class="script-code" id="code-${escapeHtml(script.id)}">${escapeHtml(script.code)}</div>
                             <div class="script-footer">
                                 ${script.demo ? `<a href="${escapeHtml(script.demo)}" target="_blank" class="btn btn-small">View Demo</a>` : '<span></span>'}
                                 <span style="font-size: 12px; color: #999;">${new Date(script.date).toLocaleDateString()}</span>
@@ -462,6 +498,20 @@
                 navigator.clipboard.writeText(script.code).then(() => {
                     showNotification('Code copied to clipboard');
                 });
+            }
+        };
+
+        // Toggle script visibility
+        window.toggleScript = function(id) {
+            const codeElement = document.getElementById(`code-${id}`);
+            const button = event.target;
+            
+            if (codeElement.classList.contains('collapsed')) {
+                codeElement.classList.remove('collapsed');
+                button.classList.remove('collapsed');
+            } else {
+                codeElement.classList.add('collapsed');
+                button.classList.add('collapsed');
             }
         };
 
