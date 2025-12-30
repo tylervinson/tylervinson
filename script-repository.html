@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Repository</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            font-weight: 400;
+        }
+
+        .tab:hover {
+            color: #1a1a1a;
+        }
+
+        .tab.active {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #1a1a1a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .scripts-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .script-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .script-card:hover {
+            border-color: #999;
+        }
+
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .script-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1a1a1a;
+            letter-spacing: -0.01em;
+        }
+
+        .script-actions {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .script-description {
+            color: #666;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .script-code {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            padding: 16px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .script-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 400;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-danger {
+            color: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        .btn-danger:hover {
+            background: #fef5f5;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1a1a1a;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            font-size: 13px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .search-box {
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .script-header {
+                flex-direction: column;
+            }
+
+            .script-actions {
+                width: 100%;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Script Repository</h1>
+            <p class="subtitle">Organize and manage your code snippets</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="browse">Browse Scripts</button>
+            <button class="tab" data-tab="add">Add Script</button>
+        </div>
+
+        <div id="browse-tab" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search scripts...">
+            </div>
+            <div id="scripts-container"></div>
+        </div>
+
+        <div id="add-tab" class="tab-content">
+            <form id="script-form">
+                <div class="form-group">
+                    <label for="script-name">Script Name</label>
+                    <input type="text" id="script-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="script-description">Description</label>
+                    <input type="text" id="script-description" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="script-code">Code</label>
+                    <textarea id="script-code" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="script-demo">Demo Link (optional)</label>
+                    <input type="text" id="script-demo" placeholder="https://...">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Add Script</button>
+                    <button type="button" class="btn" id="clear-form">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Storage management
+        const STORAGE_KEY = 'scripts-data';
+
+        function loadScripts() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveScripts(scripts) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+        }
+
+        // Tab management
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+
+        // Notification system
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Render scripts
+        function renderScripts(filter = '') {
+            const scripts = loadScripts();
+            const container = document.getElementById('scripts-container');
+            
+            const filtered = scripts.filter(script => 
+                script.name.toLowerCase().includes(filter.toLowerCase()) ||
+                script.description.toLowerCase().includes(filter.toLowerCase()) ||
+                script.code.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">{ }</div>
+                        <p>${filter ? 'No scripts found' : 'No scripts yet. Add your first script to get started.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="scripts-grid">
+                    ${filtered.map(script => `
+                        <div class="script-card">
+                            <div class="script-header">
+                                <h3 class="script-title">${escapeHtml(script.name)}</h3>
+                                <div class="script-actions">
+                                    <button class="btn btn-small" onclick="copyScript('${escapeHtml(script.id)}')">Copy</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteScript('${escapeHtml(script.id)}')">Delete</button>
+                                </div>
+                            </div>
+                            <p class="script-description">${escapeHtml(script.description)}</p>
+                            <div class="script-code">${escapeHtml(script.code)}</div>
+                            <div class="script-footer">
+                                ${script.demo ? `<a href="${escapeHtml(script.demo)}" target="_blank" class="btn btn-small">View Demo</a>` : '<span></span>'}
+                                <span style="font-size: 12px; color: #999;">${new Date(script.date).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Add script
+        document.getElementById('script-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const scripts = loadScripts();
+            const newScript = {
+                id: Date.now().toString(),
+                name: document.getElementById('script-name').value,
+                description: document.getElementById('script-description').value,
+                code: document.getElementById('script-code').value,
+                demo: document.getElementById('script-demo').value,
+                date: new Date().toISOString()
+            };
+            
+            scripts.unshift(newScript);
+            saveScripts(scripts);
+            
+            document.getElementById('script-form').reset();
+            renderScripts();
+            showNotification('Script added successfully');
+            
+            // Switch to browse tab
+            document.querySelector('.tab[data-tab="browse"]').click();
+        });
+
+        // Clear form
+        document.getElementById('clear-form').addEventListener('click', () => {
+            document.getElementById('script-form').reset();
+        });
+
+        // Copy script
+        window.copyScript = function(id) {
+            const scripts = loadScripts();
+            const script = scripts.find(s => s.id === id);
+            
+            if (script) {
+                navigator.clipboard.writeText(script.code).then(() => {
+                    showNotification('Code copied to clipboard');
+                });
+            }
+        };
+
+        // Delete script
+        window.deleteScript = function(id) {
+            if (confirm('Are you sure you want to delete this script?')) {
+                let scripts = loadScripts();
+                scripts = scripts.filter(s => s.id !== id);
+                saveScripts(scripts);
+                renderScripts();
+                showNotification('Script deleted');
+            }
+        };
+
+        // Search
+        document.getElementById('search').addEventListener('input', (e) => {
+            renderScripts(e.target.value);
+        });
+
+        // Helper function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initial render
+        renderScripts();
+    </script>
+</body>
+</html>
