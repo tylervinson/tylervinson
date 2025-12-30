@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formstack Documents HTML Theme Generator</title>
-     <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -286,7 +286,7 @@
         <div class="container">
             <h1>Formstack Documents<br>HTML Theme Generator</h1>
             <p class="subtitle">Create custom HTML themes for your Formstack documents with ease</p>
-            <a href="Formstack-Template-Maker-v1.zip" class="download-button" styles="<a href="#" class="download-button" style="
+           <a href="Formstack-Template-Maker-v1.zip" class="download-button" styles="<a href="#" class="download-button" style="
     font-size: 14px;
     font-weight: 600;
     line-height: 14px;
@@ -356,15 +356,15 @@ color: rgb(11, 59, 96);
                                 <div class="step-number">4</div>
                                 <div class="step-content">
                                     <h3>Install the Extension</h3>
-                                    <p>Drag and drop the downloaded file onto the extensions page, or click "Load unpacked" and select the extension folder.</p>
+                                    <p>Click "Load unpacked" and select the unzipped extension folder.</p>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-number">5</div>
                                 <div class="step-content">
-                                    <h3>Confirm Installation</h3>
-                                    <p>The extension icon should now appear in your Chrome toolbar. You're ready to start creating custom themes.</p>
+                                    <h3>Pin Extension</h3>
+                                    <p>Once pinned the extension icon should appear in your Chrome toolbar.</p>
                                 </div>
                             </div>
                         </div>
@@ -393,58 +393,44 @@ color: rgb(11, 59, 96);
                             <div class="step">
                                 <div class="step-number">1</div>
                                 <div class="step-content">
-                                    <h3>Open Your Document</h3>
-                                    <p>Navigate to your Formstack Documents dashboard and open the document you want to customize.</p>
+                                    <h3>Retrieve the Form URL</h3>
+                                    <p>In Formstack, navigate to the form and copy the Formstack form URL.</p>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-number">2</div>
                                 <div class="step-content">
-                                    <h3>Launch the Theme Generator</h3>
-                                    <p>Click the extension icon in your Chrome toolbar to activate the HTML Theme Generator interface.</p>
+                                    <h3>Create the Initial Template</h3>
+                                    <p>In Formstack Documents, open the document and go to the Document Builder tab. From the input dropdown, select “Web,” paste the copied form URL, and click Import Form. Save the document.</p>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
-                                    <h3>Customize Your Theme</h3>
-                                    <p>Use the visual editor to modify colors, fonts, spacing, and layout options for your document theme.</p>
+                                    <h3>Generate the HTML Template</h3>
+                                    <p>Open the browser extension and click “Scan Current Page.” The extension will locate the Initial Template and the associated markup. Click “Snipped” to load the markup into the conversion box, then click “Generate Template.” This produces a fully functional HTML template with all fields and labels, along with JSON form data for testing, specific to the form.</p>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-number">4</div>
                                 <div class="step-content">
-                                    <h3>Preview Your Changes</h3>
-                                    <p>Review your theme in real-time with the preview panel to ensure it meets your requirements.</p>
+                                    <h3>Implement the HTML Template</h3>
+                                    <p>Copy the generated HTML from the extension. In Formstack Documents, open the Advanced HTML Editor, replace the existing HTML with the copied content, and save the document.</p>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-number">5</div>
                                 <div class="step-content">
-                                    <h3>Export and Apply</h3>
-                                    <p>Once satisfied, export the generated HTML theme code and apply it to your Formstack document.</p>
+                                    <h3>Test the HTML Template</h3>
+                                    <p>Copy the JSON data from the extension. In Formstack Documents, open the Test tab, scroll to the bottom, paste the JSON into the final input field, and click Test Document.</p>
                                 </div>
                             </div>
 
-                            <div class="step">
-                                <div class="step-number">6</div>
-                                <div class="step-content">
-                                    <h3>Test Your Theme</h3>
-                                    <p>Generate a test document to verify your theme renders correctly with actual data.</p>
-                                </div>
-                            </div>
-
-                            <div class="step">
-                                <div class="step-number">7</div>
-                                <div class="step-content">
-                                    <h3>Save and Share</h3>
-                                    <p>Save your custom theme for future use and share it with your team members if needed.</p>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -458,7 +444,7 @@ color: rgb(11, 59, 96);
         </div>
     </footer>
 
-  <script>
+    <script>
         function toggleContent(section, type) {
             const contentWrapper = document.getElementById(`${section}-content`);
             const buttons = contentWrapper.previousElementSibling.querySelectorAll('.toggle-button');
