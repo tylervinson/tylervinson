@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Script Repository</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -180,8 +181,7 @@
             border: none;
             display: block;
         }
-        
-
+ 
         .code-toggle {
             display: flex;
             gap: 8px;
@@ -393,42 +393,56 @@
         <div id="auth-section">
             <header>
                 <h1>Script Repository</h1>
-                <p class="subtitle">Connect to GitHub to manage your scripts</p>
+                <p class="subtitle">Enter your password to access scripts</p>
             </header>
 
-            <div style="max-width: 500px; margin: 0 auto;">
+            <div style="max-width: 400px; margin: 0 auto;">
                 <div class="auth-card">
-                    <h2 style="font-size: 20px; font-weight: 500; margin-bottom: 24px;">GitHub Configuration</h2>
-                    
                     <div class="form-group">
-                        <label for="github-owner">GitHub Username</label>
-                        <input type="text" id="github-owner" placeholder="your-username">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password">
                     </div>
 
-                    <div class="form-group">
-                        <label for="github-repo">Repository Name</label>
-                        <input type="text" id="github-repo" placeholder="script-repository">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="github-token">Personal Access Token</label>
-                        <input type="password" id="github-token" placeholder="ghp_...">
-                        <p style="font-size: 12px; color: #666; margin-top: 8px;">
-                            Need a token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=Script%20Repository" target="_blank" style="color: #1a1a1a; text-decoration: underline;">Create one here</a>
-                        </p>
-                    </div>
-
-                    <button class="btn" onclick="authenticate()" style="width: 100%;">Connect to GitHub</button>
+                    <button class="btn" onclick="authenticate()" style="width: 100%;">Unlock</button>
                 </div>
 
-                <div style="margin-top: 32px; padding: 16px; background: #f5f5f5; border: 1px solid #e0e0e0; font-size: 13px; color: #666;">
-                    <strong style="color: #1a1a1a;">Setup Instructions:</strong>
-                    <ol style="margin: 8px 0 0 20px; line-height: 1.8;">
-                        <li>Create a GitHub repository (public or private)</li>
-                        <li>Generate a Personal Access Token with 'repo' scope</li>
-                        <li>Enter your details above and connect</li>
-                    </ol>
+                <div id="setup-section" style="margin-top: 32px; display: none;">
+                    <div style="padding: 16px; background: #f5f5f5; border: 1px solid #e0e0e0;">
+                        <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 16px;">First Time Setup</h3>
+                        
+                        <div class="form-group">
+                            <label for="setup-owner">GitHub Username</label>
+                            <input type="text" id="setup-owner" placeholder="your-username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="setup-repo">Repository Name</label>
+                            <input type="text" id="setup-repo" placeholder="script-repository">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="setup-token">Personal Access Token</label>
+                            <input type="password" id="setup-token" placeholder="ghp_...">
+                            <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                                <a href="https://github.com/settings/tokens/new?scopes=repo&description=Script%20Repository" target="_blank" style="color: #1a1a1a; text-decoration: underline;">Create token here</a>
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="setup-password">Choose a Password</label>
+                            <input type="password" id="setup-password" placeholder="Choose a password">
+                        </div>
+
+                        <button class="btn" onclick="generateEncryptedConfig()" style="width: 100%;">Generate Encrypted Config</button>
+                        
+                        <div id="encrypted-output" style="display: none; margin-top: 16px;">
+                            <label style="display: block; margin-bottom: 8px;">Copy this and replace the values in the HTML:</label>
+                            <textarea id="config-output" readonly style="width: 100%; min-height: 100px; font-family: monospace; font-size: 12px; padding: 8px;"></textarea>
+                        </div>
+                    </div>
                 </div>
+
+                <button class="btn" onclick="toggleSetup()" style="width: 100%; margin-top: 16px; background: #f5f5f5; color: #666;">First Time Setup</button>
             </div>
         </div>
 
@@ -439,7 +453,7 @@
                     <h1>Script Repository</h1>
                     <p class="subtitle">Organize and manage your code snippets</p>
                 </div>
-                <button class="btn btn-small" onclick="logout()">Disconnect</button>
+                <button class="btn btn-small" onclick="logout()">Lock</button>
             </header>
 
         <div class="tabs">
@@ -492,11 +506,16 @@
     <script>
         // GitHub Configuration
         const GITHUB_CONFIG = {
-            owner: 'YOUR_GITHUB_USERNAME',  // Replace with your GitHub username
-            repo: 'YOUR_REPO_NAME',         // Replace with your repo name
-            path: 'scripts.json',            // File path in your repo
-            token: '',                       // Will be set by user
-            branch: 'main'                   // Or 'master' if that's your default branch
+            owner: 'YOUR_GITHUB_USERNAME',     // Replace with your GitHub username
+            repo: 'YOUR_REPO_NAME',            // Replace with your repo name
+            path: 'scripts.json',               // File path in your repo
+            branch: 'main',                     // Or 'master' if that's your default branch
+            
+            // ENCRYPTED TOKEN - Replace this after setup
+            encryptedToken: 'ENCRYPTED_TOKEN_WILL_GO_HERE',
+            
+            // Current session token (decrypted)
+            token: ''
         };
 
         // Storage management with GitHub API
@@ -593,11 +612,12 @@
             }
         }
 
-        // Authentication
+        // Authentication with encrypted token
         function checkAuthentication() {
-            const token = localStorage.getItem('github_token');
-            if (token) {
-                GITHUB_CONFIG.token = token;
+            // Check if we have a session token (already unlocked)
+            const sessionToken = sessionStorage.getItem('github_token');
+            if (sessionToken) {
+                GITHUB_CONFIG.token = sessionToken;
                 isAuthenticated = true;
                 document.getElementById('auth-section').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
@@ -609,51 +629,79 @@
         }
 
         function authenticate() {
-            const token = document.getElementById('github-token').value.trim();
-            const owner = document.getElementById('github-owner').value.trim();
-            const repo = document.getElementById('github-repo').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!password) {
+                showNotification('Please enter your password');
+                return;
+            }
 
-            if (!token || !owner || !repo) {
+            try {
+                // Decrypt the token
+                const decrypted = CryptoJS.AES.decrypt(GITHUB_CONFIG.encryptedToken, password).toString(CryptoJS.enc.Utf8);
+                
+                if (!decrypted) {
+                    showNotification('Incorrect password');
+                    return;
+                }
+
+                GITHUB_CONFIG.token = decrypted;
+                sessionStorage.setItem('github_token', decrypted);
+                
+                isAuthenticated = true;
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                
+                loadScripts().then(() => {
+                    renderScripts();
+                    showNotification('Access granted');
+                });
+            } catch (error) {
+                showNotification('Incorrect password');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('github_token');
+            GITHUB_CONFIG.token = '';
+            isAuthenticated = false;
+            scriptsCache = [];
+            document.getElementById('password').value = '';
+            checkAuthentication();
+        }
+
+        function toggleSetup() {
+            const setupSection = document.getElementById('setup-section');
+            setupSection.style.display = setupSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function generateEncryptedConfig() {
+            const owner = document.getElementById('setup-owner').value.trim();
+            const repo = document.getElementById('setup-repo').value.trim();
+            const token = document.getElementById('setup-token').value.trim();
+            const password = document.getElementById('setup-password').value;
+
+            if (!owner || !repo || !token || !password) {
                 showNotification('Please fill in all fields');
                 return;
             }
 
-            GITHUB_CONFIG.token = token;
-            GITHUB_CONFIG.owner = owner;
-            GITHUB_CONFIG.repo = repo;
-            
-            localStorage.setItem('github_token', token);
-            localStorage.setItem('github_owner', owner);
-            localStorage.setItem('github_repo', repo);
+            // Encrypt the token
+            const encrypted = CryptoJS.AES.encrypt(token, password).toString();
 
-            isAuthenticated = true;
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
+            // Generate config output
+            const output = `owner: '${owner}',
+repo: '${repo}',
+encryptedToken: '${encrypted}',`;
+
+            document.getElementById('config-output').value = output;
+            document.getElementById('encrypted-output').style.display = 'block';
             
-            loadScripts().then(() => {
-                renderScripts();
-                showNotification('Connected to GitHub successfully');
-            });
+            showNotification('Config generated! Copy and paste into your HTML file');
         }
 
-        function logout() {
-            localStorage.removeItem('github_token');
-            localStorage.removeItem('github_owner');
-            localStorage.removeItem('github_repo');
-            GITHUB_CONFIG.token = '';
-            isAuthenticated = false;
-            scriptsCache = [];
-            checkAuthentication();
-        }
-
-        // Load saved GitHub config on page load
+        // Load on page load
         window.addEventListener('DOMContentLoaded', () => {
-            const savedOwner = localStorage.getItem('github_owner');
-            const savedRepo = localStorage.getItem('github_repo');
-            
-            if (savedOwner) GITHUB_CONFIG.owner = savedOwner;
-            if (savedRepo) GITHUB_CONFIG.repo = savedRepo;
-            
             checkAuthentication();
         });
 
