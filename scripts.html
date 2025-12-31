@@ -170,12 +170,18 @@
         }
 
         .script-code.render-mode {
+            padding: 0;
             background: #fff;
-            white-space: normal;
-            word-break: normal;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 14px;
         }
+
+        .script-code iframe {
+            width: 100%;
+            min-height: 400px;
+            border: none;
+            display: block;
+        }
+          
+        
 
         .code-toggle {
             display: flex;
@@ -504,7 +510,9 @@
                                 <button class="toggle-btn" onclick="toggleView('${escapeHtml(script.id)}', 'code')">Code</button>
                                 <button class="toggle-btn active" onclick="toggleView('${escapeHtml(script.id)}', 'render')">Render</button>
                             </div>
-                            <div class="script-code collapsed render-mode" id="code-${escapeHtml(script.id)}">${script.code}</div>
+                            <div class="script-code collapsed render-mode" id="code-${escapeHtml(script.id)}">
+                                <iframe id="iframe-${escapeHtml(script.id)}"></iframe>
+                            </div>
                             ` : `
                             <div class="script-code collapsed" id="code-${escapeHtml(script.id)}">${escapeHtml(script.code)}</div>
                             `}
@@ -516,6 +524,16 @@
                     `).join('')}
                 </div>
             `;
+
+            // Populate iframes for HTML scripts
+            filtered.forEach(script => {
+                if (script.type === 'html') {
+                    const iframe = document.getElementById(`iframe-${script.id}`);
+                    if (iframe) {
+                        iframe.srcdoc = script.code;
+                    }
+                }
+            });
         }
 
         // Helper function
@@ -607,8 +625,32 @@
             event.target.classList.add('active');
             
             if (view === 'render') {
-                codeElement.innerHTML = script.code;
+                // Create iframe for isolated HTML rendering
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.minHeight = '400px';
+                iframe.style.border = 'none';
+                iframe.style.display = 'block';
+                
+                codeElement.innerHTML = '';
+                codeElement.appendChild(iframe);
                 codeElement.classList.add('render-mode');
+                
+                // Write HTML content to iframe
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(script.code);
+                iframeDoc.close();
+                
+                // Auto-resize iframe based on content
+                iframe.onload = function() {
+                    try {
+                        const height = iframe.contentWindow.document.body.scrollHeight;
+                        iframe.style.height = Math.max(height, 400) + 'px';
+                    } catch (e) {
+                        // Keep default height if can't access content
+                    }
+                };
             } else {
                 codeElement.textContent = script.code;
                 codeElement.classList.remove('render-mode');
