@@ -181,7 +181,6 @@
             display: block;
         }
           
-        
 
         .code-toggle {
             display: flex;
@@ -501,6 +500,7 @@
                                 </div>
                                 <div class="script-actions">
                                     <button class="btn btn-small" onclick="copyScript('${escapeHtml(script.id)}')">Copy</button>
+                                    <button class="btn btn-small" onclick="editScript('${escapeHtml(script.id)}')">Edit</button>
                                     <button class="btn btn-small btn-danger" onclick="deleteScript('${escapeHtml(script.id)}')">Delete</button>
                                 </div>
                             </div>
@@ -559,22 +559,46 @@
             
             const scripts = loadScripts();
             const code = document.getElementById('script-code').value;
-            const newScript = {
-                id: Date.now().toString(),
-                name: document.getElementById('script-name').value,
-                type: isHTML(code) ? 'html' : 'script',
-                description: document.getElementById('script-description').value,
-                code: code,
-                demo: document.getElementById('script-demo').value,
-                date: new Date().toISOString()
-            };
+            const editingId = e.target.dataset.editingId;
             
-            scripts.unshift(newScript);
+            if (editingId) {
+                // Update existing script
+                const index = scripts.findIndex(s => s.id === editingId);
+                if (index !== -1) {
+                    scripts[index] = {
+                        ...scripts[index],
+                        name: document.getElementById('script-name').value,
+                        type: isHTML(code) ? 'html' : 'script',
+                        description: document.getElementById('script-description').value,
+                        code: code,
+                        demo: document.getElementById('script-demo').value,
+                    };
+                    showNotification('Script updated successfully');
+                }
+                
+                // Reset edit mode
+                delete e.target.dataset.editingId;
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Add Script';
+            } else {
+                // Add new script
+                const newScript = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('script-name').value,
+                    type: isHTML(code) ? 'html' : 'script',
+                    description: document.getElementById('script-description').value,
+                    code: code,
+                    demo: document.getElementById('script-demo').value,
+                    date: new Date().toISOString()
+                };
+                
+                scripts.unshift(newScript);
+                showNotification('Script added successfully');
+            }
+            
             saveScripts(scripts);
-            
             document.getElementById('script-form').reset();
             renderScripts();
-            showNotification('Script added successfully');
             
             // Switch to browse tab
             document.querySelector('.tab[data-tab="browse"]').click();
@@ -582,7 +606,15 @@
 
         // Clear form
         document.getElementById('clear-form').addEventListener('click', () => {
-            document.getElementById('script-form').reset();
+            const form = document.getElementById('script-form');
+            form.reset();
+            
+            // Reset edit mode if active
+            if (form.dataset.editingId) {
+                delete form.dataset.editingId;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Add Script';
+            }
         });
 
         // Copy script
@@ -594,6 +626,32 @@
                 navigator.clipboard.writeText(script.code).then(() => {
                     showNotification('Code copied to clipboard');
                 });
+            }
+        };
+
+        // Edit script
+        window.editScript = function(id) {
+            const scripts = loadScripts();
+            const script = scripts.find(s => s.id === id);
+            
+            if (script) {
+                // Populate form with script data
+                document.getElementById('script-name').value = script.name;
+                document.getElementById('script-description').value = script.description;
+                document.getElementById('script-code').value = script.code;
+                document.getElementById('script-demo').value = script.demo || '';
+                
+                // Store the ID we're editing
+                document.getElementById('script-form').dataset.editingId = id;
+                
+                // Change button text
+                const submitBtn = document.querySelector('#script-form button[type="submit"]');
+                submitBtn.textContent = 'Update Script';
+                
+                // Switch to Add Script tab
+                document.querySelector('.tab[data-tab="add"]').click();
+                
+                showNotification('Editing script');
             }
         };
 
