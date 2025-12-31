@@ -111,6 +111,23 @@
             gap: 16px;
         }
 
+        .script-title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            flex: 1;
+            user-select: none;
+        }
+
+        .script-title-area:hover .script-title {
+            color: #666;
+        }
+
+        .script-title-area:hover .expand-btn {
+            color: #1a1a1a;
+        }
+
         .script-title {
             font-size: 18px;
             font-weight: 500;
@@ -150,6 +167,40 @@
             margin-bottom: 0;
             opacity: 0;
             overflow: hidden;
+        }
+
+        .script-code.render-mode {
+            background: #fff;
+            white-space: normal;
+            word-break: normal;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .code-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .toggle-btn {
+            padding: 4px 12px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            border-color: #999;
         }
 
         .expand-btn {
@@ -438,8 +489,8 @@
                     ${filtered.map(script => `
                         <div class="script-card">
                             <div class="script-header">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <button class="expand-btn collapsed" onclick="toggleScript('${escapeHtml(script.id)}')">▼</button>
+                                <div class="script-title-area" onclick="toggleScript('${escapeHtml(script.id)}')">
+                                    <button class="expand-btn collapsed">▼</button>
                                     <h3 class="script-title">${escapeHtml(script.name)}</h3>
                                 </div>
                                 <div class="script-actions">
@@ -448,7 +499,15 @@
                                 </div>
                             </div>
                             <p class="script-description">${escapeHtml(script.description)}</p>
+                            ${script.type === 'html' ? `
+                            <div class="code-toggle">
+                                <button class="toggle-btn" onclick="toggleView('${escapeHtml(script.id)}', 'code')">Code</button>
+                                <button class="toggle-btn active" onclick="toggleView('${escapeHtml(script.id)}', 'render')">Render</button>
+                            </div>
+                            <div class="script-code collapsed render-mode" id="code-${escapeHtml(script.id)}">${script.code}</div>
+                            ` : `
                             <div class="script-code collapsed" id="code-${escapeHtml(script.id)}">${escapeHtml(script.code)}</div>
+                            `}
                             <div class="script-footer">
                                 ${script.demo ? `<a href="${escapeHtml(script.demo)}" target="_blank" class="btn btn-small">View Demo</a>` : '<span></span>'}
                                 <span style="font-size: 12px; color: #999;">${new Date(script.date).toLocaleDateString()}</span>
@@ -459,16 +518,35 @@
             `;
         }
 
+        // Helper function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Detect if code is HTML
+        function isHTML(code) {
+            const trimmed = code.trim();
+            // Check for common HTML patterns
+            return /^<!DOCTYPE html>/i.test(trimmed) || 
+                   /^<html/i.test(trimmed) || 
+                   /<\/html>\s*$/i.test(trimmed) ||
+                   (/<[a-z][\s\S]*>/i.test(trimmed) && /<\/[a-z]+>/i.test(trimmed));
+        }
+
         // Add script
         document.getElementById('script-form').addEventListener('submit', (e) => {
             e.preventDefault();
             
             const scripts = loadScripts();
+            const code = document.getElementById('script-code').value;
             const newScript = {
                 id: Date.now().toString(),
                 name: document.getElementById('script-name').value,
+                type: isHTML(code) ? 'html' : 'script',
                 description: document.getElementById('script-description').value,
-                code: document.getElementById('script-code').value,
+                code: code,
                 demo: document.getElementById('script-demo').value,
                 date: new Date().toISOString()
             };
@@ -504,7 +582,8 @@
         // Toggle script visibility
         window.toggleScript = function(id) {
             const codeElement = document.getElementById(`code-${id}`);
-            const button = event.target;
+            const titleArea = event.currentTarget;
+            const button = titleArea.querySelector('.expand-btn');
             
             if (codeElement.classList.contains('collapsed')) {
                 codeElement.classList.remove('collapsed');
@@ -512,6 +591,27 @@
             } else {
                 codeElement.classList.add('collapsed');
                 button.classList.add('collapsed');
+            }
+        };
+
+        // Toggle between code and render view for HTML
+        window.toggleView = function(id, view) {
+            event.stopPropagation();
+            const scripts = loadScripts();
+            const script = scripts.find(s => s.id === id);
+            const codeElement = document.getElementById(`code-${id}`);
+            const card = codeElement.closest('.script-card');
+            const buttons = card.querySelectorAll('.toggle-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (view === 'render') {
+                codeElement.innerHTML = script.code;
+                codeElement.classList.add('render-mode');
+            } else {
+                codeElement.textContent = script.code;
+                codeElement.classList.remove('render-mode');
             }
         };
 
@@ -530,13 +630,6 @@
         document.getElementById('search').addEventListener('input', (e) => {
             renderScripts(e.target.value);
         });
-
-        // Helper function
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
 
         // Initial render
         renderScripts();
