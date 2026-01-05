@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Sun Icon</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f5f5;
+        }
+
+        .icon-container {
+            background: #FFBE5F;
+            border-radius: 50%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+                box-shadow: 12px 14px 22px 2px #dfdfdf;
+        }
+
+        .icon-container svg {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="icon-container">
+        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="66.37" height="69.41" viewBox="0 0 66.37 69.41">
+            <defs>
+                <style>
+                    .cls-1 {
+                        stroke-width: 2.15px;
+                    }
+                    .cls-1, .cls-2 {
+                        fill: none;
+                        stroke: #000;
+                        stroke-linecap: round;
+                        stroke-miterlimit: 10;
+                    }
+                    .cls-2 {
+                        stroke-width: 2.03px;
+                    }
+                    .cls-3 {
+                        fill: #fff;
+                    }
+                    
+                    /* Animation for the wavy outer sun rays */
+                    .spinning-rays {
+                        transform-origin: 33.185px 34.705px;
+                    }
+                    
+                    @keyframes spin {
+                        from {
+                            transform: rotate(0deg);
+                        }
+                        to {
+                            transform: rotate(720deg);
+                        }
+                    }
+                </style>
+            </defs>
+            
+            <!-- Wavy outer sun rays - complete circle spinning behind everything -->
+            <g class="spinning-rays">
+                <path class="cls-1" d="M12.58,59.47c.14,1.07.47,1.95,1.16,2.46,2.54,1.85,8.41-2.64,11.47-1.65,3.05.99,5.04,8.07,8.31,8.07s5.36-7.12,8.31-8.07c2.94-.95,8.93,3.5,11.47,1.65s.1-8.86,1.97-11.42c1.87-2.56,9.26-2.35,10.25-5.4.99-3.05-5.13-7.13-5.13-10.4s6.08-7.45,5.13-10.39c-.95-2.94-8.41-2.85-10.25-5.4s.59-9.55-1.97-11.42c-2.57-1.87-8.42,2.64-11.47,1.65-3.05-.99-5.05-8.06-8.31-8.06s-5.36,7.12-8.31,8.07c-2.94.95-8.93-3.5-11.47-1.65s-.1,8.86-1.97,11.42c-1.87,2.57-9.26,2.34-10.25,5.4-.99,3.06,5.13,7.13,5.13,10.4s-6.08,7.43-5.13,10.38c.19.58.59,1.03,1.15,1.41"/>
+                <path class="cls-1" d="M1.9,42.8c-.5.95-.74,1.86-.48,2.68,1,2.98,8.39,2.71,10.31,5.28,1.92,2.57-.55,9.5,2.12,11.39s8.49-2.71,11.45-1.78c2.95.92,5.26,8.02,8.41,7.98s5.2-7.17,8.21-8.18c3.01-1.01,8.91,3.44,11.49,1.52,2.57-1.92-.06-8.78,1.83-11.45s9.27-2.56,10.19-5.51c.92-2.95-5.22-7.19-5.24-10.33s6-7.45,4.99-10.46c-1.02-3.01-8.4-2.71-10.31-5.28-1.92-2.57.54-9.5-2.12-11.38s-8.49,2.71-11.45,1.78c-2.95-.92-5.26-8.02-8.41-7.98s-5.2,7.17-8.21,8.18c-3.01,1.02-8.91-3.44-11.49-1.52-2.58,1.92.06,8.78-1.83,11.45s-9.26,2.55-10.19,5.5c-.18.58-.11,1.18.12,1.82"/>
+            </g>
+            
+            <!-- Face elements on the main circle -->
+            <path class="cls-1" d="M40.42,40.05c-1.85,2.01-4.52,3.27-7.46,3.27s-5.61-1.26-7.46-3.27"/>
+            <path class="cls-1" d="M28.31,33.53v-5.01"/>
+            <path class="cls-1" d="M37.62,33.53v-5.01"/>
+            
+            <!-- Main circle outline -->
+            <path class="cls-2" d="M33.18,54.35c10.85,0,19.65-8.8,19.65-19.65s-8.8-19.65-19.65-19.65-19.65,8.81-19.65,19.66,8.8,19.65,19.65,19.65h0Z"/>
+            
+            <!-- Question mark circle backgrounds -->
+            <path class="cls-3" d="M11.42,60.51c5.53,0,10.01-4.48,10.01-10.01s-4.48-10.01-10.01-10.01S1.41,44.97,1.41,50.49s4.48,10.01,10.01,10.01Z"/>
+            <path class="cls-3" d="M11.77,60.51c5.53,0,10.01-4.48,10.01-10.01s-4.48-10.01-10.01-10.01S1.76,44.97,1.76,50.49s4.48,10.01,10.01,10.01Z"/>
+            
+            <!-- Question mark -->
+            <path d="M14.76,48.07v-.02c0-1.43-.94-2.6-2.21-2.98,0,0-.43-.14-.89-.14s-.94.15-.94.15c-1.26.4-2.17,1.55-2.17,2.92,0,.5.4.91.91.91s.91-.4.91-.91c0-.69.57-1.25,1.25-1.25.74,0,1.3.57,1.3,1.25,0,.26-.07.49-.19.69,0,0-.48.6-1.06.63-1.11.06-.95,1.67-.95,1.67v1.23c0,.5.41.91.91.91s.91-.4.91-.91v-1.23c1.23-.37,2.13-1.45,2.2-2.76v-.17h.03,0Z"/>
+            <path d="M11.65,54.22h0c-.5,0-.91.41-.91.91v.52c0,.5.41.91.91.91h0c.5,0,.91-.41.91-.91v-.52c0-.5-.41-.91-.91-.91Z"/>
+            
+            <!-- Question mark circle outline -->
+            <path class="cls-1" d="M11.66,60.62c5.59,0,10.12-4.53,10.12-10.12s-4.53-10.12-10.12-10.12S1.54,44.9,1.54,50.49s4.53,10.12,10.12,10.12Z"/>
+            
+            <!-- SM text -->
+            <path d="M60.29,55.97c-.32-.09-.56-.21-.7-.34s-.22-.3-.22-.5c0-.22.09-.41.27-.56s.41-.22.7-.22c.2,0,.37.04.52.11s.27.18.36.31.13.28.13.44h-.38c0-.17-.05-.31-.16-.41s-.26-.15-.46-.15c-.18,0-.33.04-.43.12-.1.08-.16.2-.16.34,0,.12.05.21.15.29.1.08.27.15.5.22s.42.14.55.22.23.17.3.28.1.23.1.38c0,.23-.09.42-.27.55s-.42.21-.72.21c-.2,0-.38-.04-.55-.11s-.3-.18-.39-.31-.14-.28-.14-.44h.38c0,.17.06.31.19.41s.3.15.51.15.35-.04.46-.12.16-.19.16-.33-.05-.25-.15-.32-.27-.15-.53-.23h-.02Z"/>
+            <path d="M62.31,54.39l.93,2.32.93-2.32h.49v2.84h-.38v-1.11l.04-1.2-.93,2.3h-.29l-.93-2.3.04,1.19v1.11h-.38v-2.84h.48Z"/>
+        </svg>
+    </div>
+
+    <script>
+        const container = document.querySelector('.icon-container');
+        const spinningRays = document.querySelector('.spinning-rays');
+        
+        function triggerSpin() {
+            // Set the animation with sharper easing for quicker stop
+            spinningRays.style.animation = 'spin 1.5s cubic-bezier(0.6, 0.0, 0.4, 1)';
+            
+            // Remove animation after it completes so it can be triggered again
+            setTimeout(() => {
+                spinningRays.style.animation = '';
+            }, 1500);
+        }
+        
+        // Spin on load
+        window.addEventListener('load', () => {
+            triggerSpin();
+        });
+        
+        // Spin on hover
+        container.addEventListener('mouseenter', () => {
+            triggerSpin();
+        });
+    </script>
+</body>
+</html>

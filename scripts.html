@@ -155,6 +155,8 @@
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
             font-size: 13px;
             overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
             word-break: break-all;
             transition: max-height 0.3s ease, opacity 0.3s ease;
         }
@@ -173,12 +175,14 @@
             background: #fff;
         }
 
-     .script-code iframe {
-    width: 100%;
-    min-height: 554px;
-    border: none;
-    display: block;
-}
+        .script-code iframe {
+            width: 100%;
+            min-height: 400px;
+            border: none;
+            display: block;
+        }
+
+
         .code-toggle {
             display: flex;
             gap: 8px;
@@ -501,7 +505,7 @@
     <div class="notification" id="notification"></div>
 
     <script>
-       // GitHub Configuration
+         // GitHub Configuration
         const GITHUB_CONFIG = {
             owner: 'tylervinson',
             repo: 'tylervinson',
@@ -513,7 +517,6 @@
             // Current session token (decrypted)
             token: ''
         };
-
         // Storage management with GitHub API
         let scriptsCache = [];
         let isAuthenticated = false;
@@ -770,8 +773,8 @@ encryptedToken: '${encrypted}',`;
                             <p class="script-description">${escapeHtml(script.description)}</p>
                             ${script.type === 'html' ? `
                             <div class="code-toggle">
-                                <button class="toggle-btn" onclick="toggleView('${escapeHtml(script.id)}', 'code')">Code</button>
-                                <button class="toggle-btn active" onclick="toggleView('${escapeHtml(script.id)}', 'render')">Render</button>
+                                <button class="toggle-btn" onclick="toggleView('${escapeHtml(script.id)}', 'code', event)">Code</button>
+                                <button class="toggle-btn active" onclick="toggleView('${escapeHtml(script.id)}', 'render', event)">Render</button>
                             </div>
                             <div class="script-code collapsed render-mode" id="code-${escapeHtml(script.id)}">
                                 <iframe id="iframe-${escapeHtml(script.id)}"></iframe>
@@ -935,8 +938,8 @@ encryptedToken: '${encrypted}',`;
         };
 
         // Toggle between code and render view for HTML
-        window.toggleView = async function(id, view) {
-            event.stopPropagation();
+        window.toggleView = async function(id, view, event) {
+            if (event) event.stopPropagation();
             const scripts = await loadScripts();
             const script = scripts.find(s => s.id === id);
             const codeElement = document.getElementById(`code-${id}`);
@@ -944,7 +947,7 @@ encryptedToken: '${encrypted}',`;
             const buttons = card.querySelectorAll('.toggle-btn');
             
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
             
             if (view === 'render') {
                 // Create iframe for isolated HTML rendering
