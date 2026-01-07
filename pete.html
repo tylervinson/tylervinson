@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Layout Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #fff;
+            padding: 40px 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .visualizer-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+            position: relative;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            font-family: inherit;
+            transition: color 0.3s;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #1a1a1a;
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: -2px;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .instructions {
+            background: #ffffff;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .instructions h2 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .instructions p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .comparison-section {
+            margin-bottom: 48px;
+        }
+
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .preset-btn {
+            padding: 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .preset-btn:active {
+            transform: translateY(0);
+        }
+
+        .preset-btn svg {
+            width: 28px;
+            height: 28px;
+            stroke: #1a1a1a;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover svg {
+            stroke: #666;
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 16px 20px;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 300px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .tooltip.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            transform: rotate(45deg);
+        }
+
+        .tooltip[data-position="bottom"]::before {
+            top: -8px;
+            left: 50%;
+            margin-left: -8px;
+        }
+
+        .tooltip[data-position="bottom-left"]::before {
+            top: -8px;
+            left: 32px;
+        }
+
+        .tooltip[data-position="top"]::before {
+            bottom: -8px;
+            left: 50%;
+            margin-left: -8px;
+        }
+
+        .tooltip[data-position="left"]::before {
+            right: -8px;
+            top: 50%;
+            margin-top: -8px;
+        }
+
+        .tooltip[data-position="right"]::before {
+            left: -8px;
+            top: 50%;
+            margin-top: -8px;
+        }
+
+        .tooltip-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .tooltip-btn {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #fafafa;
+            color: #1a1a1a;
+        }
+
+        .tooltip-btn:hover {
+            background: #f0f0f0;
+            border-color: #d0d0d0;
+        }
+
+        .tooltip-btn.next {
+            background: #1a1a1a;
+            color: #ffffff;
+            border-color: #1a1a1a;
+        }
+
+        .tooltip-btn.next:hover {
+            background: #333;
+            border-color: #333;
+        }
+
+        .viewport-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+            background: #F1F9FD;
+            border-radius: 2px;
+        }
+
+        .viewport-container {
+            position: relative;
+            background: #ffffff;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            width: 1200px;
+            max-width: 100%;
+            resize: horizontal;
+            overflow: auto;
+            min-width: 320px;
+            container-type: inline-size;
+            transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .viewport-container.animating {
+            pointer-events: none;
+        }
+
+        .viewport-container.dragging {
+            transition: none;
+        }
+
+        .viewport-container.dragging * {
+            transition: none !important;
+        }
+
+        /* Show all hover states during animation */
+        .viewport-container.animating .viewport-content {
+            background: rgba(200, 220, 255, 0.15);
+        }
+
+        .viewport-container.animating .viewport-content::before {
+            border-color: rgba(100, 150, 200, 0.6);
+        }
+
+        .viewport-container.animating .feature-grid {
+            background: rgba(255, 200, 150, 0.15);
+        }
+
+        .viewport-container.animating .feature-grid::before {
+            border-color: rgba(255, 150, 100, 0.6);
+        }
+
+        .viewport-container.animating .feature-card {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .viewport-container.animating .feature-card::before {
+            border-color: rgba(100, 100, 100, 0.5);
+        }
+
+        .viewport-container.animating .icon::before {
+            border-color: rgba(100, 150, 255, 0.6);
+        }
+
+        .viewport-container.animating .feature-title {
+            background: rgba(150, 100, 255, 0.12);
+        }
+
+        .viewport-container.animating .feature-title::before {
+            border-color: rgba(150, 100, 255, 0.6);
+        }
+
+        .viewport-container.animating .feature-copy {
+            background: rgba(255, 150, 100, 0.12);
+        }
+
+        .viewport-container.animating .feature-copy::before {
+            border-color: rgba(255, 150, 100, 0.6);
+        }
+
+        /* Incorrect structure animation states */
+        .viewport-container.animating .incorrect-structure::before {
+            border-color: rgba(220, 38, 38, 0.6);
+        }
+
+        .viewport-container.animating .incorrect-row {
+            background: rgba(200, 200, 200, 0.15);
+        }
+
+        .viewport-container.animating .incorrect-row::before {
+            border-color: rgba(150, 150, 150, 0.6);
+        }
+
+        .viewport-container.animating .incorrect-item {
+            background: rgba(240, 240, 240, 0.7);
+        }
+
+        .viewport-container.animating .incorrect-item::before {
+            border-color: rgba(100, 100, 100, 0.5);
+        }
+
+        .viewport-info {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+           
+
+            border-bottom: 1px solid #ddd;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-variant-numeric: tabular-nums;
+            backdrop-filter: blur(10px);
+        }
+
+        .resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 24px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .resize-handle::before {
+            content: '';
+            width: 4px;
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+
+        .resize-handle:hover::before {
+            opacity: 0.6;
+        }
+
+        .viewport-container.resizing .resize-handle::before {
+            opacity: 0.8;
+        }
+
+        .viewport-content {
+            padding: 40px 20px;
+            min-height: 400px;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+        }
+
+        .viewport-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(100, 150, 200, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .viewport-content:hover::before {
+            border-color: rgba(100, 150, 200, 0.6);
+        }
+
+        .viewport-content.locked::before {
+            border-color: rgba(100, 150, 200, 0.8);
+        }
+
+        .viewport-content:hover {
+            background: rgba(200, 220, 255, 0.15);
+        }
+
+        .viewport-content.locked {
+            background: rgba(200, 220, 255, 0.2);
+        }
+
+        .feature-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            padding: 20px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .feature-grid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(255, 150, 100, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .feature-grid:hover::before {
+            border-color: rgba(255, 150, 100, 0.6);
+        }
+
+        .feature-grid.locked::before {
+            border-color: rgba(255, 150, 100, 0.8);
+        }
+
+        .feature-grid:hover {
+            background: rgba(255, 200, 150, 0.15);
+        }
+
+        .feature-grid.locked {
+            background: rgba(255, 200, 150, 0.2);
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 40px 28px;
+            background: transparent;
+            border-radius: 2px;
+            flex: 1 1 300px;
+            max-width: 360px;
+            min-width: 280px;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            justify-content: center;
+        }
+
+        .feature-card:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .feature-card.locked {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(100, 100, 100, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            border-color: rgba(100, 100, 100, 0.5);
+        }
+
+        .feature-card.locked::before {
+            border-color: rgba(100, 100, 100, 0.7);
+        }
+
+        .icon {
+            width: 94px;
+            height: 94px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .icon::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px dashed rgba(100, 150, 255, 0);
+            border-radius: 2px;
+            transition: border-color 0.3s ease;
+        }
+
+        .icon:hover::before {
+            border-color: rgba(100, 150, 255, 0.6);
+        }
+
+        .icon.locked::before {
+            border-color: rgba(100, 150, 255, 0.8);
+        }
+
+        .icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .feature-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .feature-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(150, 100, 255, 0);
+            border-radius: 2px;
+            transition: border-color 0.3s ease;
+        }
+
+        .feature-title:hover::before {
+            border-color: rgba(150, 100, 255, 0.6);
+        }
+
+        .feature-title.locked::before {
+            border-color: rgba(150, 100, 255, 0.8);
+        }
+
+        .feature-title:hover {
+            background: rgba(150, 100, 255, 0.12);
+        }
+
+        .feature-title.locked {
+            background: rgba(150, 100, 255, 0.18);
+        }
+
+        .feature-copy {
+            font-size: 15px;
+            color: #666666;
+            line-height: 1.7;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .feature-copy::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(255, 150, 100, 0);
+            border-radius: 2px;
+            transition: border-color 0.3s ease;
+        }
+
+        .feature-copy:hover::before {
+            border-color: rgba(255, 150, 100, 0.6);
+        }
+
+        .feature-copy.locked::before {
+            border-color: rgba(255, 150, 100, 0.8);
+        }
+
+        .feature-copy:hover {
+            background: rgba(255, 150, 100, 0.12);
+        }
+
+        .feature-copy.locked {
+            background: rgba(255, 150, 100, 0.18);
+        }
+
+        /* Incorrect structure styles */
+        .incorrect-structure {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 352.5px;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            justify-content: center;
+        }
+
+        .incorrect-structure::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(220, 38, 38, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .incorrect-structure:hover::before {
+            border-color: rgba(220, 38, 38, 0.6);
+        }
+
+        .incorrect-structure.locked::before {
+            border-color: rgba(220, 38, 38, 0.8);
+        }
+
+        .incorrect-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .incorrect-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(150, 150, 150, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .incorrect-row:hover::before {
+            border-color: rgba(150, 150, 150, 0.6);
+        }
+
+        .incorrect-row.locked::before {
+            border-color: rgba(150, 150, 150, 0.8);
+        }
+
+        .incorrect-row:hover {
+            background: rgba(200, 200, 200, 0.15);
+        }
+
+        .incorrect-row.locked {
+            background: rgba(200, 200, 200, 0.2);
+        }
+
+        .incorrect-item {
+            flex: 1 1 280px;
+            max-width: 360px;
+            min-width: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            padding: 0 28px;
+            border-radius: 2px;
+        }
+
+        .incorrect-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed rgba(100, 100, 100, 0);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .incorrect-item:hover::before {
+            border-color: rgba(100, 100, 100, 0.5);
+        }
+
+        .incorrect-item.locked::before {
+            border-color: rgba(100, 100, 100, 0.7);
+        }
+
+        .incorrect-item:hover {
+            background: rgba(240, 240, 240, 0.7);
+        }
+
+        .incorrect-item.locked {
+            background: rgba(230, 230, 230, 0.8);
+        }
+
+        .breakpoint-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="visualizer-wrapper">
+        <div class="instructions">
+            <h2>Responsive Layout Visualizer</h2>
+            <p>Drag the right edge of the container to resize it, or use the preset buttons. Switch between tabs to compare the correct and incorrect layout structures.</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="correct">✓ Correct Layout</button>
+            <button class="tab" data-tab="incorrect">✗ Incorrect Layout</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <div class="tab-content active" id="correct">
+            <div class="comparison-section">
+                <div class="section-header">
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-viewport="1" data-width="425" title="Mobile">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="7" y="2" width="10" height="20" rx="2"/>
+                                <line x1="12" y1="18" x2="12" y2="18"/>
+                            </svg>
+                        </button>
+                        <button class="preset-btn" data-viewport="1" data-width="768" title="Tablet">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                <line x1="12" y1="18" x2="12" y2="18"/>
+                            </svg>
+                        </button>
+                        <button class="preset-btn" data-viewport="1" data-width="1200" title="Desktop">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="viewport-wrapper">
+                    <div class="viewport-container" id="viewport">
+                        <div class="viewport-info" id="viewportInfo">
+                            <span id="widthDisplay">1200px</span>
+                            <span class="breakpoint-indicator" id="breakpointDisplay">Desktop • 3 Columns</span>
+                        </div>
+                        <div class="resize-handle" id="resizeHandle"></div>
+                        <div class="viewport-content">
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <div class="icon">
+                                        <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M24.62,23.76s-.06.01-.10.02c.03,0,.06-.02.10-.02ZM21.5,25.2s-.04.07-.05.11c.02-.05.04-.09.05-.11ZM22.39,39.82c.10.02.20.06.29.12-.08-.06-.18-.10-.29-.12ZM21.6,41.53s-.04.07-.05.11c.02-.05.04-.09.05-.11ZM20.84,43.36s-.02.08-.02.10c0-.04.01-.07.02-.10ZM43.28,60.26c.25,0,.96.02,3.17.07,2.76.06,6.72.15,8.64.18v-7.35s.05-14.86.05-14.86v-8.17s.05-5.56.05-5.56v-6.52c-4.22-.05-23.87-.32-28.23-.43l-.16,5.49s0,.05,0,.08c-.01.09-.05.26-.12.41-.04.07-.30.63-.30.63-.02.05-.05.10-.09.15l-.45.59c-.12.13-.32.32-.63.36-.06,0-.15.02-.53-.02-.33-.01-.66-.22-.79-.63-.01-.04-.04-.10-.07-.15-.01-.01-.02-.02-.03-.03-.02-.01-.06-.05-.11-.10-.04,0-.08,0-.13,0-.03,0-.27.02-.52-.10-.03-.01-.10-.05-.18-.10l-.10.03s-.10.09-.15.13c-.02.09-.03.17-.03.17,0,.01,0,.03,0,.04.07.14.15.33.27.60.13.27.11.60-.04.85,0,.02-.04.11-.07.17,0,.06,0,.12,0,.20,0,0,0,.02,0,.02.04.10.08.28.20.89.02.09.02.18,0,.27l-.11.74s0,.07.01.13c0,.03.01.07.02.11.05.17.24.71.24.71.01.03.02.06.03.09l.02.11c.02.10.02.21,0,.31.01.11.03.33.06.83,0,.16-.03.45-.26.69l-.18.18c.03.29.03.34.02.42,0,.01-.01.20-.02.38h0s-.02.34-.02.34c0,0,0,.10,0,.19,0,.04.01.10.02.15.05.07.10.14.16.24.10.15.21.33.29.42.03.03.06.07.08.10.04.07.10.17.14.28.08.12.12.25.15.33.11.22.16.37.18.51,0,.03.02.12.03.19.04.07.10.17.18.34.03.05.05.11.06.16,0,.04.04.17.04.35v.08c.19.15.46.38.61.52.07.07.11.10.14.12.07.05.12.09.22.20.10.11.21.23.22.23.06.06.11.14.15.22.05.10.15.38.04.68-.03.09-.05.15-.37.60-.02.03-.04.06-.07.08-.05.06-.20.20-.35.30-.02.02-.09.07-.17.13-.17.12-.37.28-.52.38-.18.11-.25.15-.30.18-.04.02-.08.06-.12.08v.02s-.08.23-.08.23c-.01.04-.03.08-.05.12-.04.08-.16.27-.39.40.03.15.02.32-.03.47l-.03.10s0,.09,0,.14c0,.05-.02.14,0,.21.02.10.03.18.04.22.05.17.08.45-.07.71-.02.04-.14.33-.14.33,0,.02-.02.04-.03.07,0,.06-.03.14-.06.25,0,.03,0,.06,0,.09,0,.10-.04.27-.15.46-.04.07-.18.28-.27.40,0,.03-.02.05-.03.07-.02.04-.06.14-.14.24-.01.03-.13.26-.13.26-.06.12-.15.21-.26.28-.08.06-.18.14-.26.21.02.05.05.11.07.17.08.20.11.35.09.49,0,.10,0,.32,0,.32,0,.05,0,.11,0,.16-.01.08-.03.18-.07.28.08.02.18.06.24.08.02.01.07.04.13.06.04.02.09.05.12.06.29.09.51.33.59.61.12.31.18.51.15.73,0-.03.01.02.02.09,0,.10.02.22.03.38.06.32-.07.66-.34.86-.03.02-.10.08-.18.14,0,.04,0,.07,0,.07-.03.37-.34.69-.73.74-.05,0-.14.02-.52-.01-.06,0-.10-.01-.16-.03,0,0,0,0-.01,0l-.25.47c1.59.69,6.43,2.77,8.48,3.65l12.85,5.37s1.17.49,1.28.55c.01,0,.03.01.04.02ZM55.87,62.05h0c-1.35,0-6.22-.12-9.44-.19-1.69-.04-2.99-.07-3.18-.07-.25,0-.49-.08-.68-.18-.14-.06-1.18-.50-1.18-.50l-12.86-5.38c-8.97-3.85-9.06-3.90-9.09-3.91-.38-.19-.56-.63-.44-1.06.01-.07.03-.19.05-.27.04-.18.15-.36.20-.45l.32-.61c.04-.28.23-.52.50-.62l.52-.19c.13-.05.26-.06.39-.03,0,0,0-.02.01-.02.05-.07.10-.13.17-.19,0,0,.05-.04.12-.10,0-.03,0-.06,0-.08-.01-.10-.02-.19-.02-.27-.01,0-.03-.01-.04-.02-.08-.04-.13-.05-.13-.05l-.34-.07c-.24-.05-.44-.19-.56-.39-.05-.08-.08-.17-.10-.27,0-.03-.03-.11-.05-.16-.16-.28-.07-.62-.04-.73,0,0,.06-.21.10-.33,0-.10,0-.18,0-.24-.02-.04-.04-.10-.06-.14-.17-.24-.21-.54-.12-.81,0,0,.11-.30.14-.36l.09-.19c.05-.11.12-.20.22-.27,0,0,.25-.20.34-.28,0,0,0,0,0,0,.05-.09.11-.19.15-.26.02-.09.06-.17.12-.24,0,0,.11-.16.20-.28,0-.08.02-.15.04-.22,0,0,.04-.10.05-.17.02-.14.06-.29.15-.45.02-.05.05-.12.09-.20,0-.05-.02-.10-.03-.16-.04-.22-.02-.47-.01-.60h0c0-.05,0-.13.02-.25,0-.04.01-.09.02-.13-.01-.11,0-.22.02-.33.01-.11.04-.30.06-.37.05-.22.16-.38.20-.43.03-.04.07-.08.10-.11.09-.08.17-.14.23-.19.09-.24.12-.30.15-.34l.07-.12c.05-.09.13-.18.21-.24,0,0,.18-.13.29-.20.07-.05.11-.07.17-.10.03-.02.07-.04.17-.10.12-.08.30-.21.44-.32.06-.04.12-.09.16-.12-.03-.03-.07-.06-.11-.10-.16-.15-.53-.45-.66-.55-.21-.14-.31-.34-.35-.43-.04-.09-.06-.19-.06-.28v-.37c-.04-.06-.08-.13-.10-.17-.03-.03-.13-.17-.21-.69-.02-.05-.05-.10-.06-.13-.01-.03-.04-.09-.05-.13-.07-.10-.11-.19-.13-.26-.11-.13-.22-.31-.37-.52-.04-.07-.08-.13-.11-.17-.15-.15-.24-.36-.27-.60-.02-.10-.05-.30-.06-.42,0-.13,0-.29,0-.29l.02-.37c0-.15.02-.31.02-.40,0-.11-.04-.36-.05-.42-.04-.37.16-.66.25-.76l.19-.20c0-.16-.02-.37-.03-.45-.02-.11-.03-.22-.02-.31-.25-.73-.26-.77-.27-.86l-.02-.12s-.01-.07-.01-.11c0,0-.01-.39,0-.45l.10-.66c-.03-.15-.08-.38-.10-.49-.03-.07-.06-.19-.09-.38,0-.05-.01-.10-.01-.15,0,0,0-.10,0-.17-.05-.25.03-.49.10-.63,0-.02.02-.05.04-.08-.07-.16-.16-.37-.21-.46-.10-.15-.16-.33-.15-.52,0-.15.05-.29.12-.42.01-.08.03-.17.03-.21.01-.12.06-.25.13-.38.04-.08.10-.15.17-.21,0,0,.39-.34.44-.38.12-.09.25-.15.32-.18.03-.01.05-.02.08-.03l.38-.10c.17-.04.31-.04.36-.04.11,0,.22.04.32.09,0,0,.15.08.26.14.03,0,.07,0,.09,0,.26-.07.53.03.62.08.06.03.12.07.17.12,0,0,.36.34.40.38.04.03.08.07.12.12l.03-.04c.06-.13.19-.41.25-.53l.04-.98.14-5.18c0-.21.09-.40.24-.54.15-.14.35-.21.55-.20,1.59.08,29.46.46,29.68.46.42,0,.76.34.76.77v7.28s-.04,5.56-.04,5.56l-.02,15.43-.04,7.60v7.44c.02.12.04.54.01.76-.04.39-.37.68-.76.68Z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="feature-title">$6,100,000</h3>
+                                    <p class="feature-copy">Reinvested in Arizona communities</p>
+                                </div>
+
+                                <div class="feature-card">
+                                    <div class="icon">
+                                        <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M40.95,21.79c-3.86,0-7,3.14-7,7s3.14,7,7,7,7-3.14,7-7-3.14-7-7-7ZM40.95,37.78c-4.96,0-9-4.04-9-9s4.04-9,9-9,9,4.04,9,9-4.04,9-9,9ZM40.46,42.24c-6.83,0-15.17,5.67-15.17,12.28v.66c0,1.59,1.29,2.88,2.88,2.88h25.57c1.59,0,2.88-1.29,2.88-2.88v-.66c0-6.61-8.52-12.28-15.5-12.28h-.66ZM53.73,60.06h-25.57c-2.69,0-4.88-2.19-4.88-4.88v-.66c0-7.91,9.39-14.28,17.17-14.28h.66c7.93,0,17.5,6.37,17.5,14.28v.66c0,2.69-2.19,4.88-4.88,4.88Z"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M40.46,42.24c-6.83,0-15.17,5.67-15.17,12.28v.66c0,1.59,1.29,2.88,2.88,2.88h25.57c1.59,0,2.88-1.29,2.88-2.88v-.66c0-6.61-8.52-12.28-15.5-12.28h-.66ZM53.73,60.06h-25.57c-2.69,0-4.88-2.19-4.88-4.88v-.66c0-7.91,9.39-14.28,17.17-14.28h.66c7.93,0,17.5,6.37,17.5,14.28v.66c0,2.69-2.19,4.88-4.88,4.88Z"/>
+                                            <path fill="#0b3b60" d="M58.62,25.87c-2.46,0-4.46,2-4.46,4.46s2,4.46,4.46,4.46,4.46-2,4.46-4.46-2-4.46-4.46-4.46ZM58.62,36.79c-3.56,0-6.46-2.9-6.46-6.46s2.9-6.46,6.46-6.46,6.46,2.9,6.46,6.46-2.9,6.46-6.46,6.46ZM23.32,25.87c-2.46,0-4.46,2-4.46,4.46s2,4.46,4.46,4.46,4.46-2,4.46-4.46-2-4.46-4.46-4.46ZM23.32,36.79c-3.56,0-6.46-2.9-6.46-6.46s2.9-6.46,6.46-6.46,6.46,2.9,6.46,6.46-2.9,6.46-6.46,6.46ZM58.73,38.91h-.45c-2.27,0-4.74.79-6.85,2.11.62.35,1.22.73,1.79,1.14,1.61-.85,3.4-1.35,5.06-1.35h.45c4.54,0,10.31,3.82,10.31,8.11v.45c0,.94-.76,1.7-1.7,1.7h-7.31c.2.63.36,1.27.46,1.9h6.85c1.98,0,3.6-1.61,3.6-3.6v-.45c0-5.55-6.68-10.01-12.21-10.01ZM21.86,51.07h-7.26c-.94,0-1.7-.76-1.7-1.7v-.45c0-4.37,5.55-8.11,10.08-8.11h.45c1.66,0,3.47.51,5.11,1.36.58-.42,1.19-.81,1.82-1.18-2.14-1.3-4.63-2.08-6.93-2.08h-.45c-5.43,0-11.98,4.47-11.98,10.01v.45c0,1.98,1.61,3.6,3.6,3.6h6.81c.09-.63.25-1.27.45-1.9Z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="feature-title">14,000</h3>
+                                    <p class="feature-copy">Volunteer Hours</p>
+                                </div>
+
+                                <div class="feature-card">
+                                    <div class="icon">
+                                         <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#002c4e" d="M40.96,41.73c-.29,0-.57-.08-.83-.23-2.34-1.39-13.98-8.7-13.98-16.12,0-4.62,3.79-8.38,8.46-8.38,2.46,0,4.75,1.04,6.36,2.87,1.6-1.83,3.89-2.87,6.36-2.87,2.26,0,4.38.87,5.98,2.46,1.6,1.58,2.48,3.69,2.48,5.93,0,7.41-11.65,14.73-13.98,16.12-.25.15-.54.23-.83.23ZM34.6,19.06c-3.52,0-6.38,2.84-6.38,6.33,0,6.16,10.63,12.93,12.74,14.21,2.12-1.28,12.74-8.06,12.74-14.21,0-1.69-.66-3.28-1.87-4.47-1.2-1.19-2.81-1.86-4.52-1.86-2,0-3.85.91-5.07,2.5-.62.81-1.95.8-2.57,0-1.22-1.59-3.07-2.5-5.07-2.5Z"/>
+                                            <path fill="#002c4e" d="M39.15,62c-.24,0-.46-.12-.58-.3-.15-.13-.26-.33-.26-.54-.01-3.61-.98-8.51-3.69-11.42-1.96-2.11-10.34-10.88-11.65-11.92-.91-.73-2.34-1.18-3.36-.08-.46.49-.7,1.15-.7,1.86s.25,1.37.7,1.86l5.76,6.22c.25.27.25.69,0,.96l-.09.10c-.13.15-.32.23-.53.23s-.39-.08-.53-.23l-5.76-6.22c-.72-.78-1.12-1.81-1.12-2.92,0-.99.32-1.93.91-2.67v-9.5c0-1.43-1.06-2.59-2.34-2.59s-2.34,1.16-2.34,2.59v12.88c0,2.78.86,5.07,2.62,6.99l9.98,8.55s.04.03.06.06c1.04,1.12,1.42,4.29,1.43,5.25,0,.22-.1.42-.26.55-.13.18-.34.31-.58.31-.39,0-.72-.32-.72-.71v-.07c0-1.21-.45-3.61-.99-4.24l-9.97-8.54s-.04-.03-.06-.06c-2.07-2.23-3.07-4.88-3.07-8.08v-12.88c0-2.29,1.75-4.15,3.9-4.15s3.9,1.86,3.9,4.15v8.34c1.16-.45,2.66-.33,4.12.83,1.51,1.19,10.33,10.48,11.82,12.08,2.57,2.78,4.11,7.47,4.11,12.55v.07c0,.39-.32.71-.72.71Z"/>
+                                            <path fill="#002c4e" d="M55.12,62c-.25,0-.46-.12-.58-.3-.16-.13-.26-.33-.26-.56.01-.96.39-4.13,1.43-5.24.02-.02.04-.04.06-.06l9.99-8.56c1.77-1.92,2.62-4.21,2.62-6.99v-12.88c0-1.43-1.05-2.59-2.34-2.59s-2.34,1.16-2.34,2.59v9.5c.59.75.91,1.68.91,2.67,0,1.1-.4,2.13-1.12,2.92l-5.76,6.21c-.13.15-.32.23-.53.23s-.39-.08-.53-.23l-.09-.10c-.25-.27-.25-.69,0-.96l5.76-6.22c.46-.49.7-1.15.7-1.86s-.25-1.37-.7-1.86c-1.02-1.09-2.45-.64-3.36.08-1.29,1.03-9.69,9.8-11.64,11.92-2.7,2.92-3.68,7.82-3.69,11.42,0,.22-.1.41-.26.54-.13.18-.34.31-.58.31-.39,0-.72-.32-.72-.71v-.07c0-5.08,1.53-9.78,4.11-12.55,1.48-1.6,10.33-10.89,11.82-12.08,1.46-1.16,2.95-1.28,4.12-.83v-8.34c0-2.29,1.75-4.15,3.9-4.15s3.9,1.86,3.9,4.15v12.88c0,3.21-1.01,5.85-3.07,8.08-.02.02-.04.04-.06.06l-9.98,8.56c-.53.63-.98,3.03-.98,4.23v.07c0,.39-.32.71-.72.71h-.01Z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="feature-title">220</h3>
+                                    <p class="feature-copy">Partners across the state</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="incorrect">
+            <div class="comparison-section">
+                <div class="section-header">
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-viewport="2" data-width="425" title="Mobile">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="7" y="2" width="10" height="20" rx="2"/>
+                                <line x1="12" y1="18" x2="12" y2="18"/>
+                            </svg>
+                        </button>
+                        <button class="preset-btn" data-viewport="2" data-width="768" title="Tablet">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                <line x1="12" y1="18" x2="12" y2="18"/>
+                            </svg>
+                        </button>
+                        <button class="preset-btn" data-viewport="2" data-width="1200" title="Desktop">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="viewport-wrapper">
+                    <div class="viewport-container" id="viewport2">
+                        <div class="viewport-info" id="viewportInfo2">
+                            <span id="widthDisplay2">1200px</span>
+                            <span class="breakpoint-indicator" id="breakpointDisplay2">Desktop • 3 Columns</span>
+                        </div>
+                        <div class="resize-handle" id="resizeHandle2"></div>
+                        <div class="viewport-content" id="viewportContent2">
+                            <div class="incorrect-structure">
+                                <!-- Row of icons -->
+                                <div class="incorrect-row icons-row">
+                                    <div class="incorrect-item">
+                                        <div class="icon">
+                                            <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M24.62,23.76s-.06.01-.10.02c.03,0,.06-.02.10-.02ZM21.5,25.2s-.04.07-.05.11c.02-.05.04-.09.05-.11ZM22.39,39.82c.10.02.20.06.29.12-.08-.06-.18-.10-.29-.12ZM21.6,41.53s-.04.07-.05.11c.02-.05.04-.09.05-.11ZM20.84,43.36s-.02.08-.02.10c0-.04.01-.07.02-.10ZM43.28,60.26c.25,0,.96.02,3.17.07,2.76.06,6.72.15,8.64.18v-7.35s.05-14.86.05-14.86v-8.17s.05-5.56.05-5.56v-6.52c-4.22-.05-23.87-.32-28.23-.43l-.16,5.49s0,.05,0,.08c-.01.09-.05.26-.12.41-.04.07-.30.63-.30.63-.02.05-.05.10-.09.15l-.45.59c-.12.13-.32.32-.63.36-.06,0-.15.02-.53-.02-.33-.01-.66-.22-.79-.63-.01-.04-.04-.10-.07-.15-.01-.01-.02-.02-.03-.03-.02-.01-.06-.05-.11-.10-.04,0-.08,0-.13,0-.03,0-.27.02-.52-.10-.03-.01-.10-.05-.18-.10l-.10.03s-.10.09-.15.13c-.02.09-.03.17-.03.17,0,.01,0,.03,0,.04.07.14.15.33.27.60.13.27.11.60-.04.85,0,.02-.04.11-.07.17,0,.06,0,.12,0,.20,0,0,0,.02,0,.02.04.10.08.28.20.89.02.09.02.18,0,.27l-.11.74s0,.07.01.13c0,.03.01.07.02.11.05.17.24.71.24.71.01.03.02.06.03.09l.02.11c.02.10.02.21,0,.31.01.11.03.33.06.83,0,.16-.03.45-.26.69l-.18.18c.03.29.03.34.02.42,0,.01-.01.20-.02.38h0s-.02.34-.02.34c0,0,0,.10,0,.19,0,.04.01.10.02.15.05.07.10.14.16.24.10.15.21.33.29.42.03.03.06.07.08.10.04.07.10.17.14.28.08.12.12.25.15.33.11.22.16.37.18.51,0,.03.02.12.03.19.04.07.10.17.18.34.03.05.05.11.06.16,0,.04.04.17.04.35v.08c.19.15.46.38.61.52.07.07.11.10.14.12.07.05.12.09.22.20.10.11.21.23.22.23.06.06.11.14.15.22.05.10.15.38.04.68-.03.09-.05.15-.37.60-.02.03-.04.06-.07.08-.05.06-.20.20-.35.30-.02.02-.09.07-.17.13-.17.12-.37.28-.52.38-.18.11-.25.15-.30.18-.04.02-.08.06-.12.08v.02s-.08.23-.08.23c-.01.04-.03.08-.05.12-.04.08-.16.27-.39.40.03.15.02.32-.03.47l-.03.10s0,.09,0,.14c0,.05-.02.14,0,.21.02.10.03.18.04.22.05.17.08.45-.07.71-.02.04-.14.33-.14.33,0,.02-.02.04-.03.07,0,.06-.03.14-.06.25,0,.03,0,.06,0,.09,0,.10-.04.27-.15.46-.04.07-.18.28-.27.40,0,.03-.02.05-.03.07-.02.04-.06.14-.14.24-.01.03-.13.26-.13.26-.06.12-.15.21-.26.28-.08.06-.18.14-.26.21.02.05.05.11.07.17.08.20.11.35.09.49,0,.10,0,.32,0,.32,0,.05,0,.11,0,.16-.01.08-.03.18-.07.28.08.02.18.06.24.08.02.01.07.04.13.06.04.02.09.05.12.06.29.09.51.33.59.61.12.31.18.51.15.73,0-.03.01.02.02.09,0,.10.02.22.03.38.06.32-.07.66-.34.86-.03.02-.10.08-.18.14,0,.04,0,.07,0,.07-.03.37-.34.69-.73.74-.05,0-.14.02-.52-.01-.06,0-.10-.01-.16-.03,0,0,0,0-.01,0l-.25.47c1.59.69,6.43,2.77,8.48,3.65l12.85,5.37s1.17.49,1.28.55c.01,0,.03.01.04.02ZM55.87,62.05h0c-1.35,0-6.22-.12-9.44-.19-1.69-.04-2.99-.07-3.18-.07-.25,0-.49-.08-.68-.18-.14-.06-1.18-.50-1.18-.50l-12.86-5.38c-8.97-3.85-9.06-3.90-9.09-3.91-.38-.19-.56-.63-.44-1.06.01-.07.03-.19.05-.27.04-.18.15-.36.20-.45l.32-.61c.04-.28.23-.52.50-.62l.52-.19c.13-.05.26-.06.39-.03,0,0,0-.02.01-.02.05-.07.10-.13.17-.19,0,0,.05-.04.12-.10,0-.03,0-.06,0-.08-.01-.10-.02-.19-.02-.27-.01,0-.03-.01-.04-.02-.08-.04-.13-.05-.13-.05l-.34-.07c-.24-.05-.44-.19-.56-.39-.05-.08-.08-.17-.10-.27,0-.03-.03-.11-.05-.16-.16-.28-.07-.62-.04-.73,0,0,.06-.21.10-.33,0-.10,0-.18,0-.24-.02-.04-.04-.10-.06-.14-.17-.24-.21-.54-.12-.81,0,0,.11-.30.14-.36l.09-.19c.05-.11.12-.20.22-.27,0,0,.25-.20.34-.28,0,0,0,0,0,0,.05-.09.11-.19.15-.26.02-.09.06-.17.12-.24,0,0,.11-.16.20-.28,0-.08.02-.15.04-.22,0,0,.04-.10.05-.17.02-.14.06-.29.15-.45.02-.05.05-.12.09-.20,0-.05-.02-.10-.03-.16-.04-.22-.02-.47-.01-.60h0c0-.05,0-.13.02-.25,0-.04.01-.09.02-.13-.01-.11,0-.22.02-.33.01-.11.04-.30.06-.37.05-.22.16-.38.20-.43.03-.04.07-.08.10-.11.09-.08.17-.14.23-.19.09-.24.12-.30.15-.34l.07-.12c.05-.09.13-.18.21-.24,0,0,.18-.13.29-.20.07-.05.11-.07.17-.10.03-.02.07-.04.17-.10.12-.08.30-.21.44-.32.06-.04.12-.09.16-.12-.03-.03-.07-.06-.11-.10-.16-.15-.53-.45-.66-.55-.21-.14-.31-.34-.35-.43-.04-.09-.06-.19-.06-.28v-.37c-.04-.06-.08-.13-.10-.17-.03-.03-.13-.17-.21-.69-.02-.05-.05-.10-.06-.13-.01-.03-.04-.09-.05-.13-.07-.10-.11-.19-.13-.26-.11-.13-.22-.31-.37-.52-.04-.07-.08-.13-.11-.17-.15-.15-.24-.36-.27-.60-.02-.10-.05-.30-.06-.42,0-.13,0-.29,0-.29l.02-.37c0-.15.02-.31.02-.40,0-.11-.04-.36-.05-.42-.04-.37.16-.66.25-.76l.19-.20c0-.16-.02-.37-.03-.45-.02-.11-.03-.22-.02-.31-.25-.73-.26-.77-.27-.86l-.02-.12s-.01-.07-.01-.11c0,0-.01-.39,0-.45l.10-.66c-.03-.15-.08-.38-.10-.49-.03-.07-.06-.19-.09-.38,0-.05-.01-.10-.01-.15,0,0,0-.10,0-.17-.05-.25.03-.49.10-.63,0-.02.02-.05.04-.08-.07-.16-.16-.37-.21-.46-.10-.15-.16-.33-.15-.52,0-.15.05-.29.12-.42.01-.08.03-.17.03-.21.01-.12.06-.25.13-.38.04-.08.10-.15.17-.21,0,0,.39-.34.44-.38.12-.09.25-.15.32-.18.03-.01.05-.02.08-.03l.38-.10c.17-.04.31-.04.36-.04.11,0,.22.04.32.09,0,0,.15.08.26.14.03,0,.07,0,.09,0,.26-.07.53.03.62.08.06.03.12.07.17.12,0,0,.36.34.40.38.04.03.08.07.12.12l.03-.04c.06-.13.19-.41.25-.53l.04-.98.14-5.18c0-.21.09-.40.24-.54.15-.14.35-.21.55-.20,1.59.08,29.46.46,29.68.46.42,0,.76.34.76.77v7.28s-.04,5.56-.04,5.56l-.02,15.43-.04,7.60v7.44c.02.12.04.54.01.76-.04.39-.37.68-.76.68Z"/>
+                                        </svg>
+                                        </div>
+                                    </div>
+                                    <div class="incorrect-item">
+                                        <div class="icon">
+                                           <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M40.95,21.79c-3.86,0-7,3.14-7,7s3.14,7,7,7,7-3.14,7-7-3.14-7-7-7ZM40.95,37.78c-4.96,0-9-4.04-9-9s4.04-9,9-9,9,4.04,9,9-4.04,9-9,9ZM40.46,42.24c-6.83,0-15.17,5.67-15.17,12.28v.66c0,1.59,1.29,2.88,2.88,2.88h25.57c1.59,0,2.88-1.29,2.88-2.88v-.66c0-6.61-8.52-12.28-15.5-12.28h-.66ZM53.73,60.06h-25.57c-2.69,0-4.88-2.19-4.88-4.88v-.66c0-7.91,9.39-14.28,17.17-14.28h.66c7.93,0,17.5,6.37,17.5,14.28v.66c0,2.69-2.19,4.88-4.88,4.88Z"/>
+                                            <path fill="#0b3b60" fill-rule="evenodd" d="M40.46,42.24c-6.83,0-15.17,5.67-15.17,12.28v.66c0,1.59,1.29,2.88,2.88,2.88h25.57c1.59,0,2.88-1.29,2.88-2.88v-.66c0-6.61-8.52-12.28-15.5-12.28h-.66ZM53.73,60.06h-25.57c-2.69,0-4.88-2.19-4.88-4.88v-.66c0-7.91,9.39-14.28,17.17-14.28h.66c7.93,0,17.5,6.37,17.5,14.28v.66c0,2.69-2.19,4.88-4.88,4.88Z"/>
+                                            <path fill="#0b3b60" d="M58.62,25.87c-2.46,0-4.46,2-4.46,4.46s2,4.46,4.46,4.46,4.46-2,4.46-4.46-2-4.46-4.46-4.46ZM58.62,36.79c-3.56,0-6.46-2.9-6.46-6.46s2.9-6.46,6.46-6.46,6.46,2.9,6.46,6.46-2.9,6.46-6.46,6.46ZM23.32,25.87c-2.46,0-4.46,2-4.46,4.46s2,4.46,4.46,4.46,4.46-2,4.46-4.46-2-4.46-4.46-4.46ZM23.32,36.79c-3.56,0-6.46-2.9-6.46-6.46s2.9-6.46,6.46-6.46,6.46,2.9,6.46,6.46-2.9,6.46-6.46,6.46ZM58.73,38.91h-.45c-2.27,0-4.74.79-6.85,2.11.62.35,1.22.73,1.79,1.14,1.61-.85,3.4-1.35,5.06-1.35h.45c4.54,0,10.31,3.82,10.31,8.11v.45c0,.94-.76,1.7-1.7,1.7h-7.31c.2.63.36,1.27.46,1.9h6.85c1.98,0,3.6-1.61,3.6-3.6v-.45c0-5.55-6.68-10.01-12.21-10.01ZM21.86,51.07h-7.26c-.94,0-1.7-.76-1.7-1.7v-.45c0-4.37,5.55-8.11,10.08-8.11h.45c1.66,0,3.47.51,5.11,1.36.58-.42,1.19-.81,1.82-1.18-2.14-1.3-4.63-2.08-6.93-2.08h-.45c-5.43,0-11.98,4.47-11.98,10.01v.45c0,1.98,1.61,3.6,3.6,3.6h6.81c.09-.63.25-1.27.45-1.9Z"/>
+                                        </svg>
+                                        </div>
+                                    </div>
+                                    <div class="incorrect-item">
+                                        <div class="icon">
+                                             <svg viewBox="0 0 80 80">
+                                            <circle fill="#98e1ff" cx="40" cy="40" r="40"/>
+                                            <path fill="#002c4e" d="M40.96,41.73c-.29,0-.57-.08-.83-.23-2.34-1.39-13.98-8.7-13.98-16.12,0-4.62,3.79-8.38,8.46-8.38,2.46,0,4.75,1.04,6.36,2.87,1.6-1.83,3.89-2.87,6.36-2.87,2.26,0,4.38.87,5.98,2.46,1.6,1.58,2.48,3.69,2.48,5.93,0,7.41-11.65,14.73-13.98,16.12-.25.15-.54.23-.83.23ZM34.6,19.06c-3.52,0-6.38,2.84-6.38,6.33,0,6.16,10.63,12.93,12.74,14.21,2.12-1.28,12.74-8.06,12.74-14.21,0-1.69-.66-3.28-1.87-4.47-1.2-1.19-2.81-1.86-4.52-1.86-2,0-3.85.91-5.07,2.5-.62.81-1.95.8-2.57,0-1.22-1.59-3.07-2.5-5.07-2.5Z"/>
+                                            <path fill="#002c4e" d="M39.15,62c-.24,0-.46-.12-.58-.3-.15-.13-.26-.33-.26-.54-.01-3.61-.98-8.51-3.69-11.42-1.96-2.11-10.34-10.88-11.65-11.92-.91-.73-2.34-1.18-3.36-.08-.46.49-.7,1.15-.7,1.86s.25,1.37.7,1.86l5.76,6.22c.25.27.25.69,0,.96l-.09.10c-.13.15-.32.23-.53.23s-.39-.08-.53-.23l-5.76-6.22c-.72-.78-1.12-1.81-1.12-2.92,0-.99.32-1.93.91-2.67v-9.5c0-1.43-1.06-2.59-2.34-2.59s-2.34,1.16-2.34,2.59v12.88c0,2.78.86,5.07,2.62,6.99l9.98,8.55s.04.03.06.06c1.04,1.12,1.42,4.29,1.43,5.25,0,.22-.1.42-.26.55-.13.18-.34.31-.58.31-.39,0-.72-.32-.72-.71v-.07c0-1.21-.45-3.61-.99-4.24l-9.97-8.54s-.04-.03-.06-.06c-2.07-2.23-3.07-4.88-3.07-8.08v-12.88c0-2.29,1.75-4.15,3.9-4.15s3.9,1.86,3.9,4.15v8.34c1.16-.45,2.66-.33,4.12.83,1.51,1.19,10.33,10.48,11.82,12.08,2.57,2.78,4.11,7.47,4.11,12.55v.07c0,.39-.32.71-.72.71Z"/>
+                                            <path fill="#002c4e" d="M55.12,62c-.25,0-.46-.12-.58-.3-.16-.13-.26-.33-.26-.56.01-.96.39-4.13,1.43-5.24.02-.02.04-.04.06-.06l9.99-8.56c1.77-1.92,2.62-4.21,2.62-6.99v-12.88c0-1.43-1.05-2.59-2.34-2.59s-2.34,1.16-2.34,2.59v9.5c.59.75.91,1.68.91,2.67,0,1.1-.4,2.13-1.12,2.92l-5.76,6.21c-.13.15-.32.23-.53.23s-.39-.08-.53-.23l-.09-.10c-.25-.27-.25-.69,0-.96l5.76-6.22c.46-.49.7-1.15.7-1.86s-.25-1.37-.7-1.86c-1.02-1.09-2.45-.64-3.36.08-1.29,1.03-9.69,9.8-11.64,11.92-2.7,2.92-3.68,7.82-3.69,11.42,0,.22-.1.41-.26.54-.13.18-.34.31-.58.31-.39,0-.72-.32-.72-.71v-.07c0-5.08,1.53-9.78,4.11-12.55,1.48-1.6,10.33-10.89,11.82-12.08,1.46-1.16,2.95-1.28,4.12-.83v-8.34c0-2.29,1.75-4.15,3.9-4.15s3.9,1.86,3.9,4.15v12.88c0,3.21-1.01,5.85-3.07,8.08-.02.02-.04.04-.06.06l-9.98,8.56c-.53.63-.98,3.03-.98,4.23v.07c0,.39-.32.71-.72.71h-.01Z"/>
+                                        </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Row of titles -->
+                                <div class="incorrect-row titles-row">
+                                    <div class="incorrect-item">
+                                        <h3 class="feature-title">$6,100,000</h3>
+                                    </div>
+                                    <div class="incorrect-item">
+                                         <h3 class="feature-title">14,000</h3>
+                                    </div>
+                                    <div class="incorrect-item">
+                                        <h3 class="feature-title">220</h3>
+                                    </div>
+                                </div>
+
+                                <!-- Row of copy -->
+                                <div class="incorrect-row copy-row">
+                                    <div class="incorrect-item">
+                                         <p class="feature-copy">Reinvested in Arizona communities</p>
+                                    </div>
+                                    <div class="incorrect-item">
+                                        <p class="feature-copy">Volunteer Hours</p>
+                                    </div>
+                                    <div class="incorrect-item">
+                                       <p class="feature-copy">Partners across the state</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const viewport = document.getElementById('viewport');
+        const resizeHandle = document.getElementById('resizeHandle');
+        const widthDisplay = document.getElementById('widthDisplay');
+        const breakpointDisplay = document.getElementById('breakpointDisplay');
+        const viewportContent = document.querySelector('.viewport-content');
+        const featureGrid = document.querySelector('.feature-grid');
+        const featureCards = document.querySelectorAll('.feature-card');
+        const icons = document.querySelectorAll('.icon');
+        const titles = document.querySelectorAll('.feature-title');
+        const copies = document.querySelectorAll('.feature-copy');
+
+        // Second viewport elements
+        const viewport2 = document.getElementById('viewport2');
+        const resizeHandle2 = document.getElementById('resizeHandle2');
+        const widthDisplay2 = document.getElementById('widthDisplay2');
+        const breakpointDisplay2 = document.getElementById('breakpointDisplay2');
+        const viewportContent2 = document.getElementById('viewportContent2');
+        const incorrectStructure = document.querySelector('.incorrect-structure');
+        const incorrectRows = document.querySelectorAll('.incorrect-row');
+        const incorrectItems = document.querySelectorAll('.incorrect-item');
+
+        let isResizing = false;
+        let viewportLeft = 0;
+        let isResizing2 = false;
+        let viewportLeft2 = 0;
+
+        // Click-to-lock functionality
+        const lockableElements = [
+            { elements: [viewportContent], class: 'viewport-content' },
+            { elements: [featureGrid], class: 'feature-grid' },
+            { elements: featureCards, class: 'feature-card' },
+            { elements: icons, class: 'icon' },
+            { elements: titles, class: 'feature-title' },
+            { elements: copies, class: 'feature-copy' },
+            // Second viewport elements
+            { elements: [viewportContent2], class: 'viewport-content' },
+            { elements: [incorrectStructure], class: 'incorrect-structure' },
+            { elements: incorrectRows, class: 'incorrect-row' },
+            { elements: incorrectItems, class: 'incorrect-item' }
+        ];
+
+        function unlockAll() {
+            lockableElements.forEach(group => {
+                group.elements.forEach(el => {
+                    if (el) el.classList.remove('locked');
+                });
+            });
+        }
+
+        lockableElements.forEach(group => {
+            group.elements.forEach(el => {
+                if (el) {
+                    el.addEventListener('click', (e) => {
+                        // Don't lock if clicking on resize handle area
+                        if (e.target === resizeHandle || e.target.closest('#resizeHandle') ||
+                            e.target === resizeHandle2 || e.target.closest('#resizeHandle2')) {
+                            return;
+                        }
+                        
+                        e.stopPropagation();
+                        unlockAll();
+                        el.classList.add('locked');
+                    });
+                }
+            });
+        });
+
+        // Click outside to unlock
+        document.addEventListener('click', (e) => {
+            // Check if click is outside both viewports or on resize handles
+            const outsideViewport1 = !viewport.contains(e.target) || e.target === resizeHandle || e.target.closest('#resizeHandle');
+            const outsideViewport2 = !viewport2.contains(e.target) || e.target === resizeHandle2 || e.target.closest('#resizeHandle2');
+            
+            if (outsideViewport1 && outsideViewport2) {
+                unlockAll();
+            }
+        });
+
+        function updateDisplay() {
+            const width = viewport.offsetWidth;
+            widthDisplay.textContent = width + 'px';
+
+            // Calculate how many cards fit per row based on card width + gap
+            const cardMinWidth = 280;
+            const cardMaxWidth = 360;
+            const gap = 40;
+            const contentPadding = 40; // 20px on each side
+            
+            const availableWidth = width - contentPadding;
+            let columns = Math.floor((availableWidth + gap) / (cardMinWidth + gap));
+            columns = Math.max(1, Math.min(3, columns));
+
+            let layout;
+            if (columns === 1) {
+                layout = 'Mobile';
+            } else if (columns === 2) {
+                layout = 'Tablet';
+            } else {
+                layout = 'Desktop';
+            }
+
+            breakpointDisplay.textContent = `${layout} • ${columns} Column${columns > 1 ? 's' : ''}`;
+        }
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            const rect = viewport.getBoundingClientRect();
+            viewportLeft = rect.left;
+            viewport.classList.add('resizing');
+            viewport.classList.add('dragging');
+            viewport.classList.add('animating');
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+            e.stopPropagation(); // Prevent click from unlocking
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            let newWidth = e.clientX - viewportLeft;
+            
+            // Apply constraints
+            newWidth = Math.max(320, Math.min(1600, newWidth));
+            
+            viewport.style.width = newWidth + 'px';
+            updateDisplay();
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                viewport.classList.remove('resizing');
+                viewport.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                
+                // Keep animating class for 3 seconds after drag ends
+                setTimeout(() => {
+                    viewport.classList.remove('animating');
+                }, 3000);
+            }
+        });
+
+        // Update on window resize
+        const resizeObserver = new ResizeObserver(() => {
+            updateDisplay();
+        });
+        resizeObserver.observe(viewport);
+
+        const resizeObserver2 = new ResizeObserver(() => {
+            updateDisplay2();
+        });
+        resizeObserver2.observe(viewport2);
+
+        // Second viewport resize handlers
+        function updateDisplay2() {
+            const width = viewport2.offsetWidth;
+            widthDisplay2.textContent = width + 'px';
+
+            const cardMinWidth = 280;
+            const gap = 40;
+            const contentPadding = 40;
+            
+            const availableWidth = width - contentPadding;
+            let columns = Math.floor((availableWidth + gap) / (cardMinWidth + gap));
+            columns = Math.max(1, Math.min(3, columns));
+
+            let layout;
+            if (columns === 1) {
+                layout = 'Mobile';
+            } else if (columns === 2) {
+                layout = 'Tablet';
+            } else {
+                layout = 'Desktop';
+            }
+
+            breakpointDisplay2.textContent = `${layout} • ${columns} Column${columns > 1 ? 's' : ''}`;
+        }
+
+        resizeHandle2.addEventListener('mousedown', (e) => {
+            isResizing2 = true;
+            const rect = viewport2.getBoundingClientRect();
+            viewportLeft2 = rect.left;
+            viewport2.classList.add('resizing');
+            viewport2.classList.add('dragging');
+            viewport2.classList.add('animating');
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+            e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizing2) {
+                let newWidth = e.clientX - viewportLeft2;
+                newWidth = Math.max(320, Math.min(1600, newWidth));
+                viewport2.style.width = newWidth + 'px';
+                updateDisplay2();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing2) {
+                isResizing2 = false;
+                viewport2.classList.remove('resizing');
+                viewport2.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                
+                // Keep animating class for 3 seconds after drag ends
+                setTimeout(() => {
+                    viewport2.classList.remove('animating');
+                }, 3000);
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+        updateDisplay2();
+
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabIndicator = document.querySelector('.tab-indicator');
+
+        function updateTabIndicator(activeTab) {
+            const rect = activeTab.getBoundingClientRect();
+            const tabsRect = activeTab.parentElement.getBoundingClientRect();
+            
+            tabIndicator.style.left = (rect.left - tabsRect.left) + 'px';
+            tabIndicator.style.width = rect.width + 'px';
+        }
+
+        // Initialize indicator position
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+            updateTabIndicator(activeTab);
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+                
+                // Animate indicator
+                updateTabIndicator(tab);
+            });
+        });
+
+        // Update indicator on window resize
+        window.addEventListener('resize', () => {
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab) {
+                updateTabIndicator(activeTab);
+            }
+        });
+
+        // Preset button handlers
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const viewportNum = btn.dataset.viewport;
+                const width = parseInt(btn.dataset.width);
+                
+                if (viewportNum === '1') {
+                    viewport.classList.add('animating');
+                    viewport.style.width = width + 'px';
+                    updateDisplay();
+                    
+                    // Keep animating class for 400ms animation + 3000ms extra = 3400ms total
+                    setTimeout(() => {
+                        viewport.classList.remove('animating');
+                    }, 3400);
+                } else if (viewportNum === '2') {
+                    viewport2.classList.add('animating');
+                    viewport2.style.width = width + 'px';
+                    updateDisplay2();
+                    
+                    // Keep animating class for 400ms animation + 3000ms extra = 3400ms total
+                    setTimeout(() => {
+                        viewport2.classList.remove('animating');
+                    }, 3400);
+                }
+            });
+        });
+
+        // Onboarding tooltip system
+        const onboardingSteps = [
+            {
+                element: '.tabs',
+                position: 'bottom-left',
+                text: 'Switch between tabs to see the correct and incorrect layout structures.'
+            },
+            {
+                element: '.preset-buttons',
+                position: 'bottom',
+                text: 'Click these device icons to quickly switch between mobile, tablet, and desktop sizes.'
+            },
+            {
+                element: '.resize-handle',
+                position: 'left',
+                text: 'Drag this edge to manually resize the viewport and watch elements rearrange in real-time.'
+            },
+            {
+                element: '.viewport-content',
+                position: 'top',
+                text: 'Hover over elements to see their structure. Click to lock the highlight and drag while locked.'
+            }
+        ];
+
+        let currentStep = 0;
+        let currentTooltip;
+
+        // Cookie utilities
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function createTooltip(step) {
+            const stepData = onboardingSteps[step];
+            const targetElement = document.querySelector(stepData.element);
+            
+            if (!targetElement) return;
+
+            // Create tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.setAttribute('data-position', stepData.position);
+            
+            tooltip.innerHTML = `
+                <div>${stepData.text}</div>
+                <div class="tooltip-actions">
+                    <button class="tooltip-btn skip">Skip Tour</button>
+                    <button class="tooltip-btn next">${step === onboardingSteps.length - 1 ? 'Got it!' : 'Next'}</button>
+                </div>
+            `;
+
+            document.body.appendChild(tooltip);
+            currentTooltip = tooltip;
+
+            // Position tooltip
+            const rect = targetElement.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            switch(stepData.position) {
+                case 'bottom':
+                    tooltip.style.left = (rect.left + rect.width / 2 - tooltipRect.width / 2) + 'px';
+                    tooltip.style.top = (rect.bottom + 16) + 'px';
+                    break;
+                case 'bottom-left':
+                    tooltip.style.left = rect.left + 'px';
+                    tooltip.style.top = (rect.bottom + 16) + 'px';
+                    break;
+                case 'top':
+                    tooltip.style.left = (rect.left + rect.width / 2 - tooltipRect.width / 2) + 'px';
+                    tooltip.style.top = (rect.top - tooltipRect.height - 16) + 'px';
+                    break;
+                case 'left':
+                    tooltip.style.left = (rect.left - tooltipRect.width - 16) + 'px';
+                    tooltip.style.top = (rect.top + rect.height / 2 - tooltipRect.height / 2) + 'px';
+                    break;
+                case 'right':
+                    tooltip.style.left = (rect.right + 16) + 'px';
+                    tooltip.style.top = (rect.top + rect.height / 2 - tooltipRect.height / 2) + 'px';
+                    break;
+            }
+
+            setTimeout(() => tooltip.classList.add('active'), 10);
+
+            // Event listeners
+            tooltip.querySelector('.skip').addEventListener('click', endTour);
+            tooltip.querySelector('.next').addEventListener('click', () => {
+                if (step === onboardingSteps.length - 1) {
+                    endTour();
+                } else {
+                    nextStep();
+                }
+            });
+        }
+
+        function nextStep() {
+            if (currentTooltip) {
+                currentTooltip.remove();
+                currentTooltip = null;
+            }
+            
+            currentStep++;
+            if (currentStep < onboardingSteps.length) {
+                createTooltip(currentStep);
+            } else {
+                endTour();
+            }
+        }
+
+        function endTour() {
+            if (currentTooltip) {
+                currentTooltip.classList.remove('active');
+                setTimeout(() => {
+                    currentTooltip.remove();
+                    currentTooltip = null;
+                }, 300);
+            }
+            
+            // Set cookie to remember tour was completed
+            setCookie('onboardingCompleted', 'true', 30);
+        }
+
+        // Start onboarding if not completed
+        if (!getCookie('onboardingCompleted')) {
+            setTimeout(() => {
+                createTooltip(currentStep);
+            }, 500);
+        }
+    </script>
+</body>
+</html>
