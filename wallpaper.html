@@ -80,6 +80,9 @@
   <script>
     const canvas = document.getElementById('gridCanvas');
     const ctx = canvas.getContext('2d');
+    
+    // Store grid state for exact SVG export
+    let currentGridState = [];
 
     let minCellsAcross = 8;
     let isChristmasMode = true;
@@ -131,8 +134,12 @@
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const { cellSize, rows, cols } = calculateGrid();
+      
+      // Reset grid state
+      currentGridState = [];
 
       for (let row = 0; row < rows; row++) {
+        currentGridState[row] = [];
         for (let col = 0; col < cols; col++) {
           ctx.fillStyle = 'transparent';
           ctx.strokeStyle = 'transparent';
@@ -144,11 +151,38 @@
           const shapeColors = colors.filter(c => c !== bgColor);
           const shapeColor = shapeColors[Math.floor(Math.random() * shapeColors.length)];
 
+          // Store state for SVG export
+          const cellState = {
+            bgColor: bgColor,
+            shapeColor: shapeColor
+          };
+
           if (isChristmasMode) {
-            drawSvgShape(ctx, col * cellSize, row * cellSize, cellSize, bgColor);
+            const colorSet = getRandomColors();
+            const rotations = [0, 90, 180, 270];
+            const rotation = rotations[Math.floor(Math.random() * rotations.length)];
+            const bgOptions = ['#FFFFFF', '#E7EAF1', '#F1F9FD'];
+            const availableBgs = bgOptions.filter(bg => bg !== colorSet.cls2);
+            const lightBg = availableBgs.length === bgOptions.length 
+              ? bgOptions[Math.floor(Math.random() * bgOptions.length)]
+              : availableBgs[Math.floor(Math.random() * availableBgs.length)];
+            
+            cellState.isChristmas = true;
+            cellState.colorSet = colorSet;
+            cellState.rotation = rotation;
+            cellState.lightBg = lightBg;
+            
+            drawSvgShape(ctx, col * cellSize, row * cellSize, cellSize, bgColor, colorSet, rotation, lightBg);
           } else {
-            drawQuarterCircle(ctx, col * cellSize, row * cellSize, cellSize, shapeColor);
+            const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+            const corner = corners[Math.floor(Math.random() * corners.length)];
+            cellState.isChristmas = false;
+            cellState.corner = corner;
+            
+            drawQuarterCircle(ctx, col * cellSize, row * cellSize, cellSize, shapeColor, corner);
           }
+          
+          currentGridState[row][col] = cellState;
         }
       }
     }
@@ -157,10 +191,8 @@
       return color;
     }
 
-    function drawQuarterCircle(context, x, y, size, color) {
+    function drawQuarterCircle(context, x, y, size, color, corner) {
       context.fillStyle = color;
-      const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-      const corner = corners[Math.floor(Math.random() * corners.length)];
 
       context.beginPath();
       switch (corner) {
@@ -196,25 +228,7 @@
       };
     }
 
-    function drawSvgShape(context, x, y, size, bgColor) {
-      // Get three random colors different from background and from each other
-      const colorSet = getRandomColors();
-      // Random rotation: 0, 90, 180, or 270 degrees
-      const rotations = [0, 90, 180, 270];
-      const rotation = rotations[Math.floor(Math.random() * rotations.length)];
-      
-      // New snowflake design with stars
-      // Three light background options
-      const bgOptions = ['#FFFFFF', '#E7EAF1', '#F1F9FD'];
-      
-      // Filter out the quarter circle color if it matches any background option
-      const availableBgs = bgOptions.filter(bg => bg !== colorSet.cls2);
-      
-      // If quarter circle isn't a light color, use all options; otherwise use filtered list
-      const lightBg = availableBgs.length === bgOptions.length 
-        ? bgOptions[Math.floor(Math.random() * bgOptions.length)]
-        : availableBgs[Math.floor(Math.random() * availableBgs.length)];
-      
+    function drawSvgShape(context, x, y, size, bgColor, colorSet, rotation, lightBg) {
       const svgString = `<?xml version="1.0" encoding="UTF-8"?>
 <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="82.66 1.24 80 80">
   <defs>
@@ -332,18 +346,185 @@
     }
 
     function downloadCanvasAsImage() {
-      let image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-      let link = document.createElement('a');
-      link.download = 'my-canvas.png';
-      link.href = image;
-      link.click();
-    }
+      // Use stored grid state
+      const { cellSize, rows, cols } = calculateGrid();
+      
+      let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">
+`;
 
-    function randomPalette() {
-      const randomIndex = Math.floor(Math.random() * (colorPalettes.length - 1)) + 1;
-      colors = colorPalettes[randomIndex];
-      isChristmasMode = false;
-      drawGrid();
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * cellSize;
+          const y = row * cellSize;
+          const cellState = currentGridState[row][col];
+          
+          svgContent += `  <rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${cellState.bgColor}"/>\n`;
+          
+          if (cellState.isChristmas) {
+            const cs = cellState.colorSet;
+            const rot = cellState.rotation;
+            const lb = cellState.lightBg;
+            const clipId = `clip${row}_${col}`;
+            
+            svgContent += `  <svg x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" viewBox="82.66 1.24 80 80">
+    <defs>
+      <style>.s${row}_${col}{stroke:${cs.cls4};stroke-linecap:round;stroke-linejoin:round;}</style>
+      <clipPath id="${clipId}"><rect x="82.66" y="1.24" width="80" height="80"/></clipPath>
+    </defs>
+    <g clip-path="url(#${clipId})" transform="rotate(${rot} 122.66 41.24)">
+      <rect fill="${lb}" x="82.66" y="1.24" width="80" height="80"/>
+      <path fill="${cs.cls2}" d="M82.66,1.24h0v80h80C162.66,37.05,126.85,1.24,82.66,1.24Z"/>
+      <path fill="${cs.cls4}" d="M97.79,44.52h-4.62l3.27-3.27c.13-.13.13-.35,0-.48-.13-.13-.35-.13-.48,0l-3.27,3.27v-4.62c0-.19-.15-.34-.34-.34s-.34.15-.34.34v4.62l-3.27-3.27c-.13-.13-.35-.13-.48,0-.13.13-.13.35,0,.48l3.27,3.27h-4.62c-.19,0-.34.15-.34.34s.15.34.34.34h4.62l-3.27,3.27c-.13.13-.13.35,0,.48.07.07.15.1.24.1s.17-.03.24-.1l3.27-3.27v4.62c0,.19.15.34.34.34s.34-.15.34-.34v-4.62l3.27,3.27c.07.07.15.1.24.1s.17-.03.24-.1c.13-.13.13-.35,0-.48l-3.27-3.27h4.62c.19,0,.34-.15.34-.34s-.15-.34-.34-.34Z"/>
+      <path fill="${cs.cls4}" d="M91.88,64.89c.12.12.57,1.44.66,1.69.51.22,1.09.43,1.62.62-.5.19-1.12.42-1.61.63-.13.31-.56,1.68-.68,1.83-.21-.54-.41-1.32-.65-1.83-.55-.2-1.10-.40-1.64-.63.55-.2,1.10-.42,1.64-.63.23-.54.42-1.14.66-1.69Z"/>
+      <path fill="${cs.cls3}" d="M55.67,37.01h-12.62l8.92-8.92c.36-.36.36-.94,0-1.31s-.94-.36-1.31,0l-8.92,8.92v-12.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92v12.62l-8.92-8.92c-.36-.36-.94-.36-1.31,0s-.36.94,0,1.31l8.92,8.92h-12.62c-.51,0-.92.41-.92.92s.41.92.92.92h12.62l-8.92,8.92c-.36.36-.36.94,0,1.31.18.18.42.27.65.27s.47-.09.65-.27l8.92-8.92v12.62c0,.51.41.92.92.92s.92-.41.92-.92v-12.62l8.92,8.92c.18.18.42.27.65.27s.47-.09.65-.27c.36-.36.36-.94,0-1.31l-8.92-8.92h12.62c.51,0,.92-.41.92-.92s-.41-.92-.92-.92Z"/>
+      <path fill="${cs.cls2}" d="M36.85,80.19h-12.62l8.92-8.92c.36-.36.36-.94,0-1.31-.36-.36-.94-.36-1.31,0l-8.92,8.92v-12.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92v12.62l-8.92-8.92c-.36-.36-.94-.36-1.31,0-.36.36-.36.94,0,1.31l8.92,8.92H7.16c-.51,0-.92.41-.92.92s.41.92.92.92h12.62l-8.92,8.92c-.36.36-.36.94,0,1.31.18.18.42.27.65.27s.47-.09.65-.27l8.92-8.92v12.62c0,.51.41.92.92.92s.92-.41.92-.92v-12.62l8.92,8.92c.18.18.42.27.65.27s.47-.09.65-.27c.36-.36.36-.94,0-1.31l-8.92-8.92h12.62c.51,0,.92-.41.92-.92s-.41-.92-.92-.92Z"/>
+      <path fill="${cs.cls2}" d="M97.8,134.09h-12.62l8.92-8.92c.36-.36.36-.94,0-1.31s-.94-.36-1.31,0l-8.92,8.92v-12.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92v12.62l-8.92-8.92c-.36-.36-.94-.36-1.31,0s-.36.94,0,1.31l8.92,8.92h-12.62c-.51,0-.92.41-.92.92s.41.92.92.92h12.62l-8.92,8.92c-.36.36-.36.94,0,1.31.18.18.42.27.65.27s.47-.09.65-.27l8.92-8.92v12.62c0,.51.41.92.92.92s.92-.41.92-.92v-12.62l8.92,8.92c.18.18.42.27.65.27s.47-.09.65-.27c.36-.36.36-.94,0-1.31l-8.92-8.92h12.62c.51,0,.92-.41.92-.92s-.41-.92-.92-.92Z"/>
+      <path fill="${cs.cls3}" d="M54.72,118.32h-12.62l8.92-8.92c.36-.36.36-.94,0-1.31s-.94-.36-1.31,0l-8.92,8.92v-12.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92v12.62l-8.92-8.92c-.36-.36-.94-.36-1.31,0s-.36.94,0,1.31l8.92,8.92h-12.62c-.51,0-.92.41-.92.92s.41.92.92.92h12.62l-8.92,8.92c-.36.36-.36.94,0,1.31.18.18.42.27.65.27s.47-.09.65-.27l8.92-8.92v12.62c0,.51.41.92.92.92s.92-.41.92-.92v-12.62l8.92,8.92c.18.18.42.27.65.27s.47-.09.65-.27c.36-.36.36-.94,0-1.31l-8.92-8.92h12.62c.51,0,.92-.41.92-.92s-.41-.92-.92-.92Z"/>
+      <path fill="${cs.cls3}" d="M142.04,122.36h-12.62l8.92-8.92c.36-.36.36-.94,0-1.31s-.94-.36-1.31,0l-8.92,8.92v-12.62c0-.51-.41-.92-.92-.92s-.92.41-.92.92v12.62l-8.92-8.92c-.36-.36-.94-.36-1.31,0s-.36.94,0,1.31l8.92,8.92h-12.62c-.51,0-.92.41-.92.92s.41.92.92.92h12.62l-8.92,8.92c-.36.36-.36.94,0,1.31.18.18.42.27.65.27s.47-.09.65-.27l8.92-8.92v12.62c0,.51.41.92.92.92s.92-.41.92-.92v-12.62l8.92,8.92c.18.18.42.27.65.27s.47-.09.65-.27c.36-.36.36-.94,0-1.31l-8.92-8.92h12.62c.51,0,.92-.41.92-.92s-.41-.92-.92-.92Z"/>
+      <circle fill="${cs.cls3}" cx="62.53" cy="57.53" r="4.27"/>
+      <circle fill="${cs.cls3}" cx="110.43" cy="15.72" r="4.19"/>
+      <circle fill="${cs.cls3}" cx="99.01" cy="108.66" r="4.16"/>
+      <circle fill="${cs.cls2}" cx="106.21" cy="147.27" r="4.71"/>
+      <circle fill="${cs.cls3}" cx="150.11" cy="104.5" r="4.25"/>
+      <circle fill="${cs.cls4}" cx="150.11" cy="52.39" r="4.71"/>
+      <circle fill="${cs.cls2}" cx="58.25" cy="13.24" r="4.71"/>
+      <circle fill="${cs.cls3}" cx="17.69" cy="54.09" r="4.32"/>
+      <circle fill="${cs.cls2}" cx="56.6" cy="91.54" r="4.71"/>
+      <circle fill="${cs.cls3}" cx="54.08" cy="144.92" r="4.17"/>
+      <circle fill="${cs.cls3}" cx="94" cy="24.58" r="2.82"/>
+      <circle fill="${cs.cls3}" cx="101.65" cy="49.47" r="1.51"/>
+      <circle fill="${cs.cls3}" cx="132.96" cy="28.16" r="1.51"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="24.29" x2="123.57" y2="60.38"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="38.48" x2="126.94" y2="35.01"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="120.21" y1="35.01" x2="123.57" y2="38.48"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="34.17" x2="126.94" y2="30.7"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="120.21" y1="30.7" x2="123.57" y2="34.17"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="29.86" x2="126.94" y2="26.39"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="120.21" y1="26.39" x2="123.57" y2="29.86"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="46.19" x2="120.21" y2="49.66"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="126.94" y1="49.66" x2="123.57" y2="46.19"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="50.5" x2="120.21" y2="53.97"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="126.94" y1="53.97" x2="123.57" y2="50.5"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="123.57" y1="54.8" x2="120.21" y2="58.28"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="126.94" y1="58.28" x2="123.57" y2="54.8"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="107.94" y1="33.31" x2="139.2" y2="51.36"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="120.23" y1="40.41" x2="118.91" y2="35.76"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="115.54" y1="41.59" x2="120.23" y2="40.41"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="116.5" y1="38.25" x2="115.18" y2="33.6"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="111.81" y1="39.43" x2="116.5" y2="38.25"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="112.77" y1="36.1" x2="111.45" y2="31.45"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="108.08" y1="37.28" x2="112.77" y2="36.1"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="126.91" y1="44.26" x2="128.23" y2="48.91"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="131.6" y1="43.08" x2="126.91" y2="44.26"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="130.64" y1="46.42" x2="131.96" y2="51.07"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="135.33" y1="45.24" x2="130.64" y2="46.41"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="134.37" y1="48.57" x2="135.69" y2="53.22"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="139.06" y1="47.39" x2="134.37" y2="48.57"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="139.2" y1="33.31" x2="107.94" y2="51.36"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="126.91" y1="40.41" x2="131.6" y2="41.59"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="128.23" y1="35.76" x2="126.91" y2="40.41"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="130.64" y1="38.25" x2="135.33" y2="39.43"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="131.96" y1="33.6" x2="130.64" y2="38.25"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="134.37" y1="36.1" x2="139.06" y2="37.28"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="135.69" y1="31.45" x2="134.37" y2="36.1"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="120.23" y1="44.26" x2="115.54" y2="43.08"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="118.91" y1="48.91" x2="120.23" y2="44.26"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="116.5" y1="46.41" x2="111.81" y2="45.24"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="115.18" y1="51.07" x2="116.5" y2="46.42"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="112.77" y1="48.57" x2="108.08" y2="47.39"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".5" x1="111.45" y1="53.22" x2="112.77" y2="48.57"/>
+      <path fill="${cs.cls4}" d="M145.84,67.5h-6.28l4.44-4.44c.18-.18.18-.47,0-.65-.18-.18-.47-.18-.65,0l-4.44,4.44v-6.28c0-.25-.21-.46-.46-.46s-.46.21-.46.46v6.28l-4.44-4.44c-.18-.18-.47-.18-.65,0-.18.18-.18.47,0,.65l4.44,4.44h-6.28c-.25,0-.46.21-.46.46s.21.46.46.46h6.28l-4.44,4.44c-.18.18-.18.47,0,.65.09.09.21.13.33.13s.24-.04.33-.13l4.44-4.44v6.28c0,.25.21.46.46.46s.46-.21.46-.46v-6.28l4.44,4.44c.09.09.21.13.33.13s.24-.04.33-.13c.18-.18.18-.47,0-.65l-4.44-4.44h6.28c.25,0,.46-.21.46-.46s-.21-.46-.46-.46Z"/>
+      <path fill="${cs.cls4}" d="M98.28,11.38h-2.45l1.73-1.73c.07-.07.07-.18,0-.25-.07-.07-.18-.07-.25,0l-1.73,1.73v-2.45c0-.1-.08-.18-.18-.18s-.18.08-.18.18v2.45l-1.73-1.73c-.07-.07-.18-.07-.25,0-.07.07-.07.18,0,.25l1.73,1.73h-2.45c-.1,0-.18.08-.18.18s.08.18.18.18h2.45l-1.73,1.73c-.07.07-.07.18,0,.25.03.03.08.05.13.05s.09-.02.13-.05l1.73-1.73v2.45c0,.1.08.18.18.18s.18-.08.18-.18v-2.45l1.73,1.73s.08.05.13.05.09-.02.13-.05c.07-.07.07-.18,0-.25l-1.73-1.73h2.45c.1,0,.18-.08.18-.18s-.08-.18-.18-.18Z"/>
+      <path fill="${cs.cls4}" d="M124.59,73.09c.03.17-.41,1.49-.49,1.75.27.48.62,1,.92,1.47-.52-.15-1.14-.33-1.67-.46-.29.17-1.45,1.01-1.64,1.06.15-.56.46-1.30.58-1.85-.33-.49-.64-.98-.94-1.49.56.17,1.13.32,1.69.48.51-.30,1.02-.66,1.54-.96Z"/>
+      <path fill="${cs.cls4}" d="M107.28,27.78c-.10.14-1.32.8-1.56.93-.13.54-.24,1.15-.34,1.70-.27-.47-.60-1.03-.89-1.48-.33-.07-1.75-.27-1.92-.36.49-.30,1.23-.62,1.69-.94.10-.58.22-1.15.35-1.73.29.51.59,1.01.90,1.51.58.14,1.20.22,1.78.37Z"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="105.9 66.61 105.31 66.71 103.22 67.08"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="109.81 65.93 110.4 65.83 112.49 65.47"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="110.4" y1="65.83" x2="112.18" y2="66.86"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="110.4" y1="65.83" x2="111.73" y2="64.26"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="105.31" y1="66.71" x2="103.53" y2="65.68"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="105.31" y1="66.71" x2="103.98" y2="68.29"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="106.23 65.13 105.75 64.79 104.01 63.57"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="109.48 67.42 109.96 67.76 111.7 68.98"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="109.96" y1="67.76" x2="110.5" y2="69.75"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="109.96" y1="67.76" x2="112.02" y2="67.58"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="105.75" y1="64.79" x2="105.21" y2="62.79"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="105.75" y1="64.79" x2="103.69" y2="64.96"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="106.71 67.9 106.71 67.9 106.37 68.38 106.37 68.38 105.15 70.12"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="109 64.65 109 64.64 109.34 64.16 109.34 64.16 110.56 62.43"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="109.34" y1="64.16" x2="109.17" y2="62.11"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="109.34" y1="64.16" x2="111.33" y2="63.63"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="106.37" y1="68.38" x2="106.54" y2="70.44"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="106.37" y1="68.38" x2="104.38" y2="68.91"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="107.51 64.31 107.41 63.73 107.05 61.64"/>
+      <polyline class="s${row}_${col}" fill="none" stroke-width=".25" points="108.2 68.23 108.3 68.81 108.66 70.90"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="108.3" y1="68.81" x2="107.27" y2="70.6"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="108.3" y1="68.81" x2="109.87" y2="70.14"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="107.41" y1="63.73" x2="108.44" y2="61.94"/>
+      <line class="s${row}_${col}" fill="none" stroke-width=".25" x1="107.41" y1="63.73" x2="105.84" y2="62.40"/>
+      <polygon class="s${row}_${col}" fill="none" stroke-width=".25" points="109.81 65.93 108.83 66.49 109.48 67.42 108.39 67.11 108.2 68.23 107.64 67.24 106.71 67.9 107.02 66.8 105.9 66.61 106.88 66.05 106.23 65.13 107.32 65.43 107.51 64.31 108.07 65.3 109 64.64 108.69 65.74 109.81 65.93"/>
+      <circle fill="${cs.cls3}" cx="123.3" cy="64.85" r="1.97"/>
+      <circle fill="${cs.cls3}" cx="155.74" cy="72.41" r="1.41"/>
+      <circle fill="${cs.cls3}" cx="86.8" cy="19.05" r="1.13"/>
+      <circle fill="${cs.cls3}" cx="101.96" cy="77.22" r="1.13"/>
+    </g>
+  </svg>\n`;
+          } else {
+            const corner = cellState.corner;
+            let path = '';
+            switch (corner) {
+              case 'top-left':
+                path = `M ${x} ${y} A ${cellSize} ${cellSize} 0 0 1 ${x + cellSize} ${y + cellSize} L ${x} ${y + cellSize} Z`;
+                break;
+              case 'top-right':
+                path = `M ${x + cellSize} ${y} A ${cellSize} ${cellSize} 0 0 1 ${x} ${y + cellSize} L ${x + cellSize} ${y + cellSize} Z`;
+                break;
+              case 'bottom-left':
+                path = `M ${x} ${y + cellSize} A ${cellSize} ${cellSize} 0 0 1 ${x + cellSize} ${y} L ${x} ${y} Z`;
+                break;
+              case 'bottom-right':
+                path = `M ${x + cellSize} ${y + cellSize} A ${cellSize} ${cellSize} 0 0 1 ${x} ${y} L ${x + cellSize} ${y} Z`;
+                break;
+            }
+            svgContent += `  <path fill="${cellState.shapeColor}" d="${path}"/>\n`;
+          }
+        }
+      }
+      
+      svgContent += `</svg>`;
+      
+      // Convert SVG to PNG at high resolution
+      const scale = 4; // 4x resolution for high quality
+      const img = new Image();
+      const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      img.onload = function() {
+        // Create high-res canvas
+        const pngCanvas = document.createElement('canvas');
+        pngCanvas.width = canvas.width * scale;
+        pngCanvas.height = canvas.height * scale;
+        const pngCtx = pngCanvas.getContext('2d');
+        
+        // Draw SVG to canvas at high resolution
+        pngCtx.drawImage(img, 0, 0, pngCanvas.width, pngCanvas.height);
+        
+        // Convert to PNG and download
+        pngCanvas.toBlob(function(blob) {
+          const pngUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const timestamp = new Date().toISOString().slice(0,10);
+          link.download = `bauhaus-grid-${pngCanvas.width}x${pngCanvas.height}-${timestamp}.png`;
+          link.href = pngUrl;
+          link.click();
+          
+          // Cleanup
+          URL.revokeObjectURL(url);
+          URL.revokeObjectURL(pngUrl);
+        }, 'image/png');
+      };
+      
+      img.src = url;
     }
 
     function christmasMode() {
@@ -361,6 +542,19 @@
     });
 
     document.getElementById('downloadBtn').addEventListener('click', downloadCanvasAsImage);
+
+    function refreshPage() {
+      colors = colorPalettes[0]; // AZ Blue palette
+      isChristmasMode = false;
+      drawGrid();
+    }
+
+    function randomPalette() {
+      const randomIndex = Math.floor(Math.random() * (colorPalettes.length - 1)) + 1;
+      colors = colorPalettes[randomIndex];
+      isChristmasMode = false;
+      drawGrid();
+    }
 
     function refreshPage() {
       colors = colorPalettes[0]; // AZ Blue palette
