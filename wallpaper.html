@@ -60,6 +60,52 @@
     .fa {
       margin-right: 8px;
     }
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .buttons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fff;
+        border-top: 2px solid #cdcdcd;
+        padding: 0;
+        margin: 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      }
+
+      .buttons button {
+        flex: 1;
+        height: 100%;
+        border: none;
+        border-right: 1px solid #e0e0e0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        font-size: 24px;
+      }
+
+      .buttons button:last-child {
+        border-right: none;
+      }
+
+      .buttons button .fa {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .buttons button .button-text {
+        display: none;
+      }
+    }
   </style>
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -70,10 +116,10 @@
 
 <body>
   <div class="buttons">
-    <button id="downloadBtn"><i class="fa fa-download"></i>Download</button>
-    <button onclick="refreshPage()" id="refreshBtn"><i class="fa fa-sync-alt"></i>AZ Blue</button>
-    <button onclick="christmasMode()" id="christmasBtn"><i class="fa fa-tree"></i>AZ Blue Christmas</button>
-    <button onclick="randomPalette()" id="randomPaletteBtn"><i class="fa fa-palette"></i>Random</button>
+    <button id="downloadBtn"><i class="fa fa-download"></i><span class="button-text"> Download</span></button>
+    <button onclick="refreshPage()" id="refreshBtn"><i class="fa fa-shield-alt"></i><span class="button-text"> AZ Blue</span></button>
+    <button onclick="christmasMode()" id="christmasBtn"><i class="fa fa-snowflake"></i><span class="button-text"> AZ Blue Christmas</span></button>
+    <button onclick="randomPalette()" id="randomPaletteBtn"><i class="fa fa-random"></i><span class="button-text"> Random</span></button>
   </div>
   <canvas id="gridCanvas" width="1440" height="960"></canvas>
 
