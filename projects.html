@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Projects</title>
+   <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        header {
+            margin-bottom: 100px;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            color: #000;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 120px;
+        }
+
+        .project {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .project:nth-child(even) {
+            direction: rtl;
+        }
+
+        .project:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .project-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .project-number {
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .project h2 {
+            font-size: 36px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            color: #000;
+        }
+
+        .project-description {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .project-description p + p {
+            margin-top: 16px;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .project-image {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .project-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .cta-link {
+            display: inline-block;
+            padding: 14px 28px;
+            background: #1a1a1a;
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            align-self: flex-start;
+        }
+
+        .cta-link:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            margin-top: 140px;
+            padding-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .time-savings {
+            margin-top: 40px;
+            padding: 0;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .time-savings h2 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: #000;
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            margin: 0;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .process-column {
+            padding: 16px 20px;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .process-column:last-child {
+            border-right: none;
+        }
+
+        .process-column h3 {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+
+        .process-column ul {
+            list-style: none;
+            margin: 0 0 10px 0;
+            flex-grow: 1;
+        }
+
+        .process-column li {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #444;
+            margin-bottom: 6px;
+            padding-left: 0;
+        }
+
+        .process-column li strong {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .time-large {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            align-self: flex-start;
+        }
+
+        .manual .time-large {
+               background: #ffe5e5;
+        }
+
+        .automated .time-large {
+                background: #f0fff8;
+        }
+        article {
+                border-bottom: 1px solid #ddd;
+    padding-bottom: 100px;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            header {
+                page-break-after: always;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin-bottom: 0;
+                padding: 0 80px;
+                text-align: center;
+            }
+
+            header h1 {
+                font-size: 32px;
+            }
+
+            .project {
+                page-break-after: always;
+                page-break-inside: avoid;
+                min-height: 100vh;
+                padding: 60px 80px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                row-gap: 30px;
+                column-gap: 80px;
+                align-items: center;
+                margin: 0;
+                border-bottom: none;
+            }
+
+            article {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .project-list {
+                gap: 0;
+            }
+
+            .project:nth-child(even) {
+                direction: ltr;
+            }
+
+            .project-content {
+                gap: 20px;
+            }
+
+            .project h2 {
+                font-size: 32px;
+            }
+
+            .project-description {
+                font-size: 15px;
+            }
+
+            .cta-link {
+                display: none;
+            }
+
+            footer {
+                page-break-before: always;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 0;
+            }
+
+            .project-image {
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .time-savings {
+                margin-top: 20px;
+            }
+
+            .time-savings h2 {
+                font-size: 18px;
+                padding: 12px 16px;
+            }
+
+            .process-column {
+                padding: 10px 16px;
+            }
+
+            .process-column h3 {
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+
+            .process-column li {
+                font-size: 10px;
+                margin-bottom: 3px;
+                line-height: 1.3;
+            }
+
+            .process-column ul {
+                margin: 0 0 8px 0;
+            }
+
+            .time-large {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2025 Workflow Solutions & Automation</h1>
+            <p class="subtitle">AZ Blue Experience Design & Digital Marketing Teams</p>
+        </header>
+
+        <div class="project-list">
+            <!-- Project 1: Responsive Layout Visualizer -->
+            <article class="project">
+                <div class="project-content">
+                    <h2>Responsive Layout Visualizer</h2>
+                    <div class="project-description">
+                    <p>Manually converting Formstack form submissions into email templates for our Documents workflow was time-consuming and error-prone. The process required submitting test forms, extracting field labels and variable names from HTML snippets, wrapping them in Formstack's conditional syntax, and building matching test JSON with realistic data.</p>
+                        <p>This extension automates the entire process by scanning the form page, detecting all fields, and generating both a complete email template with proper conditionals and test JSON with sample data. The process now takes seconds instead of hours.</p>    
+                    </div>
+                    
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder"><img src="responsive.png"></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Project 2: Formstack Documents HTML Template Generator -->
+            <article class="project">
+                <div class="project-content">
+                    <h2>Formstack Documents HTML Template Generator</h2>
+                    <div class="project-description">
+                        <p>Debugging GA4 and GTM implementations required constantly switching between browser tabs and network monitoring tools. This side panel extension provides persistent visibility into analytics tracking without interrupting the debugging workflow.</p>
+                        <p>The extension captures analytics requests in real-time, displaying tracking IDs, UTM parameters, cookies, and network traffic to Google's servers. It includes auto-refresh intervals, JSON export functionality, and one-click cookie clearing for testing fresh sessions. All data processing happens locally within the browser.</p> </div>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder"><img src="formstack.png"></div>
+                    </div>
+                </div>
+                
+                <div class="time-savings" style="grid-column: 1 / -1;">
+                    <h2>Time Savings: Manual vs. Automated Process</h2>
+                    <div class="comparison">
+                        <div class="process-column manual">
+                            <h3>Manual Template Creation</h3>
+                            <ul>
+                                <li><strong>Form Setup:</strong> Add and configure merge fields in form builder</li>
+                                <li><strong>Data Extraction:</strong> Submit test form, extract and match variable names to labels</li>
+                                <li><strong>Template Development:</strong> Write HTML structure, add conditionals, insert merge tags, configure image modifiers</li>
+                                <li><strong>Test Data Creation:</strong> Build JSON structure, generate realistic values, create base64 signature images</li>
+                                <li><strong>Integration Configuration:</strong> Map all fields in settings, configure document merge</li>
+                                <li><strong>Testing & QC:</strong> Test template output, debug errors, validate all fields render correctly</li>
+                                <li><strong>Refinement:</strong> Fix formatting issues, correct typos, re-test after changes</li>
+                                <li><strong>Documentation:</strong> Create field mapping reference</li>
+                            </ul>
+                            <div class="time-large">4-12 hours</div>
+                        </div>
+                        
+                        <div class="process-column automated">
+                            <h3>Automated with Extension</h3>
+                            <ul>
+                                <li><strong>Generation:</strong> Click scan, extension auto-detects fields and creates template + test JSON</li>
+                                <li><strong>Integration:</strong> Paste into Formstack Documents</li>
+                                <li><strong>Testing & QC:</strong> Visual review, validate output, test all fields</li>
+                                <li><strong>Refinement:</strong> Minor adjustments if needed</li>
+                            </ul>
+                            <div class="time-large">20-30 minutes</div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Project 3: GA4 Analytics Viewer -->
+            <article class="project">
+                <div class="project-content"> 
+                    <h2>GA4 Analytics Viewer</h2>
+                    <div class="project-description">
+                  <p>Debugging GA4 and GTM implementations required constantly switching between browser tabs and network monitoring tools. This side panel extension provides persistent visibility into analytics tracking without interrupting the debugging workflow.</p>
+                        <p>The extension captures analytics requests in real-time, displaying tracking IDs, UTM parameters, cookies, and network traffic to Google's servers. It includes auto-refresh intervals, JSON export functionality, and one-click cookie clearing for testing fresh sessions. All data processing happens locally within the browser.</p>  
+                    </div>
+                   
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder"><img src="ga4.png"></div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <footer>
+            <p></p>
+        </footer>
+    </div>
+</body>
+</html>
