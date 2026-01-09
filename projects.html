@@ -296,6 +296,10 @@
                 border-bottom: none;
             }
 
+            .project:last-child {
+                page-break-after: avoid;
+            }
+
             article {
                 border-bottom: none;
                 padding-bottom: 0;
@@ -326,13 +330,7 @@
             }
 
             footer {
-                page-break-before: always;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
-                padding: 0;
+                display: none;
             }
 
             .project-image {
