@@ -94,6 +94,16 @@
             margin-top: 16px;
         }
 
+        .project-description code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            background: #e6f3ff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #b3d9ff;
+            color: #1a1a1a;
+        }
+
         .project-meta {
             display: flex;
             gap: 24px;
@@ -394,8 +404,9 @@
                 <div class="project-content">
                     <h2>Formstack Documents HTML Template Generator</h2>
                     <div class="project-description">
-                    <p>Formstack Documents HTML Template Generator is a Chrome extension that automates the creation of email templates and test data for Formstack Documents. When you submit a form in Formstack, it generates an HTML snippet showing all the form fields and their values. Manually converting this into a properly formatted email template is tedious and error-prone, requiring you to extract each field label, match it to its variable name, wrap it in the correct Formstack syntax with conditionals, and create corresponding test JSON data.</p> 
-                <p>The extension solves this by scanning the Formstack page to find the HTML snippet (detecting 189+ fields instantly), then parsing each form cell to extract label/variable pairs. It automatically generates a professional table-based email template with proper {if $Variable != ''} conditionals, {$Variable} merge tags (adding |insert_image modifiers for signatures), organized by sections. Simultaneously, it creates intelligent test JSON with realistic sample data (NPIs, addresses, phone numbers) and base64-encoded test images for signature fields, giving you production-ready templates and test data in seconds instead of hours of manual work.</p>    
+                    <p>Manually converting Formstack form submissions into email templates for our Documents workflow was time-consuming and error-prone. The process required submitting test forms, extracting field labels and variable names from HTML snippets, wrapping them in Formstack's conditional syntax, and building matching test JSON with realistic data.</p> 
+                <p>This extension automates the entire process by scanning the form page, detecting all fields, and generating both a complete email template with proper <code>{if $Variable != ''}</code> conditionals and <code>{$Variable}</code> merge tags (including <code>|insert_image</code> modifiers for signatures), plus test JSON with sample data. The process now takes seconds instead of hours.</p>    
+                </div>
                 </div>
                 <div>
                     <div class="project-image">
