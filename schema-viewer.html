@@ -426,90 +426,111 @@
             const outputDiv = document.getElementById('output');
             let html = '<button id="pdfButton" class="pdf-button visible" onclick="generatePDF()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></button>';
 
-            // Page Information
-            if (data['@type'] === 'WebPage') {
-                html += `
-                    <h2>${data.name || 'Structured Data'}</h2>
-                    <p style="color: #666; margin-bottom: 2rem;">Structured Data (JSON-LD Schema)</p>
-                    
-                    <div class="section">
-                        <h3>Page Information</h3>
-                        ${createProperty('Type', `<span class="badge">${data['@type']}</span>`)}
-                        ${data.url ? createProperty('URL', `<a href="${data.url}" target="_blank">${data.url}</a>`) : ''}
-                        ${data.name ? createProperty('Name', data.name) : ''}
-                        ${data.description ? createProperty('Description', data.description) : ''}
-                        ${data.inLanguage ? createProperty('Language', data.inLanguage === 'en' ? 'English' : data.inLanguage) : ''}
-                    </div>
-                `;
-            }
+            // Extract title
+            const title = data.name || data.headline || data.title || data['@type'] || 'Structured Data';
+            
+            html += `
+                <h2>${title}</h2>
+                <p style="color: #666; margin-bottom: 2rem;">Structured Data (JSON-LD Schema)</p>
+            `;
 
-            // Publisher
-            if (data.publisher) {
-                html += `<div class="section"><h3>Publisher</h3>`;
-                html += createProperty('Organization', data.publisher.name || '');
-                if (data.publisher.url) {
-                    html += createProperty('Website', `<a href="${data.publisher.url}" target="_blank">${data.publisher.url}</a>`);
-                }
-                if (data.publisher.contactPoint) {
-                    data.publisher.contactPoint.forEach(contact => {
-                        if (contact.telephone) {
-                            html += createProperty(contact.contactType === 'TTY' ? 'TTY' : 'Phone', contact.telephone);
-                        }
-                    });
-                }
-                html += `</div>`;
-            }
-
-            // About / Service
-            if (data.about && data.about.areaServed) {
-                html += `<div class="section"><h3>Service Areas</h3>`;
-                data.about.areaServed.forEach(area => {
-                    html += `<div class="list-item">${area.name}</div>`;
-                });
-                html += `</div>`;
-            }
-
-            // Plans / Offers
-            if (data.about && data.about.hasOfferCatalog) {
-                const catalog = data.about.hasOfferCatalog;
-                if (catalog.itemListElement && catalog.itemListElement.itemListElement) {
-                    html += `<div class="section"><h3>${catalog.name || 'Plans'}</h3>`;
-                    
-                    catalog.itemListElement.itemListElement.forEach(plan => {
-                        html += `<div class="nested">
-                            <h3 style="font-weight: 500; margin: 1rem 0 0.5rem;">${plan.name}</h3>
-                            ${plan.areaServed ? createProperty('Coverage Areas', Array.isArray(plan.areaServed) ? plan.areaServed.join(', ') : plan.areaServed) : ''}
-                            ${plan.description ? createProperty('Features', plan.description) : ''}
-                        </div>`;
-                    });
-                    
-                    html += `</div>`;
-                }
-            }
-
-            // Main Entity (alternative plan listing)
-            if (data.mainEntity && data.mainEntity['@type'] === 'ItemList') {
-                html += `<div class="section"><h3>${data.mainEntity.name || 'Featured Items'}</h3>`;
-                data.mainEntity.itemListElement.forEach(item => {
-                    if (item.item) {
-                        html += `<div class="list-item">
-                            <strong>${item.item.name}</strong>
-                            ${item.item.url ? `<br><a href="${item.item.url}" target="_blank">${item.item.url}</a>` : ''}
-                        </div>`;
-                    }
-                });
-                html += `</div>`;
-            }
-
-            // Breadcrumb
-            if (data.breadcrumb) {
-                html += `<div class="section"><h3>Breadcrumb Navigation</h3>`;
-                const path = data.breadcrumb.itemListElement.map(item => item.name).join(' → ');
-                html += createProperty('Path', path);
-                html += `</div>`;
-            }
+            // Render all properties
+            html += renderObject(data, 'Main Properties');
 
             outputDiv.innerHTML = html;
+        }
+
+        function renderObject(obj, sectionTitle = null, isNested = false) {
+            let html = '';
+            
+            if (sectionTitle && !isNested) {
+                html += `<div class="section"><h3>${sectionTitle}</h3>`;
+            } else if (isNested) {
+                html += `<div class="nested">`;
+            }
+
+            for (const [key, value] of Object.entries(obj)) {
+                // Skip context and empty values
+                if (key === '@context' || value === null || value === undefined || value === '') continue;
+
+                const label = formatLabel(key);
+
+                if (typeof value === 'string') {
+                    // Handle URLs
+                    if (value.startsWith('http://') || value.startsWith('https://')) {
+                        html += createProperty(label, `<a href="${value}" target="_blank">${value}</a>`);
+                    } else if (key === '@type') {
+                        html += createProperty(label, `<span class="badge">${value}</span>`);
+                    } else {
+                        html += createProperty(label, value);
+                    }
+                } else if (typeof value === 'number' || typeof value === 'boolean') {
+                    html += createProperty(label, value);
+                } else if (Array.isArray(value)) {
+                    // Handle arrays
+                    if (value.length > 0) {
+                        if (typeof value[0] === 'string') {
+                            // Array of strings
+                            if (value[0].startsWith('http://') || value[0].startsWith('https://')) {
+                                // Array of URLs
+                                html += `<div class="property">
+                                    <div class="property-name">${label}</div>
+                                    <div class="property-value">`;
+                                value.forEach(item => {
+                                    html += `<a href="${item}" target="_blank" style="display: block; margin: 0.25rem 0;">${item}</a>`;
+                                });
+                                html += `</div></div>`;
+                            } else {
+                                // Regular string array
+                                html += createProperty(label, value.join(', '));
+                            }
+                        } else if (typeof value[0] === 'object') {
+                            // Array of objects
+                            html += `<div class="property">
+                                <div class="property-name">${label}</div>
+                                <div class="property-value">`;
+                            value.forEach((item, index) => {
+                                html += renderObject(item, null, true);
+                                if (index < value.length - 1) {
+                                    html += '<div style="margin: 1rem 0; border-top: 1px solid #f0f0f0;"></div>';
+                                }
+                            });
+                            html += `</div></div>`;
+                        } else {
+                            // Array of primitives
+                            html += createProperty(label, value.join(', '));
+                        }
+                    }
+                } else if (typeof value === 'object') {
+                    // Nested object
+                    html += `<div class="property">
+                        <div class="property-name">${label}</div>
+                        <div class="property-value">`;
+                    html += renderObject(value, null, true);
+                    html += `</div></div>`;
+                }
+            }
+
+            if (sectionTitle && !isNested) {
+                html += `</div>`;
+            } else if (isNested) {
+                html += `</div>`;
+            }
+
+            return html;
+        }
+
+        function formatLabel(key) {
+            // Remove @ symbol
+            if (key.startsWith('@')) {
+                key = key.substring(1);
+            }
+            
+            // Convert camelCase to Title Case
+            return key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .trim();
         }
 
         function createProperty(name, value) {
