@@ -212,6 +212,147 @@
         <div id="output" class="output-section"></div>
     </div>
 
-   
+    <script>
+        function clearAll() {
+            document.getElementById('jsonInput').value = '';
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('output').classList.remove('visible');
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function parseAndDisplay() {
+            const input = document.getElementById('jsonInput').value.trim();
+            const errorDiv = document.getElementById('error');
+            const outputDiv = document.getElementById('output');
+
+            errorDiv.style.display = 'none';
+            
+            if (!input) {
+                errorDiv.textContent = 'Please paste some JSON-LD content.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                let jsonData;
+                
+                // Try to extract JSON from script tag
+                const scriptMatch = input.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i);
+                if (scriptMatch) {
+                    jsonData = JSON.parse(scriptMatch[1]);
+                } else {
+                    // Try parsing as pure JSON
+                    jsonData = JSON.parse(input);
+                }
+
+                displayData(jsonData);
+                outputDiv.classList.add('visible');
+                
+            } catch (e) {
+                errorDiv.textContent = 'Error parsing JSON: ' + e.message;
+                errorDiv.style.display = 'block';
+                outputDiv.classList.remove('visible');
+            }
+        }
+
+        function displayData(data) {
+            const outputDiv = document.getElementById('output');
+            let html = '';
+
+            // Page Information
+            if (data['@type'] === 'WebPage') {
+                html += `
+                    <h2>${data.name || 'Structured Data'}</h2>
+                    <p style="color: #666; margin-bottom: 2rem;">Structured Data (JSON-LD Schema)</p>
+                    
+                    <div class="section">
+                        <h3>Page Information</h3>
+                        ${createProperty('Type', `<span class="badge">${data['@type']}</span>`)}
+                        ${data.url ? createProperty('URL', `<a href="${data.url}" target="_blank">${data.url}</a>`) : ''}
+                        ${data.name ? createProperty('Name', data.name) : ''}
+                        ${data.description ? createProperty('Description', data.description) : ''}
+                        ${data.inLanguage ? createProperty('Language', data.inLanguage === 'en' ? 'English' : data.inLanguage) : ''}
+                    </div>
+                `;
+            }
+
+            // Publisher
+            if (data.publisher) {
+                html += `<div class="section"><h3>Publisher</h3>`;
+                html += createProperty('Organization', data.publisher.name || '');
+                if (data.publisher.url) {
+                    html += createProperty('Website', `<a href="${data.publisher.url}" target="_blank">${data.publisher.url}</a>`);
+                }
+                if (data.publisher.contactPoint) {
+                    data.publisher.contactPoint.forEach(contact => {
+                        if (contact.telephone) {
+                            html += createProperty(contact.contactType === 'TTY' ? 'TTY' : 'Phone', contact.telephone);
+                        }
+                    });
+                }
+                html += `</div>`;
+            }
+
+            // About / Service
+            if (data.about && data.about.areaServed) {
+                html += `<div class="section"><h3>Service Areas</h3>`;
+                data.about.areaServed.forEach(area => {
+                    html += `<div class="list-item">${area.name}</div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Plans / Offers
+            if (data.about && data.about.hasOfferCatalog) {
+                const catalog = data.about.hasOfferCatalog;
+                if (catalog.itemListElement && catalog.itemListElement.itemListElement) {
+                    html += `<div class="section"><h3>${catalog.name || 'Plans'}</h3>`;
+                    
+                    catalog.itemListElement.itemListElement.forEach(plan => {
+                        html += `<div class="nested">
+                            <h3 style="font-weight: 500; margin: 1rem 0 0.5rem;">${plan.name}</h3>
+                            ${plan.areaServed ? createProperty('Coverage Areas', Array.isArray(plan.areaServed) ? plan.areaServed.join(', ') : plan.areaServed) : ''}
+                            ${plan.description ? createProperty('Features', plan.description) : ''}
+                        </div>`;
+                    });
+                    
+                    html += `</div>`;
+                }
+            }
+
+            // Main Entity (alternative plan listing)
+            if (data.mainEntity && data.mainEntity['@type'] === 'ItemList') {
+                html += `<div class="section"><h3>${data.mainEntity.name || 'Featured Items'}</h3>`;
+                data.mainEntity.itemListElement.forEach(item => {
+                    if (item.item) {
+                        html += `<div class="list-item">
+                            <strong>${item.item.name}</strong>
+                            ${item.item.url ? `<br><a href="${item.item.url}" target="_blank">${item.item.url}</a>` : ''}
+                        </div>`;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            // Breadcrumb
+            if (data.breadcrumb) {
+                html += `<div class="section"><h3>Breadcrumb Navigation</h3>`;
+                const path = data.breadcrumb.itemListElement.map(item => item.name).join(' → ');
+                html += createProperty('Path', path);
+                html += `</div>`;
+            }
+
+            outputDiv.innerHTML = html;
+        }
+
+        function createProperty(name, value) {
+            return `
+                <div class="property">
+                    <div class="property-name">${name}</div>
+                    <div class="property-value">${value}</div>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
