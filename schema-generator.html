@@ -586,6 +586,88 @@
                 schema.publisher.contactPoint = contactPoints;
             }
 
+            // Extract service/product information from page content
+            const mainHeading = doc.querySelector('h1')?.textContent;
+            const subheadings = Array.from(doc.querySelectorAll('h2, h3')).map(h => h.textContent.trim());
+            const paragraphs = Array.from(doc.querySelectorAll('p')).slice(0, 5).map(p => p.textContent.trim());
+            
+            // Look for service indicators (plans, products, services mentioned)
+            const bodyText = doc.body.textContent.toLowerCase();
+            const hasServices = bodyText.includes('plan') || bodyText.includes('service') || 
+                               bodyText.includes('product') || bodyText.includes('coverage') ||
+                               bodyText.includes('benefit');
+            
+            if (hasServices && (path.includes('medicare') || path.includes('insurance') || 
+                path.includes('plan') || path.includes('service'))) {
+                
+                // Create About section for services
+                schema.about = {
+                    "@type": "Service",
+                    "name": mainHeading || title,
+                    "provider": {
+                        "@type": "Organization",
+                        "@id": `${siteConfig.websiteUrl}/#organization`
+                    },
+                    "serviceType": extractServiceType(mainHeading, bodyText),
+                    "description": description || (paragraphs[0] || '').substring(0, 200)
+                };
+
+                // Try to find target audience
+                const audienceMatch = bodyText.match(/(medicare[- ]eligible|seniors|individuals|families|businesses)/i);
+                if (audienceMatch) {
+                    schema.about.audience = {
+                        "@type": "PeopleAudience",
+                        "name": audienceMatch[0].charAt(0).toUpperCase() + audienceMatch[0].slice(1)
+                    };
+                }
+
+                // Try to extract area served from content
+                const countyMatch = bodyText.match(/([A-Z][a-z]+\s+County)/g);
+                if (countyMatch && countyMatch.length > 0) {
+                    schema.about.areaServed = countyMatch.slice(0, 3).map(county => ({
+                        "@type": "AdministrativeArea",
+                        "name": county
+                    }));
+                }
+
+                // Look for specific plan/product mentions
+                const planNames = extractPlanNames(doc);
+                if (planNames.length > 0) {
+                    schema.about.hasOfferCatalog = {
+                        "@type": "OfferCatalog",
+                        "name": `${mainHeading || title} Plans`,
+                        "itemListElement": {
+                            "@type": "ItemList",
+                            "numberOfItems": planNames.length,
+                            "itemListElement": planNames.map((planName, idx) => ({
+                                "@type": "Service",
+                                "name": planName,
+                                "description": `${planName} coverage option`
+                            }))
+                        }
+                    };
+                }
+            }
+
+            // Create mainEntity if we have service offerings
+            if (schema.about && schema.about.hasOfferCatalog) {
+                const plans = schema.about.hasOfferCatalog.itemListElement.itemListElement;
+                schema.mainEntity = {
+                    "@type": "ItemList",
+                    "name": `Featured ${mainHeading || 'Plans'}`,
+                    "itemListElement": plans.map((plan, idx) => ({
+                        "@type": "ListItem",
+                        "position": idx + 1,
+                        "item": {
+                            "@type": "Service",
+                            "name": plan.name,
+                            "url": pageData.url,
+                            "provider": { "@id": `${siteConfig.websiteUrl}/#organization` }
+                        }
+                    }))
+                };
+            }
+
             // Add type-specific properties
             if (pageType === 'Article') {
                 schema.author = {
@@ -613,7 +695,64 @@
                 }
             ];
 
+            // Add additional action if CTA buttons found
+            const ctaButtons = doc.querySelectorAll('a[href*="shop"], a[href*="enroll"], button');
+            if (ctaButtons.length > 0) {
+                const ctaText = Array.from(ctaButtons).find(btn => 
+                    btn.textContent.toLowerCase().includes('shop') || 
+                    btn.textContent.toLowerCase().includes('enroll') ||
+                    btn.textContent.toLowerCase().includes('compare')
+                );
+                if (ctaText) {
+                    schema.potentialAction.push({
+                        "@type": "Action",
+                        "name": ctaText.textContent.trim(),
+                        "target": pageData.url
+                    });
+                }
+            }
+
             return schema;
+        }
+
+        function extractServiceType(heading, bodyText) {
+            if (bodyText.includes('medicare advantage') || bodyText.includes('hmo')) {
+                return 'Medicare Advantage (Part C) HMO';
+            }
+            if (bodyText.includes('medicare')) {
+                return 'Medicare Insurance';
+            }
+            if (bodyText.includes('health insurance')) {
+                return 'Health Insurance';
+            }
+            return heading || 'Insurance Services';
+        }
+
+        function extractPlanNames(doc) {
+            const planNames = [];
+            
+            // Look for common plan name patterns
+            const headings = doc.querySelectorAll('h2, h3, h4');
+            headings.forEach(h => {
+                const text = h.textContent.trim();
+                // Match patterns like "Blue Best Life", "Plan Name (HMO)", etc.
+                if (text.match(/(Plan|Plus|Classic|Premium|Basic|Standard|Elite|Select)/i) ||
+                    text.match(/\(HMO\)|\(PPO\)|\(EPO\)/)) {
+                    planNames.push(text);
+                }
+            });
+
+            // Look in lists
+            const listItems = doc.querySelectorAll('li');
+            listItems.forEach(li => {
+                const text = li.textContent.trim();
+                if (text.length < 100 && text.match(/(Plan|Plus|Classic|Premium|HMO|PPO)/i)) {
+                    planNames.push(text);
+                }
+            });
+
+            // Deduplicate and limit
+            return [...new Set(planNames)].slice(0, 5);
         }
 
         function determinePageType(path, doc) {
@@ -669,6 +808,11 @@
                     viewBtn.className = 'btn-small';
                     viewBtn.onclick = () => togglePreview(index);
 
+                    const viewHtmlBtn = document.createElement('button');
+                    viewHtmlBtn.textContent = 'View HTML';
+                    viewHtmlBtn.className = 'btn-small';
+                    viewHtmlBtn.onclick = () => toggleHtmlPreview(index);
+
                     const copyBtn = document.createElement('button');
                     copyBtn.textContent = 'Copy';
                     copyBtn.className = 'btn-small';
@@ -684,6 +828,7 @@
                     downloadBtn.onclick = () => downloadSchema(result, index);
 
                     actionsDiv.appendChild(viewBtn);
+                    actionsDiv.appendChild(viewHtmlBtn);
                     actionsDiv.appendChild(copyBtn);
                     actionsDiv.appendChild(downloadBtn);
                 }
@@ -698,6 +843,11 @@
                     preview.id = `preview-${index}`;
                     preview.innerHTML = `<pre>${escapeHtml(result.schema)}</pre>`;
                     item.appendChild(preview);
+
+                    const htmlPreview = document.createElement('div');
+                    htmlPreview.className = 'html-preview';
+                    htmlPreview.id = `html-preview-${index}`;
+                    item.appendChild(htmlPreview);
                 }
             });
         }
@@ -705,6 +855,76 @@
         function togglePreview(index) {
             const preview = document.getElementById(`preview-${index}`);
             preview.style.display = preview.style.display === 'none' || !preview.style.display ? 'block' : 'none';
+        }
+
+        function toggleHtmlPreview(index) {
+            const htmlPreview = document.getElementById(`html-preview-${index}`);
+            const isVisible = htmlPreview.style.display === 'block';
+            
+            if (!isVisible) {
+                const schema = generatedSchemas[index].schema;
+                const htmlContent = generateHTMLFromSchema(schema);
+                htmlPreview.innerHTML = htmlContent;
+                htmlPreview.style.display = 'block';
+            } else {
+                htmlPreview.style.display = 'none';
+            }
+        }
+
+        function generateHTMLFromSchema(schemaJson) {
+            const schema = JSON.parse(schemaJson);
+            
+            let html = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif;">';
+            html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400;">' + escapeHtml(schema.name) + '</h3>';
+            
+            if (schema.description) {
+                html += '<p style="color: #666; margin-bottom: 1.5rem;">' + escapeHtml(schema.description) + '</p>';
+            }
+
+            html += '<div style="background: #f9f9f9; padding: 1rem; margin-bottom: 1rem; border-left: 3px solid #1a1a1a;">';
+            html += '<strong>Type:</strong> ' + escapeHtml(schema['@type']);
+            html += ' | <strong>Language:</strong> ' + escapeHtml(schema.inLanguage);
+            html += '</div>';
+
+            if (schema.breadcrumb) {
+                html += '<div style="margin-bottom: 1rem;"><strong>Breadcrumbs:</strong> ';
+                schema.breadcrumb.itemListElement.forEach((item, idx) => {
+                    if (idx > 0) html += ' / ';
+                    html += escapeHtml(item.name);
+                });
+                html += '</div>';
+            }
+
+            if (schema.publisher) {
+                html += '<div style="background: #fafafa; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e0e0e0;">';
+                html += '<strong>Publisher:</strong> ' + escapeHtml(schema.publisher.name);
+                if (schema.publisher.contactPoint) {
+                    html += '<div style="margin-top: 0.5rem;">';
+                    schema.publisher.contactPoint.forEach(cp => {
+                        html += '<div>' + escapeHtml(cp.contactType) + ': ' + escapeHtml(cp.telephone) + '</div>';
+                    });
+                    html += '</div>';
+                }
+                html += '</div>';
+            }
+
+            if (schema.about) {
+                html += '<div style="background: #f0f7ff; padding: 1rem; margin-bottom: 1rem; border: 1px solid #2196f3;">';
+                html += '<strong>About:</strong> ' + escapeHtml(schema.about.name || schema.about['@type']);
+                if (schema.about.description) {
+                    html += '<div style="margin-top: 0.5rem; color: #666;">' + escapeHtml(schema.about.description) + '</div>';
+                }
+                html += '</div>';
+            }
+
+            if (schema.mainEntity) {
+                html += '<div style="background: #f0f7ff; padding: 1rem; margin-bottom: 1rem; border: 1px solid #2196f3;">';
+                html += '<strong>Main Entity:</strong> ' + escapeHtml(schema.mainEntity.name || schema.mainEntity['@type']);
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
         }
 
         function downloadSchema(result, index) {
