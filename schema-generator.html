@@ -241,7 +241,8 @@
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
             <div class="info-box">
                 <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted.<br>
+                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
+                <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
             </div>
             
             <div class="upload-zone" id="uploadZone">
@@ -880,51 +881,184 @@
             const schema = JSON.parse(schemaJson);
             
             let html = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif;">';
-            html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400;">' + escapeHtml(schema.name) + '</h3>';
+            html += '<h3 style="margin: 0 0 1.5rem 0; font-weight: 400; border-bottom: 2px solid #1a1a1a; padding-bottom: 0.5rem;">' + escapeHtml(schema.name) + '</h3>';
             
-            if (schema.description) {
-                html += '<p style="color: #666; margin-bottom: 1.5rem;">' + escapeHtml(schema.description) + '</p>';
-            }
-
-            html += '<div style="background: #f9f9f9; padding: 1rem; margin-bottom: 1rem; border-left: 3px solid #1a1a1a;">';
-            html += '<strong>Type:</strong> ' + escapeHtml(schema['@type']);
-            html += ' | <strong>Language:</strong> ' + escapeHtml(schema.inLanguage);
+            // Basic Info Section
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">';
+            
+            html += '<div style="background: #f9f9f9; padding: 1rem; border-left: 3px solid #1a1a1a;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Type</div>';
+            html += '<div style="font-weight: 500;">' + escapeHtml(schema['@type']) + '</div>';
+            html += '</div>';
+            
+            html += '<div style="background: #f9f9f9; padding: 1rem; border-left: 3px solid #1a1a1a;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Language</div>';
+            html += '<div style="font-weight: 500;">' + escapeHtml(schema.inLanguage) + '</div>';
+            html += '</div>';
+            
             html += '</div>';
 
-            if (schema.breadcrumb) {
-                html += '<div style="margin-bottom: 1rem;"><strong>Breadcrumbs:</strong> ';
-                schema.breadcrumb.itemListElement.forEach((item, idx) => {
-                    if (idx > 0) html += ' / ';
-                    html += escapeHtml(item.name);
-                });
+            // Description
+            if (schema.description) {
+                html += '<div style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; font-weight: 500;">Description</div>';
+                html += '<div style="color: #333;">' + escapeHtml(schema.description) + '</div>';
                 html += '</div>';
             }
 
+            // URL & ID
+            html += '<div style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+            html += '<div style="margin-bottom: 0.5rem;"><strong>URL:</strong> <a href="' + escapeHtml(schema.url) + '" target="_blank" style="color: #0066cc; word-break: break-all;">' + escapeHtml(schema.url) + '</a></div>';
+            html += '<div><strong>ID:</strong> <code style="background: #f5f5f5; padding: 0.25rem 0.5rem;">' + escapeHtml(schema['@id']) + '</code></div>';
+            html += '</div>';
+
+            // IsPartOf
+            if (schema.isPartOf) {
+                html += '<div style="background: #f0f7ff; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid #2196f3;">';
+                html += '<div style="font-weight: 500; margin-bottom: 0.5rem;">Part Of Website</div>';
+                html += '<div><strong>Name:</strong> ' + escapeHtml(schema.isPartOf.name) + '</div>';
+                html += '<div><strong>URL:</strong> <a href="' + escapeHtml(schema.isPartOf.url) + '" target="_blank" style="color: #0066cc;">' + escapeHtml(schema.isPartOf.url) + '</a></div>';
+                html += '</div>';
+            }
+
+            // Primary Image
+            if (schema.primaryImageOfPage && schema.primaryImageOfPage.url) {
+                html += '<div style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-weight: 500; margin-bottom: 0.5rem;">Primary Image</div>';
+                html += '<div style="word-break: break-all;"><a href="' + escapeHtml(schema.primaryImageOfPage.url) + '" target="_blank" style="color: #0066cc;">' + escapeHtml(schema.primaryImageOfPage.url) + '</a></div>';
+                html += '</div>';
+            }
+
+            // Breadcrumbs
+            if (schema.breadcrumb && schema.breadcrumb.itemListElement && schema.breadcrumb.itemListElement.length > 0) {
+                html += '<div style="background: #fff3e0; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid #ff9800;">';
+                html += '<div style="font-weight: 500; margin-bottom: 0.75rem;">Breadcrumbs</div>';
+                html += '<div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">';
+                schema.breadcrumb.itemListElement.forEach((item, idx) => {
+                    if (idx > 0) html += '<span style="color: #999;">›</span>';
+                    html += '<span style="background: #fff; padding: 0.25rem 0.75rem; border-radius: 2px; font-size: 0.9rem; border: 1px solid #e0e0e0;">';
+                    html += escapeHtml(item.name);
+                    html += '</span>';
+                });
+                html += '</div></div>';
+            }
+
+            // Publisher
             if (schema.publisher) {
-                html += '<div style="background: #fafafa; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e0e0e0;">';
-                html += '<strong>Publisher:</strong> ' + escapeHtml(schema.publisher.name);
-                if (schema.publisher.contactPoint) {
-                    html += '<div style="margin-top: 0.5rem;">';
+                html += '<div style="background: #e8f5e9; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid #4caf50;">';
+                html += '<div style="font-weight: 500; margin-bottom: 1rem; font-size: 1.05rem;">Publisher / Organization</div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>Name:</strong> ' + escapeHtml(schema.publisher.name) + '</div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>URL:</strong> <a href="' + escapeHtml(schema.publisher.url) + '" target="_blank" style="color: #0066cc;">' + escapeHtml(schema.publisher.url) + '</a></div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>ID:</strong> <code style="background: #fff; padding: 0.25rem 0.5rem;">' + escapeHtml(schema.publisher['@id']) + '</code></div>';
+                
+                if (schema.publisher.logo) {
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Logo:</strong> <a href="' + escapeHtml(schema.publisher.logo.url) + '" target="_blank" style="color: #0066cc; font-size: 0.9rem; word-break: break-all;">' + escapeHtml(schema.publisher.logo.url) + '</a></div>';
+                }
+                
+                if (schema.publisher.contactPoint && schema.publisher.contactPoint.length > 0) {
+                    html += '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #c8e6c9;">';
+                    html += '<div style="font-weight: 500; margin-bottom: 0.5rem;">Contact Points</div>';
                     schema.publisher.contactPoint.forEach(cp => {
-                        html += '<div>' + escapeHtml(cp.contactType) + ': ' + escapeHtml(cp.telephone) + '</div>';
+                        html += '<div style="margin: 0.5rem 0; padding: 0.75rem; background: #fff; border-left: 2px solid #4caf50;">';
+                        html += '<div><strong>Type:</strong> ' + escapeHtml(cp.contactType) + '</div>';
+                        html += '<div><strong>Phone:</strong> ' + escapeHtml(cp.telephone) + '</div>';
+                        html += '<div><strong>Area:</strong> ' + escapeHtml(cp.areaServed.join(', ')) + '</div>';
+                        html += '<div><strong>Languages:</strong> ' + escapeHtml(cp.availableLanguage.join(', ')) + '</div>';
+                        html += '</div>';
                     });
                     html += '</div>';
                 }
                 html += '</div>';
             }
 
-            if (schema.about) {
-                html += '<div style="background: #f0f7ff; padding: 1rem; margin-bottom: 1rem; border: 1px solid #2196f3;">';
-                html += '<strong>About:</strong> ' + escapeHtml(schema.about.name || schema.about['@type']);
+            // About (Service)
+            if (schema.about && schema.about.name) {
+                html += '<div style="background: #f3e5f5; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid #9c27b0;">';
+                html += '<div style="font-weight: 500; margin-bottom: 1rem; font-size: 1.05rem;">About (Service)</div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>Name:</strong> ' + escapeHtml(schema.about.name) + '</div>';
+                
+                if (schema.about.serviceType) {
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Service Type:</strong> ' + escapeHtml(schema.about.serviceType) + '</div>';
+                }
+                
                 if (schema.about.description) {
-                    html += '<div style="margin-top: 0.5rem; color: #666;">' + escapeHtml(schema.about.description) + '</div>';
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Description:</strong> ' + escapeHtml(schema.about.description) + '</div>';
+                }
+                
+                if (schema.about.audience && schema.about.audience.name) {
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Target Audience:</strong> ' + escapeHtml(schema.about.audience.name) + '</div>';
+                }
+                
+                if (schema.about.areaServed && schema.about.areaServed.length > 0) {
+                    html += '<div style="margin-top: 1rem;"><strong>Areas Served:</strong></div>';
+                    html += '<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">';
+                    schema.about.areaServed.forEach(area => {
+                        html += '<span style="background: #fff; padding: 0.5rem 1rem; border-radius: 2px; border: 1px solid #e0e0e0;">' + escapeHtml(area.name) + '</span>';
+                    });
+                    html += '</div>';
+                }
+                
+                // Offer Catalog
+                if (schema.about.hasOfferCatalog && schema.about.hasOfferCatalog.itemListElement.itemListElement.length > 0) {
+                    html += '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e1bee7;">';
+                    html += '<div style="font-weight: 500; margin-bottom: 0.75rem;">Offer Catalog: ' + escapeHtml(schema.about.hasOfferCatalog.name) + '</div>';
+                    html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.75rem;">Number of Items: ' + schema.about.hasOfferCatalog.itemListElement.numberOfItems + '</div>';
+                    
+                    schema.about.hasOfferCatalog.itemListElement.itemListElement.forEach(item => {
+                        html += '<div style="margin: 0.75rem 0; padding: 1rem; background: #fff; border-left: 2px solid #9c27b0;">';
+                        html += '<div style="font-weight: 500; margin-bottom: 0.25rem;">' + escapeHtml(item.name) + '</div>';
+                        if (item.description) {
+                            html += '<div style="color: #666; font-size: 0.9rem; margin-bottom: 0.25rem;">' + escapeHtml(item.description) + '</div>';
+                        }
+                        if (item.areaServed && item.areaServed.length > 0) {
+                            html += '<div style="font-size: 0.85rem; color: #666;">Areas: ' + escapeHtml(item.areaServed.join(', ')) + '</div>';
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
                 }
                 html += '</div>';
             }
 
-            if (schema.mainEntity) {
-                html += '<div style="background: #f0f7ff; padding: 1rem; margin-bottom: 1rem; border: 1px solid #2196f3;">';
-                html += '<strong>Main Entity:</strong> ' + escapeHtml(schema.mainEntity.name || schema.mainEntity['@type']);
+            // Main Entity
+            if (schema.mainEntity && schema.mainEntity.itemListElement && schema.mainEntity.itemListElement.length > 0) {
+                html += '<div style="background: #e3f2fd; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid #2196f3;">';
+                html += '<div style="font-weight: 500; margin-bottom: 1rem; font-size: 1.05rem;">Main Entity: ' + escapeHtml(schema.mainEntity.name) + '</div>';
+                
+                schema.mainEntity.itemListElement.forEach(item => {
+                    html += '<div style="margin: 0.75rem 0; padding: 1rem; background: #fff; border-left: 2px solid #2196f3;">';
+                    html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Position: ' + item.position + '</div>';
+                    html += '<div style="font-weight: 500; margin-bottom: 0.25rem;">' + escapeHtml(item.item.name) + '</div>';
+                    html += '<div style="font-size: 0.85rem;"><strong>Type:</strong> ' + escapeHtml(item.item['@type']) + '</div>';
+                    html += '<div style="font-size: 0.85rem;"><strong>URL:</strong> <a href="' + escapeHtml(item.item.url) + '" target="_blank" style="color: #0066cc;">' + escapeHtml(item.item.url) + '</a></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Potential Actions
+            if (schema.potentialAction && schema.potentialAction.length > 0) {
+                html += '<div style="background: #fff3e0; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid #ff9800;">';
+                html += '<div style="font-weight: 500; margin-bottom: 1rem; font-size: 1.05rem;">Potential Actions</div>';
+                
+                schema.potentialAction.forEach((action, idx) => {
+                    html += '<div style="margin: 0.75rem 0; padding: 1rem; background: #fff; border-left: 2px solid #ff9800;">';
+                    html += '<div style="font-weight: 500; margin-bottom: 0.5rem;">' + escapeHtml(action['@type']) + '</div>';
+                    if (action.name) {
+                        html += '<div><strong>Name:</strong> ' + escapeHtml(action.name) + '</div>';
+                    }
+                    if (action.target) {
+                        if (typeof action.target === 'string') {
+                            html += '<div><strong>Target:</strong> ' + escapeHtml(action.target) + '</div>';
+                        } else if (action.target.urlTemplate) {
+                            html += '<div><strong>URL Template:</strong> ' + escapeHtml(action.target.urlTemplate) + '</div>';
+                        }
+                    }
+                    if (action['query-input']) {
+                        html += '<div style="font-size: 0.85rem; color: #666;"><strong>Query Input:</strong> ' + escapeHtml(action['query-input']) + '</div>';
+                    }
+                    html += '</div>';
+                });
                 html += '</div>';
             }
 
