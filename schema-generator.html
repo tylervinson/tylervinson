@@ -390,6 +390,8 @@
             }
 
             const domain = url.hostname;
+            const cleanDomain = domain.replace('www.', '');
+            const origin = url.origin;
             const path = url.pathname;
             const segments = path.split('/').filter(s => s);
 
@@ -413,35 +415,45 @@
                 }
             }
 
-            // Generate base schema
-            const schema = {
-                "@context": "https://schema.org",
-                "@type": schemaType,
-                "@id": item.url,
-                "url": item.url
-            };
-
-            // Add title if provided
-            if (item.title) {
-                schema.name = item.title;
-                if (schemaType === 'Article') {
-                    schema.headline = item.title;
-                }
-            } else {
-                // Generate title from URL
-                const lastSegment = segments[segments.length - 1] || domain;
-                schema.name = lastSegment
+            // Generate page title
+            let pageTitle = item.title;
+            if (!pageTitle) {
+                const lastSegment = segments[segments.length - 1] || cleanDomain;
+                pageTitle = lastSegment
                     .replace(/-/g, ' ')
                     .replace(/\b\w/g, l => l.toUpperCase());
             }
+
+            // Generate base schema with full structure
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": schemaType,
+                "@id": `${item.url}#webpage`,
+                "url": item.url,
+                "name": pageTitle,
+                "inLanguage": "en"
+            };
 
             // Add description if provided
             if (item.description) {
                 schema.description = item.description;
             }
 
+            // Add isPartOf (parent website)
+            schema.isPartOf = {
+                "@type": "WebSite",
+                "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()),
+                "url": origin + "/"
+            };
+
+            // Add primary image
+            schema.primaryImageOfPage = {
+                "@type": "ImageObject",
+                "url": `${origin}/logo.png` // Can be customized
+            };
+
             // Add breadcrumbs for nested pages
-            if (segments.length > 1) {
+            if (segments.length > 0) {
                 const breadcrumbs = {
                     "@type": "BreadcrumbList",
                     "itemListElement": []
@@ -454,51 +466,144 @@
                         "@type": "ListItem",
                         "position": index + 1,
                         "name": segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                        "item": `${url.origin}${currentPath}`
+                        "item": `${origin}${currentPath}`
                     });
                 });
 
                 schema.breadcrumb = breadcrumbs;
             }
 
+            // Add comprehensive publisher/organization information
+            schema.publisher = {
+                "@type": "Organization",
+                "@id": `${origin}/#organization`,
+                "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()),
+                "url": origin + "/",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": `${origin}/logo.png`
+                },
+                "contactPoint": [
+                    {
+                        "@type": "ContactPoint",
+                        "telephone": "+1-800-555-0000", // Customize this
+                        "contactType": "customer service",
+                        "areaServed": ["US"],
+                        "availableLanguage": ["en"]
+                    }
+                ]
+            };
+
             // Add type-specific properties
             switch (schemaType) {
                 case 'Article':
                     schema.author = {
                         "@type": "Organization",
-                        "name": domain
+                        "@id": `${origin}/#organization`
                     };
                     schema.publisher = {
                         "@type": "Organization",
-                        "name": domain
+                        "@id": `${origin}/#organization`,
+                        "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()),
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/logo.png`
+                        }
                     };
+                    schema.headline = pageTitle;
                     schema.datePublished = new Date().toISOString().split('T')[0];
+                    schema.dateModified = new Date().toISOString().split('T')[0];
+                    schema.image = {
+                        "@type": "ImageObject",
+                        "url": `${origin}/article-image.jpg`
+                    };
                     break;
 
                 case 'Product':
                     schema.offers = {
                         "@type": "Offer",
                         "url": item.url,
-                        "availability": "https://schema.org/InStock"
+                        "priceCurrency": "USD",
+                        "availability": "https://schema.org/InStock",
+                        "seller": {
+                            "@type": "Organization",
+                            "@id": `${origin}/#organization`
+                        }
                     };
+                    schema.brand = {
+                        "@type": "Brand",
+                        "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase())
+                    };
+                    if (item.description) {
+                        schema.description = item.description;
+                    }
                     break;
 
                 case 'ContactPage':
                     schema.mainEntity = {
-                        "@type": "ContactPoint",
-                        "contactType": "customer service"
+                        "@type": "Organization",
+                        "@id": `${origin}/#organization`,
+                        "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()),
+                        "url": origin + "/",
+                        "contactPoint": [
+                            {
+                                "@type": "ContactPoint",
+                                "telephone": "+1-800-555-0000",
+                                "contactType": "customer service",
+                                "areaServed": ["US"],
+                                "availableLanguage": ["en"]
+                            }
+                        ]
                     };
                     break;
 
-                case 'Organization':
                 case 'AboutPage':
                     schema.mainEntity = {
                         "@type": "Organization",
-                        "name": domain,
-                        "url": url.origin
+                        "@id": `${origin}/#organization`,
+                        "name": cleanDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()),
+                        "url": origin + "/",
+                        "description": item.description || `Learn more about ${cleanDomain.split('.')[0]}`,
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": `${origin}/logo.png`
+                        }
                     };
                     break;
+
+                case 'FAQPage':
+                    schema.mainEntity = [
+                        {
+                            "@type": "Question",
+                            "name": "Example Question 1",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "This is a placeholder answer. Replace with actual FAQ content."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Example Question 2",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "This is a placeholder answer. Replace with actual FAQ content."
+                            }
+                        }
+                    ];
+                    break;
             }
+
+            // Add potential actions for interactive pages
+            schema.potentialAction = [
+                {
+                    "@type": "SearchAction",
+                    "target": {
+                        "@type": "EntryPoint",
+                        "urlTemplate": `${origin}/search?q={search_term_string}`
+                    },
+                    "query-input": "required name=search_term_string"
+                }
+            ];
 
             return schema;
         }
@@ -606,12 +711,41 @@
                 html += '<p style="color: #666; margin-bottom: 1.5rem;">' + escapeHtml(schema.description) + '</p>';
             }
 
-            html += '<div style="background: #f9f9f9; padding: 1rem; margin-bottom: 1rem; border-left: 3px solid #1a1a1a;">';
+            // Schema Type and ID
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">';
+            html += '<div style="background: #f9f9f9; padding: 1rem; border-left: 3px solid #1a1a1a;">';
             html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Schema Type</div>';
             html += '<div style="font-weight: 500;">' + escapeHtml(schema['@type']) + '</div>';
             html += '</div>';
+            
+            html += '<div style="background: #f9f9f9; padding: 1rem; border-left: 3px solid #1a1a1a;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Language</div>';
+            html += '<div style="font-weight: 500;">' + escapeHtml(schema.inLanguage || 'en') + '</div>';
+            html += '</div>';
+            html += '</div>';
 
-            // Add breadcrumbs if they exist
+            // Publisher/Organization info
+            if (schema.publisher) {
+                html += '<div style="background: #fafafa; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem;">Publisher</div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>Name:</strong> ' + escapeHtml(schema.publisher.name) + '</div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong>URL:</strong> <a href="' + escapeHtml(schema.publisher.url) + '" target="_blank" style="color: #0066cc;">' + escapeHtml(schema.publisher.url) + '</a></div>';
+                
+                if (schema.publisher.contactPoint && schema.publisher.contactPoint.length > 0) {
+                    html += '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">';
+                    html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Contact Points</div>';
+                    schema.publisher.contactPoint.forEach(contact => {
+                        html += '<div style="margin: 0.5rem 0; padding: 0.5rem; background: #fff; border-left: 2px solid #1a1a1a;">';
+                        html += escapeHtml(contact.contactType) + ': ' + escapeHtml(contact.telephone || 'N/A');
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+            }
+
+            // Breadcrumbs
             if (schema.breadcrumb && schema.breadcrumb.itemListElement) {
                 html += '<div style="margin-bottom: 1.5rem;">';
                 html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Breadcrumbs</div>';
@@ -629,37 +763,84 @@
                 html += '</div></div>';
             }
 
-            // Add type-specific content
+            // Type-specific content
             if (schema['@type'] === 'Article') {
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">';
+                html += '<div style="background: #fafafa; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem;">Article Information</div>';
                 
                 if (schema.author) {
-                    html += '<div>';
-                    html += '<div style="font-size: 0.85rem; color: #666;">Author</div>';
-                    html += '<div>' + escapeHtml(schema.author.name || 'Organization') + '</div>';
-                    html += '</div>';
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Author:</strong> ' + escapeHtml(schema.author.name || schema.author['@type']) + '</div>';
                 }
                 
                 if (schema.datePublished) {
-                    html += '<div>';
-                    html += '<div style="font-size: 0.85rem; color: #666;">Published</div>';
-                    html += '<div>' + escapeHtml(schema.datePublished) + '</div>';
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Published:</strong> ' + escapeHtml(schema.datePublished) + '</div>';
+                }
+                
+                if (schema.dateModified) {
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Modified:</strong> ' + escapeHtml(schema.dateModified) + '</div>';
+                }
+                
+                html += '</div>';
+            }
+
+            if (schema['@type'] === 'Product') {
+                html += '<div style="background: #fafafa; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem;">Product Information</div>';
+                
+                if (schema.brand) {
+                    html += '<div style="margin-bottom: 0.5rem;"><strong>Brand:</strong> ' + escapeHtml(schema.brand.name) + '</div>';
+                }
+                
+                if (schema.offers) {
+                    html += '<div style="margin-top: 1rem; padding: 1rem; background: #f0f7ff; border-radius: 4px;">';
+                    html += '<div style="color: #2e7d32; font-weight: 500;">✓ In Stock</div>';
+                    if (schema.offers.priceCurrency) {
+                        html += '<div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">Currency: ' + escapeHtml(schema.offers.priceCurrency) + '</div>';
+                    }
                     html += '</div>';
                 }
                 
                 html += '</div>';
             }
 
-            if (schema['@type'] === 'Product' && schema.offers) {
-                html += '<div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">';
-                html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Product Availability</div>';
-                html += '<div style="color: #2e7d32; font-weight: 500;">In Stock</div>';
+            if (schema.mainEntity && schema['@type'] === 'FAQPage') {
+                html += '<div style="background: #fafafa; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem;">FAQ Questions</div>';
+                
+                if (Array.isArray(schema.mainEntity)) {
+                    schema.mainEntity.forEach((faq, idx) => {
+                        html += '<div style="margin-bottom: 1rem; padding: 1rem; background: #fff; border-left: 3px solid #1a1a1a;">';
+                        html += '<div style="font-weight: 500; margin-bottom: 0.5rem;">' + escapeHtml(faq.name) + '</div>';
+                        if (faq.acceptedAnswer) {
+                            html += '<div style="color: #666; font-size: 0.9rem;">' + escapeHtml(faq.acceptedAnswer.text) + '</div>';
+                        }
+                        html += '</div>';
+                    });
+                }
+                
                 html += '</div>';
             }
 
-            // Add URL
+            // Potential Actions
+            if (schema.potentialAction && schema.potentialAction.length > 0) {
+                html += '<div style="background: #fafafa; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e0e0e0;">';
+                html += '<div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem;">Available Actions</div>';
+                
+                schema.potentialAction.forEach(action => {
+                    html += '<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #fff; border-left: 2px solid #1a1a1a;">';
+                    html += '<strong>' + escapeHtml(action['@type']) + '</strong>';
+                    if (action.name) {
+                        html += ': ' + escapeHtml(action.name);
+                    }
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            }
+
+            // URL
             html += '<div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">';
-            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">URL</div>';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Canonical URL</div>';
             html += '<a href="' + escapeHtml(schema.url) + '" target="_blank" style="color: #0066cc; text-decoration: none; word-break: break-all;">';
             html += escapeHtml(schema.url);
             html += '</a></div>';
