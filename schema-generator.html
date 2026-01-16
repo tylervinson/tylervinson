@@ -132,10 +132,14 @@
         .result-item {
             padding: 1rem;
             border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-header {
             display: grid;
             grid-template-columns: 1fr auto;
             gap: 1rem;
             align-items: center;
+            margin-bottom: 0.5rem;
         }
 
         .result-item:last-child {
@@ -191,11 +195,16 @@
             overflow-x: auto;
             font-size: 0.85rem;
             border: 1px solid #e0e0e0;
+            max-width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .schema-preview {
             display: none;
             margin-top: 1rem;
+            width: 100%;
+            overflow: hidden;
         }
 
         .html-preview {
@@ -204,6 +213,9 @@
             background: #ffffff;
             border: 1px solid #e0e0e0;
             padding: 1.5rem;
+            width: 100%;
+            overflow: auto;
+            max-height: 600px;
         }
 
         .cors-note {
@@ -229,7 +241,7 @@
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
             <div class="info-box">
                 <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                <strong>Required:</strong>"URL" colomn header
+                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted.<br>
             </div>
             
             <div class="upload-zone" id="uploadZone">
@@ -761,6 +773,10 @@
                 const item = document.createElement('div');
                 item.className = 'result-item';
                 
+                // Create header row with URL and buttons
+                const headerRow = document.createElement('div');
+                headerRow.className = 'result-header';
+                
                 const urlDiv = document.createElement('div');
                 urlDiv.innerHTML = `
                     <div class="result-url">${result.url}</div>
@@ -802,8 +818,10 @@
                     actionsDiv.appendChild(downloadBtn);
                 }
 
-                item.appendChild(urlDiv);
-                item.appendChild(actionsDiv);
+                headerRow.appendChild(urlDiv);
+                headerRow.appendChild(actionsDiv);
+                item.appendChild(headerRow);
+                
                 resultsList.appendChild(item);
 
                 if (result.success) {
