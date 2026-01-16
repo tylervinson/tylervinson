@@ -814,7 +814,8 @@
                     copyBtn.textContent = 'Copy';
                     copyBtn.className = 'btn-small';
                     copyBtn.onclick = () => {
-                        navigator.clipboard.writeText(result.schema);
+                        const wrappedSchema = `<script type="application/ld+json">\n${result.schema}\n<\/script>`;
+                        navigator.clipboard.writeText(wrappedSchema);
                         copyBtn.textContent = 'Copied!';
                         setTimeout(() => copyBtn.textContent = 'Copy', 2000);
                     };
@@ -838,7 +839,10 @@
                     const preview = document.createElement('div');
                     preview.className = 'schema-preview';
                     preview.id = `preview-${index}`;
-                    preview.innerHTML = `<pre>${escapeHtml(result.schema)}</pre>`;
+                    
+                    // Wrap JSON in script tags - escape the closing script tag to prevent breaking
+                    const wrappedSchema = `<script type="application/ld+json">\n${result.schema}\n<\/script>`;
+                    preview.innerHTML = `<pre>${escapeHtml(wrappedSchema)}</pre>`;
                     item.appendChild(preview);
 
                     const htmlPreview = document.createElement('div');
@@ -851,11 +855,26 @@
 
         function togglePreview(index) {
             const preview = document.getElementById(`preview-${index}`);
+            const htmlPreview = document.getElementById(`html-preview-${index}`);
+            
+            // Close HTML preview if open
+            if (htmlPreview.style.display === 'block') {
+                htmlPreview.style.display = 'none';
+            }
+            
+            // Toggle JSON preview
             preview.style.display = preview.style.display === 'none' || !preview.style.display ? 'block' : 'none';
         }
 
         function toggleHtmlPreview(index) {
             const htmlPreview = document.getElementById(`html-preview-${index}`);
+            const preview = document.getElementById(`preview-${index}`);
+            
+            // Close JSON preview if open
+            if (preview.style.display === 'block') {
+                preview.style.display = 'none';
+            }
+            
             const isVisible = htmlPreview.style.display === 'block';
             
             if (!isVisible) {
@@ -925,8 +944,9 @@
         }
 
         function downloadSchema(result, index) {
-            const blob = new Blob([result.schema], { type: 'application/json' });
-            const filename = `schema-${index + 1}.json`;
+            const wrappedSchema = `<script type="application/ld+json">\n${result.schema}\n<\/script>`;
+            const blob = new Blob([wrappedSchema], { type: 'text/html' });
+            const filename = `schema-${index + 1}.html`;
             saveAs(blob, filename);
         }
 
@@ -935,7 +955,8 @@
             
             generatedSchemas.forEach((result, index) => {
                 if (result.success) {
-                    zip.file(`schema-${index + 1}.json`, result.schema);
+                    const wrappedSchema = `<script type="application/ld+json">\n${result.schema}\n<\/script>`;
+                    zip.file(`schema-${index + 1}.html`, wrappedSchema);
                 }
             });
 
