@@ -228,7 +228,7 @@
         <div class="upload-section">
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
             <div class="cors-note">
-                <strong>✓ CORS Proxy Enabled:</strong> This tool uses AllOrigins proxy to fetch pages from any domain. It will automatically scrape each URL to extract page metadata (title, description, organization info, phone numbers, etc.) and generate comprehensive JSON-LD schemas.
+                <strong>✓ CORS Proxy Enabled:</strong> This tool uses corsproxy.io to fetch pages from any domain. It will automatically scrape each URL to extract page metadata (title, description, organization info, phone numbers, etc.) and generate comprehensive JSON-LD schemas.
             </div>
             <div class="info-box">
                 <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
@@ -395,7 +395,7 @@
 
         async function scrapePage(url) {
             // Use CORS proxy to fetch the page
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
             
             try {
                 const response = await fetch(proxyUrl);
