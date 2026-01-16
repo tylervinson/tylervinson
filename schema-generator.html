@@ -229,8 +229,7 @@
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
             <div class="info-box">
                 <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
-                <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
+                <strong>Required:</strong>"URL" colomn header
             </div>
             
             <div class="upload-zone" id="uploadZone">
@@ -487,42 +486,83 @@
 
             const pageType = determinePageType(path, doc);
 
-            // Build comprehensive schema
+            // Build schema using the EXACT template structure
             const schema = {
                 "@context": "https://schema.org",
-                "@type": pageType,
+                "@type": "WebPage",
                 "@id": `${pageData.url}#webpage`,
                 "url": pageData.url,
-                "name": title || 'Page',
-                "inLanguage": "en"
-            };
-
-            if (description) {
-                schema.description = description;
-            }
-
-            // Add isPartOf
-            schema.isPartOf = {
-                "@type": "WebSite",
-                "name": siteConfig.orgShortName || extractDomainName(url.hostname),
-                "url": siteConfig.websiteUrl + "/"
-            };
-
-            // Add primary image
-            if (siteConfig.logoUrl) {
-                schema.primaryImageOfPage = {
+                "name": title || '',
+                "description": description || '',
+                "isPartOf": {
+                    "@type": "WebSite",
+                    "name": siteConfig.orgShortName || extractDomainName(url.hostname),
+                    "url": siteConfig.websiteUrl + "/"
+                },
+                "primaryImageOfPage": {
                     "@type": "ImageObject",
-                    "url": siteConfig.logoUrl
-                };
-            }
+                    "url": siteConfig.logoUrl || ''
+                },
+                "inLanguage": "en",
+                "breadcrumb": {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": []
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "@id": `${siteConfig.websiteUrl}/#organization`,
+                    "name": siteConfig.orgName || siteConfig.orgShortName || extractDomainName(url.hostname),
+                    "url": siteConfig.websiteUrl + "/",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": siteConfig.logoUrl || ''
+                    },
+                    "contactPoint": []
+                },
+                "about": {
+                    "@type": "Service",
+                    "name": '',
+                    "provider": {
+                        "@type": "Organization",
+                        "@id": `${siteConfig.websiteUrl}/#organization`
+                    },
+                    "areaServed": [],
+                    "audience": {
+                        "@type": "PeopleAudience",
+                        "name": ''
+                    },
+                    "serviceType": '',
+                    "description": '',
+                    "hasOfferCatalog": {
+                        "@type": "OfferCatalog",
+                        "name": '',
+                        "itemListElement": {
+                            "@type": "ItemList",
+                            "itemListOrder": "http://schema.org/ItemListOrderAscending",
+                            "numberOfItems": 0,
+                            "itemListElement": []
+                        }
+                    }
+                },
+                "mainEntity": {
+                    "@type": "ItemList",
+                    "name": '',
+                    "itemListElement": []
+                },
+                "potentialAction": [
+                    {
+                        "@type": "SearchAction",
+                        "target": {
+                            "@type": "EntryPoint",
+                            "urlTemplate": pageData.url
+                        },
+                        "query-input": "required name=search_term_string"
+                    }
+                ]
+            };
 
             // Build breadcrumbs from URL path
             if (segments.length > 0) {
-                schema.breadcrumb = {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": []
-                };
-
                 let currentPath = '';
                 segments.forEach((segment, index) => {
                     currentPath += '/' + segment;
@@ -535,25 +575,9 @@
                 });
             }
 
-            // Build publisher
-            schema.publisher = {
-                "@type": "Organization",
-                "@id": `${siteConfig.websiteUrl}/#organization`,
-                "name": siteConfig.orgName || siteConfig.orgShortName || extractDomainName(url.hostname),
-                "url": siteConfig.websiteUrl + "/"
-            };
-
-            if (siteConfig.logoUrl) {
-                schema.publisher.logo = {
-                    "@type": "ImageObject",
-                    "url": siteConfig.logoUrl
-                };
-            }
-
             // Add contact points
-            const contactPoints = [];
             if (siteConfig.phones.sales) {
-                contactPoints.push({
+                schema.publisher.contactPoint.push({
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.sales,
                     "contactType": "sales",
@@ -562,7 +586,7 @@
                 });
             }
             if (siteConfig.phones.service) {
-                contactPoints.push({
+                schema.publisher.contactPoint.push({
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.service,
                     "contactType": "customer service",
@@ -571,7 +595,7 @@
                 });
             }
             if (siteConfig.phones.tty) {
-                contactPoints.push({
+                schema.publisher.contactPoint.push({
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.tty,
                     "contactType": "TTY",
@@ -579,17 +603,12 @@
                     "availableLanguage": ["en"]
                 });
             }
-            if (contactPoints.length > 0) {
-                schema.publisher.contactPoint = contactPoints;
-            }
 
             // Extract service/product information from page content
             const mainHeading = doc.querySelector('h1')?.textContent;
-            const subheadings = Array.from(doc.querySelectorAll('h2, h3')).map(h => h.textContent.trim());
-            const paragraphs = Array.from(doc.querySelectorAll('p')).slice(0, 5).map(p => p.textContent.trim());
+            const bodyText = doc.body.textContent.toLowerCase();
             
             // Look for service indicators (plans, products, services mentioned)
-            const bodyText = doc.body.textContent.toLowerCase();
             const hasServices = bodyText.includes('plan') || bodyText.includes('service') || 
                                bodyText.includes('product') || bodyText.includes('coverage') ||
                                bodyText.includes('benefit');
@@ -597,29 +616,19 @@
             if (hasServices && (path.includes('medicare') || path.includes('insurance') || 
                 path.includes('plan') || path.includes('service'))) {
                 
-                // Create About section for services
-                schema.about = {
-                    "@type": "Service",
-                    "name": mainHeading || title,
-                    "provider": {
-                        "@type": "Organization",
-                        "@id": `${siteConfig.websiteUrl}/#organization`
-                    },
-                    "serviceType": extractServiceType(mainHeading, bodyText),
-                    "description": description || (paragraphs[0] || '').substring(0, 200)
-                };
+                // Fill in About section
+                schema.about.name = mainHeading || title;
+                schema.about.serviceType = extractServiceType(mainHeading, bodyText);
+                schema.about.description = description || '';
 
                 // Try to find target audience
                 const audienceMatch = bodyText.match(/(medicare[- ]eligible|seniors|individuals|families|businesses)/i);
                 if (audienceMatch) {
-                    schema.about.audience = {
-                        "@type": "PeopleAudience",
-                        "name": audienceMatch[0].charAt(0).toUpperCase() + audienceMatch[0].slice(1)
-                    };
+                    schema.about.audience.name = audienceMatch[0].charAt(0).toUpperCase() + audienceMatch[0].slice(1);
                 }
 
                 // Try to extract area served from content
-                const countyMatch = bodyText.match(/([A-Z][a-z]+\s+County)/g);
+                const countyMatch = bodyText.match(/([A-Z][a-z]+\s+County,?\s*[A-Z]{2})/g);
                 if (countyMatch && countyMatch.length > 0) {
                     schema.about.areaServed = countyMatch.slice(0, 3).map(county => ({
                         "@type": "AdministrativeArea",
@@ -630,67 +639,29 @@
                 // Look for specific plan/product mentions
                 const planNames = extractPlanNames(doc);
                 if (planNames.length > 0) {
-                    schema.about.hasOfferCatalog = {
-                        "@type": "OfferCatalog",
-                        "name": `${mainHeading || title} Plans`,
-                        "itemListElement": {
-                            "@type": "ItemList",
-                            "numberOfItems": planNames.length,
-                            "itemListElement": planNames.map((planName, idx) => ({
-                                "@type": "Service",
-                                "name": planName,
-                                "description": `${planName} coverage option`
-                            }))
-                        }
-                    };
-                }
-            }
+                    schema.about.hasOfferCatalog.name = `${mainHeading || title} Plans`;
+                    schema.about.hasOfferCatalog.itemListElement.numberOfItems = planNames.length;
+                    schema.about.hasOfferCatalog.itemListElement.itemListElement = planNames.map((planName, idx) => ({
+                        "@type": "Service",
+                        "name": planName,
+                        "areaServed": countyMatch ? countyMatch.slice(0, 3) : [],
+                        "description": `${planName} coverage option`
+                    }));
 
-            // Create mainEntity if we have service offerings
-            if (schema.about && schema.about.hasOfferCatalog) {
-                const plans = schema.about.hasOfferCatalog.itemListElement.itemListElement;
-                schema.mainEntity = {
-                    "@type": "ItemList",
-                    "name": `Featured ${mainHeading || 'Plans'}`,
-                    "itemListElement": plans.map((plan, idx) => ({
+                    // Create mainEntity
+                    schema.mainEntity.name = `Featured ${mainHeading || 'Plans'}`;
+                    schema.mainEntity.itemListElement = planNames.map((planName, idx) => ({
                         "@type": "ListItem",
                         "position": idx + 1,
                         "item": {
                             "@type": "Service",
-                            "name": plan.name,
+                            "name": planName,
                             "url": pageData.url,
                             "provider": { "@id": `${siteConfig.websiteUrl}/#organization` }
                         }
-                    }))
-                };
-            }
-
-            // Add type-specific properties
-            if (pageType === 'Article') {
-                schema.author = {
-                    "@type": "Organization",
-                    "@id": `${siteConfig.websiteUrl}/#organization`
-                };
-                schema.headline = title;
-                const datePublished = doc.querySelector('meta[property="article:published_time"]')?.content ||
-                                     doc.querySelector('time[datetime]')?.getAttribute('datetime');
-                if (datePublished) {
-                    schema.datePublished = datePublished.split('T')[0];
-                    schema.dateModified = datePublished.split('T')[0];
+                    }));
                 }
             }
-
-            // Add potential actions
-            schema.potentialAction = [
-                {
-                    "@type": "SearchAction",
-                    "target": {
-                        "@type": "EntryPoint",
-                        "urlTemplate": pageData.url
-                    },
-                    "query-input": "required name=search_term_string"
-                }
-            ];
 
             // Add additional action if CTA buttons found
             const ctaButtons = doc.querySelectorAll('a[href*="shop"], a[href*="enroll"], button');
