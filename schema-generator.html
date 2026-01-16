@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON-LD Schema Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .upload-section {
+            background: #ffffff;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .upload-zone:hover {
+            border-color: #999;
+            background: #f5f5f5;
+        }
+
+        .upload-zone.dragover {
+            border-color: #0066cc;
+            background: #f0f7ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        button {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover:not(:disabled) {
+            background: #333;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            background: #ffffff;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .results-section {
+            background: #ffffff;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .result-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-url {
+            font-size: 0.9rem;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .download-all {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info-box {
+            background: #f9f9f9;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+            border-left: 3px solid #1a1a1a;
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 3px solid #d32f2f;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .schema-preview {
+            display: none;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>JSON-LD Schema Generator</h1>
+            <p class="subtitle">Upload a spreadsheet of URLs to automatically generate structured data schemas</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
+            <div class="info-box">
+                <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
+                <strong>Required:</strong> First column must contain URLs (with header "URL" or "url")<br>
+                <strong>Optional columns:</strong> Page Type, Title, Description (helps generate better schemas)
+            </div>
+            
+            <div class="upload-zone" id="uploadZone">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" style="margin-bottom: 1rem;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p style="color: #666; margin-bottom: 0.5rem;">Drop your spreadsheet here or click to browse</p>
+                <p style="color: #999; font-size: 0.85rem;">CSV, XLSX, or XLS files</p>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button id="generateBtn" disabled>Generate Schemas</button>
+            </div>
+        </div>
+
+        <div class="progress-section" id="progressSection">
+            <h2 style="margin-bottom: 1rem; font-weight: 400;">Generating Schemas...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status" id="statusText">Preparing...</div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h2 style="margin-bottom: 1.5rem; font-weight: 400;">Generated Schemas</h2>
+            <div id="resultsList"></div>
+            <div class="download-all">
+                <button id="downloadAllBtn">Download All Schemas (ZIP)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        let uploadedData = [];
+        let generatedSchemas = [];
+
+        // Upload zone handling
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const generateBtn = document.getElementById('generateBtn');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    // Validate data
+                    if (jsonData.length === 0) {
+                        alert('The spreadsheet appears to be empty');
+                        return;
+                    }
+
+                    // Find URL column (case insensitive)
+                    const firstRow = jsonData[0];
+                    const urlKey = Object.keys(firstRow).find(key => 
+                        key.toLowerCase() === 'url' || key.toLowerCase() === 'urls'
+                    );
+
+                    if (!urlKey) {
+                        alert('Could not find a "URL" column in your spreadsheet. Please ensure the first column has a "URL" header.');
+                        return;
+                    }
+
+                    uploadedData = jsonData.map(row => ({
+                        url: row[urlKey],
+                        pageType: row['Page Type'] || row['Type'] || row['type'] || '',
+                        title: row['Title'] || row['title'] || '',
+                        description: row['Description'] || row['description'] || ''
+                    })).filter(row => row.url); // Remove rows without URLs
+
+                    console.log('Parsed data:', uploadedData);
+                    generateBtn.disabled = false;
+                    uploadZone.querySelector('p').textContent = `✓ Loaded ${uploadedData.length} URLs`;
+                    uploadZone.querySelector('p').style.color = '#2e7d32';
+                } catch (error) {
+                    console.error('Error parsing file:', error);
+                    alert('Error parsing file. Please ensure it\'s a valid CSV or Excel file.');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            if (uploadedData.length === 0) return;
+
+            // Show progress section
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            generateBtn.disabled = true;
+
+            generatedSchemas = [];
+            const total = uploadedData.length;
+
+            for (let i = 0; i < uploadedData.length; i++) {
+                const item = uploadedData[i];
+                updateProgress(i + 1, total, `Processing ${item.url}`);
+
+                try {
+                    const schema = await generateSchemaForURL(item);
+                    generatedSchemas.push({
+                        url: item.url,
+                        schema: schema,
+                        success: true
+                    });
+                } catch (error) {
+                    console.error(`Error generating schema for ${item.url}:`, error);
+                    generatedSchemas.push({
+                        url: item.url,
+                        error: error.message,
+                        success: false
+                    });
+                }
+            }
+
+            // Show results
+            displayResults();
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            generateBtn.disabled = false;
+        });
+
+        async function generateSchemaForURL(item) {
+            const prompt = `You are a JSON-LD schema.org structured data expert. Generate appropriate JSON-LD schema markup for the following URL.
+
+URL: ${item.url}
+${item.pageType ? `Page Type: ${item.pageType}` : ''}
+${item.title ? `Title: ${item.title}` : ''}
+${item.description ? `Description: ${item.description}` : ''}
+
+Please analyze the URL and any provided information to generate the most appropriate schema.org structured data. Common schema types include:
+- WebPage (default for most pages)
+- Article (for blog posts, news articles)
+- Product (for product pages)
+- Organization (for about/company pages)
+- FAQPage (for FAQ pages)
+- ContactPage (for contact pages)
+- LocalBusiness (for local business pages)
+
+Return ONLY valid JSON-LD markup, no explanation or markdown. The output should be ready to insert into a <script type="application/ld+json"> tag.`;
+
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 1000,
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const content = data.content[0].text;
+            
+            // Clean up the response - remove markdown code blocks if present
+            let cleanedContent = content.trim();
+            if (cleanedContent.startsWith('```json')) {
+                cleanedContent = cleanedContent.replace(/^```json\n/, '').replace(/\n```$/, '');
+            } else if (cleanedContent.startsWith('```')) {
+                cleanedContent = cleanedContent.replace(/^```\n/, '').replace(/\n```$/, '');
+            }
+            
+            // Validate it's valid JSON
+            JSON.parse(cleanedContent);
+            
+            return cleanedContent;
+        }
+
+        function updateProgress(current, total, status) {
+            const percent = (current / total) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('statusText').textContent = `${status} (${current}/${total})`;
+        }
+
+        function displayResults() {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+
+            generatedSchemas.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                
+                const urlDiv = document.createElement('div');
+                urlDiv.innerHTML = `
+                    <div class="result-url">${result.url}</div>
+                    ${result.success ? '<span style="color: #2e7d32; font-size: 0.85rem;">✓ Generated</span>' : '<span style="color: #d32f2f; font-size: 0.85rem;">✗ Error</span>'}
+                `;
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'result-actions';
+
+                if (result.success) {
+                    const viewBtn = document.createElement('button');
+                    viewBtn.textContent = 'View';
+                    viewBtn.className = 'btn-small';
+                    viewBtn.onclick = () => togglePreview(index);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.className = 'btn-small';
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(result.schema);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+                    };
+
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.className = 'btn-small';
+                    downloadBtn.onclick = () => downloadSchema(result, index);
+
+                    actionsDiv.appendChild(viewBtn);
+                    actionsDiv.appendChild(copyBtn);
+                    actionsDiv.appendChild(downloadBtn);
+                }
+
+                item.appendChild(urlDiv);
+                item.appendChild(actionsDiv);
+                resultsList.appendChild(item);
+
+                if (result.success) {
+                    const preview = document.createElement('div');
+                    preview.className = 'schema-preview';
+                    preview.id = `preview-${index}`;
+                    preview.innerHTML = `<pre>${escapeHtml(result.schema)}</pre>`;
+                    item.appendChild(preview);
+                }
+            });
+        }
+
+        function togglePreview(index) {
+            const preview = document.getElementById(`preview-${index}`);
+            preview.style.display = preview.style.display === 'none' || !preview.style.display ? 'block' : 'none';
+        }
+
+        function downloadSchema(result, index) {
+            const blob = new Blob([result.schema], { type: 'application/json' });
+            const filename = `schema-${index + 1}.json`;
+            saveAs(blob, filename);
+        }
+
+        document.getElementById('downloadAllBtn').addEventListener('click', async () => {
+            const zip = new JSZip();
+            
+            generatedSchemas.forEach((result, index) => {
+                if (result.success) {
+                    zip.file(`schema-${index + 1}.json`, result.schema);
+                }
+            });
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            saveAs(content, 'schemas.zip');
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
