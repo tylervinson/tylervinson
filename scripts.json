@@ -1,5 +1,14 @@
 [
   {
+    "id": "1769014052465",
+    "name": "Formstack Submission Validation/Blocker",
+    "type": "html",
+    "description": "Fixes Text Area Field Validation Bug",
+    "code": "<script>\n(function () {\n  const FORM_ID = 'fsForm5256070';\n  const FIELD_ID = 'field143216580';\n  const MIN_LENGTH = 20;\n  const REQUIRED_MSG = 'This field is required.';\n  const MINLEN_MSG = 'Please enter at least 20 characters.';\n\n  function showError(field, message) {\n    const wrapper = field.closest('.fsField');\n    if (!wrapper) return;\n\n    wrapper.classList.add('fsValidationError');\n\n    let err = wrapper.querySelector('.fsError');\n    if (!err) {\n      err = document.createElement('div');\n      err.className = 'fsError';\n      wrapper.appendChild(err);\n    }\n\n    err.textContent = message;\n  }\n\n  function clearError(field) {\n    const wrapper = field.closest('.fsField');\n    if (!wrapper) return;\n\n    wrapper.classList.remove('fsValidationError');\n    const err = wrapper.querySelector('.fsError');\n    if (err) err.remove();\n  }\n\n  document.addEventListener(\n    'submit',\n    function (e) {\n      const form = document.getElementById(FORM_ID);\n      if (e.target !== form) return;\n\n      const field = document.getElementById(FIELD_ID);\n      if (!field) return;\n\n      const value = field.value.trim();\n\n      if (!value) {\n        e.preventDefault();\n        e.stopImmediatePropagation();\n        showError(field, REQUIRED_MSG);\n        field.focus();\n        return;\n      }\n\n      if (value.length < MIN_LENGTH) {\n        e.preventDefault();\n        e.stopImmediatePropagation();\n        showError(field, MINLEN_MSG);\n        field.focus();\n      }\n    },\n    true\n  );\n\n  document.addEventListener('input', function (e) {\n    if (e.target.id !== FIELD_ID) return;\n    clearError(e.target);\n  });\n})();\n</script>\n",
+    "demo": "",
+    "date": "2026-01-21T16:47:32.465Z"
+  },
+  {
     "id": "1769005124651",
     "name": "Formstack Field Extractor",
     "type": "script",
