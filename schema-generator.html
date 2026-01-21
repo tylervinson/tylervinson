@@ -241,7 +241,8 @@
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
             <div class="info-box">
                 <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                <strong>Required:</strong> "URL" as column header in first row.<br>
+                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
+                <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
             </div>
             
             <div class="upload-zone" id="uploadZone">
@@ -284,6 +285,82 @@
         let uploadedData = [];
         let generatedSchemas = [];
         let siteConfig = null; // Will be extracted from first page
+
+        // Version History Management
+        const STORAGE_KEY = 'schema_version_history';
+        
+        function getVersionHistory() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : {};
+        }
+        
+        function saveSchemaVersion(url, schema) {
+            const history = getVersionHistory();
+            if (!history[url]) {
+                history[url] = [];
+            }
+            
+            history[url].push({
+                schema: schema,
+                timestamp: new Date().toISOString(),
+                version: history[url].length + 1
+            });
+            
+            // Keep only last 10 versions per URL
+            if (history[url].length > 10) {
+                history[url].shift();
+            }
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        }
+        
+        function getURLHistory(url) {
+            const history = getVersionHistory();
+            return history[url] || [];
+        }
+        
+        function compareSchemas(schema1, schema2) {
+            const changes = {
+                added: [],
+                removed: [],
+                modified: []
+            };
+            
+            const obj1 = JSON.parse(schema1);
+            const obj2 = JSON.parse(schema2);
+            
+            findDifferences(obj1, obj2, '', changes);
+            
+            return changes;
+        }
+        
+        function findDifferences(obj1, obj2, path, changes) {
+            const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+            
+            for (const key of allKeys) {
+                const currentPath = path ? `${path}.${key}` : key;
+                const val1 = obj1[key];
+                const val2 = obj2[key];
+                
+                if (!(key in obj2)) {
+                    changes.removed.push({ path: currentPath, value: val1 });
+                } else if (!(key in obj1)) {
+                    changes.added.push({ path: currentPath, value: val2 });
+                } else if (typeof val1 !== typeof val2) {
+                    changes.modified.push({ path: currentPath, oldValue: val1, newValue: val2 });
+                } else if (typeof val1 === 'object' && val1 !== null && val2 !== null) {
+                    if (Array.isArray(val1) && Array.isArray(val2)) {
+                        if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+                            changes.modified.push({ path: currentPath, oldValue: val1, newValue: val2 });
+                        }
+                    } else {
+                        findDifferences(val1, val2, currentPath, changes);
+                    }
+                } else if (val1 !== val2) {
+                    changes.modified.push({ path: currentPath, oldValue: val1, newValue: val2 });
+                }
+            }
+        }
 
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
@@ -378,9 +455,14 @@
                     
                     // Generate schema
                     const schema = generateSchemaFromPageData(pageData, siteConfig);
+                    const schemaJson = JSON.stringify(schema, null, 2);
+                    
+                    // Save to version history
+                    saveSchemaVersion(item.url, schemaJson);
+                    
                     generatedSchemas.push({
                         url: item.url,
-                        schema: JSON.stringify(schema, null, 2),
+                        schema: schemaJson,
                         success: true
                     });
                 } catch (error) {
@@ -797,6 +879,17 @@
                     viewHtmlBtn.className = 'btn-small';
                     viewHtmlBtn.onclick = () => toggleHtmlPreview(index);
 
+                    const historyBtn = document.createElement('button');
+                    historyBtn.textContent = 'History';
+                    historyBtn.className = 'btn-small';
+                    const urlHistory = getURLHistory(result.url);
+                    if (urlHistory.length === 0) {
+                        historyBtn.disabled = true;
+                        historyBtn.style.opacity = '0.5';
+                    } else {
+                        historyBtn.onclick = () => showHistory(index, result.url);
+                    }
+
                     const copyBtn = document.createElement('button');
                     copyBtn.textContent = 'Copy';
                     copyBtn.className = 'btn-small';
@@ -814,6 +907,7 @@
 
                     actionsDiv.appendChild(viewBtn);
                     actionsDiv.appendChild(viewHtmlBtn);
+                    actionsDiv.appendChild(historyBtn);
                     actionsDiv.appendChild(copyBtn);
                     actionsDiv.appendChild(downloadBtn);
                 }
@@ -838,6 +932,11 @@
                     htmlPreview.className = 'html-preview';
                     htmlPreview.id = `html-preview-${index}`;
                     item.appendChild(htmlPreview);
+
+                    const historyPreview = document.createElement('div');
+                    historyPreview.className = 'html-preview';
+                    historyPreview.id = `history-preview-${index}`;
+                    item.appendChild(historyPreview);
                 }
             });
         }
@@ -858,10 +957,14 @@
         function toggleHtmlPreview(index) {
             const htmlPreview = document.getElementById(`html-preview-${index}`);
             const preview = document.getElementById(`preview-${index}`);
+            const historyPreview = document.getElementById(`history-preview-${index}`);
             
-            // Close JSON preview if open
+            // Close other previews if open
             if (preview.style.display === 'block') {
                 preview.style.display = 'none';
+            }
+            if (historyPreview.style.display === 'block') {
+                historyPreview.style.display = 'none';
             }
             
             const isVisible = htmlPreview.style.display === 'block';
@@ -874,6 +977,190 @@
             } else {
                 htmlPreview.style.display = 'none';
             }
+        }
+
+        function showHistory(index, url) {
+            const historyPreview = document.getElementById(`history-preview-${index}`);
+            const preview = document.getElementById(`preview-${index}`);
+            const htmlPreview = document.getElementById(`html-preview-${index}`);
+            
+            // Close other previews if open
+            if (preview.style.display === 'block') {
+                preview.style.display = 'none';
+            }
+            if (htmlPreview.style.display === 'block') {
+                htmlPreview.style.display = 'none';
+            }
+            
+            const isVisible = historyPreview.style.display === 'block';
+            
+            if (!isVisible) {
+                const history = getURLHistory(url);
+                const currentSchema = generatedSchemas[index].schema;
+                const htmlContent = generateHistoryView(url, history, currentSchema);
+                historyPreview.innerHTML = htmlContent;
+                historyPreview.style.display = 'block';
+            } else {
+                historyPreview.style.display = 'none';
+            }
+        }
+
+        function generateHistoryView(url, history, currentSchema) {
+            let html = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif;">';
+            html += '<h3 style="margin: 0 0 1.5rem 0; font-weight: 300; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">Version History</h3>';
+            
+            html += '<div style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e0e0e0; background: #fafafa;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">URL</div>';
+            html += '<div style="word-break: break-all; font-size: 0.9rem;">' + escapeHtml(url) + '</div>';
+            html += '</div>';
+
+            html += '<div style="margin-bottom: 1rem;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Total Versions: ' + history.length + '</div>';
+            html += '</div>';
+
+            // Show each version
+            history.forEach((version, idx) => {
+                const versionDate = new Date(version.timestamp);
+                const isLatest = idx === history.length - 1;
+                
+                html += '<div style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid #e0e0e0; ' + (isLatest ? 'background: #f9f9f9;' : '') + '">';
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e0e0e0;">';
+                html += '<div>';
+                html += '<div style="font-weight: 400; margin-bottom: 0.25rem;">Version ' + version.version + (isLatest ? ' (Latest)' : '') + '</div>';
+                html += '<div style="font-size: 0.85rem; color: #666;">' + versionDate.toLocaleString() + '</div>';
+                html += '</div>';
+                html += '<button onclick="compareVersion(\'' + url + '\', ' + idx + ')" style="padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; cursor: pointer; font-size: 0.85rem;">Compare to Current</button>';
+                html += '</div>';
+                
+                // Show a preview of key fields
+                try {
+                    const schema = JSON.parse(version.schema);
+                    html += '<div style="font-size: 0.9rem;">';
+                    html += '<div style="margin-bottom: 0.25rem;"><span style="color: #666;">Name:</span> ' + escapeHtml(schema.name || 'N/A') + '</div>';
+                    html += '<div style="margin-bottom: 0.25rem;"><span style="color: #666;">Type:</span> ' + escapeHtml(schema['@type'] || 'N/A') + '</div>';
+                    if (schema.description) {
+                        html += '<div style="margin-bottom: 0.25rem;"><span style="color: #666;">Description:</span> ' + escapeHtml(schema.description.substring(0, 100)) + (schema.description.length > 100 ? '...' : '') + '</div>';
+                    }
+                    html += '</div>';
+                } catch (e) {
+                    html += '<div style="color: #999; font-size: 0.85rem;">Unable to parse schema</div>';
+                }
+                
+                html += '</div>';
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        function compareVersion(url, versionIndex) {
+            const history = getURLHistory(url);
+            const oldVersion = history[versionIndex];
+            const currentSchema = generatedSchemas.find(s => s.url === url)?.schema;
+            
+            if (!currentSchema) return;
+            
+            const changes = compareSchemas(oldVersion.schema, currentSchema);
+            showComparisonModal(url, oldVersion, currentSchema, changes);
+        }
+
+        function showComparisonModal(url, oldVersion, currentSchema, changes) {
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem;';
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = 'background: white; max-width: 1200px; width: 100%; max-height: 90vh; overflow: auto; padding: 2rem; position: relative;';
+            
+            const versionDate = new Date(oldVersion.timestamp);
+            
+            let html = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif;">';
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0;">';
+            html += '<h2 style="margin: 0; font-weight: 300; font-size: 1.5rem;">Schema Comparison</h2>';
+            html += '<button onclick="this.closest(\'.modal-overlay\').remove()" style="background: #1a1a1a; color: white; border: none; padding: 0.5rem 1.5rem; cursor: pointer;">Close</button>';
+            html += '</div>';
+            
+            html += '<div style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e0e0e0; background: #fafafa;">';
+            html += '<div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">Comparing</div>';
+            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">';
+            html += '<div><strong>Version ' + oldVersion.version + '</strong><br><span style="font-size: 0.85rem; color: #666;">' + versionDate.toLocaleString() + '</span></div>';
+            html += '<div><strong>Current Version</strong><br><span style="font-size: 0.85rem; color: #666;">' + new Date().toLocaleString() + '</span></div>';
+            html += '</div></div>';
+
+            // Summary
+            html += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">';
+            html += '<div style="padding: 1rem; border: 1px solid #e0e0e0; text-align: center;">';
+            html += '<div style="font-size: 1.5rem; font-weight: 300; color: #2e7d32;">' + changes.added.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Added</div>';
+            html += '</div>';
+            html += '<div style="padding: 1rem; border: 1px solid #e0e0e0; text-align: center;">';
+            html += '<div style="font-size: 1.5rem; font-weight: 300; color: #ed6c02;">' + changes.modified.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Modified</div>';
+            html += '</div>';
+            html += '<div style="padding: 1rem; border: 1px solid #e0e0e0; text-align: center;">';
+            html += '<div style="font-size: 1.5rem; font-weight: 300; color: #d32f2f;">' + changes.removed.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Removed</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Changes details
+            if (changes.added.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid #2e7d32; background: #f1f8f4;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; font-size: 1.1rem; color: #2e7d32;">Added Fields</h3>';
+                changes.added.forEach(change => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-left: 3px solid #2e7d32;">';
+                    html += '<div style="font-family: monospace; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">' + escapeHtml(change.path) + '</div>';
+                    html += '<div style="font-size: 0.9rem;">' + escapeHtml(JSON.stringify(change.value)) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            if (changes.modified.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid #ed6c02; background: #fff4e6;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; font-size: 1.1rem; color: #ed6c02;">Modified Fields</h3>';
+                changes.modified.forEach(change => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-left: 3px solid #ed6c02;">';
+                    html += '<div style="font-family: monospace; font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">' + escapeHtml(change.path) + '</div>';
+                    html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">';
+                    html += '<div><div style="font-size: 0.75rem; color: #666; margin-bottom: 0.25rem;">OLD</div><div style="font-size: 0.9rem; color: #d32f2f;">' + escapeHtml(JSON.stringify(change.oldValue)) + '</div></div>';
+                    html += '<div><div style="font-size: 0.75rem; color: #666; margin-bottom: 0.25rem;">NEW</div><div style="font-size: 0.9rem; color: #2e7d32;">' + escapeHtml(JSON.stringify(change.newValue)) + '</div></div>';
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            }
+
+            if (changes.removed.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid #d32f2f; background: #ffebee;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; font-size: 1.1rem; color: #d32f2f;">Removed Fields</h3>';
+                changes.removed.forEach(change => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-left: 3px solid #d32f2f;">';
+                    html += '<div style="font-family: monospace; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">' + escapeHtml(change.path) + '</div>';
+                    html += '<div style="font-size: 0.9rem;">' + escapeHtml(JSON.stringify(change.value)) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            if (changes.added.length === 0 && changes.modified.length === 0 && changes.removed.length === 0) {
+                html += '<div style="padding: 2rem; text-align: center; color: #666; border: 1px solid #e0e0e0;">';
+                html += 'No changes detected between versions';
+                html += '</div>';
+            }
+
+            html += '</div>';
+            
+            modalContent.innerHTML = html;
+            modal.className = 'modal-overlay';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
 
         function generateHTMLFromSchema(schemaJson) {
