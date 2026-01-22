@@ -1048,9 +1048,58 @@
                 return;
             }
 
-            // Use the same generation logic as spreadsheet
+            // Set up data and trigger generation directly
             uploadedData = [{ url: url }];
-            document.getElementById('generateBtn').click();
+            
+            // Collapse upload section
+            uploadSection.classList.add('collapsed');
+            
+            // Show and animate progress section
+            progressSection.style.display = 'block';
+            setTimeout(() => progressSection.classList.add('show'), 10);
+            
+            document.getElementById('resultsSection').style.display = 'none';
+            generateSingleBtn.disabled = true;
+
+            generatedSchemas = [];
+            const total = 1;
+
+            try {
+                updateProgress(1, total, `Scraping ${url}`);
+
+                // Scrape the page
+                const pageData = await scrapePage(url);
+                
+                // Extract site config
+                siteConfig = extractSiteConfig(pageData);
+                
+                // Generate schema
+                const schema = generateSchemaFromPageData(pageData, siteConfig);
+                const schemaJson = JSON.stringify(schema, null, 2);
+                
+                // Save to GitHub
+                await saveSchemaToGitHub(url, schemaJson);
+                
+                generatedSchemas.push({
+                    url: url,
+                    schema: schemaJson,
+                    success: true
+                });
+            } catch (error) {
+                console.error(`Error processing ${url}:`, error);
+                generatedSchemas.push({
+                    url: url,
+                    error: error.message,
+                    success: false
+                });
+            }
+
+            displayResults();
+            progressSection.classList.remove('show');
+            setTimeout(() => progressSection.style.display = 'none', 400);
+            document.getElementById('resultsSection').style.display = 'block';
+            generateSingleBtn.disabled = false;
+            singleUrlInput.value = '';
         });
 
         uploadZone.addEventListener('click', () => fileInput.click());
