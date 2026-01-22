@@ -1047,58 +1047,21 @@
                 return;
             }
 
-            // Set up data and trigger generation directly
+            // Set up data and use the same batch logic
             uploadedData = [{ url: url }];
             
-            // Collapse upload section
-            uploadSection.classList.add('collapsed');
-            
-            // Show and animate progress section
-            progressSection.style.display = 'block';
-            setTimeout(() => progressSection.classList.add('show'), 10);
-            
-            document.getElementById('resultsSection').style.display = 'none';
+            // Disable single URL button and enable main generate button temporarily
             generateSingleBtn.disabled = true;
-
-            generatedSchemas = [];
-            const total = 1;
-
-            try {
-                updateProgress(1, total, `Scraping ${url}`);
-
-                // Scrape the page
-                const pageData = await scrapePage(url);
-                
-                // Extract site config
-                siteConfig = extractSiteConfig(pageData);
-                
-                // Generate schema
-                const schema = generateSchemaFromPageData(pageData, siteConfig);
-                const schemaJson = JSON.stringify(schema, null, 2);
-                
-                // Save to GitHub
-                await saveSchemaToGitHub(url, schemaJson);
-                
-                generatedSchemas.push({
-                    url: url,
-                    schema: schemaJson,
-                    success: true
-                });
-            } catch (error) {
-                console.error(`Error processing ${url}:`, error);
-                generatedSchemas.push({
-                    url: url,
-                    error: error.message,
-                    success: false
-                });
-            }
-
-            displayResults();
-            progressSection.classList.remove('show');
-            setTimeout(() => progressSection.style.display = 'none', 400);
-            document.getElementById('resultsSection').style.display = 'block';
-            generateSingleBtn.disabled = false;
-            singleUrlInput.value = '';
+            generateBtn.disabled = false;
+            
+            // Trigger the main generate button (uses same logic for both)
+            generateBtn.click();
+            
+            // Clean up - clear input after generation starts
+            setTimeout(() => {
+                singleUrlInput.value = '';
+                generateSingleBtn.disabled = false;
+            }, 500);
         });
 
         uploadZone.addEventListener('click', () => fileInput.click());
@@ -1495,6 +1458,11 @@
             const mainHeading = doc.querySelector('h1')?.textContent;
             const bodyText = doc.body.textContent.toLowerCase();
             
+            // Always fill in basic About section info
+            schema.about.name = mainHeading || title || 'Content';
+            schema.about.description = description || `Information about ${mainHeading || title}`;
+            schema.about.serviceType = "Information";
+            
             // Look for service indicators (plans, products, services mentioned)
             const hasServices = bodyText.includes('plan') || bodyText.includes('service') || 
                                bodyText.includes('product') || bodyText.includes('coverage') ||
@@ -1503,8 +1471,7 @@
             if (hasServices && (path.includes('medicare') || path.includes('insurance') || 
                 path.includes('plan') || path.includes('service'))) {
                 
-                // Fill in About section with comprehensive details
-                schema.about.name = mainHeading || title;
+                // Override with comprehensive service details
                 schema.about.serviceType = extractServiceType(mainHeading, bodyText);
                 schema.about.description = description || `Comprehensive ${mainHeading || title} services and coverage options.`;
 
@@ -1785,22 +1752,37 @@
             const htmlPreview = document.getElementById(`html-preview-${index}`);
             const preview = document.getElementById(`preview-${index}`);
             const historyPreview = document.getElementById(`history-preview-${index}`);
+            const validationPreview = document.getElementById(`validation-preview-${index}`);
+            
+            if (!htmlPreview) {
+                console.error('HTML preview element not found for index:', index);
+                return;
+            }
             
             // Close other previews if open
-            if (preview.style.display === 'block') {
+            if (preview && preview.style.display === 'block') {
                 preview.style.display = 'none';
             }
-            if (historyPreview.style.display === 'block') {
+            if (historyPreview && historyPreview.style.display === 'block') {
                 historyPreview.style.display = 'none';
+            }
+            if (validationPreview && validationPreview.style.display === 'block') {
+                validationPreview.style.display = 'none';
             }
             
             const isVisible = htmlPreview.style.display === 'block';
             
             if (!isVisible) {
-                const schema = generatedSchemas[index].schema;
-                const htmlContent = generateHTMLFromSchema(schema);
-                htmlPreview.innerHTML = htmlContent;
-                htmlPreview.style.display = 'block';
+                try {
+                    const schema = generatedSchemas[index].schema;
+                    const htmlContent = generateHTMLFromSchema(schema);
+                    htmlPreview.innerHTML = htmlContent;
+                    htmlPreview.style.display = 'block';
+                } catch (error) {
+                    console.error('Error generating HTML preview:', error);
+                    htmlPreview.innerHTML = '<div style="padding: 2rem; color: #d32f2f;">Error generating preview: ' + error.message + '</div>';
+                    htmlPreview.style.display = 'block';
+                }
             } else {
                 htmlPreview.style.display = 'none';
             }
