@@ -48,7 +48,7 @@
             padding: 2rem;
             border: 1px solid #e0e0e0;
             margin-bottom: 2rem;
-            transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transition: all 0.35s cubic-bezier(0.1, 0.1, 0.1, 1);
             overflow: hidden;
             max-height: 1000px;
         }
@@ -59,7 +59,7 @@
         }
 
         .upload-content {
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transition: opacity 0.15s ease, transform 0.15s ease;
         }
 
         .upload-section.collapsed .upload-content {
@@ -80,14 +80,19 @@
             color: #333;
         }
 
-        .collapse-icon {
-            transition: transform 0.3s ease;
-            font-size: 1.2rem;
-            color: #666;
+        .github-settings-btn {
+            padding: 0.75rem 1.5rem;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            font-size: 0.9rem;
         }
 
-        .upload-section.collapsed .collapse-icon {
-            transform: rotate(180deg);
+        .github-settings-btn.hidden {
+            display: none;
         }
 
         .upload-zone {
@@ -140,12 +145,12 @@
             margin-bottom: 2rem;
             display: none;
             overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transition: all 0.35s cubic-bezier(0.1, 0.1, 0.1, 1);
             transform-origin: top;
         }
 
         .progress-section.show {
-            animation: slideDown 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            animation: slideDown 0.35s cubic-bezier(0.1, 0.1, 0.1, 1);
         }
 
         @keyframes slideDown {
@@ -295,7 +300,7 @@
                 <h1>JSON-LD Schema Generator</h1>
                 <p class="subtitle">Upload URLs and automatically scrape page content to generate comprehensive schemas</p>
             </div>
-            <button onclick="showGitHubConfigModal()" style="padding: 0.75rem 1.5rem; background: #1a1a1a; color: white; border: none; cursor: pointer; font-family: inherit; white-space: nowrap; font-size: 0.9rem;">⚙️ GitHub Settings</button>
+            <button id="githubSettingsBtn" class="github-settings-btn" onclick="showGitHubConfigModal()">⚙️ GitHub Settings</button>
         </div>
     </header>
 
@@ -303,7 +308,6 @@
         <div class="upload-section" id="uploadSection">
             <div class="upload-header" onclick="toggleUploadSection()">
                 <h2 style="margin-bottom: 0; font-weight: 400;">Upload Spreadsheet</h2>
-                <span class="collapse-icon">▼</span>
             </div>
             <div class="upload-content">
                 <div class="info-box" style="margin-top: 1rem;">
@@ -431,8 +435,23 @@
             localStorage.setItem('github_branch', branch);
             
             document.querySelector('.modal-overlay').remove();
+            updateSettingsButtonVisibility();
             alert('GitHub configuration saved!');
         }
+
+        function updateSettingsButtonVisibility() {
+            const settingsBtn = document.getElementById('githubSettingsBtn');
+            if (isGitHubConfigured()) {
+                settingsBtn.classList.add('hidden');
+            } else {
+                settingsBtn.classList.remove('hidden');
+            }
+        }
+
+        // Check and hide button on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSettingsButtonVisibility();
+        });
 
         // GitHub API Functions
         async function saveSchemaToGitHub(url, schema) {
