@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON-LD Schema Generator - Overview</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        header {
+            background: #1a1a1a;
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-weight: 300;
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .content-section {
+            padding: 3rem 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 3rem;
+            align-items: start;
+            margin-bottom: 3rem;
+        }
+
+        .thumbnail {
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            aspect-ratio: 16/10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overview h2 {
+            font-weight: 400;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .overview p {
+            margin-bottom: 1.5rem;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .overview ul {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .overview ul li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #333;
+        }
+
+        .overview ul li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button, .btn {
+            padding: 0.75rem 2rem;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity 0.2s ease;
+        }
+
+        button:hover, .btn:hover {
+            opacity: 0.8;
+        }
+
+        button.secondary {
+            background: transparent;
+            color: #1a1a1a;
+            border: 1px solid #1a1a1a;
+        }
+
+        button.secondary:hover {
+            background: #f5f5f5;
+            opacity: 1;
+        }
+
+        .schema-display {
+            display: none;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .schema-display.visible {
+            display: block;
+        }
+
+        .schema-display h3 {
+            font-weight: 400;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .schema-display pre {
+            background: #ffffff;
+            padding: 1.5rem;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>JSON-LD Schema Generator</h1>
+            <p class="subtitle">Automated structured data generation, validation, and version control</p>
+        </div>
+    </header>
+
+    <div class="container content-section">
+        <div class="two-column">
+            <div class="thumbnail">
+                <img src="tool-screenshot.png" alt="JSON-LD Schema Generator Screenshot">
+                <!-- If no image, the placeholder text will show -->
+            </div>
+
+            <div class="overview">
+                <h2>Overview</h2>
+                <p>A comprehensive web-based tool for automatically generating, managing, and validating JSON-LD structured data schemas for websites. It scrapes live web pages to extract metadata and creates production-ready schema markup that improves SEO and search visibility.</p>
+
+                <h3 style="font-weight: 400; font-size: 1.2rem; margin-bottom: 0.75rem;">Key Capabilities</h3>
+                <ul>
+                    <li><strong>Automated Schema Generation</strong> – Bulk processing via spreadsheet upload or single URL mode with auto-extraction of page metadata</li>
+                    <li><strong>Version Control & History</strong> – GitHub integration stores schemas with full version tracking and side-by-side diff comparison</li>
+                    <li><strong>Schema Management</strong> – Browse, search, view, and delete stored schemas without re-scraping</li>
+                    <li><strong>Quality Assurance</strong> – Comprehensive validation against schema.org standards with 0-100 scoring system</li>
+                    <li><strong>Multiple Output Formats</strong> – JSON view, HTML preview, wrapped script tags, and bulk ZIP export</li>
+                    <li><strong>Professional Features</strong> – CORS proxy support, retry logic, progress tracking, and clean minimal UI</li>
+                </ul>
+
+                <div class="button-group">
+                    <a href="" class="btn">Launch Tool</a>
+                    <button class="secondary" onclick="toggleSchema()">View Sample Schema</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="schemaDisplay" class="schema-display">
+            <h3>Sample Generated Schema</h3>
+            <pre>{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://example.com/medicare-advantage#webpage",
+  "url": "https://example.com/medicare-advantage",
+  "name": "Medicare Advantage Plans | Comprehensive Healthcare Coverage",
+  "description": "Explore Medicare Advantage plans offering comprehensive healthcare coverage with additional benefits beyond Original Medicare.",
+  "inLanguage": "en-US",
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://example.com/#website",
+    "url": "https://example.com",
+    "name": "Healthcare Solutions",
+    "inLanguage": "en-US"
+  },
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "@id": "https://example.com/medicare-advantage#primaryimage",
+    "url": "https://example.com/images/medicare-hero.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "@id": "https://example.com/medicare-advantage#breadcrumb",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https://example.com",
+          "name": "Home"
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "item": {
+          "@id": "https://example.com/medicare",
+          "name": "Medicare"
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https://example.com/medicare-advantage",
+          "name": "Medicare Advantage"
+        }
+      }
+    ]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://example.com/#organization",
+    "name": "Healthcare Solutions",
+    "url": "https://example.com",
+    "logo": {
+      "@type": "ImageObject",
+      "@id": "https://example.com/#logo",
+      "url": "https://example.com/images/logo.png",
+      "width": 300,
+      "height": 60
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+1-800-555-0100",
+        "contactType": "Sales",
+        "areaServed": "US",
+        "availableLanguage": ["en", "es"]
+      },
+      {
+        "@type": "ContactPoint",
+        "telephone": "+1-800-555-0200",
+        "contactType": "Customer Service",
+        "areaServed": "US",
+        "availableLanguage": ["en", "es"]
+      }
+    ]
+  },
+  "about": {
+    "@type": "Service",
+    "name": "Medicare Advantage",
+    "provider": {
+      "@id": "https://example.com/#organization"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "United States"
+    },
+    "audience": {
+      "@type": "PeopleAudience",
+      "name": "Medicare-eligible individuals"
+    },
+    "serviceType": "Medicare Advantage",
+    "description": "Comprehensive Medicare Advantage plans with additional benefits including prescription drug coverage, dental, vision, and wellness programs.",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Medicare Advantage Plans",
+      "itemListElement": [
+        {
+          "@type": "ItemList",
+          "itemListOrder": "Unordered",
+          "numberOfItems": 3,
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Medicare Advantage HMO Plan"
+            },
+            {
+              "@type": "Offer",
+              "name": "Medicare Advantage PPO Plan"
+            },
+            {
+              "@type": "Offer",
+              "name": "Medicare Advantage Special Needs Plan"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": "Featured Medicare Advantage Plans",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@type": "Service",
+          "name": "Comprehensive Care HMO"
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "item": {
+          "@type": "Service",
+          "name": "Flexible Choice PPO"
+        }
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@type": "Service",
+          "name": "Premium Plus Plan"
+        }
+      }
+    ]
+  },
+  "potentialAction": [
+    {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://example.com/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  ]
+}</pre>
+        </div>
+    </div>
+
+    <script>
+        function toggleSchema() {
+            const schemaDisplay = document.getElementById('schemaDisplay');
+            schemaDisplay.classList.toggle('visible');
+            
+            // Smooth scroll to schema if it's being shown
+            if (schemaDisplay.classList.contains('visible')) {
+                setTimeout(() => {
+                    schemaDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+    </script>
+</body>
+</html>
