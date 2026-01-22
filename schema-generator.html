@@ -81,6 +81,64 @@
             color: #333;
         }
 
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 0;
+            position: relative;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tabs::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .tabs[data-active="0"]::after {
+            left: 0;
+            width: 120px;
+        }
+
+        .tabs[data-active="1"]::after {
+            left: 120px;
+            width: 96px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: #1a1a1a;
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            color: #1a1a1a;
+            background: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .github-settings-btn {
             padding: 0.75rem 1.5rem;
             background: #1a1a1a;
@@ -330,18 +388,19 @@
     </header>
 
     <div class="container">
+        <div class="tabs" data-active="0">
+            <button class="tab-btn active" onclick="switchTab('spreadsheet', 0)">Spreadsheet</button>
+            <button class="tab-btn" onclick="switchTab('single', 1)">Single URL</button>
+        </div>
+
         <div class="upload-section" id="uploadSection">
             <div class="upload-header" onclick="toggleUploadSection()">
-                <h2 style="margin-bottom: 0; font-weight: 400;">Upload Spreadsheet</h2>
+                <h2 style="margin-bottom: 0; font-weight: 400; padding-bottom: 20px;">Upload Spreadsheet</h2>
             </div>
-            <div class="upload-content">
-                <div class="info-box" style="margin-top: 1rem;">
-                    <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                    <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
-                    <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
-                </div>
             
-            <div class="upload-zone" id="uploadZone">
+            <div class="upload-content">
+                <div id="spreadsheetTab" class="tab-content active">
+                    <div class="upload-zone" id="uploadZone">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" style="margin-bottom: 1rem;">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
@@ -355,8 +414,19 @@
             <div style="margin-top: 1.5rem;">
                 <button id="generateBtn" disabled>Generate Schemas</button>
             </div>
+                </div>
+
+                <div id="singleTab" class="tab-content">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 400;">Enter URL</label>
+                        <input type="text" id="singleUrlInput" placeholder="https://example.com/page" style="width: 100%; padding: 0.75rem; border: 1px solid #e0e0e0; font-family: inherit; font-size: 1rem;">
+                    </div>
+                    <div>
+                        <button id="generateSingleBtn" disabled>Generate Schema</button>
+                    </div>
+                </div>
             </div>
-        </div>
+            </div>
 
         <div class="progress-section" id="progressSection">
             <h2 style="margin-bottom: 1rem; font-weight: 400;">Scraping Pages & Generating Schemas...</h2>
@@ -491,7 +561,9 @@
             modalContent.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0;">
                     <h2 style="margin: 0; font-weight: 300; font-size: 1.5rem;">Stored Schemas</h2>
-                    <button onclick="this.closest('.modal-overlay').remove()" style="background: #1a1a1a; color: white; border: none; padding: 0.5rem 1.5rem; cursor: pointer; font-family: inherit;">Close</button>
+                    <button onclick="this.closest('.modal-overlay').remove()" style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.5rem; color: #1a1a1a; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="Close" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
                 <div id="schemasList" style="padding: 1rem; text-align: center; color: #666;">Loading schemas...</div>
             `;
@@ -537,9 +609,13 @@
                                 <span style="margin-left: 1rem;">Versions: ${versionCount}</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                            <button onclick='viewStoredSchema(${JSON.stringify(schemaData.url)})' style="padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">View</button>
-                            <button onclick='deleteStoredSchema(${JSON.stringify(schemaData.url)}, this)' style="padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">Delete</button>
+                        <div style="display: flex; gap: 1rem; flex-shrink: 0;">
+                            <button onclick='viewStoredSchema(${JSON.stringify(schemaData.url)})' style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.25rem; color: #1a1a1a; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="View Schema" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                            <button onclick='deleteStoredSchema(${JSON.stringify(schemaData.url)}, this)' style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.25rem; color: #d32f2f; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="Delete Schema" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -899,6 +975,32 @@
         const uploadSection = document.getElementById('uploadSection');
         const progressSection = document.getElementById('progressSection');
 
+        function switchTab(tabName, tabIndex) {
+            // Update data-active attribute for sliding border
+            document.querySelector('.tabs').setAttribute('data-active', tabIndex);
+
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Update header text and show appropriate tab
+            const uploadHeader = document.querySelector('.upload-header h2');
+            if (tabName === 'spreadsheet') {
+                uploadHeader.textContent = 'Upload Spreadsheet';
+                document.getElementById('spreadsheetTab').classList.add('active');
+            } else {
+                uploadHeader.textContent = 'Generate from URL';
+                document.getElementById('singleTab').classList.add('active');
+            }
+        }
+
         function toggleUploadSection() {
             uploadSection.classList.toggle('collapsed');
         }
@@ -908,6 +1010,34 @@
             // Expand upload section if it's collapsed
             uploadSection.classList.remove('collapsed');
         }
+
+        // Single URL input handler
+        const singleUrlInput = document.getElementById('singleUrlInput');
+        const generateSingleBtn = document.getElementById('generateSingleBtn');
+
+        singleUrlInput.addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            generateSingleBtn.disabled = !url;
+        });
+
+        // Single URL generate handler
+        generateSingleBtn.addEventListener('click', async () => {
+            const url = singleUrlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            // Use the same generation logic as spreadsheet
+            uploadedData = [{ url: url }];
+            document.getElementById('generateBtn').click();
+        });
 
         uploadZone.addEventListener('click', () => fileInput.click());
 
