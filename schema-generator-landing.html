@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON-LD Schema Generator - Overview</title>
+    <title>JSON Schema Generator - Overview</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
@@ -105,12 +105,7 @@
             font-weight: bold;
         }
 
-        .button-group {
-            display: flex;
-            gap: 1rem;
-        }
-
-        button, .btn {
+        .btn {
             padding: 0.75rem 2rem;
             background: #1a1a1a;
             color: white;
@@ -123,31 +118,15 @@
             transition: opacity 0.2s ease;
         }
 
-        button:hover, .btn:hover {
+        .btn:hover {
             opacity: 0.8;
         }
 
-        button.secondary {
-            background: transparent;
-            color: #1a1a1a;
-            border: 1px solid #1a1a1a;
-        }
-
-        button.secondary:hover {
-            background: #f5f5f5;
-            opacity: 1;
-        }
-
         .schema-display {
-            display: none;
             margin-top: 3rem;
             padding: 2rem;
             background: #fafafa;
             border: 1px solid #e0e0e0;
-        }
-
-        .schema-display.visible {
-            display: block;
         }
 
         .schema-display h3 {
@@ -158,26 +137,72 @@
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .schema-display pre {
+        .schema-content {
             background: #ffffff;
             padding: 1.5rem;
-            overflow-x: auto;
             border: 1px solid #e0e0e0;
-            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .schema-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .schema-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .schema-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #999;
+            margin-bottom: 0.75rem;
+        }
+
+        .schema-field {
+            margin-bottom: 1rem;
+        }
+
+        .schema-field-label {
             font-size: 0.85rem;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .schema-field-value {
+            font-size: 0.95rem;
+            color: #1a1a1a;
+        }
+
+        .schema-list {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        .schema-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 0.9rem;
+        }
+
+        .schema-list li:last-child {
+            border-bottom: none;
+        }
+
+        .schema-nested {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid #e0e0e0;
         }
 
         @media (max-width: 768px) {
             .two-column {
                 grid-template-columns: 1fr;
                 gap: 2rem;
-            }
-
-            .button-group {
-                flex-direction: column;
             }
 
             h1 {
@@ -215,194 +240,166 @@
                     <li><strong>Professional Features</strong> – CORS proxy support, retry logic, progress tracking, and clean minimal UI</li>
                 </ul>
 
-                <div class="button-group">
-                    <a href="" class="btn">Launch Tool</a>
-                    <button class="secondary" onclick="toggleSchema()">View Sample Schema</button>
-                </div>
+                <a href="" class="btn">Launch Tool</a>
             </div>
         </div>
 
-        <div id="schemaDisplay" class="schema-display">
+        <div class="schema-display">
             <h3>Sample Generated Schema</h3>
-            <pre>{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "@id": "https://example.com/medicare-advantage#webpage",
-  "url": "https://example.com/medicare-advantage",
-  "name": "Medicare Advantage Plans | Comprehensive Healthcare Coverage",
-  "description": "Explore Medicare Advantage plans offering comprehensive healthcare coverage with additional benefits beyond Original Medicare.",
-  "inLanguage": "en-US",
-  "isPartOf": {
-    "@type": "WebSite",
-    "@id": "https://example.com/#website",
-    "url": "https://example.com",
-    "name": "Healthcare Solutions",
-    "inLanguage": "en-US"
-  },
-  "primaryImageOfPage": {
-    "@type": "ImageObject",
-    "@id": "https://example.com/medicare-advantage#primaryimage",
-    "url": "https://example.com/images/medicare-hero.jpg",
-    "width": 1200,
-    "height": 630
-  },
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "@id": "https://example.com/medicare-advantage#breadcrumb",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "item": {
-          "@id": "https://example.com",
-          "name": "Home"
-        }
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "item": {
-          "@id": "https://example.com/medicare",
-          "name": "Medicare"
-        }
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "item": {
-          "@id": "https://example.com/medicare-advantage",
-          "name": "Medicare Advantage"
-        }
-      }
-    ]
-  },
-  "publisher": {
-    "@type": "Organization",
-    "@id": "https://example.com/#organization",
-    "name": "Healthcare Solutions",
-    "url": "https://example.com",
-    "logo": {
-      "@type": "ImageObject",
-      "@id": "https://example.com/#logo",
-      "url": "https://example.com/images/logo.png",
-      "width": 300,
-      "height": 60
-    },
-    "contactPoint": [
-      {
-        "@type": "ContactPoint",
-        "telephone": "+1-800-555-0100",
-        "contactType": "Sales",
-        "areaServed": "US",
-        "availableLanguage": ["en", "es"]
-      },
-      {
-        "@type": "ContactPoint",
-        "telephone": "+1-800-555-0200",
-        "contactType": "Customer Service",
-        "areaServed": "US",
-        "availableLanguage": ["en", "es"]
-      }
-    ]
-  },
-  "about": {
-    "@type": "Service",
-    "name": "Medicare Advantage",
-    "provider": {
-      "@id": "https://example.com/#organization"
-    },
-    "areaServed": {
-      "@type": "Country",
-      "name": "United States"
-    },
-    "audience": {
-      "@type": "PeopleAudience",
-      "name": "Medicare-eligible individuals"
-    },
-    "serviceType": "Medicare Advantage",
-    "description": "Comprehensive Medicare Advantage plans with additional benefits including prescription drug coverage, dental, vision, and wellness programs.",
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Medicare Advantage Plans",
-      "itemListElement": [
-        {
-          "@type": "ItemList",
-          "itemListOrder": "Unordered",
-          "numberOfItems": 3,
-          "itemListElement": [
-            {
-              "@type": "Offer",
-              "name": "Medicare Advantage HMO Plan"
-            },
-            {
-              "@type": "Offer",
-              "name": "Medicare Advantage PPO Plan"
-            },
-            {
-              "@type": "Offer",
-              "name": "Medicare Advantage Special Needs Plan"
-            }
-          ]
-        }
-      ]
-    }
-  },
-  "mainEntity": {
-    "@type": "ItemList",
-    "name": "Featured Medicare Advantage Plans",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "item": {
-          "@type": "Service",
-          "name": "Comprehensive Care HMO"
-        }
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "item": {
-          "@type": "Service",
-          "name": "Flexible Choice PPO"
-        }
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "item": {
-          "@type": "Service",
-          "name": "Premium Plus Plan"
-        }
-      }
-    ]
-  },
-  "potentialAction": [
-    {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://example.com/search?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
-  ]
-}</pre>
+            <div class="schema-content">
+                
+                <!-- Basic Information -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Basic Information</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Type</div>
+                        <div class="schema-field-value">WebPage</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Name</div>
+                        <div class="schema-field-value">AZ Blue | Blue Cross Blue Shield of Arizona | Health Insurance</div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Description</div>
+                    <div class="schema-field-value">
+                        Be your healthiest with Blue Cross Blue Shield of Arizona. Find health insurance plans for all health concerns and budgets for individuals, families, and businesses.
+                    </div>
+                </div>
+
+                <!-- URL & ID -->
+                <div class="schema-section">
+                    <div class="schema-section-title">URL & Identifiers</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">URL</div>
+                        <div class="schema-field-value">https://www.azblue.com/</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">@ID</div>
+                        <div class="schema-field-value">https://www.azblue.com/#webpage</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Language</div>
+                        <div class="schema-field-value">en-US</div>
+                    </div>
+                </div>
+
+                <!-- IsPartOf -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Is Part Of</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Website</div>
+                        <div class="schema-field-value">Health Insurance</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Site URL</div>
+                        <div class="schema-field-value">https://www.azblue.com</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Website ID</div>
+                        <div class="schema-field-value">https://www.azblue.com/#website</div>
+                    </div>
+                </div>
+
+                <!-- Primary Image -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Primary Image</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Image URL</div>
+                        <div class="schema-field-value">https://assets.azblue.com/m/2af89a84b70faafe/original/Homepage-Heart-Hero-Mobile.png</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Dimensions</div>
+                        <div class="schema-field-value">1200 × 630</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Image ID</div>
+                        <div class="schema-field-value">https://www.azblue.com/#primaryimage</div>
+                    </div>
+                </div>
+
+                <!-- Breadcrumbs -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Breadcrumbs</div>
+                    <div class="schema-field-value" style="color: #666;">
+                        No breadcrumb items (homepage)
+                    </div>
+                </div>
+
+                <!-- Publisher -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Publisher</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Organization</div>
+                        <div class="schema-field-value">Health Insurance</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Organization ID</div>
+                        <div class="schema-field-value">https://www.azblue.com/#organization</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Logo</div>
+                        <div class="schema-field-value">https://assets.azblue.com/m/2af89a84b70faafe/original/Homepage-Heart-Hero-Mobile.png (300 × 60)</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Contact Points</div>
+                        <div class="schema-nested">
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong>Customer Service</strong><br>
+                                (800)-232-2345<br>
+                                <span style="color: #666; font-size: 0.85rem;">Languages: English, Spanish | Area: US</span>
+                            </div>
+                            <div>
+                                <strong>TTY</strong><br>
+                                711<br>
+                                <span style="color: #666; font-size: 0.85rem;">Languages: English | Area: US</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About -->
+                <div class="schema-section">
+                    <div class="schema-section-title">About (Service)</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Service Name</div>
+                        <div class="schema-field-value">Sign Up For Your AZ Blue Portal</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Service Type</div>
+                        <div class="schema-field-value">Information</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Area Served</div>
+                        <div class="schema-field-value">United States</div>
+                    </div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Description</div>
+                        <div class="schema-field-value">Be your healthiest with Blue Cross Blue Shield of Arizona. Find health insurance plans for all health concerns and budgets for individuals, families, and businesses.</div>
+                    </div>
+                </div>
+
+                <!-- Main Entity -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Main Entity</div>
+                    <div class="schema-field-value" style="color: #666;">
+                        No main entity items
+                    </div>
+                </div>
+
+                <!-- Potential Actions -->
+                <div class="schema-section">
+                    <div class="schema-section-title">Potential Actions</div>
+                    <div class="schema-field">
+                        <div class="schema-field-label">Search Action</div>
+                        <div class="schema-field-value">https://www.azblue.com/search?q={search_term_string}</div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-
-    <script>
-        function toggleSchema() {
-            const schemaDisplay = document.getElementById('schemaDisplay');
-            schemaDisplay.classList.toggle('visible');
-            
-            // Smooth scroll to schema if it's being shown
-            if (schemaDisplay.classList.contains('visible')) {
-                setTimeout(() => {
-                    schemaDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
-            }
-        }
-    </script>
 </body>
 </html>
