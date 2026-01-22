@@ -73,11 +73,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
             user-select: none;
         }
 
-        .upload-header:hover h2 {
+        .upload-header.clickable {
+            cursor: pointer;
+        }
+
+        .upload-header.clickable:hover h2 {
             color: #333;
         }
 
@@ -390,7 +393,7 @@
         </div>
 
         <div class="upload-section" id="uploadSection">
-            <div class="upload-header" onclick="toggleUploadSection()">
+            <div class="upload-header" id="uploadHeader">
                 <h2 style="margin-bottom: 0; font-weight: 400; padding-bottom: 20px;">Upload Spreadsheet</h2>
             </div>
             
@@ -545,6 +548,7 @@
         // Check and hide button on page load
         window.addEventListener('DOMContentLoaded', () => {
             updateSettingsButtonVisibility();
+            disableAccordion(); // Start with accordion disabled
         });
 
         async function showBrowseSchemas() {
@@ -671,6 +675,7 @@
             // Display the schema
             displayResults();
             document.getElementById('resultsSection').style.display = 'block';
+            enableAccordion(); // Enable accordion when viewing stored schemas
         }
 
         async function deleteStoredSchema(url, buttonElement) {
@@ -970,6 +975,18 @@
         const generateBtn = document.getElementById('generateBtn');
         const uploadSection = document.getElementById('uploadSection');
         const progressSection = document.getElementById('progressSection');
+        const uploadHeader = document.getElementById('uploadHeader');
+
+        function enableAccordion() {
+            uploadHeader.classList.add('clickable');
+            uploadHeader.onclick = toggleUploadSection;
+        }
+
+        function disableAccordion() {
+            uploadHeader.classList.remove('clickable');
+            uploadHeader.onclick = null;
+            uploadSection.classList.remove('collapsed');
+        }
 
         function switchTab(tabName, tabIndex) {
             // Update data-active attribute for sliding border
@@ -1003,8 +1020,9 @@
 
         function closeResults() {
             document.getElementById('resultsSection').style.display = 'none';
-            // Expand upload section if it's collapsed
+            // Expand upload section and disable accordion
             uploadSection.classList.remove('collapsed');
+            disableAccordion();
         }
 
         // Single URL input handler
@@ -1156,6 +1174,7 @@
             progressSection.classList.remove('show');
             setTimeout(() => progressSection.style.display = 'none', 400);
             document.getElementById('resultsSection').style.display = 'block';
+            enableAccordion(); // Enable accordion when results are shown
             generateBtn.disabled = false;
         });
 
