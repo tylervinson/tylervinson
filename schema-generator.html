@@ -48,6 +48,46 @@
             padding: 2rem;
             border: 1px solid #e0e0e0;
             margin-bottom: 2rem;
+            transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            overflow: hidden;
+            max-height: 1000px;
+        }
+
+        .upload-section.collapsed {
+            max-height: 80px;
+            padding: 1rem 2rem;
+        }
+
+        .upload-content {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .upload-section.collapsed .upload-content {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .upload-header:hover h2 {
+            color: #333;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .upload-section.collapsed .collapse-icon {
+            transform: rotate(180deg);
         }
 
         .upload-zone {
@@ -99,6 +139,26 @@
             border: 1px solid #e0e0e0;
             margin-bottom: 2rem;
             display: none;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform-origin: top;
+        }
+
+        .progress-section.show {
+            animation: slideDown 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 500px;
+            }
         }
 
         .progress-bar {
@@ -240,13 +300,17 @@
     </header>
 
     <div class="container">
-        <div class="upload-section">
-            <h2 style="margin-bottom: 1rem; font-weight: 400;">Upload Spreadsheet</h2>
-            <div class="info-box">
-                <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
-                <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
-                <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-header" onclick="toggleUploadSection()">
+                <h2 style="margin-bottom: 0; font-weight: 400;">Upload Spreadsheet</h2>
+                <span class="collapse-icon">▼</span>
             </div>
+            <div class="upload-content">
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>Supported formats:</strong> CSV, XLSX, XLS<br>
+                    <strong>Required:</strong> Just a "URL" column - everything else is automatically extracted!<br>
+                    <strong>Extracted automatically:</strong> Page title, meta description, organization name, phone numbers, breadcrumbs, and more
+                </div>
             
             <div class="upload-zone" id="uploadZone">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" style="margin-bottom: 1rem;">
@@ -261,6 +325,7 @@
 
             <div style="margin-top: 1.5rem;">
                 <button id="generateBtn" disabled>Generate Schemas</button>
+            </div>
             </div>
         </div>
 
@@ -400,7 +465,7 @@
                     if (getResponse.ok) {
                         const data = await getResponse.json();
                         existingSha = data.sha;
-                        existingContent = JSON.parse(atob(data.content));
+                        existingContent = JSON.parse(base64ToUtf8(data.content));
                     }
                 } catch (e) {
                     // File doesn't exist yet, that's fine
@@ -427,7 +492,7 @@
                 };
                 
                 // Save to GitHub
-                const content = btoa(JSON.stringify(fileContent, null, 2));
+                const content = utf8ToBase64(JSON.stringify(fileContent, null, 2));
                 const commitMessage = `Update schema for ${url} - Version ${history.length}`;
                 
                 const putResponse = await fetch(
@@ -485,7 +550,7 @@
                 }
                 
                 const data = await response.json();
-                return JSON.parse(atob(data.content));
+                return JSON.parse(base64ToUtf8(data.content));
             } catch (error) {
                 console.error('Error loading from GitHub:', error);
                 return null;
@@ -499,6 +564,15 @@
                 .replace(/[^a-z0-9]/gi, '_')
                 .toLowerCase()
                 .substring(0, 200) + '.json';
+        }
+
+        // UTF-8 safe base64 encoding/decoding
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64ToUtf8(str) {
+            return decodeURIComponent(escape(atob(str)));
         }
 
         async function getVersionHistory(url) {
@@ -552,6 +626,12 @@
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const generateBtn = document.getElementById('generateBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const progressSection = document.getElementById('progressSection');
+
+        function toggleUploadSection() {
+            uploadSection.classList.toggle('collapsed');
+        }
 
         uploadZone.addEventListener('click', () => fileInput.click());
 
@@ -620,7 +700,13 @@
         generateBtn.addEventListener('click', async () => {
             if (uploadedData.length === 0) return;
 
-            document.getElementById('progressSection').style.display = 'block';
+            // Collapse upload section
+            uploadSection.classList.add('collapsed');
+            
+            // Show and animate progress section
+            progressSection.style.display = 'block';
+            setTimeout(() => progressSection.classList.add('show'), 10);
+            
             document.getElementById('resultsSection').style.display = 'none';
             generateBtn.disabled = true;
 
@@ -665,7 +751,8 @@
             }
 
             displayResults();
-            document.getElementById('progressSection').style.display = 'none';
+            progressSection.classList.remove('show');
+            setTimeout(() => progressSection.style.display = 'none', 400);
             document.getElementById('resultsSection').style.display = 'block';
             generateBtn.disabled = false;
         });
