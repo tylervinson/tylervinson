@@ -1576,6 +1576,12 @@
                     viewHtmlBtn.title = 'View HTML';
                     viewHtmlBtn.onclick = () => toggleHtmlPreview(index);
 
+                    const validateBtn = document.createElement('button');
+                    validateBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                    validateBtn.className = 'icon-btn';
+                    validateBtn.title = 'Validate Schema';
+                    validateBtn.onclick = () => validateSchema(index);
+
                     const historyBtn = document.createElement('button');
                     historyBtn.innerHTML = '<i class="fa-regular fa-clock"></i>';
                     historyBtn.className = 'icon-btn';
@@ -1609,6 +1615,7 @@
 
                     actionsDiv.appendChild(viewBtn);
                     actionsDiv.appendChild(viewHtmlBtn);
+                    actionsDiv.appendChild(validateBtn);
                     actionsDiv.appendChild(historyBtn);
                     actionsDiv.appendChild(copyBtn);
                     actionsDiv.appendChild(downloadBtn);
@@ -1634,6 +1641,11 @@
                     htmlPreview.className = 'html-preview';
                     htmlPreview.id = `html-preview-${index}`;
                     item.appendChild(htmlPreview);
+
+                    const validationPreview = document.createElement('div');
+                    validationPreview.className = 'html-preview';
+                    validationPreview.id = `validation-preview-${index}`;
+                    item.appendChild(validationPreview);
 
                     const historyPreview = document.createElement('div');
                     historyPreview.className = 'html-preview';
@@ -1685,6 +1697,7 @@
             const historyPreview = document.getElementById(`history-preview-${index}`);
             const preview = document.getElementById(`preview-${index}`);
             const htmlPreview = document.getElementById(`html-preview-${index}`);
+            const validationPreview = document.getElementById(`validation-preview-${index}`);
             
             // Close other previews if open
             if (preview.style.display === 'block') {
@@ -1692,6 +1705,9 @@
             }
             if (htmlPreview.style.display === 'block') {
                 htmlPreview.style.display = 'none';
+            }
+            if (validationPreview.style.display === 'block') {
+                validationPreview.style.display = 'none';
             }
             
             const isVisible = historyPreview.style.display === 'block';
@@ -1707,6 +1723,241 @@
             } else {
                 historyPreview.style.display = 'none';
             }
+        }
+
+        function validateSchema(index) {
+            const validationPreview = document.getElementById(`validation-preview-${index}`);
+            const preview = document.getElementById(`preview-${index}`);
+            const htmlPreview = document.getElementById(`html-preview-${index}`);
+            const historyPreview = document.getElementById(`history-preview-${index}`);
+            
+            // Close other previews if open
+            if (preview.style.display === 'block') {
+                preview.style.display = 'none';
+            }
+            if (htmlPreview.style.display === 'block') {
+                htmlPreview.style.display = 'none';
+            }
+            if (historyPreview.style.display === 'block') {
+                historyPreview.style.display = 'none';
+            }
+            
+            const isVisible = validationPreview.style.display === 'block';
+            
+            if (!isVisible) {
+                const schema = generatedSchemas[index].schema;
+                const validationResults = performValidation(schema);
+                const htmlContent = generateValidationView(validationResults);
+                validationPreview.innerHTML = htmlContent;
+                validationPreview.style.display = 'block';
+            } else {
+                validationPreview.style.display = 'none';
+            }
+        }
+
+        function performValidation(schemaJson) {
+            const results = {
+                score: 100,
+                errors: [],
+                warnings: [],
+                suggestions: [],
+                passed: []
+            };
+
+            try {
+                const schema = JSON.parse(schemaJson);
+                
+                // Required fields check
+                if (!schema['@context']) {
+                    results.errors.push({ field: '@context', message: 'Missing required @context field' });
+                    results.score -= 20;
+                } else {
+                    results.passed.push({ field: '@context', message: 'Context defined correctly' });
+                }
+
+                if (!schema['@type']) {
+                    results.errors.push({ field: '@type', message: 'Missing required @type field' });
+                    results.score -= 20;
+                } else {
+                    results.passed.push({ field: '@type', message: 'Type defined: ' + schema['@type'] });
+                }
+
+                if (!schema.name || schema.name === '') {
+                    results.warnings.push({ field: 'name', message: 'Name field is empty or missing' });
+                    results.score -= 10;
+                } else {
+                    results.passed.push({ field: 'name', message: 'Name present' });
+                }
+
+                if (!schema.description || schema.description === '') {
+                    results.warnings.push({ field: 'description', message: 'Description is recommended for better SEO' });
+                    results.score -= 5;
+                } else {
+                    results.passed.push({ field: 'description', message: 'Description present' });
+                }
+
+                // URL validation
+                if (!schema.url) {
+                    results.warnings.push({ field: 'url', message: 'URL field is missing' });
+                    results.score -= 5;
+                } else if (!schema.url.startsWith('http')) {
+                    results.errors.push({ field: 'url', message: 'URL must start with http:// or https://' });
+                    results.score -= 10;
+                } else {
+                    results.passed.push({ field: 'url', message: 'Valid URL format' });
+                }
+
+                // Breadcrumb validation
+                if (schema.breadcrumb) {
+                    if (!schema.breadcrumb.itemListElement || schema.breadcrumb.itemListElement.length === 0) {
+                        results.warnings.push({ field: 'breadcrumb', message: 'Breadcrumb exists but has no items' });
+                        results.score -= 5;
+                    } else {
+                        results.passed.push({ field: 'breadcrumb', message: schema.breadcrumb.itemListElement.length + ' breadcrumb items' });
+                    }
+                }
+
+                // Publisher validation
+                if (schema.publisher) {
+                    if (!schema.publisher.name || schema.publisher.name === '') {
+                        results.warnings.push({ field: 'publisher.name', message: 'Publisher name is empty' });
+                        results.score -= 5;
+                    } else {
+                        results.passed.push({ field: 'publisher', message: 'Publisher information complete' });
+                    }
+
+                    if (schema.publisher.contactPoint && schema.publisher.contactPoint.length === 0) {
+                        results.suggestions.push({ field: 'publisher.contactPoint', message: 'Consider adding contact points for better discoverability' });
+                    } else if (schema.publisher.contactPoint && schema.publisher.contactPoint.length > 0) {
+                        results.passed.push({ field: 'contactPoint', message: schema.publisher.contactPoint.length + ' contact point(s)' });
+                    }
+                } else {
+                    results.warnings.push({ field: 'publisher', message: 'Publisher information is recommended' });
+                    results.score -= 5;
+                }
+
+                // Image validation
+                if (schema.primaryImageOfPage) {
+                    if (!schema.primaryImageOfPage.url || schema.primaryImageOfPage.url === '') {
+                        results.warnings.push({ field: 'primaryImageOfPage.url', message: 'Image URL is empty' });
+                        results.score -= 3;
+                    } else {
+                        results.passed.push({ field: 'primaryImageOfPage', message: 'Primary image defined' });
+                    }
+                }
+
+                // About section validation
+                if (schema.about) {
+                    if (!schema.about.name || schema.about.name === '') {
+                        results.warnings.push({ field: 'about.name', message: 'About section exists but name is empty' });
+                        results.score -= 3;
+                    } else {
+                        results.passed.push({ field: 'about', message: 'About section complete' });
+                    }
+                } else {
+                    results.suggestions.push({ field: 'about', message: 'Consider adding "about" section for richer context' });
+                }
+
+                // MainEntity validation
+                if (schema.mainEntity) {
+                    if (!schema.mainEntity.itemListElement || schema.mainEntity.itemListElement.length === 0) {
+                        results.warnings.push({ field: 'mainEntity', message: 'MainEntity exists but has no items' });
+                        results.score -= 3;
+                    } else {
+                        results.passed.push({ field: 'mainEntity', message: schema.mainEntity.itemListElement.length + ' main entities' });
+                    }
+                }
+
+                // Ensure score doesn't go below 0
+                results.score = Math.max(0, results.score);
+
+            } catch (error) {
+                results.errors.push({ field: 'JSON', message: 'Invalid JSON: ' + error.message });
+                results.score = 0;
+            }
+
+            return results;
+        }
+
+        function generateValidationView(results) {
+            let html = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif;">';
+            
+            // Score header
+            const scoreColor = results.score >= 80 ? '#2e7d32' : results.score >= 60 ? '#ed6c02' : '#d32f2f';
+            html += '<div style="text-align: center; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 1.5rem;">';
+            html += '<div style="font-size: 3rem; font-weight: 300; color: ' + scoreColor + ';">' + results.score + '</div>';
+            html += '<div style="font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 0.1em;">Validation Score</div>';
+            html += '</div>';
+
+            // Summary
+            html += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">';
+            html += '<div style="text-align: center; padding: 1rem; border: 1px solid #e0e0e0;">';
+            html += '<div style="font-size: 1.5rem; color: #d32f2f;">' + results.errors.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Errors</div>';
+            html += '</div>';
+            html += '<div style="text-align: center; padding: 1rem; border: 1px solid #e0e0e0;">';
+            html += '<div style="font-size: 1.5rem; color: #ed6c02;">' + results.warnings.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Warnings</div>';
+            html += '</div>';
+            html += '<div style="text-align: center; padding: 1rem; border: 1px solid #e0e0e0;">';
+            html += '<div style="font-size: 1.5rem; color: #2e7d32;">' + results.passed.length + '</div>';
+            html += '<div style="font-size: 0.85rem; color: #666;">Passed</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Errors
+            if (results.errors.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; color: #d32f2f; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Errors</h3>';
+                results.errors.forEach(error => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 1rem; border: 1px solid #d32f2f; background: #ffebee;">';
+                    html += '<div style="font-weight: 400; margin-bottom: 0.25rem;">' + escapeHtml(error.field) + '</div>';
+                    html += '<div style="font-size: 0.9rem; color: #666;">' + escapeHtml(error.message) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Warnings
+            if (results.warnings.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; color: #ed6c02; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Warnings</h3>';
+                results.warnings.forEach(warning => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 1rem; border: 1px solid #ed6c02; background: #fff3e0;">';
+                    html += '<div style="font-weight: 400; margin-bottom: 0.25rem;">' + escapeHtml(warning.field) + '</div>';
+                    html += '<div style="font-size: 0.9rem; color: #666;">' + escapeHtml(warning.message) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Suggestions
+            if (results.suggestions.length > 0) {
+                html += '<div style="margin-bottom: 1.5rem;">';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; color: #1976d2; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Suggestions</h3>';
+                results.suggestions.forEach(suggestion => {
+                    html += '<div style="margin-bottom: 0.75rem; padding: 1rem; border: 1px solid #1976d2; background: #e3f2fd;">';
+                    html += '<div style="font-weight: 400; margin-bottom: 0.25rem;">' + escapeHtml(suggestion.field) + '</div>';
+                    html += '<div style="font-size: 0.9rem; color: #666;">' + escapeHtml(suggestion.message) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Passed checks
+            if (results.passed.length > 0) {
+                html += '<div>';
+                html += '<h3 style="margin: 0 0 1rem 0; font-weight: 400; color: #2e7d32; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Passed Checks</h3>';
+                results.passed.forEach(pass => {
+                    html += '<div style="margin-bottom: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; background: #f9f9f9;">';
+                    html += '<div style="font-size: 0.9rem;"><strong>' + escapeHtml(pass.field) + ':</strong> ' + escapeHtml(pass.message) + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
         }
 
         function generateHistoryView(url, history, currentSchema) {
