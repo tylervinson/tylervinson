@@ -1321,9 +1321,25 @@
             const description = doc.querySelector('meta[name="description"]')?.content ||
                                doc.querySelector('meta[property="og:description"]')?.content;
 
+            // Extract image information
+            const ogImage = doc.querySelector('meta[property="og:image"]')?.content || 
+                           doc.querySelector('meta[name="twitter:image"]')?.content ||
+                           siteConfig.logoUrl;
+            
+            const ogImageWidth = doc.querySelector('meta[property="og:image:width"]')?.content || 1200;
+            const ogImageHeight = doc.querySelector('meta[property="og:image:height"]')?.content || 630;
+
+            // Get publish/modified dates if available
+            const datePublished = doc.querySelector('meta[property="article:published_time"]')?.content ||
+                                 doc.querySelector('meta[name="date"]')?.content ||
+                                 doc.querySelector('time[datetime]')?.getAttribute('datetime');
+            
+            const dateModified = doc.querySelector('meta[property="article:modified_time"]')?.content ||
+                                doc.querySelector('meta[property="og:updated_time"]')?.content;
+
             const pageType = determinePageType(path, doc);
 
-            // Build schema using the EXACT template structure
+            // Build enhanced schema with all SEO-beneficial properties
             const schema = {
                 "@context": "https://schema.org",
                 "@type": "WebPage",
@@ -1331,28 +1347,37 @@
                 "url": pageData.url,
                 "name": title || '',
                 "description": description || '',
+                "inLanguage": "en-US",
                 "isPartOf": {
                     "@type": "WebSite",
-                    "name": siteConfig.orgShortName || extractDomainName(url.hostname),
-                    "url": siteConfig.websiteUrl + "/"
+                    "@id": `${siteConfig.websiteUrl}/#website`,
+                    "url": siteConfig.websiteUrl,
+                    "name": siteConfig.orgName || siteConfig.orgShortName || extractDomainName(url.hostname),
+                    "inLanguage": "en-US"
                 },
                 "primaryImageOfPage": {
                     "@type": "ImageObject",
-                    "url": siteConfig.logoUrl || ''
+                    "@id": `${pageData.url}#primaryimage`,
+                    "url": ogImage || '',
+                    "width": parseInt(ogImageWidth) || 1200,
+                    "height": parseInt(ogImageHeight) || 630
                 },
-                "inLanguage": "en",
                 "breadcrumb": {
                     "@type": "BreadcrumbList",
+                    "@id": `${pageData.url}#breadcrumb`,
                     "itemListElement": []
                 },
                 "publisher": {
                     "@type": "Organization",
                     "@id": `${siteConfig.websiteUrl}/#organization`,
                     "name": siteConfig.orgName || siteConfig.orgShortName || extractDomainName(url.hostname),
-                    "url": siteConfig.websiteUrl + "/",
+                    "url": siteConfig.websiteUrl,
                     "logo": {
                         "@type": "ImageObject",
-                        "url": siteConfig.logoUrl || ''
+                        "@id": `${siteConfig.websiteUrl}/#logo`,
+                        "url": siteConfig.logoUrl || '',
+                        "width": 300,
+                        "height": 60
                     },
                     "contactPoint": []
                 },
@@ -1363,7 +1388,10 @@
                         "@type": "Organization",
                         "@id": `${siteConfig.websiteUrl}/#organization`
                     },
-                    "areaServed": [],
+                    "areaServed": {
+                        "@type": "Country",
+                        "name": "United States"
+                    },
                     "audience": {
                         "@type": "PeopleAudience",
                         "name": ''
@@ -1373,12 +1401,14 @@
                     "hasOfferCatalog": {
                         "@type": "OfferCatalog",
                         "name": '',
-                        "itemListElement": {
-                            "@type": "ItemList",
-                            "itemListOrder": "http://schema.org/ItemListOrderAscending",
-                            "numberOfItems": 0,
-                            "itemListElement": []
-                        }
+                        "itemListElement": [
+                            {
+                                "@type": "ItemList",
+                                "itemListOrder": "http://schema.org/ItemListOrderAscending",
+                                "numberOfItems": 0,
+                                "itemListElement": []
+                            }
+                        ]
                     }
                 },
                 "mainEntity": {
@@ -1391,44 +1421,64 @@
                         "@type": "SearchAction",
                         "target": {
                             "@type": "EntryPoint",
-                            "urlTemplate": pageData.url
+                            "urlTemplate": `${siteConfig.websiteUrl}/search?q={search_term_string}`
                         },
                         "query-input": "required name=search_term_string"
                     }
                 ]
             };
 
-            // Build breadcrumbs from URL path
+            // Add dates if available (SEO benefit)
+            if (datePublished) {
+                schema.datePublished = datePublished;
+            }
+            if (dateModified) {
+                schema.dateModified = dateModified;
+            }
+
+            // Build breadcrumbs with full item objects (better for rich results)
             if (segments.length > 0) {
+                // Always include Home as first breadcrumb
+                schema.breadcrumb.itemListElement.push({
+                    "@type": "ListItem",
+                    "position": 1,
+                    "item": {
+                        "@id": siteConfig.websiteUrl,
+                        "name": "Home"
+                    }
+                });
+
                 let currentPath = '';
                 segments.forEach((segment, index) => {
                     currentPath += '/' + segment;
                     schema.breadcrumb.itemListElement.push({
                         "@type": "ListItem",
-                        "position": index + 1,
-                        "name": segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                        "item": `${url.origin}${currentPath}`
+                        "position": index + 2,
+                        "item": {
+                            "@id": `${url.origin}${currentPath}`,
+                            "name": segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        }
                     });
                 });
             }
 
-            // Add contact points
+            // Add enhanced contact points with more details
             if (siteConfig.phones.sales) {
                 schema.publisher.contactPoint.push({
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.sales,
-                    "contactType": "sales",
-                    "areaServed": [siteConfig.areaServed],
-                    "availableLanguage": ["en"]
+                    "contactType": "Sales",
+                    "areaServed": "US",
+                    "availableLanguage": ["en", "es"]
                 });
             }
             if (siteConfig.phones.service) {
                 schema.publisher.contactPoint.push({
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.service,
-                    "contactType": "customer service",
-                    "areaServed": [siteConfig.areaServed],
-                    "availableLanguage": ["en"]
+                    "contactType": "Customer Service",
+                    "areaServed": "US",
+                    "availableLanguage": ["en", "es"]
                 });
             }
             if (siteConfig.phones.tty) {
@@ -1436,7 +1486,7 @@
                     "@type": "ContactPoint",
                     "telephone": siteConfig.phones.tty,
                     "contactType": "TTY",
-                    "areaServed": [siteConfig.areaServed],
+                    "areaServed": "US",
                     "availableLanguage": ["en"]
                 });
             }
@@ -1453,39 +1503,49 @@
             if (hasServices && (path.includes('medicare') || path.includes('insurance') || 
                 path.includes('plan') || path.includes('service'))) {
                 
-                // Fill in About section
+                // Fill in About section with comprehensive details
                 schema.about.name = mainHeading || title;
                 schema.about.serviceType = extractServiceType(mainHeading, bodyText);
-                schema.about.description = description || '';
+                schema.about.description = description || `Comprehensive ${mainHeading || title} services and coverage options.`;
 
                 // Try to find target audience
                 const audienceMatch = bodyText.match(/(medicare[- ]eligible|seniors|individuals|families|businesses)/i);
                 if (audienceMatch) {
                     schema.about.audience.name = audienceMatch[0].charAt(0).toUpperCase() + audienceMatch[0].slice(1);
+                } else {
+                    // Default audience for healthcare
+                    schema.about.audience.name = "Medicare-eligible individuals";
                 }
 
-                // Try to extract area served from content
+                // Try to extract specific area served from content (counties, states, etc.)
                 const countyMatch = bodyText.match(/([A-Z][a-z]+\s+County,?\s*[A-Z]{2})/g);
                 if (countyMatch && countyMatch.length > 0) {
-                    schema.about.areaServed = countyMatch.slice(0, 3).map(county => ({
-                        "@type": "AdministrativeArea",
-                        "name": county
-                    }));
+                    // Add specific service areas as additional property
+                    schema.about.additionalProperty = {
+                        "@type": "PropertyValue",
+                        "name": "Service Areas",
+                        "value": countyMatch.slice(0, 5).map(county => ({
+                            "@type": "AdministrativeArea",
+                            "name": county
+                        }))
+                    };
                 }
 
                 // Look for specific plan/product mentions
                 const planNames = extractPlanNames(doc);
                 if (planNames.length > 0) {
                     schema.about.hasOfferCatalog.name = `${mainHeading || title} Plans`;
-                    schema.about.hasOfferCatalog.itemListElement.numberOfItems = planNames.length;
-                    schema.about.hasOfferCatalog.itemListElement.itemListElement = planNames.map((planName, idx) => ({
-                        "@type": "Service",
+                    schema.about.hasOfferCatalog.itemListElement[0].numberOfItems = planNames.length;
+                    schema.about.hasOfferCatalog.itemListElement[0].itemListElement = planNames.map((planName, idx) => ({
+                        "@type": "Offer",
                         "name": planName,
-                        "areaServed": countyMatch ? countyMatch.slice(0, 3) : [],
-                        "description": `${planName} coverage option`
+                        "description": `${planName} - comprehensive coverage option`,
+                        "url": pageData.url,
+                        "availability": "https://schema.org/InStock",
+                        "areaServed": "US"
                     }));
 
-                    // Create mainEntity
+                    // Create mainEntity with full structure
                     schema.mainEntity.name = `Featured ${mainHeading || 'Plans'}`;
                     schema.mainEntity.itemListElement = planNames.map((planName, idx) => ({
                         "@type": "ListItem",
@@ -1494,7 +1554,12 @@
                             "@type": "Service",
                             "name": planName,
                             "url": pageData.url,
-                            "provider": { "@id": `${siteConfig.websiteUrl}/#organization` }
+                            "provider": { 
+                                "@type": "Organization",
+                                "@id": `${siteConfig.websiteUrl}/#organization` 
+                            },
+                            "areaServed": "US",
+                            "serviceType": schema.about.serviceType
                         }
                     }));
                 }
