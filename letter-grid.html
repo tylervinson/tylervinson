@@ -20,7 +20,7 @@
             margin: 0;
             height: 100vh;
             overflow: hidden;
-            background-color: #333;
+            background-color: #fff;
         }
         .controls {
             display: flex;
@@ -82,8 +82,8 @@
     height: 80vmin;
     max-width: 800px;
     max-height: 800px;
-    background-color: #333;
-    border: 40px solid #333;
+    background-color: #fff;
+    border: 40px solid #fff;
     border-radius: 5px;
         }
         .cell {
@@ -91,14 +91,14 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-color: #333;
-    border: 1px solid #333;
+    background-color: #fff;
+    border: 1px solid #fff;
     border-radius: 5px;
         }
         .letter {
             display: inline-block;
             transform-origin:left center;
-            color: rgb(249, 229, 211);
+            color: #FFD495;
             position: relative;
             opacity: 0;
             text-align: center;
@@ -179,9 +179,9 @@
     <script>
          const characters = "abcdefghijklmnopqrstuvwxyz&ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
         //const characters = "abcdegmnopqrs?&".split('');
-        //const colors = ["#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#F8E2CF", "#AAD1D9", "#FAF7F5"];
-       // const colors =  ['#ccc5b9', '#252422', '#403d39', '#eb5e28', '#fffcf2'];
-        const colors =  ['#ccc5b9', '#252422', '#403d39', '#eb5e28', '#fffcf2', 'eb5e28', 'eb5e28', 'eb5e28', 'eb5e28'];
+        const colors = ["#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#FD665C", "#F8E2CF", "#AAD1D9", "#FAF7F5"];
+        //const colors =  ['#ccc5b9', '#252422', '#403d39', '#eb5e28', '#fffcf2'];
+       // const colors =  ['#ccc5b9', '#252422', '#403d39', '#eb5e28', '#fffcf2', 'eb5e28', 'eb5e28', 'eb5e28', 'eb5e28'];
         let fontSizeMultiplier = .3;
 
         function getRandomFromArray(arr) {
