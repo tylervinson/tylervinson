@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insurance Plan Comparison</title>
+    <title>Insurance Plan Comparison Tool - Standalone</title>
     <style>
-        * {
+        /* Insurance Plan Comparison Tool - All Styles */
+        
+        .insurance-comparison-tool * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
+        .insurance-comparison-tool {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
             background: #f8f9fa;
             color: #1a1a1a;
@@ -19,12 +21,12 @@
             padding: 2rem 1rem;
         }
 
-        .container {
+        .comparison-container {
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        h1 {
+        .insurance-comparison-tool h1 {
             font-size: 2.5rem;
             font-weight: 300;
             letter-spacing: -0.02em;
@@ -33,7 +35,7 @@
             animation: fadeInUp 0.6s ease forwards;
         }
 
-        .subtitle {
+        .insurance-comparison-tool .subtitle {
             font-size: 1.1rem;
             color: #666;
             font-weight: 300;
@@ -42,7 +44,7 @@
             animation: fadeInUp 0.6s ease 0.1s forwards;
         }
 
-        .instruction {
+        .insurance-comparison-tool .instruction {
             font-size: 0.95rem;
             color: #999;
             margin-bottom: 2.5rem;
@@ -276,28 +278,8 @@
             }
         }
 
-        @keyframes cardFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-            }
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #999;
-            font-size: 1.1rem;
-        }
-
         @media (max-width: 768px) {
-            h1 {
+            .insurance-comparison-tool h1 {
                 font-size: 2rem;
             }
 
@@ -340,26 +322,130 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Insurance Plan Comparison</h1>
-        <p class="subtitle">Compare any two plans from our selection</p>
-        <p class="instruction">Select any two plans to see a detailed side-by-side comparison</p>
+    
+    <!-- Insurance Plan Comparison Tool -->
+    <div class="insurance-comparison-tool">
+        <div class="comparison-container">
+            <h1>Insurance Plan Comparison</h1>
+            <p class="subtitle">Compare any two plans from our selection</p>
+            <p class="instruction">Select any two plans to see a detailed side-by-side comparison</p>
 
-        <div class="selection-section">
-            <div class="section-label">Available Plans</div>
-            <div class="plan-selector" id="planSelector"></div>
-        </div>
+            <div class="selection-section">
+                <div class="section-label">Available Plans</div>
+                <div class="plan-selector" id="planSelector">
+                    
+                    <!-- Plan 1: Basic Plan -->
+                    <button class="plan-button" data-plan-id="1" 
+                            data-plan-name="Basic Plan"
+                            data-plan-type="basic"
+                            data-coverage-type="Individual"
+                            data-price="149"
+                            data-deductible="2500"
+                            data-max-out-of-pocket="7000"
+                            data-coverage-percent="80"
+                            data-doctor-visits="30"
+                            data-prescription="Generic only"
+                            data-emergency="250"
+                            data-mental-health="Limited"
+                            data-dental-vision="Not included">
+                        <div class="selected-indicator"></div>
+                        <div class="plan-button-type">basic</div>
+                        <div class="plan-button-name">Basic Plan</div>
+                        <div class="plan-button-price">
+                            $149
+                            <span class="plan-button-period">/month</span>
+                        </div>
+                        <div class="plan-button-coverage">Individual Coverage</div>
+                    </button>
 
-        <div class="comparison-area" id="comparisonArea">
-            <div class="comparison-grid" id="comparisonGrid"></div>
-        </div>
+                    <!-- Plan 2: Standard Plan -->
+                    <button class="plan-button" data-plan-id="2"
+                            data-plan-name="Standard Plan"
+                            data-plan-type="standard"
+                            data-coverage-type="Individual"
+                            data-price="299"
+                            data-deductible="1500"
+                            data-max-out-of-pocket="5000"
+                            data-coverage-percent="90"
+                            data-doctor-visits="20"
+                            data-prescription="Generic & Brand"
+                            data-emergency="150"
+                            data-mental-health="Included"
+                            data-dental-vision="Vision only">
+                        <div class="selected-indicator"></div>
+                        <div class="plan-button-type">standard</div>
+                        <div class="plan-button-name">Standard Plan</div>
+                        <div class="plan-button-price">
+                            $299
+                            <span class="plan-button-period">/month</span>
+                        </div>
+                        <div class="plan-button-coverage">Individual Coverage</div>
+                    </button>
 
-        <div class="empty-state" id="emptyState">
-            Select two plans to begin comparison
+                    <!-- Plan 3: Premium Plan -->
+                    <button class="plan-button" data-plan-id="3"
+                            data-plan-name="Premium Plan"
+                            data-plan-type="premium"
+                            data-coverage-type="Individual"
+                            data-price="499"
+                            data-deductible="500"
+                            data-max-out-of-pocket="3000"
+                            data-coverage-percent="95"
+                            data-doctor-visits="10"
+                            data-prescription="Full coverage"
+                            data-emergency="100"
+                            data-mental-health="Full coverage"
+                            data-dental-vision="Both included">
+                        <div class="selected-indicator"></div>
+                        <div class="plan-button-type">premium</div>
+                        <div class="plan-button-name">Premium Plan</div>
+                        <div class="plan-button-price">
+                            $499
+                            <span class="plan-button-period">/month</span>
+                        </div>
+                        <div class="plan-button-coverage">Individual Coverage</div>
+                    </button>
+
+                    <!-- Plan 4: Family Plan -->
+                    <button class="plan-button" data-plan-id="4"
+                            data-plan-name="Family Plan"
+                            data-plan-type="family"
+                            data-coverage-type="Family"
+                            data-price="649"
+                            data-deductible="2000"
+                            data-max-out-of-pocket="8000"
+                            data-coverage-percent="90"
+                            data-doctor-visits="25"
+                            data-prescription="Generic & Brand"
+                            data-emergency="175"
+                            data-mental-health="Included"
+                            data-dental-vision="Vision only">
+                        <div class="selected-indicator"></div>
+                        <div class="plan-button-type">family</div>
+                        <div class="plan-button-name">Family Plan</div>
+                        <div class="plan-button-price">
+                            $649
+                            <span class="plan-button-period">/month</span>
+                        </div>
+                        <div class="plan-button-coverage">Family Coverage</div>
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="comparison-area" id="comparisonArea">
+                <div class="comparison-grid" id="comparisonGrid"></div>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                Select two plans to begin comparison
+            </div>
         </div>
     </div>
 
     <script>
+        // Insurance Plan Comparison Tool - JavaScript
+        
         const plans = [
             {
                 id: 1,
@@ -429,20 +515,7 @@
         const comparisonGrid = document.getElementById('comparisonGrid');
         const emptyState = document.getElementById('emptyState');
 
-        function renderPlanSelector() {
-            planSelector.innerHTML = plans.map(plan => `
-                <button class="plan-button" data-plan-id="${plan.id}">
-                    <div class="selected-indicator"></div>
-                    <div class="plan-button-type">${plan.type}</div>
-                    <div class="plan-button-name">${plan.name}</div>
-                    <div class="plan-button-price">
-                        $${plan.price}
-                        <span class="plan-button-period">/month</span>
-                    </div>
-                    <div class="plan-button-coverage">${plan.coverageType} Coverage</div>
-                </button>
-            `).join('');
-
+        function initializeEventListeners() {
             document.querySelectorAll('.plan-button').forEach(button => {
                 button.addEventListener('click', () => handlePlanSelection(parseInt(button.dataset.planId)));
             });
@@ -462,7 +535,7 @@
                 }
                 selectedPlans.push(planId);
             }
-
+            
             updateUI();
         }
 
@@ -482,7 +555,7 @@
                     button.classList.remove('disabled');
                 }
             });
-
+            
             if (selectedPlans.length >= 1) {
                 emptyState.style.display = 'none';
                 comparisonArea.classList.add('visible');
@@ -508,7 +581,7 @@
                         <div class="comparison-plan-header"></div>
                     </div>
                 `;
-
+                
                 const comparisons = [
                     { label: 'Annual Deductible', getValue: (p) => `$${p.deductible.toLocaleString()}` },
                     { label: 'Max Out-of-Pocket', getValue: (p) => `$${p.maxOutOfPocket.toLocaleString()}` },
@@ -519,7 +592,7 @@
                     { label: 'Mental Health Coverage', getValue: (p) => p.mentalHealth },
                     { label: 'Dental & Vision', getValue: (p) => p.dentalVision }
                 ];
-
+                
                 comparisonGrid.innerHTML = headerRow + comparisons.map(comp => {
                     return `
                         <div class="comparison-row">
@@ -542,7 +615,7 @@
                 
                 const plan1 = selectedPlanObjects[0];
                 const plan2 = selectedPlanObjects[1];
-
+                
                 // Header row with plan names and prices
                 const headerRow = `
                     <div class="comparison-header-row">
@@ -557,66 +630,67 @@
                         </div>
                     </div>
                 `;
-
-                const comparisons = [
-                {
-                    label: 'Annual Deductible',
-                    getValue: (p) => `$${p.deductible.toLocaleString()}`,
-                    compare: (p1, p2) => p1.deductible < p2.deductible ? 'better' : (p1.deductible > p2.deductible ? 'worse' : '')
-                },
-                {
-                    label: 'Max Out-of-Pocket',
-                    getValue: (p) => `$${p.maxOutOfPocket.toLocaleString()}`,
-                    compare: (p1, p2) => p1.maxOutOfPocket < p2.maxOutOfPocket ? 'better' : (p1.maxOutOfPocket > p2.maxOutOfPocket ? 'worse' : '')
-                },
-                {
-                    label: 'Coverage Percentage',
-                    getValue: (p) => `${p.coveragePercent}%`,
-                    compare: (p1, p2) => p1.coveragePercent > p2.coveragePercent ? 'better' : (p1.coveragePercent < p2.coveragePercent ? 'worse' : '')
-                },
-                {
-                    label: 'Doctor Visit Copay',
-                    getValue: (p) => `$${p.doctorVisits}`,
-                    compare: (p1, p2) => p1.doctorVisits < p2.doctorVisits ? 'better' : (p1.doctorVisits > p2.doctorVisits ? 'worse' : '')
-                },
-                {
-                    label: 'Prescription Coverage',
-                    getValue: (p) => p.prescriptionCoverage,
-                    compare: () => ''
-                },
-                {
-                    label: 'Emergency Care Copay',
-                    getValue: (p) => `$${p.emergency}`,
-                    compare: (p1, p2) => p1.emergency < p2.emergency ? 'better' : (p1.emergency > p2.emergency ? 'worse' : '')
-                },
-                {
-                    label: 'Mental Health Coverage',
-                    getValue: (p) => p.mentalHealth,
-                    compare: () => ''
-                },
-                {
-                    label: 'Dental & Vision',
-                    getValue: (p) => p.dentalVision,
-                    compare: () => ''
-                }
-            ];
-
-            comparisonGrid.innerHTML = headerRow + comparisons.map(comp => {
-                const val1Class = comp.compare(plan1, plan2);
-                const val2Class = comp.compare(plan2, plan1);
                 
-                return `
-                    <div class="comparison-row">
-                        <div class="feature-label">${comp.label}</div>
-                        <div class="feature-value ${val1Class}">${comp.getValue(plan1)}</div>
-                        <div class="feature-value ${val2Class}">${comp.getValue(plan2)}</div>
-                    </div>
-                `;
-            }).join('');
+                const comparisons = [
+                    {
+                        label: 'Annual Deductible',
+                        getValue: (p) => `$${p.deductible.toLocaleString()}`,
+                        compare: (p1, p2) => p1.deductible < p2.deductible ? 'better' : (p1.deductible > p2.deductible ? 'worse' : '')
+                    },
+                    {
+                        label: 'Max Out-of-Pocket',
+                        getValue: (p) => `$${p.maxOutOfPocket.toLocaleString()}`,
+                        compare: (p1, p2) => p1.maxOutOfPocket < p2.maxOutOfPocket ? 'better' : (p1.maxOutOfPocket > p2.maxOutOfPocket ? 'worse' : '')
+                    },
+                    {
+                        label: 'Coverage Percentage',
+                        getValue: (p) => `${p.coveragePercent}%`,
+                        compare: (p1, p2) => p1.coveragePercent > p2.coveragePercent ? 'better' : (p1.coveragePercent < p2.coveragePercent ? 'worse' : '')
+                    },
+                    {
+                        label: 'Doctor Visit Copay',
+                        getValue: (p) => `$${p.doctorVisits}`,
+                        compare: (p1, p2) => p1.doctorVisits < p2.doctorVisits ? 'better' : (p1.doctorVisits > p2.doctorVisits ? 'worse' : '')
+                    },
+                    {
+                        label: 'Prescription Coverage',
+                        getValue: (p) => p.prescriptionCoverage,
+                        compare: () => ''
+                    },
+                    {
+                        label: 'Emergency Care Copay',
+                        getValue: (p) => `$${p.emergency}`,
+                        compare: (p1, p2) => p1.emergency < p2.emergency ? 'better' : (p1.emergency > p2.emergency ? 'worse' : '')
+                    },
+                    {
+                        label: 'Mental Health Coverage',
+                        getValue: (p) => p.mentalHealth,
+                        compare: () => ''
+                    },
+                    {
+                        label: 'Dental & Vision',
+                        getValue: (p) => p.dentalVision,
+                        compare: () => ''
+                    }
+                ];
+                
+                comparisonGrid.innerHTML = headerRow + comparisons.map(comp => {
+                    const val1Class = comp.compare(plan1, plan2);
+                    const val2Class = comp.compare(plan2, plan1);
+                    
+                    return `
+                        <div class="comparison-row">
+                            <div class="feature-label">${comp.label}</div>
+                            <div class="feature-value ${val1Class}">${comp.getValue(plan1)}</div>
+                            <div class="feature-value ${val2Class}">${comp.getValue(plan2)}</div>
+                        </div>
+                    `;
+                }).join('');
             }
         }
 
-        renderPlanSelector();
+        // Initialize the tool
+        initializeEventListeners();
     </script>
 </body>
 </html>
