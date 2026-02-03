@@ -224,6 +224,16 @@
             }
         }
 
+        @keyframes clockTick {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #progressClock {
+            animation: clockTick 2s linear infinite;
+            display: inline-block;
+        }
+
         .progress-bar {
             width: 100%;
             height: 4px;
@@ -299,7 +309,6 @@
             transition: opacity 0.2s ease;
             font-size: 1.25rem;
             color: #1a1a1a;
-            margin-left:8px;
         }
 
         .icon-btn:hover {
@@ -433,7 +442,10 @@
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
-            <div class="status" id="statusText">Preparing...</div>
+            <div class="status" id="statusText">
+                <i class="fa-regular fa-clock" id="progressClock" style="display: none; margin-right: 0.5rem;"></i>
+                <span id="statusTextContent">Preparing...</span>
+            </div>
         </div>
 
         <div class="results-section" id="resultsSection">
@@ -1193,18 +1205,29 @@
         async function scrapePage(url) {
             // List of CORS proxies to try
             const proxies = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                { name: 'AllOrigins', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+                { name: 'CorsProxy', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
+                { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` }
             ];
             
             let lastError = null;
             
             // Try each proxy
-            for (const proxyUrl of proxies) {
+            for (let i = 0; i < proxies.length; i++) {
+                const proxy = proxies[i];
                 try {
-                    console.log(`Attempting to fetch via: ${proxyUrl.split('?')[0]}`);
-                    const response = await fetch(proxyUrl);
+                    console.log(`Attempting to fetch via: ${proxy.name}`);
+                    
+                    // Show clock icon and update text when trying proxies
+                    const progressClock = document.getElementById('progressClock');
+                    const statusTextContent = document.getElementById('statusTextContent');
+                    if (statusTextContent && i > 0) {
+                        // Only show clock on retry attempts
+                        if (progressClock) progressClock.style.display = 'inline-block';
+                        statusTextContent.textContent = `Fetching ${url}...`;
+                    }
+                    
+                    const response = await fetch(proxy.url);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1214,7 +1237,10 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     
-                    console.log(`✓ Successfully fetched via: ${proxyUrl.split('?')[0]}`);
+                    console.log(`✓ Successfully fetched via: ${proxy.name}`);
+                    
+                    // Hide clock on success
+                    if (progressClock) progressClock.style.display = 'none';
                     
                     return {
                         url: url,
@@ -1222,7 +1248,7 @@
                         html: html
                     };
                 } catch (error) {
-                    console.warn(`✗ Failed with ${proxyUrl.split('?')[0]}: ${error.message}`);
+                    console.warn(`✗ Failed with ${proxy.name}: ${error.message}`);
                     lastError = error;
                     // Continue to next proxy
                 }
@@ -1569,7 +1595,72 @@
                 }
             }
 
+            // Clean up empty arrays and objects to improve validation scores
+            cleanupEmptyFields(schema);
+
             return schema;
+        }
+
+        function cleanupEmptyFields(obj) {
+            // Remove empty arrays, empty strings, and empty nested objects
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    const value = obj[key];
+                    
+                    // Handle arrays
+                    if (Array.isArray(value)) {
+                        if (value.length === 0) {
+                            delete obj[key];
+                        } else {
+                            // Recursively clean nested objects in arrays
+                            value.forEach(item => {
+                                if (typeof item === 'object' && item !== null) {
+                                    cleanupEmptyFields(item);
+                                }
+                            });
+                        }
+                    }
+                    // Handle objects
+                    else if (typeof value === 'object' && value !== null) {
+                        // Recursively clean nested objects
+                        cleanupEmptyFields(value);
+                        
+                        // Remove object if it's empty after cleaning
+                        if (Object.keys(value).length === 0) {
+                            delete obj[key];
+                        }
+                        
+                        // Special handling for specific empty patterns
+                        if (key === 'hasOfferCatalog' && value.itemListElement) {
+                            // Remove hasOfferCatalog if it has no actual offers
+                            if (Array.isArray(value.itemListElement) && 
+                                value.itemListElement.length > 0 &&
+                                value.itemListElement[0].itemListElement &&
+                                value.itemListElement[0].itemListElement.length === 0) {
+                                delete obj[key];
+                            }
+                        }
+                        
+                        if (key === 'mainEntity' && value.itemListElement) {
+                            // Remove mainEntity if it has no items
+                            if (Array.isArray(value.itemListElement) && value.itemListElement.length === 0) {
+                                delete obj[key];
+                            }
+                        }
+                        
+                        if (key === 'breadcrumb' && value.itemListElement) {
+                            // Remove breadcrumb if it has no items
+                            if (Array.isArray(value.itemListElement) && value.itemListElement.length === 0) {
+                                delete obj[key];
+                            }
+                        }
+                    }
+                    // Handle empty strings (but keep explicitly set values like empty audience name)
+                    else if (value === '' && !['name', 'description', 'serviceType'].includes(key)) {
+                        delete obj[key];
+                    }
+                }
+            }
         }
 
         function extractServiceType(heading, bodyText) {
@@ -1639,7 +1730,10 @@
         function updateProgress(current, total, status) {
             const percent = (current / total) * 100;
             document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('statusText').textContent = `${status} (${current}/${total})`;
+            document.getElementById('statusTextContent').textContent = `${status} (${current}/${total})`;
+            
+            // Hide clock when not retrying proxies
+            document.getElementById('progressClock').style.display = 'none';
         }
 
         function displayResults() {
