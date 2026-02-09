@@ -1203,12 +1203,15 @@
         });
 
         async function scrapePage(url) {
-            // List of CORS proxies to try
+            // List of CORS proxies to try - Cloudflare Worker first (most reliable)
             const proxies = [
-                { name: 'Direct', url: url }, // Try direct first in case CORS is allowed
-                { name: 'AllOrigins', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+                { name: 'CloudflareWorker', url: `https://schema-cors-proxy.bcbs-of-az.workers.dev/?url=${encodeURIComponent(url)}` },
+                { name: 'Direct', url: url }, // Try direct in case CORS is allowed
+                { name: 'AllOrigins', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, parseResponse: (data) => JSON.parse(data).contents },
+                { name: 'CorsAnywhere', url: `https://cors-anywhere.herokuapp.com/${url}` },
                 { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}` },
                 { name: 'CorsProxy', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
+                { name: 'ProxyThis', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` }
             ];
             
             let lastError = null;
@@ -1239,7 +1242,16 @@
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     
-                    const html = await response.text();
+                    let html = await response.text();
+                    
+                    // Use custom parser if provided (e.g., for AllOrigins JSON response)
+                    if (proxy.parseResponse) {
+                        try {
+                            html = proxy.parseResponse(html);
+                        } catch (parseError) {
+                            throw new Error(`Failed to parse proxy response: ${parseError.message}`);
+                        }
+                    }
                     
                     // Validate that we got actual HTML
                     if (!html || html.trim().length < 100) {
@@ -1268,14 +1280,20 @@
                     console.warn(`✗ Failed with ${proxy.name}: ${error.message}`);
                     lastError = error;
                     // Continue to next proxy
+                    
+                    // Add small delay between proxy attempts to avoid hammering
+                    if (i < proxies.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
                 }
             }
             
             // All proxies failed - provide helpful error message
             const errorMsg = `Unable to fetch ${url}. All fetch methods failed. This may be due to:\n` +
                            `• Site blocking automated requests\n` +
-                           `• CORS proxy rate limits\n` +
+                           `• CORS proxy rate limits or downtime\n` +
                            `• Network connectivity issues\n\n` +
+                           `Suggestion: Try again in a few minutes or use a different URL.\n\n` +
                            `Last error: ${lastError.message}`;
             throw new Error(errorMsg);
         }
