@@ -1205,9 +1205,10 @@
         async function scrapePage(url) {
             // List of CORS proxies to try
             const proxies = [
+                { name: 'Direct', url: url }, // Try direct first in case CORS is allowed
                 { name: 'AllOrigins', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+                { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}` },
                 { name: 'CorsProxy', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
-                { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` }
             ];
             
             let lastError = null;
@@ -1227,15 +1228,31 @@
                         statusTextContent.textContent = `Fetching ${url}...`;
                     }
                     
-                    const response = await fetch(proxy.url);
+                    const response = await fetch(proxy.url, {
+                        method: 'GET',
+                        headers: proxy.name === 'Direct' ? {
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                        } : {}
+                    });
                     
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     
                     const html = await response.text();
+                    
+                    // Validate that we got actual HTML
+                    if (!html || html.trim().length < 100) {
+                        throw new Error('Response too short or empty');
+                    }
+                    
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Check if parsing was successful
+                    if (!doc || !doc.body) {
+                        throw new Error('Failed to parse HTML');
+                    }
                     
                     console.log(`✓ Successfully fetched via: ${proxy.name}`);
                     
@@ -1254,8 +1271,13 @@
                 }
             }
             
-            // All proxies failed
-            throw new Error(`Failed to fetch from all proxies. Last error: ${lastError.message}`);
+            // All proxies failed - provide helpful error message
+            const errorMsg = `Unable to fetch ${url}. All fetch methods failed. This may be due to:\n` +
+                           `• Site blocking automated requests\n` +
+                           `• CORS proxy rate limits\n` +
+                           `• Network connectivity issues\n\n` +
+                           `Last error: ${lastError.message}`;
+            throw new Error(errorMsg);
         }
 
         function extractSiteConfig(pageData) {
