@@ -303,12 +303,17 @@
             border: none;
             cursor: pointer;
             padding: 0;
+            margin-right: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: opacity 0.2s ease;
             font-size: 1.25rem;
             color: #1a1a1a;
+        }
+
+        .icon-btn:last-child {
+            margin-right: 0;
         }
 
         .icon-btn:hover {
@@ -1805,7 +1810,7 @@
                     viewBtn.onclick = () => togglePreview(index);
 
                     const viewHtmlBtn = document.createElement('button');
-                    viewHtmlBtn.innerHTML = '<i class="fa-solid fa-code"></i>';
+                    viewHtmlBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
                     viewHtmlBtn.className = 'icon-btn';
                     viewHtmlBtn.title = 'View HTML';
                     viewHtmlBtn.onclick = () => toggleHtmlPreview(index);
