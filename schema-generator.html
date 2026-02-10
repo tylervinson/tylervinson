@@ -473,7 +473,14 @@
         let generatedSchemas = [];
         let siteConfig = null; // Will be extracted from first page
 
-        // GitHub Configuration
+        // Public read-only GitHub configuration (everyone can view schemas)
+        const publicGitHubConfig = {
+            owner: 'tylervinson',
+            repo: 'tylervinson',
+            branch: 'main'
+        };
+
+        // Private GitHub Configuration (required for saving/deleting)
         let githubConfig = {
             token: localStorage.getItem('github_token') || '',
             owner: localStorage.getItem('github_owner') || '',
@@ -481,9 +488,22 @@
             branch: localStorage.getItem('github_branch') || 'main'
         };
 
-        // Check if GitHub is configured
-        function isGitHubConfigured() {
+        // Check if user has write access (token configured)
+        function hasWriteAccess() {
             return githubConfig.token && githubConfig.owner && githubConfig.repo;
+        }
+
+        // Check if GitHub is configured (legacy function, now checks write access)
+        function isGitHubConfigured() {
+            return hasWriteAccess();
+        }
+
+        // Get config for reading (uses public config if user hasn't configured their own)
+        function getReadConfig() {
+            if (hasWriteAccess()) {
+                return githubConfig;
+            }
+            return publicGitHubConfig;
         }
 
         // Show GitHub config modal on first use
@@ -556,10 +576,13 @@
 
         function updateSettingsButtonVisibility() {
             const settingsBtn = document.getElementById('githubSettingsBtn');
-            if (isGitHubConfigured()) {
+            if (hasWriteAccess()) {
+                // User has configured GitHub - hide the settings button
                 settingsBtn.classList.add('hidden');
             } else {
+                // User hasn't configured - show settings button so they can add their own schemas
                 settingsBtn.classList.remove('hidden');
+                settingsBtn.title = 'Configure GitHub to save your own schemas';
             }
         }
 
@@ -618,6 +641,12 @@
                 const lastUpdated = new Date(schemaData.lastUpdated).toLocaleString();
                 const versionCount = schemaData.history?.length || 0;
                 
+                const deleteButtonHtml = hasWriteAccess() ? `
+                            <button onclick='deleteStoredSchema(${JSON.stringify(schemaData.url)}, this)' style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.25rem; color: #d32f2f; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="Delete Schema" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                ` : '';
+                
                 schemaItem.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
                         <div style="flex: 1; min-width: 0;">
@@ -631,9 +660,7 @@
                             <button onclick='viewStoredSchema(${JSON.stringify(schemaData.url)})' style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.25rem; color: #1a1a1a; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="View Schema" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
                                 <i class="fa-regular fa-eye"></i>
                             </button>
-                            <button onclick='deleteStoredSchema(${JSON.stringify(schemaData.url)}, this)' style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.25rem; color: #d32f2f; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s ease;" title="Delete Schema" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
-                                <i class="fa-regular fa-trash-can"></i>
-                            </button>
+                            ${deleteButtonHtml}
                         </div>
                     </div>
                 `;
@@ -643,22 +670,24 @@
         }
 
         async function getSchemaFromGitHub(url, filename = null) {
-            if (!isGitHubConfigured()) {
-                return null;
-            }
+            const config = getReadConfig();
 
             try {
                 const file = filename || urlToFilename(url);
                 const path = `schemas/${file}`;
                 
+                const headers = {
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                
+                // Only add auth if user has write access
+                if (hasWriteAccess()) {
+                    headers['Authorization'] = `token ${githubConfig.token}`;
+                }
+                
                 const response = await fetch(
-                    `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}?ref=${githubConfig.branch}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
+                    `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}?ref=${config.branch}`,
+                    { headers }
                 );
                 
                 if (!response.ok) {
@@ -911,21 +940,21 @@
         }
 
         async function listAllSchemas() {
-            if (!isGitHubConfigured()) {
-                alert('Please configure GitHub first');
-                showGitHubConfigModal();
-                return [];
-            }
+            const config = getReadConfig();
 
             try {
+                const headers = {
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                
+                // Only add auth header if user has write access
+                if (hasWriteAccess()) {
+                    headers['Authorization'] = `token ${githubConfig.token}`;
+                }
+
                 const response = await fetch(
-                    `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/schemas?ref=${githubConfig.branch}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
+                    `https://api.github.com/repos/${config.owner}/${config.repo}/contents/schemas?ref=${config.branch}`,
+                    { headers }
                 );
                 
                 if (!response.ok) {
