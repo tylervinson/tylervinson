@@ -1,5 +1,14 @@
 [
   {
+    "id": "1770834074108",
+    "name": "AZ Blue In Action - Flip Cards",
+    "type": "html",
+    "description": "GTM tag backup",
+    "code": "<style>\n/* Card container */\n#c53dfa18-bef9-4faf-90bd-de466fe1182e > div > div ul li {\n  height: 400px !important;\n  position: relative;\n  display: block;\n}\n\n#c53dfa18-bef9-4faf-90bd-de466fe1182e > div > div ul li > div {\n  position: relative;\n  width: 100%;\n  height: 100%;\n  cursor: pointer;\n}\n\n/* Card sides base styles */\n.card-side {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  transition: opacity 0.6s;\n}\n\n/* Front of card */\n.card-front {\n  opacity: 1;\n  z-index: 2;\n}\n\n/* Back of card */\n.card-back {\n  opacity: 0;\n  z-index: 1;\n  background: white;\n  padding: 2rem;\n}\n\n/* States when flipped */\n.flipped .card-front {\n  opacity: 0;\n  z-index: 1;\n}\n\n.flipped .card-back {\n  opacity: 1;\n  z-index: 2;\n}\n</style>\n\n<script>\n(function() {\n  // Get all card containers\n  var cards = document.querySelectorAll('#c53dfa18-bef9-4faf-90bd-de466fe1182e > div > div ul li > div');\n  \n  // Function to unflip all cards\n  function unflipAllCards() {\n    cards.forEach(function(card) {\n      card.classList.remove('flipped');\n    });\n  }\n  \n  // Function to handle click events\n  function handleClick(event) {\n    var clickedCard = event.currentTarget;\n    \n    if (clickedCard.classList.contains('flipped')) {\n      // If clicking an already flipped card, just unflip it\n      clickedCard.classList.remove('flipped');\n    } else {\n      // If clicking a new card, unflip all others and flip this one\n      unflipAllCards();\n      clickedCard.classList.add('flipped');\n    }\n  }\n  \n  // Initialize cards\n  cards.forEach(function(card) {\n    // Add card side classes\n    card.querySelector('div:first-child').classList.add('card-side', 'card-front');\n    card.querySelector('div:nth-child(2)').classList.add('card-side', 'card-back');\n    \n    // Find and remove the height class\n    var elementsWithHeight = card.getElementsByClassName('h-[270px]');\n    if (elementsWithHeight.length > 0) {\n      Array.from(elementsWithHeight).forEach(function(element) {\n        element.classList.remove('h-[270px]');\n      });\n    }\n    \n    // Add click handler\n    card.addEventListener('click', handleClick);\n    \n    // Add accessibility attributes\n    card.setAttribute('tabindex', '0');\n    card.setAttribute('role', 'button');\n    card.setAttribute('aria-label', 'Flip card to see details');\n    \n    // Add keyboard support\n    card.addEventListener('keydown', function(event) {\n      if (event.key === 'Enter' || event.key === ' ') {\n        event.preventDefault();\n        handleClick({ currentTarget: card });\n      }\n    });\n  });\n})();\n</script>",
+    "demo": "",
+    "date": "2026-02-11T18:21:14.108Z"
+  },
+  {
     "id": "1769204485444",
     "name": "Ceros Embed Code Generator",
     "type": "html",
