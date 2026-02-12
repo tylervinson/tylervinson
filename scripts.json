@@ -1,5 +1,14 @@
 [
   {
+    "id": "1770890672040",
+    "name": "GTM SPA Injection Tag Template",
+    "type": "html",
+    "description": "For use as a Custom HTML tag type with a Page View trigger",
+    "code": "<script>\n(function() {\n    /**\n     * 1. THE TASK FUNCTION\n     * This is where you put the \"Hello World\" logic.\n     */\n    var runProjectLogic = function(targetElement) {\n        // Safety: Ensure we don't initialize the same element twice\n        if (targetElement.dataset.initialized === \"true\") return;\n        \n        // Mark as initialized\n        targetElement.dataset.initialized = \"true\";\n\n        // --- HELLO WORLD LOGIC ---\n        console.log(\"Hello World: SPA component detected and logic applied!\");\n        targetElement.style.border = \"2px solid #018bc0\"; \n        // -------------------------\n    };\n\n    /**\n     * 2. THE OBSERVER\n     * This watches for the specific 'wrapper' class to enter the DOM.\n     */\n    var observer = new MutationObserver(function(mutations) {\n        // Replace '.azb-shell' with whatever unique class your CMS uses\n        var shell = document.querySelector('.azb-shell');\n        \n        if (shell) {\n            runProjectLogic(shell);\n        }\n    });\n\n    /**\n     * 3. START WATCHING\n     * We watch the 'body' because in SPAs, the body stays while \n     * the internal HTML is swapped out.\n     */\n    observer.observe(document.body, { \n        childList: true, \n        subtree: true \n    });\n\n    // Run once immediately for direct entry (hard refresh)\n    var initialCheck = document.querySelector('.azb-shell');\n    if (initialCheck) runProjectLogic(initialCheck);\n    \n})();\n</script>",
+    "demo": "",
+    "date": "2026-02-12T10:04:32.041Z"
+  },
+  {
     "id": "1770834491932",
     "name": "Content Slider Hero - TV",
     "type": "html",
