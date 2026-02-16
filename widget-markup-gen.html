@@ -415,7 +415,19 @@
       if (hasDynamicObjects) {
         dynamicObjects.forEach((obj, objIndex) => {
           const fieldCounts = {};
-          const dynamicElements = obj.querySelectorAll('[class*="dynamic-"]');
+          
+          // Find all elements with dynamic-* classes (except dynamic-object)
+          const allElements = obj.querySelectorAll('*');
+          const dynamicElements = [];
+          
+          allElements.forEach(el => {
+            const hasDynamicClass = Array.from(el.classList).some(cls => 
+              cls.startsWith('dynamic-') && cls !== 'dynamic-object'
+            );
+            if (hasDynamicClass) {
+              dynamicElements.push(el);
+            }
+          });
           
           dynamicElements.forEach(el => {
             Array.from(el.classList).forEach(cls => {
@@ -424,7 +436,21 @@
                 fieldCounts[type] = (fieldCounts[type] || 0) + 1;
                 const fieldNum = fieldCounts[type];
                 
-                obj.setAttribute(`data-${type}-${fieldNum}`, 'placeholder');
+                // Extract actual content as the data value
+                let dataValue;
+                
+                // For number types, prioritize data-target attribute
+                if (type === 'number') {
+                  dataValue = el.dataset.target || el.getAttribute('data-target') || el.textContent.trim() || 'placeholder';
+                } else {
+                  // For text, use textContent
+                  dataValue = el.textContent.trim() || 'placeholder';
+                }
+                
+                // Add data attribute to THIS element (not parent)
+                el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
+                
+                // Update the element's class
                 el.classList.remove(cls);
                 el.classList.add(`${type}-${fieldNum}`);
               }
@@ -436,7 +462,19 @@
         });
       } else {
         const fieldCounts = {};
-        const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
+        
+        // Find all dynamic-* classes at widget level
+        const allElements = widgetContainer.querySelectorAll('*');
+        const dynamicElements = [];
+        
+        allElements.forEach(el => {
+          const hasDynamicClass = Array.from(el.classList).some(cls => 
+            cls.startsWith('dynamic-')
+          );
+          if (hasDynamicClass) {
+            dynamicElements.push(el);
+          }
+        });
         
         dynamicElements.forEach(el => {
           Array.from(el.classList).forEach(cls => {
@@ -445,7 +483,21 @@
               fieldCounts[type] = (fieldCounts[type] || 0) + 1;
               const fieldNum = fieldCounts[type];
               
-              widgetContainer.setAttribute(`data-${type}-${fieldNum}`, 'placeholder');
+              // Extract actual content as the data value
+              let dataValue;
+              
+              // For number types, prioritize data-target attribute
+              if (type === 'number') {
+                dataValue = el.dataset.target || el.getAttribute('data-target') || el.textContent.trim() || 'placeholder';
+              } else {
+                // For text, use textContent
+                dataValue = el.textContent.trim() || 'placeholder';
+              }
+              
+              // Add data attribute to THIS element (not parent)
+              el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
+              
+              // Update the element's class
               el.classList.remove(cls);
               el.classList.add(`${type}-${fieldNum}`);
             }
@@ -568,12 +620,19 @@ function get${functionName}Data() {
 
   objectElements.forEach(el => {
     const obj = { id: el.dataset.objectId || '' };
-    Array.from(el.attributes).forEach(attr => {
-      if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
-        const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
-        obj[fieldName] = attr.value;
-      }
+    
+    // Find all elements with data attributes within this object
+    const dataElements = el.querySelectorAll('[data-text-1], [data-number-1], [data-email-1], [data-phone-1], [data-url-1], [data-date-1], [data-textarea-1], [data-checkbox-1]');
+    
+    dataElements.forEach(dataEl => {
+      Array.from(dataEl.attributes).forEach(attr => {
+        if (attr.name.startsWith('data-') && attr.name !== 'data-object-id' && !attr.name.startsWith('data-target')) {
+          const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
+          obj[fieldName] = attr.value;
+        }
+      });
     });
+    
     objects.push(obj);
   });
 
@@ -584,12 +643,19 @@ function get${functionName}Data() {
   if (!widget) return null;
 
   const data = {};
-  Array.from(widget.attributes).forEach(attr => {
-    if (attr.name.startsWith('data-')) {
-      const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
-      data[fieldName] = attr.value;
-    }
+  
+  // Find all elements with data attributes
+  const dataElements = widget.querySelectorAll('[data-text-1], [data-number-1], [data-email-1], [data-phone-1], [data-url-1], [data-date-1], [data-textarea-1], [data-checkbox-1]');
+  
+  dataElements.forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('data-') && !attr.name.startsWith('data-target')) {
+        const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
+        data[fieldName] = attr.value;
+      }
+    });
   });
+  
   return data;
 }`;
 
@@ -599,18 +665,21 @@ function update${functionName}Data(data) {
   if (!widget) return false;
 
   const objectElements = widget.querySelectorAll('[data-object-id]');
+  
   data.objects.forEach((obj, index) => {
     if (!objectElements[index]) return;
-    const el = objectElements[index];
+    const objEl = objectElements[index];
 
     Object.keys(obj).forEach(key => {
       if (key !== 'id') {
         const attrName = 'data-' + key.replace(/_/g, '-');
-        el.setAttribute(attrName, obj[key]);
         
-        const className = key.replace(/_/g, '-');
-        const visibleEl = el.querySelector('.' + className);
-        if (visibleEl) visibleEl.textContent = obj[key];
+        // Find element with this data attribute within the object
+        const targetEl = objEl.querySelector('[' + attrName + ']');
+        if (targetEl) {
+          targetEl.setAttribute(attrName, obj[key]);
+          targetEl.textContent = obj[key];
+        }
       }
     });
   });
@@ -623,11 +692,13 @@ function update${functionName}Data(data) {
 
   Object.keys(data).forEach(key => {
     const attrName = 'data-' + key.replace(/_/g, '-');
-    widget.setAttribute(attrName, data[key]);
     
-    const className = key.replace(/_/g, '-');
-    const visibleEl = widget.querySelector('.' + className);
-    if (visibleEl) visibleEl.textContent = data[key];
+    // Find element with this data attribute
+    const targetEl = widget.querySelector('[' + attrName + ']');
+    if (targetEl) {
+      targetEl.setAttribute(attrName, data[key]);
+      targetEl.textContent = data[key];
+    }
   });
 
   return true;
