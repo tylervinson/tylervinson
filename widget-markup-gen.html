@@ -658,7 +658,7 @@ function setupMutationObserver() {
     clearTimeout(observer._timeout);
     observer._timeout = setTimeout(() => {
       for (const className in WIDGET_REGISTRY) {
-        const el = document.querySelector(\`.$ {className}\`);
+        const el = document.querySelector(\`.\${className}\`);
         if (el && !el.dataset.widgetDetected) {
           el.dataset.widgetDetected = 'true';
           console.log(\`[Widget Editor] Detected widget: \${className}\`);
@@ -715,7 +715,7 @@ function detectWidgets() {
   const found = [];
 
   for (const className in WIDGET_REGISTRY) {
-    const element = document.querySelector(\`.$ {className}\`);
+    const element = document.querySelector(\`.\${className}\`);
 
     if (element) {
       found.push({
@@ -733,7 +733,7 @@ function detectWidgets() {
 // Helper: find widget element in main document
 // ---------------------------------------------------------------------------
 function findWidgetElement(className) {
-  return document.querySelector(\`.$ {className}\`);
+  return document.querySelector(\`.\${className}\`);
 }
 
 // ---------------------------------------------------------------------------
