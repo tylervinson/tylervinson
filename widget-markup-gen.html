@@ -297,10 +297,10 @@
       <p class="subtitle">Automatically generate extension code from your widget HTML</p>
       
       <nav class="tab-nav">
-                <a href="widget-extension.html" class="tab-nav-link">Extension Overview</a>
-                <a href="widget-markup-gen.html" class="tab-nav-link active">Code Generator</a>
-                <a href="widget-specs.html" class="tab-nav-link">Markup Specs</a>
-            </nav>
+        <a href="sitecore-widget-editor-overview.html" class="tab-nav-link">Extension Overview</a>
+        <a href="widget-code-generator.html" class="tab-nav-link active">Code Generator</a>
+        <a href="widget-markup-specifications.html" class="tab-nav-link">Markup Specs</a>
+      </nav>
     </header>
 
     <div class="main-grid">
@@ -333,7 +333,7 @@
           <label>Widget HTML Sample</label>
           <textarea id="htmlInput" placeholder="Paste your widget HTML here..."></textarea>
           <div class="info-box">
-            Paste a complete HTML snippet showing all data-* attributes you want to edit
+            Paste HTML with dynamic-object and dynamic-{type} classes. Generator will add data attributes and create extension code.
           </div>
         </div>
 
@@ -350,13 +350,21 @@
         </div>
 
         <div class="output-tabs">
-          <button class="tab active" onclick="switchTab('registry')">Registry</button>
+          <button class="tab active" onclick="switchTab('processedHTML')">Processed HTML</button>
+          <button class="tab" onclick="switchTab('registry')">Registry</button>
           <button class="tab" onclick="switchTab('contentScript')">content-script.js</button>
           <button class="tab" onclick="switchTab('sidepanel')">sidepanel.js</button>
           <button class="tab" onclick="switchTab('instructions')">Instructions</button>
         </div>
 
-        <div id="registry" class="tab-content active">
+        <div id="processedHTML" class="tab-content active">
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode('processedHTMLCode')" title="Copy to clipboard">📋</button>
+            <pre id="processedHTMLCode">// Generate code to see output</pre>
+          </div>
+        </div>
+
+        <div id="registry" class="tab-content">
           <div class="code-wrapper">
             <button class="copy-btn" onclick="copyCode('registryCode')" title="Copy to clipboard">📋</button>
             <pre id="registryCode">// Generate code to see output</pre>
@@ -415,44 +423,115 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      // Find all elements with data-* attributes
-      const elementsWithData = doc.querySelectorAll('[data-]');
-      const dataAttributes = new Set();
-      const itemSelector = null;
-      let itemIdentifier = null;
+      // Find widget container (first element)
+      const widgetContainer = doc.body.firstElementChild;
+      if (!widgetContainer) {
+        return { error: 'No widget container found' };
+      }
+
+      const widgetClass = widgetContainer.className;
       
-      // Look for repeating item pattern (e.g., data-plan-id, data-member-id)
-      const idPattern = /data-(\w+)-id/;
+      // Check for dynamic-object elements
+      const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
+      const hasDynamicObjects = dynamicObjects.length > 0;
       
-      elementsWithData.forEach(el => {
-        Array.from(el.attributes).forEach(attr => {
-          if (attr.name.startsWith('data-')) {
-            dataAttributes.add(attr.name);
-            
-            // Check if this is an ID attribute
-            const match = attr.name.match(idPattern);
-            if (match && !itemIdentifier) {
-              itemIdentifier = match[1]; // e.g., "plan", "member"
-            }
+      // Find all dynamic-* elements
+      const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
+      if (dynamicElements.length === 0) {
+        return { error: 'No dynamic-* classes found in HTML' };
+      }
+
+      // Collect field types
+      const fieldTypes = new Set();
+      dynamicElements.forEach(el => {
+        const classes = Array.from(el.classList);
+        classes.forEach(cls => {
+          if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
+            const type = cls.replace('dynamic-', '');
+            fieldTypes.add(type);
           }
         });
       });
 
       return {
-        attributes: Array.from(dataAttributes).sort(),
-        itemIdentifier: itemIdentifier,
-        itemSelector: itemIdentifier ? `[data-${itemIdentifier}-id]` : null
+        widgetClass: widgetClass,
+        hasDynamicObjects: hasDynamicObjects,
+        objectCount: hasDynamicObjects ? dynamicObjects.length : 1,
+        fieldTypes: Array.from(fieldTypes),
+        dynamicElements: dynamicElements.length
       };
     }
 
-    function toCamelCase(str) {
-      return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-    }
+    function processHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      const widgetContainer = doc.body.firstElementChild;
+      if (!widgetContainer) return null;
 
-    function toDisplayName(str) {
-      return str.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+      const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
+      const hasDynamicObjects = dynamicObjects.length > 0;
+
+      if (hasDynamicObjects) {
+        // Process each dynamic-object
+        dynamicObjects.forEach((obj, objIndex) => {
+          const fieldCounts = {};
+          
+          // Find all dynamic-* elements within this object
+          const dynamicElements = obj.querySelectorAll('[class*="dynamic-"]');
+          
+          dynamicElements.forEach(el => {
+            const classes = Array.from(el.classList);
+            classes.forEach(cls => {
+              if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
+                const type = cls.replace('dynamic-', '');
+                
+                // Increment counter for this type
+                fieldCounts[type] = (fieldCounts[type] || 0) + 1;
+                const fieldNum = fieldCounts[type];
+                
+                // Set data attribute on parent object
+                const attrName = `data-${type}-${fieldNum}`;
+                obj.setAttribute(attrName, 'placeholder');
+                
+                // Replace class on element
+                el.classList.remove(cls);
+                el.classList.add(`${type}-${fieldNum}`);
+              }
+            });
+          });
+          
+          // Add object ID and remove dynamic-object class
+          obj.setAttribute('data-object-id', (objIndex + 1).toString());
+          obj.classList.remove('dynamic-object');
+        });
+      } else {
+        // No dynamic-objects, treat widget container as the object
+        const fieldCounts = {};
+        const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
+        
+        dynamicElements.forEach(el => {
+          const classes = Array.from(el.classList);
+          classes.forEach(cls => {
+            if (cls.startsWith('dynamic-')) {
+              const type = cls.replace('dynamic-', '');
+              
+              fieldCounts[type] = (fieldCounts[type] || 0) + 1;
+              const fieldNum = fieldCounts[type];
+              
+              // Set data attribute on widget container
+              const attrName = `data-${type}-${fieldNum}`;
+              widgetContainer.setAttribute(attrName, 'placeholder');
+              
+              // Replace class on element
+              el.classList.remove(cls);
+              el.classList.add(`${type}-${fieldNum}`);
+            }
+          });
+        });
+      }
+
+      return doc.body.innerHTML;
     }
 
     function generateCode() {
@@ -475,43 +554,44 @@
       // Analyze HTML
       const analysis = analyzeHTML(htmlInput);
       
-      if (analysis.attributes.length === 0) {
-        showError('No data-* attributes found in HTML. Make sure your widget uses data attributes.');
+      if (analysis.error) {
+        showError(analysis.error);
         return;
       }
 
       // Show analysis
       showAnalysis(analysis);
 
-      // Generate code
-      const camelClass = toCamelCase(widgetClass);
-      const itemName = analysis.itemIdentifier || 'item';
-      const itemsName = itemName + 's';
-      
-      // Extract field names from data attributes
-      const fields = analysis.attributes
-        .filter(attr => !attr.endsWith('-id')) // Exclude ID field
-        .map(attr => {
-          const fieldName = attr.replace('data-', '').replace(`${itemName}-`, '');
-          return {
-            dataAttr: attr,
-            fieldName: fieldName,
-            camelCase: toCamelCase(fieldName),
-            displayName: toDisplayName(fieldName)
-          };
-        });
+      // Process HTML to generate output
+      const processedHTML = processHTML(htmlInput);
 
+      // Show processed HTML in first tab
+      document.getElementById('processedHTMLCode').textContent = processedHTML;
+
+      // Generate code for extension
+      const camelClass = toCamelCase(widgetClass);
+      
       // Generate registry code
       generateRegistryCode(widgetClass, widgetName, widgetDescription);
 
       // Generate content-script.js code
-      generateContentScriptCode(widgetClass, camelClass, itemName, itemsName, analysis.itemSelector, fields);
+      generateContentScriptCode(widgetClass, camelClass, analysis);
 
       // Generate sidepanel.js code
-      generateSidepanelCode(widgetClass, camelClass, itemName, itemsName, fields);
+      generateSidepanelCode(widgetClass, camelClass, analysis);
 
       // Generate instructions
       generateInstructions(widgetClass);
+    }
+
+    function toCamelCase(str) {
+      return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    }
+
+    function toDisplayName(str) {
+      return str.split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
     }
 
     function showError(message) {
@@ -526,15 +606,25 @@
           <div class="analysis-title">Detected Structure</div>
           <ul class="field-list">
             <li class="field-item">
-              <span class="field-name">Item Selector:</span>
-              <span class="field-type">${analysis.itemSelector || 'Not detected'}</span>
+              <span class="field-name">Widget Class:</span>
+              <span class="field-type">${analysis.widgetClass}</span>
             </li>
-            ${analysis.attributes.map(attr => `
-              <li class="field-item">
-                <span class="field-name">${attr}</span>
-                <span class="field-type">data attribute</span>
-              </li>
-            `).join('')}
+            <li class="field-item">
+              <span class="field-name">Has Multiple Objects:</span>
+              <span class="field-type">${analysis.hasDynamicObjects ? 'Yes' : 'No'}</span>
+            </li>
+            <li class="field-item">
+              <span class="field-name">Object Count:</span>
+              <span class="field-type">${analysis.objectCount}</span>
+            </li>
+            <li class="field-item">
+              <span class="field-name">Field Types:</span>
+              <span class="field-type">${analysis.fieldTypes.join(', ')}</span>
+            </li>
+            <li class="field-item">
+              <span class="field-name">Total Dynamic Elements:</span>
+              <span class="field-type">${analysis.dynamicElements}</span>
+            </li>
           </ul>
         </div>
       `;
@@ -557,97 +647,190 @@ const WIDGET_REGISTRY = {
       document.getElementById('registryCode').textContent = code;
     }
 
-    function generateContentScriptCode(widgetClass, camelClass, itemName, itemsName, itemSelector, fields) {
+    function generateContentScriptCode(widgetClass, camelClass, analysis) {
+      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+      const hasObjects = analysis.hasDynamicObjects;
+      
+      let extractCode = '';
+      let updateCode = '';
+
+      if (hasObjects) {
+        // Multiple objects version
+        extractCode = `function get${functionName}Data() {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return null;
+
+  const objectElements = widget.querySelectorAll('[data-object-id]');
+  const objects = [];
+
+  objectElements.forEach(el => {
+    const obj = {
+      id: el.dataset.objectId || ''
+    };
+    
+    // Extract all data-* attributes
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
+        const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
+        obj[fieldName] = attr.value;
+      }
+    });
+    
+    objects.push(obj);
+  });
+
+  return { objects };
+}`;
+
+        updateCode = `function update${functionName}Data(data) {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return false;
+
+  const objectElements = widget.querySelectorAll('[data-object-id]');
+
+  data.objects.forEach((obj, index) => {
+    if (!objectElements[index]) return;
+    const el = objectElements[index];
+
+    // Update all data attributes
+    Object.keys(obj).forEach(key => {
+      if (key !== 'id') {
+        const attrName = 'data-' + key.replace(/_/g, '-');
+        el.setAttribute(attrName, obj[key]);
+        
+        // Update visible element
+        const className = key.replace(/_/g, '-');
+        const visibleEl = el.querySelector('.' + className);
+        if (visibleEl) {
+          visibleEl.textContent = obj[key];
+        }
+      }
+    });
+  });
+
+  return true;
+}`;
+      } else {
+        // Single object version (no dynamic-object)
+        extractCode = `function get${functionName}Data() {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return null;
+
+  const data = {};
+  
+  // Extract all data-* attributes from widget container
+  Array.from(widget.attributes).forEach(attr => {
+    if (attr.name.startsWith('data-')) {
+      const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
+      data[fieldName] = attr.value;
+    }
+  });
+
+  return data;
+}`;
+
+        updateCode = `function update${functionName}Data(data) {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return false;
+
+  // Update all data attributes on widget container
+  Object.keys(data).forEach(key => {
+    const attrName = 'data-' + key.replace(/_/g, '-');
+    widget.setAttribute(attrName, data[key]);
+    
+    // Update visible element
+    const className = key.replace(/_/g, '-');
+    const visibleEl = widget.querySelector('.' + className);
+    if (visibleEl) {
+      visibleEl.textContent = data[key];
+    }
+  });
+
+  return true;
+}`;
+      }
+
       const code = `// =============================================================================
 // ${widgetClass.toUpperCase().replace(/-/g, ' ')}
 // =============================================================================
 
-function get${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data() {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return null;
+${extractCode}
 
-  const ${itemName}Elements = widget.querySelectorAll('${itemSelector || '[data-id]'}');
-  const ${itemsName} = [];
-
-  ${itemName}Elements.forEach(el => {
-    ${itemsName}.push({
-      id: el.dataset.${toCamelCase(itemName + '-id')} || '',
-${fields.map(f => `      ${f.camelCase}: el.dataset.${f.camelCase} || ''`).join(',\n')}
-    });
-  });
-
-  return { ${itemsName} };
-}
-
-function update${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data(data) {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return false;
-
-  const ${itemName}Elements = widget.querySelectorAll('${itemSelector || '[data-id]'}');
-
-  data.${itemsName}.forEach((${itemName}, index) => {
-    if (!${itemName}Elements[index]) return;
-    const el = ${itemName}Elements[index];
-
-    // Update data attributes
-${fields.map(f => `    el.dataset.${f.camelCase} = ${itemName}.${f.camelCase};`).join('\n')}
-
-    // Update visible text elements (customize these selectors based on your HTML)
-${fields.map(f => `    const ${f.camelCase}El = el.querySelector('.${itemName}-${f.fieldName}');
-    if (${f.camelCase}El) ${f.camelCase}El.textContent = ${itemName}.${f.camelCase};`).join('\n')}
-  });
-
-  return true;
-}
+${updateCode}
 
 // Add to getWidgetData() router:
 if (widgetClass === '${widgetClass}') {
-  return get${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data();
+  return get${functionName}Data();
 }
 
 // Add to updateWidgetData() router:
 if (widgetClass === '${widgetClass}') {
-  success = update${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data(data);
+  success = update${functionName}Data(data);
 }`;
 
       document.getElementById('contentScriptCode').textContent = code;
     }
 
-    function generateSidepanelCode(widgetClass, camelClass, itemName, itemsName, fields) {
+    function generateSidepanelCode(widgetClass, camelClass, analysis) {
       const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-      
-      const code = `// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
-// =============================================================================
+      const hasObjects = analysis.hasDynamicObjects;
 
-function render${functionName}Editor(data) {
-  const ${itemsName} = data.${itemsName};
+      // Map field types to input types
+      const inputTypeMap = {
+        'text': 'text',
+        'email': 'email',
+        'number': 'number',
+        'phone': 'tel',
+        'url': 'url',
+        'date': 'date',
+        'textarea': 'textarea',
+        'checkbox': 'checkbox'
+      };
+
+      let renderFunction = '';
+      
+      if (hasObjects) {
+        renderFunction = `function render${functionName}Editor(data) {
+  const objects = data.objects;
 
   return \`
     <div class="editor-title">${toDisplayName(widgetClass)}</div>
 
-    \${${itemsName}.map((${itemName}, index) => \`
+    \${objects.map((obj, index) => \`
       <div class="plan-section">
-        <div class="plan-section-title">${toDisplayName(itemName)} \${parseInt(index) + 1}</div>
+        <div class="plan-section-title">Item \${parseInt(index) + 1}</div>
 
-${fields.map(f => {
-  const inputType = f.fieldName.includes('email') ? 'email' : 
-                   f.fieldName.includes('phone') ? 'tel' :
-                   f.fieldName.includes('url') ? 'url' :
-                   f.fieldName.includes('bio') || f.fieldName.includes('description') ? 'textarea' : 'text';
-  
-  if (inputType === 'textarea') {
-    return `        <div class="form-group">
-          <label>${f.displayName}</label>
-          <textarea class="${itemName}-${f.fieldName}" data-${itemName}-index="\${index}" rows="4">\${${itemName}.${f.camelCase}}</textarea>
-        </div>`;
-  } else {
-    return `        <div class="form-group">
-          <label>${f.displayName}</label>
-          <input type="${inputType}" class="${itemName}-${f.fieldName}" data-${itemName}-index="\${index}" value="\${${itemName}.${f.camelCase}}">
-        </div>`;
-  }
-}).join('\n\n')}
+        \${Object.keys(obj).filter(k => k !== 'id').map(key => {
+          const fieldName = key.replace(/_/g, '-');
+          const displayName = toDisplayName(fieldName);
+          const fieldType = fieldName.split('-')[0];
+          const inputType = ${JSON.stringify(inputTypeMap)}[fieldType] || 'text';
+          
+          if (inputType === 'textarea') {
+            return \`
+              <div class="form-group">
+                <label>\${displayName}</label>
+                <textarea class="field-\${key}" data-object-index="\${index}" rows="4">\${obj[key]}</textarea>
+              </div>
+            \`;
+          } else if (inputType === 'checkbox') {
+            return \`
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" class="field-\${key}" data-object-index="\${index}" \${obj[key] === 'true' ? 'checked' : ''}>
+                  \${displayName}
+                </label>
+              </div>
+            \`;
+          } else {
+            return \`
+              <div class="form-group">
+                <label>\${displayName}</label>
+                <input type="\${inputType}" class="field-\${key}" data-object-index="\${index}" value="\${obj[key]}">
+              </div>
+            \`;
+          }
+        }).join('')}
       </div>
     \`).join('')}
 
@@ -656,50 +839,99 @@ ${fields.map(f => {
       <button class="btn-primary" id="saveBtn">Apply Changes</button>
     </div>
   \`;
-}
+}`;
+      } else {
+        renderFunction = `function render${functionName}Editor(data) {
+  return \`
+    <div class="editor-title">${toDisplayName(widgetClass)}</div>
+
+    <div class="plan-section">
+      \${Object.keys(data).map(key => {
+        const fieldName = key.replace(/_/g, '-');
+        const displayName = toDisplayName(fieldName);
+        const fieldType = fieldName.split('-')[0];
+        const inputType = ${JSON.stringify(inputTypeMap)}[fieldType] || 'text';
+        
+        if (inputType === 'textarea') {
+          return \`
+            <div class="form-group">
+              <label>\${displayName}</label>
+              <textarea class="field-\${key}" rows="4">\${data[key]}</textarea>
+            </div>
+          \`;
+        } else if (inputType === 'checkbox') {
+          return \`
+            <div class="form-group">
+              <label>
+                <input type="checkbox" class="field-\${key}" \${data[key] === 'true' ? 'checked' : ''}>
+                \${displayName}
+              </label>
+            </div>
+          \`;
+        } else {
+          return \`
+            <div class="form-group">
+              <label>\${displayName}</label>
+              <input type="\${inputType}" class="field-\${key}" value="\${data[key]}">
+            </div>
+          \`;
+        }
+      }).join('')}
+    </div>
+
+    <div class="button-group">
+      <button class="btn-secondary" id="clearBtn">Reset</button>
+      <button class="btn-primary" id="saveBtn">Apply Changes</button>
+    </div>
+  \`;
+}`;
+      }
+
+      const code = `// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
+// =============================================================================
+
+${renderFunction}
 
 function attach${functionName}EditorEvents(originalData) {
   document.getElementById('saveBtn').addEventListener('click', save${functionName}Data);
   document.getElementById('clearBtn').addEventListener('click', () => {
-    clear${functionName}Form(originalData);
+    renderEditor('${widgetClass}', originalData);
   });
-}
-
-function clear${functionName}Form(originalData) {
-  const ${itemsName} = originalData.${itemsName};
-  ${itemsName}.forEach((${itemName}, index) => {
-    const i = index.toString();
-    const field = (cls) => document.querySelector(\`.\${cls}[data-${itemName}-index="\${i}"]\`);
-
-${fields.map(f => `    field('${itemName}-${f.fieldName}').value = ${itemName}.${f.camelCase} || '';`).join('\n')}
-  });
-  document.getElementById('messageArea').innerHTML = '';
 }
 
 async function save${functionName}Data() {
-  const ${itemsName} = [];
-  const ${itemName}Count = document.querySelectorAll('.plan-section').length;
-
-  for (let i = 0; i < ${itemName}Count; i++) {
-    const field = (cls) => document.querySelector(\`.\${cls}[data-${itemName}-index="\${i}"]\`);
-
-    ${itemsName}.push({
-      id: (i + 1).toString(),
-${fields.map(f => `      ${f.camelCase}: field('${itemName}-${f.fieldName}').value`).join(',\n')}
+  // Collect form data
+  const formData = ${hasObjects ? '{ objects: [] }' : '{}'};
+  
+  ${hasObjects ? `
+  const objectCount = document.querySelectorAll('.plan-section').length;
+  for (let i = 0; i < objectCount; i++) {
+    const obj = { id: (i + 1).toString() };
+    document.querySelectorAll(\`[data-object-index="\${i}"]\`).forEach(input => {
+      const key = input.className.replace('field-', '');
+      obj[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
     });
+    formData.objects.push(obj);
   }
+  ` : `
+  document.querySelectorAll('[class^="field-"]').forEach(input => {
+    const key = input.className.replace('field-', '');
+    formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
+  });
+  `}
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.tabs.sendMessage(tab.id, {
     action: 'updateWidgetData',
     widgetClass: '${widgetClass}',
-    data: { ${itemsName}: ${itemsName} }
+    data: formData
   }, (response) => {
     if (response && response.success) {
-      showSuccess('Changes applied successfully! The page has been updated.');
+      showSuccess('Changes applied successfully!');
     } else {
-      showError('Failed to apply changes. Please try again.');
+      showError('Failed to apply changes.');
     }
   });
 }
@@ -718,48 +950,34 @@ if (widgetClass === '${widgetClass}') {
         <div style="padding: 1rem; line-height: 1.8;">
           <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Installation Instructions</h3>
           
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 1: Update content-script.js</h4>
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 1: Use Generated HTML</h4>
+          <p style="margin-left: 1.5rem; color: #666;">
+            Copy the HTML from the <strong>Registry</strong> tab and replace your original widget markup.
+            This version has all the <code>data-*</code> attributes added and <code>dynamic-*</code> classes replaced.
+          </p>
+
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 2: Update content-script.js</h4>
           <ol style="margin-left: 1.5rem;">
             <li>Open <code>content-script.js</code></li>
-            <li>Add the registry entry from the <strong>Registry</strong> tab to <code>WIDGET_REGISTRY</code></li>
-            <li>Copy the data extraction and update functions from the <strong>content-script.js</strong> tab</li>
-            <li>Add them after the existing widget functions (around line 180)</li>
-            <li>Add the router entries to <code>getWidgetData()</code> and <code>updateWidgetData()</code></li>
+            <li>Add the registry entry to <code>WIDGET_REGISTRY</code></li>
+            <li>Copy the functions from <strong>content-script.js</strong> tab</li>
+            <li>Add router entries to <code>getWidgetData()</code> and <code>updateWidgetData()</code></li>
           </ol>
 
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 2: Update sidepanel.js</h4>
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 3: Update sidepanel.js</h4>
           <ol style="margin-left: 1.5rem;">
             <li>Open <code>sidepanel.js</code></li>
-            <li>Copy all the functions from the <strong>sidepanel.js</strong> tab</li>
-            <li>Add them after the existing editor functions (around line 250)</li>
-            <li>Add the router entry to <code>renderEditor()</code></li>
+            <li>Copy all functions from <strong>sidepanel.js</strong> tab</li>
+            <li>Add router entry to <code>renderEditor()</code></li>
           </ol>
-
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 3: Customize Selectors</h4>
-          <p style="margin-left: 1.5rem; color: #666;">
-            Review the generated <code>querySelector</code> calls in the update function. 
-            The generator assumes class names like <code>.${widgetClass}-field-name</code>, 
-            but you may need to adjust these based on your actual HTML structure.
-          </p>
 
           <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 4: Test</h4>
           <ol style="margin-left: 1.5rem;">
-            <li>Reload the extension in <code>chrome://extensions/</code></li>
-            <li>Navigate to a page with your widget</li>
-            <li>Open the extension side panel</li>
-            <li>Verify detection and form rendering</li>
-            <li>Test editing and saving</li>
+            <li>Reload extension in <code>chrome://extensions/</code></li>
+            <li>Navigate to page with your widget</li>
+            <li>Open side panel and verify detection</li>
+            <li>Edit and save to test</li>
           </ol>
-
-          <div style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-            <strong>Note:</strong> This generator creates a starting point. You may need to adjust:
-            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-              <li>CSS selectors for visible text elements</li>
-              <li>Input types (text, email, tel, textarea, etc.)</li>
-              <li>Field validation or formatting</li>
-              <li>Form layout (single column vs. two-column rows)</li>
-            </ul>
-          </div>
         </div>
       `;
       

@@ -234,129 +234,111 @@
         <p class="subtitle">Requirements for Code Generator Compatibility</p>
         
         <nav class="tab-nav">
-                <a href="widget-extension.html" class="tab-nav-link">Extension Overview</a>
-                <a href="widget-markup-gen.html" class="tab-nav-link">Code Generator</a>
-                <a href="widget-specs.html" class="tab-nav-link active">Markup Specs</a>
-            </nav>
+            <a href="sitecore-widget-editor-overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="widget-code-generator.html" class="tab-nav-link">Code Generator</a>
+            <a href="widget-markup-specifications.html" class="tab-nav-link active">Markup Specs</a>
+        </nav>
     </header>
 
     <!-- Required Structure -->
     <section>
         <h2>Required HTML Structure</h2>
         
-        <p>Your widget HTML must follow this specific structure for the code generator to work correctly:</p>
+        <p>Your widget HTML stores all editable data in <code>data-*</code> attributes. Visible content can be generated from these attributes by your widget's JavaScript.</p>
 
         <div class="rule-box">
-            <strong>Rule 1: Outer Container with Unique Class</strong>
-            <p>The widget must have a single outer container element with a unique CSS class that identifies the widget type.</p>
+            <strong>Three Requirements</strong>
+            <ol style="margin-left: 1.5rem; margin-top: 8px;">
+                <li><strong>Outer container:</strong> Unique CSS class identifying the widget type (e.g., <code>team-member-bio</code>)</li>
+                <li><strong>Item identifiers:</strong> Each repeating item needs <code>data-{itemtype}-id</code> (e.g., <code>data-member-id="1"</code>)</li>
+                <li><strong>Data attributes:</strong> All editable fields as <code>data-*</code> attributes on the item element</li>
+            </ol>
         </div>
 
-        <pre><code>&lt;div class="your-widget-name"&gt;
-  &lt;!-- widget content --&gt;
-&lt;/div&gt;</code></pre>
-
-        <div class="rule-box">
-            <strong>Rule 2: Repeating Item Structure</strong>
-            <p>If your widget contains multiple items (plans, members, testimonials, etc.), each item must have a unique identifier attribute following the pattern <code>data-{itemtype}-id</code>.</p>
-        </div>
-
+        <h3>Minimal Structure (Data Only)</h3>
         <pre><code>&lt;div class="team-member-bio"&gt;
-  &lt;div data-member-id="1"&gt;...&lt;/div&gt;
-  &lt;div data-member-id="2"&gt;...&lt;/div&gt;
-  &lt;div data-member-id="3"&gt;...&lt;/div&gt;
+  &lt;div data-member-id="1"
+       data-name="John Smith"
+       data-title="Senior Developer"
+       data-email="john@company.com"&gt;
+    &lt;!-- Your widget's JavaScript renders this --&gt;
+  &lt;/div&gt;
 &lt;/div&gt;</code></pre>
 
-        <div class="rule-box">
-            <strong>Rule 3: Data Attributes for All Editable Fields</strong>
-            <p>Every piece of data you want to edit must be stored in a <code>data-*</code> attribute on the item element. The generator will detect these automatically.</p>
+        <h3>With Visible Content (Optional)</h3>
+        <p>If your widget already renders visible content, the extension will update both the <code>data-*</code> attributes AND the visible elements to keep them in sync:</p>
+        
+        <pre><code>&lt;div class="team-member-bio"&gt;
+  &lt;div data-member-id="1"
+       data-name="John Smith"
+       data-title="Senior Developer"
+       data-email="john@company.com"&gt;
+    &lt;!-- Extension updates these when you save --&gt;
+    &lt;h3 class="member-name"&gt;John Smith&lt;/h3&gt;
+    &lt;p class="member-title"&gt;Senior Developer&lt;/p&gt;
+    &lt;p class="member-email"&gt;john@company.com&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <div class="warning">
+            <strong>Important:</strong> The source of truth is the <code>data-*</code> attributes. Visible content is just for display and will be overwritten when the extension saves changes.
         </div>
-
-        <pre><code>&lt;div data-member-id="1"
-     data-name="John Smith"
-     data-title="Senior Developer"
-     data-email="john@company.com"
-     data-phone="555-1234"
-     data-bio="Biography text here"&gt;
-  &lt;!-- visible content --&gt;
-&lt;/div&gt;</code></pre>
     </section>
 
-    <!-- Naming Conventions -->
+    <!-- Naming -->
     <section>
         <h2>Naming Conventions</h2>
 
-        <h3>Widget Class Names</h3>
-        <ul>
-            <li>Use lowercase with hyphens (kebab-case)</li>
-            <li>Be descriptive and unique</li>
-            <li>Avoid generic names like "widget" or "component"</li>
-        </ul>
+        <p><strong>Widget class:</strong> lowercase-with-hyphens (e.g., <code>team-member-bio</code>, <code>pricing-calculator</code>)</p>
+        <p><strong>Item identifier:</strong> <code>data-{singular-itemtype}-id</code> (e.g., <code>data-member-id</code>, <code>data-plan-id</code>)</p>
+        <p><strong>Field attributes:</strong> <code>data-{field-name}</code> (e.g., <code>data-name</code>, <code>data-email</code>, <code>data-bio</code>)</p>
 
         <div class="example-grid">
             <div class="example-box good">
                 <h4>Good Examples</h4>
                 <pre><code>team-member-bio
-insurance-comparison-tool
+insurance-comparison
 testimonial-carousel
-pricing-calculator
-product-showcase</code></pre>
+pricing-calculator</code></pre>
             </div>
             <div class="example-box bad">
-                <h4>Bad Examples</h4>
+                <h4>Avoid</h4>
                 <pre><code>widget
 component
 box
-container
 content</code></pre>
             </div>
         </div>
 
-        <h3>Data Attribute Names</h3>
-        <ul>
-            <li>Use the pattern <code>data-{field-name}</code></li>
-            <li>Use lowercase with hyphens</li>
-            <li>Be descriptive and clear</li>
-            <li>For item identifiers, use <code>data-{itemtype}-id</code></li>
-        </ul>
-
+        <h3>Auto-Detected Input Types</h3>
+        <p>The generator creates appropriate form inputs based on field names:</p>
         <table>
             <thead>
                 <tr>
-                    <th>Attribute Name</th>
-                    <th>Purpose</th>
-                    <th>Generated Form Field</th>
+                    <th>Field Name Contains</th>
+                    <th>Input Type</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>data-member-id</td>
-                    <td>Unique identifier (required)</td>
-                    <td>Hidden (used for tracking)</td>
+                    <td>email</td>
+                    <td>Email input</td>
                 </tr>
                 <tr>
-                    <td>data-name</td>
-                    <td>Person's full name</td>
-                    <td>Text input: "Name"</td>
+                    <td>phone</td>
+                    <td>Tel input</td>
                 </tr>
                 <tr>
-                    <td>data-email</td>
-                    <td>Email address</td>
-                    <td>Email input: "Email"</td>
+                    <td>url, link</td>
+                    <td>URL input</td>
                 </tr>
                 <tr>
-                    <td>data-phone</td>
-                    <td>Phone number</td>
-                    <td>Tel input: "Phone"</td>
+                    <td>bio, description</td>
+                    <td>Textarea</td>
                 </tr>
                 <tr>
-                    <td>data-bio</td>
-                    <td>Biography text</td>
-                    <td>Textarea: "Bio"</td>
-                </tr>
-                <tr>
-                    <td>data-profile-url</td>
-                    <td>URL to profile</td>
-                    <td>URL input: "Profile URL"</td>
+                    <td>anything else</td>
+                    <td>Text input</td>
                 </tr>
             </tbody>
         </table>
@@ -364,211 +346,87 @@ content</code></pre>
 
     <!-- Complete Example -->
     <section>
-        <h2>Complete Working Example</h2>
+        <h2>Complete Example</h2>
 
-        <p>Here's a complete example that follows all the rules:</p>
-
-        <pre><code>&lt;!-- Widget: Team Member Bio --&gt;
-&lt;div class="team-member-bio"&gt;
+        <pre><code>&lt;div class="team-member-bio"&gt;
   
-  &lt;!-- Member 1 --&gt;
-  &lt;div class="member-card" 
-       data-member-id="1"
+  &lt;div data-member-id="1"
        data-name="Sarah Johnson"
        data-title="VP of Engineering"
-       data-department="Engineering"
-       data-email="sarah.johnson@company.com"
+       data-email="sarah@company.com"
        data-phone="555-0001"
-       data-location="San Francisco, CA"
-       data-bio="Sarah has over 15 years of experience in software development."
-       data-linkedin-url="https://linkedin.com/in/sarahjohnson"&gt;
-    
-    &lt;img class="member-photo" src="/images/sarah.jpg" alt="Sarah Johnson"&gt;
+       data-bio="Sarah has over 15 years of experience."&gt;
+    &lt;!-- Optional: visible content your widget renders --&gt;
     &lt;h3 class="member-name"&gt;Sarah Johnson&lt;/h3&gt;
     &lt;p class="member-title"&gt;VP of Engineering&lt;/p&gt;
-    &lt;p class="member-department"&gt;Engineering&lt;/p&gt;
-    &lt;p class="member-email"&gt;sarah.johnson@company.com&lt;/p&gt;
-    &lt;p class="member-phone"&gt;555-0001&lt;/p&gt;
-    &lt;p class="member-location"&gt;San Francisco, CA&lt;/p&gt;
-    &lt;p class="member-bio"&gt;Sarah has over 15 years of experience in software development.&lt;/p&gt;
-    &lt;a class="member-linkedin" href="https://linkedin.com/in/sarahjohnson"&gt;LinkedIn&lt;/a&gt;
+    &lt;p class="member-email"&gt;sarah@company.com&lt;/p&gt;
   &lt;/div&gt;
 
-  &lt;!-- Member 2 --&gt;
-  &lt;div class="member-card" 
-       data-member-id="2"
+  &lt;div data-member-id="2"
        data-name="Michael Chen"
        data-title="Lead Designer"
-       data-department="Design"
-       data-email="michael.chen@company.com"
+       data-email="michael@company.com"
        data-phone="555-0002"
-       data-location="New York, NY"
-       data-bio="Michael specializes in user experience and interface design."
-       data-linkedin-url="https://linkedin.com/in/michaelchen"&gt;
-    
-    &lt;img class="member-photo" src="/images/michael.jpg" alt="Michael Chen"&gt;
+       data-bio="Michael specializes in UX design."&gt;
     &lt;h3 class="member-name"&gt;Michael Chen&lt;/h3&gt;
     &lt;p class="member-title"&gt;Lead Designer&lt;/p&gt;
-    &lt;p class="member-department"&gt;Design&lt;/p&gt;
-    &lt;p class="member-email"&gt;michael.chen@company.com&lt;/p&gt;
-    &lt;p class="member-phone"&gt;555-0002&lt;/p&gt;
-    &lt;p class="member-location"&gt;New York, NY&lt;/p&gt;
-    &lt;p class="member-bio"&gt;Michael specializes in user experience and interface design.&lt;/p&gt;
-    &lt;a class="member-linkedin" href="https://linkedin.com/in/michaelchen"&gt;LinkedIn&lt;/a&gt;
+    &lt;p class="member-email"&gt;michael@company.com&lt;/p&gt;
   &lt;/div&gt;
 
 &lt;/div&gt;</code></pre>
 
-        <p><strong>What the generator will detect:</strong></p>
+        <p><strong>Generator detects:</strong></p>
         <ul>
             <li>Widget class: <code>team-member-bio</code></li>
-            <li>Item selector: <code>[data-member-id]</code></li>
-            <li>Item type: <code>member</code></li>
-            <li>Editable fields: name, title, department, email, phone, location, bio, linkedin-url</li>
+            <li>Item type: <code>member</code> (from <code>data-member-id</code>)</li>
+            <li>Fields: name (text), title (text), email (email input), phone (tel input), bio (textarea)</li>
         </ul>
     </section>
 
-    <!-- Visible Content Structure -->
+    <!-- Visible Content -->
     <section>
-        <h2>Visible Content Structure</h2>
+        <h2>Updating Visible Content</h2>
 
-        <div class="rule-box">
-            <strong>Rule 4: CSS Classes Match Data Attributes</strong>
-            <p>For the generated code to work with minimal customization, your visible content elements should use CSS classes that match the data attribute names.</p>
-        </div>
+        <p>The generated code will update visible elements IF they follow the naming pattern <code>.{itemtype}-{field-name}</code>:</p>
 
-        <p><strong>Pattern:</strong> If you have <code>data-{field-name}</code>, use class <code>.{itemtype}-{field-name}</code></p>
+        <pre><code>data-name → .member-name
+data-email → .member-email
+data-title → .member-title</code></pre>
+
+        <p>If your CSS classes don't match this pattern, you'll need to manually update the <code>querySelector</code> selectors in the generated update function.</p>
 
         <div class="example-grid">
             <div class="example-box good">
-                <h4>Matching Pattern (Recommended)</h4>
-                <pre><code>&lt;div data-member-id="1"
-     data-name="John Smith"
-     data-email="john@company.com"&gt;
+                <h4>Auto-works</h4>
+                <pre><code>&lt;div data-name="John"&gt;
   &lt;h3 class="member-name"&gt;
-    John Smith
+    John
   &lt;/h3&gt;
-  &lt;p class="member-email"&gt;
-    john@company.com
-  &lt;/p&gt;
 &lt;/div&gt;</code></pre>
             </div>
             <div class="example-box bad">
-                <h4>Non-Matching (Requires Manual Updates)</h4>
-                <pre><code>&lt;div data-member-id="1"
-     data-name="John Smith"
-     data-email="john@company.com"&gt;
+                <h4>Needs Manual Update</h4>
+                <pre><code>&lt;div data-name="John"&gt;
   &lt;h3 class="person-fullname"&gt;
-    John Smith
+    John
   &lt;/h3&gt;
-  &lt;p class="contact-email-address"&gt;
-    john@company.com
-  &lt;/p&gt;
 &lt;/div&gt;</code></pre>
             </div>
         </div>
-
-        <div class="warning">
-            <strong>Note:</strong> If your CSS classes don't match the pattern, the generator will still create the code, but you'll need to manually update the <code>querySelector</code> selectors in the update function.
-        </div>
-    </section>
-
-    <!-- Common Patterns -->
-    <section>
-        <h2>Common Widget Patterns</h2>
-
-        <h3>Pattern 1: Simple List Widget</h3>
-        <pre><code>&lt;div class="testimonial-list"&gt;
-  &lt;div data-testimonial-id="1"
-       data-author="Jane Doe"
-       data-company="Acme Corp"
-       data-quote="This product is amazing!"
-       data-rating="5"&gt;
-    &lt;blockquote class="testimonial-quote"&gt;This product is amazing!&lt;/blockquote&gt;
-    &lt;p class="testimonial-author"&gt;Jane Doe&lt;/p&gt;
-    &lt;p class="testimonial-company"&gt;Acme Corp&lt;/p&gt;
-    &lt;div class="testimonial-rating"&gt;★★★★★&lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-        <h3>Pattern 2: Comparison Widget</h3>
-        <pre><code>&lt;div class="pricing-comparison"&gt;
-  &lt;div data-plan-id="1"
-       data-name="Basic"
-       data-price="29"
-       data-features="5 users, 10GB storage"&gt;
-    &lt;h3 class="plan-name"&gt;Basic&lt;/h3&gt;
-    &lt;p class="plan-price"&gt;$29&lt;/p&gt;
-    &lt;p class="plan-features"&gt;5 users, 10GB storage&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-        <h3>Pattern 3: Complex Nested Widget</h3>
-        <pre><code>&lt;div class="product-showcase"&gt;
-  &lt;div data-product-id="1"
-       data-name="Premium Widget"
-       data-sku="PRD-001"
-       data-price="199.99"
-       data-description="High-quality premium widget"
-       data-category="Electronics"
-       data-stock-status="In Stock"
-       data-rating="4.5"&gt;
-    &lt;div class="product-header"&gt;
-      &lt;h3 class="product-name"&gt;Premium Widget&lt;/h3&gt;
-      &lt;span class="product-sku"&gt;PRD-001&lt;/span&gt;
-    &lt;/div&gt;
-    &lt;div class="product-details"&gt;
-      &lt;p class="product-price"&gt;$199.99&lt;/p&gt;
-      &lt;p class="product-description"&gt;High-quality premium widget&lt;/p&gt;
-      &lt;span class="product-category"&gt;Electronics&lt;/span&gt;
-      &lt;span class="product-stock-status"&gt;In Stock&lt;/span&gt;
-      &lt;div class="product-rating"&gt;4.5 stars&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
     </section>
 
     <!-- Checklist -->
     <section>
-        <h2>Pre-Generation Checklist</h2>
-
-        <p>Before using the code generator, verify your HTML meets these requirements:</p>
+        <h2>Pre-Generator Checklist</h2>
 
         <ol>
-            <li><strong>✓ Unique outer container class</strong> — One clear class name for the widget</li>
-            <li><strong>✓ Item identifier pattern</strong> — <code>data-{itemtype}-id</code> on each repeating item</li>
-            <li><strong>✓ All data in attributes</strong> — Every editable field has a <code>data-*</code> attribute</li>
-            <li><strong>✓ Consistent naming</strong> — Lowercase, hyphenated attribute names</li>
-            <li><strong>✓ Matching CSS classes</strong> — <code>.{itemtype}-{field-name}</code> pattern for visible elements</li>
-            <li><strong>✓ Complete sample</strong> — Include at least 2 items showing all possible fields</li>
-            <li><strong>✓ Valid HTML</strong> — Properly nested and closed tags</li>
+            <li>✓ Widget has unique class name</li>
+            <li>✓ Items have <code>data-{itemtype}-id</code></li>
+            <li>✓ All editable fields are <code>data-*</code> attributes</li>
+            <li>✓ Naming uses lowercase-with-hyphens</li>
+            <li>✓ Sample HTML includes 2+ items with all fields</li>
+            <li>✓ (Optional) Visible content classes follow <code>.{itemtype}-{field}</code> pattern</li>
         </ol>
-    </section>
-
-    <!-- Troubleshooting -->
-    <section>
-        <h2>Troubleshooting</h2>
-
-        <h3>Generator says "No data-* attributes found"</h3>
-        <ul>
-            <li>Make sure you're using <code>data-</code> prefix (not just custom attributes)</li>
-            <li>Check that attributes are on the actual elements, not in comments</li>
-            <li>Verify the HTML is valid and can be parsed</li>
-        </ul>
-
-        <h3>Generator can't detect item type</h3>
-        <ul>
-            <li>Add a <code>data-{itemtype}-id</code> attribute to identify repeating items</li>
-            <li>Example: <code>data-member-id</code>, <code>data-plan-id</code>, <code>data-product-id</code></li>
-            <li>Use singular form (member, not members)</li>
-        </ul>
-
-        <h3>Generated selectors don't match my HTML</h3>
-        <ul>
-            <li>Follow the <code>.{itemtype}-{field-name}</code> class naming pattern</li>
-            <li>OR manually update the selectors in the generated code</li>
-            <li>Look for lines like <code>el.querySelector('.member-name')</code> and adjust</li>
-        </ul>
     </section>
 
 </div>
