@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitecore Widget Editor - Overview</title>
+   <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        header {
+            margin-bottom: 100px;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            color: #000;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 120px;
+        }
+
+        .project {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .project:nth-child(even) {
+            direction: rtl;
+        }
+
+        .project:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .project-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .project-number {
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .project h2 {
+            font-size: 36px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            color: #000;
+        }
+
+        .project-description {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .project-description p + p {
+            margin-top: 16px;
+        }
+
+        .project-description code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            background: #fff4e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #ffd9a6;
+            color: #1a1a1a;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .project-image {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .project-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 500;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border-radius: 8px;
+        }
+
+        .project-image {
+            cursor: pointer;
+        }
+
+        .project-image:hover {
+            opacity: 0.95;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            animation: zoomIn 0.2s ease;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #ccc;
+            background: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); }
+            to { transform: scale(1); }
+        }
+
+        .cta-link {
+            display: inline-block;
+            padding: 14px 28px;
+            background: #1a1a1a;
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            align-self: flex-start;
+            margin-top: 25px;
+        }
+
+        .cta-link:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            margin-top: 140px;
+            padding-top: 40px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .feature-grid {
+            margin-top: 40px;
+            padding: 0;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .feature-grid h3 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: #000;
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            margin: 0;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .feature-item {
+            padding: 16px 20px;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .feature-item:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+        .feature-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+        }
+
+        .feature-item p {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #666;
+            margin: 0;
+        }
+
+        .tech-stack {
+            margin-top: 40px;
+            padding: 0;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .tech-stack h3 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: #000;
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            margin: 0;
+        }
+
+        .tech-list {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tech-tag {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            color: #444;
+        }
+
+        .architecture-section {
+            grid-column: 1 / -1;
+            margin-top: 40px;
+        }
+
+        .architecture-diagram {
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .architecture-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .architecture-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .architecture-box {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .architecture-box h4 {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .architecture-box p {
+            font-size: 13px;
+            color: #888;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .architecture-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #ccc;
+            margin: 20px 0;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            header {
+                page-break-after: always;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin-bottom: 0;
+                padding: 0 80px;
+                text-align: center;
+            }
+
+            header h1 {
+                font-size: 32px;
+            }
+
+            .project {
+                page-break-after: always;
+                page-break-inside: avoid;
+                min-height: 100vh;
+                padding: 60px 80px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                row-gap: 30px;
+                column-gap: 80px;
+                align-items: center;
+                margin: 0;
+                border-bottom: none;
+            }
+
+            .project:last-child {
+                page-break-after: avoid;
+            }
+
+            article {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .project-list {
+                gap: 0;
+            }
+
+            .project:nth-child(even) {
+                direction: ltr;
+            }
+
+            .project-content {
+                gap: 20px;
+            }
+
+            .project h2 {
+                font-size: 32px;
+            }
+
+            .project-description {
+                font-size: 15px;
+            }
+
+            .cta-link {
+                display: none;
+            }
+
+            footer {
+                display: none;
+            }
+
+            .project-image {
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .feature-grid, .tech-stack {
+                margin-top: 20px;
+            }
+
+            .feature-grid h3, .tech-stack h3 {
+                font-size: 18px;
+                padding: 12px 16px;
+            }
+
+            .feature-item {
+                padding: 10px 16px;
+            }
+
+            .feature-item h4 {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+
+            .feature-item p {
+                font-size: 11px;
+            }
+
+            .tech-list {
+                padding: 12px 16px;
+            }
+
+            .tech-tag {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            .architecture-section {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sitecore Widget Editor</h1>
+            <p class="subtitle">Chrome Extension for Visual Widget Configuration</p>
+        </header>
+
+        <div class="project-list">
+            <!-- Overview Section -->
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">OVERVIEW</div>
+                    <h2>Visual Interface for Complex Widget Data</h2>
+                    <div class="project-description">
+                        <p>Editing data-driven widgets in Sitecore traditionally requires manual manipulation of HTML attributes and inline data structures. Content editors must dig through source code to modify insurance plan details, testimonial content, or comparison tables.</p>
+                        <p>This Chrome extension bridges that gap by detecting widgets on the page, extracting their data from <code>data-*</code> attributes, and presenting a clean form interface in a persistent sidebar. Changes sync instantly back to the DOM and properly notify Sitecore's Experience Editor, enabling the save button.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder"><img src="admin01.png"></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Key Features Section -->
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">CAPABILITIES</div>
+                    <h2>Intelligent Widget Management</h2>
+                    <div class="project-description">
+                        <p>The extension employs a registry-based architecture where each widget type is defined once and automatically detected across all Sitecore pages. A mutation observer watches for dynamically loaded content, ensuring widgets added after page load are still recognized.</p>
+                        <p>When multiple widgets exist on a page, a dropdown selector appears. For pages with a single widget, the editor loads immediately. All changes are validated and synchronized in real-time with visual feedback for success or error states.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder"><img src="admin02.png"></div>
+                    </div>
+                </div>
+                
+                <div class="feature-grid" style="grid-column: 1 / -1;">
+                    <h3>Core Features</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <h4>Automatic Detection</h4>
+                            <p>Scans page DOM for registered widget classes with mutation observer support for dynamic content</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Data Extraction</h4>
+                            <p>Reads widget configuration from data attributes and converts to editable form fields</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Visual Editing</h4>
+                            <p>Persistent sidebar with dynamically generated forms based on widget type and schema</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>DOM Synchronization</h4>
+                            <p>Updates both data attributes and visible content to maintain consistency across the widget</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Sitecore Integration</h4>
+                            <p>Multi-strategy change notification that triggers TinyMCE content sync and enables save button</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Extensible Registry</h4>
+                            <p>Simple widget registration system allows new widget types to be added in minutes</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Technical Architecture Section -->
+            <article class="project">
+                <div class="project-content" style="grid-column: 1 / -1;">
+                    <div class="project-number">ARCHITECTURE</div>
+                    <h2>Multi-Layer Change Notification</h2>
+                    <div class="project-description">
+                        <p>The critical challenge: Sitecore's TinyMCE editor maintains an internal content model separate from the page DOM. Direct DOM modifications are invisible to the editor, preventing saves.</p>
+                        <p>The <code>SitecoreBridge</code> module solves this through a four-strategy approach: finding the TinyMCE instance that owns the modified element and forcing it to re-read the DOM; notifying Sitecore's field-level change tracking APIs; dispatching events on Sitecore's chrome wrapper elements; and falling back to standard DOM input/change events.</p>
+                    </div>
+                </div>
+
+                <div class="architecture-section">
+                    <div class="architecture-diagram">
+                        <div class="architecture-row">
+                            <div class="architecture-box">
+                                <h4>Background Script</h4>
+                                <p>Service worker managing side panel lifecycle and extension icon clicks</p>
+                            </div>
+                            <div class="architecture-box">
+                                <h4>Content Script</h4>
+                                <p>Widget detection, data extraction, DOM updates, Sitecore notification</p>
+                            </div>
+                            <div class="architecture-box">
+                                <h4>Side Panel UI</h4>
+                                <p>Dynamic form rendering, user input handling, save coordination</p>
+                            </div>
+                        </div>
+                        
+                        <div class="architecture-arrow">↓</div>
+                        
+                        <div class="architecture-row">
+                            <div class="architecture-box">
+                                <h4>Sitecore Bridge</h4>
+                                <p>Multi-strategy change notification: TinyMCE sync, field tracking, chrome events</p>
+                            </div>
+                            <div class="architecture-box">
+                                <h4>TinyMCE Editor</h4>
+                                <p>Content model synchronization, dirty state management, undo history</p>
+                            </div>
+                            <div class="architecture-box">
+                                <h4>Experience Editor</h4>
+                                <p>Save button enablement, field change tracking, page state management</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modalImage" alt="Enlarged view">
+    </div>
+
+    <script>
+        // Make all project images clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectImages = document.querySelectorAll('.project-image');
+            
+            projectImages.forEach(img => {
+                img.addEventListener('click', function() {
+                    const imgElement = this.querySelector('img');
+                    if (imgElement && imgElement.src) {
+                        openModal(imgElement.src, imgElement.alt);
+                    }
+                });
+            });
+        });
+
+        function openModal(src, alt) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = src;
+            modalImg.alt = alt;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on background click
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+
+</body>
+</html>

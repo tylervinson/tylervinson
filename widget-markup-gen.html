@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitecore Widget Editor - Code Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #e0e0e0;
+      margin-top: 24px;
+    }
+
+    .tab-nav-link {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #999;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s;
+    }
+
+    .tab-nav-link:hover {
+      color: #666;
+    }
+
+    .tab-nav-link.active {
+      color: #1a1a1a;
+      border-bottom-color: #1a1a1a;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .input-section, .output-section {
+      background: #fff;
+      padding: 30px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+
+    textarea {
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+      min-height: 200px;
+    }
+
+    .info-box {
+      background: #f5f5f5;
+      border-left: 2px solid #1a1a1a;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    button {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .output-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #999;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tab.active {
+      color: #1a1a1a;
+      border-bottom-color: #1a1a1a;
+    }
+
+    .tab:hover {
+      color: #666;
+      background: none;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .code-wrapper {
+      position: relative;
+    }
+
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 20px;
+      padding-top: 50px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #000;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #333;
+      color: #fff;
+      padding: 8px;
+      font-size: 20px;
+      border: 1px solid #444;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+    }
+
+    .analysis-section {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      margin: 20px 0;
+    }
+
+    .analysis-title {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .field-list {
+      list-style: none;
+    }
+
+    .field-item {
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .field-name {
+      font-family: 'Courier New', monospace;
+      color: #1a1a1a;
+    }
+
+    .field-type {
+      color: #999;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .error-message {
+      background: #fff;
+      border-left: 2px solid #d00;
+      padding: 12px;
+      margin: 20px 0;
+      font-size: 13px;
+      color: #d00;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Widget Code Generator</h1>
+      <p class="subtitle">Automatically generate extension code from your widget HTML</p>
+      
+      <nav class="tab-nav">
+                <a href="widget-extension.html" class="tab-nav-link">Extension Overview</a>
+                <a href="widget-markup-gen.html" class="tab-nav-link active">Code Generator</a>
+                <a href="widget-specs.html" class="tab-nav-link">Markup Specs</a>
+            </nav>
+    </header>
+
+    <div class="main-grid">
+      <!-- Input Section -->
+      <div class="input-section">
+        <div class="section-title">
+          <span class="section-number">1</span>
+          Input
+        </div>
+
+        <div class="form-group">
+          <label>Widget Class Name</label>
+          <input type="text" id="widgetClass" placeholder="team-member-bio">
+          <div class="info-box">
+            The CSS class on the widget's outer container (e.g., "team-member-bio")
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Widget Display Name</label>
+          <input type="text" id="widgetName" placeholder="Team Member Bio">
+        </div>
+
+        <div class="form-group">
+          <label>Widget Description</label>
+          <input type="text" id="widgetDescription" placeholder="Edit team member information and biography">
+        </div>
+
+        <div class="form-group">
+          <label>Widget HTML Sample</label>
+          <textarea id="htmlInput" placeholder="Paste your widget HTML here..."></textarea>
+          <div class="info-box">
+            Paste a complete HTML snippet showing all data-* attributes you want to edit
+          </div>
+        </div>
+
+        <button onclick="generateCode()">Generate Code</button>
+
+        <div id="analysisOutput"></div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="output-section">
+        <div class="section-title">
+          <span class="section-number">2</span>
+          Generated Code
+        </div>
+
+        <div class="output-tabs">
+          <button class="tab active" onclick="switchTab('registry')">Registry</button>
+          <button class="tab" onclick="switchTab('contentScript')">content-script.js</button>
+          <button class="tab" onclick="switchTab('sidepanel')">sidepanel.js</button>
+          <button class="tab" onclick="switchTab('instructions')">Instructions</button>
+        </div>
+
+        <div id="registry" class="tab-content active">
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode('registryCode')" title="Copy to clipboard">📋</button>
+            <pre id="registryCode">// Generate code to see output</pre>
+          </div>
+        </div>
+
+        <div id="contentScript" class="tab-content">
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode('contentScriptCode')" title="Copy to clipboard">📋</button>
+            <pre id="contentScriptCode">// Generate code to see output</pre>
+          </div>
+        </div>
+
+        <div id="sidepanel" class="tab-content">
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode('sidepanelCode')" title="Copy to clipboard">📋</button>
+            <pre id="sidepanelCode">// Generate code to see output</pre>
+          </div>
+        </div>
+
+        <div id="instructions" class="tab-content">
+          <div id="instructionsContent">Generate code to see instructions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function copyCode(elementId) {
+      const code = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✓';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    function analyzeHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Find all elements with data-* attributes
+      const elementsWithData = doc.querySelectorAll('[data-]');
+      const dataAttributes = new Set();
+      const itemSelector = null;
+      let itemIdentifier = null;
+      
+      // Look for repeating item pattern (e.g., data-plan-id, data-member-id)
+      const idPattern = /data-(\w+)-id/;
+      
+      elementsWithData.forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith('data-')) {
+            dataAttributes.add(attr.name);
+            
+            // Check if this is an ID attribute
+            const match = attr.name.match(idPattern);
+            if (match && !itemIdentifier) {
+              itemIdentifier = match[1]; // e.g., "plan", "member"
+            }
+          }
+        });
+      });
+
+      return {
+        attributes: Array.from(dataAttributes).sort(),
+        itemIdentifier: itemIdentifier,
+        itemSelector: itemIdentifier ? `[data-${itemIdentifier}-id]` : null
+      };
+    }
+
+    function toCamelCase(str) {
+      return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    }
+
+    function toDisplayName(str) {
+      return str.split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+
+    function generateCode() {
+      const widgetClass = document.getElementById('widgetClass').value.trim();
+      const widgetName = document.getElementById('widgetName').value.trim();
+      const widgetDescription = document.getElementById('widgetDescription').value.trim();
+      const htmlInput = document.getElementById('htmlInput').value.trim();
+
+      // Validation
+      if (!widgetClass) {
+        showError('Please enter a widget class name');
+        return;
+      }
+
+      if (!htmlInput) {
+        showError('Please paste widget HTML');
+        return;
+      }
+
+      // Analyze HTML
+      const analysis = analyzeHTML(htmlInput);
+      
+      if (analysis.attributes.length === 0) {
+        showError('No data-* attributes found in HTML. Make sure your widget uses data attributes.');
+        return;
+      }
+
+      // Show analysis
+      showAnalysis(analysis);
+
+      // Generate code
+      const camelClass = toCamelCase(widgetClass);
+      const itemName = analysis.itemIdentifier || 'item';
+      const itemsName = itemName + 's';
+      
+      // Extract field names from data attributes
+      const fields = analysis.attributes
+        .filter(attr => !attr.endsWith('-id')) // Exclude ID field
+        .map(attr => {
+          const fieldName = attr.replace('data-', '').replace(`${itemName}-`, '');
+          return {
+            dataAttr: attr,
+            fieldName: fieldName,
+            camelCase: toCamelCase(fieldName),
+            displayName: toDisplayName(fieldName)
+          };
+        });
+
+      // Generate registry code
+      generateRegistryCode(widgetClass, widgetName, widgetDescription);
+
+      // Generate content-script.js code
+      generateContentScriptCode(widgetClass, camelClass, itemName, itemsName, analysis.itemSelector, fields);
+
+      // Generate sidepanel.js code
+      generateSidepanelCode(widgetClass, camelClass, itemName, itemsName, fields);
+
+      // Generate instructions
+      generateInstructions(widgetClass);
+    }
+
+    function showError(message) {
+      document.getElementById('analysisOutput').innerHTML = `
+        <div class="error-message">${message}</div>
+      `;
+    }
+
+    function showAnalysis(analysis) {
+      const html = `
+        <div class="analysis-section">
+          <div class="analysis-title">Detected Structure</div>
+          <ul class="field-list">
+            <li class="field-item">
+              <span class="field-name">Item Selector:</span>
+              <span class="field-type">${analysis.itemSelector || 'Not detected'}</span>
+            </li>
+            ${analysis.attributes.map(attr => `
+              <li class="field-item">
+                <span class="field-name">${attr}</span>
+                <span class="field-type">data attribute</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+      document.getElementById('analysisOutput').innerHTML = html;
+    }
+
+    function generateRegistryCode(widgetClass, widgetName, widgetDescription) {
+      const code = `// Add this to WIDGET_REGISTRY in content-script.js
+const WIDGET_REGISTRY = {
+  'insurance-comparison-tool': {
+    name: 'Insurance Plan Comparison',
+    description: 'Edit insurance plan details and comparison data'
+  },
+  '${widgetClass}': {
+    name: '${widgetName || toDisplayName(widgetClass)}',
+    description: '${widgetDescription || 'Edit ' + widgetClass.replace(/-/g, ' ') + ' data'}'
+  }
+};`;
+      
+      document.getElementById('registryCode').textContent = code;
+    }
+
+    function generateContentScriptCode(widgetClass, camelClass, itemName, itemsName, itemSelector, fields) {
+      const code = `// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')}
+// =============================================================================
+
+function get${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data() {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return null;
+
+  const ${itemName}Elements = widget.querySelectorAll('${itemSelector || '[data-id]'}');
+  const ${itemsName} = [];
+
+  ${itemName}Elements.forEach(el => {
+    ${itemsName}.push({
+      id: el.dataset.${toCamelCase(itemName + '-id')} || '',
+${fields.map(f => `      ${f.camelCase}: el.dataset.${f.camelCase} || ''`).join(',\n')}
+    });
+  });
+
+  return { ${itemsName} };
+}
+
+function update${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data(data) {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return false;
+
+  const ${itemName}Elements = widget.querySelectorAll('${itemSelector || '[data-id]'}');
+
+  data.${itemsName}.forEach((${itemName}, index) => {
+    if (!${itemName}Elements[index]) return;
+    const el = ${itemName}Elements[index];
+
+    // Update data attributes
+${fields.map(f => `    el.dataset.${f.camelCase} = ${itemName}.${f.camelCase};`).join('\n')}
+
+    // Update visible text elements (customize these selectors based on your HTML)
+${fields.map(f => `    const ${f.camelCase}El = el.querySelector('.${itemName}-${f.fieldName}');
+    if (${f.camelCase}El) ${f.camelCase}El.textContent = ${itemName}.${f.camelCase};`).join('\n')}
+  });
+
+  return true;
+}
+
+// Add to getWidgetData() router:
+if (widgetClass === '${widgetClass}') {
+  return get${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data();
+}
+
+// Add to updateWidgetData() router:
+if (widgetClass === '${widgetClass}') {
+  success = update${camelClass.charAt(0).toUpperCase() + camelClass.slice(1)}Data(data);
+}`;
+
+      document.getElementById('contentScriptCode').textContent = code;
+    }
+
+    function generateSidepanelCode(widgetClass, camelClass, itemName, itemsName, fields) {
+      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+      
+      const code = `// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
+// =============================================================================
+
+function render${functionName}Editor(data) {
+  const ${itemsName} = data.${itemsName};
+
+  return \`
+    <div class="editor-title">${toDisplayName(widgetClass)}</div>
+
+    \${${itemsName}.map((${itemName}, index) => \`
+      <div class="plan-section">
+        <div class="plan-section-title">${toDisplayName(itemName)} \${parseInt(index) + 1}</div>
+
+${fields.map(f => {
+  const inputType = f.fieldName.includes('email') ? 'email' : 
+                   f.fieldName.includes('phone') ? 'tel' :
+                   f.fieldName.includes('url') ? 'url' :
+                   f.fieldName.includes('bio') || f.fieldName.includes('description') ? 'textarea' : 'text';
+  
+  if (inputType === 'textarea') {
+    return `        <div class="form-group">
+          <label>${f.displayName}</label>
+          <textarea class="${itemName}-${f.fieldName}" data-${itemName}-index="\${index}" rows="4">\${${itemName}.${f.camelCase}}</textarea>
+        </div>`;
+  } else {
+    return `        <div class="form-group">
+          <label>${f.displayName}</label>
+          <input type="${inputType}" class="${itemName}-${f.fieldName}" data-${itemName}-index="\${index}" value="\${${itemName}.${f.camelCase}}">
+        </div>`;
+  }
+}).join('\n\n')}
+      </div>
+    \`).join('')}
+
+    <div class="button-group">
+      <button class="btn-secondary" id="clearBtn">Reset</button>
+      <button class="btn-primary" id="saveBtn">Apply Changes</button>
+    </div>
+  \`;
+}
+
+function attach${functionName}EditorEvents(originalData) {
+  document.getElementById('saveBtn').addEventListener('click', save${functionName}Data);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    clear${functionName}Form(originalData);
+  });
+}
+
+function clear${functionName}Form(originalData) {
+  const ${itemsName} = originalData.${itemsName};
+  ${itemsName}.forEach((${itemName}, index) => {
+    const i = index.toString();
+    const field = (cls) => document.querySelector(\`.\${cls}[data-${itemName}-index="\${i}"]\`);
+
+${fields.map(f => `    field('${itemName}-${f.fieldName}').value = ${itemName}.${f.camelCase} || '';`).join('\n')}
+  });
+  document.getElementById('messageArea').innerHTML = '';
+}
+
+async function save${functionName}Data() {
+  const ${itemsName} = [];
+  const ${itemName}Count = document.querySelectorAll('.plan-section').length;
+
+  for (let i = 0; i < ${itemName}Count; i++) {
+    const field = (cls) => document.querySelector(\`.\${cls}[data-${itemName}-index="\${i}"]\`);
+
+    ${itemsName}.push({
+      id: (i + 1).toString(),
+${fields.map(f => `      ${f.camelCase}: field('${itemName}-${f.fieldName}').value`).join(',\n')}
+    });
+  }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.tabs.sendMessage(tab.id, {
+    action: 'updateWidgetData',
+    widgetClass: '${widgetClass}',
+    data: { ${itemsName}: ${itemsName} }
+  }, (response) => {
+    if (response && response.success) {
+      showSuccess('Changes applied successfully! The page has been updated.');
+    } else {
+      showError('Failed to apply changes. Please try again.');
+    }
+  });
+}
+
+// Add to renderEditor() router:
+if (widgetClass === '${widgetClass}') {
+  container.innerHTML = render${functionName}Editor(data);
+  attach${functionName}EditorEvents(data);
+}`;
+
+      document.getElementById('sidepanelCode').textContent = code;
+    }
+
+    function generateInstructions(widgetClass) {
+      const html = `
+        <div style="padding: 1rem; line-height: 1.8;">
+          <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Installation Instructions</h3>
+          
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 1: Update content-script.js</h4>
+          <ol style="margin-left: 1.5rem;">
+            <li>Open <code>content-script.js</code></li>
+            <li>Add the registry entry from the <strong>Registry</strong> tab to <code>WIDGET_REGISTRY</code></li>
+            <li>Copy the data extraction and update functions from the <strong>content-script.js</strong> tab</li>
+            <li>Add them after the existing widget functions (around line 180)</li>
+            <li>Add the router entries to <code>getWidgetData()</code> and <code>updateWidgetData()</code></li>
+          </ol>
+
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 2: Update sidepanel.js</h4>
+          <ol style="margin-left: 1.5rem;">
+            <li>Open <code>sidepanel.js</code></li>
+            <li>Copy all the functions from the <strong>sidepanel.js</strong> tab</li>
+            <li>Add them after the existing editor functions (around line 250)</li>
+            <li>Add the router entry to <code>renderEditor()</code></li>
+          </ol>
+
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 3: Customize Selectors</h4>
+          <p style="margin-left: 1.5rem; color: #666;">
+            Review the generated <code>querySelector</code> calls in the update function. 
+            The generator assumes class names like <code>.${widgetClass}-field-name</code>, 
+            but you may need to adjust these based on your actual HTML structure.
+          </p>
+
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 4: Test</h4>
+          <ol style="margin-left: 1.5rem;">
+            <li>Reload the extension in <code>chrome://extensions/</code></li>
+            <li>Navigate to a page with your widget</li>
+            <li>Open the extension side panel</li>
+            <li>Verify detection and form rendering</li>
+            <li>Test editing and saving</li>
+          </ol>
+
+          <div style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
+            <strong>Note:</strong> This generator creates a starting point. You may need to adjust:
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+              <li>CSS selectors for visible text elements</li>
+              <li>Input types (text, email, tel, textarea, etc.)</li>
+              <li>Field validation or formatting</li>
+              <li>Form layout (single column vs. two-column rows)</li>
+            </ul>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('instructionsContent').innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>

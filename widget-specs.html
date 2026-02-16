@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget HTML Markup Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-top: 24px;
+        }
+
+        .tab-nav-link {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #999;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s;
+        }
+
+        .tab-nav-link:hover {
+            color: #666;
+        }
+
+        .tab-nav-link.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+        }
+
+        section {
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 24px 0 12px;
+            color: #1a1a1a;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #444;
+            font-size: 15px;
+        }
+
+        ul, ol {
+            margin: 16px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 15px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        pre {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid #000;
+        }
+
+        .rule-box {
+            background: #f9f9f9;
+            border-left: 3px solid #1a1a1a;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .rule-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .example-box {
+            border: 1px solid #e0e0e0;
+            padding: 16px;
+        }
+
+        .example-box h4 {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .good {
+            border-left: 3px solid #2d7d2d;
+        }
+
+        .bad {
+            border-left: 3px solid #c00;
+        }
+
+        .good h4::before {
+            content: "✓ ";
+            color: #2d7d2d;
+        }
+
+        .bad h4::before {
+            content: "✗ ";
+            color: #c00;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #666;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        td:first-child {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .warning {
+            background: #fff9e6;
+            border-left: 3px solid #f90;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Widget HTML Markup Specifications</h1>
+        <p class="subtitle">Requirements for Code Generator Compatibility</p>
+        
+        <nav class="tab-nav">
+                <a href="widget-extension.html" class="tab-nav-link">Extension Overview</a>
+                <a href="widget-markup-gen.html" class="tab-nav-link">Code Generator</a>
+                <a href="widget-specs.html" class="tab-nav-link active">Markup Specs</a>
+            </nav>
+    </header>
+
+    <!-- Required Structure -->
+    <section>
+        <h2>Required HTML Structure</h2>
+        
+        <p>Your widget HTML must follow this specific structure for the code generator to work correctly:</p>
+
+        <div class="rule-box">
+            <strong>Rule 1: Outer Container with Unique Class</strong>
+            <p>The widget must have a single outer container element with a unique CSS class that identifies the widget type.</p>
+        </div>
+
+        <pre><code>&lt;div class="your-widget-name"&gt;
+  &lt;!-- widget content --&gt;
+&lt;/div&gt;</code></pre>
+
+        <div class="rule-box">
+            <strong>Rule 2: Repeating Item Structure</strong>
+            <p>If your widget contains multiple items (plans, members, testimonials, etc.), each item must have a unique identifier attribute following the pattern <code>data-{itemtype}-id</code>.</p>
+        </div>
+
+        <pre><code>&lt;div class="team-member-bio"&gt;
+  &lt;div data-member-id="1"&gt;...&lt;/div&gt;
+  &lt;div data-member-id="2"&gt;...&lt;/div&gt;
+  &lt;div data-member-id="3"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <div class="rule-box">
+            <strong>Rule 3: Data Attributes for All Editable Fields</strong>
+            <p>Every piece of data you want to edit must be stored in a <code>data-*</code> attribute on the item element. The generator will detect these automatically.</p>
+        </div>
+
+        <pre><code>&lt;div data-member-id="1"
+     data-name="John Smith"
+     data-title="Senior Developer"
+     data-email="john@company.com"
+     data-phone="555-1234"
+     data-bio="Biography text here"&gt;
+  &lt;!-- visible content --&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+
+    <!-- Naming Conventions -->
+    <section>
+        <h2>Naming Conventions</h2>
+
+        <h3>Widget Class Names</h3>
+        <ul>
+            <li>Use lowercase with hyphens (kebab-case)</li>
+            <li>Be descriptive and unique</li>
+            <li>Avoid generic names like "widget" or "component"</li>
+        </ul>
+
+        <div class="example-grid">
+            <div class="example-box good">
+                <h4>Good Examples</h4>
+                <pre><code>team-member-bio
+insurance-comparison-tool
+testimonial-carousel
+pricing-calculator
+product-showcase</code></pre>
+            </div>
+            <div class="example-box bad">
+                <h4>Bad Examples</h4>
+                <pre><code>widget
+component
+box
+container
+content</code></pre>
+            </div>
+        </div>
+
+        <h3>Data Attribute Names</h3>
+        <ul>
+            <li>Use the pattern <code>data-{field-name}</code></li>
+            <li>Use lowercase with hyphens</li>
+            <li>Be descriptive and clear</li>
+            <li>For item identifiers, use <code>data-{itemtype}-id</code></li>
+        </ul>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Attribute Name</th>
+                    <th>Purpose</th>
+                    <th>Generated Form Field</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>data-member-id</td>
+                    <td>Unique identifier (required)</td>
+                    <td>Hidden (used for tracking)</td>
+                </tr>
+                <tr>
+                    <td>data-name</td>
+                    <td>Person's full name</td>
+                    <td>Text input: "Name"</td>
+                </tr>
+                <tr>
+                    <td>data-email</td>
+                    <td>Email address</td>
+                    <td>Email input: "Email"</td>
+                </tr>
+                <tr>
+                    <td>data-phone</td>
+                    <td>Phone number</td>
+                    <td>Tel input: "Phone"</td>
+                </tr>
+                <tr>
+                    <td>data-bio</td>
+                    <td>Biography text</td>
+                    <td>Textarea: "Bio"</td>
+                </tr>
+                <tr>
+                    <td>data-profile-url</td>
+                    <td>URL to profile</td>
+                    <td>URL input: "Profile URL"</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Complete Example -->
+    <section>
+        <h2>Complete Working Example</h2>
+
+        <p>Here's a complete example that follows all the rules:</p>
+
+        <pre><code>&lt;!-- Widget: Team Member Bio --&gt;
+&lt;div class="team-member-bio"&gt;
+  
+  &lt;!-- Member 1 --&gt;
+  &lt;div class="member-card" 
+       data-member-id="1"
+       data-name="Sarah Johnson"
+       data-title="VP of Engineering"
+       data-department="Engineering"
+       data-email="sarah.johnson@company.com"
+       data-phone="555-0001"
+       data-location="San Francisco, CA"
+       data-bio="Sarah has over 15 years of experience in software development."
+       data-linkedin-url="https://linkedin.com/in/sarahjohnson"&gt;
+    
+    &lt;img class="member-photo" src="/images/sarah.jpg" alt="Sarah Johnson"&gt;
+    &lt;h3 class="member-name"&gt;Sarah Johnson&lt;/h3&gt;
+    &lt;p class="member-title"&gt;VP of Engineering&lt;/p&gt;
+    &lt;p class="member-department"&gt;Engineering&lt;/p&gt;
+    &lt;p class="member-email"&gt;sarah.johnson@company.com&lt;/p&gt;
+    &lt;p class="member-phone"&gt;555-0001&lt;/p&gt;
+    &lt;p class="member-location"&gt;San Francisco, CA&lt;/p&gt;
+    &lt;p class="member-bio"&gt;Sarah has over 15 years of experience in software development.&lt;/p&gt;
+    &lt;a class="member-linkedin" href="https://linkedin.com/in/sarahjohnson"&gt;LinkedIn&lt;/a&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Member 2 --&gt;
+  &lt;div class="member-card" 
+       data-member-id="2"
+       data-name="Michael Chen"
+       data-title="Lead Designer"
+       data-department="Design"
+       data-email="michael.chen@company.com"
+       data-phone="555-0002"
+       data-location="New York, NY"
+       data-bio="Michael specializes in user experience and interface design."
+       data-linkedin-url="https://linkedin.com/in/michaelchen"&gt;
+    
+    &lt;img class="member-photo" src="/images/michael.jpg" alt="Michael Chen"&gt;
+    &lt;h3 class="member-name"&gt;Michael Chen&lt;/h3&gt;
+    &lt;p class="member-title"&gt;Lead Designer&lt;/p&gt;
+    &lt;p class="member-department"&gt;Design&lt;/p&gt;
+    &lt;p class="member-email"&gt;michael.chen@company.com&lt;/p&gt;
+    &lt;p class="member-phone"&gt;555-0002&lt;/p&gt;
+    &lt;p class="member-location"&gt;New York, NY&lt;/p&gt;
+    &lt;p class="member-bio"&gt;Michael specializes in user experience and interface design.&lt;/p&gt;
+    &lt;a class="member-linkedin" href="https://linkedin.com/in/michaelchen"&gt;LinkedIn&lt;/a&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;</code></pre>
+
+        <p><strong>What the generator will detect:</strong></p>
+        <ul>
+            <li>Widget class: <code>team-member-bio</code></li>
+            <li>Item selector: <code>[data-member-id]</code></li>
+            <li>Item type: <code>member</code></li>
+            <li>Editable fields: name, title, department, email, phone, location, bio, linkedin-url</li>
+        </ul>
+    </section>
+
+    <!-- Visible Content Structure -->
+    <section>
+        <h2>Visible Content Structure</h2>
+
+        <div class="rule-box">
+            <strong>Rule 4: CSS Classes Match Data Attributes</strong>
+            <p>For the generated code to work with minimal customization, your visible content elements should use CSS classes that match the data attribute names.</p>
+        </div>
+
+        <p><strong>Pattern:</strong> If you have <code>data-{field-name}</code>, use class <code>.{itemtype}-{field-name}</code></p>
+
+        <div class="example-grid">
+            <div class="example-box good">
+                <h4>Matching Pattern (Recommended)</h4>
+                <pre><code>&lt;div data-member-id="1"
+     data-name="John Smith"
+     data-email="john@company.com"&gt;
+  &lt;h3 class="member-name"&gt;
+    John Smith
+  &lt;/h3&gt;
+  &lt;p class="member-email"&gt;
+    john@company.com
+  &lt;/p&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="example-box bad">
+                <h4>Non-Matching (Requires Manual Updates)</h4>
+                <pre><code>&lt;div data-member-id="1"
+     data-name="John Smith"
+     data-email="john@company.com"&gt;
+  &lt;h3 class="person-fullname"&gt;
+    John Smith
+  &lt;/h3&gt;
+  &lt;p class="contact-email-address"&gt;
+    john@company.com
+  &lt;/p&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>Note:</strong> If your CSS classes don't match the pattern, the generator will still create the code, but you'll need to manually update the <code>querySelector</code> selectors in the update function.
+        </div>
+    </section>
+
+    <!-- Common Patterns -->
+    <section>
+        <h2>Common Widget Patterns</h2>
+
+        <h3>Pattern 1: Simple List Widget</h3>
+        <pre><code>&lt;div class="testimonial-list"&gt;
+  &lt;div data-testimonial-id="1"
+       data-author="Jane Doe"
+       data-company="Acme Corp"
+       data-quote="This product is amazing!"
+       data-rating="5"&gt;
+    &lt;blockquote class="testimonial-quote"&gt;This product is amazing!&lt;/blockquote&gt;
+    &lt;p class="testimonial-author"&gt;Jane Doe&lt;/p&gt;
+    &lt;p class="testimonial-company"&gt;Acme Corp&lt;/p&gt;
+    &lt;div class="testimonial-rating"&gt;★★★★★&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <h3>Pattern 2: Comparison Widget</h3>
+        <pre><code>&lt;div class="pricing-comparison"&gt;
+  &lt;div data-plan-id="1"
+       data-name="Basic"
+       data-price="29"
+       data-features="5 users, 10GB storage"&gt;
+    &lt;h3 class="plan-name"&gt;Basic&lt;/h3&gt;
+    &lt;p class="plan-price"&gt;$29&lt;/p&gt;
+    &lt;p class="plan-features"&gt;5 users, 10GB storage&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <h3>Pattern 3: Complex Nested Widget</h3>
+        <pre><code>&lt;div class="product-showcase"&gt;
+  &lt;div data-product-id="1"
+       data-name="Premium Widget"
+       data-sku="PRD-001"
+       data-price="199.99"
+       data-description="High-quality premium widget"
+       data-category="Electronics"
+       data-stock-status="In Stock"
+       data-rating="4.5"&gt;
+    &lt;div class="product-header"&gt;
+      &lt;h3 class="product-name"&gt;Premium Widget&lt;/h3&gt;
+      &lt;span class="product-sku"&gt;PRD-001&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="product-details"&gt;
+      &lt;p class="product-price"&gt;$199.99&lt;/p&gt;
+      &lt;p class="product-description"&gt;High-quality premium widget&lt;/p&gt;
+      &lt;span class="product-category"&gt;Electronics&lt;/span&gt;
+      &lt;span class="product-stock-status"&gt;In Stock&lt;/span&gt;
+      &lt;div class="product-rating"&gt;4.5 stars&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+
+    <!-- Checklist -->
+    <section>
+        <h2>Pre-Generation Checklist</h2>
+
+        <p>Before using the code generator, verify your HTML meets these requirements:</p>
+
+        <ol>
+            <li><strong>✓ Unique outer container class</strong> — One clear class name for the widget</li>
+            <li><strong>✓ Item identifier pattern</strong> — <code>data-{itemtype}-id</code> on each repeating item</li>
+            <li><strong>✓ All data in attributes</strong> — Every editable field has a <code>data-*</code> attribute</li>
+            <li><strong>✓ Consistent naming</strong> — Lowercase, hyphenated attribute names</li>
+            <li><strong>✓ Matching CSS classes</strong> — <code>.{itemtype}-{field-name}</code> pattern for visible elements</li>
+            <li><strong>✓ Complete sample</strong> — Include at least 2 items showing all possible fields</li>
+            <li><strong>✓ Valid HTML</strong> — Properly nested and closed tags</li>
+        </ol>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section>
+        <h2>Troubleshooting</h2>
+
+        <h3>Generator says "No data-* attributes found"</h3>
+        <ul>
+            <li>Make sure you're using <code>data-</code> prefix (not just custom attributes)</li>
+            <li>Check that attributes are on the actual elements, not in comments</li>
+            <li>Verify the HTML is valid and can be parsed</li>
+        </ul>
+
+        <h3>Generator can't detect item type</h3>
+        <ul>
+            <li>Add a <code>data-{itemtype}-id</code> attribute to identify repeating items</li>
+            <li>Example: <code>data-member-id</code>, <code>data-plan-id</code>, <code>data-product-id</code></li>
+            <li>Use singular form (member, not members)</li>
+        </ul>
+
+        <h3>Generated selectors don't match my HTML</h3>
+        <ul>
+            <li>Follow the <code>.{itemtype}-{field-name}</code> class naming pattern</li>
+            <li>OR manually update the selectors in the generated code</li>
+            <li>Look for lines like <code>el.querySelector('.member-name')</code> and adjust</li>
+        </ul>
+    </section>
+
+</div>
+
+</body>
+</html>
