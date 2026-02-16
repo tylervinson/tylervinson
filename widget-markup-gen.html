@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sitecore Widget Editor - Code Generator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -40,6 +40,7 @@
       color: #666;
       font-size: 15px;
       font-weight: 400;
+      margin-bottom: 24px;
     }
 
     .tab-nav {
@@ -153,83 +154,6 @@
       background: #333;
     }
 
-    .output-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .tab {
-      padding: 10px 16px;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: #999;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .tab.active {
-      color: #1a1a1a;
-      border-bottom-color: #1a1a1a;
-    }
-
-    .tab:hover {
-      color: #666;
-      background: none;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .code-wrapper {
-      position: relative;
-    }
-
-    pre {
-      background: #1a1a1a;
-      color: #e0e0e0;
-      padding: 20px;
-      padding-top: 50px;
-      overflow-x: auto;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      max-height: 600px;
-      overflow-y: auto;
-      border: 1px solid #000;
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #333;
-      color: #fff;
-      padding: 8px;
-      font-size: 20px;
-      border: 1px solid #444;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .copy-btn:hover {
-      background: #444;
-    }
-
     .analysis-section {
       background: #f9f9f9;
       border: 1px solid #e0e0e0;
@@ -282,6 +206,70 @@
       color: #d00;
     }
 
+    .download-btn {
+      width: 100%;
+      padding: 16px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .download-btn:hover {
+      background: #333;
+    }
+
+    .download-info {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .code-wrapper {
+      position: relative;
+    }
+
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 20px;
+      padding-top: 50px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #000;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #333;
+      color: #fff;
+      padding: 8px;
+      font-size: 20px;
+      border: 1px solid #444;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+    }
+
     @media (max-width: 1024px) {
       .main-grid {
         grid-template-columns: 1fr;
@@ -297,19 +285,16 @@
       <p class="subtitle">Automatically generate extension code from your widget HTML</p>
       
       <nav class="tab-nav">
-        <a href="widget-extension.html" class="tab-nav-link">Extension Overview</a>
-        <a href="widget-markup-gen.html" class="tab-nav-link active">Code Generator</a>
-        <a href="widget-specs.html" class="tab-nav-link">Markup Specs</a>
+        <a href="sitecore-widget-editor-overview.html" class="tab-nav-link">Extension Overview</a>
+        <a href="widget-code-generator.html" class="tab-nav-link active">Code Generator</a>
+        <a href="widget-markup-specifications.html" class="tab-nav-link">Markup Specs</a>
       </nav>
     </header>
 
     <div class="main-grid">
       <!-- Input Section -->
       <div class="input-section">
-        <div class="section-title">
-          <span class="section-number">1</span>
-          Input
-        </div>
+        <div class="section-title">Input</div>
 
         <div class="form-group">
           <label>Widget Class Name</label>
@@ -344,71 +329,33 @@
 
       <!-- Output Section -->
       <div class="output-section">
-        <div class="section-title">
-          <span class="section-number">2</span>
-          Generated Code
+        <div class="section-title">Generated Files</div>
+
+        <div id="downloadSection" style="display: none;">
+          <button id="downloadBtn" class="download-btn">
+            📦 Download Extension Files (.zip)
+          </button>
+          <p class="download-info">
+            Contains: content-script.js, sidepanel.js, manifest.json, processed-widget.html
+          </p>
         </div>
 
-        <div class="output-tabs">
-          <button class="tab active" onclick="switchTab('processedHTML')">Processed HTML</button>
-          <button class="tab" onclick="switchTab('registry')">Registry</button>
-          <button class="tab" onclick="switchTab('contentScript')">content-script.js</button>
-          <button class="tab" onclick="switchTab('sidepanel')">sidepanel.js</button>
-          <button class="tab" onclick="switchTab('instructions')">Instructions</button>
-        </div>
-
-        <div id="processedHTML" class="tab-content active">
+        <div id="previewSection" style="display: none;">
+          <h3 style="font-size: 13px; font-weight: 500; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666;">Processed HTML Preview</h3>
           <div class="code-wrapper">
-            <button class="copy-btn" onclick="copyCode('processedHTMLCode')" title="Copy to clipboard">📋</button>
+            <button class="copy-btn" onclick="copyCode()" title="Copy to clipboard">📋</button>
             <pre id="processedHTMLCode">// Generate code to see output</pre>
           </div>
-        </div>
-
-        <div id="registry" class="tab-content">
-          <div class="code-wrapper">
-            <button class="copy-btn" onclick="copyCode('registryCode')" title="Copy to clipboard">📋</button>
-            <pre id="registryCode">// Generate code to see output</pre>
-          </div>
-        </div>
-
-        <div id="contentScript" class="tab-content">
-          <div class="code-wrapper">
-            <button class="copy-btn" onclick="copyCode('contentScriptCode')" title="Copy to clipboard">📋</button>
-            <pre id="contentScriptCode">// Generate code to see output</pre>
-          </div>
-        </div>
-
-        <div id="sidepanel" class="tab-content">
-          <div class="code-wrapper">
-            <button class="copy-btn" onclick="copyCode('sidepanelCode')" title="Copy to clipboard">📋</button>
-            <pre id="sidepanelCode">// Generate code to see output</pre>
-          </div>
-        </div>
-
-        <div id="instructions" class="tab-content">
-          <div id="instructionsContent">Generate code to see instructions</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    function switchTab(tabName) {
-      // Update tab buttons
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      event.target.classList.add('active');
+    let generatedFiles = {};
 
-      // Update tab content
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-      document.getElementById(tabName).classList.add('active');
-    }
-
-    function copyCode(elementId) {
-      const code = document.getElementById(elementId).textContent;
+    function copyCode() {
+      const code = document.getElementById('processedHTMLCode').textContent;
       navigator.clipboard.writeText(code).then(() => {
         const btn = event.target;
         const originalText = btn.textContent;
@@ -423,39 +370,33 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      // Find widget container (first element)
       const widgetContainer = doc.body.firstElementChild;
       if (!widgetContainer) {
         return { error: 'No widget container found' };
       }
 
-      const widgetClass = widgetContainer.className;
-      
-      // Check for dynamic-object elements
+      const widgetClass = widgetContainer.className.split(' ')[0];
       const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
       const hasDynamicObjects = dynamicObjects.length > 0;
-      
-      // Find all dynamic-* elements
       const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
+      
       if (dynamicElements.length === 0) {
         return { error: 'No dynamic-* classes found in HTML' };
       }
 
-      // Collect field types
       const fieldTypes = new Set();
       dynamicElements.forEach(el => {
         const classes = Array.from(el.classList);
         classes.forEach(cls => {
           if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
-            const type = cls.replace('dynamic-', '');
-            fieldTypes.add(type);
+            fieldTypes.add(cls.replace('dynamic-', ''));
           }
         });
       });
 
       return {
-        widgetClass: widgetClass,
-        hasDynamicObjects: hasDynamicObjects,
+        widgetClass,
+        hasDynamicObjects,
         objectCount: hasDynamicObjects ? dynamicObjects.length : 1,
         fieldTypes: Array.from(fieldTypes),
         dynamicElements: dynamicElements.length
@@ -465,7 +406,6 @@
     function processHTML(html) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      
       const widgetContainer = doc.body.firstElementChild;
       if (!widgetContainer) return null;
 
@@ -473,57 +413,39 @@
       const hasDynamicObjects = dynamicObjects.length > 0;
 
       if (hasDynamicObjects) {
-        // Process each dynamic-object
         dynamicObjects.forEach((obj, objIndex) => {
           const fieldCounts = {};
-          
-          // Find all dynamic-* elements within this object
           const dynamicElements = obj.querySelectorAll('[class*="dynamic-"]');
           
           dynamicElements.forEach(el => {
-            const classes = Array.from(el.classList);
-            classes.forEach(cls => {
+            Array.from(el.classList).forEach(cls => {
               if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
                 const type = cls.replace('dynamic-', '');
-                
-                // Increment counter for this type
                 fieldCounts[type] = (fieldCounts[type] || 0) + 1;
                 const fieldNum = fieldCounts[type];
                 
-                // Set data attribute on parent object
-                const attrName = `data-${type}-${fieldNum}`;
-                obj.setAttribute(attrName, 'placeholder');
-                
-                // Replace class on element
+                obj.setAttribute(`data-${type}-${fieldNum}`, 'placeholder');
                 el.classList.remove(cls);
                 el.classList.add(`${type}-${fieldNum}`);
               }
             });
           });
           
-          // Add object ID and remove dynamic-object class
           obj.setAttribute('data-object-id', (objIndex + 1).toString());
           obj.classList.remove('dynamic-object');
         });
       } else {
-        // No dynamic-objects, treat widget container as the object
         const fieldCounts = {};
         const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
         
         dynamicElements.forEach(el => {
-          const classes = Array.from(el.classList);
-          classes.forEach(cls => {
+          Array.from(el.classList).forEach(cls => {
             if (cls.startsWith('dynamic-')) {
               const type = cls.replace('dynamic-', '');
-              
               fieldCounts[type] = (fieldCounts[type] || 0) + 1;
               const fieldNum = fieldCounts[type];
               
-              // Set data attribute on widget container
-              const attrName = `data-${type}-${fieldNum}`;
-              widgetContainer.setAttribute(attrName, 'placeholder');
-              
-              // Replace class on element
+              widgetContainer.setAttribute(`data-${type}-${fieldNum}`, 'placeholder');
               el.classList.remove(cls);
               el.classList.add(`${type}-${fieldNum}`);
             }
@@ -534,70 +456,16 @@
       return doc.body.innerHTML;
     }
 
-    function generateCode() {
-      const widgetClass = document.getElementById('widgetClass').value.trim();
-      const widgetName = document.getElementById('widgetName').value.trim();
-      const widgetDescription = document.getElementById('widgetDescription').value.trim();
-      const htmlInput = document.getElementById('htmlInput').value.trim();
-
-      // Validation
-      if (!widgetClass) {
-        showError('Please enter a widget class name');
-        return;
-      }
-
-      if (!htmlInput) {
-        showError('Please paste widget HTML');
-        return;
-      }
-
-      // Analyze HTML
-      const analysis = analyzeHTML(htmlInput);
-      
-      if (analysis.error) {
-        showError(analysis.error);
-        return;
-      }
-
-      // Show analysis
-      showAnalysis(analysis);
-
-      // Process HTML to generate output
-      const processedHTML = processHTML(htmlInput);
-
-      // Show processed HTML in first tab
-      document.getElementById('processedHTMLCode').textContent = processedHTML;
-
-      // Generate code for extension
-      const camelClass = toCamelCase(widgetClass);
-      
-      // Generate registry code
-      generateRegistryCode(widgetClass, widgetName, widgetDescription);
-
-      // Generate content-script.js code
-      generateContentScriptCode(widgetClass, camelClass, analysis);
-
-      // Generate sidepanel.js code
-      generateSidepanelCode(widgetClass, camelClass, analysis);
-
-      // Generate instructions
-      generateInstructions(widgetClass);
-    }
-
     function toCamelCase(str) {
       return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     }
 
     function toDisplayName(str) {
-      return str.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+      return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
 
     function showError(message) {
-      document.getElementById('analysisOutput').innerHTML = `
-        <div class="error-message">${message}</div>
-      `;
+      document.getElementById('analysisOutput').innerHTML = `<div class="error-message">${message}</div>`;
     }
 
     function showAnalysis(analysis) {
@@ -610,20 +478,12 @@
               <span class="field-type">${analysis.widgetClass}</span>
             </li>
             <li class="field-item">
-              <span class="field-name">Has Multiple Objects:</span>
-              <span class="field-type">${analysis.hasDynamicObjects ? 'Yes' : 'No'}</span>
-            </li>
-            <li class="field-item">
-              <span class="field-name">Object Count:</span>
-              <span class="field-type">${analysis.objectCount}</span>
+              <span class="field-name">Pattern:</span>
+              <span class="field-type">${analysis.hasDynamicObjects ? 'Multiple Objects' : 'Single Widget'}</span>
             </li>
             <li class="field-item">
               <span class="field-name">Field Types:</span>
               <span class="field-type">${analysis.fieldTypes.join(', ')}</span>
-            </li>
-            <li class="field-item">
-              <span class="field-name">Total Dynamic Elements:</span>
-              <span class="field-type">${analysis.dynamicElements}</span>
             </li>
           </ul>
         </div>
@@ -631,32 +491,75 @@
       document.getElementById('analysisOutput').innerHTML = html;
     }
 
-    function generateRegistryCode(widgetClass, widgetName, widgetDescription) {
-      const code = `// Add this to WIDGET_REGISTRY in content-script.js
-const WIDGET_REGISTRY = {
-  'insurance-comparison-tool': {
-    name: 'Insurance Plan Comparison',
-    description: 'Edit insurance plan details and comparison data'
-  },
-  '${widgetClass}': {
-    name: '${widgetName || toDisplayName(widgetClass)}',
-    description: '${widgetDescription || 'Edit ' + widgetClass.replace(/-/g, ' ') + ' data'}'
-  }
-};`;
+    async function generateCode() {
+      const widgetClass = document.getElementById('widgetClass').value.trim();
+      const widgetName = document.getElementById('widgetName').value.trim();
+      const widgetDescription = document.getElementById('widgetDescription').value.trim();
+      const htmlInput = document.getElementById('htmlInput').value.trim();
+
+      if (!widgetClass) {
+        showError('Please enter a widget class name');
+        return;
+      }
+
+      if (!htmlInput) {
+        showError('Please paste widget HTML');
+        return;
+      }
+
+      const analysis = analyzeHTML(htmlInput);
       
-      document.getElementById('registryCode').textContent = code;
+      if (analysis.error) {
+        showError(analysis.error);
+        return;
+      }
+
+      showAnalysis(analysis);
+
+      const processedHTML = processHTML(htmlInput);
+      document.getElementById('processedHTMLCode').textContent = processedHTML;
+      document.getElementById('previewSection').style.display = 'block';
+
+      const camelClass = toCamelCase(widgetClass);
+      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+      
+      generateCompleteFiles(
+        widgetClass, 
+        widgetName || toDisplayName(widgetClass), 
+        widgetDescription || `Edit ${widgetClass.replace(/-/g, ' ')} data`,
+        analysis, 
+        processedHTML, 
+        functionName
+      );
+
+      document.getElementById('downloadSection').style.display = 'block';
+      document.getElementById('downloadBtn').onclick = () => downloadZip(widgetClass);
     }
 
-    function generateContentScriptCode(widgetClass, camelClass, analysis) {
-      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+    function generateCompleteFiles(widgetClass, widgetName, widgetDescription, analysis, processedHTML, functionName) {
       const hasObjects = analysis.hasDynamicObjects;
       
-      let extractCode = '';
-      let updateCode = '';
+      // Generate content-script.js
+      generatedFiles['content-script.js'] = generateContentScript(widgetClass, widgetName, widgetDescription, hasObjects, functionName);
+      
+      // Generate sidepanel.js
+      generatedFiles['sidepanel.js'] = generateSidepanel(widgetClass, widgetName, hasObjects, functionName);
+      
+      // Generate manifest.json
+      generatedFiles['manifest.json'] = generateManifest();
+      
+      // Include processed HTML
+      generatedFiles['processed-widget.html'] = processedHTML;
+    }
 
-      if (hasObjects) {
-        // Multiple objects version
-        extractCode = `function get${functionName}Data() {
+    function generateContentScript(widgetClass, widgetName, widgetDescription, hasObjects, functionName) {
+      const newWidgetRegistry = `  '${widgetClass}': {
+    name: '${widgetName}',
+    description: '${widgetDescription}'
+  }`;
+
+      const newGetData = hasObjects ? `
+function get${functionName}Data() {
   const widget = findWidgetElement('${widgetClass}');
   if (!widget) return null;
 
@@ -664,118 +567,344 @@ const WIDGET_REGISTRY = {
   const objects = [];
 
   objectElements.forEach(el => {
-    const obj = {
-      id: el.dataset.objectId || ''
-    };
-    
-    // Extract all data-* attributes
+    const obj = { id: el.dataset.objectId || '' };
     Array.from(el.attributes).forEach(attr => {
       if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
         const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
         obj[fieldName] = attr.value;
       }
     });
-    
     objects.push(obj);
   });
 
   return { objects };
-}`;
-
-        updateCode = `function update${functionName}Data(data) {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return false;
-
-  const objectElements = widget.querySelectorAll('[data-object-id]');
-
-  data.objects.forEach((obj, index) => {
-    if (!objectElements[index]) return;
-    const el = objectElements[index];
-
-    // Update all data attributes
-    Object.keys(obj).forEach(key => {
-      if (key !== 'id') {
-        const attrName = 'data-' + key.replace(/_/g, '-');
-        el.setAttribute(attrName, obj[key]);
-        
-        // Update visible element
-        const className = key.replace(/_/g, '-');
-        const visibleEl = el.querySelector('.' + className);
-        if (visibleEl) {
-          visibleEl.textContent = obj[key];
-        }
-      }
-    });
-  });
-
-  return true;
-}`;
-      } else {
-        // Single object version (no dynamic-object)
-        extractCode = `function get${functionName}Data() {
+}` : `
+function get${functionName}Data() {
   const widget = findWidgetElement('${widgetClass}');
   if (!widget) return null;
 
   const data = {};
-  
-  // Extract all data-* attributes from widget container
   Array.from(widget.attributes).forEach(attr => {
     if (attr.name.startsWith('data-')) {
       const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
       data[fieldName] = attr.value;
     }
   });
-
   return data;
 }`;
 
-        updateCode = `function update${functionName}Data(data) {
+      const newUpdateData = hasObjects ? `
+function update${functionName}Data(data) {
   const widget = findWidgetElement('${widgetClass}');
   if (!widget) return false;
 
-  // Update all data attributes on widget container
+  const objectElements = widget.querySelectorAll('[data-object-id]');
+  data.objects.forEach((obj, index) => {
+    if (!objectElements[index]) return;
+    const el = objectElements[index];
+
+    Object.keys(obj).forEach(key => {
+      if (key !== 'id') {
+        const attrName = 'data-' + key.replace(/_/g, '-');
+        el.setAttribute(attrName, obj[key]);
+        
+        const className = key.replace(/_/g, '-');
+        const visibleEl = el.querySelector('.' + className);
+        if (visibleEl) visibleEl.textContent = obj[key];
+      }
+    });
+  });
+
+  return true;
+}` : `
+function update${functionName}Data(data) {
+  const widget = findWidgetElement('${widgetClass}');
+  if (!widget) return false;
+
   Object.keys(data).forEach(key => {
     const attrName = 'data-' + key.replace(/_/g, '-');
     widget.setAttribute(attrName, data[key]);
     
-    // Update visible element
     const className = key.replace(/_/g, '-');
     const visibleEl = widget.querySelector('.' + className);
-    if (visibleEl) {
-      visibleEl.textContent = data[key];
-    }
+    if (visibleEl) visibleEl.textContent = data[key];
   });
 
   return true;
 }`;
-      }
 
-      const code = `// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')}
+      return `// =============================================================================
+// Content Script — Scans page for widgets, reads/writes data, notifies Sitecore
 // =============================================================================
 
-${extractCode}
+// Widget registry — add new widgets here
+const WIDGET_REGISTRY = {
+  'insurance-comparison-tool': {
+    name: 'Insurance Plan Comparison',
+    description: 'Edit insurance plan details and comparison data'
+  },
+${newWidgetRegistry}
+};
 
-${updateCode}
+// ---------------------------------------------------------------------------
+// Mutation observer for dynamically loaded widgets
+// ---------------------------------------------------------------------------
+let observer = null;
 
-// Add to getWidgetData() router:
-if (widgetClass === '${widgetClass}') {
-  return get${functionName}Data();
+function setupMutationObserver() {
+  if (observer) return;
+
+  observer = new MutationObserver(() => {
+    clearTimeout(observer._timeout);
+    observer._timeout = setTimeout(() => {
+      for (const className in WIDGET_REGISTRY) {
+        const el = document.querySelector(\`.$ {className}\`);
+        if (el && !el.dataset.widgetDetected) {
+          el.dataset.widgetDetected = 'true';
+          console.log(\`[Widget Editor] Detected widget: \${className}\`);
+        }
+      }
+    }, 500);
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// Add to updateWidgetData() router:
-if (widgetClass === '${widgetClass}') {
-  success = update${functionName}Data(data);
-}`;
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupMutationObserver);
+} else {
+  setupMutationObserver();
+}
 
-      document.getElementById('contentScriptCode').textContent = code;
+// ---------------------------------------------------------------------------
+// Message handler — communication with sidebar/popup
+// ---------------------------------------------------------------------------
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+  if (request.action === 'detectWidgets') {
+    const foundWidgets = detectWidgets();
+    if (foundWidgets.length > 0) {
+      sendResponse({ widgets: foundWidgets });
+    }
+    return foundWidgets.length > 0;
+  }
+
+  if (request.action === 'getWidgetData') {
+    const el = findWidgetElement(request.widgetClass);
+    if (!el) return false;
+    const data = getWidgetData(request.widgetClass);
+    sendResponse({ data });
+    return true;
+  }
+
+  if (request.action === 'updateWidgetData') {
+    const el = findWidgetElement(request.widgetClass);
+    if (!el) return false;
+    const success = updateWidgetData(request.widgetClass, request.data);
+    sendResponse({ success });
+    return true;
+  }
+
+  return false;
+});
+
+// ---------------------------------------------------------------------------
+// Widget detection
+// ---------------------------------------------------------------------------
+function detectWidgets() {
+  const found = [];
+
+  for (const className in WIDGET_REGISTRY) {
+    const element = document.querySelector(\`.$ {className}\`);
+
+    if (element) {
+      found.push({
+        className,
+        name: WIDGET_REGISTRY[className].name,
+        description: WIDGET_REGISTRY[className].description
+      });
+    }
+  }
+
+  return found;
+}
+
+// ---------------------------------------------------------------------------
+// Helper: find widget element in main document
+// ---------------------------------------------------------------------------
+function findWidgetElement(className) {
+  return document.querySelector(\`.$ {className}\`);
+}
+
+// ---------------------------------------------------------------------------
+// Data extraction router
+// ---------------------------------------------------------------------------
+function getWidgetData(widgetClass) {
+  if (widgetClass === 'insurance-comparison-tool') {
+    return getInsuranceComparisonData();
+  }
+  if (widgetClass === '${widgetClass}') {
+    return get${functionName}Data();
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Data update router — applies changes then notifies Sitecore
+// ---------------------------------------------------------------------------
+function updateWidgetData(widgetClass, data) {
+  let success = false;
+
+  if (widgetClass === 'insurance-comparison-tool') {
+    success = updateInsuranceComparisonData(data);
+  }
+  if (widgetClass === '${widgetClass}') {
+    success = update${functionName}Data(data);
+  }
+
+  if (success) {
+    const widgetEl = findWidgetElement(widgetClass);
+    if (widgetEl && window.SitecoreBridge) {
+      const notified = window.SitecoreBridge.notifyChange(widgetEl);
+      console.log(\`[Widget Editor] Sitecore notified: \${notified}\`);
+    } else {
+      console.warn('[Widget Editor] SitecoreBridge not available or widget not found');
+    }
+  }
+
+  return success;
+}
+
+
+// =============================================================================
+// INSURANCE COMPARISON TOOL
+// =============================================================================
+
+function getInsuranceComparisonData() {
+  const tool = findWidgetElement('insurance-comparison-tool');
+  if (!tool) return null;
+
+  const planButtons = tool.querySelectorAll('[data-plan-id]');
+  const plans = [];
+
+  planButtons.forEach(btn => {
+    plans.push({
+      id:              btn.dataset.planId          || '',
+      name:            btn.dataset.planName        || '',
+      type:            btn.dataset.planType        || '',
+      coverageType:    btn.dataset.coverageType    || '',
+      price:           btn.dataset.price           || '',
+      deductible:      btn.dataset.deductible      || '',
+      maxOutOfPocket:  btn.dataset.maxOutOfPocket  || '',
+      coveragePercent: btn.dataset.coveragePercent || '',
+      doctorVisits:    btn.dataset.doctorVisits    || '',
+      emergency:       btn.dataset.emergency       || '',
+      prescription:    btn.dataset.prescription    || '',
+      mentalHealth:    btn.dataset.mentalHealth    || '',
+      dentalVision:    btn.dataset.dentalVision    || ''
+    });
+  });
+
+  return { plans };
+}
+
+function updateInsuranceComparisonData(data) {
+  const tool = findWidgetElement('insurance-comparison-tool');
+  if (!tool) return false;
+
+  const planButtons = tool.querySelectorAll('[data-plan-id]');
+  const comparisonGrid = tool.querySelector('.comparison-grid');
+
+  const fieldFormatters = {
+    price:          function(v) { return '$' + v + '/mo'; },
+    deductible:     function(v) { return '$' + Number(v).toLocaleString(); },
+    maxOutOfPocket: function(v) { return '$' + Number(v).toLocaleString(); },
+    coveragePercent:function(v) { return v + '%'; },
+    doctorVisits:   function(v) { return '$' + v; },
+    prescription:   function(v) { return v; },
+    emergency:      function(v) { return '$' + v; },
+    mentalHealth:   function(v) { return v; },
+    dentalVision:   function(v) { return v; }
+  };
+
+  data.plans.forEach((plan, index) => {
+    if (!planButtons[index]) return;
+    const btn = planButtons[index];
+    const planId = btn.dataset.planId;
+
+    btn.dataset.planName       = plan.name;
+    btn.dataset.planType       = plan.type;
+    btn.dataset.coverageType   = plan.coverageType;
+    btn.dataset.price          = plan.price;
+    btn.dataset.deductible     = plan.deductible;
+    btn.dataset.maxOutOfPocket = plan.maxOutOfPocket;
+    btn.dataset.coveragePercent = plan.coveragePercent;
+    btn.dataset.doctorVisits   = plan.doctorVisits;
+    btn.dataset.emergency      = plan.emergency;
+    btn.dataset.prescription   = plan.prescription;
+    btn.dataset.mentalHealth   = plan.mentalHealth;
+    btn.dataset.dentalVision   = plan.dentalVision;
+
+    const typeEl = btn.querySelector('.plan-button-type');
+    if (typeEl) typeEl.textContent = plan.type;
+
+    const nameEl = btn.querySelector('.plan-button-name');
+    if (nameEl) nameEl.textContent = plan.name;
+
+    const coverageEl = btn.querySelector('.plan-button-coverage');
+    if (coverageEl) coverageEl.textContent = plan.coverageType + ' Coverage';
+
+    const priceEl = btn.querySelector('.plan-button-price');
+    if (priceEl) {
+      const periodSpan = priceEl.querySelector('.plan-button-period');
+      if (periodSpan) {
+        const textNodes = Array.from(priceEl.childNodes).filter(n => n.nodeType === 3);
+        if (textNodes.length > 0) {
+          textNodes[0].textContent = '$' + plan.price + ' ';
+        }
+      } else {
+        priceEl.textContent = '$' + plan.price;
+      }
     }
 
-    function generateSidepanelCode(widgetClass, camelClass, analysis) {
-      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-      const hasObjects = analysis.hasDynamicObjects;
+    if (comparisonGrid) {
+      const planFields = {
+        price: plan.price, deductible: plan.deductible,
+        maxOutOfPocket: plan.maxOutOfPocket, coveragePercent: plan.coveragePercent,
+        doctorVisits: plan.doctorVisits, prescription: plan.prescription,
+        emergency: plan.emergency, mentalHealth: plan.mentalHealth,
+        dentalVision: plan.dentalVision
+      };
 
-      // Map field types to input types
+      for (const field in planFields) {
+        const row = comparisonGrid.querySelector('.comparison-row[data-comparison="' + field + '"]');
+        if (!row) continue;
+        const cell = row.querySelector('.feature-value[data-plan="' + planId + '"]');
+        if (!cell) continue;
+        const formatter = fieldFormatters[field];
+        cell.textContent = formatter ? formatter(planFields[field]) : planFields[field];
+      }
+    }
+  });
+
+  return true;
+}
+
+// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')}
+// =============================================================================
+${newGetData}
+${newUpdateData}
+`;
+    }
+
+    function generateSidepanel(widgetClass, widgetName, hasObjects, functionName) {
+      const newRenderCase = `
+  if (widgetClass === '${widgetClass}') {
+    container.innerHTML = render${functionName}Editor(data);
+    attach${functionName}EditorEvents(data);
+  }`;
+
       const inputTypeMap = {
         'text': 'text',
         'email': 'email',
@@ -787,14 +916,13 @@ if (widgetClass === '${widgetClass}') {
         'checkbox': 'checkbox'
       };
 
-      let renderFunction = '';
-      
-      if (hasObjects) {
-        renderFunction = `function render${functionName}Editor(data) {
+      const renderFunction = hasObjects ? `
+function render${functionName}Editor(data) {
   const objects = data.objects;
+  const inputTypes = ${JSON.stringify(inputTypeMap)};
 
   return \`
-    <div class="editor-title">${toDisplayName(widgetClass)}</div>
+    <div class="editor-title">${widgetName}</div>
 
     \${objects.map((obj, index) => \`
       <div class="plan-section">
@@ -802,9 +930,9 @@ if (widgetClass === '${widgetClass}') {
 
         \${Object.keys(obj).filter(k => k !== 'id').map(key => {
           const fieldName = key.replace(/_/g, '-');
-          const displayName = toDisplayName(fieldName);
+          const displayName = fieldName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
           const fieldType = fieldName.split('-')[0];
-          const inputType = ${JSON.stringify(inputTypeMap)}[fieldType] || 'text';
+          const inputType = inputTypes[fieldType] || 'text';
           
           if (inputType === 'textarea') {
             return \`
@@ -839,18 +967,19 @@ if (widgetClass === '${widgetClass}') {
       <button class="btn-primary" id="saveBtn">Apply Changes</button>
     </div>
   \`;
-}`;
-      } else {
-        renderFunction = `function render${functionName}Editor(data) {
+}` : `
+function render${functionName}Editor(data) {
+  const inputTypes = ${JSON.stringify(inputTypeMap)};
+
   return \`
-    <div class="editor-title">${toDisplayName(widgetClass)}</div>
+    <div class="editor-title">${widgetName}</div>
 
     <div class="plan-section">
       \${Object.keys(data).map(key => {
         const fieldName = key.replace(/_/g, '-');
-        const displayName = toDisplayName(fieldName);
+        const displayName = fieldName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         const fieldType = fieldName.split('-')[0];
-        const inputType = ${JSON.stringify(inputTypeMap)}[fieldType] || 'text';
+        const inputType = inputTypes[fieldType] || 'text';
         
         if (inputType === 'textarea') {
           return \`
@@ -885,27 +1014,20 @@ if (widgetClass === '${widgetClass}') {
     </div>
   \`;
 }`;
-      }
 
-      const code = `// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
-// =============================================================================
-
-${renderFunction}
-
+      const attachFunction = `
 function attach${functionName}EditorEvents(originalData) {
   document.getElementById('saveBtn').addEventListener('click', save${functionName}Data);
   document.getElementById('clearBtn').addEventListener('click', () => {
     renderEditor('${widgetClass}', originalData);
   });
-}
+}`;
 
+      const saveFunction = hasObjects ? `
 async function save${functionName}Data() {
-  // Collect form data
-  const formData = ${hasObjects ? '{ objects: [] }' : '{}'};
-  
-  ${hasObjects ? `
+  const formData = { objects: [] };
   const objectCount = document.querySelectorAll('.plan-section').length;
+  
   for (let i = 0; i < objectCount; i++) {
     const obj = { id: (i + 1).toString() };
     document.querySelectorAll(\`[data-object-index="\${i}"]\`).forEach(input => {
@@ -914,12 +1036,6 @@ async function save${functionName}Data() {
     });
     formData.objects.push(obj);
   }
-  ` : `
-  document.querySelectorAll('[class^="field-"]').forEach(input => {
-    const key = input.className.replace('field-', '');
-    formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
-  });
-  `}
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -929,59 +1045,414 @@ async function save${functionName}Data() {
     data: formData
   }, (response) => {
     if (response && response.success) {
-      showSuccess('Changes applied successfully!');
+      showSuccess('Changes applied successfully! The page has been updated.');
     } else {
-      showError('Failed to apply changes.');
+      showError('Failed to apply changes. Please try again.');
+    }
+  });
+}` : `
+async function save${functionName}Data() {
+  const formData = {};
+  document.querySelectorAll('[class^="field-"]').forEach(input => {
+    const key = input.className.replace('field-', '');
+    formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
+  });
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.tabs.sendMessage(tab.id, {
+    action: 'updateWidgetData',
+    widgetClass: '${widgetClass}',
+    data: formData
+  }, (response) => {
+    if (response && response.success) {
+      showSuccess('Changes applied successfully! The page has been updated.');
+    } else {
+      showError('Failed to apply changes. Please try again.');
+    }
+  });
+}`;
+
+      return `// =============================================================================
+// Sidepanel script — Widget editor UI
+// =============================================================================
+
+let currentWidgets = [];
+let selectedWidget = null;
+let activeTab = null;
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+let retryCount = 0;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  activeTab = tab;
+  await scanForWidgets();
+  setupRescanButton();
+});
+
+function setupRescanButton() {
+  const headerDiv = document.querySelector('.header');
+  const rescanBtn = document.createElement('button');
+  rescanBtn.id = 'rescanBtn';
+  rescanBtn.innerHTML = '↻ Rescan Page';
+  rescanBtn.onclick = async () => {
+    retryCount = 0;
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading').textContent = 'Scanning page for widgets...';
+    document.getElementById('noWidgets').style.display = 'none';
+    document.getElementById('widgetSelector').style.display = 'none';
+    document.getElementById('editorContainer').style.display = 'none';
+    document.getElementById('messageArea').innerHTML = '';
+    await scanForWidgets();
+  };
+  headerDiv.appendChild(rescanBtn);
+}
+
+async function scanForWidgets() {
+  if (!activeTab) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    activeTab = tab;
+  }
+
+  chrome.tabs.sendMessage(activeTab.id, { action: 'detectWidgets' }, (response) => {
+    if (chrome.runtime.lastError) {
+      showError('Could not connect to page. Please refresh and try again.');
+      return;
+    }
+
+    if (response && response.widgets) {
+      if (response.widgets.length > 0) {
+        retryCount = 0;
+        handleWidgetsDetected(response.widgets);
+      } else {
+        if (retryCount < MAX_RETRIES) {
+          retryCount++;
+          const loadingEl = document.getElementById('loading');
+          loadingEl.textContent = \`Scanning page for widgets... (attempt \${retryCount + 1} of \${MAX_RETRIES + 1})\`;
+          setTimeout(() => { scanForWidgets(); }, RETRY_DELAY);
+        } else {
+          retryCount = 0;
+          handleWidgetsDetected([]);
+        }
+      }
     }
   });
 }
 
-// Add to renderEditor() router:
-if (widgetClass === '${widgetClass}') {
-  container.innerHTML = render${functionName}Editor(data);
-  attach${functionName}EditorEvents(data);
-}`;
+function handleWidgetsDetected(widgets) {
+  document.getElementById('loading').style.display = 'none';
+  currentWidgets = widgets;
 
-      document.getElementById('sidepanelCode').textContent = code;
+  if (widgets.length === 0) {
+    document.getElementById('noWidgets').style.display = 'block';
+  } else if (widgets.length === 1) {
+    selectedWidget = widgets[0];
+    loadEditor(widgets[0].className);
+  } else {
+    showWidgetSelector(widgets);
+  }
+}
+
+function showWidgetSelector(widgets) {
+  const selector = document.getElementById('widgetSelector');
+  const dropdown = document.getElementById('widgetDropdown');
+
+  dropdown.innerHTML = '<option value="">-- Select a widget --</option>';
+
+  widgets.forEach(widget => {
+    const option = document.createElement('option');
+    option.value = widget.className;
+    option.textContent = widget.name;
+    dropdown.appendChild(option);
+  });
+
+  dropdown.addEventListener('change', (e) => {
+    if (e.target.value) {
+      const widget = widgets.find(w => w.className === e.target.value);
+      selectedWidget = widget;
+      loadEditor(e.target.value);
+    }
+  });
+
+  selector.style.display = 'block';
+}
+
+async function loadEditor(widgetClass) {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.tabs.sendMessage(tab.id, {
+    action: 'getWidgetData',
+    widgetClass: widgetClass
+  }, (response) => {
+    if (chrome.runtime.lastError) {
+      showError('Could not connect to page. Please refresh and try again.');
+      return;
+    }
+    if (response && response.data) {
+      renderEditor(widgetClass, response.data);
+    } else {
+      showError('Could not read widget data from the page.');
+    }
+  });
+}
+
+function renderEditor(widgetClass, data) {
+  const container = document.getElementById('editorContainer');
+
+  if (widgetClass === 'insurance-comparison-tool') {
+    container.innerHTML = renderInsuranceEditor(data);
+    attachInsuranceEditorEvents(data);
+  }
+${newRenderCase}
+
+  container.style.display = 'block';
+}
+
+
+// =============================================================================
+// INSURANCE COMPARISON EDITOR
+// =============================================================================
+
+function renderInsuranceEditor(data) {
+  const plans = data.plans;
+
+  return \`
+    <div class="editor-title">Insurance Plan Comparison</div>
+
+    \${plans.map((plan, index) => \`
+      <div class="plan-section">
+        <div class="plan-section-title">Plan \${parseInt(index) + 1}</div>
+
+        <div class="form-group">
+          <label>Plan Name</label>
+          <input type="text" class="plan-name" data-plan-index="\${index}" value="\${plan.name}">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Plan Type</label>
+            <select class="plan-type" data-plan-index="\${index}">
+              <option value="basic" \${plan.type === 'basic' ? 'selected' : ''}>Basic</option>
+              <option value="standard" \${plan.type === 'standard' ? 'selected' : ''}>Standard</option>
+              <option value="premium" \${plan.type === 'premium' ? 'selected' : ''}>Premium</option>
+              <option value="family" \${plan.type === 'family' ? 'selected' : ''}>Family</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Coverage Type</label>
+            <select class="plan-coverage-type" data-plan-index="\${index}">
+              <option value="Individual" \${plan.coverageType === 'Individual' ? 'selected' : ''}>Individual</option>
+              <option value="Family" \${plan.coverageType === 'Family' ? 'selected' : ''}>Family</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Monthly Price ($)</label>
+            <input type="text" class="plan-price" data-plan-index="\${index}" value="\${plan.price}">
+          </div>
+
+          <div class="form-group">
+            <label>Annual Deductible ($)</label>
+            <input type="text" class="plan-deductible" data-plan-index="\${index}" value="\${plan.deductible}">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Max Out-of-Pocket ($)</label>
+            <input type="text" class="plan-max-out" data-plan-index="\${index}" value="\${plan.maxOutOfPocket}">
+          </div>
+
+          <div class="form-group">
+            <label>Coverage Percent (%)</label>
+            <input type="text" class="plan-coverage-percent" data-plan-index="\${index}" value="\${plan.coveragePercent}">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Doctor Visit Copay ($)</label>
+            <input type="text" class="plan-doctor-visits" data-plan-index="\${index}" value="\${plan.doctorVisits}">
+          </div>
+
+          <div class="form-group">
+            <label>Emergency Care Copay ($)</label>
+            <input type="text" class="plan-emergency" data-plan-index="\${index}" value="\${plan.emergency}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Prescription Coverage</label>
+          <input type="text" class="plan-prescription" data-plan-index="\${index}" value="\${plan.prescription}">
+          <div class="help-text">e.g., "Generic only", "Generic & Brand", "Full coverage"</div>
+        </div>
+
+        <div class="form-group">
+          <label>Mental Health Coverage</label>
+          <input type="text" class="plan-mental-health" data-plan-index="\${index}" value="\${plan.mentalHealth}">
+          <div class="help-text">e.g., "Limited", "Included", "Full coverage"</div>
+        </div>
+
+        <div class="form-group">
+          <label>Dental & Vision</label>
+          <input type="text" class="plan-dental-vision" data-plan-index="\${index}" value="\${plan.dentalVision}">
+          <div class="help-text">e.g., "Not included", "Vision only", "Both included"</div>
+        </div>
+      </div>
+    \`).join('')}
+
+    <div class="button-group">
+      <button class="btn-secondary" id="clearBtn">Clear Form</button>
+      <button class="btn-primary" id="saveBtn">Apply Changes</button>
+    </div>
+  \`;
+}
+
+function attachInsuranceEditorEvents(originalData) {
+  document.getElementById('saveBtn').addEventListener('click', saveInsuranceData);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    clearInsuranceForm(originalData);
+  });
+}
+
+function clearInsuranceForm(originalData) {
+  const plans = originalData.plans;
+  plans.forEach((plan, index) => {
+    const i = index.toString();
+    const field = (cls) => document.querySelector(\`.\${cls}[data-plan-index="\${i}"]\`);
+
+    field('plan-name').value = plan.name || '';
+    field('plan-type').value = plan.type || 'basic';
+    field('plan-coverage-type').value = plan.coverageType || 'Individual';
+    field('plan-price').value = plan.price || '';
+    field('plan-deductible').value = plan.deductible || '';
+    field('plan-max-out').value = plan.maxOutOfPocket || '';
+    field('plan-coverage-percent').value = plan.coveragePercent || '';
+    field('plan-doctor-visits').value = plan.doctorVisits || '';
+    field('plan-emergency').value = plan.emergency || '';
+    field('plan-prescription').value = plan.prescription || '';
+    field('plan-mental-health').value = plan.mentalHealth || '';
+    field('plan-dental-vision').value = plan.dentalVision || '';
+  });
+  document.getElementById('messageArea').innerHTML = '';
+}
+
+async function saveInsuranceData() {
+  const plans = [];
+  const planCount = document.querySelectorAll('.plan-section').length;
+
+  for (let i = 0; i < planCount; i++) {
+    const field = (cls) => document.querySelector(\`.\${cls}[data-plan-index="\${i}"]\`);
+
+    plans.push({
+      id: (i + 1).toString(),
+      name: field('plan-name').value,
+      type: field('plan-type').value,
+      coverageType: field('plan-coverage-type').value,
+      price: field('plan-price').value,
+      deductible: field('plan-deductible').value,
+      maxOutOfPocket: field('plan-max-out').value,
+      coveragePercent: field('plan-coverage-percent').value,
+      doctorVisits: field('plan-doctor-visits').value,
+      emergency: field('plan-emergency').value,
+      prescription: field('plan-prescription').value,
+      mentalHealth: field('plan-mental-health').value,
+      dentalVision: field('plan-dental-vision').value
+    });
+  }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.tabs.sendMessage(tab.id, {
+    action: 'updateWidgetData',
+    widgetClass: 'insurance-comparison-tool',
+    data: { plans: plans }
+  }, (response) => {
+    if (response && response.success) {
+      showSuccess('Changes applied successfully! The page has been updated.');
+    } else {
+      showError('Failed to apply changes. Please try again.');
+    }
+  });
+}
+
+
+// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
+// =============================================================================
+${renderFunction}
+${attachFunction}
+${saveFunction}
+
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+function showSuccess(message) {
+  const messageArea = document.getElementById('messageArea');
+  messageArea.innerHTML = \`<div class="success-message">\${message}</div>\`;
+  setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
+}
+
+function showError(message) {
+  const messageArea = document.getElementById('messageArea');
+  messageArea.innerHTML = \`<div class="error-message">\${message}</div>\`;
+  document.getElementById('loading').style.display = 'none';
+}
+`;
     }
 
-    function generateInstructions(widgetClass) {
-      const html = `
-        <div style="padding: 1rem; line-height: 1.8;">
-          <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Installation Instructions</h3>
-          
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 1: Use Generated HTML</h4>
-          <p style="margin-left: 1.5rem; color: #666;">
-            Copy the HTML from the <strong>Registry</strong> tab and replace your original widget markup.
-            This version has all the <code>data-*</code> attributes added and <code>dynamic-*</code> classes replaced.
-          </p>
-
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 2: Update content-script.js</h4>
-          <ol style="margin-left: 1.5rem;">
-            <li>Open <code>content-script.js</code></li>
-            <li>Add the registry entry to <code>WIDGET_REGISTRY</code></li>
-            <li>Copy the functions from <strong>content-script.js</strong> tab</li>
-            <li>Add router entries to <code>getWidgetData()</code> and <code>updateWidgetData()</code></li>
-          </ol>
-
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 3: Update sidepanel.js</h4>
-          <ol style="margin-left: 1.5rem;">
-            <li>Open <code>sidepanel.js</code></li>
-            <li>Copy all functions from <strong>sidepanel.js</strong> tab</li>
-            <li>Add router entry to <code>renderEditor()</code></li>
-          </ol>
-
-          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Step 4: Test</h4>
-          <ol style="margin-left: 1.5rem;">
-            <li>Reload extension in <code>chrome://extensions/</code></li>
-            <li>Navigate to page with your widget</li>
-            <li>Open side panel and verify detection</li>
-            <li>Edit and save to test</li>
-          </ol>
-        </div>
-      `;
+    function generateManifest() {
+      const now = new Date();
+      const version = `1.${now.getMonth() + 1}.${now.getDate()}`;
       
-      document.getElementById('instructionsContent').innerHTML = html;
+      return JSON.stringify({
+        "manifest_version": 3,
+        "name": "Sitecore Widget Editor",
+        "version": version,
+        "description": "Edit custom widgets on Sitecore pages with a visual interface",
+        "permissions": ["activeTab", "scripting", "sidePanel"],
+        "side_panel": { "default_path": "sidepanel.html" },
+        "action": {
+          "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon128.png"
+          }
+        },
+        "background": { "service_worker": "background.js" },
+        "icons": {
+          "16": "icon16.png",
+          "48": "icon48.png",
+          "128": "icon128.png"
+        },
+        "content_scripts": [{
+          "matches": ["<all_urls>"],
+          "js": ["sitecore-bridge.js", "content-script.js"],
+          "run_at": "document_idle",
+          "all_frames": false
+        }]
+      }, null, 2);
+    }
+
+    async function downloadZip(widgetClass) {
+      const zip = new JSZip();
+      
+      Object.keys(generatedFiles).forEach(filename => {
+        zip.file(filename, generatedFiles[filename]);
+      });
+
+      const content = await zip.generateAsync({type: "blob"});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = `${widgetClass}-extension-files.zip`;
+      link.click();
     }
   </script>
 
