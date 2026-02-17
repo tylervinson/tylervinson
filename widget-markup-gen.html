@@ -18,7 +18,21 @@
 
     .container { max-width: 1400px; margin: 0 auto; }
 
-    header { margin-bottom: 40px; }
+    header { 
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .version {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 10px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
 
     h1 {
       font-size: 32px;
@@ -334,6 +348,7 @@
 
 <div class="container">
   <header>
+    <div class="version">v3.1.0</div>
     <h1>Widget Code Generator</h1>
     <p class="subtitle">Upload your extension, add a widget, download updated extension</p>
     <nav class="tab-nav">
@@ -717,24 +732,54 @@
   function injectIntoContentScript(code, widgetClass, widgetName, widgetDescription, hasObjects, functionName) {
     // 1. Add to WIDGET_REGISTRY
     const registryEntry = `  '${widgetClass}': {\n    name: '${widgetName}',\n    description: '${widgetDescription}'\n  }`;
-    code = code.replace(
-      /(\s*\/\/\s*Add more widgets here\s*\n?\s*\};)/,
-      `,\n${registryEntry}\n  // Add more widgets here\n};`
-    );
+    
+    // Try with comment first, fallback to before closing brace
+    if (code.match(/\/\/\s*Add more widgets here/)) {
+      code = code.replace(
+        /(\s*\/\/\s*Add more widgets here\s*\n?\s*\};)/,
+        `,\n${registryEntry}\n  // Add more widgets here\n};`
+      );
+    } else {
+      // Fallback: find WIDGET_REGISTRY closing and inject before it
+      code = code.replace(
+        /(const WIDGET_REGISTRY\s*=\s*\{[\s\S]*?)(\n\};)/,
+        `$1,\n${registryEntry}\n};`
+      );
+    }
 
     // 2. Add to getWidgetData router
     const getDataCase = `  if (widgetClass === '${widgetClass}') {\n    return get${functionName}Data();\n  }`;
-    code = code.replace(
-      /(\/\/\s*Add more widget data extractors here\s*\n\s*return null;)/,
-      `${getDataCase}\n  // Add more widget data extractors here\n  return null;`
-    );
+    
+    // Try with comment first, fallback to before return null
+    if (code.match(/\/\/\s*Add more widget data extractors here/)) {
+      code = code.replace(
+        /(\/\/\s*Add more widget data extractors here\s*\n\s*return null;)/,
+        `${getDataCase}\n  // Add more widget data extractors here\n  return null;`
+      );
+    } else {
+      // Fallback: inject before return null in getWidgetData
+      code = code.replace(
+        /(function getWidgetData\(widgetClass\) \{[\s\S]*?)(\n\s*return null;\n\})/,
+        `$1\n${getDataCase}$2`
+      );
+    }
 
     // 3. Add to updateWidgetData router
     const updateDataCase = `  if (widgetClass === '${widgetClass}') {\n    success = update${functionName}Data(data);\n  }`;
-    code = code.replace(
-      /(\/\/\s*Add more widget updaters here)/,
-      `${updateDataCase}\n  // Add more widget updaters here`
-    );
+    
+    // Try with comment first, fallback to before if (success)
+    if (code.match(/\/\/\s*Add more widget updaters here/)) {
+      code = code.replace(
+        /(\/\/\s*Add more widget updaters here)/,
+        `${updateDataCase}\n  // Add more widget updaters here`
+      );
+    } else {
+      // Fallback: inject before the if (success) block
+      code = code.replace(
+        /(function updateWidgetData\(widgetClass, data\) \{\s*let success = false;[\s\S]*?)(\n\s*if \(success\) \{)/,
+        `$1\n${updateDataCase}$2`
+      );
+    }
 
     // 4. Append widget functions at end of file
     const newFunctions = generateWidgetFunctions(widgetClass, hasObjects, functionName);
