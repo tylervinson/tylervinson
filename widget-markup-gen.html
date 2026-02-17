@@ -168,12 +168,35 @@
       font-size: 13px;
     }
 
-    .widget-item-name { font-family: 'Courier New', monospace; }
+    .widget-item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .widget-item-name { 
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    
     .widget-item-badge {
       font-size: 11px;
-      color: #666;
+      color: #999;
+    }
+
+    .widget-item-delete {
+      background: #c00;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+    }
+
+    .widget-item-delete:hover {
+      background: #a00;
     }
 
     .info-box {
@@ -471,14 +494,111 @@
       return;
     }
 
-    list.innerHTML = detectedWidgets.map(w => `
+    list.innerHTML = detectedWidgets.map((w, idx) => `
       <div class="widget-item">
-        <span class="widget-item-name">${w.className}</span>
-        <span class="widget-item-badge">${w.name}</span>
+        <div class="widget-item-left">
+          <span class="widget-item-name">${w.className}</span>
+          <span class="widget-item-badge">${w.name}</span>
+        </div>
+        <button class="widget-item-delete" onclick="deleteWidget('${w.className}')">Delete</button>
       </div>
     `).join('');
 
     container.style.display = 'block';
+  }
+
+  async function deleteWidget(widgetClass) {
+    if (!confirm(`Delete widget "${widgetClass}"?\n\nThis will remove it from content-script.js and sidepanel.js.`)) {
+      return;
+    }
+
+    try {
+      // Remove from content-script.js
+      currentContentScript = removeWidgetFromContentScript(currentContentScript, widgetClass);
+      
+      // Remove from sidepanel.js
+      currentSidepanel = removeWidgetFromSidepanel(currentSidepanel, widgetClass);
+
+      // Update detected widgets list
+      detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
+      showExistingWidgets();
+
+      // Create updated ZIP
+      const newZip = new JSZip();
+      const filePromises = [];
+      loadedZip.forEach((relativePath, file) => {
+        filePromises.push(
+          file.async('uint8array').then(content => {
+            newZip.file(relativePath, content);
+          })
+        );
+      });
+      await Promise.all(filePromises);
+
+      newZip.file('content-script.js', currentContentScript);
+      newZip.file('sidepanel.js', currentSidepanel);
+      if (currentManifest) {
+        newZip.file('manifest.json', updateManifest(currentManifest));
+      }
+
+      generatedZipBlob = await newZip.generateAsync({ type: 'blob' });
+
+      // Auto-download
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(generatedZipBlob);
+      link.download = `sitecore-widget-editor-removed-${widgetClass}.zip`;
+      link.click();
+
+      showStatus('success', `✓ Widget "${widgetClass}" removed. Download started.`);
+
+    } catch (err) {
+      showStatus('error', `Failed to delete widget: ${err.message}`);
+    }
+  }
+
+  function removeWidgetFromContentScript(code, widgetClass) {
+    // Remove from WIDGET_REGISTRY
+    const registryPattern = new RegExp(`\\s*,?\\s*'${widgetClass}'\\s*:\\s*\\{[^}]*\\}`, 'g');
+    code = code.replace(registryPattern, '');
+
+    // Remove router case from getWidgetData
+    const getPattern = new RegExp(`\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`, 'g');
+    code = code.replace(getPattern, '');
+
+    // Remove router case from updateWidgetData
+    const updatePattern = new RegExp(`\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`, 'g');
+    code = code.replace(updatePattern, '');
+
+    // Remove widget functions section
+    const camelClass = toCamelCase(widgetClass);
+    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+    const sectionPattern = new RegExp(
+      `// =+\\s*\\n// ${widgetClass.toUpperCase().replace(/-/g, ' ')}\\s*\\n// =+[\\s\\S]*?(?=\\n// =|\\n\\n$|$)`,
+      'g'
+    );
+    code = code.replace(sectionPattern, '');
+
+    return code;
+  }
+
+  function removeWidgetFromSidepanel(code, widgetClass) {
+    // Remove from renderEditor router
+    const camelClass = toCamelCase(widgetClass);
+    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+    const renderPattern = new RegExp(
+      `\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`,
+      'g'
+    );
+    code = code.replace(renderPattern, '');
+
+    // Remove editor functions section
+    const sectionPattern = new RegExp(
+      `// =+\\s*\\n// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR\\s*\\n// =+[\\s\\S]*?(?=\\n// =|$)`,
+      'g'
+    );
+    code = code.replace(sectionPattern, '');
+
+    return code;
   }
 
   function setUploadStatus(type, message) {
@@ -851,8 +971,20 @@ ${saveFn}
     if (!loadedZip) return showStatus('error', 'Please upload your extension ZIP first');
 
     // Check for duplicate
-    if (detectedWidgets.find(w => w.className === widgetClass)) {
-      return showStatus('error', `Widget "${widgetClass}" already exists in this extension`);
+    const existingWidget = detectedWidgets.find(w => w.className === widgetClass);
+    if (existingWidget) {
+      const replace = confirm(
+        `Widget "${widgetClass}" already exists.\n\nDo you want to REPLACE it with the new version?\n\nClick OK to replace, Cancel to abort.`
+      );
+      
+      if (!replace) {
+        return showStatus('error', 'Generation cancelled');
+      }
+
+      // Remove the existing widget before adding new one
+      currentContentScript = removeWidgetFromContentScript(currentContentScript, widgetClass);
+      currentSidepanel = removeWidgetFromSidepanel(currentSidepanel, widgetClass);
+      detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
     }
 
     const analysis = analyzeHTML(htmlInput);
