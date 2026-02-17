@@ -403,6 +403,17 @@
       };
     }
 
+    function getDirectText(el) {
+      // Only get direct text nodes (nodeType 3), not text from child elements
+      let text = '';
+      el.childNodes.forEach(node => {
+        if (node.nodeType === 3) {
+          text += node.textContent.trim();
+        }
+      });
+      return text;
+    }
+
     function processHTML(html) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
@@ -436,18 +447,12 @@
                 fieldCounts[type] = (fieldCounts[type] || 0) + 1;
                 const fieldNum = fieldCounts[type];
                 
-                // Extract actual content as the data value
-                let dataValue;
+                // Extract text content as the data value - direct text nodes only
+                const textContent = getDirectText(el);
+                // For numbers, fall back to 0 rather than placeholder
+                const dataValue = textContent !== '' ? textContent : (type === 'number' ? '0' : 'placeholder');
                 
-                // For number types, prioritize data-target attribute
-                if (type === 'number') {
-                  dataValue = el.dataset.target || el.getAttribute('data-target') || el.textContent.trim() || 'placeholder';
-                } else {
-                  // For text, use textContent
-                  dataValue = el.textContent.trim() || 'placeholder';
-                }
-                
-                // Add data attribute to THIS element (not parent)
+                // Add data attribute to THIS element
                 el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
                 
                 // Update the element's class
@@ -483,18 +488,12 @@
               fieldCounts[type] = (fieldCounts[type] || 0) + 1;
               const fieldNum = fieldCounts[type];
               
-              // Extract actual content as the data value
-              let dataValue;
+              // Extract text content as the data value - direct text nodes only
+              const textContent = getDirectText(el);
+              // For numbers, fall back to 0 rather than placeholder
+              const dataValue = textContent !== '' ? textContent : (type === 'number' ? '0' : 'placeholder');
               
-              // For number types, prioritize data-target attribute
-              if (type === 'number') {
-                dataValue = el.dataset.target || el.getAttribute('data-target') || el.textContent.trim() || 'placeholder';
-              } else {
-                // For text, use textContent
-                dataValue = el.textContent.trim() || 'placeholder';
-              }
-              
-              // Add data attribute to THIS element (not parent)
+              // Add data attribute to THIS element
               el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
               
               // Update the element's class
@@ -626,7 +625,7 @@ function get${functionName}Data() {
     
     dataElements.forEach(dataEl => {
       Array.from(dataEl.attributes).forEach(attr => {
-        if (attr.name.startsWith('data-') && attr.name !== 'data-object-id' && !attr.name.startsWith('data-target')) {
+        if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
           const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
           obj[fieldName] = attr.value;
         }
@@ -649,7 +648,7 @@ function get${functionName}Data() {
   
   dataElements.forEach(el => {
     Array.from(el.attributes).forEach(attr => {
-      if (attr.name.startsWith('data-') && !attr.name.startsWith('data-target')) {
+      if (attr.name.startsWith('data-')) {
         const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
         data[fieldName] = attr.value;
       }
@@ -979,7 +978,7 @@ ${newUpdateData}
       const inputTypeMap = {
         'text': 'text',
         'email': 'email',
-        'number': 'number',
+        'number': 'text',
         'phone': 'tel',
         'url': 'url',
         'date': 'date',
