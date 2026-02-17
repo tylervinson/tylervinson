@@ -6,11 +6,7 @@
   <title>Sitecore Widget Editor - Code Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -20,14 +16,9 @@
       padding: 40px 20px;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1400px; margin: 0 auto; }
 
-    header {
-      margin-bottom: 40px;
-    }
+    header { margin-bottom: 40px; }
 
     h1 {
       font-size: 32px;
@@ -45,7 +36,6 @@
 
     .tab-nav {
       display: flex;
-      gap: 0;
       border-bottom: 1px solid #e0e0e0;
       margin-top: 24px;
     }
@@ -59,17 +49,10 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border-bottom: 2px solid transparent;
-      transition: color 0.2s;
     }
 
-    .tab-nav-link:hover {
-      color: #666;
-    }
-
-    .tab-nav-link.active {
-      color: #1a1a1a;
-      border-bottom-color: #1a1a1a;
-    }
+    .tab-nav-link:hover { color: #666; }
+    .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
 
     .main-grid {
       display: grid;
@@ -77,14 +60,14 @@
       gap: 20px;
     }
 
-    .input-section, .output-section {
+    .panel {
       background: #fff;
       padding: 30px;
       border: 1px solid #e0e0e0;
     }
 
-    .section-title {
-      font-size: 13px;
+    .panel-title {
+      font-size: 12px;
       font-weight: 500;
       margin-bottom: 24px;
       text-transform: uppercase;
@@ -92,9 +75,7 @@
       color: #666;
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
     label {
       display: block;
@@ -106,8 +87,7 @@
       letter-spacing: 0.3px;
     }
 
-    input[type="text"],
-    textarea {
+    input[type="text"], textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #d0d0d0;
@@ -116,8 +96,7 @@
       font-size: 14px;
     }
 
-    input[type="text"]:focus,
-    textarea:focus {
+    input[type="text"]:focus, textarea:focus {
       outline: none;
       border-color: #1a1a1a;
     }
@@ -128,10 +107,79 @@
       min-height: 200px;
     }
 
+    /* ZIP Upload Zone */
+    .upload-zone {
+      border: 1px dashed #ccc;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .upload-zone:hover { border-color: #1a1a1a; }
+
+    .upload-zone.has-file {
+      border-style: solid;
+      border-color: #1a1a1a;
+      background: #f9f9f9;
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 24px; margin-bottom: 8px; }
+
+    .upload-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .upload-label strong { color: #1a1a1a; }
+
+    .upload-status {
+      font-size: 12px;
+      margin-top: 8px;
+      color: #666;
+    }
+
+    .upload-status.loaded { color: #2a7a2a; }
+    .upload-status.error { color: #c00; }
+
+    /* Widget list */
+    .widget-list {
+      margin-bottom: 16px;
+    }
+
+    .widget-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .widget-item-name { font-family: 'Courier New', monospace; }
+    .widget-item-badge {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
     .info-box {
       background: #f5f5f5;
       border-left: 2px solid #1a1a1a;
-      padding: 12px;
+      padding: 10px 12px;
       margin-top: 8px;
       font-size: 12px;
       color: #666;
@@ -150,78 +198,14 @@
       letter-spacing: 0.5px;
     }
 
-    button:hover {
-      background: #333;
-    }
-
-    .analysis-section {
-      background: #f9f9f9;
-      border: 1px solid #e0e0e0;
-      padding: 16px;
-      margin: 20px 0;
-    }
-
-    .analysis-title {
-      font-size: 12px;
-      font-weight: 500;
-      margin-bottom: 12px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .field-list {
-      list-style: none;
-    }
-
-    .field-item {
-      padding: 8px 12px;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-    }
-
-    .field-name {
-      font-family: 'Courier New', monospace;
-      color: #1a1a1a;
-    }
-
-    .field-type {
-      color: #999;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .error-message {
-      background: #fff;
-      border-left: 2px solid #d00;
-      padding: 12px;
-      margin: 20px 0;
-      font-size: 13px;
-      color: #d00;
-    }
+    button:hover { background: #333; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
 
     .download-btn {
       width: 100%;
       padding: 16px;
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
       font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-
-    .download-btn:hover {
-      background: #333;
+      margin-bottom: 8px;
     }
 
     .download-info {
@@ -231,9 +215,53 @@
       margin-bottom: 24px;
     }
 
-    .code-wrapper {
-      position: relative;
+    .analysis-box {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      margin: 20px 0;
     }
+
+    .analysis-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 10px;
+    }
+
+    .analysis-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .analysis-row:last-child { border-bottom: none; }
+    .analysis-key { color: #666; }
+    .analysis-val { font-family: 'Courier New', monospace; font-size: 12px; }
+
+    .error-msg {
+      border-left: 2px solid #c00;
+      padding: 10px 12px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: #c00;
+      background: #fff;
+    }
+
+    .success-msg {
+      border-left: 2px solid #2a7a2a;
+      padding: 10px 12px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: #2a7a2a;
+      background: #fff;
+    }
+
+    .code-wrapper { position: relative; margin-top: 16px; }
 
     pre {
       background: #1a1a1a;
@@ -242,9 +270,9 @@
       padding-top: 50px;
       overflow-x: auto;
       font-family: 'Courier New', monospace;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.5;
-      max-height: 400px;
+      max-height: 360px;
       overflow-y: auto;
       border: 1px solid #000;
     }
@@ -255,383 +283,363 @@
       right: 12px;
       background: #333;
       color: #fff;
-      padding: 8px;
-      font-size: 20px;
       border: 1px solid #444;
       cursor: pointer;
       width: 36px;
       height: 36px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0;
     }
 
-    .copy-btn:hover {
-      background: #444;
+    .copy-btn:hover { background: #444; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 24px 0;
     }
 
     @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
+      .main-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>Widget Code Generator</h1>
-      <p class="subtitle">Automatically generate extension code from your widget HTML</p>
-      
-      <nav class="tab-nav">
-        <a href="sitecore-widget-editor-overview.html" class="tab-nav-link">Extension Overview</a>
-        <a href="widget-code-generator.html" class="tab-nav-link active">Code Generator</a>
-        <a href="widget-markup-specifications.html" class="tab-nav-link">Markup Specs</a>
-      </nav>
-    </header>
+<div class="container">
+  <header>
+    <h1>Widget Code Generator</h1>
+    <p class="subtitle">Upload your extension, add a widget, download updated extension</p>
+    <nav class="tab-nav">
+      <a href="sitecore-widget-editor-overview.html" class="tab-nav-link">Extension Overview</a>
+      <a href="widget-code-generator.html" class="tab-nav-link active">Code Generator</a>
+      <a href="widget-markup-specifications.html" class="tab-nav-link">Markup Specs</a>
+    </nav>
+  </header>
 
-    <div class="main-grid">
-      <!-- Input Section -->
-      <div class="input-section">
-        <div class="section-title">Input</div>
+  <div class="main-grid">
 
-        <div class="form-group">
-          <label>Widget Class Name</label>
-          <input type="text" id="widgetClass" placeholder="team-member-bio">
-          <div class="info-box">
-            The CSS class on the widget's outer container (e.g., "team-member-bio")
-          </div>
-        </div>
+    <!-- LEFT: Input -->
+    <div class="panel">
+      <div class="panel-title">1 — Upload Current Extension</div>
 
-        <div class="form-group">
-          <label>Widget Display Name</label>
-          <input type="text" id="widgetName" placeholder="Team Member Bio">
-        </div>
-
-        <div class="form-group">
-          <label>Widget Description</label>
-          <input type="text" id="widgetDescription" placeholder="Edit team member information and biography">
-        </div>
-
-        <div class="form-group">
-          <label>Widget HTML Sample</label>
-          <textarea id="htmlInput" placeholder="Paste your widget HTML here..."></textarea>
-          <div class="info-box">
-            Paste HTML with dynamic-object and dynamic-{type} classes. Generator will add data attributes and create extension code.
-          </div>
-        </div>
-
-        <button onclick="generateCode()">Generate Code</button>
-
-        <div id="analysisOutput"></div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="zipInput" accept=".zip">
+        <div class="upload-icon">📦</div>
+        <div class="upload-label"><strong>Click to upload</strong> your extension .zip</div>
+        <div class="upload-status" id="uploadStatus">No file selected</div>
       </div>
 
-      <!-- Output Section -->
-      <div class="output-section">
-        <div class="section-title">Generated Files</div>
+      <div id="currentWidgets" style="display:none;">
+        <div class="analysis-title">Existing Widgets Found</div>
+        <div class="widget-list" id="widgetList"></div>
+      </div>
 
-        <div id="downloadSection" style="display: none;">
-          <button id="downloadBtn" class="download-btn">
-            📦 Download Extension Files (.zip)
-          </button>
-          <p class="download-info">
-            Contains: content-script.js, sidepanel.js, manifest.json, processed-widget.html
-          </p>
-        </div>
+      <hr class="divider">
 
-        <div id="previewSection" style="display: none;">
-          <h3 style="font-size: 13px; font-weight: 500; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666;">Processed HTML Preview</h3>
-          <div class="code-wrapper">
-            <button class="copy-btn" onclick="copyCode()" title="Copy to clipboard">📋</button>
-            <pre id="processedHTMLCode">// Generate code to see output</pre>
-          </div>
+      <div class="panel-title">2 — New Widget Details</div>
+
+      <div class="form-group">
+        <label>Widget Class Name</label>
+        <input type="text" id="widgetClass" placeholder="team-member-bio">
+        <div class="info-box">CSS class on the widget's outer container</div>
+      </div>
+
+      <div class="form-group">
+        <label>Widget Display Name</label>
+        <input type="text" id="widgetName" placeholder="Team Member Bio">
+      </div>
+
+      <div class="form-group">
+        <label>Widget Description</label>
+        <input type="text" id="widgetDescription" placeholder="Edit team member bios">
+      </div>
+
+      <div class="form-group">
+        <label>Widget HTML</label>
+        <textarea id="htmlInput" placeholder="Paste widget HTML with dynamic-* classes..."></textarea>
+        <div class="info-box">Use dynamic-object, dynamic-text, dynamic-number, dynamic-email, etc.</div>
+      </div>
+
+      <button onclick="generateCode()" id="generateBtn" disabled>Generate &amp; Download</button>
+
+      <div id="statusOutput"></div>
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div class="panel">
+      <div class="panel-title">Output</div>
+
+      <div id="outputPlaceholder" style="color:#999; font-size:14px; padding: 20px 0;">
+        Upload your extension ZIP and fill in the widget details to get started.
+      </div>
+
+      <div id="outputSection" style="display:none;">
+        <button class="download-btn" id="downloadBtn">📦 Download Updated Extension (.zip)</button>
+        <p class="download-info">Drop-in replacement — contains all existing widgets plus your new one</p>
+
+        <hr class="divider">
+
+        <div class="panel-title">Processed HTML Preview</div>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyHTML()" title="Copy">📋</button>
+          <pre id="htmlPreview">// Generate to see output</pre>
         </div>
       </div>
     </div>
+
   </div>
+</div>
 
-  <script>
-    let generatedFiles = {};
+<script>
+  // ─── State ────────────────────────────────────────────────────────────────
+  let loadedZip = null;
+  let currentContentScript = '';
+  let currentSidepanel = '';
+  let currentManifest = '';
+  let detectedWidgets = [];
+  let generatedZipBlob = null;
 
-    function copyCode() {
-      const code = document.getElementById('processedHTMLCode').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = '✓';
-        setTimeout(() => {
-          btn.textContent = originalText;
-        }, 2000);
-      });
+  // ─── ZIP Upload ───────────────────────────────────────────────────────────
+  document.getElementById('zipInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      loadedZip = await JSZip.loadAsync(file);
+      await readExtensionFiles();
+    } catch (err) {
+      setUploadStatus('error', `Failed to read ZIP: ${err.message}`);
+    }
+  });
+
+  async function readExtensionFiles() {
+    try {
+      // Read content-script.js
+      const csFile = loadedZip.file('content-script.js');
+      if (!csFile) throw new Error('content-script.js not found in ZIP');
+      currentContentScript = await csFile.async('string');
+
+      // Read sidepanel.js
+      const spFile = loadedZip.file('sidepanel.js');
+      if (!spFile) throw new Error('sidepanel.js not found in ZIP');
+      currentSidepanel = await spFile.async('string');
+
+      // Read manifest.json
+      const mfFile = loadedZip.file('manifest.json');
+      if (mfFile) {
+        currentManifest = await mfFile.async('string');
+      }
+
+      // Detect existing widgets from WIDGET_REGISTRY
+      detectedWidgets = parseWidgetRegistry(currentContentScript);
+
+      // Update UI
+      setUploadStatus('loaded', `✓ Loaded — ${Object.keys(loadedZip.files).length} files found`);
+      document.getElementById('uploadZone').classList.add('has-file');
+      showExistingWidgets();
+      document.getElementById('generateBtn').removeAttribute('disabled');
+
+    } catch (err) {
+      setUploadStatus('error', err.message);
+    }
+  }
+
+  function parseWidgetRegistry(code) {
+    const widgets = [];
+    const registryMatch = code.match(/const WIDGET_REGISTRY\s*=\s*\{([\s\S]*?)\};/);
+    if (!registryMatch) return widgets;
+
+    const registryBody = registryMatch[1];
+    const entryPattern = /'([^']+)'\s*:\s*\{\s*name\s*:\s*'([^']+)'/g;
+    let match;
+    while ((match = entryPattern.exec(registryBody)) !== null) {
+      widgets.push({ className: match[1], name: match[2] });
+    }
+    return widgets;
+  }
+
+  function showExistingWidgets() {
+    const container = document.getElementById('currentWidgets');
+    const list = document.getElementById('widgetList');
+
+    if (detectedWidgets.length === 0) {
+      container.style.display = 'none';
+      return;
     }
 
-    function analyzeHTML(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      
-      const widgetContainer = doc.body.firstElementChild;
-      if (!widgetContainer) {
-        return { error: 'No widget container found' };
-      }
+    list.innerHTML = detectedWidgets.map(w => `
+      <div class="widget-item">
+        <span class="widget-item-name">${w.className}</span>
+        <span class="widget-item-badge">${w.name}</span>
+      </div>
+    `).join('');
 
-      const widgetClass = widgetContainer.className.split(' ')[0];
-      const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
-      const hasDynamicObjects = dynamicObjects.length > 0;
-      const dynamicElements = widgetContainer.querySelectorAll('[class*="dynamic-"]');
-      
-      if (dynamicElements.length === 0) {
-        return { error: 'No dynamic-* classes found in HTML' };
-      }
+    container.style.display = 'block';
+  }
 
-      const fieldTypes = new Set();
-      dynamicElements.forEach(el => {
-        const classes = Array.from(el.classList);
-        classes.forEach(cls => {
+  function setUploadStatus(type, message) {
+    const el = document.getElementById('uploadStatus');
+    el.textContent = message;
+    el.className = `upload-status ${type}`;
+  }
+
+  // ─── HTML Processing ──────────────────────────────────────────────────────
+  function getDirectText(el) {
+    let text = '';
+    el.childNodes.forEach(node => {
+      if (node.nodeType === 3) {
+        text += node.textContent.trim();
+      }
+    });
+    return text;
+  }
+
+  function processHTML(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const widgetContainer = doc.body.firstElementChild;
+    if (!widgetContainer) return null;
+
+    const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
+    const hasDynamicObjects = dynamicObjects.length > 0;
+
+    function processElement(el, target) {
+      // target = the element to add data attributes to (either the el itself)
+      const fieldCounts = {};
+
+      const allEls = el.querySelectorAll('*');
+      const dynamicEls = [];
+
+      allEls.forEach(child => {
+        const hasDynClass = Array.from(child.classList).some(cls =>
+          cls.startsWith('dynamic-') && cls !== 'dynamic-object'
+        );
+        if (hasDynClass) dynamicEls.push(child);
+      });
+
+      dynamicEls.forEach(child => {
+        Array.from(child.classList).forEach(cls => {
           if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
-            fieldTypes.add(cls.replace('dynamic-', ''));
+            const type = cls.replace('dynamic-', '');
+            fieldCounts[type] = (fieldCounts[type] || 0) + 1;
+            const fieldNum = fieldCounts[type];
+
+            // Extract direct text only (ignores child elements like <span>%)
+            const directText = getDirectText(child);
+            const dataValue = directText !== '' ? directText : (type === 'number' ? '0' : 'placeholder');
+
+            // Data attribute goes ON the element itself
+            child.setAttribute(`data-${type}-${fieldNum}`, dataValue);
+
+            // Replace dynamic class with numbered class
+            child.classList.remove(cls);
+            child.classList.add(`${type}-${fieldNum}`);
           }
         });
       });
-
-      return {
-        widgetClass,
-        hasDynamicObjects,
-        objectCount: hasDynamicObjects ? dynamicObjects.length : 1,
-        fieldTypes: Array.from(fieldTypes),
-        dynamicElements: dynamicElements.length
-      };
     }
 
-    function getDirectText(el) {
-      // Only get direct text nodes (nodeType 3), not text from child elements
-      let text = '';
-      el.childNodes.forEach(node => {
-        if (node.nodeType === 3) {
-          text += node.textContent.trim();
+    if (hasDynamicObjects) {
+      dynamicObjects.forEach((obj, i) => {
+        processElement(obj);
+        obj.setAttribute('data-object-id', (i + 1).toString());
+        obj.classList.remove('dynamic-object');
+      });
+    } else {
+      processElement(widgetContainer);
+    }
+
+    return doc.body.innerHTML;
+  }
+
+  function analyzeHTML(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const container = doc.body.firstElementChild;
+    if (!container) return { error: 'No widget container found' };
+
+    const widgetClass = container.className.split(' ')[0];
+    const dynamicObjects = container.querySelectorAll('.dynamic-object');
+    const hasDynamicObjects = dynamicObjects.length > 0;
+    const allDynamic = container.querySelectorAll('[class*="dynamic-"]');
+
+    if (allDynamic.length === 0) return { error: 'No dynamic-* classes found' };
+
+    const fieldTypes = new Set();
+    allDynamic.forEach(el => {
+      Array.from(el.classList).forEach(cls => {
+        if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
+          fieldTypes.add(cls.replace('dynamic-', ''));
         }
       });
-      return text;
-    }
+    });
 
-    function processHTML(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const widgetContainer = doc.body.firstElementChild;
-      if (!widgetContainer) return null;
+    return {
+      widgetClass,
+      hasDynamicObjects,
+      objectCount: hasDynamicObjects ? dynamicObjects.length : 1,
+      fieldTypes: Array.from(fieldTypes)
+    };
+  }
 
-      const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
-      const hasDynamicObjects = dynamicObjects.length > 0;
+  // ─── Code Generation ──────────────────────────────────────────────────────
+  function toCamelCase(str) {
+    return str.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  }
 
-      if (hasDynamicObjects) {
-        dynamicObjects.forEach((obj, objIndex) => {
-          const fieldCounts = {};
-          
-          // Find all elements with dynamic-* classes (except dynamic-object)
-          const allElements = obj.querySelectorAll('*');
-          const dynamicElements = [];
-          
-          allElements.forEach(el => {
-            const hasDynamicClass = Array.from(el.classList).some(cls => 
-              cls.startsWith('dynamic-') && cls !== 'dynamic-object'
-            );
-            if (hasDynamicClass) {
-              dynamicElements.push(el);
-            }
-          });
-          
-          dynamicElements.forEach(el => {
-            Array.from(el.classList).forEach(cls => {
-              if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
-                const type = cls.replace('dynamic-', '');
-                fieldCounts[type] = (fieldCounts[type] || 0) + 1;
-                const fieldNum = fieldCounts[type];
-                
-                // Extract text content as the data value - direct text nodes only
-                const textContent = getDirectText(el);
-                // For numbers, fall back to 0 rather than placeholder
-                const dataValue = textContent !== '' ? textContent : (type === 'number' ? '0' : 'placeholder');
-                
-                // Add data attribute to THIS element
-                el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
-                
-                // Update the element's class
-                el.classList.remove(cls);
-                el.classList.add(`${type}-${fieldNum}`);
-              }
-            });
-          });
-          
-          obj.setAttribute('data-object-id', (objIndex + 1).toString());
-          obj.classList.remove('dynamic-object');
-        });
-      } else {
-        const fieldCounts = {};
-        
-        // Find all dynamic-* classes at widget level
-        const allElements = widgetContainer.querySelectorAll('*');
-        const dynamicElements = [];
-        
-        allElements.forEach(el => {
-          const hasDynamicClass = Array.from(el.classList).some(cls => 
-            cls.startsWith('dynamic-')
-          );
-          if (hasDynamicClass) {
-            dynamicElements.push(el);
-          }
-        });
-        
-        dynamicElements.forEach(el => {
-          Array.from(el.classList).forEach(cls => {
-            if (cls.startsWith('dynamic-')) {
-              const type = cls.replace('dynamic-', '');
-              fieldCounts[type] = (fieldCounts[type] || 0) + 1;
-              const fieldNum = fieldCounts[type];
-              
-              // Extract text content as the data value - direct text nodes only
-              const textContent = getDirectText(el);
-              // For numbers, fall back to 0 rather than placeholder
-              const dataValue = textContent !== '' ? textContent : (type === 'number' ? '0' : 'placeholder');
-              
-              // Add data attribute to THIS element
-              el.setAttribute(`data-${type}-${fieldNum}`, dataValue);
-              
-              // Update the element's class
-              el.classList.remove(cls);
-              el.classList.add(`${type}-${fieldNum}`);
-            }
-          });
-        });
-      }
+  function toDisplayName(str) {
+    return str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
 
-      return doc.body.innerHTML;
-    }
+  function injectIntoContentScript(code, widgetClass, widgetName, widgetDescription, hasObjects, functionName) {
+    // 1. Add to WIDGET_REGISTRY
+    const registryEntry = `  '${widgetClass}': {\n    name: '${widgetName}',\n    description: '${widgetDescription}'\n  }`;
+    code = code.replace(
+      /(\s*\/\/\s*Add more widgets here\s*\n?\s*\};)/,
+      `,\n${registryEntry}\n  // Add more widgets here\n};`
+    );
 
-    function toCamelCase(str) {
-      return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-    }
+    // 2. Add to getWidgetData router
+    const getDataCase = `  if (widgetClass === '${widgetClass}') {\n    return get${functionName}Data();\n  }`;
+    code = code.replace(
+      /(\/\/\s*Add more widget data extractors here\s*\n\s*return null;)/,
+      `${getDataCase}\n  // Add more widget data extractors here\n  return null;`
+    );
 
-    function toDisplayName(str) {
-      return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    }
+    // 3. Add to updateWidgetData router
+    const updateDataCase = `  if (widgetClass === '${widgetClass}') {\n    success = update${functionName}Data(data);\n  }`;
+    code = code.replace(
+      /(\/\/\s*Add more widget updaters here)/,
+      `${updateDataCase}\n  // Add more widget updaters here`
+    );
 
-    function showError(message) {
-      document.getElementById('analysisOutput').innerHTML = `<div class="error-message">${message}</div>`;
-    }
+    // 4. Append widget functions at end of file
+    const newFunctions = generateWidgetFunctions(widgetClass, hasObjects, functionName);
+    code = code.trimEnd() + '\n\n' + newFunctions;
 
-    function showAnalysis(analysis) {
-      const html = `
-        <div class="analysis-section">
-          <div class="analysis-title">Detected Structure</div>
-          <ul class="field-list">
-            <li class="field-item">
-              <span class="field-name">Widget Class:</span>
-              <span class="field-type">${analysis.widgetClass}</span>
-            </li>
-            <li class="field-item">
-              <span class="field-name">Pattern:</span>
-              <span class="field-type">${analysis.hasDynamicObjects ? 'Multiple Objects' : 'Single Widget'}</span>
-            </li>
-            <li class="field-item">
-              <span class="field-name">Field Types:</span>
-              <span class="field-type">${analysis.fieldTypes.join(', ')}</span>
-            </li>
-          </ul>
-        </div>
-      `;
-      document.getElementById('analysisOutput').innerHTML = html;
-    }
+    return code;
+  }
 
-    async function generateCode() {
-      const widgetClass = document.getElementById('widgetClass').value.trim();
-      const widgetName = document.getElementById('widgetName').value.trim();
-      const widgetDescription = document.getElementById('widgetDescription').value.trim();
-      const htmlInput = document.getElementById('htmlInput').value.trim();
-
-      if (!widgetClass) {
-        showError('Please enter a widget class name');
-        return;
-      }
-
-      if (!htmlInput) {
-        showError('Please paste widget HTML');
-        return;
-      }
-
-      const analysis = analyzeHTML(htmlInput);
-      
-      if (analysis.error) {
-        showError(analysis.error);
-        return;
-      }
-
-      showAnalysis(analysis);
-
-      const processedHTML = processHTML(htmlInput);
-      document.getElementById('processedHTMLCode').textContent = processedHTML;
-      document.getElementById('previewSection').style.display = 'block';
-
-      const camelClass = toCamelCase(widgetClass);
-      const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-      
-      generateCompleteFiles(
-        widgetClass, 
-        widgetName || toDisplayName(widgetClass), 
-        widgetDescription || `Edit ${widgetClass.replace(/-/g, ' ')} data`,
-        analysis, 
-        processedHTML, 
-        functionName
-      );
-
-      document.getElementById('downloadSection').style.display = 'block';
-      document.getElementById('downloadBtn').onclick = () => downloadZip(widgetClass);
-    }
-
-    function generateCompleteFiles(widgetClass, widgetName, widgetDescription, analysis, processedHTML, functionName) {
-      const hasObjects = analysis.hasDynamicObjects;
-      
-      // Generate content-script.js
-      generatedFiles['content-script.js'] = generateContentScript(widgetClass, widgetName, widgetDescription, hasObjects, functionName);
-      
-      // Generate sidepanel.js
-      generatedFiles['sidepanel.js'] = generateSidepanel(widgetClass, widgetName, hasObjects, functionName);
-      
-      // Generate manifest.json
-      generatedFiles['manifest.json'] = generateManifest();
-      
-      // Include processed HTML
-      generatedFiles['processed-widget.html'] = processedHTML;
-    }
-
-    function generateContentScript(widgetClass, widgetName, widgetDescription, hasObjects, functionName) {
-      const newWidgetRegistry = `  '${widgetClass}': {
-    name: '${widgetName}',
-    description: '${widgetDescription}'
-  }`;
-
-      const newGetData = hasObjects ? `
+  function generateWidgetFunctions(widgetClass, hasObjects, functionName) {
+    const getDataFn = hasObjects ? `
 function get${functionName}Data() {
   const widget = findWidgetElement('${widgetClass}');
   if (!widget) return null;
 
-  const objectElements = widget.querySelectorAll('[data-object-id]');
   const objects = [];
-
-  objectElements.forEach(el => {
+  widget.querySelectorAll('[data-object-id]').forEach(el => {
     const obj = { id: el.dataset.objectId || '' };
-    
-    // Find all elements with data attributes within this object
-    const dataElements = el.querySelectorAll('[data-text-1], [data-number-1], [data-email-1], [data-phone-1], [data-url-1], [data-date-1], [data-textarea-1], [data-checkbox-1]');
-    
-    dataElements.forEach(dataEl => {
-      Array.from(dataEl.attributes).forEach(attr => {
+    el.querySelectorAll('*').forEach(child => {
+      Array.from(child.attributes).forEach(attr => {
         if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
-          const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
-          obj[fieldName] = attr.value;
+          obj[attr.name.replace('data-', '').replace(/-/g, '_')] = attr.value;
         }
       });
     });
-    
     objects.push(obj);
   });
 
@@ -642,43 +650,32 @@ function get${functionName}Data() {
   if (!widget) return null;
 
   const data = {};
-  
-  // Find all elements with data attributes
-  const dataElements = widget.querySelectorAll('[data-text-1], [data-number-1], [data-email-1], [data-phone-1], [data-url-1], [data-date-1], [data-textarea-1], [data-checkbox-1]');
-  
-  dataElements.forEach(el => {
+  widget.querySelectorAll('*').forEach(el => {
     Array.from(el.attributes).forEach(attr => {
       if (attr.name.startsWith('data-')) {
-        const fieldName = attr.name.replace('data-', '').replace(/-/g, '_');
-        data[fieldName] = attr.value;
+        data[attr.name.replace('data-', '').replace(/-/g, '_')] = attr.value;
       }
     });
   });
-  
+
   return data;
 }`;
 
-      const newUpdateData = hasObjects ? `
+    const updateDataFn = hasObjects ? `
 function update${functionName}Data(data) {
   const widget = findWidgetElement('${widgetClass}');
   if (!widget) return false;
 
-  const objectElements = widget.querySelectorAll('[data-object-id]');
-  
-  data.objects.forEach((obj, index) => {
-    if (!objectElements[index]) return;
-    const objEl = objectElements[index];
-
+  const objectEls = widget.querySelectorAll('[data-object-id]');
+  data.objects.forEach((obj, i) => {
+    if (!objectEls[i]) return;
     Object.keys(obj).forEach(key => {
-      if (key !== 'id') {
-        const attrName = 'data-' + key.replace(/_/g, '-');
-        
-        // Find element with this data attribute within the object
-        const targetEl = objEl.querySelector('[' + attrName + ']');
-        if (targetEl) {
-          targetEl.setAttribute(attrName, obj[key]);
-          targetEl.textContent = obj[key];
-        }
+      if (key === 'id') return;
+      const attrName = 'data-' + key.replace(/_/g, '-');
+      const targetEl = objectEls[i].querySelector('[' + attrName + ']');
+      if (targetEl) {
+        targetEl.setAttribute(attrName, obj[key]);
+        targetEl.textContent = obj[key];
       }
     });
   });
@@ -691,8 +688,6 @@ function update${functionName}Data(data) {
 
   Object.keys(data).forEach(key => {
     const attrName = 'data-' + key.replace(/_/g, '-');
-    
-    // Find element with this data attribute
     const targetEl = widget.querySelector('[' + attrName + ']');
     if (targetEl) {
       targetEl.setAttribute(attrName, data[key]);
@@ -703,335 +698,59 @@ function update${functionName}Data(data) {
   return true;
 }`;
 
-      return `// =============================================================================
-// Content Script — Scans page for widgets, reads/writes data, notifies Sitecore
-// =============================================================================
-
-// Widget registry — add new widgets here
-const WIDGET_REGISTRY = {
-  'insurance-comparison-tool': {
-    name: 'Insurance Plan Comparison',
-    description: 'Edit insurance plan details and comparison data'
-  },
-${newWidgetRegistry}
-};
-
-// ---------------------------------------------------------------------------
-// Mutation observer for dynamically loaded widgets
-// ---------------------------------------------------------------------------
-let observer = null;
-
-function setupMutationObserver() {
-  if (observer) return;
-
-  observer = new MutationObserver(() => {
-    clearTimeout(observer._timeout);
-    observer._timeout = setTimeout(() => {
-      for (const className in WIDGET_REGISTRY) {
-        const el = document.querySelector(\`.\${className}\`);
-        if (el && !el.dataset.widgetDetected) {
-          el.dataset.widgetDetected = 'true';
-          console.log(\`[Widget Editor] Detected widget: \${className}\`);
-        }
-      }
-    }, 500);
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupMutationObserver);
-} else {
-  setupMutationObserver();
-}
-
-// ---------------------------------------------------------------------------
-// Message handler — communication with sidebar/popup
-// ---------------------------------------------------------------------------
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
-  if (request.action === 'detectWidgets') {
-    const foundWidgets = detectWidgets();
-    if (foundWidgets.length > 0) {
-      sendResponse({ widgets: foundWidgets });
-    }
-    return foundWidgets.length > 0;
-  }
-
-  if (request.action === 'getWidgetData') {
-    const el = findWidgetElement(request.widgetClass);
-    if (!el) return false;
-    const data = getWidgetData(request.widgetClass);
-    sendResponse({ data });
-    return true;
-  }
-
-  if (request.action === 'updateWidgetData') {
-    const el = findWidgetElement(request.widgetClass);
-    if (!el) return false;
-    const success = updateWidgetData(request.widgetClass, request.data);
-    sendResponse({ success });
-    return true;
-  }
-
-  return false;
-});
-
-// ---------------------------------------------------------------------------
-// Widget detection
-// ---------------------------------------------------------------------------
-function detectWidgets() {
-  const found = [];
-
-  for (const className in WIDGET_REGISTRY) {
-    const element = document.querySelector(\`.\${className}\`);
-
-    if (element) {
-      found.push({
-        className,
-        name: WIDGET_REGISTRY[className].name,
-        description: WIDGET_REGISTRY[className].description
-      });
-    }
-  }
-
-  return found;
-}
-
-// ---------------------------------------------------------------------------
-// Helper: find widget element in main document
-// ---------------------------------------------------------------------------
-function findWidgetElement(className) {
-  return document.querySelector(\`.\${className}\`);
-}
-
-// ---------------------------------------------------------------------------
-// Data extraction router
-// ---------------------------------------------------------------------------
-function getWidgetData(widgetClass) {
-  if (widgetClass === 'insurance-comparison-tool') {
-    return getInsuranceComparisonData();
-  }
-  if (widgetClass === '${widgetClass}') {
-    return get${functionName}Data();
-  }
-  return null;
-}
-
-// ---------------------------------------------------------------------------
-// Data update router — applies changes then notifies Sitecore
-// ---------------------------------------------------------------------------
-function updateWidgetData(widgetClass, data) {
-  let success = false;
-
-  if (widgetClass === 'insurance-comparison-tool') {
-    success = updateInsuranceComparisonData(data);
-  }
-  if (widgetClass === '${widgetClass}') {
-    success = update${functionName}Data(data);
-  }
-
-  if (success) {
-    const widgetEl = findWidgetElement(widgetClass);
-    if (widgetEl && window.SitecoreBridge) {
-      const notified = window.SitecoreBridge.notifyChange(widgetEl);
-      console.log(\`[Widget Editor] Sitecore notified: \${notified}\`);
-    } else {
-      console.warn('[Widget Editor] SitecoreBridge not available or widget not found');
-    }
-  }
-
-  return success;
-}
-
-
-// =============================================================================
-// INSURANCE COMPARISON TOOL
-// =============================================================================
-
-function getInsuranceComparisonData() {
-  const tool = findWidgetElement('insurance-comparison-tool');
-  if (!tool) return null;
-
-  const planButtons = tool.querySelectorAll('[data-plan-id]');
-  const plans = [];
-
-  planButtons.forEach(btn => {
-    plans.push({
-      id:              btn.dataset.planId          || '',
-      name:            btn.dataset.planName        || '',
-      type:            btn.dataset.planType        || '',
-      coverageType:    btn.dataset.coverageType    || '',
-      price:           btn.dataset.price           || '',
-      deductible:      btn.dataset.deductible      || '',
-      maxOutOfPocket:  btn.dataset.maxOutOfPocket  || '',
-      coveragePercent: btn.dataset.coveragePercent || '',
-      doctorVisits:    btn.dataset.doctorVisits    || '',
-      emergency:       btn.dataset.emergency       || '',
-      prescription:    btn.dataset.prescription    || '',
-      mentalHealth:    btn.dataset.mentalHealth    || '',
-      dentalVision:    btn.dataset.dentalVision    || ''
-    });
-  });
-
-  return { plans };
-}
-
-function updateInsuranceComparisonData(data) {
-  const tool = findWidgetElement('insurance-comparison-tool');
-  if (!tool) return false;
-
-  const planButtons = tool.querySelectorAll('[data-plan-id]');
-  const comparisonGrid = tool.querySelector('.comparison-grid');
-
-  const fieldFormatters = {
-    price:          function(v) { return '$' + v + '/mo'; },
-    deductible:     function(v) { return '$' + Number(v).toLocaleString(); },
-    maxOutOfPocket: function(v) { return '$' + Number(v).toLocaleString(); },
-    coveragePercent:function(v) { return v + '%'; },
-    doctorVisits:   function(v) { return '$' + v; },
-    prescription:   function(v) { return v; },
-    emergency:      function(v) { return '$' + v; },
-    mentalHealth:   function(v) { return v; },
-    dentalVision:   function(v) { return v; }
-  };
-
-  data.plans.forEach((plan, index) => {
-    if (!planButtons[index]) return;
-    const btn = planButtons[index];
-    const planId = btn.dataset.planId;
-
-    btn.dataset.planName       = plan.name;
-    btn.dataset.planType       = plan.type;
-    btn.dataset.coverageType   = plan.coverageType;
-    btn.dataset.price          = plan.price;
-    btn.dataset.deductible     = plan.deductible;
-    btn.dataset.maxOutOfPocket = plan.maxOutOfPocket;
-    btn.dataset.coveragePercent = plan.coveragePercent;
-    btn.dataset.doctorVisits   = plan.doctorVisits;
-    btn.dataset.emergency      = plan.emergency;
-    btn.dataset.prescription   = plan.prescription;
-    btn.dataset.mentalHealth   = plan.mentalHealth;
-    btn.dataset.dentalVision   = plan.dentalVision;
-
-    const typeEl = btn.querySelector('.plan-button-type');
-    if (typeEl) typeEl.textContent = plan.type;
-
-    const nameEl = btn.querySelector('.plan-button-name');
-    if (nameEl) nameEl.textContent = plan.name;
-
-    const coverageEl = btn.querySelector('.plan-button-coverage');
-    if (coverageEl) coverageEl.textContent = plan.coverageType + ' Coverage';
-
-    const priceEl = btn.querySelector('.plan-button-price');
-    if (priceEl) {
-      const periodSpan = priceEl.querySelector('.plan-button-period');
-      if (periodSpan) {
-        const textNodes = Array.from(priceEl.childNodes).filter(n => n.nodeType === 3);
-        if (textNodes.length > 0) {
-          textNodes[0].textContent = '$' + plan.price + ' ';
-        }
-      } else {
-        priceEl.textContent = '$' + plan.price;
-      }
-    }
-
-    if (comparisonGrid) {
-      const planFields = {
-        price: plan.price, deductible: plan.deductible,
-        maxOutOfPocket: plan.maxOutOfPocket, coveragePercent: plan.coveragePercent,
-        doctorVisits: plan.doctorVisits, prescription: plan.prescription,
-        emergency: plan.emergency, mentalHealth: plan.mentalHealth,
-        dentalVision: plan.dentalVision
-      };
-
-      for (const field in planFields) {
-        const row = comparisonGrid.querySelector('.comparison-row[data-comparison="' + field + '"]');
-        if (!row) continue;
-        const cell = row.querySelector('.feature-value[data-plan="' + planId + '"]');
-        if (!cell) continue;
-        const formatter = fieldFormatters[field];
-        cell.textContent = formatter ? formatter(planFields[field]) : planFields[field];
-      }
-    }
-  });
-
-  return true;
-}
-
-// =============================================================================
+    return `// =============================================================================
 // ${widgetClass.toUpperCase().replace(/-/g, ' ')}
 // =============================================================================
-${newGetData}
-${newUpdateData}
+${getDataFn}
+${updateDataFn}
 `;
-    }
+  }
 
-    function generateSidepanel(widgetClass, widgetName, hasObjects, functionName) {
-      const newRenderCase = `
-  if (widgetClass === '${widgetClass}') {
-    container.innerHTML = render${functionName}Editor(data);
-    attach${functionName}EditorEvents(data);
-  }`;
+  function injectIntoSidepanel(code, widgetClass, widgetName, hasObjects, functionName) {
+    // 1. Add to renderEditor router
+    const renderCase = `\n  if (widgetClass === '${widgetClass}') {\n    container.innerHTML = render${functionName}Editor(data);\n    attach${functionName}EditorEvents(data);\n  }\n`;
+    code = code.replace(
+      /(container\.style\.display\s*=\s*'block';\s*\n?\s*\})/,
+      `${renderCase}\n  container.style.display = 'block';\n}`
+    );
 
-      const inputTypeMap = {
-        'text': 'text',
-        'email': 'email',
-        'number': 'text',
-        'phone': 'tel',
-        'url': 'url',
-        'date': 'date',
-        'textarea': 'textarea',
-        'checkbox': 'checkbox'
-      };
+    // 2. Append editor functions before HELPERS section
+    const editorFunctions = generateEditorFunctions(widgetClass, widgetName, hasObjects, functionName);
+    code = code.replace(
+      /(\/\/ =+\s*\n\/\/ HELPERS)/,
+      `${editorFunctions}\n// =============================================================================\n// HELPERS`
+    );
 
-      const renderFunction = hasObjects ? `
+    return code;
+  }
+
+  function generateEditorFunctions(widgetClass, widgetName, hasObjects, functionName) {
+    const inputTypeMap = { text: 'text', email: 'email', number: 'text', phone: 'tel', url: 'url', date: 'date', textarea: 'textarea', checkbox: 'checkbox' };
+
+    const renderFn = hasObjects ? `
 function render${functionName}Editor(data) {
   const objects = data.objects;
   const inputTypes = ${JSON.stringify(inputTypeMap)};
 
   return \`
     <div class="editor-title">${widgetName}</div>
-
     \${objects.map((obj, index) => \`
       <div class="plan-section">
-        <div class="plan-section-title">Item \${parseInt(index) + 1}</div>
-
+        <div class="plan-section-title">Item \${index + 1}</div>
         \${Object.keys(obj).filter(k => k !== 'id').map(key => {
-          const fieldName = key.replace(/_/g, '-');
-          const displayName = fieldName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-          const fieldType = fieldName.split('-')[0];
+          const fieldType = key.split('_')[0];
           const inputType = inputTypes[fieldType] || 'text';
-          
+          const label = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
           if (inputType === 'textarea') {
-            return \`
-              <div class="form-group">
-                <label>\${displayName}</label>
-                <textarea class="field-\${key}" data-object-index="\${index}" rows="4">\${obj[key]}</textarea>
-              </div>
-            \`;
+            return \`<div class="form-group"><label>\${label}</label><textarea class="field-\${key}" data-object-index="\${index}" rows="3">\${obj[key]}</textarea></div>\`;
           } else if (inputType === 'checkbox') {
-            return \`
-              <div class="form-group">
-                <label>
-                  <input type="checkbox" class="field-\${key}" data-object-index="\${index}" \${obj[key] === 'true' ? 'checked' : ''}>
-                  \${displayName}
-                </label>
-              </div>
-            \`;
+            return \`<div class="form-group"><label><input type="checkbox" class="field-\${key}" data-object-index="\${index}" \${obj[key] === 'true' ? 'checked' : ''}> \${label}</label></div>\`;
           } else {
-            return \`
-              <div class="form-group">
-                <label>\${displayName}</label>
-                <input type="\${inputType}" class="field-\${key}" data-object-index="\${index}" value="\${obj[key]}">
-              </div>
-            \`;
+            return \`<div class="form-group"><label>\${label}</label><input type="\${inputType}" class="field-\${key}" data-object-index="\${index}" value="\${obj[key]}"></div>\`;
           }
         }).join('')}
       </div>
     \`).join('')}
-
     <div class="button-group">
       <button class="btn-secondary" id="clearBtn">Reset</button>
       <button class="btn-primary" id="saveBtn">Apply Changes</button>
@@ -1043,41 +762,20 @@ function render${functionName}Editor(data) {
 
   return \`
     <div class="editor-title">${widgetName}</div>
-
     <div class="plan-section">
       \${Object.keys(data).map(key => {
-        const fieldName = key.replace(/_/g, '-');
-        const displayName = fieldName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        const fieldType = fieldName.split('-')[0];
+        const fieldType = key.split('_')[0];
         const inputType = inputTypes[fieldType] || 'text';
-        
+        const label = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
         if (inputType === 'textarea') {
-          return \`
-            <div class="form-group">
-              <label>\${displayName}</label>
-              <textarea class="field-\${key}" rows="4">\${data[key]}</textarea>
-            </div>
-          \`;
+          return \`<div class="form-group"><label>\${label}</label><textarea class="field-\${key}" rows="3">\${data[key]}</textarea></div>\`;
         } else if (inputType === 'checkbox') {
-          return \`
-            <div class="form-group">
-              <label>
-                <input type="checkbox" class="field-\${key}" \${data[key] === 'true' ? 'checked' : ''}>
-                \${displayName}
-              </label>
-            </div>
-          \`;
+          return \`<div class="form-group"><label><input type="checkbox" class="field-\${key}" \${data[key] === 'true' ? 'checked' : ''}> \${label}</label></div>\`;
         } else {
-          return \`
-            <div class="form-group">
-              <label>\${displayName}</label>
-              <input type="\${inputType}" class="field-\${key}" value="\${data[key]}">
-            </div>
-          \`;
+          return \`<div class="form-group"><label>\${label}</label><input type="\${inputType}" class="field-\${key}" value="\${data[key]}"></div>\`;
         }
       }).join('')}
     </div>
-
     <div class="button-group">
       <button class="btn-secondary" id="clearBtn">Reset</button>
       <button class="btn-primary" id="saveBtn">Apply Changes</button>
@@ -1085,7 +783,7 @@ function render${functionName}Editor(data) {
   \`;
 }`;
 
-      const attachFunction = `
+    const attachFn = `
 function attach${functionName}EditorEvents(originalData) {
   document.getElementById('saveBtn').addEventListener('click', save${functionName}Data);
   document.getElementById('clearBtn').addEventListener('click', () => {
@@ -1093,438 +791,163 @@ function attach${functionName}EditorEvents(originalData) {
   });
 }`;
 
-      const saveFunction = hasObjects ? `
+    const saveFn = hasObjects ? `
 async function save${functionName}Data() {
   const formData = { objects: [] };
-  const objectCount = document.querySelectorAll('.plan-section').length;
-  
-  for (let i = 0; i < objectCount; i++) {
+  const count = document.querySelectorAll('.plan-section').length;
+  for (let i = 0; i < count; i++) {
     const obj = { id: (i + 1).toString() };
     document.querySelectorAll(\`[data-object-index="\${i}"]\`).forEach(input => {
-      const key = input.className.replace('field-', '');
-      obj[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
+      const key = input.className.split(' ').find(c => c.startsWith('field-'))?.replace('field-', '');
+      if (key) obj[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
     });
     formData.objects.push(obj);
   }
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.tabs.sendMessage(tab.id, {
-    action: 'updateWidgetData',
-    widgetClass: '${widgetClass}',
-    data: formData
-  }, (response) => {
-    if (response && response.success) {
-      showSuccess('Changes applied successfully! The page has been updated.');
-    } else {
-      showError('Failed to apply changes. Please try again.');
-    }
-  });
+  await sendWidgetUpdate('${widgetClass}', formData);
 }` : `
 async function save${functionName}Data() {
   const formData = {};
-  document.querySelectorAll('[class^="field-"]').forEach(input => {
-    const key = input.className.replace('field-', '');
-    formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
+  document.querySelectorAll('[class*="field-"]').forEach(input => {
+    const key = input.className.split(' ').find(c => c.startsWith('field-'))?.replace('field-', '');
+    if (key) formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
   });
+  await sendWidgetUpdate('${widgetClass}', formData);
+}`;
 
+    return `
+// =============================================================================
+// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
+// =============================================================================
+${renderFn}
+${attachFn}
+${saveFn}
+`;
+  }
+
+  function updateManifest(manifestJson) {
+    try {
+      const manifest = JSON.parse(manifestJson);
+      const parts = (manifest.version || '1.0.0').split('.');
+      parts[2] = (parseInt(parts[2] || 0) + 1).toString();
+      manifest.version = parts.join('.');
+      return JSON.stringify(manifest, null, 2);
+    } catch {
+      return manifestJson;
+    }
+  }
+
+  // ─── Main Generate Function ───────────────────────────────────────────────
+  async function generateCode() {
+    const widgetClass = document.getElementById('widgetClass').value.trim();
+    const widgetName = document.getElementById('widgetName').value.trim() || toDisplayName(widgetClass);
+    const widgetDescription = document.getElementById('widgetDescription').value.trim() || `Edit ${widgetClass.replace(/-/g, ' ')} data`;
+    const htmlInput = document.getElementById('htmlInput').value.trim();
+    const statusEl = document.getElementById('statusOutput');
+
+    statusEl.innerHTML = '';
+
+    if (!widgetClass) return showStatus('error', 'Please enter a widget class name');
+    if (!htmlInput) return showStatus('error', 'Please paste widget HTML');
+    if (!loadedZip) return showStatus('error', 'Please upload your extension ZIP first');
+
+    // Check for duplicate
+    if (detectedWidgets.find(w => w.className === widgetClass)) {
+      return showStatus('error', `Widget "${widgetClass}" already exists in this extension`);
+    }
+
+    const analysis = analyzeHTML(htmlInput);
+    if (analysis.error) return showStatus('error', analysis.error);
+
+    const camelClass = toCamelCase(widgetClass);
+    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
+    const hasObjects = analysis.hasDynamicObjects;
+
+    // Process HTML
+    const processedHTML = processHTML(htmlInput);
+    document.getElementById('htmlPreview').textContent = processedHTML;
+
+    // Inject into existing files
+    const newContentScript = injectIntoContentScript(
+      currentContentScript, widgetClass, widgetName, widgetDescription, hasObjects, functionName
+    );
+    const newSidepanel = injectIntoSidepanel(
+      currentSidepanel, widgetClass, widgetName, hasObjects, functionName
+    );
+    const newManifest = currentManifest ? updateManifest(currentManifest) : null;
+
+    // Also add a sendWidgetUpdate helper if not already present
+    let finalSidepanel = newSidepanel;
+    if (!finalSidepanel.includes('async function sendWidgetUpdate')) {
+      finalSidepanel += `
+
+async function sendWidgetUpdate(widgetClass, data) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
   chrome.tabs.sendMessage(tab.id, {
     action: 'updateWidgetData',
-    widgetClass: '${widgetClass}',
-    data: formData
+    widgetClass,
+    data
   }, (response) => {
     if (response && response.success) {
-      showSuccess('Changes applied successfully! The page has been updated.');
+      showSuccess('Changes applied successfully!');
     } else {
       showError('Failed to apply changes. Please try again.');
     }
   });
 }`;
+    }
 
-      return `// =============================================================================
-// Sidepanel script — Widget editor UI
-// =============================================================================
+    // Build new ZIP from existing ZIP + updated files
+    const newZip = new JSZip();
 
-let currentWidgets = [];
-let selectedWidget = null;
-let activeTab = null;
+    // Copy all existing files
+    const filePromises = [];
+    loadedZip.forEach((relativePath, file) => {
+      filePromises.push(
+        file.async('uint8array').then(content => {
+          newZip.file(relativePath, content);
+        })
+      );
+    });
+    await Promise.all(filePromises);
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-let retryCount = 0;
+    // Overwrite updated files
+    newZip.file('content-script.js', newContentScript);
+    newZip.file('sidepanel.js', finalSidepanel);
+    if (newManifest) newZip.file('manifest.json', newManifest);
+    newZip.file('processed-widget.html', processedHTML);
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  activeTab = tab;
-  await scanForWidgets();
-  setupRescanButton();
-});
+    // Generate blob
+    generatedZipBlob = await newZip.generateAsync({ type: 'blob' });
 
-function setupRescanButton() {
-  const headerDiv = document.querySelector('.header');
-  const rescanBtn = document.createElement('button');
-  rescanBtn.id = 'rescanBtn';
-  rescanBtn.innerHTML = '↻ Rescan Page';
-  rescanBtn.onclick = async () => {
-    retryCount = 0;
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('loading').textContent = 'Scanning page for widgets...';
-    document.getElementById('noWidgets').style.display = 'none';
-    document.getElementById('widgetSelector').style.display = 'none';
-    document.getElementById('editorContainer').style.display = 'none';
-    document.getElementById('messageArea').innerHTML = '';
-    await scanForWidgets();
-  };
-  headerDiv.appendChild(rescanBtn);
-}
+    // Setup download
+    document.getElementById('downloadBtn').onclick = () => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(generatedZipBlob);
+      link.download = `sitecore-widget-editor-${widgetClass}.zip`;
+      link.click();
+    };
 
-async function scanForWidgets() {
-  if (!activeTab) {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    activeTab = tab;
+    // Show output
+    document.getElementById('outputPlaceholder').style.display = 'none';
+    document.getElementById('outputSection').style.display = 'block';
+
+    showStatus('success', `✓ Ready — "${widgetName}" added. ${detectedWidgets.length + 1} widgets total in updated extension.`);
   }
 
-  chrome.tabs.sendMessage(activeTab.id, { action: 'detectWidgets' }, (response) => {
-    if (chrome.runtime.lastError) {
-      showError('Could not connect to page. Please refresh and try again.');
-      return;
-    }
-
-    if (response && response.widgets) {
-      if (response.widgets.length > 0) {
-        retryCount = 0;
-        handleWidgetsDetected(response.widgets);
-      } else {
-        if (retryCount < MAX_RETRIES) {
-          retryCount++;
-          const loadingEl = document.getElementById('loading');
-          loadingEl.textContent = \`Scanning page for widgets... (attempt \${retryCount + 1} of \${MAX_RETRIES + 1})\`;
-          setTimeout(() => { scanForWidgets(); }, RETRY_DELAY);
-        } else {
-          retryCount = 0;
-          handleWidgetsDetected([]);
-        }
-      }
-    }
-  });
-}
-
-function handleWidgetsDetected(widgets) {
-  document.getElementById('loading').style.display = 'none';
-  currentWidgets = widgets;
-
-  if (widgets.length === 0) {
-    document.getElementById('noWidgets').style.display = 'block';
-  } else if (widgets.length === 1) {
-    selectedWidget = widgets[0];
-    loadEditor(widgets[0].className);
-  } else {
-    showWidgetSelector(widgets);
+  function showStatus(type, message) {
+    document.getElementById('statusOutput').innerHTML = `<div class="${type}-msg">${message}</div>`;
   }
-}
 
-function showWidgetSelector(widgets) {
-  const selector = document.getElementById('widgetSelector');
-  const dropdown = document.getElementById('widgetDropdown');
-
-  dropdown.innerHTML = '<option value="">-- Select a widget --</option>';
-
-  widgets.forEach(widget => {
-    const option = document.createElement('option');
-    option.value = widget.className;
-    option.textContent = widget.name;
-    dropdown.appendChild(option);
-  });
-
-  dropdown.addEventListener('change', (e) => {
-    if (e.target.value) {
-      const widget = widgets.find(w => w.className === e.target.value);
-      selectedWidget = widget;
-      loadEditor(e.target.value);
-    }
-  });
-
-  selector.style.display = 'block';
-}
-
-async function loadEditor(widgetClass) {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.tabs.sendMessage(tab.id, {
-    action: 'getWidgetData',
-    widgetClass: widgetClass
-  }, (response) => {
-    if (chrome.runtime.lastError) {
-      showError('Could not connect to page. Please refresh and try again.');
-      return;
-    }
-    if (response && response.data) {
-      renderEditor(widgetClass, response.data);
-    } else {
-      showError('Could not read widget data from the page.');
-    }
-  });
-}
-
-function renderEditor(widgetClass, data) {
-  const container = document.getElementById('editorContainer');
-
-  if (widgetClass === 'insurance-comparison-tool') {
-    container.innerHTML = renderInsuranceEditor(data);
-    attachInsuranceEditorEvents(data);
-  }
-${newRenderCase}
-
-  container.style.display = 'block';
-}
-
-
-// =============================================================================
-// INSURANCE COMPARISON EDITOR
-// =============================================================================
-
-function renderInsuranceEditor(data) {
-  const plans = data.plans;
-
-  return \`
-    <div class="editor-title">Insurance Plan Comparison</div>
-
-    \${plans.map((plan, index) => \`
-      <div class="plan-section">
-        <div class="plan-section-title">Plan \${parseInt(index) + 1}</div>
-
-        <div class="form-group">
-          <label>Plan Name</label>
-          <input type="text" class="plan-name" data-plan-index="\${index}" value="\${plan.name}">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Plan Type</label>
-            <select class="plan-type" data-plan-index="\${index}">
-              <option value="basic" \${plan.type === 'basic' ? 'selected' : ''}>Basic</option>
-              <option value="standard" \${plan.type === 'standard' ? 'selected' : ''}>Standard</option>
-              <option value="premium" \${plan.type === 'premium' ? 'selected' : ''}>Premium</option>
-              <option value="family" \${plan.type === 'family' ? 'selected' : ''}>Family</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Coverage Type</label>
-            <select class="plan-coverage-type" data-plan-index="\${index}">
-              <option value="Individual" \${plan.coverageType === 'Individual' ? 'selected' : ''}>Individual</option>
-              <option value="Family" \${plan.coverageType === 'Family' ? 'selected' : ''}>Family</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Monthly Price ($)</label>
-            <input type="text" class="plan-price" data-plan-index="\${index}" value="\${plan.price}">
-          </div>
-
-          <div class="form-group">
-            <label>Annual Deductible ($)</label>
-            <input type="text" class="plan-deductible" data-plan-index="\${index}" value="\${plan.deductible}">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Max Out-of-Pocket ($)</label>
-            <input type="text" class="plan-max-out" data-plan-index="\${index}" value="\${plan.maxOutOfPocket}">
-          </div>
-
-          <div class="form-group">
-            <label>Coverage Percent (%)</label>
-            <input type="text" class="plan-coverage-percent" data-plan-index="\${index}" value="\${plan.coveragePercent}">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Doctor Visit Copay ($)</label>
-            <input type="text" class="plan-doctor-visits" data-plan-index="\${index}" value="\${plan.doctorVisits}">
-          </div>
-
-          <div class="form-group">
-            <label>Emergency Care Copay ($)</label>
-            <input type="text" class="plan-emergency" data-plan-index="\${index}" value="\${plan.emergency}">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Prescription Coverage</label>
-          <input type="text" class="plan-prescription" data-plan-index="\${index}" value="\${plan.prescription}">
-          <div class="help-text">e.g., "Generic only", "Generic & Brand", "Full coverage"</div>
-        </div>
-
-        <div class="form-group">
-          <label>Mental Health Coverage</label>
-          <input type="text" class="plan-mental-health" data-plan-index="\${index}" value="\${plan.mentalHealth}">
-          <div class="help-text">e.g., "Limited", "Included", "Full coverage"</div>
-        </div>
-
-        <div class="form-group">
-          <label>Dental & Vision</label>
-          <input type="text" class="plan-dental-vision" data-plan-index="\${index}" value="\${plan.dentalVision}">
-          <div class="help-text">e.g., "Not included", "Vision only", "Both included"</div>
-        </div>
-      </div>
-    \`).join('')}
-
-    <div class="button-group">
-      <button class="btn-secondary" id="clearBtn">Clear Form</button>
-      <button class="btn-primary" id="saveBtn">Apply Changes</button>
-    </div>
-  \`;
-}
-
-function attachInsuranceEditorEvents(originalData) {
-  document.getElementById('saveBtn').addEventListener('click', saveInsuranceData);
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    clearInsuranceForm(originalData);
-  });
-}
-
-function clearInsuranceForm(originalData) {
-  const plans = originalData.plans;
-  plans.forEach((plan, index) => {
-    const i = index.toString();
-    const field = (cls) => document.querySelector(\`.\${cls}[data-plan-index="\${i}"]\`);
-
-    field('plan-name').value = plan.name || '';
-    field('plan-type').value = plan.type || 'basic';
-    field('plan-coverage-type').value = plan.coverageType || 'Individual';
-    field('plan-price').value = plan.price || '';
-    field('plan-deductible').value = plan.deductible || '';
-    field('plan-max-out').value = plan.maxOutOfPocket || '';
-    field('plan-coverage-percent').value = plan.coveragePercent || '';
-    field('plan-doctor-visits').value = plan.doctorVisits || '';
-    field('plan-emergency').value = plan.emergency || '';
-    field('plan-prescription').value = plan.prescription || '';
-    field('plan-mental-health').value = plan.mentalHealth || '';
-    field('plan-dental-vision').value = plan.dentalVision || '';
-  });
-  document.getElementById('messageArea').innerHTML = '';
-}
-
-async function saveInsuranceData() {
-  const plans = [];
-  const planCount = document.querySelectorAll('.plan-section').length;
-
-  for (let i = 0; i < planCount; i++) {
-    const field = (cls) => document.querySelector(\`.\${cls}[data-plan-index="\${i}"]\`);
-
-    plans.push({
-      id: (i + 1).toString(),
-      name: field('plan-name').value,
-      type: field('plan-type').value,
-      coverageType: field('plan-coverage-type').value,
-      price: field('plan-price').value,
-      deductible: field('plan-deductible').value,
-      maxOutOfPocket: field('plan-max-out').value,
-      coveragePercent: field('plan-coverage-percent').value,
-      doctorVisits: field('plan-doctor-visits').value,
-      emergency: field('plan-emergency').value,
-      prescription: field('plan-prescription').value,
-      mentalHealth: field('plan-mental-health').value,
-      dentalVision: field('plan-dental-vision').value
+  function copyHTML() {
+    const code = document.getElementById('htmlPreview').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓';
+      setTimeout(() => btn.textContent = orig, 2000);
     });
   }
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.tabs.sendMessage(tab.id, {
-    action: 'updateWidgetData',
-    widgetClass: 'insurance-comparison-tool',
-    data: { plans: plans }
-  }, (response) => {
-    if (response && response.success) {
-      showSuccess('Changes applied successfully! The page has been updated.');
-    } else {
-      showError('Failed to apply changes. Please try again.');
-    }
-  });
-}
-
-
-// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
-// =============================================================================
-${renderFunction}
-${attachFunction}
-${saveFunction}
-
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-function showSuccess(message) {
-  const messageArea = document.getElementById('messageArea');
-  messageArea.innerHTML = \`<div class="success-message">\${message}</div>\`;
-  setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
-}
-
-function showError(message) {
-  const messageArea = document.getElementById('messageArea');
-  messageArea.innerHTML = \`<div class="error-message">\${message}</div>\`;
-  document.getElementById('loading').style.display = 'none';
-}
-`;
-    }
-
-    function generateManifest() {
-      const now = new Date();
-      const version = `1.${now.getMonth() + 1}.${now.getDate()}`;
-      
-      return JSON.stringify({
-        "manifest_version": 3,
-        "name": "Sitecore Widget Editor",
-        "version": version,
-        "description": "Edit custom widgets on Sitecore pages with a visual interface",
-        "permissions": ["activeTab", "scripting", "sidePanel"],
-        "side_panel": { "default_path": "sidepanel.html" },
-        "action": {
-          "default_icon": {
-            "16": "icon16.png",
-            "48": "icon48.png",
-            "128": "icon128.png"
-          }
-        },
-        "background": { "service_worker": "background.js" },
-        "icons": {
-          "16": "icon16.png",
-          "48": "icon48.png",
-          "128": "icon128.png"
-        },
-        "content_scripts": [{
-          "matches": ["<all_urls>"],
-          "js": ["sitecore-bridge.js", "content-script.js"],
-          "run_at": "document_idle",
-          "all_frames": false
-        }]
-      }, null, 2);
-    }
-
-    async function downloadZip(widgetClass) {
-      const zip = new JSZip();
-      
-      Object.keys(generatedFiles).forEach(filename => {
-        zip.file(filename, generatedFiles[filename]);
-      });
-
-      const content = await zip.generateAsync({type: "blob"});
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(content);
-      link.download = `${widgetClass}-extension-files.zip`;
-      link.click();
-    }
-  </script>
+</script>
 
 </body>
 </html>
