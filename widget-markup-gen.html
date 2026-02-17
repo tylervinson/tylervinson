@@ -521,9 +521,8 @@
 
       // Update detected widgets list
       detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
-      showExistingWidgets();
 
-      // Create updated ZIP
+      // Create updated ZIP and UPDATE loadedZip state
       const newZip = new JSZip();
       const filePromises = [];
       loadedZip.forEach((relativePath, file) => {
@@ -535,12 +534,19 @@
       });
       await Promise.all(filePromises);
 
+      // Overwrite with updated files
       newZip.file('content-script.js', currentContentScript);
       newZip.file('sidepanel.js', currentSidepanel);
       if (currentManifest) {
-        newZip.file('manifest.json', updateManifest(currentManifest));
+        const updatedManifest = updateManifest(currentManifest);
+        newZip.file('manifest.json', updatedManifest);
+        currentManifest = updatedManifest;
       }
 
+      // CRITICAL: Update loadedZip to the new ZIP so next operations use updated state
+      loadedZip = newZip;
+
+      // Generate download
       generatedZipBlob = await newZip.generateAsync({ type: 'blob' });
 
       // Auto-download
@@ -549,7 +555,9 @@
       link.download = `sitecore-widget-editor-removed-${widgetClass}.zip`;
       link.click();
 
-      showStatus('success', `✓ Widget "${widgetClass}" removed. Download started.`);
+      // Update UI
+      showExistingWidgets();
+      showStatus('success', `✓ Widget "${widgetClass}" removed. Download started. You can now add more widgets or close this page.`);
 
     } catch (err) {
       showStatus('error', `Failed to delete widget: ${err.message}`);
