@@ -397,7 +397,7 @@
       <div class="panel-title">Output</div>
 
       <div id="outputPlaceholder" style="color:#999; font-size:14px; padding: 20px 0;">
-        Upload your extension ZIP and fill in the widget details to get started.
+        Upload your extension ZIP to get started.
       </div>
 
       <div id="outputSection" style="display:none;">
@@ -508,7 +508,7 @@
   }
 
   async function deleteWidget(widgetClass) {
-    if (!confirm(`Delete widget "${widgetClass}"?\n\nThis will remove it from content-script.js and sidepanel.js.`)) {
+    if (!confirm(`Delete widget "${widgetClass}"?\n\nThis will remove it from the extension code.`)) {
       return;
     }
 
@@ -522,7 +522,7 @@
       // Update detected widgets list
       detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
 
-      // Create updated ZIP and UPDATE loadedZip state
+      // Create updated ZIP and UPDATE loadedZip state (no download yet)
       const newZip = new JSZip();
       const filePromises = [];
       loadedZip.forEach((relativePath, file) => {
@@ -546,18 +546,9 @@
       // CRITICAL: Update loadedZip to the new ZIP so next operations use updated state
       loadedZip = newZip;
 
-      // Generate download
-      generatedZipBlob = await newZip.generateAsync({ type: 'blob' });
-
-      // Auto-download
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(generatedZipBlob);
-      link.download = `sitecore-widget-editor-removed-${widgetClass}.zip`;
-      link.click();
-
       // Update UI
       showExistingWidgets();
-      showStatus('success', `✓ Widget "${widgetClass}" removed. Download started. You can now add more widgets or close this page.`);
+      showStatus('success', `✓ Widget "${widgetClass}" removed. Click "Generate & Download" to get your updated extension.`);
 
     } catch (err) {
       showStatus('error', `Failed to delete widget: ${err.message}`);
@@ -967,16 +958,44 @@ ${saveFn}
   // ─── Main Generate Function ───────────────────────────────────────────────
   async function generateCode() {
     const widgetClass = document.getElementById('widgetClass').value.trim();
-    const widgetName = document.getElementById('widgetName').value.trim() || toDisplayName(widgetClass);
-    const widgetDescription = document.getElementById('widgetDescription').value.trim() || `Edit ${widgetClass.replace(/-/g, ' ')} data`;
+    const widgetName = document.getElementById('widgetName').value.trim();
+    const widgetDescription = document.getElementById('widgetDescription').value.trim();
     const htmlInput = document.getElementById('htmlInput').value.trim();
     const statusEl = document.getElementById('statusOutput');
 
     statusEl.innerHTML = '';
 
-    if (!widgetClass) return showStatus('error', 'Please enter a widget class name');
-    if (!htmlInput) return showStatus('error', 'Please paste widget HTML');
     if (!loadedZip) return showStatus('error', 'Please upload your extension ZIP first');
+
+    // If no HTML provided, just package current state (e.g., after deletions)
+    if (!htmlInput) {
+      try {
+        generatedZipBlob = await loadedZip.generateAsync({ type: 'blob' });
+
+        document.getElementById('downloadBtn').onclick = () => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(generatedZipBlob);
+          link.download = `sitecore-widget-editor-updated.zip`;
+          link.click();
+        };
+
+        document.getElementById('outputPlaceholder').style.display = 'none';
+        document.getElementById('outputSection').style.display = 'block';
+        document.getElementById('htmlPreview').textContent = '// No new widget HTML to preview';
+
+        showStatus('success', `✓ Extension packaged with ${detectedWidgets.length} widget(s). Ready to download.`);
+        return;
+      } catch (err) {
+        return showStatus('error', `Failed to package extension: ${err.message}`);
+      }
+    }
+
+    // Adding a new widget - require all fields
+    if (!widgetClass) return showStatus('error', 'Please enter a widget class name');
+    
+    // Use defaults if not provided
+    const finalWidgetName = widgetName || toDisplayName(widgetClass);
+    const finalWidgetDescription = widgetDescription || `Edit ${widgetClass.replace(/-/g, ' ')} data`;
 
     // Check for duplicate
     const existingWidget = detectedWidgets.find(w => w.className === widgetClass);
@@ -1008,10 +1027,10 @@ ${saveFn}
 
     // Inject into existing files
     const newContentScript = injectIntoContentScript(
-      currentContentScript, widgetClass, widgetName, widgetDescription, hasObjects, functionName
+      currentContentScript, widgetClass, finalWidgetName, finalWidgetDescription, hasObjects, functionName
     );
     const newSidepanel = injectIntoSidepanel(
-      currentSidepanel, widgetClass, widgetName, hasObjects, functionName
+      currentSidepanel, widgetClass, finalWidgetName, hasObjects, functionName
     );
     const newManifest = currentManifest ? updateManifest(currentManifest) : null;
 
@@ -1071,7 +1090,7 @@ async function sendWidgetUpdate(widgetClass, data) {
     document.getElementById('outputPlaceholder').style.display = 'none';
     document.getElementById('outputSection').style.display = 'block';
 
-    showStatus('success', `✓ Ready — "${widgetName}" added. ${detectedWidgets.length + 1} widgets total in updated extension.`);
+    showStatus('success', `✓ Ready — "${finalWidgetName}" added. ${detectedWidgets.length + 1} widgets total in updated extension.`);
   }
 
   function showStatus(type, message) {
