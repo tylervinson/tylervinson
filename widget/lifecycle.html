@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Lifecycle - Sitecore Widget Editor</title>
+   <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        header {
+            margin-bottom: 100px;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            color: #000;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            font-weight: 400;
+            margin-bottom: 32px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 32px;
+        }
+
+        .tab-nav-link {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #999;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s;
+        }
+
+        .tab-nav-link:hover {
+            color: #666;
+        }
+
+        .tab-nav-link.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 120px;
+        }
+
+        .project {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .project:nth-child(even) {
+            direction: rtl;
+        }
+
+        .project:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .project-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .project-number {
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .project h2 {
+            font-size: 36px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            color: #000;
+        }
+
+        .project-description {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .project-description p + p {
+            margin-top: 16px;
+        }
+
+        .project-description code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+            color: #1a1a1a;
+        }
+
+        .project-image {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .project-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 500;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border-radius: 8px;
+        }
+
+        .step-list {
+            margin-top: 24px;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .step-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+            color: #444;
+            font-size: 15px;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-list li strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        footer {
+            margin-top: 140px;
+            padding-top: 40px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+        }
+
+        @media (max-width: 1024px) {
+            .project {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .project:nth-child(even) {
+                direction: ltr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Widget Lifecycle</h1>
+            <p class="subtitle">Complete walkthrough from development to production maintenance</p>
+
+            <nav class="tab-nav">
+                <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+                <a href="generator.html" class="tab-nav-link">Markup Generator</a>
+                <a href="lifecycle.html" class="tab-nav-link active">Widget Lifecycle</a>
+            </nav>
+        </header>
+
+        <div class="project-list">
+
+            <!-- Phase 1: Design & Development -->
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 1</div>
+                    <h2>Design & Development</h2>
+                    <div class="project-description">
+                        <p>Begin by designing and building the widget in your local development environment. Focus on creating clean, semantic HTML with proper structure. At this stage, no special classes or data attributes are needed.</p>
+                        <p>Write standard HTML using content elements like headings, paragraphs, links, and images. The markup generator will handle the rest.</p>
+                        
+                        <ul class="step-list">
+                            <li><strong>Design:</strong> Create mockups and finalize visual design</li>
+                            <li><strong>Build:</strong> Write HTML, CSS, and any JavaScript functionality</li>
+                            <li><strong>Test:</strong> Verify widget works in development environment</li>
+                            <li><strong>Prepare:</strong> Clean up markup, remove unnecessary classes</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Development Screenshot</div>
+                </div>
+            </div>
+
+            <!-- Phase 2: Markup Generation -->
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 2</div>
+                    <h2>Markup Generation</h2>
+                    <div class="project-description">
+                        <p>Use the HTML Auto-Annotator to transform your clean HTML into Sitecore-ready markup. The generator automatically detects content elements and adds all necessary data attributes.</p>
+                        <p>Provide the widget class name, display name, and optional description. The generator wraps your HTML with <code>.editable-widget</code> class and adds <code>data-*</code> attributes to all editable content elements.</p>
+                        
+                        <ul class="step-list">
+                            <li><strong>Open Generator:</strong> Navigate to the HTML Auto-Annotator tool</li>
+                            <li><strong>Configure:</strong> Enter widget class, display name, description</li>
+                            <li><strong>Paste HTML:</strong> Input your clean widget HTML</li>
+                            <li><strong>Generate:</strong> Click to process and auto-annotate</li>
+                            <li><strong>Copy Output:</strong> Get fully annotated HTML ready for Sitecore</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Generator Interface Screenshot</div>
+                </div>
+            </div>
+
+            <!-- Phase 3: Sitecore Integration -->
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 3</div>
+                    <h2>Sitecore Integration</h2>
+                    <div class="project-description">
+                        <p>Deploy the annotated HTML to Sitecore. The markup now contains all necessary metadata for the extension to automatically discover and manage the widget.</p>
+                        <p>No manual registration or code updates required. The extension will immediately detect any widget with the <code>.editable-widget</code> class when the page loads.</p>
+                        
+                        <ul class="step-list">
+                            <li><strong>Copy HTML:</strong> Take annotated markup from generator</li>
+                            <li><strong>Add to Sitecore:</strong> Paste into appropriate component or template</li>
+                            <li><strong>Include CSS/JS:</strong> Add any associated stylesheets and scripts</li>
+                            <li><strong>Publish:</strong> Deploy changes to staging or production</li>
+                            <li><strong>Verify:</strong> Check widget renders correctly on page</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Sitecore CMS Screenshot</div>
+                </div>
+            </div>
+
+            <!-- Phase 4: Content Management -->
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 4</div>
+                    <h2>Content Management</h2>
+                    <div class="project-description">
+                        <p>Once deployed, the Chrome extension automatically discovers the widget and provides a visual editing interface. Content editors can make changes directly through the browser without touching code or accessing the CMS.</p>
+                        <p>The extension reads all <code>data-*</code> attributes, builds an appropriate form interface, and writes changes back to both the attributes and visible page content in real-time.</p>
+                        
+                        <ul class="step-list">
+                            <li><strong>Open Page:</strong> Navigate to page containing the widget</li>
+                            <li><strong>Launch Extension:</strong> Click extension icon to open sidepanel</li>
+                            <li><strong>Select Widget:</strong> Choose from auto-discovered widgets</li>
+                            <li><strong>Edit Content:</strong> Update text, links, images through form interface</li>
+                            <li><strong>Apply Changes:</strong> Save updates back to page</li>
+                            <li><strong>Notify Sitecore:</strong> Extension triggers CMS to persist changes</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Extension Sidepanel Screenshot</div>
+                </div>
+            </div>
+
+            <!-- Phase 5: Ongoing Maintenance -->
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 5</div>
+                    <h2>Ongoing Maintenance</h2>
+                    <div class="project-description">
+                        <p>The extension requires no updates when new widgets are added. Simply follow the same process: generate annotated HTML, add to Sitecore, and the extension automatically detects it.</p>
+                        <p>For existing widgets, content updates happen in real-time through the extension. Structural changes require regenerating the HTML through the markup generator.</p>
+                        
+                        <ul class="step-list">
+                            <li><strong>Content Updates:</strong> Use extension for text, link, and image changes</li>
+                            <li><strong>Structural Changes:</strong> Regenerate HTML if adding/removing elements</li>
+                            <li><strong>New Widgets:</strong> Run through markup generator, no extension updates</li>
+                            <li><strong>Exclusions:</strong> Add <code>.exclude</code> classes to prevent editing specific elements</li>
+                            <li><strong>Team Access:</strong> All team members use same extension version</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Maintenance Workflow Diagram</div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            Sitecore Widget Editor Documentation
+        </footer>
+    </div>
+</body>
+</html>

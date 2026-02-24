@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget HTML Auto-Annotator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    header { 
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .version {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 10px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 15px;
+      font-weight: 400;
+      margin-bottom: 24px;
+    }
+
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid #e0e0e0;
+      margin-top: 24px;
+    }
+
+    .tab-nav-link {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #999;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-nav-link:hover { color: #666; }
+    .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .panel {
+      background: #fff;
+      padding: 30px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d0d0d0;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+      line-height: 1.5;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+
+    .btn {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover { background: #333; }
+    .btn:disabled { background: #999; cursor: not-allowed; }
+
+    .code-wrapper {
+      position: relative;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      margin-top: 20px;
+    }
+
+    .code-wrapper pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #444;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .copy-btn svg {
+      display: block;
+    }
+
+    .copy-btn:hover { background: #444; }
+
+    .info-box {
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #1a1a1a;
+    }
+
+    .info-box code {
+      background: #fff;
+      padding: 2px 6px;
+      border: 1px solid #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stat {
+      background: #f5f5f5;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="version">v4.0</div>
+    <h1>Widget HTML Auto-Annotator</h1>
+    <p class="subtitle">Paste clean HTML with .editable-widget class → get annotated HTML with data-* attributes</p>
+
+    <nav class="tab-nav">
+      <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+      <a href="generator.html" class="tab-nav-link active">Auto-Annotator</a>
+      <a href="lifecycle.html" class="tab-nav-link">Lifecycle</a>
+    </nav>
+  </header>
+
+  <div class="main-grid">
+    <!-- Input Panel -->
+    <div class="panel">
+      <div class="panel-title">Widget Configuration</div>
+
+      <div class="info-box">
+        <strong>How it works:</strong><br>
+        1. Enter widget class name and metadata below<br>
+        2. Paste your clean HTML (without data-* attributes)<br>
+        3. Generator auto-detects content elements (h1-h6, p, a, img, li)<br>
+        4. Adds all data-* attributes and widget metadata<br>
+        5. Use <code>.exclude</code> or <code>.exclude-*</code> to skip elements
+      </div>
+
+      <div class="form-group">
+        <label>Widget Class Name</label>
+        <input type="text" id="widgetClass" placeholder="hero-section" />
+      </div>
+
+      <div class="form-group">
+        <label>Widget Display Name</label>
+        <input type="text" id="widgetName" placeholder="Hero Section" />
+      </div>
+
+      <div class="form-group">
+        <label>Widget Description (Optional)</label>
+        <input type="text" id="widgetDescription" placeholder="Main hero content with heading and CTA" />
+      </div>
+
+      <div class="form-group">
+        <label>Paste Your HTML</label>
+        <textarea id="htmlInput" rows="15" placeholder='<div>
+  <h1>Welcome</h1>
+  <p>Description here</p>
+  <a href="/link">Learn More</a>
+</div>'></textarea>
+      </div>
+
+      <button class="btn" onclick="processHTML()">Generate Annotated HTML →</button>
+    </div>
+
+    <!-- Output Panel -->
+    <div class="panel">
+      <div class="panel-title">Annotated HTML</div>
+
+      <div id="stats" style="display:none;">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="statElements">0</div>
+            <div class="stat-label">Elements Found</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statAnnotated">0</div>
+            <div class="stat-label">Annotated</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statExcluded">0</div>
+            <div class="stat-label">Excluded</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyOutput()" title="Copy">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <pre id="htmlOutput">Processed HTML will appear here...</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Content elements that should be editable
+const CONTENT_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'img', 'li'];
+
+function processHTML() {
+  const widgetClass = document.getElementById('widgetClass').value.trim();
+  const widgetName = document.getElementById('widgetName').value.trim();
+  const widgetDescription = document.getElementById('widgetDescription').value.trim();
+  const input = document.getElementById('htmlInput').value.trim();
+  
+  if (!widgetClass) {
+    alert('Please enter a widget class name');
+    return;
+  }
+  
+  if (!widgetName) {
+    alert('Please enter a widget display name');
+    return;
+  }
+  
+  if (!input) {
+    alert('Please paste HTML to process');
+    return;
+  }
+
+  // Parse HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+  
+  // Get the root element (could be in body)
+  const root = doc.body.children[0];
+  
+  if (!root) {
+    alert('Could not parse HTML');
+    return;
+  }
+
+  // Create wrapper div with widget metadata
+  const wrapper = doc.createElement('div');
+  wrapper.className = `editable-widget ${widgetClass}`;
+  wrapper.setAttribute('data-widget-name', widgetName);
+  if (widgetDescription) {
+    wrapper.setAttribute('data-widget-description', widgetDescription);
+  }
+  
+  // Move all children from root to wrapper
+  while (root.firstChild) {
+    wrapper.appendChild(root.firstChild);
+  }
+
+  // Process widget to add data attributes
+  const stats = {
+    total: 0,
+    annotated: 0,
+    excluded: 0
+  };
+
+  annotateWidget(wrapper, stats);
+
+  // Output results
+  const output = formatHTML(wrapper.outerHTML);
+  document.getElementById('htmlOutput').textContent = output;
+  
+  // Show stats
+  document.getElementById('stats').style.display = 'block';
+  document.getElementById('statElements').textContent = stats.total;
+  document.getElementById('statAnnotated').textContent = stats.annotated;
+  document.getElementById('statExcluded').textContent = stats.excluded;
+}
+
+function annotateWidget(widget, stats) {
+  const selector = CONTENT_ELEMENTS.join(', ');
+  const contentElements = widget.querySelectorAll(selector);
+  
+  let counters = {};
+  
+  contentElements.forEach(element => {
+    stats.total++;
+    
+    if (isExcluded(element, widget)) {
+      stats.excluded++;
+      return;
+    }
+    
+    const tagName = element.tagName.toLowerCase();
+    
+    // Initialize counter for this tag type
+    if (!counters[tagName]) {
+      counters[tagName] = 1;
+    }
+    
+    // Add data attributes based on element type
+    if (tagName === 'a') {
+      element.setAttribute(`data-link-${counters[tagName]}`, element.getAttribute('href') || '');
+    } else if (tagName === 'img') {
+      element.setAttribute(`data-img-src-${counters[tagName]}`, element.getAttribute('src') || '');
+      element.setAttribute(`data-img-alt-${counters[tagName]}`, element.getAttribute('alt') || '');
+    } else {
+      // Text elements (h1-h6, p, li)
+      const text = element.textContent || '';
+      element.setAttribute(`data-${tagName}-${counters[tagName]}`, text);
+    }
+    
+    counters[tagName]++;
+    stats.annotated++;
+  });
+}
+
+function isExcluded(element, widget) {
+  // Check if element itself has .exclude class
+  if (element.classList.contains('exclude')) {
+    return true;
+  }
+  
+  const tagName = element.tagName.toLowerCase();
+  
+  // Walk up ancestors to check for exclusion classes
+  let ancestor = element.parentElement;
+  while (ancestor && ancestor !== widget.parentElement) {
+    // Check for .exclude-* (exclude all)
+    if (ancestor.classList.contains('exclude-*')) {
+      return true;
+    }
+    
+    // Check for .exclude-{tagName}
+    if (ancestor.classList.contains(`exclude-${tagName}`)) {
+      return true;
+    }
+    
+    ancestor = ancestor.parentElement;
+  }
+  
+  return false;
+}
+
+function formatHTML(html) {
+  // Basic HTML formatting
+  let formatted = html;
+  
+  // Add newlines after opening tags
+  formatted = formatted.replace(/></g, '>\n<');
+  
+  // Indent nested elements
+  const lines = formatted.split('\n');
+  let indent = 0;
+  const indented = lines.map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return '';
+    
+    if (trimmed.startsWith('</')) {
+      indent = Math.max(0, indent - 2);
+    }
+    
+    const result = ' '.repeat(indent) + trimmed;
+    
+    if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
+      indent += 2;
+    }
+    
+    return result;
+  });
+  
+  return indented.filter(line => line.trim()).join('\n');
+}
+
+function copyOutput() {
+  const output = document.getElementById('htmlOutput').textContent;
+  navigator.clipboard.writeText(output).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
