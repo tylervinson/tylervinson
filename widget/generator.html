@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sitecore Widget Editor - Code Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <title>Widget HTML Auto-Annotator</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -101,237 +100,59 @@
       letter-spacing: 0.3px;
     }
 
-    input[type="text"], textarea {
+    input[type="text"],
+    textarea {
       width: 100%;
-      padding: 10px;
+      padding: 10px 12px;
       border: 1px solid #d0d0d0;
-      background: #fff;
       font-family: inherit;
       font-size: 14px;
     }
 
-    input[type="text"]:focus, textarea:focus {
+    textarea {
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+      line-height: 1.5;
+    }
+
+    input:focus,
+    textarea:focus {
       outline: none;
       border-color: #1a1a1a;
     }
 
-    textarea {
-      font-family: 'Courier New', monospace;
-      resize: vertical;
-      min-height: 200px;
+    .btn {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* ZIP Upload Zone */
-    .upload-zone {
-      border: 1px dashed #ccc;
-      padding: 24px;
-      text-align: center;
-      cursor: pointer;
-      margin-bottom: 20px;
+    .btn:hover { background: #333; }
+    .btn:disabled { background: #999; cursor: not-allowed; }
+
+    .code-wrapper {
       position: relative;
-    }
-
-    .upload-zone:hover { border-color: #1a1a1a; }
-
-    .upload-zone.has-file {
-      border-style: solid;
-      border-color: #1a1a1a;
-      background: #f9f9f9;
-    }
-
-    .upload-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-
-    .upload-icon { 
-      margin-bottom: 8px;
-      color: #666;
-    }
-
-    .upload-icon svg {
-      display: block;
-      margin: 0 auto;
-    }
-
-    .upload-label {
-      font-size: 13px;
-      color: #666;
-    }
-
-    .upload-label strong { color: #1a1a1a; }
-
-    .upload-status {
-      font-size: 12px;
-      margin-top: 8px;
-      color: #666;
-    }
-
-    .upload-status.loaded { color: #2a7a2a; }
-    .upload-status.error { color: #c00; }
-
-    /* Widget list */
-    .widget-list {
-      margin-bottom: 16px;
-    }
-
-    .widget-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
       background: #f5f5f5;
       border: 1px solid #e0e0e0;
-      margin-bottom: 4px;
-      font-size: 13px;
+      margin-top: 20px;
     }
 
-    .widget-item-left {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .widget-item-name { 
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-    }
-    
-    .widget-item-badge {
-      font-size: 11px;
-      color: #999;
-    }
-
-    .widget-item-delete {
-      background: #c00;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
-      font-size: 11px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .widget-item-delete:hover {
-      background: #a00;
-    }
-
-    .info-box {
-      background: #f5f5f5;
-      border-left: 2px solid #1a1a1a;
-      padding: 10px 12px;
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
-    }
-
-    button {
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
-      padding: 12px 24px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    button:hover { background: #333; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-
-    .download-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      font-size: 13px;
-      margin-top: 16px;
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 500;
-    }
-
-    .download-btn:hover {
-      background: #333;
-    }
-
-    .download-info {
-      font-size: 12px;
-      color: #666;
-      margin-top: 8px;
-      margin-bottom: 0;
-    }
-
-    .analysis-box {
-      background: #f9f9f9;
-      border: 1px solid #e0e0e0;
-      padding: 16px;
-      margin: 20px 0;
-    }
-
-    .analysis-title {
-      font-size: 11px;
-      font-weight: 500;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 10px;
-    }
-
-    .analysis-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 5px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .analysis-row:last-child { border-bottom: none; }
-    .analysis-key { color: #666; }
-    .analysis-val { font-family: 'Courier New', monospace; font-size: 12px; }
-
-    .error-msg {
-      border-left: 2px solid #c00;
-      padding: 10px 12px;
-      margin: 16px 0;
-      font-size: 13px;
-      color: #c00;
-      background: #fff;
-    }
-
-    .success-msg {
-      border-left: 2px solid #2a7a2a;
-      padding: 10px 12px;
-      margin: 16px 0;
-      font-size: 13px;
-      color: #2a7a2a;
-      background: #fff;
-    }
-
-    .code-wrapper { position: relative; margin-top: 16px; }
-
-    pre {
-      background: #1a1a1a;
-      color: #e0e0e0;
+    .code-wrapper pre {
+      margin: 0;
       padding: 20px;
-      padding-top: 50px;
       overflow-x: auto;
       font-family: 'Courier New', monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      max-height: 360px;
-      overflow-y: auto;
-      border: 1px solid #000;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
     .copy-btn {
@@ -356,10 +177,53 @@
 
     .copy-btn:hover { background: #444; }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #e0e0e0;
-      margin: 24px 0;
+    .info-box {
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #1a1a1a;
+    }
+
+    .info-box code {
+      background: #fff;
+      padding: 2px 6px;
+      border: 1px solid #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stat {
+      background: #f5f5f5;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 4px;
     }
 
     @media (max-width: 1024px) {
@@ -371,819 +235,267 @@
 
 <div class="container">
   <header>
-    <div class="version">v3.1.0</div>
-    <h1>Widget Code Generator</h1>
-    <p class="subtitle">Upload your extension, add a widget, download updated extension</p>
+    <div class="version">v4.0</div>
+    <h1>Widget HTML Auto-Annotator</h1>
+    <p class="subtitle">Paste clean HTML with .editable-widget class → get annotated HTML with data-* attributes</p>
+
     <nav class="tab-nav">
       <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-      <a href="generator.html" class="tab-nav-link active">Code Generator</a>
-      <a href="integration.html" class="tab-nav-link">Integration</a>
-      <a href="specs.html" class="tab-nav-link">Markup Specs</a>
+      <a href="generator.html" class="tab-nav-link active">Auto-Annotator</a>
+      <a href="lifecycle.html" class="tab-nav-link">Lifecycle</a>
     </nav>
   </header>
 
   <div class="main-grid">
-
-    <!-- LEFT: Input -->
+    <!-- Input Panel -->
     <div class="panel">
-      <div class="panel-title">1 — Upload Current Extension</div>
+      <div class="panel-title">Widget Configuration</div>
 
-      <div class="upload-zone" id="uploadZone">
-        <input type="file" id="zipInput" accept=".zip">
-        <div class="upload-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-        </div>
-        <div class="upload-label"><strong>Click to upload</strong> your extension .zip</div>
-        <div class="upload-status" id="uploadStatus">No file selected</div>
+      <div class="info-box">
+        <strong>How it works:</strong><br>
+        1. Enter widget class name and metadata below<br>
+        2. Paste your clean HTML (without data-* attributes)<br>
+        3. Generator auto-detects content elements (h1-h6, p, a, img, li)<br>
+        4. Adds all data-* attributes and widget metadata<br>
+        5. Use <code>.exclude</code> or <code>.exclude-*</code> to skip elements
       </div>
-
-      <div id="currentWidgets" style="display:none;">
-        <div class="analysis-title">Existing Widgets Found</div>
-        <div class="widget-list" id="widgetList"></div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="panel-title">2 — New Widget Details</div>
 
       <div class="form-group">
         <label>Widget Class Name</label>
-        <input type="text" id="widgetClass" placeholder="team-member-bio">
-        <div class="info-box">CSS class on the widget's outer container</div>
+        <input type="text" id="widgetClass" placeholder="hero-section" />
       </div>
 
       <div class="form-group">
         <label>Widget Display Name</label>
-        <input type="text" id="widgetName" placeholder="Team Member Bio">
+        <input type="text" id="widgetName" placeholder="Hero Section" />
       </div>
 
       <div class="form-group">
-        <label>Widget Description</label>
-        <input type="text" id="widgetDescription" placeholder="Edit team member bios">
+        <label>Widget Description (Optional)</label>
+        <input type="text" id="widgetDescription" placeholder="Main hero content with heading and CTA" />
       </div>
 
       <div class="form-group">
-        <label>Widget HTML</label>
-        <textarea id="htmlInput" placeholder="Paste widget HTML with dynamic-* classes..."></textarea>
-        <div class="info-box">Use dynamic-object, dynamic-text, dynamic-number, dynamic-email, etc.</div>
+        <label>Paste Your HTML</label>
+        <textarea id="htmlInput" rows="15" placeholder='<div>
+  <h1>Welcome</h1>
+  <p>Description here</p>
+  <a href="/link">Learn More</a>
+</div>'></textarea>
       </div>
 
-      <button onclick="generateCode()" id="generateBtn" disabled>Generate &amp; Download</button>
-
-      <div id="statusOutput"></div>
+      <button class="btn" onclick="processHTML()">Generate Annotated HTML →</button>
     </div>
 
-    <!-- RIGHT: Output -->
+    <!-- Output Panel -->
     <div class="panel">
-      <div class="panel-title">Output</div>
+      <div class="panel-title">Annotated HTML</div>
 
-      <div id="outputPlaceholder" style="color:#999; font-size:14px; padding: 20px 0;">
-        Upload your extension ZIP to get started.
+      <div id="stats" style="display:none;">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="statElements">0</div>
+            <div class="stat-label">Elements Found</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statAnnotated">0</div>
+            <div class="stat-label">Annotated</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statExcluded">0</div>
+            <div class="stat-label">Excluded</div>
+          </div>
+        </div>
       </div>
 
-      <div id="outputSection" style="display:none;">
-        <div class="panel-title">Processed HTML Preview</div>
-        <div class="code-wrapper">
-          <button class="copy-btn" onclick="copyHTML()" title="Copy">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          </button>
-          <pre id="htmlPreview">// Generate to see output</pre>
-        </div>
-
-        <button class="download-btn" id="downloadBtn">Download Updated Extension (.zip)</button>
-        <p class="download-info">Drop-in replacement — contains all existing widgets plus your new one</p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyOutput()" title="Copy">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <pre id="htmlOutput">Processed HTML will appear here...</pre>
       </div>
     </div>
-
   </div>
+
 </div>
 
 <script>
-  // ─── State ────────────────────────────────────────────────────────────────
-  let loadedZip = null;
-  let currentContentScript = '';
-  let currentSidepanel = '';
-  let currentManifest = '';
-  let detectedWidgets = [];
-  let generatedZipBlob = null;
+// Content elements that should be editable
+const CONTENT_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'img', 'li'];
 
-  // ─── ZIP Upload ───────────────────────────────────────────────────────────
-  document.getElementById('zipInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      loadedZip = await JSZip.loadAsync(file);
-      await readExtensionFiles();
-    } catch (err) {
-      setUploadStatus('error', `Failed to read ZIP: ${err.message}`);
-    }
-  });
-
-  async function readExtensionFiles() {
-    try {
-      // Read content-script.js
-      const csFile = loadedZip.file('content-script.js');
-      if (!csFile) throw new Error('content-script.js not found in ZIP');
-      currentContentScript = await csFile.async('string');
-
-      // Read sidepanel.js
-      const spFile = loadedZip.file('sidepanel.js');
-      if (!spFile) throw new Error('sidepanel.js not found in ZIP');
-      currentSidepanel = await spFile.async('string');
-
-      // Read manifest.json
-      const mfFile = loadedZip.file('manifest.json');
-      if (mfFile) {
-        currentManifest = await mfFile.async('string');
-      }
-
-      // Detect existing widgets from WIDGET_REGISTRY
-      detectedWidgets = parseWidgetRegistry(currentContentScript);
-
-      // Update UI
-      setUploadStatus('loaded', `✓ Loaded — ${Object.keys(loadedZip.files).length} files found`);
-      document.getElementById('uploadZone').classList.add('has-file');
-      showExistingWidgets();
-      document.getElementById('generateBtn').removeAttribute('disabled');
-
-    } catch (err) {
-      setUploadStatus('error', err.message);
-    }
+function processHTML() {
+  const widgetClass = document.getElementById('widgetClass').value.trim();
+  const widgetName = document.getElementById('widgetName').value.trim();
+  const widgetDescription = document.getElementById('widgetDescription').value.trim();
+  const input = document.getElementById('htmlInput').value.trim();
+  
+  if (!widgetClass) {
+    alert('Please enter a widget class name');
+    return;
+  }
+  
+  if (!widgetName) {
+    alert('Please enter a widget display name');
+    return;
+  }
+  
+  if (!input) {
+    alert('Please paste HTML to process');
+    return;
   }
 
-  function parseWidgetRegistry(code) {
-    const widgets = [];
-    const registryMatch = code.match(/const WIDGET_REGISTRY\s*=\s*\{([\s\S]*?)\};/);
-    if (!registryMatch) return widgets;
-
-    const registryBody = registryMatch[1];
-    const entryPattern = /'([^']+)'\s*:\s*\{\s*name\s*:\s*'([^']+)'/g;
-    let match;
-    while ((match = entryPattern.exec(registryBody)) !== null) {
-      widgets.push({ className: match[1], name: match[2] });
-    }
-    return widgets;
+  // Parse HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+  
+  // Get the root element (could be in body)
+  const root = doc.body.children[0];
+  
+  if (!root) {
+    alert('Could not parse HTML');
+    return;
   }
 
-  function showExistingWidgets() {
-    const container = document.getElementById('currentWidgets');
-    const list = document.getElementById('widgetList');
+  // Create wrapper div with widget metadata
+  const wrapper = doc.createElement('div');
+  wrapper.className = `editable-widget ${widgetClass}`;
+  wrapper.setAttribute('data-widget-name', widgetName);
+  if (widgetDescription) {
+    wrapper.setAttribute('data-widget-description', widgetDescription);
+  }
+  
+  // Move all children from root to wrapper
+  while (root.firstChild) {
+    wrapper.appendChild(root.firstChild);
+  }
 
-    if (detectedWidgets.length === 0) {
-      container.style.display = 'none';
+  // Process widget to add data attributes
+  const stats = {
+    total: 0,
+    annotated: 0,
+    excluded: 0
+  };
+
+  annotateWidget(wrapper, stats);
+
+  // Output results
+  const output = formatHTML(wrapper.outerHTML);
+  document.getElementById('htmlOutput').textContent = output;
+  
+  // Show stats
+  document.getElementById('stats').style.display = 'block';
+  document.getElementById('statElements').textContent = stats.total;
+  document.getElementById('statAnnotated').textContent = stats.annotated;
+  document.getElementById('statExcluded').textContent = stats.excluded;
+}
+
+function annotateWidget(widget, stats) {
+  const selector = CONTENT_ELEMENTS.join(', ');
+  const contentElements = widget.querySelectorAll(selector);
+  
+  let counters = {};
+  
+  contentElements.forEach(element => {
+    stats.total++;
+    
+    if (isExcluded(element, widget)) {
+      stats.excluded++;
       return;
     }
-
-    list.innerHTML = detectedWidgets.map((w, idx) => `
-      <div class="widget-item">
-        <div class="widget-item-left">
-          <span class="widget-item-name">${w.className}</span>
-          <span class="widget-item-badge">${w.name}</span>
-        </div>
-        <button class="widget-item-delete" onclick="deleteWidget('${w.className}')">Delete</button>
-      </div>
-    `).join('');
-
-    container.style.display = 'block';
-  }
-
-  async function deleteWidget(widgetClass) {
-    if (!confirm(`Delete widget "${widgetClass}"?\n\nThis will remove it from the extension code.`)) {
-      return;
-    }
-
-    try {
-      // Remove from content-script.js
-      currentContentScript = removeWidgetFromContentScript(currentContentScript, widgetClass);
-      
-      // Remove from sidepanel.js
-      currentSidepanel = removeWidgetFromSidepanel(currentSidepanel, widgetClass);
-
-      // Update detected widgets list
-      detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
-
-      // Create updated ZIP and UPDATE loadedZip state (no download yet)
-      const newZip = new JSZip();
-      const filePromises = [];
-      loadedZip.forEach((relativePath, file) => {
-        filePromises.push(
-          file.async('uint8array').then(content => {
-            newZip.file(relativePath, content);
-          })
-        );
-      });
-      await Promise.all(filePromises);
-
-      // Overwrite with updated files
-      newZip.file('content-script.js', currentContentScript);
-      newZip.file('sidepanel.js', currentSidepanel);
-      if (currentManifest) {
-        const updatedManifest = updateManifest(currentManifest);
-        newZip.file('manifest.json', updatedManifest);
-        currentManifest = updatedManifest;
-      }
-
-      // CRITICAL: Update loadedZip to the new ZIP so next operations use updated state
-      loadedZip = newZip;
-
-      // Update UI
-      showExistingWidgets();
-      showStatus('success', `✓ Widget "${widgetClass}" removed. Click "Generate & Download" to get your updated extension.`);
-
-    } catch (err) {
-      showStatus('error', `Failed to delete widget: ${err.message}`);
-    }
-  }
-
-  function removeWidgetFromContentScript(code, widgetClass) {
-    // Remove from WIDGET_REGISTRY
-    const registryPattern = new RegExp(`\\s*,?\\s*'${widgetClass}'\\s*:\\s*\\{[^}]*\\}`, 'g');
-    code = code.replace(registryPattern, '');
-
-    // Remove router case from getWidgetData
-    const getPattern = new RegExp(`\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`, 'g');
-    code = code.replace(getPattern, '');
-
-    // Remove router case from updateWidgetData
-    const updatePattern = new RegExp(`\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`, 'g');
-    code = code.replace(updatePattern, '');
-
-    // Remove widget functions section
-    const camelClass = toCamelCase(widgetClass);
-    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-    const sectionPattern = new RegExp(
-      `// =+\\s*\\n// ${widgetClass.toUpperCase().replace(/-/g, ' ')}\\s*\\n// =+[\\s\\S]*?(?=\\n// =|\\n\\n$|$)`,
-      'g'
-    );
-    code = code.replace(sectionPattern, '');
-
-    return code;
-  }
-
-  function removeWidgetFromSidepanel(code, widgetClass) {
-    // Remove from renderEditor router
-    const camelClass = toCamelCase(widgetClass);
-    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-    const renderPattern = new RegExp(
-      `\\s*if \\(widgetClass === '${widgetClass}'\\) \\{[^}]*\\}\\s*`,
-      'g'
-    );
-    code = code.replace(renderPattern, '');
-
-    // Remove editor functions section
-    const sectionPattern = new RegExp(
-      `// =+\\s*\\n// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR\\s*\\n// =+[\\s\\S]*?(?=\\n// =|$)`,
-      'g'
-    );
-    code = code.replace(sectionPattern, '');
-
-    return code;
-  }
-
-  function setUploadStatus(type, message) {
-    const el = document.getElementById('uploadStatus');
-    el.textContent = message;
-    el.className = `upload-status ${type}`;
-  }
-
-  // ─── HTML Processing ──────────────────────────────────────────────────────
-  function getDirectText(el) {
-    let text = '';
-    el.childNodes.forEach(node => {
-      if (node.nodeType === 3) {
-        text += node.textContent.trim();
-      }
-    });
-    return text;
-  }
-
-  function processHTML(html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const widgetContainer = doc.body.firstElementChild;
-    if (!widgetContainer) return null;
-
-    const dynamicObjects = widgetContainer.querySelectorAll('.dynamic-object');
-    const hasDynamicObjects = dynamicObjects.length > 0;
-
-    function processElement(el, target) {
-      // target = the element to add data attributes to (either the el itself)
-      const fieldCounts = {};
-
-      const allEls = el.querySelectorAll('*');
-      const dynamicEls = [];
-
-      allEls.forEach(child => {
-        const hasDynClass = Array.from(child.classList).some(cls =>
-          cls.startsWith('dynamic-') && cls !== 'dynamic-object'
-        );
-        if (hasDynClass) dynamicEls.push(child);
-      });
-
-      dynamicEls.forEach(child => {
-        Array.from(child.classList).forEach(cls => {
-          if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
-            const type = cls.replace('dynamic-', '');
-            fieldCounts[type] = (fieldCounts[type] || 0) + 1;
-            const fieldNum = fieldCounts[type];
-
-            // Extract direct text only (ignores child elements like <span>%)
-            const directText = getDirectText(child);
-            const dataValue = directText !== '' ? directText : (type === 'number' ? '0' : 'placeholder');
-
-            // Data attribute goes ON the element itself
-            child.setAttribute(`data-${type}-${fieldNum}`, dataValue);
-
-            // Replace dynamic class with numbered class
-            child.classList.remove(cls);
-            child.classList.add(`${type}-${fieldNum}`);
-          }
-        });
-      });
-    }
-
-    if (hasDynamicObjects) {
-      dynamicObjects.forEach((obj, i) => {
-        processElement(obj);
-        obj.setAttribute('data-object-id', (i + 1).toString());
-        obj.classList.remove('dynamic-object');
-      });
-    } else {
-      processElement(widgetContainer);
-    }
-
-    return doc.body.innerHTML;
-  }
-
-  function analyzeHTML(html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const container = doc.body.firstElementChild;
-    if (!container) return { error: 'No widget container found' };
-
-    const widgetClass = container.className.split(' ')[0];
-    const dynamicObjects = container.querySelectorAll('.dynamic-object');
-    const hasDynamicObjects = dynamicObjects.length > 0;
-    const allDynamic = container.querySelectorAll('[class*="dynamic-"]');
-
-    if (allDynamic.length === 0) return { error: 'No dynamic-* classes found' };
-
-    const fieldTypes = new Set();
-    allDynamic.forEach(el => {
-      Array.from(el.classList).forEach(cls => {
-        if (cls.startsWith('dynamic-') && cls !== 'dynamic-object') {
-          fieldTypes.add(cls.replace('dynamic-', ''));
-        }
-      });
-    });
-
-    return {
-      widgetClass,
-      hasDynamicObjects,
-      objectCount: hasDynamicObjects ? dynamicObjects.length : 1,
-      fieldTypes: Array.from(fieldTypes)
-    };
-  }
-
-  // ─── Code Generation ──────────────────────────────────────────────────────
-  function toCamelCase(str) {
-    return str.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-  }
-
-  function toDisplayName(str) {
-    return str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  }
-
-  function injectIntoContentScript(code, widgetClass, widgetName, widgetDescription, hasObjects, functionName) {
-    // 1. Add to WIDGET_REGISTRY
-    const registryEntry = `  '${widgetClass}': {\n    name: '${widgetName}',\n    description: '${widgetDescription}'\n  }`;
     
-    // Try with comment first, fallback to before closing brace
-    if (code.match(/\/\/\s*Add more widgets here/)) {
-      code = code.replace(
-        /(\s*\/\/\s*Add more widgets here\s*\n?\s*\};)/,
-        `,\n${registryEntry}\n  // Add more widgets here\n};`
-      );
-    } else {
-      // Fallback: find WIDGET_REGISTRY closing and inject before it
-      code = code.replace(
-        /(const WIDGET_REGISTRY\s*=\s*\{[\s\S]*?)(\n\};)/,
-        `$1,\n${registryEntry}\n};`
-      );
-    }
-
-    // 2. Add to getWidgetData router
-    const getDataCase = `  if (widgetClass === '${widgetClass}') {\n    return get${functionName}Data();\n  }`;
+    const tagName = element.tagName.toLowerCase();
     
-    // Try with comment first, fallback to before return null
-    if (code.match(/\/\/\s*Add more widget data extractors here/)) {
-      code = code.replace(
-        /(\/\/\s*Add more widget data extractors here\s*\n\s*return null;)/,
-        `${getDataCase}\n  // Add more widget data extractors here\n  return null;`
-      );
-    } else {
-      // Fallback: inject before return null in getWidgetData
-      code = code.replace(
-        /(function getWidgetData\(widgetClass\) \{[\s\S]*?)(\n\s*return null;\n\})/,
-        `$1\n${getDataCase}$2`
-      );
+    // Initialize counter for this tag type
+    if (!counters[tagName]) {
+      counters[tagName] = 1;
     }
-
-    // 3. Add to updateWidgetData router
-    const updateDataCase = `  if (widgetClass === '${widgetClass}') {\n    success = update${functionName}Data(data);\n  }`;
     
-    // Try with comment first, fallback to before if (success)
-    if (code.match(/\/\/\s*Add more widget updaters here/)) {
-      code = code.replace(
-        /(\/\/\s*Add more widget updaters here)/,
-        `${updateDataCase}\n  // Add more widget updaters here`
-      );
+    // Add data attributes based on element type
+    if (tagName === 'a') {
+      element.setAttribute(`data-link-${counters[tagName]}`, element.getAttribute('href') || '');
+    } else if (tagName === 'img') {
+      element.setAttribute(`data-img-src-${counters[tagName]}`, element.getAttribute('src') || '');
+      element.setAttribute(`data-img-alt-${counters[tagName]}`, element.getAttribute('alt') || '');
     } else {
-      // Fallback: inject before the if (success) block
-      code = code.replace(
-        /(function updateWidgetData\(widgetClass, data\) \{\s*let success = false;[\s\S]*?)(\n\s*if \(success\) \{)/,
-        `$1\n${updateDataCase}$2`
-      );
+      // Text elements (h1-h6, p, li)
+      const text = element.textContent || '';
+      element.setAttribute(`data-${tagName}-${counters[tagName]}`, text);
     }
-
-    // 4. Append widget functions at end of file
-    const newFunctions = generateWidgetFunctions(widgetClass, hasObjects, functionName);
-    code = code.trimEnd() + '\n\n' + newFunctions;
-
-    return code;
-  }
-
-  function generateWidgetFunctions(widgetClass, hasObjects, functionName) {
-    const getDataFn = hasObjects ? `
-function get${functionName}Data() {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return null;
-
-  const objects = [];
-  widget.querySelectorAll('[data-object-id]').forEach(el => {
-    const obj = { id: el.dataset.objectId || '' };
-    el.querySelectorAll('*').forEach(child => {
-      Array.from(child.attributes).forEach(attr => {
-        if (attr.name.startsWith('data-') && attr.name !== 'data-object-id') {
-          obj[attr.name.replace('data-', '').replace(/-/g, '_')] = attr.value;
-        }
-      });
-    });
-    objects.push(obj);
-  });
-
-  return { objects };
-}` : `
-function get${functionName}Data() {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return null;
-
-  const data = {};
-  widget.querySelectorAll('*').forEach(el => {
-    Array.from(el.attributes).forEach(attr => {
-      if (attr.name.startsWith('data-')) {
-        data[attr.name.replace('data-', '').replace(/-/g, '_')] = attr.value;
-      }
-    });
-  });
-
-  return data;
-}`;
-
-    const updateDataFn = hasObjects ? `
-function update${functionName}Data(data) {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return false;
-
-  const objectEls = widget.querySelectorAll('[data-object-id]');
-  data.objects.forEach((obj, i) => {
-    if (!objectEls[i]) return;
-    Object.keys(obj).forEach(key => {
-      if (key === 'id') return;
-      const attrName = 'data-' + key.replace(/_/g, '-');
-      const targetEl = objectEls[i].querySelector('[' + attrName + ']');
-      if (targetEl) {
-        targetEl.setAttribute(attrName, obj[key]);
-        targetEl.textContent = obj[key];
-      }
-    });
-  });
-
-  return true;
-}` : `
-function update${functionName}Data(data) {
-  const widget = findWidgetElement('${widgetClass}');
-  if (!widget) return false;
-
-  Object.keys(data).forEach(key => {
-    const attrName = 'data-' + key.replace(/_/g, '-');
-    const targetEl = widget.querySelector('[' + attrName + ']');
-    if (targetEl) {
-      targetEl.setAttribute(attrName, data[key]);
-      targetEl.textContent = data[key];
-    }
-  });
-
-  return true;
-}`;
-
-    return `// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')}
-// =============================================================================
-${getDataFn}
-${updateDataFn}
-`;
-  }
-
-  function injectIntoSidepanel(code, widgetClass, widgetName, hasObjects, functionName) {
-    // 1. Add to renderEditor router
-    const renderCase = `\n  if (widgetClass === '${widgetClass}') {\n    container.innerHTML = render${functionName}Editor(data);\n    attach${functionName}EditorEvents(data);\n  }\n`;
-    code = code.replace(
-      /(container\.style\.display\s*=\s*'block';\s*\n?\s*\})/,
-      `${renderCase}\n  container.style.display = 'block';\n}`
-    );
-
-    // 2. Append editor functions before HELPERS section
-    const editorFunctions = generateEditorFunctions(widgetClass, widgetName, hasObjects, functionName);
-    code = code.replace(
-      /(\/\/ =+\s*\n\/\/ HELPERS)/,
-      `${editorFunctions}\n// =============================================================================\n// HELPERS`
-    );
-
-    return code;
-  }
-
-  function generateEditorFunctions(widgetClass, widgetName, hasObjects, functionName) {
-    const inputTypeMap = { text: 'text', email: 'email', number: 'text', phone: 'tel', url: 'url', date: 'date', textarea: 'textarea', checkbox: 'checkbox' };
-
-    const renderFn = hasObjects ? `
-function render${functionName}Editor(data) {
-  const objects = data.objects;
-  const inputTypes = ${JSON.stringify(inputTypeMap)};
-
-  return \`
-    <div class="editor-title">${widgetName}</div>
-    \${objects.map((obj, index) => \`
-      <div class="plan-section">
-        <div class="plan-section-title">Item \${index + 1}</div>
-        \${Object.keys(obj).filter(k => k !== 'id').map(key => {
-          const fieldType = key.split('_')[0];
-          const inputType = inputTypes[fieldType] || 'text';
-          const label = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
-          if (inputType === 'textarea') {
-            return \`<div class="form-group"><label>\${label}</label><textarea class="field-\${key}" data-object-index="\${index}" rows="3">\${obj[key]}</textarea></div>\`;
-          } else if (inputType === 'checkbox') {
-            return \`<div class="form-group"><label><input type="checkbox" class="field-\${key}" data-object-index="\${index}" \${obj[key] === 'true' ? 'checked' : ''}> \${label}</label></div>\`;
-          } else {
-            return \`<div class="form-group"><label>\${label}</label><input type="\${inputType}" class="field-\${key}" data-object-index="\${index}" value="\${obj[key]}"></div>\`;
-          }
-        }).join('')}
-      </div>
-    \`).join('')}
-    <div class="button-group">
-      <button class="btn-secondary" id="clearBtn">Reset</button>
-      <button class="btn-primary" id="saveBtn">Apply Changes</button>
-    </div>
-  \`;
-}` : `
-function render${functionName}Editor(data) {
-  const inputTypes = ${JSON.stringify(inputTypeMap)};
-
-  return \`
-    <div class="editor-title">${widgetName}</div>
-    <div class="plan-section">
-      \${Object.keys(data).map(key => {
-        const fieldType = key.split('_')[0];
-        const inputType = inputTypes[fieldType] || 'text';
-        const label = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
-        if (inputType === 'textarea') {
-          return \`<div class="form-group"><label>\${label}</label><textarea class="field-\${key}" rows="3">\${data[key]}</textarea></div>\`;
-        } else if (inputType === 'checkbox') {
-          return \`<div class="form-group"><label><input type="checkbox" class="field-\${key}" \${data[key] === 'true' ? 'checked' : ''}> \${label}</label></div>\`;
-        } else {
-          return \`<div class="form-group"><label>\${label}</label><input type="\${inputType}" class="field-\${key}" value="\${data[key]}"></div>\`;
-        }
-      }).join('')}
-    </div>
-    <div class="button-group">
-      <button class="btn-secondary" id="clearBtn">Reset</button>
-      <button class="btn-primary" id="saveBtn">Apply Changes</button>
-    </div>
-  \`;
-}`;
-
-    const attachFn = `
-function attach${functionName}EditorEvents(originalData) {
-  document.getElementById('saveBtn').addEventListener('click', save${functionName}Data);
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    renderEditor('${widgetClass}', originalData);
-  });
-}`;
-
-    const saveFn = hasObjects ? `
-async function save${functionName}Data() {
-  const formData = { objects: [] };
-  const count = document.querySelectorAll('.plan-section').length;
-  for (let i = 0; i < count; i++) {
-    const obj = { id: (i + 1).toString() };
-    document.querySelectorAll(\`[data-object-index="\${i}"]\`).forEach(input => {
-      const key = input.className.split(' ').find(c => c.startsWith('field-'))?.replace('field-', '');
-      if (key) obj[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
-    });
-    formData.objects.push(obj);
-  }
-  await sendWidgetUpdate('${widgetClass}', formData);
-}` : `
-async function save${functionName}Data() {
-  const formData = {};
-  document.querySelectorAll('[class*="field-"]').forEach(input => {
-    const key = input.className.split(' ').find(c => c.startsWith('field-'))?.replace('field-', '');
-    if (key) formData[key] = input.type === 'checkbox' ? input.checked.toString() : input.value;
-  });
-  await sendWidgetUpdate('${widgetClass}', formData);
-}`;
-
-    return `
-// =============================================================================
-// ${widgetClass.toUpperCase().replace(/-/g, ' ')} EDITOR
-// =============================================================================
-${renderFn}
-${attachFn}
-${saveFn}
-`;
-  }
-
-  function updateManifest(manifestJson) {
-    try {
-      const manifest = JSON.parse(manifestJson);
-      const parts = (manifest.version || '1.0.0').split('.');
-      parts[2] = (parseInt(parts[2] || 0) + 1).toString();
-      manifest.version = parts.join('.');
-      return JSON.stringify(manifest, null, 2);
-    } catch {
-      return manifestJson;
-    }
-  }
-
-  // ─── Main Generate Function ───────────────────────────────────────────────
-  async function generateCode() {
-    const widgetClass = document.getElementById('widgetClass').value.trim();
-    const widgetName = document.getElementById('widgetName').value.trim();
-    const widgetDescription = document.getElementById('widgetDescription').value.trim();
-    const htmlInput = document.getElementById('htmlInput').value.trim();
-    const statusEl = document.getElementById('statusOutput');
-
-    statusEl.innerHTML = '';
-
-    if (!loadedZip) return showStatus('error', 'Please upload your extension ZIP first');
-
-    // If no HTML provided, just package current state (e.g., after deletions)
-    if (!htmlInput) {
-      try {
-        generatedZipBlob = await loadedZip.generateAsync({ type: 'blob' });
-
-        document.getElementById('downloadBtn').onclick = () => {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(generatedZipBlob);
-          link.download = `sitecore-widget-editor-updated.zip`;
-          link.click();
-        };
-
-        document.getElementById('outputPlaceholder').style.display = 'none';
-        document.getElementById('outputSection').style.display = 'block';
-        document.getElementById('htmlPreview').textContent = '// No new widget HTML to preview';
-
-        showStatus('success', `✓ Extension packaged with ${detectedWidgets.length} widget(s). Ready to download.`);
-        return;
-      } catch (err) {
-        return showStatus('error', `Failed to package extension: ${err.message}`);
-      }
-    }
-
-    // Adding a new widget - require all fields
-    if (!widgetClass) return showStatus('error', 'Please enter a widget class name');
     
-    // Use defaults if not provided
-    const finalWidgetName = widgetName || toDisplayName(widgetClass);
-    const finalWidgetDescription = widgetDescription || `Edit ${widgetClass.replace(/-/g, ' ')} data`;
-
-    // Check for duplicate
-    const existingWidget = detectedWidgets.find(w => w.className === widgetClass);
-    if (existingWidget) {
-      const replace = confirm(
-        `Widget "${widgetClass}" already exists.\n\nDo you want to REPLACE it with the new version?\n\nClick OK to replace, Cancel to abort.`
-      );
-      
-      if (!replace) {
-        return showStatus('error', 'Generation cancelled');
-      }
-
-      // Remove the existing widget before adding new one
-      currentContentScript = removeWidgetFromContentScript(currentContentScript, widgetClass);
-      currentSidepanel = removeWidgetFromSidepanel(currentSidepanel, widgetClass);
-      detectedWidgets = detectedWidgets.filter(w => w.className !== widgetClass);
-    }
-
-    const analysis = analyzeHTML(htmlInput);
-    if (analysis.error) return showStatus('error', analysis.error);
-
-    const camelClass = toCamelCase(widgetClass);
-    const functionName = camelClass.charAt(0).toUpperCase() + camelClass.slice(1);
-    const hasObjects = analysis.hasDynamicObjects;
-
-    // Process HTML
-    const processedHTML = processHTML(htmlInput);
-    document.getElementById('htmlPreview').textContent = processedHTML;
-
-    // Inject into existing files
-    const newContentScript = injectIntoContentScript(
-      currentContentScript, widgetClass, finalWidgetName, finalWidgetDescription, hasObjects, functionName
-    );
-    const newSidepanel = injectIntoSidepanel(
-      currentSidepanel, widgetClass, finalWidgetName, hasObjects, functionName
-    );
-    const newManifest = currentManifest ? updateManifest(currentManifest) : null;
-
-    // Also add a sendWidgetUpdate helper if not already present
-    let finalSidepanel = newSidepanel;
-    if (!finalSidepanel.includes('async function sendWidgetUpdate')) {
-      finalSidepanel += `
-
-async function sendWidgetUpdate(widgetClass, data) {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  chrome.tabs.sendMessage(tab.id, {
-    action: 'updateWidgetData',
-    widgetClass,
-    data
-  }, (response) => {
-    if (response && response.success) {
-      showSuccess('Changes applied successfully!');
-    } else {
-      showError('Failed to apply changes. Please try again.');
-    }
+    counters[tagName]++;
+    stats.annotated++;
   });
-}`;
+}
+
+function isExcluded(element, widget) {
+  // Check if element itself has .exclude class
+  if (element.classList.contains('exclude')) {
+    return true;
+  }
+  
+  const tagName = element.tagName.toLowerCase();
+  
+  // Walk up ancestors to check for exclusion classes
+  let ancestor = element.parentElement;
+  while (ancestor && ancestor !== widget.parentElement) {
+    // Check for .exclude-* (exclude all)
+    if (ancestor.classList.contains('exclude-*')) {
+      return true;
     }
-
-    // Build new ZIP from existing ZIP + updated files
-    const newZip = new JSZip();
-
-    // Copy all existing files
-    const filePromises = [];
-    loadedZip.forEach((relativePath, file) => {
-      filePromises.push(
-        file.async('uint8array').then(content => {
-          newZip.file(relativePath, content);
-        })
-      );
-    });
-    await Promise.all(filePromises);
-
-    // Overwrite updated files
-    newZip.file('content-script.js', newContentScript);
-    newZip.file('sidepanel.js', finalSidepanel);
-    if (newManifest) newZip.file('manifest.json', newManifest);
-    newZip.file('processed-widget.html', processedHTML);
-
-    // Generate blob
-    generatedZipBlob = await newZip.generateAsync({ type: 'blob' });
-
-    // Setup download
-    document.getElementById('downloadBtn').onclick = () => {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(generatedZipBlob);
-      link.download = `sitecore-widget-editor-${widgetClass}.zip`;
-      link.click();
-    };
-
-    // Show output
-    document.getElementById('outputPlaceholder').style.display = 'none';
-    document.getElementById('outputSection').style.display = 'block';
-
-    showStatus('success', `✓ Ready — "${finalWidgetName}" added. ${detectedWidgets.length + 1} widgets total in updated extension.`);
+    
+    // Check for .exclude-{tagName}
+    if (ancestor.classList.contains(`exclude-${tagName}`)) {
+      return true;
+    }
+    
+    ancestor = ancestor.parentElement;
   }
+  
+  return false;
+}
 
-  function showStatus(type, message) {
-    document.getElementById('statusOutput').innerHTML = `<div class="${type}-msg">${message}</div>`;
-  }
+function formatHTML(html) {
+  // Basic HTML formatting
+  let formatted = html;
+  
+  // Add newlines after opening tags
+  formatted = formatted.replace(/></g, '>\n<');
+  
+  // Indent nested elements
+  const lines = formatted.split('\n');
+  let indent = 0;
+  const indented = lines.map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return '';
+    
+    if (trimmed.startsWith('</')) {
+      indent = Math.max(0, indent - 2);
+    }
+    
+    const result = ' '.repeat(indent) + trimmed;
+    
+    if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
+      indent += 2;
+    }
+    
+    return result;
+  });
+  
+  return indented.filter(line => line.trim()).join('\n');
+}
 
-  function copyHTML() {
-    const code = document.getElementById('htmlPreview').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-      const btn = event.target;
-      const orig = btn.textContent;
-      btn.textContent = '✓';
-      setTimeout(() => btn.textContent = orig, 2000);
-    });
-  }
+function copyOutput() {
+  const output = document.getElementById('htmlOutput').textContent;
+  navigator.clipboard.writeText(output).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
+  });
+}
 </script>
 
 </body>
