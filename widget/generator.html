@@ -282,10 +282,11 @@
       <div class="info-box">
         <strong>How it works:</strong><br>
         1. Enter widget class name and metadata below<br>
-        2. Paste your clean HTML (without data-* attributes)<br>
-        3. Generator auto-detects content elements (h1-h6, p, a, img, li)<br>
-        4. Adds all data-* attributes and widget metadata<br>
-        5. Use <code>.exclude</code> or <code>.exclude-*</code> to skip elements
+        2. Paste your clean HTML (no annotations needed)<br>
+        3. Add <code>dynamic-content</code> class to elements where data attributes should be managed<br>
+        4. Generator auto-detects content elements (h1-h6, p, a, img, li)<br>
+        5. Adds appropriate classes and data attributes based on element type<br>
+        6. Use <code>.exclude</code> or <code>.exclude-*</code> to skip elements
       </div>
 
       <div class="form-group">
@@ -429,6 +430,14 @@ function annotateWidget(widget, stats) {
   contentElements.forEach(element => {
     stats.total++;
     
+    // Check for .exclude class - remove the class but keep the attribute
+    if (element.classList.contains('exclude')) {
+      element.classList.remove('exclude');
+      stats.excluded++;
+      return;
+    }
+    
+    // Check if excluded by ancestor
     if (isExcluded(element, widget)) {
       stats.excluded++;
       return;
@@ -436,21 +445,54 @@ function annotateWidget(widget, stats) {
     
     const tagName = element.tagName.toLowerCase();
     
+    // Check if element has ANY dynamic-* class
+    const hasDynamicClass = Array.from(element.classList).some(cls => cls.startsWith('dynamic-'));
+    
     // Initialize counter for this tag type
     if (!counters[tagName]) {
       counters[tagName] = 1;
     }
     
-    // Add data attributes based on element type
-    if (tagName === 'a') {
-      element.setAttribute(`data-link-${counters[tagName]}`, element.getAttribute('href') || '');
-    } else if (tagName === 'img') {
-      element.setAttribute(`data-img-src-${counters[tagName]}`, element.getAttribute('src') || '');
-      element.setAttribute(`data-img-alt-${counters[tagName]}`, element.getAttribute('alt') || '');
+    if (hasDynamicClass) {
+      // HAS dynamic-* class
+      
+      if (tagName === 'a') {
+        // Link: REPLACE dynamic-* with dynamic-link class, add data-a-1 attribute
+        Array.from(element.classList).forEach(cls => {
+          if (cls.startsWith('dynamic-')) {
+            element.classList.remove(cls);
+          }
+        });
+        element.classList.add('dynamic-link');
+        element.setAttribute(`data-a-${counters[tagName]}`, element.getAttribute('href') || '');
+      } else if (tagName === 'img') {
+        // Image: REPLACE dynamic-* with dynamic-img class, add data-img-1 attribute
+        Array.from(element.classList).forEach(cls => {
+          if (cls.startsWith('dynamic-')) {
+            element.classList.remove(cls);
+          }
+        });
+        element.classList.add('dynamic-img');
+        element.setAttribute(`data-img-${counters[tagName]}`, element.getAttribute('src') || '');
+      } else {
+        // Text elements: KEEP dynamic-* class, add data-{tagname}-1 attribute
+        const text = element.textContent || '';
+        element.setAttribute(`data-${tagName}-${counters[tagName]}`, text);
+      }
+      
     } else {
-      // Text elements (h1-h6, p, li)
-      const text = element.textContent || '';
-      element.setAttribute(`data-${tagName}-${counters[tagName]}`, text);
+      // NO dynamic-* class
+      
+      if (tagName === 'a') {
+        // Link: add data-link class only
+        element.classList.add('data-link');
+      } else if (tagName === 'img') {
+        // Image: add data-img class only
+        element.classList.add('data-img');
+      } else {
+        // Text elements: add data-content class only
+        element.classList.add('data-content');
+      }
     }
     
     counters[tagName]++;
