@@ -92,6 +92,76 @@
             direction: ltr;
         }
 
+        .phase-card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 80px;
+        }
+
+        .phase-card {
+            background: #fff;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .phase-card .project-number {
+            font-size: 11px;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .phase-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.3px;
+            color: #000;
+        }
+
+        .phase-card p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .phase-card code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+            color: #1a1a1a;
+        }
+
+        .compact-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 8px;
+        }
+
+        .compact-list li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .compact-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #999;
+        }
+
         .project-content {
             display: flex;
             flex-direction: column;
@@ -201,6 +271,10 @@
             .project:nth-child(even) {
                 direction: ltr;
             }
+
+            .phase-card-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -237,7 +311,7 @@
                     </div>
                 </div>
                 <div class="project-image">
-                    <div class="placeholder">Development Screenshot</div>
+                    <div class="placeholder"><img src="admin04.png"></div>
                 </div>
             </div>
 
@@ -248,11 +322,12 @@
                     <h2>Markup Generation</h2>
                     <div class="project-description">
                         <p>Use the HTML Auto-Annotator to transform your clean HTML into Sitecore-ready markup. The generator automatically detects content elements and adds all necessary data attributes.</p>
-                        <p>Provide the widget class name, display name, and optional description. The generator wraps your HTML with <code>.editable-widget</code> class and adds <code>data-*</code> attributes to all editable content elements.</p>
+                        <p>Provide the widget class name, display name, and optional description. Add <code>dynamic-content</code> class to elements where data attributes should be managed. The generator wraps your HTML with <code>.editable-widget</code> class and adds marker classes or data attributes.</p>
                         
                         <ul class="step-list">
                             <li><strong>Open Generator:</strong> Navigate to the HTML Auto-Annotator tool</li>
                             <li><strong>Configure:</strong> Enter widget class, display name, description</li>
+                            <li><strong>Mark Dynamic Fields:</strong> Add <code>dynamic-content</code> class to elements that need data attribute management</li>
                             <li><strong>Paste HTML:</strong> Input your clean widget HTML</li>
                             <li><strong>Generate:</strong> Click to process and auto-annotate</li>
                             <li><strong>Copy Output:</strong> Get fully annotated HTML ready for Sitecore</li>
@@ -260,78 +335,52 @@
                     </div>
                 </div>
                 <div class="project-image">
-                    <div class="placeholder">Generator Interface Screenshot</div>
+                    <div class="placeholder"><img src="admin05.png"></div>
                 </div>
             </div>
 
-            <!-- Phase 3: Sitecore Integration -->
-            <div class="project">
-                <div class="project-content">
+            <!-- Phase 3, 4, 5: Card Grid -->
+            <div class="phase-card-grid">
+                
+                <div class="phase-card">
                     <div class="project-number">Phase 3</div>
-                    <h2>Sitecore Integration</h2>
-                    <div class="project-description">
-                        <p>Deploy the annotated HTML to Sitecore. The markup now contains all necessary metadata for the extension to automatically discover and manage the widget.</p>
-                        <p>No manual registration or code updates required. The extension will immediately detect any widget with the <code>.editable-widget</code> class when the page loads.</p>
-                        
-                        <ul class="step-list">
-                            <li><strong>Copy HTML:</strong> Take annotated markup from generator</li>
-                            <li><strong>Add to Sitecore:</strong> Paste into appropriate component or template</li>
-                            <li><strong>Include CSS/JS:</strong> Add any associated stylesheets and scripts</li>
-                            <li><strong>Publish:</strong> Deploy changes to staging or production</li>
-                            <li><strong>Verify:</strong> Check widget renders correctly on page</li>
-                        </ul>
-                    </div>
+                    <h3>Sitecore Integration</h3>
+                    <p>Deploy the annotated HTML to Sitecore. The markup now contains all necessary metadata for the extension to automatically discover and manage the widget.</p>
+                    <ul class="compact-list">
+                        <li>Copy HTML from generator</li>
+                        <li>Paste into Sitecore component</li>
+                        <li>Include CSS/JS assets</li>
+                        <li>Publish to staging/production</li>
+                        <li>Verify widget renders correctly</li>
+                    </ul>
                 </div>
-                <div class="project-image">
-                    <div class="placeholder">Sitecore CMS Screenshot</div>
-                </div>
-            </div>
 
-            <!-- Phase 4: Content Management -->
-            <div class="project">
-                <div class="project-content">
+                <div class="phase-card">
                     <div class="project-number">Phase 4</div>
-                    <h2>Content Management</h2>
-                    <div class="project-description">
-                        <p>Once deployed, the Chrome extension automatically discovers the widget and provides a visual editing interface. Content editors can make changes directly through the browser without touching code or accessing the CMS.</p>
-                        <p>The extension reads all <code>data-*</code> attributes, builds an appropriate form interface, and writes changes back to both the attributes and visible page content in real-time.</p>
-                        
-                        <ul class="step-list">
-                            <li><strong>Open Page:</strong> Navigate to page containing the widget</li>
-                            <li><strong>Launch Extension:</strong> Click extension icon to open sidepanel</li>
-                            <li><strong>Select Widget:</strong> Choose from auto-discovered widgets</li>
-                            <li><strong>Edit Content:</strong> Update text, links, images through form interface</li>
-                            <li><strong>Apply Changes:</strong> Save updates back to page</li>
-                            <li><strong>Notify Sitecore:</strong> Extension triggers CMS to persist changes</li>
-                        </ul>
-                    </div>
+                    <h3>Content Management</h3>
+                    <p>The Chrome extension automatically discovers the widget and provides a visual editing interface for content editors to make changes directly through the browser.</p>
+                    <ul class="compact-list">
+                        <li>Navigate to page with widget</li>
+                        <li>Click extension icon</li>
+                        <li>Select widget from list</li>
+                        <li>Edit text, links, and images</li>
+                        <li>Apply changes to update page</li>
+                    </ul>
                 </div>
-                <div class="project-image">
-                    <div class="placeholder">Extension Sidepanel Screenshot</div>
-                </div>
-            </div>
 
-            <!-- Phase 5: Ongoing Maintenance -->
-            <div class="project">
-                <div class="project-content">
+                <div class="phase-card">
                     <div class="project-number">Phase 5</div>
-                    <h2>Ongoing Maintenance</h2>
-                    <div class="project-description">
-                        <p>The extension requires no updates when new widgets are added. Simply follow the same process: generate annotated HTML, add to Sitecore, and the extension automatically detects it.</p>
-                        <p>For existing widgets, content updates happen in real-time through the extension. Structural changes require regenerating the HTML through the markup generator.</p>
-                        
-                        <ul class="step-list">
-                            <li><strong>Content Updates:</strong> Use extension for text, link, and image changes</li>
-                            <li><strong>Structural Changes:</strong> Regenerate HTML if adding/removing elements</li>
-                            <li><strong>New Widgets:</strong> Run through markup generator, no extension updates</li>
-                            <li><strong>Exclusions:</strong> Add <code>.exclude</code> classes to prevent editing specific elements</li>
-                            <li><strong>Team Access:</strong> All team members use same extension version</li>
-                        </ul>
-                    </div>
+                    <h3>Ongoing Maintenance</h3>
+                    <p>The extension requires no updates when new widgets are added. Content updates happen in real-time, structural changes require regenerating HTML.</p>
+                    <ul class="compact-list">
+                        <li>Content updates via extension</li>
+                        <li>Structural changes via generator</li>
+                        <li>New widgets auto-discovered</li>
+                        <li>Use <code>.exclude</code> for restrictions</li>
+                        <li>Team shares same extension version</li>
+                    </ul>
                 </div>
-                <div class="project-image">
-                    <div class="placeholder">Maintenance Workflow Diagram</div>
-                </div>
+
             </div>
 
         </div>
