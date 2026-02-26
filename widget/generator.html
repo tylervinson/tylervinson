@@ -366,6 +366,12 @@ function processHTML() {
     return;
   }
   
+  // Validate widget class format (must be kebab-case, no spaces)
+  if (/\s/.test(widgetClass)) {
+    alert('Widget Class cannot contain spaces. Use kebab-case like "animated-cards" or "my-widget"');
+    return;
+  }
+  
   if (!widgetName) {
     alert('Please enter a widget display name');
     return;
