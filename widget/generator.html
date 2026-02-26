@@ -439,8 +439,23 @@ function processHTML() {
 }
 
 function annotateWidget(widget, stats) {
+  // Check if widget has multi-object pattern
+  const objects = widget.querySelectorAll('[data-object-id]');
+  
+  if (objects.length > 0) {
+    // Multi-object widget - process each object separately with reset counters
+    objects.forEach(obj => {
+      annotateContainer(obj, stats);
+    });
+  } else {
+    // Single widget - process entire widget
+    annotateContainer(widget, stats);
+  }
+}
+
+function annotateContainer(container, stats) {
   const selector = CONTENT_ELEMENTS.join(', ');
-  const contentElements = widget.querySelectorAll(selector);
+  const contentElements = container.querySelectorAll(selector);
   
   let counters = {};
   
@@ -455,14 +470,14 @@ function annotateWidget(widget, stats) {
     }
     
     // Check if excluded by ancestor
-    if (isExcluded(element, widget)) {
+    if (isExcluded(element, container)) {
       stats.excluded++;
       return;
     }
     
     // Check if element is nested inside another editable element
     let parent = element.parentElement;
-    while (parent && parent !== widget) {
+    while (parent && parent !== container) {
       if (parent.classList.contains('dynamic-content') || 
           parent.classList.contains('data-content') ||
           parent.classList.contains('dynamic-link') ||
