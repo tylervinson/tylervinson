@@ -353,7 +353,7 @@
 
 <script>
 // Content elements that should be editable
-const CONTENT_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'img', 'li'];
+const CONTENT_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'a', 'img', 'li'];
 
 function processHTML() {
   const widgetClass = document.getElementById('widgetClass').value.trim();
@@ -390,7 +390,18 @@ function processHTML() {
 
   // Create wrapper div with widget metadata
   const wrapper = doc.createElement('div');
-  wrapper.className = `editable-widget ${widgetClass}`;
+  
+  // Preserve existing classes from root element
+  if (root.classList && root.classList.length > 0) {
+    Array.from(root.classList).forEach(cls => {
+      wrapper.classList.add(cls);
+    });
+  }
+  
+  // Add editable-widget class and widget identifier class
+  wrapper.classList.add('editable-widget');
+  wrapper.classList.add(widgetClass);
+  
   wrapper.setAttribute('data-widget-name', widgetName);
   if (widgetDescription) {
     wrapper.setAttribute('data-widget-description', widgetDescription);
@@ -476,8 +487,18 @@ function annotateWidget(widget, stats) {
         element.setAttribute(`data-img-${counters[tagName]}`, element.getAttribute('src') || '');
       } else {
         // Text elements: KEEP dynamic-* class, add data-{tagname}-1 attribute
-        const text = element.textContent || '';
-        element.setAttribute(`data-${tagName}-${counters[tagName]}`, text);
+        // Get only direct text content, not from child elements
+        let text = '';
+        element.childNodes.forEach(node => {
+          if (node.nodeType === 3) { // Text node
+            text += node.textContent;
+          }
+        });
+        text = text.trim();
+        
+        // Treat span same as p
+        const attrTag = tagName === 'span' ? 'p' : tagName;
+        element.setAttribute(`data-${attrTag}-${counters[tagName]}`, text);
       }
       
     } else {
