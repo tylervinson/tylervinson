@@ -385,6 +385,57 @@
 
         </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modalImage" alt="Enlarged view">
+    </div>
+
+    <script>
+        // Make all project images clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectImages = document.querySelectorAll('.project-image');
+            
+            projectImages.forEach(img => {
+                img.addEventListener('click', function() {
+                    const imgElement = this.querySelector('img');
+                    if (imgElement && imgElement.src) {
+                        openModal(imgElement.src, imgElement.alt);
+                    }
+                });
+            });
+        });
+
+        function openModal(src, alt) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = src;
+            modalImg.alt = alt;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on background click
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+
         <footer>
             Sitecore Widget Editor Documentation
         </footer>
