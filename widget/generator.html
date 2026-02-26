@@ -511,8 +511,8 @@ function annotateWidget(widget, stats) {
         });
         text = text.trim();
         
-        // Treat span same as p
-        const attrTag = tagName === 'span' ? 'p' : tagName;
+        // Special case: span uses data-dynamic-X instead of data-span-X
+        const attrTag = tagName === 'span' ? 'dynamic' : tagName;
         element.setAttribute(`data-${attrTag}-${counters[tagName]}`, text);
       }
       
