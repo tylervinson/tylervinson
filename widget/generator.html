@@ -454,6 +454,21 @@ function annotateWidget(widget, stats) {
       return;
     }
     
+    // Check if element is nested inside another editable element
+    let parent = element.parentElement;
+    while (parent && parent !== widget) {
+      if (parent.classList.contains('dynamic-content') || 
+          parent.classList.contains('data-content') ||
+          parent.classList.contains('dynamic-link') ||
+          parent.classList.contains('data-link') ||
+          parent.classList.contains('dynamic-img') ||
+          parent.classList.contains('data-img')) {
+        stats.excluded++;
+        return; // Skip this element, it's inside another editable element
+      }
+      parent = parent.parentElement;
+    }
+    
     const tagName = element.tagName.toLowerCase();
     
     // Check if element has ANY dynamic-* class
