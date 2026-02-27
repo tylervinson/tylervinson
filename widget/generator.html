@@ -418,6 +418,9 @@ function processHTML() {
     wrapper.appendChild(root.firstChild);
   }
 
+  // Wrap loose text nodes in p tags
+  wrapLooseTextNodes(wrapper);
+
   // Process widget to add data attributes
   const stats = {
     total: 0,
@@ -436,6 +439,30 @@ function processHTML() {
   document.getElementById('statElements').textContent = stats.total;
   document.getElementById('statAnnotated').textContent = stats.annotated;
   document.getElementById('statExcluded').textContent = stats.excluded;
+}
+
+function wrapLooseTextNodes(container) {
+  // Find all divs in the widget
+  const divs = container.querySelectorAll('div');
+  
+  divs.forEach(div => {
+    const nodesToWrap = [];
+    
+    // Only check DIRECT children of the div
+    Array.from(div.childNodes).forEach(node => {
+      // Only wrap text nodes that are direct children and have actual content
+      if (node.nodeType === 3 && node.textContent.trim()) {
+        nodesToWrap.push(node);
+      }
+    });
+    
+    // Wrap each text node in a p tag
+    nodesToWrap.forEach(textNode => {
+      const p = document.createElement('p');
+      p.textContent = textNode.textContent.trim();
+      div.replaceChild(p, textNode);
+    });
+  });
 }
 
 function annotateWidget(widget, stats) {
