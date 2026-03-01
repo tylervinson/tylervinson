@@ -51,12 +51,6 @@
       letter-spacing: 0.5px;
       font-weight: 500;
     }
-    .header-actions {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-    }
-
     /* ── TAB NAV ── */
     .tab-nav {
       display: flex;
@@ -418,13 +412,7 @@
       <a href="generator.html" class="tab-nav-link active">Code Generator</a>
     </nav>
 
-    <div class="header-actions" style="display:flex;gap:8px;align-items:center">
-      <span id="registrySource" style="font-size:11px;color:#555"></span>
-      <button class="btn btn-outline btn-sm" onclick="importRegistry()">Import Registry</button>
-      <button class="btn btn-outline btn-sm" onclick="exportRegistry()">Export Registry</button>
-      <button class="btn btn-outline btn-sm" onclick="clearAllWidgets()">Reset</button>
-    </div>
-    <input type="file" id="registryFileInput" accept=".json" style="display:none" onchange="handleRegistryFile(event)">
+
   </header>
 
   <div class="layout">
@@ -443,7 +431,7 @@
 
         <div class="notice notice-info" style="margin-bottom:24px">
           <strong style="color:#90bce8;display:block;margin-bottom:6px">How it works</strong>
-          Paste your widget HTML with <code>data-item-id</code> on each repeating element and <code>data-*</code> attributes holding the field values. The generator reads your structure as-is, registers the widget, and downloads a complete installable extension ZIP — no manual editing required.
+          Paste your widget HTML — no pre-annotation needed. The generator reads <code>item-*</code> classes on your field elements (e.g. <code>item-target</code>, <code>item-text</code>), writes <code>data-item-id</code> and <code>data-*</code> attributes onto each repeating element automatically, and outputs the annotated HTML ready to paste into Sitecore plus a complete installable extension ZIP. If your HTML is already annotated, it passes through as-is.
         </div>
 
         <div class="form-group">
@@ -498,9 +486,15 @@ plus a complete installable extension ZIP." oninput="liveAnalyze()"></textarea>
         <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
           <div class="notice notice-info" style="font-size:12px">
             Every widget in the registry is included in each generated ZIP. The version number lives in <code>widget-registry.json</code> — import it to restore your full registry on any machine.
+            <span id="registrySource" style="display:block;margin-top:6px;color:#5a8fc8"></span>
           </div>
-          <button class="btn btn-outline" style="width:100%" onclick="importRegistry()">Import widget-registry.json</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" style="flex:1" onclick="importRegistry()">Import JSON</button>
+            <button class="btn btn-outline" style="flex:1" onclick="exportRegistry()">Export JSON</button>
+            <button class="btn btn-outline" style="flex:1" onclick="clearAllWidgets()">Reset</button>
+          </div>
         </div>
+        <input type="file" id="registryFileInput" accept=".json" style="display:none" onchange="handleRegistryFile(event)">
       </div>
 
     </div>
@@ -665,10 +659,7 @@ function clearForm() {
   });
   document.getElementById('analysisResult').innerHTML = '';
   document.getElementById('generateStatus').innerHTML = '';
-  document.getElementById('outputPanel').innerHTML = `
-    <div class="empty-state">
-      <p>Paste your widget HTML on the left and click <strong style="color:#ccc">Generate Extension ZIP</strong> to produce a complete, installable Chrome extension.</p>
-    </div>`;
+  document.getElementById('outputPanel').innerHTML = '<div class="empty-state"><p>Paste your widget HTML on the left and click <strong style="color:#ccc">Generate Extension ZIP</strong> to produce a complete, installable Chrome extension.</p></div>';
   setStatus('Ready');
 }
 
@@ -1670,7 +1661,7 @@ function generateSidepanelJS(reg) {
     "    if (banner) {",
     "      banner.style.display = 'block';",
     "      banner.innerHTML = '&#9888; New version available (v' + message.remoteVersion + '). '",
-    "        + '<a href="' + message.downloadUrl + '" target="_blank" style="color:#FFBE5F;font-weight:500">Download update &rarr;</a>';",
+    "        + '<a href=\"' + message.downloadUrl + '\" target=\"_blank\" style=\"color:#FFBE5F;font-weight:500\">Download update &rarr;</a>';",
     "    }",
     '  }',
     '});',
