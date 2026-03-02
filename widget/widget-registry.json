@@ -1,6 +1,22 @@
 {
-  "version": "1.0.0",
-  "updatedAt": null,
+  "version": "1.1.0",
+  "updatedAt": "2026-03-02T19:14:35.831Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
-  "widgets": []
+  "widgets": [
+    {
+      "class": "animated-cards",
+      "name": "Animated Cards",
+      "desc": "",
+      "mode": "single",
+      "hasItems": false,
+      "hasGrid": false,
+      "fields": [],
+      "fieldDefs": [],
+      "gridPlans": [],
+      "gridFields": [],
+      "gridFieldDefs": [],
+      "grid": null,
+      "date": "3/2/2026"
+    }
+  ]
 }
