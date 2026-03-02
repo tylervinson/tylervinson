@@ -1,8 +1,35 @@
 {
   "version": "1.2.6",
-  "updatedAt": "2026-03-02T19:28:04.582Z",
+  "updatedAt": "2026-03-02T21:02:54.249Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
+    {
+      "class": "animated-cards",
+      "name": "Animated Cards",
+      "desc": "",
+      "mode": "items",
+      "hasItems": true,
+      "hasGrid": false,
+      "fields": [
+        "number",
+        "text"
+      ],
+      "fieldDefs": [
+        {
+          "name": "number",
+          "type": "percent"
+        },
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "gridPlans": [],
+      "gridFields": [],
+      "gridFieldDefs": [],
+      "grid": null,
+      "date": "3/2/2026"
+    },
     {
       "class": "insurance-comparison-tool",
       "name": "Insurance Plan Comparison Tool",
@@ -154,33 +181,6 @@
           "dental-vision": "Vision only"
         }
       },
-      "date": "3/2/2026"
-    },
-    {
-      "class": "animated-cards",
-      "name": "Animated Cards",
-      "desc": "",
-      "mode": "items",
-      "hasItems": true,
-      "hasGrid": false,
-      "fields": [
-        "number",
-        "text"
-      ],
-      "fieldDefs": [
-        {
-          "name": "number",
-          "type": "percent"
-        },
-        {
-          "name": "text",
-          "type": "text"
-        }
-      ],
-      "gridPlans": [],
-      "gridFields": [],
-      "gridFieldDefs": [],
-      "grid": null,
       "date": "3/2/2026"
     }
   ]
