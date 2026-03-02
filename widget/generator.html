@@ -558,6 +558,7 @@ plus a complete installable extension ZIP." oninput="liveAnalyze()"></textarea>
               <div style="display:flex;gap:8px">
                 <input type="password" id="ghPAT" placeholder="ghp_..." style="flex:1;font-family:Courier New,monospace;font-size:12px">
                 <button class="btn btn-outline btn-sm" onclick="saveGitHubSettings()">Save</button>
+                <button class="btn btn-outline btn-sm" onclick="testGitHubConnection()">Test</button>
               </div>
               <div class="field-hint">Needs <code>contents: write</code> on tylervinson/tylervinson. Stored in localStorage — never transmitted except to api.github.com.</div>
             </div>
@@ -2614,6 +2615,22 @@ function iGenerate() {
       + 'Unzip → chrome://extensions → Developer mode → Load unpacked → select the folder.'
       + '</div>';
     setStatus('Done · ' + version, 'ok');
+
+    // Auto-push registry to GitHub
+    pushRegistryToGitHub(false).then(result => {
+      const statusEl2 = document.getElementById('generateStatus');
+      if (result && result.ok) {
+        statusEl2.innerHTML += '<div class="notice notice-success" style="margin-top:8px">'
+          + '&#10003; Registry pushed to GitHub Pages — <code>widget/widget-registry.json</code> updated'
+          + '</div>';
+      } else if (result && result.err) {
+        statusEl2.innerHTML += '<div class="notice notice-warn" style="margin-top:8px">'
+          + '&#9888; GitHub push failed: ' + result.err + '<br>'
+          + '<span style="font-size:11px">Check your PAT in the Widget Registry tab.</span>'
+          + '</div>';
+      }
+    });
+
   }).catch(err => {
     statusEl.innerHTML = '<div class="notice notice-err">ZIP error: ' + err.message + '</div>';
     setStatus('Error', 'err');
@@ -2644,6 +2661,46 @@ function saveGitHubSettings() {
   localStorage.setItem('gh_pat', pat);
   document.getElementById('ghPAT').value = '';
   document.getElementById('ghStatus').innerHTML = '<span style="color:#7dbf82">&#10003; Token saved. It will be used on next generation.</span>';
+}
+
+async function testGitHubConnection() {
+  const pat = getGitHubPAT();
+  const statusEl = document.getElementById('ghStatus');
+  if (!pat) {
+    statusEl.innerHTML = '<span style="color:#c8a55a">No token saved — enter and save your PAT first.</span>';
+    return;
+  }
+  statusEl.innerHTML = '<span style="color:#888">Testing connection...</span>';
+  try {
+    // Test 1: Can we reach the API and is the token valid?
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': 'Bearer ' + pat,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    if (!userRes.ok) {
+      const err = await userRes.json();
+      statusEl.innerHTML = '<span style="color:#e57373">&#10007; Token invalid or expired: ' + (err.message || userRes.status) + '</span>';
+      return;
+    }
+    const user = await userRes.json();
+
+    // Test 2: Can we read the target file?
+    const fileRes = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + GITHUB_PATH + '?ref=' + GITHUB_BRANCH, {
+      headers: {
+        'Authorization': 'Bearer ' + pat,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    const fileStatus = fileRes.ok ? '&#10003; file exists' : (fileRes.status === 404 ? '&#9888; file not found (will be created)' : '&#10007; HTTP ' + fileRes.status);
+
+    statusEl.innerHTML = '<span style="color:#7dbf82">&#10003; Connected as <strong>' + user.login + '</strong> &nbsp;|&nbsp; ' + fileStatus + '</span>';
+  } catch(e) {
+    statusEl.innerHTML = '<span style="color:#e57373">&#10007; Network error: ' + e.message + '</span>';
+  }
 }
 
 async function pushRegistryToGitHub(manual) {
