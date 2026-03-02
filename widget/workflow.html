@@ -299,14 +299,14 @@
                     <div class="project-number">Phase 1</div>
                     <h2>Design & Development</h2>
                     <div class="project-description">
-                        <p>Begin by designing and building the widget in your local development environment. Focus on creating clean, semantic HTML with proper structure. At this stage, no special classes or data attributes are needed.</p>
-                        <p>Write standard HTML using content elements like headings, paragraphs, links, and images. The markup generator will handle the rest.</p>
+                        <p>Build the widget as you normally would — clean HTML, CSS, and any JavaScript. No special attributes are needed at this stage. Focus on getting the markup and visual output right.</p>
+                        <p>Once the widget looks and behaves correctly, identify the elements content authors will need to edit. These are the fields you'll mark in Phase 2.</p>
                         
                         <ul class="step-list">
                             <li><strong>Design:</strong> Create mockups and finalize visual design</li>
-                            <li><strong>Build:</strong> Write HTML, CSS, and any JavaScript functionality</li>
-                            <li><strong>Test:</strong> Verify widget works in development environment</li>
-                            <li><strong>Prepare:</strong> Clean up markup, remove unnecessary classes</li>
+                            <li><strong>Build:</strong> Write HTML, CSS, and any JavaScript</li>
+                            <li><strong>Test:</strong> Verify the widget renders correctly</li>
+                            <li><strong>Identify fields:</strong> Note which elements need to be editable</li>
                         </ul>
                     </div>
                 </div>
@@ -321,16 +321,15 @@
                     <div class="project-number">Phase 2</div>
                     <h2>Markup Generation</h2>
                     <div class="project-description">
-                        <p>Use the HTML Auto-Annotator to transform your clean HTML into Sitecore-ready markup. The generator automatically detects content elements and adds all necessary data attributes.</p>
-                        <p>Provide the widget class name, display name, and optional description. Add <code>dynamic-content</code> class to elements where data attributes should be managed. The generator wraps your HTML with <code>.editable-widget</code> class and adds marker classes or data attributes.</p>
+                        <p>Open the Code Generator and choose your approach. Use <strong>Generate Widget</strong> if you want explicit control — add <code>item-*</code> classes to your field elements (e.g. <code>item-name</code>, <code>item-price</code>) and the generator reads them automatically. Use <strong>Interactive Mode</strong> if you'd rather not think about naming conventions — just add <code>editable</code> to any element and the generator walks you through naming each field inline.</p>
+                        <p>Either way: enter the widget class and display name, paste your HTML, and click Generate. The generator annotates the HTML, registers the widget, pushes the updated registry to GitHub Pages, and downloads the extension ZIP — all in one step.</p>
                         
                         <ul class="step-list">
-                            <li><strong>Open Generator:</strong> Navigate to the HTML Auto-Annotator tool</li>
-                            <li><strong>Configure:</strong> Enter widget class, display name, description</li>
-                            <li><strong>Mark Dynamic Fields:</strong> Add <code>dynamic-content</code> class to elements that need data attribute management</li>
-                            <li><strong>Paste HTML:</strong> Input your clean widget HTML</li>
-                            <li><strong>Generate:</strong> Click to process and auto-annotate</li>
-                            <li><strong>Copy Output:</strong> Get fully annotated HTML ready for Sitecore</li>
+                            <li><strong>Mark fields:</strong> Add <code>item-*</code> classes or <code>editable</code> to editable elements</li>
+                            <li><strong>Configure:</strong> Enter widget class, display name, and description</li>
+                            <li><strong>Paste HTML:</strong> Drop your widget markup into the generator</li>
+                            <li><strong>Generate:</strong> One click produces annotated HTML + extension ZIP</li>
+                            <li><strong>Copy output:</strong> Paste the annotated HTML into Sitecore</li>
                         </ul>
                     </div>
                 </div>
@@ -345,12 +344,12 @@
                 <div class="phase-card">
                     <div class="project-number">Phase 3</div>
                     <h3>Sitecore Integration</h3>
-                    <p>Deploy the annotated HTML to Sitecore. The markup now contains all necessary metadata for the extension to automatically discover and manage the widget.</p>
+                    <p>Deploy the annotated HTML to Sitecore. The markup now contains all necessary metadata for the extension to automatically discover and edit the widget.</p>
                     <ul class="compact-list">
-                        <li>Copy HTML from generator</li>
+                        <li>Copy annotated HTML from generator output</li>
                         <li>Paste into Sitecore component</li>
-                        <li>Include CSS/JS assets</li>
-                        <li>Publish to staging/production</li>
+                        <li>Include CSS and JS assets</li>
+                        <li>Publish to staging or production</li>
                         <li>Verify widget renders correctly</li>
                     </ul>
                 </div>
@@ -358,26 +357,26 @@
                 <div class="phase-card">
                     <div class="project-number">Phase 4</div>
                     <h3>Content Management</h3>
-                    <p>The Chrome extension automatically discovers the widget and provides a visual editing interface for content editors to make changes directly through the browser.</p>
+                    <p>Install the generated extension ZIP. The sidepanel detects the widget automatically and presents a grouped editor — items and grid sections match the widget's structure exactly.</p>
                     <ul class="compact-list">
+                        <li>Install extension from generated ZIP</li>
                         <li>Navigate to page with widget</li>
-                        <li>Click extension icon</li>
-                        <li>Select widget from list</li>
-                        <li>Edit text, links, and images</li>
-                        <li>Apply changes to update page</li>
+                        <li>Click extension icon to open sidebar</li>
+                        <li>Edit fields and click Apply Changes</li>
+                        <li>Save in Sitecore Experience Editor</li>
                     </ul>
                 </div>
 
                 <div class="phase-card">
                     <div class="project-number">Phase 5</div>
                     <h3>Ongoing Maintenance</h3>
-                    <p>The extension requires no updates when new widgets are added. Content updates happen in real-time, structural changes require regenerating HTML.</p>
+                    <p>When you generate a new or updated widget, the registry is pushed to GitHub Pages automatically. Content authors see an update banner in the sidebar and can download the new version directly.</p>
                     <ul class="compact-list">
-                        <li>Content updates via extension</li>
+                        <li>Content updates via extension sidebar</li>
                         <li>Structural changes via generator</li>
-                        <li>New widgets auto-discovered</li>
-                        <li>Use <code>.exclude</code> for restrictions</li>
-                        <li>Team shares same extension version</li>
+                        <li>Registry auto-pushed to GitHub Pages</li>
+                        <li>Update banner notifies content authors</li>
+                        <li>Team always installs from same source</li>
                     </ul>
                 </div>
 

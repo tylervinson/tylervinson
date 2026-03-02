@@ -575,11 +575,13 @@
             <article class="project">
                 <div class="project-content">
                     <div class="project-number">OVERVIEW</div>
-                    <h2>Visual Interface for Complex Widget Data</h2>
+                    <h2>Visual Editing for Data-Driven Sitecore Widgets</h2>
                     <div class="project-description">
-                        <p>Editing data-driven widgets in Sitecore traditionally requires manual manipulation of HTML attributes and inline data structures. Content editors must dig through source code to modify insurance plan details, testimonial content, or comparison tables.</p>
-                        <p>This Chrome extension bridges that gap by detecting widgets on the page, extracting their data from <code>data-*</code> attributes, and presenting a clean form interface in a persistent sidebar. Changes sync instantly back to the DOM and properly notify Sitecore's Experience Editor, enabling the save button.</p>
+                        <p>Editing data-driven widgets in Sitecore traditionally requires manual manipulation of HTML attributes and inline data structures. Content editors must dig through source code to modify insurance plan details, stats cards, or comparison tables.</p>
+                        <p>This Chrome extension bridges that gap. It scans the page for registered widgets, reads their data from <code>data-*</code> attributes, and presents a clean grouped form in a persistent sidebar. Changes sync instantly back to the DOM and notify Sitecore's Experience Editor to enable the save button.</p>
+                        <p>The extension is generated automatically — paste your widget HTML into the Code Generator, mark editable fields, and download a ready-to-install ZIP that includes the full extension plus your widget's editor.</p>
                     </div>
+                    <a href="generator.html" class="cta-link">Open Code Generator &rarr;</a>
                 </div>
                 <div>
                     <div class="project-image">
@@ -592,15 +594,15 @@
             <article class="project">
                 <div class="project-content">
                     <div class="project-number">CAPABILITIES</div>
-                    <h2>Intelligent Widget Management</h2>
+                    <h2>Three Widget Modes, One Extension</h2>
                     <div class="project-description">
-                        <p>The extension employs a registry-based architecture where each widget type is defined once and automatically detected across all Sitecore pages. A mutation observer watches for dynamically loaded content, ensuring widgets added after page load are still recognized.</p>
-                        <p>When multiple widgets exist on a page, a dropdown selector appears. For pages with a single widget, the editor loads immediately. All changes are validated and synchronized in real-time with visual feedback for success or error states.</p>
+                        <p>The extension supports three widget structures — <strong>items</strong> (repeating cards or rows), <strong>grid</strong> (comparison tables with plans and fields), and <strong>composite</strong> (both together). The Code Generator detects which mode applies automatically and generates the right editor UI for each.</p>
+                        <p>A registry pushed to GitHub Pages drives everything. When you generate a new widget, the registry updates automatically — content authors with the extension installed see an update banner and can install the new version in one click.</p>
                     </div>
                 </div>
                 <div>
                     <div class="project-image">
-                        <div class="placeholder"><img src="admin02.png">></div>
+                        <div class="placeholder"><img src="admin02.png"></div>
                     </div>
                 </div>
                 
@@ -609,32 +611,32 @@
                     <div class="feature-list">
                         <div class="feature-item">
                             <h4>Automatic Detection</h4>
-                            <p>Scans page DOM for registered widget classes with mutation observer support for dynamic content</p>
+                            <p>Scans the page DOM for registered widget classes with mutation observer support for dynamically loaded content</p>
                         </div>
                         
                         <div class="feature-item">
-                            <h4>Data Extraction</h4>
-                            <p>Reads widget configuration from data attributes and converts to editable form fields</p>
+                            <h4>Three Widget Modes</h4>
+                            <p>Items (repeating elements), Grid (data-plan/data-field comparison tables), and Composite (both in one widget) — all handled automatically</p>
                         </div>
                         
                         <div class="feature-item">
-                            <h4>Visual Editing</h4>
-                            <p>Persistent sidebar with dynamically generated forms based on widget type and schema</p>
+                            <h4>Grouped Editor UI</h4>
+                            <p>Sidepanel forms are grouped to match the widget's structure — plan cards separate from comparison grid rows, with inferred field types</p>
                         </div>
                         
                         <div class="feature-item">
                             <h4>DOM Synchronization</h4>
-                            <p>Updates both data attributes and visible content to maintain consistency across the widget</p>
+                            <p>Updates both data attributes and visible text content simultaneously to keep the widget consistent</p>
                         </div>
                         
                         <div class="feature-item">
-                            <h4>Sitecore Workflow</h4>
-                            <p>Multi-strategy change notification that triggers TinyMCE content sync and enables save button</p>
+                            <h4>Sitecore Bridge</h4>
+                            <p>Multi-strategy change notification triggers TinyMCE sync, field-level change tracking, and chrome events to enable the save button</p>
                         </div>
                         
                         <div class="feature-item">
-                            <h4>Extensible Registry</h4>
-                            <p>Simple widget registration system allows new widget types to be added in minutes</p>
+                            <h4>GitHub-Backed Registry</h4>
+                            <p>Widget registry is auto-committed to GitHub Pages on every generation — content authors always have access to the latest widget definitions</p>
                         </div>
                     </div>
                 </div>
@@ -644,10 +646,10 @@
             <article class="project">
                 <div class="project-content" style="grid-column: 1 / -1;">
                     <div class="project-number">ARCHITECTURE</div>
-                    <h2>Multi-Layer Change Notification</h2>
+                    <h2>Generator → Registry → Extension</h2>
                     <div class="project-description">
-                        <p>The critical challenge: Sitecore's TinyMCE editor maintains an internal content model separate from the page DOM. Direct DOM modifications are invisible to the editor, preventing saves.</p>
-                        <p>The <code>SitecoreBridge</code> module solves this through a four-strategy approach: finding the TinyMCE instance that owns the modified element and forcing it to re-read the DOM; notifying Sitecore's field-level change tracking APIs; dispatching events on Sitecore's chrome wrapper elements; and falling back to standard DOM input/change events.</p>
+                        <p>The Code Generator is the source of truth. When you generate a widget it annotates your HTML, registers the widget definition, commits the updated <code>widget-registry.json</code> to GitHub Pages, and downloads an installable extension ZIP — all in one step.</p>
+                        <p>The extension reads the registry on startup and checks for updates periodically. When a new version is available, a banner appears in the sidepanel with a direct download link. The <code>SitecoreBridge</code> module handles the Sitecore-specific challenge of making DOM changes visible to TinyMCE's internal content model so the save button activates correctly.</p>
                     </div>
                 </div>
 
@@ -655,16 +657,16 @@
                     <div class="architecture-diagram">
                         <div class="architecture-row">
                             <div class="architecture-box">
-                                <h4>Background Script</h4>
-                                <p>Service worker managing side panel lifecycle and extension icon clicks</p>
+                                <h4>Code Generator</h4>
+                                <p>Annotates HTML, infers field types, builds registry entry, commits JSON to GitHub, downloads ZIP</p>
                             </div>
                             <div class="architecture-box">
-                                <h4>Content Script</h4>
-                                <p>Widget detection, data extraction, DOM updates, Sitecore notification</p>
+                                <h4>GitHub Pages Registry</h4>
+                                <p>widget-registry.json — source of truth for all widget definitions and current extension version</p>
                             </div>
                             <div class="architecture-box">
-                                <h4>Side Panel UI</h4>
-                                <p>Dynamic form rendering, user input handling, save coordination</p>
+                                <h4>Chrome Extension ZIP</h4>
+                                <p>Generated per-widget — includes manifest, background, content script, sidepanel, and sitecore-bridge</p>
                             </div>
                         </div>
                         
@@ -672,16 +674,16 @@
                         
                         <div class="architecture-row">
                             <div class="architecture-box">
+                                <h4>Content Script</h4>
+                                <p>Widget detection via registered classes, data extraction, DOM updates on apply</p>
+                            </div>
+                            <div class="architecture-box">
+                                <h4>Sidepanel UI</h4>
+                                <p>Mode-aware grouped editor — items, grid, or composite — with inferred field type inputs</p>
+                            </div>
+                            <div class="architecture-box">
                                 <h4>Sitecore Bridge</h4>
-                                <p>Multi-strategy change notification: TinyMCE sync, field tracking, chrome events</p>
-                            </div>
-                            <div class="architecture-box">
-                                <h4>TinyMCE Editor</h4>
-                                <p>Content model synchronization, dirty state management, undo history</p>
-                            </div>
-                            <div class="architecture-box">
-                                <h4>Experience Editor</h4>
-                                <p>Save button enablement, field change tracking, page state management</p>
+                                <p>TinyMCE sync, field-level change tracking, chrome events, DOM input/change fallback</p>
                             </div>
                         </div>
                     </div>
