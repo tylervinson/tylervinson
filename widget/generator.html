@@ -539,15 +539,29 @@ plus a complete installable extension ZIP." oninput="liveAnalyze()"></textarea>
 
           <div style="margin-top:8px;border-top:1px solid #333;padding-top:16px">
             <div class="panel-title" style="margin-bottom:12px">GitHub Settings</div>
-            <div class="form-group" style="margin-bottom:12px">
+
+            <!-- Shown when NO token is saved -->
+            <div id="ghPATForm" style="margin-bottom:12px">
               <label>Personal Access Token</label>
-              <div style="display:flex;gap:8px">
+              <div style="display:flex;gap:8px;margin-top:6px">
                 <input type="password" id="ghPAT" placeholder="ghp_..." style="flex:1;font-family:Courier New,monospace;font-size:12px">
                 <button class="btn btn-outline btn-sm" onclick="saveGitHubSettings()">Save</button>
                 <button class="btn btn-outline btn-sm" onclick="testGitHubConnection()">Test</button>
               </div>
               <div class="field-hint">Needs <code>contents: write</code> on tylervinson/tylervinson. Stored in localStorage — never transmitted except to api.github.com.</div>
             </div>
+
+            <!-- Shown when a token IS saved -->
+            <div id="ghPATSaved" style="display:none;margin-bottom:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:12px;color:#7dbf82">&#10003; Token saved — auto-push enabled</span>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-outline btn-sm" onclick="testGitHubConnection()">Test</button>
+                  <button class="btn btn-outline btn-sm" onclick="revokeGitHubToken()" style="color:#e57373;border-color:#503030">Revoke</button>
+                </div>
+              </div>
+            </div>
+
             <div id="ghStatus" style="font-size:12px;color:#555;margin-top:4px"></div>
           </div>
         </div>
@@ -2541,7 +2555,21 @@ function saveGitHubSettings() {
   }
   localStorage.setItem('gh_pat', pat);
   document.getElementById('ghPAT').value = '';
-  document.getElementById('ghStatus').innerHTML = '<span style="color:#7dbf82">&#10003; Token saved. It will be used on next generation.</span>';
+  document.getElementById('ghStatus').innerHTML = '';
+  updateGitHubUI();
+}
+
+function revokeGitHubToken() {
+  if (!confirm('Remove saved GitHub token? Auto-push will be disabled until you add a new one.')) return;
+  localStorage.removeItem('gh_pat');
+  document.getElementById('ghStatus').innerHTML = '<span style="color:#c8a55a">Token removed.</span>';
+  updateGitHubUI();
+}
+
+function updateGitHubUI() {
+  const hasPAT = !!getGitHubPAT();
+  document.getElementById('ghPATForm').style.display  = hasPAT ? 'none' : '';
+  document.getElementById('ghPATSaved').style.display = hasPAT ? '' : 'none';
 }
 
 async function testGitHubConnection() {
@@ -2660,11 +2688,12 @@ async function pushRegistryToGitHub(manual) {
 
 // Load saved PAT indicator on tab open (don't reveal the token, just show it's set)
 function initGitHubUI() {
+  updateGitHubUI();
   const hasPAT = !!getGitHubPAT();
   const statusEl = document.getElementById('ghStatus');
   if (statusEl) {
     statusEl.innerHTML = hasPAT
-      ? '<span style="color:#7dbf82">&#10003; Token saved — auto-push enabled.</span>'
+      ? ''
       : '<span style="color:#555">No token saved — enter your GitHub PAT above to enable auto-push.</span>';
   }
 }
