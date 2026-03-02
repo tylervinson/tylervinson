@@ -1,17 +1,29 @@
 {
-  "version": "1.1.0",
-  "updatedAt": "2026-03-02T19:14:35.831Z",
+  "version": "1.1.2",
+  "updatedAt": "2026-03-02T19:15:52.592Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
       "class": "animated-cards",
-      "name": "Animated Cards",
+      "name": "Animated Cards with Number Counter",
       "desc": "",
-      "mode": "single",
-      "hasItems": false,
+      "mode": "items",
+      "hasItems": true,
       "hasGrid": false,
-      "fields": [],
-      "fieldDefs": [],
+      "fields": [
+        "number",
+        "text"
+      ],
+      "fieldDefs": [
+        {
+          "name": "number",
+          "type": "percent"
+        },
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
       "gridPlans": [],
       "gridFields": [],
       "gridFieldDefs": [],
