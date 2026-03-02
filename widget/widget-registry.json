@@ -1,20 +1,17 @@
 {
-  "version": "1.2.7",
+  "version": "1.2.8",
   "updatedAt": "2026-03-02T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
-      "class": "animated-cards",
+      "class": "card-row",
       "name": "Animated Cards",
-      "desc": "",
-      "mode": "items",
-      "hasItems": true,
+      "desc": "Three-card stat widget with animated number counters",
+      "mode": "custom",
+      "hasItems": false,
       "hasGrid": false,
-      "fields": ["number", "text"],
-      "fieldDefs": [
-        { "name": "number", "type": "percent" },
-        { "name": "text",   "type": "text" }
-      ],
+      "fields": [],
+      "fieldDefs": [],
       "gridPlans": [],
       "gridFields": [],
       "gridFieldDefs": [],
