@@ -423,6 +423,7 @@
 
       <div class="tab-row">
         <button class="tab active" onclick="switchTab('generate')">Generate Widget</button>
+        <button class="tab" onclick="switchTab('interactive')">Interactive Mode</button>
         <button class="tab" onclick="switchTab('registry')">Widget Registry</button>
       </div>
 
@@ -431,7 +432,7 @@
 
         <div class="notice notice-info" style="margin-bottom:24px">
           <strong style="color:#90bce8;display:block;margin-bottom:6px">How it works</strong>
-          Paste your widget HTML — no pre-annotation needed. The generator reads <code>item-*</code> classes on your field elements (e.g. <code>item-target</code>, <code>item-text</code>), writes <code>data-item-id</code> and <code>data-*</code> attributes onto each repeating element automatically, and outputs the annotated HTML ready to paste into Sitecore plus a complete installable extension ZIP. If your HTML is already annotated, it passes through as-is.
+          Paste your widget HTML — no pre-annotation needed. The generator detects three structures automatically: <strong style="color:#ccc">items</strong> (repeating elements with <code>item-*</code> classes, e.g. <code>item-name</code>, <code>item-price</code>), <strong style="color:#ccc">grid</strong> (cells with <code>data-plan</code> and <code>data-field</code> attributes for comparison tables), and <strong style="color:#ccc">composite</strong> (both together). It annotates the HTML, infers field types, and generates a complete Chrome extension ZIP with a grouped editor that matches how content authors think about the widget. Already-annotated HTML passes through as-is.
         </div>
 
         <div class="form-group">
@@ -480,18 +481,87 @@ plus a complete installable extension ZIP." oninput="liveAnalyze()"></textarea>
 
       </div>
 
+      <!-- INTERACTIVE TAB -->
+      <div class="tab-content" id="tab-interactive">
+
+        <div class="notice notice-info" style="margin-bottom:24px">
+          <strong style="color:#90bce8;display:block;margin-bottom:6px">Interactive Mode</strong>
+          Add <code>editable</code> to any element you want content authors to be able to edit. The generator scans your HTML, groups repeated elements automatically, and walks you through naming each field — no <code>item-*</code> classes needed.
+        </div>
+
+        <div id="iStep1">
+          <div class="form-group">
+            <label>Widget Class <span style="color:#f44336">*</span></label>
+            <input type="text" id="iWidgetClass" placeholder="e.g. card-row" oninput="iOnClassInput()">
+            <div class="field-hint">CSS class on the outermost container element</div>
+          </div>
+          <div class="form-group">
+            <label>Widget Display Name <span style="color:#f44336">*</span></label>
+            <input type="text" id="iWidgetName" placeholder="e.g. Stats Card Row">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="iWidgetDesc" placeholder="e.g. Edit stats numbers and labels">
+          </div>
+          <div class="form-group">
+            <label>Widget HTML</label>
+            <textarea id="iWidgetHTML" rows="12" placeholder="Paste your widget HTML here.&#10;&#10;Add class=&quot;editable&quot; to each element you want to be editable — numbers, labels, headings, prices, etc.&#10;&#10;Example:&#10;  &lt;div class=&quot;number editable&quot;&gt;37&lt;/div&gt;&#10;  &lt;p class=&quot;copy-text editable&quot;&gt;Fewer ER Visits&lt;/p&gt;" oninput="iLivePreview()"></textarea>
+          </div>
+          <div id="iPreviewResult"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="iStartWizard()">Scan &amp; Name Fields</button>
+            <button class="btn btn-outline" onclick="iClear()">Clear</button>
+          </div>
+          <div id="iStep1Status" style="margin-top:16px"></div>
+        </div>
+
+        <div id="iStep2" style="display:none">
+          <div id="iWizardHeader" style="margin-bottom:20px"></div>
+          <div id="iWizardCards"></div>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn btn-primary" id="iNextBtn" onclick="iNextGroup()">Next Group</button>
+            <button class="btn btn-outline" onclick="iBackToStep1()">&#8592; Back</button>
+          </div>
+          <div id="iStep2Status" style="margin-top:12px"></div>
+        </div>
+
+        <div id="iStep3" style="display:none">
+          <div id="iSummary"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="iGenerate()">Generate Extension ZIP</button>
+            <button class="btn btn-outline" onclick="iBackToStep1()">Start Over</button>
+          </div>
+          <div id="iStep3Status" style="margin-top:16px"></div>
+        </div>
+
+      </div>
+
       <!-- REGISTRY TAB -->
       <div class="tab-content" id="tab-registry">
         <div id="registryList"></div>
         <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
           <div class="notice notice-info" style="font-size:12px">
-            Every widget in the registry is included in each generated ZIP. The version number lives in <code>widget-registry.json</code> — import it to restore your full registry on any machine.
+            Every widget in the registry is included in each generated ZIP. The registry is automatically pushed to GitHub Pages on every generation.
             <span id="registrySource" style="display:block;margin-top:6px;color:#5a8fc8"></span>
           </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-outline" style="flex:1" onclick="importRegistry()">Import JSON</button>
             <button class="btn btn-outline" style="flex:1" onclick="exportRegistry()">Export JSON</button>
+            <button class="btn btn-outline" style="flex:1" onclick="pushRegistryToGitHub(true)">Push to GitHub</button>
             <button class="btn btn-outline" style="flex:1" onclick="clearAllWidgets()">Reset</button>
+          </div>
+
+          <div style="margin-top:8px;border-top:1px solid #333;padding-top:16px">
+            <div class="panel-title" style="margin-bottom:12px">GitHub Settings</div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Personal Access Token</label>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="ghPAT" placeholder="ghp_..." style="flex:1;font-family:Courier New,monospace;font-size:12px">
+                <button class="btn btn-outline btn-sm" onclick="saveGitHubSettings()">Save</button>
+              </div>
+              <div class="field-hint">Needs <code>contents: write</code> on tylervinson/tylervinson. Stored in localStorage — never transmitted except to api.github.com.</div>
+            </div>
+            <div id="ghStatus" style="font-size:12px;color:#555;margin-top:4px"></div>
           </div>
         </div>
         <input type="file" id="registryFileInput" accept=".json" style="display:none" onchange="handleRegistryFile(event)">
@@ -629,11 +699,15 @@ async function fetchRemoteRegistry() {
 // ============================================================
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', (i === 0 && name === 'generate') || (i === 1 && name === 'registry'));
+    t.classList.toggle('active',
+      (i === 0 && name === 'generate') ||
+      (i === 1 && name === 'interactive') ||
+      (i === 2 && name === 'registry')
+    );
   });
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'registry') renderRegistry();
+  if (name === 'registry') { renderRegistry(); initGitHubUI(); }
 }
 
 function setStatus(msg, type) {
@@ -666,8 +740,91 @@ function clearForm() {
 // clearAllWidgets defined in registry section above
 
 // ============================================================
-// HTML ANALYSIS — reads data-item-id and data-* as-is
+// FIELD TYPE INFERENCE
 // ============================================================
+function inferFieldType(fieldName, values) {
+  const nonEmpty = values.filter(v => v && v.trim());
+  if (!nonEmpty.length) return { type: 'text' };
+  if (nonEmpty.every(v => /^\$[\d,]+/.test(v.trim()))) return { type: 'currency' };
+  if (nonEmpty.every(v => /^\d+(\.\d+)?%$/.test(v.trim()))) return { type: 'percent' };
+  const unique = [...new Set(nonEmpty.map(v => v.trim()))];
+  if (unique.length <= 6 && nonEmpty.length > unique.length) return { type: 'select', options: unique };
+  if (nonEmpty.every(v => /^https?:\/\//.test(v.trim()))) return { type: 'url' };
+  const avgLen = nonEmpty.reduce((s, v) => s + v.length, 0) / nonEmpty.length;
+  if (avgLen > 60) return { type: 'textarea' };
+  return { type: 'text' };
+}
+
+function typeColor(type) {
+  return { text: '#FFBE5F', currency: '#7dbf82', percent: '#90bce8', select: '#c792ea', textarea: '#ff9d6c', url: '#89ddff' }[type] || '#FFBE5F';
+}
+
+// ============================================================
+// ANALYZE — reads annotated HTML. Modes: single / items / grid / composite
+// ============================================================
+function analyzeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const root = doc.body.firstElementChild;
+  if (!root) return { error: 'No root element found. Make sure your HTML has a single outer container.' };
+
+  const gridCells = root.querySelectorAll('[data-plan][data-field]');
+  const items     = root.querySelectorAll('[data-item-id]');
+  const hasGrid   = gridCells.length > 0;
+  const hasItems  = items.length > 0;
+
+  // Build items analysis
+  let itemFields = [], itemFieldDefs = [];
+  if (hasItems) {
+    Array.from(items[0].attributes).forEach(attr => {
+      if (attr.name.startsWith('data-') && attr.name !== 'data-item-id') itemFields.push(attr.name.replace('data-',''));
+    });
+    itemFieldDefs = itemFields.map(f => {
+      const vals = Array.from(items).map(item => item.getAttribute('data-' + f) || '');
+      return { name: f, ...inferFieldType(f, vals) };
+    });
+  }
+
+  // Build grid analysis
+  let gridPlans = [], gridFields = [], gridFieldDefs = [], grid = {};
+  if (hasGrid) {
+    gridCells.forEach(cell => {
+      const plan = cell.getAttribute('data-plan'), field = cell.getAttribute('data-field');
+      if (plan  && !gridPlans.includes(plan))   gridPlans.push(plan);
+      if (field && !gridFields.includes(field)) gridFields.push(field);
+    });
+    gridPlans.forEach(p => { grid[p] = {}; });
+    gridCells.forEach(cell => {
+      const plan = cell.getAttribute('data-plan'), field = cell.getAttribute('data-field');
+      const val  = cell.getAttribute('data-value') || cell.textContent.trim();
+      if (plan && field) grid[plan][field] = val;
+    });
+    gridFieldDefs = gridFields.map(f => {
+      const vals = gridPlans.map(p => grid[p][f] || '');
+      return { name: f, ...inferFieldType(f, vals) };
+    });
+  }
+
+  const widgetClass = root.className.split(' ').filter(c => c && c !== 'editable-widget')[0] || '';
+
+  if (!hasItems && !hasGrid) {
+    const fields = [];
+    Array.from(root.attributes).forEach(attr => {
+      if (attr.name.startsWith('data-') && attr.name !== 'data-widget-detected') fields.push(attr.name.replace('data-',''));
+    });
+    const fieldDefs = fields.map(f => ({ name: f, ...inferFieldType(f, [root.getAttribute('data-' + f) || '']) }));
+    return { mode: 'single', hasItems: false, hasGrid: false, itemCount: 1, fields, fieldDefs, widgetClass };
+  }
+  if (hasItems && !hasGrid) {
+    if (!itemFields.length) return { error: 'Found elements with data-item-id but no data-* field attributes.' };
+    return { mode: 'items', hasItems: true, hasGrid: false, itemCount: items.length, fields: itemFields, fieldDefs: itemFieldDefs, widgetClass };
+  }
+  if (!hasItems && hasGrid) {
+    return { mode: 'grid', hasItems: false, hasGrid: true, itemCount: gridPlans.length, fields: gridFields, fieldDefs: gridFieldDefs, gridPlans, gridFields, gridFieldDefs, grid, widgetClass };
+  }
+  return { mode: 'composite', hasItems: true, hasGrid: true, itemCount: items.length, fields: itemFields, fieldDefs: itemFieldDefs, gridPlans, gridFields, gridFieldDefs, grid, widgetClass };
+}
+
 // ============================================================
 // ANNOTATE — transforms raw HTML into generator-ready HTML
 // Uses item-* classes as the signal for field names/values
@@ -696,48 +853,63 @@ function annotateHTML(html) {
     return { annotated: root.outerHTML, fromExisting: false, noItems: true };
   }
 
-  // Walk up from item-class elements to find the repeating parent
-  // The repeating parent is the closest ancestor that appears multiple times
-  // at the same level (same parent, same tag)
+  // Walk UP from each item-* element to find the lowest ancestor that:
+  // 1. Has siblings with the same tag under the same parent
+  // 2. Each sibling also contains item-* classes (confirming they are repeating items)
+  // This anchors the search to where the item-* classes actually live,
+  // rather than scanning down from the root and grabbing the wrong level.
   function findRepeatingParent(els) {
-    // Collect all ancestors up to root
-    const candidates = new Map(); // element -> count of item-class descendants
-    els.forEach(el => {
-      let node = el.parentElement;
+    // For each item-* element, walk up and collect ancestors
+    // Track which ancestors appear as siblings of same-tag elements
+    const itemClassSet = new Set(els);
+
+    // Walk up from the first item-* element to find candidate repeating ancestors
+    // Strategy: for each ancestor, check if its parent has multiple children
+    // with the same tag AND each of those siblings also descends into item-* classes
+    for (const startEl of els) {
+      let node = startEl.parentElement;
       while (node && node !== root) {
-        candidates.set(node, (candidates.get(node) || 0) + 1);
+        const parent = node.parentElement;
+        if (!parent || parent === doc) { node = node.parentElement; continue; }
+        // Get all siblings with the same tag
+        const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
+        if (siblings.length > 1) {
+          // Confirm that most siblings contain item-* classes (not just a coincidental tag match)
+          const siblingsWithItemCls = siblings.filter(s =>
+            s.querySelector('[class*="item-"]') || Array.from(s.classList).some(c => c.startsWith('item-'))
+          );
+          // Accept if at least half the siblings have item-* descendants
+          if (siblingsWithItemCls.length >= Math.max(2, Math.floor(siblings.length * 0.5))) {
+            return siblings;
+          }
+        }
         node = node.parentElement;
       }
-    });
-
-    // Find elements that are direct children of the same parent
-    // and appear more than once with the same tag
-    const parentGroups = new Map();
-    Array.from(root.children).forEach(child => {
-      const key = child.tagName;
-      if (!parentGroups.has(key)) parentGroups.set(key, []);
-      parentGroups.get(key).push(child);
-    });
-
-    // Direct children repeated = definite repeating items
-    for (const [tag, group] of parentGroups) {
-      if (group.length > 1) return group;
     }
 
-    // Otherwise go one level deeper
-    for (const child of root.children) {
-      const subGroups = new Map();
-      Array.from(child.children).forEach(grandchild => {
-        const key = grandchild.tagName;
-        if (!subGroups.has(key)) subGroups.set(key, []);
-        subGroups.get(key).push(grandchild);
+    // Fallback: scan from root looking for groups where siblings have item-* descendants
+    function scanLevel(parent, depth) {
+      if (depth > 6) return null;
+      const groups = new Map();
+      Array.from(parent.children).forEach(child => {
+        const key = child.tagName;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(child);
       });
-      for (const [tag, group] of subGroups) {
-        if (group.length > 1) return group;
+      for (const [tag, group] of groups) {
+        if (group.length > 1) {
+          const withItems = group.filter(el => el.querySelector('[class*="item-"]'));
+          if (withItems.length >= 2) return group;
+        }
       }
+      for (const child of parent.children) {
+        const result = scanLevel(child, depth + 1);
+        if (result) return result;
+      }
+      return null;
     }
 
-    return null;
+    return scanLevel(root, 0);
   }
 
   const repeatingItems = findRepeatingParent(itemClassEls);
@@ -794,52 +966,7 @@ function annotateHTML(html) {
   return { annotated: formatHTML(root.outerHTML), fields: fieldNames, itemCount: repeatingItems.length };
 }
 
-// ============================================================
-// ANALYZE — reads annotated HTML to extract field/item info
-// ============================================================
-function analyzeHTML(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const root = doc.body.firstElementChild;
-  if (!root) return { error: 'No root element found. Make sure your HTML has a single outer container.' };
-
-  const items = root.querySelectorAll('[data-item-id]');
-  const hasItems = items.length > 0;
-
-  if (!hasItems) {
-    const fields = [];
-    Array.from(root.attributes).forEach(attr => {
-      if (attr.name.startsWith('data-') && attr.name !== 'data-widget-detected') {
-        fields.push(attr.name.replace('data-', ''));
-      }
-    });
-    return {
-      hasItems: false,
-      itemCount: 1,
-      fields,
-      widgetClass: root.className.split(' ')[0] || ''
-    };
-  }
-
-  const firstItem = items[0];
-  const fields = [];
-  Array.from(firstItem.attributes).forEach(attr => {
-    if (attr.name.startsWith('data-') && attr.name !== 'data-item-id') {
-      fields.push(attr.name.replace('data-', ''));
-    }
-  });
-
-  if (fields.length === 0) {
-    return { error: 'Found elements with data-item-id but no data-* field attributes. Make sure your repeating items have data-* attributes or item-* classes.' };
-  }
-
-  return {
-    hasItems: true,
-    itemCount: items.length,
-    fields,
-    widgetClass: root.className.split(' ').filter(c => c && c !== 'editable-widget')[0] || ''
-  };
-}
+// analyzeHTML defined above
 
 // ============================================================
 // LIVE ANALYSIS — runs on paste/type
@@ -849,37 +976,41 @@ function liveAnalyze() {
   const container = document.getElementById('analysisResult');
   if (!html) { container.innerHTML = ''; return; }
 
-  // Try annotating first to get accurate field info
   const annotation = annotateHTML(html);
   const htmlToAnalyze = (annotation && annotation.annotated) ? annotation.annotated : html;
   const result = analyzeHTML(htmlToAnalyze);
 
   if (result.error) {
-    container.innerHTML = `<div class="notice notice-warn" style="margin-top:12px">${result.error}</div>`;
+    container.innerHTML = '<div class="notice notice-warn" style="margin-top:12px">' + result.error + '</div>';
     return;
   }
 
-  const fieldTags = result.fields.map(f =>
-    `<span class="field-tag"><span class="dot"></span>data-${f}</span>`
-  ).join('');
+  function makeTags(defs) {
+    return (defs || []).map(f =>
+      '<span class="field-tag"><span class="dot" style="background:' + typeColor(f.type) + '"></span>'
+      + f.name + ' <span style="color:#555;font-size:10px">' + f.type + '</span></span>'
+    ).join('');
+  }
 
-  const wasAnnotated = annotation && !annotation.fromExisting && annotation.fields && annotation.fields.length > 0;
+  const modeLabel = { single: 'Single widget', items: 'Items (' + result.itemCount + ' item' + (result.itemCount !== 1 ? 's' : '') + ')', grid: 'Grid (' + (result.gridPlans || []).length + ' plans × ' + result.fields.length + ' fields)', composite: 'Composite — items + grid' }[result.mode] || result.mode;
 
-  container.innerHTML = `
-    <div class="analysis-box" style="margin-top:12px">
-      <h4>Detected Structure</h4>
-      <div class="field-row">
-        <span class="field-name">Type</span>
-        <span class="field-type">${result.hasItems ? 'Items-based (' + result.itemCount + ' item' + (result.itemCount !== 1 ? 's' : '') + ')' : 'Single widget'}</span>
-      </div>
-      <div class="field-row">
-        <span class="field-name">Fields</span>
-        <span class="field-type">${result.fields.length} found${wasAnnotated ? ' via item-* classes' : ''}</span>
-      </div>
-      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
-        ${fieldTags || '<span style="color:#555;font-size:12px">No fields detected</span>'}
-      </div>
-    </div>`;
+  let out = '<div class="analysis-box" style="margin-top:12px"><h4>Detected Structure</h4>'
+    + '<div class="field-row"><span class="field-name">Mode</span><span class="field-type">' + modeLabel + '</span></div>';
+
+  if (result.mode === 'items' || result.mode === 'composite') {
+    out += '<div class="field-row"><span class="field-name">Item fields</span><span class="field-type">' + result.fields.length + '</span></div>'
+      + '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' + (makeTags(result.fieldDefs) || '<span style="color:#555;font-size:12px">None</span>') + '</div>';
+  }
+  if (result.mode === 'grid' || result.mode === 'composite') {
+    const gf = result.gridFieldDefs || result.fieldDefs || [];
+    out += '<div class="field-row" style="margin-top:8px"><span class="field-name">Grid fields</span><span class="field-type">' + (result.gridFields || result.fields).length + ' fields</span></div>'
+      + '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' + (makeTags(gf) || '<span style="color:#555;font-size:12px">None</span>') + '</div>';
+  }
+  if (result.mode === 'single') {
+    out += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' + (makeTags(result.fieldDefs) || '<span style="color:#555;font-size:12px">No fields</span>') + '</div>';
+  }
+  out += '</div>';
+  container.innerHTML = out;
 }
 
 // ============================================================
@@ -927,8 +1058,15 @@ function generate() {
     class: widgetClass,
     name: widgetName,
     desc: widgetDesc,
+    mode: analysis.mode,
     hasItems: analysis.hasItems,
+    hasGrid: analysis.hasGrid || false,
     fields: analysis.fields,
+    fieldDefs: analysis.fieldDefs || [],
+    gridPlans: analysis.gridPlans || [],
+    gridFields: analysis.gridFields || (analysis.mode === 'grid' ? analysis.fields : []),
+    gridFieldDefs: analysis.gridFieldDefs || (analysis.mode === 'grid' ? analysis.fieldDefs : []),
+    grid: analysis.grid || null,
     date: new Date().toLocaleDateString()
   };
   if (idx >= 0) reg[idx] = entry;
@@ -941,13 +1079,38 @@ function generate() {
   // Step 4: Show output including annotated HTML
   showOutput(analysis, version, annotatedHTML, annotation.fromExisting);
 
-  // Step 5: Build and download ZIP
+  // Step 5: Build and download ZIP + test page
   buildZip(reg, version, annotatedHTML).then(() => {
+    // Download test page automatically alongside the ZIP
+    const testHTML = generateTestPage(reg, annotatedHTML);
+    const blob = new Blob([testHTML], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'test-page.html';
+    a.click();
+    URL.revokeObjectURL(url);
+
     statusEl.innerHTML = '<div class="notice notice-success">'
-      + '<strong style="display:block;margin-bottom:4px">Extension downloaded — sitecore-widget-editor-' + version + '.zip</strong>'
-      + 'Unzip → chrome://extensions → Developer mode → Load unpacked → select the folder.'
+      + '<strong style="display:block;margin-bottom:4px">Downloaded — sitecore-widget-editor-' + version + '.zip + test-page.html</strong>'
+      + 'Open test-page.html in Chrome to test without installing the extension.'
       + '</div>';
     setStatus('Done · ' + version, 'ok');
+
+    // Auto-push registry to GitHub
+    pushRegistryToGitHub(false).then(result => {
+      if (result && result.ok) {
+        statusEl.innerHTML += '<div class="notice notice-success" style="margin-top:8px">'
+          + '&#10003; Registry pushed to GitHub Pages — <code>widget/widget-registry.json</code> updated'
+          + '</div>';
+      } else if (result && result.err) {
+        statusEl.innerHTML += '<div class="notice notice-warn" style="margin-top:8px">'
+          + '&#9888; GitHub push failed: ' + result.err + '<br>'
+          + '<span style="font-size:11px">Check your PAT in the Widget Registry tab. You can push manually there.</span>'
+          + '</div>';
+      }
+    });
+
   }).catch(err => {
     statusEl.innerHTML = '<div class="notice notice-err">ZIP error: ' + err.message + '</div>';
     setStatus('Error', 'err');
@@ -971,17 +1134,21 @@ function showOutput(analysis, version, annotatedHTML, fromExisting) {
     ? '<span style="color:#555;font-size:11px">Passed through — already annotated</span>'
     : '<span style="color:#7dbf82;font-size:11px">Annotated from item-* classes</span>';
 
+  const totalFields = analysis.fields.length + (analysis.gridFields ? analysis.gridFields.length : 0);
+  const modeLabel2  = { single:'Single', items:'Items', grid:'Grid', composite:'Composite' }[analysis.mode] || analysis.mode;
+  function makeTags2(defs) {
+    return (defs||[]).map(f => '<span class="field-tag"><span class="dot" style="background:'+typeColor(f.type)+'"></span>'+f.name+' <span style="color:#555;font-size:10px">'+f.type+'</span></span>').join('');
+  }
+  const itemTags2 = makeTags2(analysis.fieldDefs);
+  const gridTags2 = makeTags2(analysis.gridFieldDefs);
+
   document.getElementById('outputPanel').innerHTML =
     '<div class="stats-grid">'
-    + '<div class="stat-box"><div class="stat-box-value">' + analysis.itemCount + '</div><div class="stat-box-label">' + (analysis.hasItems ? 'Items' : 'Widget') + '</div></div>'
-    + '<div class="stat-box"><div class="stat-box-value">' + analysis.fields.length + '</div><div class="stat-box-label">Fields</div></div>'
+    + '<div class="stat-box"><div class="stat-box-value">' + modeLabel2 + '</div><div class="stat-box-label">Mode</div></div>'
+    + '<div class="stat-box"><div class="stat-box-value">' + totalFields + '</div><div class="stat-box-label">Fields</div></div>'
     + '<div class="stat-box"><div class="stat-box-value">' + version + '</div><div class="stat-box-label">Ext Version</div></div>'
     + '</div>'
 
-    + '<div class="output-section">'
-    + '<div class="output-section-title">Fields</div>'
-    + '<div class="field-list">' + (fieldTags || '<span style="color:#555;font-size:12px">None</span>') + '</div>'
-    + '</div>'
 
     + '<div class="output-section">'
     + '<div class="output-section-title" style="display:flex;justify-content:space-between;align-items:center">'
@@ -1013,7 +1180,231 @@ function showOutput(analysis, version, annotatedHTML, fromExisting) {
     + '<div style="display:flex;gap:8px;margin-top:6px">'
     + '<button class="btn btn-outline" style="flex:1;padding:10px" onclick="exportRegistry()">Download widget-registry.json</button>'
     + '</div>'
-    + '</div>';
+    + '</div>'
+    ;
+}
+
+
+// ============================================================
+// TEST PAGE GENERATOR
+// ============================================================
+function generateTestPage(reg, widgetHTML) {
+  const contentScript = generateContentScript(reg, getVersion());
+  const sidepanelJS   = generateSidepanelJS(reg);
+
+  // Minimal sidepanel CSS (mirrors generated sidepanel.html)
+  const panelCSS = `
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    #sp-shell{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#262c2e;color:#e0e0e0;font-size:13px;display:flex;flex-direction:column;height:100%;overflow:hidden}
+    #sp-header{padding:12px 14px 10px;border-bottom:1px solid #343d3f;flex-shrink:0}
+    #sp-header h1{font-size:13px;font-weight:500;color:#fff}
+    #sp-header .sub{font-size:11px;color:#666;margin-top:2px}
+    #sp-content{flex:1;overflow-y:auto;padding:12px 14px}
+    #sp-footer{padding:10px 14px;border-top:1px solid #343d3f;font-size:11px;color:#555;flex-shrink:0}
+    .widget-btn{display:block;width:100%;text-align:left;background:#2e3436;border:1px solid #3d4749;border-radius:4px;padding:8px 10px;color:#ccc;font-size:12px;cursor:pointer;margin-bottom:6px;transition:all .2s;font-family:inherit}
+    .widget-btn:hover{background:#343d3f;border-color:#FFBE5F;color:#fff}
+    .widget-btn .name{font-weight:500;color:#fff}
+    .widget-btn .meta{font-size:11px;color:#666;margin-top:2px}
+    .form-group{margin-bottom:10px}
+    .form-group label{display:block;font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .form-group input,.form-group textarea,.form-group select{width:100%;background:#2e3436;border:1px solid #3d4749;border-radius:3px;padding:6px 8px;color:#e0e0e0;font-size:12px;font-family:inherit;transition:border-color .2s}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#FFBE5F}
+    .form-group textarea{resize:vertical;min-height:60px}
+    .form-group select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+    .item-card{background:#2e3436;border:1px solid #3d4749;border-radius:4px;padding:10px;margin-bottom:8px}
+    .item-card-header{font-size:11px;color:#FFBE5F;font-weight:500;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+    .btn-row{display:flex;gap:8px;margin-top:14px}
+    .btn{flex:1;padding:7px 10px;border:none;border-radius:3px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s}
+    .btn-apply{background:#FFBE5F;color:#1a1a1a;font-weight:500}
+    .btn-apply:hover{background:#f0ad4e}
+    .btn-clear{background:#343d3f;color:#ccc}
+    .btn-clear:hover{background:#3d4749}
+    .back-btn{background:none;border:none;color:#666;cursor:pointer;font-size:12px;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:4px;font-family:inherit}
+    .back-btn:hover{color:#ccc}
+    .section-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
+    .success-msg{background:#1b3a1f;border:1px solid #2e7d32;border-radius:3px;padding:8px 10px;color:#a5d6a7;font-size:12px;margin-bottom:10px}
+    .error-msg{background:#3b1a1a;border:1px solid #7d2e2e;border-radius:3px;padding:8px 10px;color:#f44336;font-size:12px;margin-bottom:10px}
+    .empty{color:#555;font-size:12px;text-align:center;padding:24px 0;line-height:1.7}
+    hr{border:none;border-top:1px solid #343d3f;margin:12px 0}
+  `;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Test Page — v${getVersion()}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f0f0f0; }
+
+    /* ── Layout ── */
+    #test-layout { display: grid; grid-template-columns: 1fr 340px; height: 100vh; gap: 0; }
+    #widget-pane { overflow-y: auto; background: #fff; padding: 32px; border-right: 1px solid #ddd; }
+    #panel-pane  { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* ── Test toolbar ── */
+    #toolbar {
+      background: #1a1a1a; color: #aaa; font-size: 11px;
+      padding: 8px 14px; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid #333; flex-shrink: 0;
+    }
+    #toolbar strong { color: #FFBE5F; }
+    #toolbar .badge { background: #2e3436; border: 1px solid #3d4749; border-radius: 3px; padding: 2px 8px; color: #ccc; cursor: pointer; font-size: 11px; font-family: inherit; }
+    #toolbar .badge:hover { border-color: #FFBE5F; color: #fff; }
+    #toolbar .sep { color: #333; }
+    #mutation-log { margin-left: auto; color: #555; font-size: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── DOM change highlight ── */
+    .dom-changed { outline: 2px solid #FFBE5F !important; transition: outline 0.3s; }
+
+    /* ── Panel shell ── */
+    ${panelCSS}
+  </style>
+</head>
+<body>
+
+<div id="test-layout">
+
+  <!-- Left: Widget under test -->
+  <div id="widget-pane">
+    <div id="widget-host">
+      ${widgetHTML || '<p style="color:#999;font-size:13px">No widget HTML — re-generate to populate this page.</p>'}
+    </div>
+  </div>
+
+  <!-- Right: Simulated sidepanel -->
+  <div id="panel-pane">
+    <div id="toolbar">
+      <strong>Test Mode</strong>
+      <span class="sep">|</span>
+      <span>v${getVersion()}</span>
+      <span class="sep">|</span>
+      <button class="badge" onclick="rescan()">Rescan</button>
+      <button class="badge" onclick="resetWidget()">Reset DOM</button>
+      <span id="mutation-log">Waiting for changes...</span>
+    </div>
+    <div id="sp-shell">
+      <div id="updateBanner" style="display:none;background:#3a2e00;border-bottom:1px solid #FFBE5F;padding:8px 14px;font-size:11px;color:#FFBE5F"></div>
+      <div id="sp-header">
+        <h1>Widget Editor</h1>
+        <div class="sub" id="pageUrl">test-page.html</div>
+      </div>
+      <div id="sp-content"><div class="empty">Scanning...</div></div>
+      <div id="sp-footer"><span id="status">Ready</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Sitecore Bridge mock -->
+<script>
+window.SitecoreBridge = {
+  notifyChange: function(el) {
+    el.classList.add('dom-changed');
+    setTimeout(() => el.classList.remove('dom-changed'), 1200);
+    document.getElementById('mutation-log').textContent = 'Changed: ' + (el.className || el.tagName);
+  }
+};
+<\/script>
+
+<!-- Chrome API mock -->
+<script>
+(function() {
+  // Message bus
+  const _listeners = [];
+  const _runtimeListeners = [];
+
+  // Store original widget HTML for reset
+  window._originalWidgetHTML = document.getElementById('widget-host').innerHTML;
+
+  window.chrome = {
+    runtime: {
+      lastError: null,
+      onMessage: {
+        addListener: function(fn) { _runtimeListeners.push(fn); }
+      },
+      sendMessage: function(msg, cb) {
+        // Route messages from content-script to panel listeners
+        _runtimeListeners.forEach(fn => {
+          try { fn(msg, {}, function() {}); } catch(e) {}
+        });
+        if (cb) cb();
+        return Promise.resolve();
+      }
+    },
+    tabs: {
+      query: function(opts, cb) {
+        cb([{ id: 1, url: window.location.href }]);
+      },
+      sendMessage: function(tabId, msg, cb) {
+        // Route panel -> content script
+        if (msg.type === 'GET_WIDGETS') {
+          cb({ widgets: detectWidgets() });
+        } else if (msg.type === 'GET_WIDGET_DATA') {
+          cb({ data: getWidgetData(msg.widgetClass, msg.index || 0) });
+        } else if (msg.type === 'UPDATE_WIDGET_DATA') {
+          const success = updateWidgetData(msg.widgetClass, msg.index || 0, msg.data);
+          cb({ success });
+        } else {
+          cb({});
+        }
+      }
+    },
+    action: {
+      setBadgeText: function() {},
+      setBadgeBackgroundColor: function() {}
+    }
+  };
+
+  // DOM content override — sidepanel uses document.getElementById
+  // We need to make the panel JS operate on sp-shell's children
+  const _origGetById = document.getElementById.bind(document);
+  document.getElementById = function(id) {
+    // Remap panel IDs to sp-shell versions
+    const panelIds = ['content', 'header', 'footer', 'status', 'pageUrl', 'updateBanner'];
+    if (panelIds.includes(id)) {
+      return _origGetById('sp-' + id) || _origGetById(id);
+    }
+    return _origGetById(id);
+  };
+})();
+<\/script>
+
+<!-- Content script (widget logic) -->
+<script>
+${contentScript}
+<\/script>
+
+<!-- Panel script (editor UI) -->
+<script>
+// Override currentTab for test environment
+var currentTab = { id: 1, url: window.location.href };
+
+${sidepanelJS}
+<\/script>
+
+<!-- Test harness controls -->
+<script>
+function rescan() {
+  selectedWidget = null;
+  scanPage();
+}
+function resetWidget() {
+  document.getElementById('widget-host').innerHTML = window._originalWidgetHTML;
+  document.getElementById('mutation-log').textContent = 'DOM reset';
+  rescan();
+}
+
+// Kick off initial scan
+document.addEventListener('DOMContentLoaded', function() {
+  scanPage();
+});
+if (document.readyState !== 'loading') scanPage();
+<\/script>
+
+</body>
+</html>`;
 }
 
 function copyAnnotatedHTML() {
@@ -1236,8 +1627,12 @@ function generateContentScript(reg, version) {
     '  {\n' +
     "    class: '" + w.class + "',\n" +
     "    name: '" + w.name + "',\n" +
-    '    hasItems: ' + w.hasItems + ',\n' +
-    '    fields: [' + w.fields.map(f => "'" + f + "'").join(', ') + ']\n' +
+    "    mode: '" + (w.mode || (w.hasItems ? 'items' : 'single')) + "',\n" +
+    '    hasItems: ' + (w.hasItems||false) + ',\n' +
+    '    hasGrid: ' + (w.hasGrid||false) + ',\n' +
+    '    fields: [' + (w.fields||[]).map(f => "'" + f + "'").join(', ') + '],\n' +
+    '    gridPlans: [' + (w.gridPlans||[]).map(p => "'" + p + "'").join(', ') + '],\n' +
+    '    gridFields: [' + (w.gridFields||[]).map(f => "'" + f + "'").join(', ') + ']\n' +
     '  }'
   ).join(',\n');
 
@@ -1274,10 +1669,12 @@ function generateContentScript(reg, version) {
     '      found.push({',
     '        widgetClass: config.class,',
     '        widgetName: config.name,',
-    '        hasItems: config.hasItems,',
+    "        mode: config.mode || (config.hasItems ? 'items' : (config.hasGrid ? 'grid' : 'single')),",
+    '        hasItems: config.hasItems || false,',
+    '        hasGrid: config.hasGrid || false,',
     '        fields: config.fields,',
     '        index: idx,',
-    "        itemCount: config.hasItems ? el.querySelectorAll('[data-item-id]').length : 1",
+    "        itemCount: config.hasItems ? el.querySelectorAll('[data-item-id]').length : (config.gridPlans ? config.gridPlans.length : 1),",
     '      });',
     '    });',
     '  });',
@@ -1352,68 +1749,66 @@ function generateContentScript(reg, version) {
 
 function buildWidgetFunctions(widget) {
   const Fn     = toPascal(widget.class);
-  const fields = widget.fields;
+  const fields = widget.fields || [];
+  const mode   = widget.mode || (widget.hasItems ? 'items' : 'single');
 
-  if (!widget.hasItems) {
-    // Single-element widget — reads data-* off the root element
-    const getLines    = fields.map(f => "    " + f.replace(/-/g, '_') + ": el.getAttribute('data-" + f + "') || ''").join(',\n');
-    const updateLines = fields.map(f =>
-      "  if (data." + f.replace(/-/g, '_') + " !== undefined) {\n" +
-      "    el.setAttribute('data-" + f + "', data." + f.replace(/-/g, '_') + ");\n" +
-      "    const v = el.querySelector('.item-" + f + "');\n" +
-      "    if (v) v.textContent = data." + f.replace(/-/g, '_') + ";\n" +
-      "    if (window.SitecoreBridge) window.SitecoreBridge.notifyChange(el);\n" +
-      "  }"
-    ).join('\n');
-
+  function getItemLine(f)    { return "      " + f.replace(/-/g,'_') + ": item.getAttribute('data-" + f + "') || ''"; }
+  function updateItemLine(f) {
+    const k = f.replace(/-/g,'_');
+    return "    if (d." + k + " !== undefined) {\n"
+      + "      item.setAttribute('data-" + f + "', d." + k + ");\n"
+      + "      item.querySelectorAll('[data-" + f + "]').forEach(n => n.setAttribute('data-" + f + "', d." + k + "));\n"
+      + "      const v = item.querySelector('.item-" + f + "');\n"
+      + "      if (v) v.textContent = d." + k + ";\n"
+      + "      if (window.SitecoreBridge) window.SitecoreBridge.notifyChange(item);\n"
+      + "    }";
+  }
+  function buildGridFns() {
     return [
-      '// --- ' + widget.name + ' ---',
-      'function get' + Fn + 'Data(el) {',
-      '  return {',
-      getLines,
-      '  };',
+      'function get' + Fn + 'GridData(el) {',
+      "  const plans = [...new Set(Array.from(el.querySelectorAll('[data-plan]')).map(c => c.getAttribute('data-plan')))];",
+      '  const result = {};',
+      '  plans.forEach(plan => { result[plan] = {};',
+      "    el.querySelectorAll('[data-plan=\"' + plan + '\"][data-field]').forEach(cell => {",
+      "      result[plan][cell.getAttribute('data-field')] = cell.getAttribute('data-value') || cell.textContent.trim();",
+      '    });',
+      '  });',
+      '  return { plans, grid: result };',
       '}',
       '',
-      'function update' + Fn + 'Data(el, data) {',
-      updateLines,
+      'function update' + Fn + 'GridData(el, data) {',
+      '  if (!data.grid) return false;',
+      '  Object.entries(data.grid).forEach(([plan, flds]) => {',
+      '    Object.entries(flds).forEach(([field, value]) => {',
+      "      const cell = el.querySelector('[data-plan=\"' + plan + '\"][data-field=\"' + field + '\"]');",
+      '      if (!cell) return;',
+      "      cell.setAttribute('data-value', value); cell.textContent = value;",
+      '      if (window.SitecoreBridge) window.SitecoreBridge.notifyChange(cell);',
+      '    });',
+      '  });',
       '  return true;',
       '}',
     ].join('\n');
   }
 
-  // Items-based widget — reads data-* off each [data-item-id] element
-  const getItemLines    = fields.map(f => "      " + f.replace(/-/g, '_') + ": item.getAttribute('data-" + f + "') || ''").join(',\n');
-  const updateItemLines = fields.map(f =>
-    "    if (d." + f.replace(/-/g, '_') + " !== undefined) {\n" +
-    "      item.setAttribute('data-" + f + "', d." + f.replace(/-/g, '_') + ");\n" +
-    "      item.querySelectorAll('[data-" + f + "]').forEach(n => n.setAttribute('data-" + f + "', d." + f.replace(/-/g, '_') + "));\n" +
-    "      const v = item.querySelector('.item-" + f + "');\n" +
-    "      if (v) v.textContent = d." + f.replace(/-/g, '_') + ";\n" +
-    "      if (window.SitecoreBridge) window.SitecoreBridge.notifyChange(item);\n" +
-    "    }"
-  ).join('\n');
+  if (mode === 'single') {
+    const gl = fields.map(f => "    " + f.replace(/-/g,'_') + ": el.getAttribute('data-" + f + "') || ''").join(',\n');
+    const ul = fields.map(f => { const k=f.replace(/-/g,'_'); return "  if (data."+k+" !== undefined) {\n    el.setAttribute('data-"+f+"', data."+k+");\n    const v=el.querySelector('.item-"+f+"'); if(v) v.textContent=data."+k+";\n    if(window.SitecoreBridge) window.SitecoreBridge.notifyChange(el);\n  }"; }).join('\n');
+    return ['// --- '+widget.name+' ---','function get'+Fn+'Data(el) { return {',gl,'  }; }','','function update'+Fn+'Data(el, data) {',ul,'  return true;','}'].join('\n');
+  }
 
-  return [
-    '// --- ' + widget.name + ' ---',
-    'function get' + Fn + 'Data(el) {',
-    "  return { items: Array.from(el.querySelectorAll('[data-item-id]')).map(item => ({",
-    "    id: item.getAttribute('data-item-id'),",
-    getItemLines,
-    '  })) };',
-    '}',
-    '',
-    'function update' + Fn + 'Data(el, data) {',
-    '  if (!data.items) return false;',
-    '  data.items.forEach(d => {',
-    "    const item = el.querySelector('[data-item-id=\"' + d.id + '\"]');",
-    '    if (!item) return;',
-    updateItemLines,
-    '  });',
-    '  return true;',
-    '}',
-  ].join('\n');
+  if (mode === 'items') {
+    return ['// --- '+widget.name+' ---','function get'+Fn+'Data(el) {',"  return { items: Array.from(el.querySelectorAll('[data-item-id]')).map(item => ({","    id: item.getAttribute('data-item-id'),",fields.map(getItemLine).join(',\n'),'  })) };','}','','function update'+Fn+'Data(el, data) {','  if (!data.items) return false;','  data.items.forEach(d => {',"    const item = el.querySelector('[data-item-id=\"' + d.id + '\"]');","    if (!item) return;",fields.map(updateItemLine).join('\n'),'  });','  return true;','}'].join('\n');
+  }
+
+  if (mode === 'grid') {
+    return ['// --- '+widget.name+' ---','function get'+Fn+'Data(el) { return get'+Fn+'GridData(el); }','function update'+Fn+'Data(el, data) { return update'+Fn+'GridData(el, data); }','',buildGridFns()].join('\n');
+  }
+
+  // composite
+  const gf = widget.gridFields || [];
+  return ['// --- '+widget.name+' ---','function get'+Fn+'Data(el) {',"  const items = Array.from(el.querySelectorAll('[data-item-id]')).map(item => ({","    id: item.getAttribute('data-item-id'),",fields.map(getItemLine).join(',\n'),'  }));','  const gd = get'+Fn+'GridData(el);','  return { items, plans: gd.plans, grid: gd.grid };','}','','function update'+Fn+'Data(el, data) {','  if (data.items) { data.items.forEach(d => {',"    const item = el.querySelector('[data-item-id=\"' + d.id + '\"]'); if (!item) return;",fields.map(updateItemLine).join('\n'),'  }); }','  if (data.grid) update'+Fn+'GridData(el, data);','  return true;','}','',buildGridFns()].join('\n');
 }
-
 // ============================================================
 // sidepanel.html
 // ============================================================
@@ -1670,63 +2065,64 @@ function generateSidepanelJS(reg) {
 
 function buildEditorImpl(widget) {
   const Fn     = toPascal(widget.class);
-  const fields = widget.fields;
+  const fields = widget.fields || [];
+  const mode   = widget.mode || (widget.hasItems ? 'items' : 'single');
 
-  if (!widget.hasItems) {
-    const inputLines = fields.map(f => {
-      const key   = f.replace(/-/g, '_');
-      const label = toDisplay(f);
-      return '  html += \'<div class="form-group"><label>' + label + '</label>\''
-           + ' + \'<input type="text" data-field="' + key + '" value="\' + escHtml(data.' + key + ' || \'\') + \'"></div>\';';
-    }).join('\n');
-
-    return [
-      'function render' + Fn + 'Editor(widget, data) {',
-      "  let html = getBackBtn() + '<div class=\"section-label\">' + widget.widgetName + '</div>';",
-      inputLines,
-      '  html += getBtnRow();',
-      "  const content = document.getElementById('content');",
-      '  content.innerHTML = html;',
-      '  attachSave(() => collectFields(content), widget);',
-      "  setStatus('Editing ' + widget.widgetName);",
-      '}',
-    ].join('\n');
+  function fieldInput(f, defs, valExpr, extraAttrs) {
+    const def = (defs||[]).find(d => d.name===f) || { type:'text' };
+    const key = f.replace(/-/g,'_'), label = toDisplay(f), a = extraAttrs||'';
+    if (def.type === 'select' && def.options && def.options.length) {
+      const opts = def.options.map(o => "' + ('<option value=\""+o+"\"' + ("+valExpr+"."+key+" === '"+o+"' ? ' selected' : '') + '>"+o+"</option>') + '").join('');
+      return '  html += \'<div class="form-group"><label>'+label+'</label><select'+a+' data-field="'+key+'">'+opts+'</select></div>\';';
+    }
+    return '  html += \'<div class="form-group"><label>'+label+'</label><input type="text"'+a+' data-field="'+key+'" value="\' + escHtml('+valExpr+'.'+key+' || \'\') + \'"></div>\';';
   }
 
-  // Items editor
-  const inputLines = fields.map(f => {
-    const key   = f.replace(/-/g, '_');
-    const label = toDisplay(f);
-    return '    html += \'<div class="form-group"><label>' + label + '</label>\''
-         + ' + \'<input type="text" data-item-id="\' + item.id + \'" data-field="' + key + '" value="\' + escHtml(item.' + key + ' || \'\') + \'"></div>\';';
-  }).join('\n');
+  if (mode === 'single') {
+    return ['function render'+Fn+'Editor(widget, data) {',"  let html = getBackBtn() + '<div class=\"section-label\">' + widget.widgetName + '</div>';",fields.map(f => fieldInput(f, widget.fieldDefs, 'data', '')).join('\n'),'  html += getBtnRow();',"  const content = document.getElementById('content');",'  content.innerHTML = html;','  attachSave(() => collectFields(content), widget);',"  setStatus('Editing ' + widget.widgetName);",'}'].join('\n');
+  }
 
-  return [
-    'function render' + Fn + 'Editor(widget, data) {',
-    '  const items = (data && data.items) || [];',
-    "  let html = getBackBtn() + '<div class=\"section-label\">' + widget.widgetName + ' &mdash; ' + items.length + ' item(s)</div>';",
-    '  items.forEach((item, i) => {',
-    '    html += \'<div class="item-card"><div class="item-card-header">Item \' + (i + 1) + \'</div>\';',
-    inputLines,
-    "    html += '</div>';",
-    '  });',
-    '  html += getBtnRow();',
-    "  const content = document.getElementById('content');",
-    '  content.innerHTML = html;',
-    '  attachSave(() => {',
-    '    const map = {};',
-    "    content.querySelectorAll('[data-item-id][data-field]').forEach(input => {",
-    '      const id = input.dataset.itemId;',
-    '      if (!map[id]) map[id] = { id };',
-    '      map[id][input.dataset.field] = input.value;',
-    '    });',
-    '    return { items: Object.values(map) };',
-    '  }, widget);',
-    "  setStatus('Editing ' + widget.widgetName);",
-    '}',
-  ].join('\n');
+  function itemInputs(flds, defs) {
+    return flds.map(f => {
+      const def=(defs||[]).find(d=>d.name===f)||{type:'text'}, key=f.replace(/-/g,'_'), label=toDisplay(f);
+      const a=' data-item-id="\' + item.id + \'"', val='item.'+key+" || ''";
+      if (def.type==='select' && def.options && def.options.length) {
+        const opts=def.options.map(o=>"' + ('<option value=\""+o+"\"' + (item."+key+" === '"+o+"' ? ' selected' : '') + '>"+o+"</option>') + '").join('');
+        return '    html += \'<div class="form-group"><label>'+label+'</label><select'+a+' data-field="'+key+'">'+opts+'</select></div>\';';
+      }
+      return '    html += \'<div class="form-group"><label>'+label+'</label><input type="text"'+a+' data-field="'+key+'" value="\' + escHtml('+val+') + \'"></div>\';';
+    }).join('\n');
+  }
+
+  function gridInputs(gFlds, gDefs) {
+    return gFlds.map(f => {
+      const def=(gDefs||[]).find(d=>d.name===f)||{type:'text'}, key=f.replace(/-/g,'_'), label=toDisplay(f);
+      const a=' data-grid-plan="\' + plan + \'"';
+      const val="(data.grid && data.grid[plan] && data.grid[plan]['"+f+"']) || ''";
+      if (def.type==='select' && def.options && def.options.length) {
+        const opts=def.options.map(o=>"' + ('<option value=\""+o+"\"' + ("+val+" === '"+o+"' ? ' selected' : '') + '>"+o+"</option>') + '").join('');
+        return '      html += \'<div class="form-group"><label>'+label+'</label><select'+a+' data-field="'+key+'">'+opts+'</select></div>\';';
+      }
+      return '      html += \'<div class="form-group"><label>'+label+'</label><input type="text"'+a+' data-field="'+key+'" value="\' + escHtml('+val+') + \'"></div>\';';
+    }).join('\n');
+  }
+
+  const collectGrid = "const grid={}; content.querySelectorAll('[data-grid-plan][data-field]').forEach(inp=>{const p=inp.dataset.gridPlan; if(!grid[p]) grid[p]={}; grid[p][inp.dataset.field]=inp.value;}); ";
+  const collectItems= "const map={}; content.querySelectorAll('[data-item-id][data-field]').forEach(inp=>{const id=inp.dataset.itemId; if(!map[id]) map[id]={id}; map[id][inp.dataset.field]=inp.value;}); ";
+
+  if (mode === 'items') {
+    return ['function render'+Fn+'Editor(widget, data) {','  const items=(data&&data.items)||[];',"  let html = getBackBtn()+'<div class=\"section-label\">'+widget.widgetName+'</div>';",'  items.forEach((item,i)=>{',"    const lbl=item.name||item.type||('Item '+(i+1));",'    html+=\'<div class="item-card"><div class="item-card-header">\'+lbl+\'</div>\';',itemInputs(fields,widget.fieldDefs),"    html+='</div>';",'  });','  html+=getBtnRow();',"  const content=document.getElementById('content');",'  content.innerHTML=html;','  attachSave(()=>{'+collectItems+'return{items:Object.values(map)};}, widget);',"  setStatus('Editing '+widget.widgetName);",'}'].join('\n');
+  }
+
+  const gf = widget.gridFields||[], gd = widget.gridFieldDefs||[];
+
+  if (mode === 'grid') {
+    return ['function render'+Fn+'Editor(widget, data) {','  const plans=(data&&data.plans)||[];',"  let html=getBackBtn()+'<div class=\"section-label\">'+widget.widgetName+'</div>';",'  plans.forEach(plan=>{',"    html+='<div class=\"item-card\"><div class=\"item-card-header\">'+plan.charAt(0).toUpperCase()+plan.slice(1)+' Plan</div>';",gridInputs(gf,gd),"    html+='</div>';",'  });','  html+=getBtnRow();',"  const content=document.getElementById('content');",'  content.innerHTML=html;','  attachSave(()=>{'+collectGrid+'return{grid};}, widget);',"  setStatus('Editing '+widget.widgetName);",'}'].join('\n');
+  }
+
+  // composite
+  return ['function render'+Fn+'Editor(widget, data) {','  const items=(data&&data.items)||[], plans=(data&&data.plans)||[];',"  let html=getBackBtn()+'<div class=\"section-label\">'+widget.widgetName+'</div>';",'  if(items.length) {',"    html+='<div class=\"item-card-header\" style=\"font-size:11px;color:#FFBE5F;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px\">Plan Cards</div>';",'    items.forEach((item,i)=>{',"      const lbl=item.name||item.type||('Item '+(i+1));",'      html+=\'<div class="item-card"><div class="item-card-header">\'+lbl+\'</div>\';',itemInputs(fields,widget.fieldDefs).replace(/^  /gm,'    '),"      html+='</div>';",'    });','  }','  if(plans.length) {',"    html+='<hr><div class=\"item-card-header\" style=\"font-size:11px;color:#FFBE5F;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px\">Plan Details</div>';",'    plans.forEach(plan=>{',"      html+='<div class=\"item-card\"><div class=\"item-card-header\">'+plan.charAt(0).toUpperCase()+plan.slice(1)+' Plan</div>';",gridInputs(gf,gd),"      html+='</div>';",'    });','  }','  html+=getBtnRow();',"  const content=document.getElementById('content');",'  content.innerHTML=html;','  attachSave(()=>{'+collectItems+collectGrid+'return{items:Object.values(map),grid};}, widget);',"  setStatus('Editing '+widget.widgetName);",'}'].join('\n');
 }
-
 // ============================================================
 // README
 // ============================================================
@@ -1776,6 +2172,563 @@ function toPascal(cls) {
 }
 function toDisplay(str) {
   return str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+// ============================================================
+// INTERACTIVE MODE
+// ============================================================
+
+// State
+let iDoc       = null;  // parsed document
+let iRoot      = null;  // root element
+let iGroups    = [];    // [{items:[el,...], isRepeating, suggestedName}]
+let iGroupIdx  = 0;     // current group being named
+let iFieldDefs = [];    // [{groupIdx, itemIdx, el, suggestedName, confirmedName, type}]
+let iGroupDefs = [];    // [{isRepeating, itemCount, fields:[{name,type,defs}]}]
+
+function iOnClassInput() {
+  const val = document.getElementById('iWidgetClass').value.trim();
+  const nameEl = document.getElementById('iWidgetName');
+  if (!nameEl.value) {
+    nameEl.value = val.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+}
+
+function iClear() {
+  ['iWidgetClass','iWidgetName','iWidgetDesc','iWidgetHTML'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('iPreviewResult').innerHTML = '';
+  document.getElementById('iStep1Status').innerHTML = '';
+  iShowStep(1);
+}
+
+function iShowStep(n) {
+  document.getElementById('iStep1').style.display = n === 1 ? '' : 'none';
+  document.getElementById('iStep2').style.display = n === 2 ? '' : 'none';
+  document.getElementById('iStep3').style.display = n === 3 ? '' : 'none';
+}
+
+// ── Live preview while typing ──────────────────────────────────
+function iLivePreview() {
+  const html = document.getElementById('iWidgetHTML').value.trim();
+  const container = document.getElementById('iPreviewResult');
+  if (!html) { container.innerHTML = ''; return; }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const root = doc.body.firstElementChild;
+  if (!root) { container.innerHTML = ''; return; }
+
+  const editables = root.querySelectorAll('.editable');
+  if (!editables.length) {
+    container.innerHTML = '<div class="analysis-box" style="margin-top:12px"><span style="color:#555;font-size:12px">No elements with class <code>editable</code> found yet</span></div>';
+    return;
+  }
+
+  const groups = iDetectGroups(root, editables);
+  let html2 = '<div class="analysis-box" style="margin-top:12px"><h4>Editable Elements Found</h4>';
+  html2 += '<div class="field-row"><span class="field-name">Elements</span><span class="field-type">' + editables.length + ' editable</span></div>';
+  html2 += '<div class="field-row"><span class="field-name">Groups</span><span class="field-type">' + groups.length + ' detected</span></div>';
+  groups.forEach((g, i) => {
+    const label = g.isRepeating
+      ? g.items.length + ' repeating items × ' + g.editablesPerItem + ' field(s) each'
+      : g.editables.length + ' standalone field(s)';
+    html2 += '<div class="field-row"><span class="field-name" style="color:#ccc">Group ' + (i+1) + '</span><span class="field-type">' + label + '</span></div>';
+  });
+  html2 += '</div>';
+  container.innerHTML = html2;
+}
+
+// ── Group detection ────────────────────────────────────────────
+// Walk the DOM, find repeating sibling structures that contain editables.
+// Remaining ungrouped editables become standalone fields.
+function iDetectGroups(root, editables) {
+  const editableSet = new Set(Array.from(editables));
+  const assigned    = new Set();
+  const groups      = [];
+
+  // Walk every ancestor of editables bottom-up to find repeating parents
+  // A repeating parent: has 2+ siblings of same tag, each containing at least one editable
+  function findRepeatingAncestor(el) {
+    let node = el.parentElement;
+    while (node && node !== root) {
+      const parent = node.parentElement;
+      if (!parent) break;
+      const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
+      if (siblings.length > 1) {
+        const withEditable = siblings.filter(s => s.querySelector('.editable'));
+        if (withEditable.length >= 2 && withEditable.length === siblings.length) {
+          return siblings; // all siblings have editables
+        }
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  // Find repeating groups
+  Array.from(editables).forEach(el => {
+    if (assigned.has(el)) return;
+    const siblings = findRepeatingAncestor(el);
+    if (!siblings) return;
+
+    // Check this group of siblings not already registered
+    const key = siblings[0];
+    if (groups.some(g => g.isRepeating && g.items[0] === key)) return;
+
+    // Collect editables per item (use first item as template)
+    const firstItemEditables = Array.from(siblings[0].querySelectorAll('.editable'));
+    const editablesPerItem   = firstItemEditables.length;
+
+    groups.push({
+      isRepeating: true,
+      items: siblings,
+      editablesPerItem,
+      editables: siblings.flatMap(s => Array.from(s.querySelectorAll('.editable')))
+    });
+    siblings.forEach(s => s.querySelectorAll('.editable').forEach(e => assigned.add(e)));
+  });
+
+  // Remaining editables → standalone group
+  const standalone = Array.from(editables).filter(e => !assigned.has(e));
+  if (standalone.length) {
+    groups.push({ isRepeating: false, items: [], editables: standalone, editablesPerItem: standalone.length });
+  }
+
+  return groups;
+}
+
+// ── Suggest a field name from element context ──────────────────
+function iSuggestName(el, idx) {
+  // Try: nearby label sibling, aria-label, placeholder, class names (minus 'editable'), text content
+  const parent = el.parentElement;
+  if (parent) {
+    const labelSibling = Array.from(parent.querySelectorAll('label, .label, .field-label, .copy-text, .caption')).find(l => l !== el);
+    if (labelSibling) return iSlugify(labelSibling.textContent.trim());
+  }
+  const classes = Array.from(el.classList).filter(c => c !== 'editable' && c.length > 1);
+  if (classes.length) {
+    const name = classes[0].replace(/^(number|text|copy|value|stat|label|heading|title|price|btn|button)-?/, '') || classes[0];
+    if (name.length > 1) return iSlugify(name);
+  }
+  const text = el.textContent.trim().slice(0, 30);
+  if (text) return iSlugify(text);
+  return 'field-' + (idx + 1);
+}
+
+function iSlugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'field';
+}
+
+function iGetPreviewText(el) {
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('span, sup, sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
+  return clone.textContent.trim().slice(0, 60) || '(empty)';
+}
+
+function iInferType(el) {
+  const text = iGetPreviewText(el);
+  if (/^\$[\d,]+/.test(text)) return 'currency';
+  if (/^\d+(\.\d+)?%?$/.test(text)) return 'percent';
+  if (text.length > 60) return 'textarea';
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'a') return 'url';
+  return 'text';
+}
+
+// ── Wizard: start ──────────────────────────────────────────────
+function iStartWizard() {
+  const widgetClass = document.getElementById('iWidgetClass').value.trim();
+  const widgetName  = document.getElementById('iWidgetName').value.trim();
+  const html        = document.getElementById('iWidgetHTML').value.trim();
+  const statusEl    = document.getElementById('iStep1Status');
+
+  if (!widgetClass || !widgetName) {
+    statusEl.innerHTML = '<div class="notice notice-warn">Widget Class and Widget Name are required.</div>';
+    return;
+  }
+  if (!html) {
+    statusEl.innerHTML = '<div class="notice notice-warn">Paste your widget HTML first.</div>';
+    return;
+  }
+
+  const parser = new DOMParser();
+  iDoc  = parser.parseFromString(html, 'text/html');
+  iRoot = iDoc.body.firstElementChild;
+  if (!iRoot) {
+    statusEl.innerHTML = '<div class="notice notice-err">No root element found.</div>';
+    return;
+  }
+
+  const editables = iRoot.querySelectorAll('.editable');
+  if (!editables.length) {
+    statusEl.innerHTML = '<div class="notice notice-warn">No elements with class <code>editable</code> found. Add it to the elements you want to be editable.</div>';
+    return;
+  }
+
+  iGroups   = iDetectGroups(iRoot, editables);
+  iGroupIdx = 0;
+  iGroupDefs = [];
+  statusEl.innerHTML = '';
+  iShowStep(2);
+  iRenderGroupCard();
+}
+
+// ── Wizard: render current group card ─────────────────────────
+function iRenderGroupCard() {
+  const g = iGroups[iGroupIdx];
+  const total = iGroups.length;
+  const headerEl  = document.getElementById('iWizardHeader');
+  const cardsEl   = document.getElementById('iWizardCards');
+  const nextBtn   = document.getElementById('iNextBtn');
+  const isLast    = iGroupIdx === total - 1;
+
+  nextBtn.textContent = isLast ? 'Review & Generate' : 'Next Group →';
+
+  headerEl.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    + '<span style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.05em">Group ' + (iGroupIdx+1) + ' of ' + total + '</span>'
+    + '<span style="font-size:11px;color:#555">' + (g.isRepeating ? g.items.length + ' repeating items' : 'standalone fields') + '</span>'
+    + '</div>'
+    + '<div style="background:#1a1a1a;border:1px solid #333;border-radius:4px;height:4px;margin-bottom:20px">'
+    + '<div style="background:#FFBE5F;height:100%;border-radius:4px;width:' + Math.round(((iGroupIdx+1)/total)*100) + '%"></div>'
+    + '</div>';
+
+  let html = '';
+
+  if (g.isRepeating) {
+    // Show fields from first item only — names apply to all items
+    const firstItem = g.items[0];
+    const firstEditables = Array.from(firstItem.querySelectorAll('.editable'));
+
+    html += '<div class="notice notice-info" style="margin-bottom:16px;font-size:12px">'
+      + 'These <strong>' + firstEditables.length + ' field(s)</strong> repeat across <strong>' + g.items.length + ' items</strong>. '
+      + 'Name each field — the same names will apply to all ' + g.items.length + ' items.'
+      + '</div>';
+
+    firstEditables.forEach((el, i) => {
+      const suggested = iSuggestName(el, i);
+      const inferredType = iInferType(el);
+      const preview = iGetPreviewText(el);
+      html += iFieldCard(i, suggested, inferredType, preview, el.tagName.toLowerCase(), true);
+    });
+
+  } else {
+    // Standalone fields
+    html += '<div class="notice notice-info" style="margin-bottom:16px;font-size:12px">'
+      + 'These <strong>' + g.editables.length + ' field(s)</strong> are standalone — each is a single editable element.'
+      + '</div>';
+
+    g.editables.forEach((el, i) => {
+      const suggested = iSuggestName(el, i);
+      const inferredType = iInferType(el);
+      const preview = iGetPreviewText(el);
+      html += iFieldCard(i, suggested, inferredType, preview, el.tagName.toLowerCase(), false);
+    });
+  }
+
+  cardsEl.innerHTML = html;
+  document.getElementById('iStep2Status').innerHTML = '';
+}
+
+function iFieldCard(idx, suggested, type, preview, tag, isRepeating) {
+  const typeOptions = ['text','currency','percent','select','textarea','url'];
+  const typeColors  = { text:'#FFBE5F', currency:'#7dbf82', percent:'#90bce8', select:'#c792ea', textarea:'#ff9d6c', url:'#89ddff' };
+
+  const typeSelect = typeOptions.map(t =>
+    '<option value="'+t+'"'+(t===type?' selected':'')+'>'+t+'</option>'
+  ).join('');
+
+  return '<div style="background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:16px;margin-bottom:12px">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+    + '<span style="width:6px;height:6px;border-radius:50%;background:'+( typeColors[type]||'#FFBE5F')+'"></span>'
+    + '<span style="font-size:11px;color:#555;font-family:Courier New,monospace">&lt;'+tag+'&gt;</span>'
+    + '<span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(preview)+'</span>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 140px;gap:10px">'
+    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Field Name</label>'
+    + '<input type="text" class="i-field-name" data-idx="'+idx+'" value="'+escHtml(suggested)+'" placeholder="e.g. price" style="font-size:13px;padding:8px 10px"></div>'
+    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Type</label>'
+    + '<select class="i-field-type" data-idx="'+idx+'" style="font-size:13px;padding:8px 10px">'+typeSelect+'</select></div>'
+    + '</div>'
+    + '</div>';
+}
+
+// ── Wizard: advance to next group ─────────────────────────────
+function iNextGroup() {
+  // Collect names/types from current group card
+  const names  = Array.from(document.querySelectorAll('.i-field-name')).map(el => el.value.trim() || ('field-' + el.dataset.idx));
+  const types  = Array.from(document.querySelectorAll('.i-field-type')).map(el => el.value);
+  const g      = iGroups[iGroupIdx];
+
+  // Validate — no blank or duplicate names
+  const unique = new Set(names);
+  if (unique.size !== names.length) {
+    document.getElementById('iStep2Status').innerHTML = '<div class="notice notice-warn">Field names must be unique within a group.</div>';
+    return;
+  }
+  if (names.some(n => !n)) {
+    document.getElementById('iStep2Status').innerHTML = '<div class="notice notice-warn">All fields need a name.</div>';
+    return;
+  }
+
+  // Save group definition
+  iGroupDefs.push({
+    isRepeating: g.isRepeating,
+    items: g.items,
+    editables: g.editables,
+    editablesPerItem: g.editablesPerItem,
+    fields: names.map((name, i) => ({ name, type: types[i] }))
+  });
+
+  if (iGroupIdx < iGroups.length - 1) {
+    iGroupIdx++;
+    iRenderGroupCard();
+  } else {
+    iShowReview();
+  }
+}
+
+// ── Wizard: review & summary ───────────────────────────────────
+function iShowReview() {
+  iShowStep(3);
+  const summaryEl = document.getElementById('iSummary');
+  const widgetName = document.getElementById('iWidgetName').value;
+
+  let html = '<div class="notice notice-success" style="margin-bottom:20px">'
+    + '<strong style="display:block;margin-bottom:4px">' + escHtml(widgetName) + '</strong>'
+    + iGroupDefs.length + ' group(s) · '
+    + iGroupDefs.reduce((s,g) => s + (g.isRepeating ? g.items.length : 1), 0) + ' total item(s) · '
+    + iGroupDefs.reduce((s,g) => s + g.fields.length, 0) + ' field(s)'
+    + '</div>';
+
+  iGroupDefs.forEach((g, gi) => {
+    html += '<div class="analysis-box" style="margin-bottom:12px">'
+      + '<h4>' + (g.isRepeating ? 'Repeating Group ' + (gi+1) + ' — ' + g.items.length + ' items' : 'Standalone Fields') + '</h4>';
+    g.fields.forEach(f => {
+      const colors = { text:'#FFBE5F', currency:'#7dbf82', percent:'#90bce8', select:'#c792ea', textarea:'#ff9d6c', url:'#89ddff' };
+      html += '<div class="field-row">'
+        + '<span class="field-name"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+(colors[f.type]||'#FFBE5F')+';margin-right:6px;vertical-align:middle"></span>'
+        + f.name + '</span>'
+        + '<span class="field-type">' + f.type + '</span>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+
+  summaryEl.innerHTML = html;
+  document.getElementById('iStep3Status').innerHTML = '';
+}
+
+// ── Wizard: back ───────────────────────────────────────────────
+function iBackToStep1() {
+  iGroups = []; iGroupDefs = []; iGroupIdx = 0;
+  iShowStep(1);
+}
+
+// ── Wizard: generate ──────────────────────────────────────────
+function iGenerate() {
+  const widgetClass = document.getElementById('iWidgetClass').value.trim();
+  const widgetName  = document.getElementById('iWidgetName').value.trim();
+  const widgetDesc  = document.getElementById('iWidgetDesc').value.trim();
+  const statusEl    = document.getElementById('iStep3Status');
+
+  setStatus('Annotating HTML...', 'warn');
+
+  // Annotate the DOM using the confirmed field definitions
+  iGroupDefs.forEach(g => {
+    if (g.isRepeating) {
+      g.items.forEach((item, itemIdx) => {
+        item.setAttribute('data-item-id', String(itemIdx + 1));
+        const editables = Array.from(item.querySelectorAll('.editable'));
+        g.fields.forEach((field, fi) => {
+          if (!editables[fi]) return;
+          const el = editables[fi];
+          const clone = el.cloneNode(true);
+          clone.querySelectorAll('span,sup,sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
+          const value = clone.textContent.trim();
+          item.setAttribute('data-' + field.name, value);
+        });
+      });
+    }
+    // Standalone fields: attach to root
+    else {
+      g.editables.forEach((el, i) => {
+        const field = g.fields[i];
+        if (!field) return;
+        const clone = el.cloneNode(true);
+        clone.querySelectorAll('span,sup,sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
+        iRoot.setAttribute('data-' + field.name, clone.textContent.trim());
+      });
+    }
+  });
+
+  const annotatedHTML = formatHTML(iRoot.outerHTML);
+
+  // Build analysis object (mirrors analyzeHTML output)
+  const hasRepeating   = iGroupDefs.some(g => g.isRepeating);
+  const repeatGroup    = iGroupDefs.find(g => g.isRepeating);
+  const standaloneGroup= iGroupDefs.find(g => !g.isRepeating);
+
+  const fields    = repeatGroup    ? repeatGroup.fields.map(f => f.name)    : (standaloneGroup ? standaloneGroup.fields.map(f => f.name) : []);
+  const fieldDefs = repeatGroup    ? repeatGroup.fields                      : (standaloneGroup ? standaloneGroup.fields : []);
+  const itemCount = repeatGroup    ? repeatGroup.items.length                : 1;
+
+  const analysis = {
+    mode: hasRepeating ? 'items' : 'single',
+    hasItems: hasRepeating,
+    hasGrid: false,
+    itemCount,
+    fields,
+    fieldDefs,
+    gridPlans: [],
+    gridFields: [],
+    gridFieldDefs: [],
+    grid: null
+  };
+
+  // Register widget
+  let reg = getRegistry();
+  const entry = {
+    class: widgetClass, name: widgetName, desc: widgetDesc,
+    mode: analysis.mode, hasItems: analysis.hasItems, hasGrid: false,
+    fields, fieldDefs, gridPlans: [], gridFields: [], gridFieldDefs: [], grid: null,
+    date: new Date().toLocaleDateString()
+  };
+  const idx = reg.findIndex(w => w.class === widgetClass);
+  if (idx >= 0) reg[idx] = entry; else reg.push(entry);
+  saveRegistry(reg);
+  updateVersionBadge();
+
+  const version = getVersion();
+
+  // Switch to generate tab and show output
+  switchTab('generate');
+  showOutput(analysis, version, annotatedHTML, false);
+
+  buildZip(reg, version, annotatedHTML).then(() => {
+    document.getElementById('generateStatus').innerHTML =
+      '<div class="notice notice-success">'
+      + '<strong style="display:block;margin-bottom:4px">Extension downloaded — sitecore-widget-editor-' + version + '.zip</strong>'
+      + 'Unzip → chrome://extensions → Developer mode → Load unpacked → select the folder.'
+      + '</div>';
+    setStatus('Done · ' + version, 'ok');
+  }).catch(err => {
+    statusEl.innerHTML = '<div class="notice notice-err">ZIP error: ' + err.message + '</div>';
+    setStatus('Error', 'err');
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// GITHUB INTEGRATION
+// ============================================================
+const GITHUB_REPO  = 'tylervinson/tylervinson';
+const GITHUB_PATH  = 'widget/widget-registry.json';
+const GITHUB_BRANCH = 'main';
+
+function getGitHubPAT() {
+  return localStorage.getItem('gh_pat') || '';
+}
+
+function saveGitHubSettings() {
+  const pat = document.getElementById('ghPAT').value.trim();
+  if (!pat) {
+    document.getElementById('ghStatus').textContent = 'Enter a token first.';
+    return;
+  }
+  localStorage.setItem('gh_pat', pat);
+  document.getElementById('ghPAT').value = '';
+  document.getElementById('ghStatus').innerHTML = '<span style="color:#7dbf82">&#10003; Token saved. It will be used on next generation.</span>';
+}
+
+async function pushRegistryToGitHub(manual) {
+  const pat = getGitHubPAT();
+  if (!pat) {
+    if (manual) {
+      document.getElementById('ghStatus').innerHTML = '<span style="color:#c8a55a">No PAT saved — enter your GitHub token above.</span>';
+    }
+    return { err: 'No PAT configured' };
+  }
+
+  const json    = getRegistryJSON();
+  const encoded = btoa(unescape(encodeURIComponent(json)));
+  const apiURL  = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + GITHUB_PATH;
+
+  if (manual) {
+    document.getElementById('ghStatus').innerHTML = '<span style="color:#888">Pushing...</span>';
+  }
+
+  try {
+    // Get current file SHA (required for updates)
+    let sha = null;
+    const getRes = await fetch(apiURL + '?ref=' + GITHUB_BRANCH, {
+      headers: {
+        'Authorization': 'Bearer ' + pat,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    if (getRes.ok) {
+      const data = await getRes.json();
+      sha = data.sha;
+    } else if (getRes.status !== 404) {
+      const err = await getRes.json();
+      throw new Error(err.message || ('HTTP ' + getRes.status));
+    }
+
+    // Commit the updated file
+    const body = {
+      message: 'Update widget registry — ' + _registry.version + ' (' + new Date().toISOString().slice(0,10) + ')',
+      content: encoded,
+      branch: GITHUB_BRANCH
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiURL, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + pat,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message || ('HTTP ' + putRes.status));
+    }
+
+    if (manual) {
+      document.getElementById('ghStatus').innerHTML = '<span style="color:#7dbf82">&#10003; Pushed — widget-registry.json updated on GitHub Pages.</span>';
+      setStatus('Registry pushed to GitHub', 'ok');
+    }
+    return { ok: true };
+
+  } catch(e) {
+    if (manual) {
+      document.getElementById('ghStatus').innerHTML = '<span style="color:#e57373">&#10007; ' + e.message + '</span>';
+      setStatus('GitHub push failed', 'err');
+    }
+    return { err: e.message };
+  }
+}
+
+// Load saved PAT indicator on tab open (don't reveal the token, just show it's set)
+function initGitHubUI() {
+  const hasPAT = !!getGitHubPAT();
+  const statusEl = document.getElementById('ghStatus');
+  if (statusEl) {
+    statusEl.innerHTML = hasPAT
+      ? '<span style="color:#7dbf82">&#10003; Token saved — auto-push enabled.</span>'
+      : '<span style="color:#555">No token saved — enter your GitHub PAT above to enable auto-push.</span>';
+  }
 }
 
 // ============================================================
