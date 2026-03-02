@@ -486,53 +486,39 @@ plus a complete installable extension ZIP." oninput="liveAnalyze()"></textarea>
 
         <div class="notice notice-info" style="margin-bottom:24px">
           <strong style="color:#90bce8;display:block;margin-bottom:6px">Interactive Mode</strong>
-          Add <code>editable</code> to any element you want content authors to be able to edit. The generator scans your HTML, groups repeated elements automatically, and walks you through naming each field — no <code>item-*</code> classes needed.
+          Add <code>editable</code> to any element you want content authors to be able to edit. The generator scans your HTML, detects repeating groups, and shows all fields at once for you to name. One click to generate.
         </div>
 
-        <div id="iStep1">
-          <div class="form-group">
-            <label>Widget Class <span style="color:#f44336">*</span></label>
-            <input type="text" id="iWidgetClass" placeholder="e.g. card-row" oninput="iOnClassInput()">
-            <div class="field-hint">CSS class on the outermost container element</div>
-          </div>
-          <div class="form-group">
-            <label>Widget Display Name <span style="color:#f44336">*</span></label>
-            <input type="text" id="iWidgetName" placeholder="e.g. Stats Card Row">
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <input type="text" id="iWidgetDesc" placeholder="e.g. Edit stats numbers and labels">
-          </div>
-          <div class="form-group">
-            <label>Widget HTML</label>
-            <textarea id="iWidgetHTML" rows="12" placeholder="Paste your widget HTML here.&#10;&#10;Add class=&quot;editable&quot; to each element you want to be editable — numbers, labels, headings, prices, etc.&#10;&#10;Example:&#10;  &lt;div class=&quot;number editable&quot;&gt;37&lt;/div&gt;&#10;  &lt;p class=&quot;copy-text editable&quot;&gt;Fewer ER Visits&lt;/p&gt;" oninput="iLivePreview()"></textarea>
-          </div>
-          <div id="iPreviewResult"></div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="iStartWizard()">Scan &amp; Name Fields</button>
-            <button class="btn btn-outline" onclick="iClear()">Clear</button>
-          </div>
-          <div id="iStep1Status" style="margin-top:16px"></div>
+        <div class="form-group">
+          <label>Widget Class <span style="color:#f44336">*</span></label>
+          <input type="text" id="iWidgetClass" placeholder="e.g. card-row" oninput="iOnClassInput()">
+          <div class="field-hint">CSS class on the outermost container element</div>
+        </div>
+        <div class="form-group">
+          <label>Widget Display Name <span style="color:#f44336">*</span></label>
+          <input type="text" id="iWidgetName" placeholder="e.g. Stats Card Row">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="iWidgetDesc" placeholder="e.g. Edit stats numbers and labels">
+        </div>
+        <div class="form-group">
+          <label>Widget HTML</label>
+          <textarea id="iWidgetHTML" rows="10" placeholder="Paste your widget HTML here.&#10;&#10;Add class=&quot;editable&quot; to each element you want to be editable:&#10;  &lt;div class=&quot;number editable&quot;&gt;37&lt;/div&gt;&#10;  &lt;p class=&quot;copy-text editable&quot;&gt;Fewer ER Visits&lt;/p&gt;" oninput="iScanFields()"></textarea>
         </div>
 
-        <div id="iStep2" style="display:none">
-          <div id="iWizardHeader" style="margin-bottom:20px"></div>
-          <div id="iWizardCards"></div>
-          <div class="btn-row" style="margin-top:8px">
-            <button class="btn btn-primary" id="iNextBtn" onclick="iNextGroup()">Next Group</button>
-            <button class="btn btn-outline" onclick="iBackToStep1()">&#8592; Back</button>
-          </div>
-          <div id="iStep2Status" style="margin-top:12px"></div>
+        <div id="iFieldsPanel" style="display:none">
+          <div id="iFieldsHeader" style="margin-bottom:12px"></div>
+          <div id="iFieldCards"></div>
         </div>
 
-        <div id="iStep3" style="display:none">
-          <div id="iSummary"></div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="iGenerate()">Generate Extension ZIP</button>
-            <button class="btn btn-outline" onclick="iBackToStep1()">Start Over</button>
-          </div>
-          <div id="iStep3Status" style="margin-top:16px"></div>
+        <div id="iScanNotice"></div>
+
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-primary" id="iGenerateBtn" onclick="iGenerate()" style="display:none">Generate Extension ZIP</button>
+          <button class="btn btn-outline" onclick="iClear()">Clear</button>
         </div>
+        <div id="iGenerateStatus" style="margin-top:16px"></div>
 
       </div>
 
@@ -709,6 +695,11 @@ function switchTab(name) {
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'registry') { renderRegistry(); initGitHubUI(); }
+  if (name === 'generate' || name === 'interactive') {
+    document.getElementById('outputPanel').innerHTML = '<div class="empty-state"><p>Paste your widget HTML on the left and click <strong style="color:#ccc">Generate Extension ZIP</strong> to produce a complete, installable Chrome extension.</p></div>';
+    document.getElementById('generateStatus').innerHTML = '';
+    setStatus('Ready', '');
+  }
 }
 
 function setStatus(msg, type) {
@@ -1015,6 +1006,26 @@ function liveAnalyze() {
 }
 
 // ============================================================
+// INJECT WIDGET CLASS onto root element of annotated HTML
+// ============================================================
+function injectWidgetClass(html, widgetClass) {
+  if (!widgetClass) return html;
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+  const root   = doc.body.firstElementChild;
+  if (!root) return html;
+  // Add widgetClass if not already present
+  if (!root.classList.contains(widgetClass)) {
+    root.classList.add(widgetClass);
+  }
+  // Also add editable-widget marker for extension detection
+  if (!root.classList.contains('editable-widget')) {
+    root.classList.add('editable-widget');
+  }
+  return formatHTML(root.outerHTML);
+}
+
+// ============================================================
 // MAIN GENERATE
 // ============================================================
 function generate() {
@@ -1040,7 +1051,8 @@ function generate() {
     statusEl.innerHTML = '<div class="notice notice-err">Could not parse HTML. Make sure it has a single root element.</div>';
     return;
   }
-  const annotatedHTML = annotation.annotated;
+  // Inject widget class onto root element
+  const annotatedHTML = injectWidgetClass(annotation.annotated, widgetClass);
 
   // Step 2: Analyze annotated HTML
   const analysis = analyzeHTML(annotatedHTML);
@@ -2176,16 +2188,10 @@ function toDisplay(str) {
 }
 
 // ============================================================
-// INTERACTIVE MODE
+// INTERACTIVE MODE — single screen, auto-scans on paste
 // ============================================================
 
-// State
-let iDoc       = null;  // parsed document
-let iRoot      = null;  // root element
-let iGroups    = [];    // [{items:[el,...], isRepeating, suggestedName}]
-let iGroupIdx  = 0;     // current group being named
-let iFieldDefs = [];    // [{groupIdx, itemIdx, el, suggestedName, confirmedName, type}]
-let iGroupDefs = [];    // [{isRepeating, itemCount, fields:[{name,type,defs}]}]
+let iDoc = null, iRoot = null, iGroups = [], iGroupDefs = [];
 
 function iOnClassInput() {
   const val = document.getElementById('iWidgetClass').value.trim();
@@ -2199,58 +2205,128 @@ function iClear() {
   ['iWidgetClass','iWidgetName','iWidgetDesc','iWidgetHTML'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('iPreviewResult').innerHTML = '';
-  document.getElementById('iStep1Status').innerHTML = '';
-  iShowStep(1);
+  document.getElementById('iFieldsPanel').style.display = 'none';
+  document.getElementById('iScanNotice').innerHTML = '';
+  document.getElementById('iGenerateBtn').style.display = 'none';
+  document.getElementById('iGenerateStatus').innerHTML = '';
+  iGroups = []; iGroupDefs = [];
 }
 
-function iShowStep(n) {
-  document.getElementById('iStep1').style.display = n === 1 ? '' : 'none';
-  document.getElementById('iStep2').style.display = n === 2 ? '' : 'none';
-  document.getElementById('iStep3').style.display = n === 3 ? '' : 'none';
-}
-
-// ── Live preview while typing ──────────────────────────────────
-function iLivePreview() {
+// ── Auto-scan whenever HTML changes ───────────────────────────
+function iScanFields() {
   const html = document.getElementById('iWidgetHTML').value.trim();
-  const container = document.getElementById('iPreviewResult');
-  if (!html) { container.innerHTML = ''; return; }
+  const noticeEl  = document.getElementById('iScanNotice');
+  const panelEl   = document.getElementById('iFieldsPanel');
+  const generateBtn = document.getElementById('iGenerateBtn');
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const root = doc.body.firstElementChild;
-  if (!root) { container.innerHTML = ''; return; }
-
-  const editables = root.querySelectorAll('.editable');
-  if (!editables.length) {
-    container.innerHTML = '<div class="analysis-box" style="margin-top:12px"><span style="color:#555;font-size:12px">No elements with class <code>editable</code> found yet</span></div>';
+  if (!html) {
+    panelEl.style.display = 'none';
+    noticeEl.innerHTML = '';
+    generateBtn.style.display = 'none';
     return;
   }
 
-  const groups = iDetectGroups(root, editables);
-  let html2 = '<div class="analysis-box" style="margin-top:12px"><h4>Editable Elements Found</h4>';
-  html2 += '<div class="field-row"><span class="field-name">Elements</span><span class="field-type">' + editables.length + ' editable</span></div>';
-  html2 += '<div class="field-row"><span class="field-name">Groups</span><span class="field-type">' + groups.length + ' detected</span></div>';
-  groups.forEach((g, i) => {
-    const label = g.isRepeating
-      ? g.items.length + ' repeating items × ' + g.editablesPerItem + ' field(s) each'
-      : g.editables.length + ' standalone field(s)';
-    html2 += '<div class="field-row"><span class="field-name" style="color:#ccc">Group ' + (i+1) + '</span><span class="field-type">' + label + '</span></div>';
-  });
-  html2 += '</div>';
-  container.innerHTML = html2;
+  const parser = new DOMParser();
+  iDoc  = parser.parseFromString(html, 'text/html');
+  iRoot = iDoc.body.firstElementChild;
+  if (!iRoot) {
+    noticeEl.innerHTML = '<div class="notice notice-warn">No root element found.</div>';
+    panelEl.style.display = 'none';
+    generateBtn.style.display = 'none';
+    return;
+  }
+
+  const editables = iRoot.querySelectorAll('.editable');
+  if (!editables.length) {
+    noticeEl.innerHTML = '';
+    panelEl.style.display = 'none';
+    generateBtn.style.display = 'none';
+    return;
+  }
+
+  iGroups = iDetectGroups(iRoot, editables);
+  noticeEl.innerHTML = '';
+  iRenderAllFields();
+  panelEl.style.display = '';
+  generateBtn.style.display = '';
 }
 
-// ── Group detection ────────────────────────────────────────────
-// Walk the DOM, find repeating sibling structures that contain editables.
-// Remaining ungrouped editables become standalone fields.
-function iDetectGroups(root, editables) {
-  const editableSet = new Set(Array.from(editables));
-  const assigned    = new Set();
-  const groups      = [];
+// ── Render all field cards at once ────────────────────────────
+function iRenderAllFields() {
+  const headerEl = document.getElementById('iFieldsHeader');
+  const cardsEl  = document.getElementById('iFieldCards');
 
-  // Walk every ancestor of editables bottom-up to find repeating parents
-  // A repeating parent: has 2+ siblings of same tag, each containing at least one editable
+  const totalFields    = iGroups.reduce((s, g) => s + (g.isRepeating ? g.editablesPerItem : g.editables.length), 0);
+  const totalItems     = iGroups.filter(g => g.isRepeating).reduce((s, g) => s + g.items.length, 0);
+  const repeatingCount = iGroups.filter(g => g.isRepeating).length;
+
+  let summary = totalFields + ' editable field' + (totalFields !== 1 ? 's' : '');
+  if (repeatingCount)  summary += ' · ' + totalItems + ' repeating item' + (totalItems !== 1 ? 's' : '');
+  if (iGroups.length > 1) summary += ' · ' + iGroups.length + ' groups';
+
+  headerEl.innerHTML = '<div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">'
+    + 'Fields Detected &nbsp;<span style="color:#555;font-weight:400;text-transform:none;letter-spacing:0">— ' + summary + '. Confirm or rename each field below.</span></div>';
+
+  let html = '';
+  iGroups.forEach((g, gi) => {
+    const isRepeating = g.isRepeating;
+    const groupLabel  = isRepeating
+      ? g.items.length + ' repeating items'
+      : 'Standalone';
+
+    html += '<div style="margin-bottom:20px">'
+      + '<div style="font-size:11px;color:#FFBE5F;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
+      + 'Group ' + (gi + 1)
+      + '<span style="color:#444;font-weight:400;text-transform:none;letter-spacing:0">' + groupLabel + '</span>'
+      + '</div>';
+
+    if (isRepeating) {
+      html += '<div style="font-size:11px;color:#555;margin-bottom:8px">These fields repeat across all ' + g.items.length + ' items — one name applies to all.</div>';
+      const firstEditables = Array.from(g.items[0].querySelectorAll('.editable'));
+      firstEditables.forEach((el, fi) => {
+        html += iFieldCard(gi, fi, el);
+      });
+    } else {
+      g.editables.forEach((el, fi) => {
+        html += iFieldCard(gi, fi, el);
+      });
+    }
+
+    html += '</div>';
+  });
+
+  cardsEl.innerHTML = html;
+}
+
+function iFieldCard(groupIdx, fieldIdx, el) {
+  const suggested  = iSuggestName(el, fieldIdx);
+  const inferredType = iInferType(el);
+  const preview    = iGetPreviewText(el);
+  const tag        = el.tagName.toLowerCase();
+  const typeColors = { text:'#FFBE5F', currency:'#7dbf82', percent:'#90bce8', select:'#c792ea', textarea:'#ff9d6c', url:'#89ddff' };
+  const typeOptions = ['text','currency','percent','select','textarea','url'].map(t =>
+    '<option value="'+t+'"'+(t===inferredType?' selected':'')+'>'+t+'</option>'
+  ).join('');
+
+  return '<div style="background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:14px;margin-bottom:8px">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+    + '<span style="width:6px;height:6px;border-radius:50%;background:'+(typeColors[inferredType]||'#FFBE5F')+'"></span>'
+    + '<span style="font-size:11px;color:#555;font-family:Courier New,monospace">&lt;'+tag+'&gt;</span>'
+    + '<span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(preview)+'</span>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 140px;gap:10px">'
+    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Field Name</label>'
+    + '<input type="text" class="i-field-name" data-group="'+groupIdx+'" data-field="'+fieldIdx+'" value="'+escHtml(suggested)+'" placeholder="e.g. price"></div>'
+    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Type</label>'
+    + '<select class="i-field-type" data-group="'+groupIdx+'" data-field="'+fieldIdx+'">'+typeOptions+'</select></div>'
+    + '</div></div>';
+}
+
+// ── Group detection ───────────────────────────────────────────
+function iDetectGroups(root, editables) {
+  const assigned = new Set();
+  const groups   = [];
+
   function findRepeatingAncestor(el) {
     let node = el.parentElement;
     while (node && node !== root) {
@@ -2259,58 +2335,42 @@ function iDetectGroups(root, editables) {
       const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
       if (siblings.length > 1) {
         const withEditable = siblings.filter(s => s.querySelector('.editable'));
-        if (withEditable.length >= 2 && withEditable.length === siblings.length) {
-          return siblings; // all siblings have editables
-        }
+        if (withEditable.length >= 2 && withEditable.length === siblings.length) return siblings;
       }
       node = node.parentElement;
     }
     return null;
   }
 
-  // Find repeating groups
   Array.from(editables).forEach(el => {
     if (assigned.has(el)) return;
     const siblings = findRepeatingAncestor(el);
     if (!siblings) return;
-
-    // Check this group of siblings not already registered
-    const key = siblings[0];
-    if (groups.some(g => g.isRepeating && g.items[0] === key)) return;
-
-    // Collect editables per item (use first item as template)
-    const firstItemEditables = Array.from(siblings[0].querySelectorAll('.editable'));
-    const editablesPerItem   = firstItemEditables.length;
-
+    if (groups.some(g => g.isRepeating && g.items[0] === siblings[0])) return;
+    const editablesPerItem = siblings[0].querySelectorAll('.editable').length;
     groups.push({
-      isRepeating: true,
-      items: siblings,
-      editablesPerItem,
+      isRepeating: true, items: siblings, editablesPerItem,
       editables: siblings.flatMap(s => Array.from(s.querySelectorAll('.editable')))
     });
     siblings.forEach(s => s.querySelectorAll('.editable').forEach(e => assigned.add(e)));
   });
 
-  // Remaining editables → standalone group
   const standalone = Array.from(editables).filter(e => !assigned.has(e));
   if (standalone.length) {
     groups.push({ isRepeating: false, items: [], editables: standalone, editablesPerItem: standalone.length });
   }
-
   return groups;
 }
 
-// ── Suggest a field name from element context ──────────────────
 function iSuggestName(el, idx) {
-  // Try: nearby label sibling, aria-label, placeholder, class names (minus 'editable'), text content
   const parent = el.parentElement;
   if (parent) {
-    const labelSibling = Array.from(parent.querySelectorAll('label, .label, .field-label, .copy-text, .caption')).find(l => l !== el);
-    if (labelSibling) return iSlugify(labelSibling.textContent.trim());
+    const nearby = Array.from(parent.querySelectorAll('label,.label,.field-label,.copy-text,.caption')).find(l => l !== el);
+    if (nearby) return iSlugify(nearby.textContent.trim());
   }
   const classes = Array.from(el.classList).filter(c => c !== 'editable' && c.length > 1);
   if (classes.length) {
-    const name = classes[0].replace(/^(number|text|copy|value|stat|label|heading|title|price|btn|button)-?/, '') || classes[0];
+    const name = classes[0].replace(/^(number|text|copy|value|stat|label|heading|title|price|btn|button)-?/,'') || classes[0];
     if (name.length > 1) return iSlugify(name);
   }
   const text = el.textContent.trim().slice(0, 30);
@@ -2319,12 +2379,12 @@ function iSuggestName(el, idx) {
 }
 
 function iSlugify(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'field';
+  return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,30) || 'field';
 }
 
 function iGetPreviewText(el) {
   const clone = el.cloneNode(true);
-  clone.querySelectorAll('span, sup, sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
+  clone.querySelectorAll('span,sup,sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
   return clone.textContent.trim().slice(0, 60) || '(empty)';
 }
 
@@ -2333,230 +2393,66 @@ function iInferType(el) {
   if (/^\$[\d,]+/.test(text)) return 'currency';
   if (/^\d+(\.\d+)?%?$/.test(text)) return 'percent';
   if (text.length > 60) return 'textarea';
-  const tag = el.tagName.toLowerCase();
-  if (tag === 'a') return 'url';
+  if (el.tagName.toLowerCase() === 'a') return 'url';
   return 'text';
 }
 
-// ── Wizard: start ──────────────────────────────────────────────
-function iStartWizard() {
+// ── Generate ──────────────────────────────────────────────────
+function iGenerate() {
   const widgetClass = document.getElementById('iWidgetClass').value.trim();
   const widgetName  = document.getElementById('iWidgetName').value.trim();
-  const html        = document.getElementById('iWidgetHTML').value.trim();
-  const statusEl    = document.getElementById('iStep1Status');
+  const widgetDesc  = document.getElementById('iWidgetDesc').value.trim();
+  const statusEl    = document.getElementById('iGenerateStatus');
 
   if (!widgetClass || !widgetName) {
     statusEl.innerHTML = '<div class="notice notice-warn">Widget Class and Widget Name are required.</div>';
     return;
   }
-  if (!html) {
-    statusEl.innerHTML = '<div class="notice notice-warn">Paste your widget HTML first.</div>';
+  if (!iRoot || !iGroups.length) {
+    statusEl.innerHTML = '<div class="notice notice-warn">Paste HTML with <code>editable</code> elements first.</div>';
     return;
   }
 
-  const parser = new DOMParser();
-  iDoc  = parser.parseFromString(html, 'text/html');
-  iRoot = iDoc.body.firstElementChild;
-  if (!iRoot) {
-    statusEl.innerHTML = '<div class="notice notice-err">No root element found.</div>';
-    return;
-  }
-
-  const editables = iRoot.querySelectorAll('.editable');
-  if (!editables.length) {
-    statusEl.innerHTML = '<div class="notice notice-warn">No elements with class <code>editable</code> found. Add it to the elements you want to be editable.</div>';
-    return;
-  }
-
-  iGroups   = iDetectGroups(iRoot, editables);
-  iGroupIdx = 0;
-  iGroupDefs = [];
-  statusEl.innerHTML = '';
-  iShowStep(2);
-  iRenderGroupCard();
-}
-
-// ── Wizard: render current group card ─────────────────────────
-function iRenderGroupCard() {
-  const g = iGroups[iGroupIdx];
-  const total = iGroups.length;
-  const headerEl  = document.getElementById('iWizardHeader');
-  const cardsEl   = document.getElementById('iWizardCards');
-  const nextBtn   = document.getElementById('iNextBtn');
-  const isLast    = iGroupIdx === total - 1;
-
-  nextBtn.textContent = isLast ? 'Review & Generate' : 'Next Group →';
-
-  headerEl.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
-    + '<span style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.05em">Group ' + (iGroupIdx+1) + ' of ' + total + '</span>'
-    + '<span style="font-size:11px;color:#555">' + (g.isRepeating ? g.items.length + ' repeating items' : 'standalone fields') + '</span>'
-    + '</div>'
-    + '<div style="background:#1a1a1a;border:1px solid #333;border-radius:4px;height:4px;margin-bottom:20px">'
-    + '<div style="background:#FFBE5F;height:100%;border-radius:4px;width:' + Math.round(((iGroupIdx+1)/total)*100) + '%"></div>'
-    + '</div>';
-
-  let html = '';
-
-  if (g.isRepeating) {
-    // Show fields from first item only — names apply to all items
-    const firstItem = g.items[0];
-    const firstEditables = Array.from(firstItem.querySelectorAll('.editable'));
-
-    html += '<div class="notice notice-info" style="margin-bottom:16px;font-size:12px">'
-      + 'These <strong>' + firstEditables.length + ' field(s)</strong> repeat across <strong>' + g.items.length + ' items</strong>. '
-      + 'Name each field — the same names will apply to all ' + g.items.length + ' items.'
-      + '</div>';
-
-    firstEditables.forEach((el, i) => {
-      const suggested = iSuggestName(el, i);
-      const inferredType = iInferType(el);
-      const preview = iGetPreviewText(el);
-      html += iFieldCard(i, suggested, inferredType, preview, el.tagName.toLowerCase(), true);
-    });
-
-  } else {
-    // Standalone fields
-    html += '<div class="notice notice-info" style="margin-bottom:16px;font-size:12px">'
-      + 'These <strong>' + g.editables.length + ' field(s)</strong> are standalone — each is a single editable element.'
-      + '</div>';
-
-    g.editables.forEach((el, i) => {
-      const suggested = iSuggestName(el, i);
-      const inferredType = iInferType(el);
-      const preview = iGetPreviewText(el);
-      html += iFieldCard(i, suggested, inferredType, preview, el.tagName.toLowerCase(), false);
-    });
-  }
-
-  cardsEl.innerHTML = html;
-  document.getElementById('iStep2Status').innerHTML = '';
-}
-
-function iFieldCard(idx, suggested, type, preview, tag, isRepeating) {
-  const typeOptions = ['text','currency','percent','select','textarea','url'];
-  const typeColors  = { text:'#FFBE5F', currency:'#7dbf82', percent:'#90bce8', select:'#c792ea', textarea:'#ff9d6c', url:'#89ddff' };
-
-  const typeSelect = typeOptions.map(t =>
-    '<option value="'+t+'"'+(t===type?' selected':'')+'>'+t+'</option>'
-  ).join('');
-
-  return '<div style="background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:16px;margin-bottom:12px">'
-    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-    + '<span style="width:6px;height:6px;border-radius:50%;background:'+( typeColors[type]||'#FFBE5F')+'"></span>'
-    + '<span style="font-size:11px;color:#555;font-family:Courier New,monospace">&lt;'+tag+'&gt;</span>'
-    + '<span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(preview)+'</span>'
-    + '</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 140px;gap:10px">'
-    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Field Name</label>'
-    + '<input type="text" class="i-field-name" data-idx="'+idx+'" value="'+escHtml(suggested)+'" placeholder="e.g. price" style="font-size:13px;padding:8px 10px"></div>'
-    + '<div><label style="font-size:10px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Type</label>'
-    + '<select class="i-field-type" data-idx="'+idx+'" style="font-size:13px;padding:8px 10px">'+typeSelect+'</select></div>'
-    + '</div>'
-    + '</div>';
-}
-
-// ── Wizard: advance to next group ─────────────────────────────
-function iNextGroup() {
-  // Collect names/types from current group card
-  const names  = Array.from(document.querySelectorAll('.i-field-name')).map(el => el.value.trim() || ('field-' + el.dataset.idx));
-  const types  = Array.from(document.querySelectorAll('.i-field-type')).map(el => el.value);
-  const g      = iGroups[iGroupIdx];
-
-  // Validate — no blank or duplicate names
-  const unique = new Set(names);
-  if (unique.size !== names.length) {
-    document.getElementById('iStep2Status').innerHTML = '<div class="notice notice-warn">Field names must be unique within a group.</div>';
-    return;
-  }
-  if (names.some(n => !n)) {
-    document.getElementById('iStep2Status').innerHTML = '<div class="notice notice-warn">All fields need a name.</div>';
-    return;
-  }
-
-  // Save group definition
-  iGroupDefs.push({
-    isRepeating: g.isRepeating,
-    items: g.items,
-    editables: g.editables,
-    editablesPerItem: g.editablesPerItem,
-    fields: names.map((name, i) => ({ name, type: types[i] }))
+  // Collect field names/types from cards
+  const groupFieldMap = {};
+  document.querySelectorAll('.i-field-name').forEach(inp => {
+    const g = inp.dataset.group, f = inp.dataset.field;
+    if (!groupFieldMap[g]) groupFieldMap[g] = {};
+    groupFieldMap[g][f] = { name: inp.value.trim() || ('field-'+f), type: 'text' };
+  });
+  document.querySelectorAll('.i-field-type').forEach(sel => {
+    const g = sel.dataset.group, f = sel.dataset.field;
+    if (groupFieldMap[g] && groupFieldMap[g][f]) groupFieldMap[g][f].type = sel.value;
   });
 
-  if (iGroupIdx < iGroups.length - 1) {
-    iGroupIdx++;
-    iRenderGroupCard();
-  } else {
-    iShowReview();
+  // Validate no duplicates within a group
+  for (const [g, fields] of Object.entries(groupFieldMap)) {
+    const names = Object.values(fields).map(f => f.name);
+    if (new Set(names).size !== names.length) {
+      statusEl.innerHTML = '<div class="notice notice-warn">Group ' + (parseInt(g)+1) + ' has duplicate field names.</div>';
+      return;
+    }
   }
-}
-
-// ── Wizard: review & summary ───────────────────────────────────
-function iShowReview() {
-  iShowStep(3);
-  const summaryEl = document.getElementById('iSummary');
-  const widgetName = document.getElementById('iWidgetName').value;
-
-  let html = '<div class="notice notice-success" style="margin-bottom:20px">'
-    + '<strong style="display:block;margin-bottom:4px">' + escHtml(widgetName) + '</strong>'
-    + iGroupDefs.length + ' group(s) · '
-    + iGroupDefs.reduce((s,g) => s + (g.isRepeating ? g.items.length : 1), 0) + ' total item(s) · '
-    + iGroupDefs.reduce((s,g) => s + g.fields.length, 0) + ' field(s)'
-    + '</div>';
-
-  iGroupDefs.forEach((g, gi) => {
-    html += '<div class="analysis-box" style="margin-bottom:12px">'
-      + '<h4>' + (g.isRepeating ? 'Repeating Group ' + (gi+1) + ' — ' + g.items.length + ' items' : 'Standalone Fields') + '</h4>';
-    g.fields.forEach(f => {
-      const colors = { text:'#FFBE5F', currency:'#7dbf82', percent:'#90bce8', select:'#c792ea', textarea:'#ff9d6c', url:'#89ddff' };
-      html += '<div class="field-row">'
-        + '<span class="field-name"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+(colors[f.type]||'#FFBE5F')+';margin-right:6px;vertical-align:middle"></span>'
-        + f.name + '</span>'
-        + '<span class="field-type">' + f.type + '</span>'
-        + '</div>';
-    });
-    html += '</div>';
-  });
-
-  summaryEl.innerHTML = html;
-  document.getElementById('iStep3Status').innerHTML = '';
-}
-
-// ── Wizard: back ───────────────────────────────────────────────
-function iBackToStep1() {
-  iGroups = []; iGroupDefs = []; iGroupIdx = 0;
-  iShowStep(1);
-}
-
-// ── Wizard: generate ──────────────────────────────────────────
-function iGenerate() {
-  const widgetClass = document.getElementById('iWidgetClass').value.trim();
-  const widgetName  = document.getElementById('iWidgetName').value.trim();
-  const widgetDesc  = document.getElementById('iWidgetDesc').value.trim();
-  const statusEl    = document.getElementById('iStep3Status');
 
   setStatus('Annotating HTML...', 'warn');
 
-  // Annotate the DOM using the confirmed field definitions
-  iGroupDefs.forEach(g => {
+  // Annotate the DOM
+  iGroups.forEach((g, gi) => {
+    const fields = Object.values(groupFieldMap[gi] || {});
     if (g.isRepeating) {
       g.items.forEach((item, itemIdx) => {
         item.setAttribute('data-item-id', String(itemIdx + 1));
         const editables = Array.from(item.querySelectorAll('.editable'));
-        g.fields.forEach((field, fi) => {
+        fields.forEach((field, fi) => {
           if (!editables[fi]) return;
-          const el = editables[fi];
-          const clone = el.cloneNode(true);
+          const clone = editables[fi].cloneNode(true);
           clone.querySelectorAll('span,sup,sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
-          const value = clone.textContent.trim();
-          item.setAttribute('data-' + field.name, value);
+          item.setAttribute('data-' + field.name, clone.textContent.trim());
         });
       });
-    }
-    // Standalone fields: attach to root
-    else {
-      g.editables.forEach((el, i) => {
-        const field = g.fields[i];
+    } else {
+      g.editables.forEach((el, ei) => {
+        const field = fields[ei];
         if (!field) return;
         const clone = el.cloneNode(true);
         clone.querySelectorAll('span,sup,sub').forEach(s => { if (s.textContent.trim().length <= 2) s.remove(); });
@@ -2565,31 +2461,25 @@ function iGenerate() {
     }
   });
 
-  const annotatedHTML = formatHTML(iRoot.outerHTML);
+  const annotatedHTML = injectWidgetClass(formatHTML(iRoot.outerHTML), widgetClass);
 
-  // Build analysis object (mirrors analyzeHTML output)
-  const hasRepeating   = iGroupDefs.some(g => g.isRepeating);
-  const repeatGroup    = iGroupDefs.find(g => g.isRepeating);
-  const standaloneGroup= iGroupDefs.find(g => !g.isRepeating);
-
-  const fields    = repeatGroup    ? repeatGroup.fields.map(f => f.name)    : (standaloneGroup ? standaloneGroup.fields.map(f => f.name) : []);
-  const fieldDefs = repeatGroup    ? repeatGroup.fields                      : (standaloneGroup ? standaloneGroup.fields : []);
-  const itemCount = repeatGroup    ? repeatGroup.items.length                : 1;
+  // Build analysis
+  const repeatGroup    = iGroups.find(g => g.isRepeating);
+  const standaloneGroup= iGroups.find(g => !g.isRepeating);
+  const rFields = repeatGroup     ? Object.values(groupFieldMap[iGroups.indexOf(repeatGroup)]    || {}) : [];
+  const sFields = standaloneGroup ? Object.values(groupFieldMap[iGroups.indexOf(standaloneGroup)] || {}) : [];
+  const fields    = (rFields.length ? rFields : sFields).map(f => f.name);
+  const fieldDefs = (rFields.length ? rFields : sFields);
+  const itemCount = repeatGroup ? repeatGroup.items.length : 1;
 
   const analysis = {
-    mode: hasRepeating ? 'items' : 'single',
-    hasItems: hasRepeating,
-    hasGrid: false,
-    itemCount,
-    fields,
-    fieldDefs,
-    gridPlans: [],
-    gridFields: [],
-    gridFieldDefs: [],
-    grid: null
+    mode: repeatGroup ? 'items' : 'single',
+    hasItems: !!repeatGroup, hasGrid: false,
+    itemCount, fields, fieldDefs,
+    gridPlans: [], gridFields: [], gridFieldDefs: [], grid: null
   };
 
-  // Register widget
+  // Register
   let reg = getRegistry();
   const entry = {
     class: widgetClass, name: widgetName, desc: widgetDesc,
@@ -2603,36 +2493,27 @@ function iGenerate() {
   updateVersionBadge();
 
   const version = getVersion();
-
-  // Switch to generate tab and show output
   switchTab('generate');
   showOutput(analysis, version, annotatedHTML, false);
 
   buildZip(reg, version, annotatedHTML).then(() => {
     document.getElementById('generateStatus').innerHTML =
       '<div class="notice notice-success">'
-      + '<strong style="display:block;margin-bottom:4px">Extension downloaded — sitecore-widget-editor-' + version + '.zip</strong>'
+      + '<strong style="display:block;margin-bottom:4px">Downloaded — sitecore-widget-editor-' + version + '.zip</strong>'
       + 'Unzip → chrome://extensions → Developer mode → Load unpacked → select the folder.'
       + '</div>';
     setStatus('Done · ' + version, 'ok');
 
-    // Auto-push registry to GitHub
     pushRegistryToGitHub(false).then(result => {
-      const statusEl2 = document.getElementById('generateStatus');
+      const s2 = document.getElementById('generateStatus');
       if (result && result.ok) {
-        statusEl2.innerHTML += '<div class="notice notice-success" style="margin-top:8px">'
-          + '&#10003; Registry pushed to GitHub Pages — <code>widget/widget-registry.json</code> updated'
-          + '</div>';
+        s2.innerHTML += '<div class="notice notice-success" style="margin-top:8px">&#10003; Registry pushed to GitHub Pages</div>';
       } else if (result && result.err) {
-        statusEl2.innerHTML += '<div class="notice notice-warn" style="margin-top:8px">'
-          + '&#9888; GitHub push failed: ' + result.err + '<br>'
-          + '<span style="font-size:11px">Check your PAT in the Widget Registry tab.</span>'
-          + '</div>';
+        s2.innerHTML += '<div class="notice notice-warn" style="margin-top:8px">&#9888; GitHub push failed: ' + result.err + '</div>';
       }
     });
-
   }).catch(err => {
-    statusEl.innerHTML = '<div class="notice notice-err">ZIP error: ' + err.message + '</div>';
+    document.getElementById('generateStatus').innerHTML = '<div class="notice notice-err">ZIP error: ' + err.message + '</div>';
     setStatus('Error', 'err');
   });
 }
