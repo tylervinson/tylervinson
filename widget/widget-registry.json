@@ -1,33 +1,159 @@
 {
-  "version": "1.1.2",
-  "updatedAt": "2026-03-02T19:15:52.592Z",
+  "version": "1.1.4",
+  "updatedAt": "2026-03-02T19:26:06.072Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
-      "class": "animated-cards",
-      "name": "Animated Cards with Number Counter",
+      "class": "insurance-comparison-tool",
+      "name": "Insurance Plan Comparison Tool",
       "desc": "",
-      "mode": "items",
+      "mode": "composite",
       "hasItems": true,
-      "hasGrid": false,
+      "hasGrid": true,
       "fields": [
-        "number",
-        "text"
+        "type",
+        "name",
+        "coverage",
+        "price"
       ],
       "fieldDefs": [
         {
-          "name": "number",
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "coverage",
+          "type": "select",
+          "options": [
+            "Individual Coverage",
+            "Family Coverage"
+          ]
+        },
+        {
+          "name": "price",
+          "type": "currency"
+        }
+      ],
+      "gridPlans": [
+        "basic",
+        "standard",
+        "premium",
+        "family"
+      ],
+      "gridFields": [
+        "price",
+        "deductible",
+        "max-oop",
+        "coverage",
+        "doctor-copay",
+        "rx",
+        "er-copay",
+        "mental-health",
+        "dental-vision"
+      ],
+      "gridFieldDefs": [
+        {
+          "name": "price",
+          "type": "currency"
+        },
+        {
+          "name": "deductible",
+          "type": "currency"
+        },
+        {
+          "name": "max-oop",
+          "type": "currency"
+        },
+        {
+          "name": "coverage",
           "type": "percent"
         },
         {
-          "name": "text",
-          "type": "text"
+          "name": "doctor-copay",
+          "type": "currency"
+        },
+        {
+          "name": "rx",
+          "type": "select",
+          "options": [
+            "Generic only",
+            "Generic & Brand",
+            "Full coverage"
+          ]
+        },
+        {
+          "name": "er-copay",
+          "type": "currency"
+        },
+        {
+          "name": "mental-health",
+          "type": "select",
+          "options": [
+            "Limited",
+            "Included",
+            "Full coverage"
+          ]
+        },
+        {
+          "name": "dental-vision",
+          "type": "select",
+          "options": [
+            "Not included",
+            "Vision only",
+            "Both included"
+          ]
         }
       ],
-      "gridPlans": [],
-      "gridFields": [],
-      "gridFieldDefs": [],
-      "grid": null,
+      "grid": {
+        "basic": {
+          "price": "$189/mo",
+          "deductible": "$2,500",
+          "max-oop": "$7,000",
+          "coverage": "80%",
+          "doctor-copay": "$30",
+          "rx": "Generic only",
+          "er-copay": "$250",
+          "mental-health": "Limited",
+          "dental-vision": "Not included"
+        },
+        "standard": {
+          "price": "$299/mo",
+          "deductible": "$1,500",
+          "max-oop": "$5,000",
+          "coverage": "90%",
+          "doctor-copay": "$20",
+          "rx": "Generic & Brand",
+          "er-copay": "$150",
+          "mental-health": "Included",
+          "dental-vision": "Vision only"
+        },
+        "premium": {
+          "price": "$499/mo",
+          "deductible": "$500",
+          "max-oop": "$3,000",
+          "coverage": "95%",
+          "doctor-copay": "$10",
+          "rx": "Full coverage",
+          "er-copay": "$100",
+          "mental-health": "Full coverage",
+          "dental-vision": "Both included"
+        },
+        "family": {
+          "price": "$649/mo",
+          "deductible": "$2,000",
+          "max-oop": "$8,000",
+          "coverage": "90%",
+          "doctor-copay": "$25",
+          "rx": "Generic & Brand",
+          "er-copay": "$175",
+          "mental-health": "Included",
+          "dental-vision": "Vision only"
+        }
+      },
       "date": "3/2/2026"
     }
   ]
