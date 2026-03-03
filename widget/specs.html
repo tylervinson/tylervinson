@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specs - Sitecore Widget Editor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 32px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+        /* Specs layout */
+        .specs-body { display: grid; grid-template-columns: 220px 1fr; gap: 80px; align-items: start; }
+        .specs-nav { position: sticky; top: 40px; }
+        .specs-nav-list { list-style: none; border-left: 1px solid #e0e0e0; }
+        .specs-nav-list li a { display: block; padding: 8px 0 8px 16px; font-size: 13px; color: #888; text-decoration: none; border-left: 2px solid transparent; margin-left: -1px; transition: color 0.2s, border-color 0.2s; }
+        .specs-nav-list li a:hover { color: #1a1a1a; }
+        .specs-nav-list li a.active { color: #1a1a1a; border-left-color: #1a1a1a; font-weight: 500; }
+        .specs-nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; padding: 16px 0 8px 16px; display: block; }
+        .specs-nav-label:first-child { padding-top: 0; }
+
+        .specs-content { display: flex; flex-direction: column; gap: 80px; min-width: 0; }
+        .spec-section { display: flex; flex-direction: column; gap: 24px; }
+        .spec-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #FFBE5F; }
+        .spec-section h2 { font-size: 32px; font-weight: 600; letter-spacing: -0.5px; color: #000; line-height: 1.2; }
+        .spec-section p { font-size: 15px; line-height: 1.7; color: #444; }
+        .spec-section p + p { margin-top: 12px; }
+        .spec-section p code, .spec-section li code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #fff4e6; padding: 2px 5px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
+
+        /* Code block */
+        .code-block { background: #1e2426; border-radius: 8px; overflow: hidden; }
+        .code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #2c3436; }
+        .code-block-title { font-size: 11px; font-weight: 500; color: #666; font-family: 'SF Mono', Monaco, Consolas, monospace; }
+        .code-block pre { padding: 20px; overflow-x: auto; }
+        .code-block code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; color: #e0e0e0; line-height: 1.7; background: none; border: none; padding: 0; }
+        .tok-key { color: #88c0d0; }
+        .tok-str { color: #a3be8c; }
+        .tok-num { color: #d08770; }
+        .tok-bool { color: #81a1c1; }
+        .tok-comment { color: #555; font-style: italic; }
+
+        /* Field reference table */
+        .field-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .field-table thead th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #999; padding: 8px 16px; border-bottom: 2px solid #e0e0e0; }
+        .field-table tbody td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; vertical-align: top; color: #444; line-height: 1.5; }
+        .field-table tbody tr:last-child td { border-bottom: none; }
+        .field-table tbody td:first-child { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #1a1a1a; white-space: nowrap; }
+        .field-table tbody td:nth-child(2) { color: #888; font-size: 13px; }
+        .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .badge-req { background: #fff0e0; color: #c06000; border: 1px solid #ffd9a6; }
+        .badge-opt { background: #f0f0f0; color: #888; border: 1px solid #ddd; }
+
+        /* Steps list */
+        .step-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .step-list li { display: flex; gap: 20px; padding: 20px 24px; background: #fff; border-bottom: 1px solid #f0f0f0; align-items: flex-start; }
+        .step-list li:last-child { border-bottom: none; }
+        .step-num { flex-shrink: 0; width: 24px; height: 24px; background: #FFBE5F; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #1a1a1a; margin-top: 1px; }
+        .step-body strong { display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+        .step-body span { font-size: 14px; color: #666; line-height: 1.5; }
+
+        /* Two-col layout within a section */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .info-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; }
+        .info-card h4 { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 10px; }
+        .info-card p { font-size: 13px; color: #666; line-height: 1.6; }
+        .info-card p code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; border: 1px solid #e0e0e0; color: #1a1a1a; }
+        .info-card ul { list-style: none; padding: 0; margin-top: 8px; }
+        .info-card ul li { font-size: 13px; color: #444; padding: 5px 0 5px 14px; position: relative; border-bottom: 1px solid #f5f5f5; line-height: 1.5; }
+        .info-card ul li:last-child { border-bottom: none; }
+        .info-card ul li:before { content: "→"; position: absolute; left: 0; color: #bbb; }
+
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .specs-body { grid-template-columns: 1fr; }
+            .specs-nav { display: none; }
+            h1 { font-size: 36px; }
+            .two-col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Technical Specs</h1>
+            <p class="subtitle">Registry schema, field definitions, and how the extension works</p>
+            <nav class="tab-nav">
+                <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+                <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
+                <a href="specs.html" class="tab-nav-link active">Technical Specs</a>
+            </nav>
+            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
+        </header>
+
+        <div class="specs-body">
+
+            <!-- Sticky nav -->
+            <nav class="specs-nav" aria-label="Page sections">
+                <ul class="specs-nav-list">
+                    <li><span class="specs-nav-label">Getting Started</span></li>
+                    <li><a href="#installation" class="active">Installation</a></li>
+                    <li><a href="#registry">Registry File</a></li>
+                    <li><span class="specs-nav-label">Registry Schema</span></li>
+                    <li><a href="#widget-object">Widget Object</a></li>
+                    <li><a href="#repeat-block">Repeat Block</a></li>
+                    <li><a href="#field-object">Field Object</a></li>
+                    <li><a href="#standalone-fields">Standalone Fields</a></li>
+                    <li><span class="specs-nav-label">Reference</span></li>
+                    <li><a href="#full-example">Full Example</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#update-flow">Update Flow</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main content -->
+            <div class="specs-content">
+
+                <!-- Installation -->
+                <section class="spec-section" id="installation">
+                    <div class="spec-section-label">Getting Started</div>
+                    <h2>Installation</h2>
+                    <p>The extension is installed manually via Chrome developer mode. It does not require any changes to your Sitecore environment or widget markup — it reads field values entirely through CSS selectors defined in the registry.</p>
+
+                    <ul class="step-list">
+                        <li>
+                            <div class="step-num">1</div>
+                            <div class="step-body">
+                                <strong>Download the extension ZIP</strong>
+                                <span>Download from tylervinson.com/widget/ and unzip to a folder on your machine.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">2</div>
+                            <div class="step-body">
+                                <strong>Open Chrome Extensions</strong>
+                                <span>Navigate to <code>chrome://extensions</code> and enable Developer Mode using the toggle in the top right.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">3</div>
+                            <div class="step-body">
+                                <strong>Load unpacked</strong>
+                                <span>Click "Load unpacked" and select the unzipped extension folder. The Sitecore Widget Editor icon will appear in your toolbar.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">4</div>
+                            <div class="step-body">
+                                <strong>Open the sidebar</strong>
+                                <span>Navigate to a page containing a registered widget and click the extension icon. The sidebar opens and detects widgets automatically.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Registry File -->
+                <section class="spec-section" id="registry">
+                    <h2>The Registry File</h2>
+                    <p>The registry is a single JSON file hosted at <code>tylervinson.com/widget/widget-registry.json</code>. It is the only thing that needs to change when you add or modify a widget. The extension fetches it fresh every time the sidebar opens.</p>
+
+                    <div class="two-col">
+                        <div class="info-card">
+                            <h4>What the registry controls</h4>
+                            <ul>
+                                <li>Which CSS classes identify editable widgets</li>
+                                <li>What the widget is called in the editor UI</li>
+                                <li>Which DOM elements are fields and what they're labelled</li>
+                                <li>How repeating items are grouped (cards, rows, plans)</li>
+                                <li>Which fields sync numeric values back to data attributes</li>
+                                <li>The version string that triggers the update badge</li>
+                            </ul>
+                        </div>
+                        <div class="info-card">
+                            <h4>What the registry does not control</h4>
+                            <ul>
+                                <li>Widget HTML structure — no special markup required</li>
+                                <li>CSS or JavaScript — the extension does not inject styles</li>
+                                <li>Sitecore field bindings — changes apply to the live DOM only</li>
+                                <li>Field validation — values are written as-is</li>
+                                <li>Field ordering in forms — follows array order in the registry</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">widget-registry.json — top-level structure</span>
+                        </div>
+                        <pre><code>{
+  <span class="tok-key">"version"</span>: <span class="tok-str">"1.3.0"</span>,          <span class="tok-comment">// bump this to trigger the update badge</span>
+  <span class="tok-key">"widgets"</span>: [ ... ]       <span class="tok-comment">// array of widget definition objects</span>
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- Widget Object -->
+                <section class="spec-section" id="widget-object">
+                    <div class="spec-section-label">Registry Schema</div>
+                    <h2>Widget Object</h2>
+                    <p>Each entry in the <code>widgets</code> array describes one editable widget. The extension identifies widgets on the page by matching <code>class</code> against elements in the DOM.</p>
+
+                    <table class="field-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th></th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>class</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>The CSS class name on the widget's root element. The extension queries <code>document.querySelectorAll('.' + class)</code> to find instances on the page.</td>
+                            </tr>
+                            <tr>
+                                <td>name</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>Display name shown in the sidebar picker when multiple widgets are detected on the same page.</td>
+                            </tr>
+                            <tr>
+                                <td>repeat</td>
+                                <td>object</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>Defines a repeating group of items (cards, plans, rows). See the Repeat Block reference below. Omit for widgets with only standalone fields.</td>
+                            </tr>
+                            <tr>
+                                <td>fields</td>
+                                <td>array</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>Field definitions scoped to each repeat item. Required if <code>repeat</code> is present. See the Field Object reference below.</td>
+                            </tr>
+                            <tr>
+                                <td>standaloneFields</td>
+                                <td>array</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>Fields that appear once in the widget, outside any repeating item — headings, subtitles, introductory copy. Uses the same field definition format but selectors are relative to the widget root.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Repeat Block -->
+                <section class="spec-section" id="repeat-block">
+                    <h2>Repeat Block</h2>
+                    <p>The <code>repeat</code> object tells the extension how to find the repeating elements within a widget — the individual cards, plan buttons, or table rows that each have their own set of editable fields. The sidebar renders one collapsible group per item found.</p>
+
+                    <table class="field-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th></th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>selector</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>CSS selector for each repeating item, relative to the widget root. E.g. <code>.profile-card</code> or <code>.plan-button</code>.</td>
+                            </tr>
+                            <tr>
+                                <td>groupLabel</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>Singular label for each group in the sidebar. E.g. <code>"Card"</code> or <code>"Plan"</code>. Groups are labelled "Card 1", "Card 2", etc.</td>
+                            </tr>
+                            <tr>
+                                <td>groupLabelField</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>The <code>key</code> of the field whose value is appended to the group header for context. E.g. if set to <code>"name"</code>, groups display as "Plan 1 — Basic" using the current plan name value.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Field Object -->
+                <section class="spec-section" id="field-object">
+                    <h2>Field Object</h2>
+                    <p>Fields in the <code>fields</code> array are scoped to each repeat item. The <code>selector</code> property is resolved relative to the item element — not the widget root. A field can target the item element itself, a comparison table cell, or both simultaneously using <code>selector</code> and <code>gridSelector</code> together.</p>
+
+                    <table class="field-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th></th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>key</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>Internal identifier for this field. Used to wire form inputs to DOM elements. Must be unique within the fields array for a given widget.</td>
+                            </tr>
+                            <tr>
+                                <td>label</td>
+                                <td>string</td>
+                                <td><span class="badge badge-req">Required</span></td>
+                                <td>Human-readable label displayed above the input in the sidebar editor form.</td>
+                            </tr>
+                            <tr>
+                                <td>selector</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional*</span></td>
+                                <td>CSS selector for the target element, relative to the repeat item. Required unless <code>gridSelector</code> is the only target. Text content is read from and written to this element.</td>
+                            </tr>
+                            <tr>
+                                <td>type</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>Input type: <code>"text"</code> (default) or <code>"textarea"</code> for longer content. Affects the form input rendered in the sidebar.</td>
+                            </tr>
+                            <tr>
+                                <td>syncDataAttr</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>If set, the extension also writes the field value to this <code>data-*</code> attribute on the repeat item element. E.g. <code>"data-target"</code> keeps counter animation start values in sync.</td>
+                            </tr>
+                            <tr>
+                                <td>syncNumeric</td>
+                                <td>boolean</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>When <code>true</code>, strips non-numeric characters before writing to <code>syncDataAttr</code>. Useful when the visible value includes a symbol (e.g. <code>$299</code>) but the data attribute expects a raw number (<code>299</code>).</td>
+                            </tr>
+                            <tr>
+                                <td>gridSelector</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional</span></td>
+                                <td>CSS selector for the corresponding row in a comparison table, relative to the widget root. When present, the field value is also written to the matching grid cell. Used when a value appears in both a card button and a table row.</td>
+                            </tr>
+                            <tr>
+                                <td>gridCellSelector</td>
+                                <td>string</td>
+                                <td><span class="badge badge-opt">Optional*</span></td>
+                                <td>Selector for the specific cell within the grid row, relative to the row. Use <code>{planNum}</code> as a placeholder — it is replaced with the item's 1-based index. E.g. <code>"[data-plan='{planNum}']"</code>. Required if <code>gridSelector</code> is set.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Standalone Fields -->
+                <section class="spec-section" id="standalone-fields">
+                    <h2>Standalone Fields</h2>
+                    <p>The <code>standaloneFields</code> array works identically to <code>fields</code> except that selectors are resolved relative to the widget root rather than a repeat item. Use it for elements that appear once in the widget regardless of how many items it contains — a section heading, a subtitle, or an introductory paragraph.</p>
+                    <p>Standalone fields are rendered above the repeating item groups in the sidebar, under a "General" heading. They support the same <code>key</code>, <code>label</code>, <code>selector</code>, and <code>type</code> properties. The <code>syncDataAttr</code>, <code>syncNumeric</code>, <code>gridSelector</code>, and <code>gridCellSelector</code> properties are not applicable to standalone fields.</p>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">standaloneFields example</span>
+                        </div>
+                        <pre><code><span class="tok-key">"standaloneFields"</span>: [
+  {
+    <span class="tok-key">"key"</span>: <span class="tok-str">"title"</span>,
+    <span class="tok-key">"label"</span>: <span class="tok-str">"Section Heading"</span>,
+    <span class="tok-key">"selector"</span>: <span class="tok-str">"h1"</span>,
+    <span class="tok-key">"type"</span>: <span class="tok-str">"text"</span>
+  },
+  {
+    <span class="tok-key">"key"</span>: <span class="tok-str">"subtitle"</span>,
+    <span class="tok-key">"label"</span>: <span class="tok-str">"Subtitle"</span>,
+    <span class="tok-key">"selector"</span>: <span class="tok-str">".subtitle"</span>,
+    <span class="tok-key">"type"</span>: <span class="tok-str">"text"</span>
+  },
+  {
+    <span class="tok-key">"key"</span>: <span class="tok-str">"body"</span>,
+    <span class="tok-key">"label"</span>: <span class="tok-str">"Intro Copy"</span>,
+    <span class="tok-key">"selector"</span>: <span class="tok-str">".intro-text p"</span>,
+    <span class="tok-key">"type"</span>: <span class="tok-str">"textarea"</span>
+  }
+]</code></pre>
+                    </div>
+                </section>
+
+                <!-- Full Example -->
+                <section class="spec-section" id="full-example">
+                    <div class="spec-section-label">Reference</div>
+                    <h2>Full Example</h2>
+                    <p>A complete registry entry for a widget with both standalone fields and repeating items. This example represents an animated stats card row with a section heading and four individual stat cards.</p>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-title">widget-registry.json</span>
+                        </div>
+                        <pre><code>{
+  <span class="tok-key">"version"</span>: <span class="tok-str">"1.3.0"</span>,
+  <span class="tok-key">"widgets"</span>: [
+    {
+      <span class="tok-key">"class"</span>: <span class="tok-str">"card-row"</span>,
+      <span class="tok-key">"name"</span>: <span class="tok-str">"Animated Stats Cards"</span>,
+      <span class="tok-key">"standaloneFields"</span>: [
+        {
+          <span class="tok-key">"key"</span>: <span class="tok-str">"heading"</span>,
+          <span class="tok-key">"label"</span>: <span class="tok-str">"Section Heading"</span>,
+          <span class="tok-key">"selector"</span>: <span class="tok-str">".section-heading"</span>,
+          <span class="tok-key">"type"</span>: <span class="tok-str">"text"</span>
+        }
+      ],
+      <span class="tok-key">"repeat"</span>: {
+        <span class="tok-key">"selector"</span>: <span class="tok-str">".profile-card"</span>,
+        <span class="tok-key">"groupLabel"</span>: <span class="tok-str">"Card"</span>
+      },
+      <span class="tok-key">"fields"</span>: [
+        {
+          <span class="tok-key">"key"</span>: <span class="tok-str">"number"</span>,
+          <span class="tok-key">"label"</span>: <span class="tok-str">"Statistic Value"</span>,
+          <span class="tok-key">"selector"</span>: <span class="tok-str">".number"</span>,
+          <span class="tok-key">"type"</span>: <span class="tok-str">"text"</span>,
+          <span class="tok-key">"syncDataAttr"</span>: <span class="tok-str">"data-target"</span>,
+          <span class="tok-key">"syncNumeric"</span>: <span class="tok-bool">true</span>
+        },
+        {
+          <span class="tok-key">"key"</span>: <span class="tok-str">"label"</span>,
+          <span class="tok-key">"label"</span>: <span class="tok-str">"Card Label"</span>,
+          <span class="tok-key">"selector"</span>: <span class="tok-str">".copy-text"</span>,
+          <span class="tok-key">"type"</span>: <span class="tok-str">"text"</span>
+        }
+      ]
+    }
+  ]
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- How It Works -->
+                <section class="spec-section" id="how-it-works">
+                    <h2>How It Works</h2>
+                    <p>Understanding the data flow helps when debugging why a field isn't reading or writing correctly.</p>
+
+                    <div class="two-col">
+                        <div class="info-card">
+                            <h4>Reading field values (on sidebar open)</h4>
+                            <ul>
+                                <li>Sidepanel fetches the registry from the server</li>
+                                <li>Sends <code>GET_WIDGETS</code> with full registry to the content script</li>
+                                <li>Content script queries DOM for each widget class, returns matches</li>
+                                <li>Sidepanel sends <code>GET_WIDGET_DATA</code> with the widget definition</li>
+                                <li>Content script walks field selectors, returns text content</li>
+                                <li>Sidepanel renders the form with current values pre-filled</li>
+                            </ul>
+                        </div>
+                        <div class="info-card">
+                            <h4>Writing field values (on Apply)</h4>
+                            <ul>
+                                <li>Sidepanel collects all form values and sends <code>UPDATE_WIDGET_DATA</code></li>
+                                <li>Content script sets <code>textContent</code> on each target element</li>
+                                <li>If <code>syncDataAttr</code> is set, writes value to the data attribute too</li>
+                                <li>If <code>syncNumeric</code>, strips non-numeric characters first</li>
+                                <li>If <code>gridSelector</code> is set, updates the comparison table cell</li>
+                                <li>Calls <code>SitecoreBridge.notifyChange(el)</code> after each write</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Update Flow -->
+                <section class="spec-section" id="update-flow">
+                    <h2>Update Flow</h2>
+                    <p>The extension has a lightweight update notification system. It does not auto-update itself — it notifies content authors that a new version is available and provides a direct download link.</p>
+
+                    <ul class="step-list">
+                        <li>
+                            <div class="step-num">1</div>
+                            <div class="step-body">
+                                <strong>Developer updates the registry</strong>
+                                <span>New widget added, field changed, or structural update made. The top-level <code>version</code> string is incremented (e.g. <code>1.3.0</code> &rarr; <code>1.4.0</code>) and the JSON is pushed to the server.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">2</div>
+                            <div class="step-body">
+                                <strong>Background worker detects the version bump</strong>
+                                <span>The background service worker polls the registry URL periodically and compares the fetched version against <code>CURRENT_VERSION</code> in the extension code. If they differ, it sets the <code>!</code> badge on the extension icon.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">3</div>
+                            <div class="step-body">
+                                <strong>Update banner appears in the sidebar</strong>
+                                <span>When the content author next opens the sidebar, the background worker sends an <code>UPDATE_AVAILABLE</code> message and a banner appears at the top of the panel with the new version number and a download link.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-num">4</div>
+                            <div class="step-body">
+                                <strong>Content author downloads and reinstalls</strong>
+                                <span>The author downloads the new ZIP, removes the old extension from Chrome, and loads the new one unpacked. Registry-only changes (new fields, adjusted selectors) do not require a reinstall — only changes to the extension code itself do.</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="info-card" style="margin-top: 8px;">
+                        <h4>When you need to reinstall vs. just push JSON</h4>
+                        <p><strong>Push JSON only:</strong> adding a new widget, adding or removing fields, changing selectors, updating labels, or any change that only touches the registry definition.</p>
+                        <p style="margin-top: 8px;"><strong>Reinstall required:</strong> changes to the extension code itself — <code>sidepanel.js</code>, <code>content-script.js</code>, <code>background.js</code>, <code>sitecore-bridge.js</code>, or <code>manifest.json</code>. In this case, increment both the registry version and the <code>CURRENT_VERSION</code> constant in <code>background.js</code>.</p>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <footer>Sitecore Widget Editor Documentation</footer>
+    </div>
+
+    <script>
+        // Highlight active nav item on scroll
+        var sections = document.querySelectorAll('.spec-section');
+        var navLinks = document.querySelectorAll('.specs-nav-list a');
+
+        function onScroll() {
+            var scrollY = window.scrollY + 120;
+            var active = null;
+            sections.forEach(function(section) {
+                if (section.offsetTop <= scrollY) active = section.id;
+            });
+            navLinks.forEach(function(link) {
+                link.classList.toggle('active', link.getAttribute('href') === '#' + active);
+            });
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // Smooth scroll
+        navLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
