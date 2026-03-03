@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "updatedAt": "2026-03-03T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
@@ -155,6 +155,52 @@
           "type": "textarea"
         }
       ]
+    },
+    {
+      "class": "zoom-meetings",
+      "name": "Zoom Meetings",
+      "desc": "Styled Zoom meeting list with automatic expiry and sorting",
+      "repeat": {
+        "selector": ".zoom-meeting",
+        "groupLabel": "Meeting",
+        "groupLabelField": "title"
+      },
+      "fields": [
+        {
+          "key": "title",
+          "label": "Meeting Title",
+          "selector": ".zoom-title",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "selector": ".zoom-description",
+          "type": "textarea"
+        },
+        {
+          "key": "link",
+          "label": "Zoom URL",
+          "selector": ".zoom-link",
+          "type": "text",
+          "syncDataAttr": "href"
+        },
+        {
+          "key": "start",
+          "label": "Start Date/Time (ISO)",
+          "selector": ".zoom-meeting",
+          "type": "text",
+          "syncDataAttr": "data-start"
+        },
+        {
+          "key": "end",
+          "label": "End Date/Time (ISO)",
+          "selector": ".zoom-meeting",
+          "type": "text",
+          "syncDataAttr": "data-end"
+        }
+      ],
+      "standaloneFields": []
     }
   ]
 }
