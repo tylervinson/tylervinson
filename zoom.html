@@ -1,190 +1,307 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Zoom Auto Expiry Demo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom Meeting Auto-Expiry</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 48px; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 0; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f6f8;
-  margin: 40px;
-}
+        /* Controls row */
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 0 24px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 32px;
+        }
+        .controls-row h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            letter-spacing: -0.3px;
+        }
+        .date-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .date-control label {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+        .date-control input[type="date"] {
+            font-family: inherit;
+            font-size: 13px;
+            color: #1a1a1a;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 7px 12px;
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        .date-control input[type="date"]:focus { border-color: #FFBE5F; }
 
-.controls {
-  margin-bottom: 20px;
-}
+        /* Meeting list */
+        .zoom-meetings {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
 
-.zoom-meetings {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
+        .zoom-meeting {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid #f0f0f0;
+            overflow: hidden;
+            transition:
+                max-height 450ms cubic-bezier(.25,.8,.25,1),
+                opacity 300ms ease;
+            max-height: 200px;
+        }
 
-.zoom-meeting {
-  display: flex;
-  background: #ffffff;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
+        .zoom-meeting:last-child { border-bottom: none; }
 
-.zoom-meeting.hidden {
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-}
+        .zoom-meeting.collapsing {
+            max-height: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+        }
 
-.zoom-date-block {
-  background: #0b5cff;
-  color: #ffffff;
-  padding: 16px;
-  text-align: center;
-  min-width: 110px;
-}
+        /* Date block */
+        .zoom-date-block {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px 24px;
+            text-align: center;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .zoom-month { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #FFBE5F; }
+        .zoom-day { font-size: 32px; font-weight: 600; line-height: 1; margin: 4px 0; letter-spacing: -1px; }
+        .zoom-time { font-size: 11px; color: #888; letter-spacing: 0.3px; }
 
-.zoom-month { font-size: 12px; letter-spacing: 1px; }
-.zoom-day { font-size: 28px; font-weight: bold; }
-.zoom-time { font-size: 12px; margin-top: 6px; }
+        /* Content */
+        .zoom-content {
+            padding: 20px 28px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+        .zoom-title { font-size: 16px; font-weight: 600; color: #000; letter-spacing: -0.2px; }
+        .zoom-description { font-size: 14px; color: #888; }
 
-.zoom-content {
-  padding: 18px;
-  flex: 1;
-}
+        /* Action */
+        .zoom-action {
+            display: flex;
+            align-items: center;
+            padding: 20px 28px;
+            flex-shrink: 0;
+        }
+        .zoom-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #FFBE5F;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .zoom-link:hover { background: #FFD495; }
 
-.zoom-title { margin: 0 0 8px 0; font-size: 18px; }
-.zoom-description { margin: 0 0 12px 0; font-size: 14px; color: #555; }
+        /* Empty state */
+        .empty-state {
+            display: none;
+            padding: 48px;
+            text-align: center;
+            color: #bbb;
+            font-size: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .empty-state.visible { display: block; }
 
-.zoom-link {
-  display: inline-block;
-  padding: 8px 14px;
-  background: #0b5cff;
-  color: #ffffff;
-  text-decoration: none;
-  border-radius: 4px;
-  font-size: 14px;
-}
-</style>
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .controls-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .zoom-action { display: none; }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>Zoom Meetings</h1>
+            <p class="subtitle">Upcoming sessions — expired meetings hide automatically</p>
+        </header>
 
-<h2>Zoom Meetings Auto-Expiry Demo</h2>
+        <div class="controls-row">
+            <h2>Scheduled Meetings</h2>
+            <div class="date-control">
+                <label>Simulate date</label>
+                <input type="date" id="mockDate">
+            </div>
+        </div>
 
-<div class="controls">
-<label>Select Current Date:
-<input type="date" id="mockDate">
-</label>
-</div>
+        <div class="zoom-meetings" id="meetingList">
 
-<div class="zoom-meetings">
+            <div class="zoom-meeting" data-end="2026-03-05">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">05</div>
+                    <div class="zoom-time">2:00 PM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">Executive Webinar</div>
+                    <div class="zoom-description">Quarterly leadership update</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
 
-  <!-- March 5 -->
-  <div class="zoom-meeting" data-end="2026-03-05">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">05</div>
-      <div class="zoom-time">2:00 PM</div>
+            <div class="zoom-meeting" data-end="2026-03-07">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">07</div>
+                    <div class="zoom-time">11:00 AM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">Marketing Strategy Session</div>
+                    <div class="zoom-description">Planning Q2 campaigns</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
+
+            <div class="zoom-meeting" data-end="2026-03-10">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">10</div>
+                    <div class="zoom-time">9:00 AM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">Product Training</div>
+                    <div class="zoom-description">Feature deep dive session</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
+
+            <div class="zoom-meeting" data-end="2026-03-12">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">12</div>
+                    <div class="zoom-time">3:00 PM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">HR Policy Review</div>
+                    <div class="zoom-description">Benefits and compliance updates</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
+
+            <div class="zoom-meeting" data-end="2026-03-15">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">15</div>
+                    <div class="zoom-time">1:00 PM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">Sales Enablement Workshop</div>
+                    <div class="zoom-description">Improving close rates</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
+
+            <div class="zoom-meeting" data-end="2026-03-18">
+                <div class="zoom-date-block">
+                    <div class="zoom-month">Mar</div>
+                    <div class="zoom-day">18</div>
+                    <div class="zoom-time">4:00 PM</div>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-title">Technology Roadmap Briefing</div>
+                    <div class="zoom-description">Future platform initiatives</div>
+                </div>
+                <div class="zoom-action">
+                    <a class="zoom-link" href="#">Join Meeting</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            No upcoming meetings scheduled.
+        </div>
+
+        <footer>Sitecore Widget Editor Documentation</footer>
     </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">Executive Webinar</h3>
-      <p class="zoom-description">Quarterly leadership update.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
 
-  <!-- March 7 -->
-  <div class="zoom-meeting" data-end="2026-03-07">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">07</div>
-      <div class="zoom-time">11:00 AM</div>
-    </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">Marketing Strategy Session</h3>
-      <p class="zoom-description">Planning Q2 campaigns.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
+    <script>
+        var dateInput = document.getElementById('mockDate');
+        var meetings  = document.querySelectorAll('.zoom-meeting');
+        var list      = document.getElementById('meetingList');
+        var empty     = document.getElementById('emptyState');
 
-  <!-- March 10 -->
-  <div class="zoom-meeting" data-end="2026-03-10">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">10</div>
-      <div class="zoom-time">9:00 AM</div>
-    </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">Product Training</h3>
-      <p class="zoom-description">Feature deep dive session.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
+        function updateVisibility(selectedDate) {
+            var visible = 0;
+            meetings.forEach(function(meeting) {
+                var endDate   = new Date(meeting.dataset.end);
+                var isExpired = endDate < selectedDate;
+                meeting.classList.toggle('collapsing', isExpired);
+                if (!isExpired) visible++;
+            });
+            // Show empty state if all meetings collapsed
+            setTimeout(function() {
+                var anyVisible = Array.from(meetings).some(function(m) { return !m.classList.contains('collapsing'); });
+                list.style.display  = anyVisible ? '' : 'none';
+                empty.classList.toggle('visible', !anyVisible);
+            }, 460);
+        }
 
-  <!-- March 12 -->
-  <div class="zoom-meeting" data-end="2026-03-12">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">12</div>
-      <div class="zoom-time">3:00 PM</div>
-    </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">HR Policy Review</h3>
-      <p class="zoom-description">Benefits and compliance updates.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
-
-  <!-- March 15 -->
-  <div class="zoom-meeting" data-end="2026-03-15">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">15</div>
-      <div class="zoom-time">1:00 PM</div>
-    </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">Sales Enablement Workshop</h3>
-      <p class="zoom-description">Improving close rates.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
-
-  <!-- March 18 -->
-  <div class="zoom-meeting" data-end="2026-03-18">
-    <div class="zoom-date-block">
-      <div class="zoom-month">MAR</div>
-      <div class="zoom-day">18</div>
-      <div class="zoom-time">4:00 PM</div>
-    </div>
-    <div class="zoom-content">
-      <h3 class="zoom-title">Technology Roadmap Briefing</h3>
-      <p class="zoom-description">Future platform initiatives.</p>
-      <a class="zoom-link" href="#">Join Meeting</a>
-    </div>
-  </div>
-
-</div>
-
-<script>
-const dateInput = document.getElementById("mockDate");
-const meetings = document.querySelectorAll(".zoom-meeting");
-
-dateInput.addEventListener("change", function() {
-  const selectedDate = new Date(this.value);
-
-  meetings.forEach(meeting => {
-    const endDate = new Date(meeting.dataset.end);
-
-    if (endDate < selectedDate) {
-      meeting.classList.add("hidden");
-    } else {
-      meeting.classList.remove("hidden");
-    }
-  });
-});
-</script>
-
+        dateInput.addEventListener('change', function() {
+            updateVisibility(new Date(this.value));
+        });
+    </script>
 </body>
 </html>
