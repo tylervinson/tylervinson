@@ -1,12 +1,11 @@
 {
-  "version": "1.4.0",
+  "version": "1.3.0",
   "updatedAt": "2026-03-03T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
-      "class": "card-row",
+      "class": "animated-cards",
       "name": "Animated Cards",
-      "desc": "Three-card stat widget with animated number counters",
       "repeat": {
         "selector": ".profile-card",
         "groupLabel": "Card"
@@ -14,25 +13,31 @@
       "fields": [
         {
           "key": "number",
-          "label": "Number",
+          "label": "Statistic Value",
           "selector": ".number",
           "type": "text",
           "syncDataAttr": "data-target",
           "syncNumeric": true
         },
         {
-          "key": "label",
-          "label": "Label",
+          "key": "text",
+          "label": "Card Label",
           "selector": ".copy-text",
           "type": "text"
         }
-      ],
-      "standaloneFields": []
+      ]
     },
     {
       "class": "insurance-comparison-tool",
-      "name": "Insurance Plan Comparison",
-      "desc": "Compare up to 4 insurance plans side-by-side",
+      "name": "Insurance Plan Comparison Tool",
+      "standaloneFields": [
+        {
+          "key": "heading",
+          "label": "Section Heading",
+          "selector": ".section-title",
+          "type": "text"
+        }
+      ],
       "repeat": {
         "selector": ".plan-button",
         "groupLabel": "Plan",
@@ -40,132 +45,62 @@
       },
       "fields": [
         {
+          "key": "type",
+          "label": "Plan Type",
+          "selector": ".plan-type",
+          "type": "text"
+        },
+        {
           "key": "name",
           "label": "Plan Name",
-          "selector": ".plan-button-name",
-          "type": "text",
-          "syncDataAttr": "data-plan-name"
+          "selector": ".plan-name",
+          "type": "text"
         },
         {
           "key": "coverage",
-          "label": "Coverage Label",
-          "selector": ".plan-button-coverage",
+          "label": "Coverage Type",
+          "selector": ".plan-coverage",
           "type": "text"
         },
         {
           "key": "price",
           "label": "Monthly Price",
-          "selector": ".plan-button-price",
+          "selector": ".plan-price",
           "type": "text",
           "syncDataAttr": "data-price",
           "syncNumeric": true,
-          "gridSelector": "[data-comparison='price']",
-          "gridCellSelector": "[data-plan='{planNum}']"
-        },
-        {
-          "key": "deductible",
-          "label": "Annual Deductible",
-          "gridSelector": "[data-comparison='deductible']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "syncDataAttr": "data-deductible",
-          "syncNumeric": true,
-          "type": "text"
-        },
-        {
-          "key": "maxOutOfPocket",
-          "label": "Max Out-of-Pocket",
-          "gridSelector": "[data-comparison='maxOutOfPocket']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "syncDataAttr": "data-max-out-of-pocket",
-          "syncNumeric": true,
-          "type": "text"
-        },
-        {
-          "key": "coveragePercent",
-          "label": "Coverage %",
-          "gridSelector": "[data-comparison='coveragePercent']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "syncDataAttr": "data-coverage-percent",
-          "syncNumeric": true,
-          "type": "text"
-        },
-        {
-          "key": "doctorVisits",
-          "label": "Doctor Visit Copay",
-          "gridSelector": "[data-comparison='doctorVisits']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "syncDataAttr": "data-doctor-visits",
-          "syncNumeric": true,
-          "type": "text"
-        },
-        {
-          "key": "prescription",
-          "label": "Prescription Coverage",
-          "gridSelector": "[data-comparison='prescription']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "type": "text"
-        },
-        {
-          "key": "emergency",
-          "label": "Emergency Care Copay",
-          "gridSelector": "[data-comparison='emergency']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "syncDataAttr": "data-emergency",
-          "syncNumeric": true,
-          "type": "text"
-        },
-        {
-          "key": "mentalHealth",
-          "label": "Mental Health Coverage",
-          "gridSelector": "[data-comparison='mentalHealth']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "type": "text"
-        },
-        {
-          "key": "dentalVision",
-          "label": "Dental / Vision",
-          "gridSelector": "[data-comparison='dentalVision']",
-          "gridCellSelector": "[data-plan='{planNum}']",
-          "type": "text"
-        }
-      ],
-      "standaloneFields": [
-        {
-          "key": "title",
-          "label": "Title",
-          "selector": "h1",
-          "type": "text"
-        },
-        {
-          "key": "subtitle",
-          "label": "Subtitle",
-          "selector": ".subtitle",
-          "type": "text"
-        },
-        {
-          "key": "instructionHeading",
-          "label": "Instruction Heading",
-          "selector": ".instruction-content h2",
-          "type": "text"
-        },
-        {
-          "key": "instructionBody",
-          "label": "Instruction Body",
-          "selector": ".instruction-content p",
-          "type": "textarea"
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-plan='{planNum}'] .price-cell"
         }
       ]
     },
     {
       "class": "zoom-meetings",
       "name": "Zoom Meetings",
-      "desc": "Styled Zoom meeting list with automatic expiry and sorting",
       "repeat": {
         "selector": ".zoom-meeting",
         "groupLabel": "Meeting",
         "groupLabelField": "title"
       },
       "fields": [
+        {
+          "key": "month",
+          "label": "Month",
+          "selector": ".zoom-month",
+          "type": "text"
+        },
+        {
+          "key": "day",
+          "label": "Day",
+          "selector": ".zoom-day",
+          "type": "text"
+        },
+        {
+          "key": "time",
+          "label": "Time",
+          "selector": ".zoom-time",
+          "type": "text"
+        },
         {
           "key": "title",
           "label": "Meeting Title",
@@ -176,31 +111,16 @@
           "key": "description",
           "label": "Description",
           "selector": ".zoom-description",
-          "type": "textarea"
+          "type": "text"
         },
         {
           "key": "link",
-          "label": "Zoom URL",
+          "label": "Join URL",
           "selector": ".zoom-link",
           "type": "text",
-          "syncDataAttr": "href"
-        },
-        {
-          "key": "start",
-          "label": "Start Date/Time (ISO)",
-          "selector": ".zoom-meeting",
-          "type": "text",
-          "syncDataAttr": "data-start"
-        },
-        {
-          "key": "end",
-          "label": "End Date/Time (ISO)",
-          "selector": ".zoom-meeting",
-          "type": "text",
-          "syncDataAttr": "data-end"
+          "attr": "href"
         }
-      ],
-      "standaloneFields": []
+      ]
     }
   ]
 }
