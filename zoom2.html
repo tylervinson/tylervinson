@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoom Meeting Auto-Expiry</title>
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+background:#fafafa;
+color:#1a1a1a;
+line-height:1.6;
+}
+
+.container{
+max-width:1400px;
+margin:0 auto;
+padding:80px 40px;
+}
+
+header{margin-bottom:48px}
+
+h1{
+font-size:56px;
+font-weight:600;
+letter-spacing:-1.5px;
+margin-bottom:12px;
+}
+
+.subtitle{
+font-size:18px;
+color:#666;
+margin-bottom:20px;
+}
+
+/* Tabs */
+
+.tab-nav{
+display:flex;
+border-bottom:1px solid #e0e0e0;
+margin-bottom:24px;
+}
+
+.tab-nav-link{
+padding:12px 20px;
+text-decoration:none;
+color:#999;
+font-size:12px;
+font-weight:500;
+text-transform:uppercase;
+letter-spacing:.5px;
+border-bottom:2px solid transparent;
+}
+
+.tab-nav-link.active{
+color:#000;
+border-bottom-color:#000;
+}
+
+/* Controls */
+
+.controls-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:32px 0 24px;
+border-bottom:1px solid #e0e0e0;
+margin-bottom:32px;
+}
+
+.date-control{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.date-control label{
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:.5px;
+color:#999;
+}
+
+.date-control input{
+border:1px solid #e0e0e0;
+border-radius:4px;
+padding:7px 12px;
+font-size:13px;
+}
+
+/* Meeting list */
+
+.zoom-meetings{
+display:flex;
+flex-direction:column;
+border:1px solid #e0e0e0;
+border-radius:8px;
+overflow:hidden;
+background:#fff;
+}
+
+.zoom-meeting{
+display:flex;
+border-bottom:1px solid #f0f0f0;
+overflow:hidden;
+transition:max-height .45s cubic-bezier(.25,.8,.25,1),opacity .3s ease;
+max-height:220px;
+}
+
+.zoom-meeting:last-child{border-bottom:none}
+
+.zoom-meeting.collapsing{
+max-height:0!important;
+opacity:0;
+pointer-events:none;
+}
+
+/* Date */
+
+.zoom-date-block{
+background:#1a1a1a;
+color:#fff;
+padding:20px 24px;
+min-width:100px;
+text-align:center;
+}
+
+.zoom-month{
+font-size:10px;
+text-transform:uppercase;
+letter-spacing:1.5px;
+color:#FFBE5F;
+}
+
+.zoom-day{
+font-size:32px;
+font-weight:600;
+}
+
+.zoom-time{
+font-size:11px;
+color:#888;
+}
+
+/* Content */
+
+.zoom-content{
+padding:20px 28px;
+flex:1;
+cursor:pointer;
+}
+
+.zoom-title{
+font-size:16px;
+font-weight:600;
+}
+
+.zoom-title::after{
+content:" +";
+color:#bbb;
+}
+
+.zoom-meeting.expanded .zoom-title::after{
+content:" −";
+}
+
+.zoom-description{
+font-size:14px;
+color:#888;
+max-height:0;
+overflow:hidden;
+opacity:0;
+transition:max-height .35s cubic-bezier(.25,.8,.25,1),opacity .25s ease;
+}
+
+.zoom-meeting.expanded .zoom-description{
+max-height:120px;
+opacity:1;
+margin-top:8px;
+}
+
+/* Action */
+
+.zoom-action{
+display:flex;
+align-items:center;
+padding:20px 28px;
+}
+
+.zoom-link{
+padding:8px 20px;
+background:#FFBE5F;
+color:#1a1a1a;
+text-decoration:none;
+border-radius:4px;
+font-size:13px;
+font-weight:600;
+}
+
+/* Calendar */
+
+.calendar-view{
+display:none;
+border:1px solid #e0e0e0;
+border-radius:8px;
+background:#fff;
+padding:20px;
+}
+
+.calendar-view.active{display:block}
+
+.calendar-grid{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:6px;
+}
+
+.calendar-header{
+font-size:12px;
+font-weight:600;
+text-align:center;
+color:#888;
+padding-bottom:6px;
+}
+
+.calendar-day{
+border:1px solid #eee;
+border-radius:4px;
+min-height:90px;
+padding:6px;
+font-size:12px;
+background:#fff;
+}
+
+.calendar-day.today{
+border-color:#FFBE5F;
+}
+
+.calendar-day-number{
+font-weight:600;
+margin-bottom:4px;
+}
+
+.calendar-event{
+background:#FFBE5F;
+padding:3px 6px;
+border-radius:3px;
+font-size:11px;
+margin-bottom:3px;
+cursor:pointer;
+}
+
+.empty-state{
+display:none;
+padding:48px;
+text-align:center;
+color:#bbb;
+border:1px solid #e0e0e0;
+border-radius:8px;
+background:#fff;
+}
+
+.empty-state.visible{display:block}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>Zoom Meetings</h1>
+<p class="subtitle">Upcoming sessions — expired meetings hide automatically</p>
+</header>
+
+<div class="tab-nav">
+<a href="#" class="tab-nav-link active" data-view="list">List</a>
+<a href="#" class="tab-nav-link" data-view="calendar">Calendar</a>
+</div>
+
+<div class="controls-row">
+<h2>Scheduled Meetings</h2>
+
+<div class="date-control">
+<label>Simulate date</label>
+<input type="date" id="mockDate">
+</div>
+
+</div>
+
+<div class="zoom-meetings" id="meetingList">
+
+<div class="zoom-meeting" data-date="2026-03-05" data-end="2026-03-05">
+<div class="zoom-date-block">
+<div class="zoom-month">Mar</div>
+<div class="zoom-day">05</div>
+<div class="zoom-time">2:00 PM</div>
+</div>
+<div class="zoom-content">
+<div class="zoom-title">Executive Webinar</div>
+<div class="zoom-description">Quarterly leadership update covering KPIs and growth strategy.</div>
+</div>
+<div class="zoom-action"><a class="zoom-link" href="#">Join Meeting</a></div>
+</div>
+
+<div class="zoom-meeting" data-date="2026-03-07" data-end="2026-03-07">
+<div class="zoom-date-block">
+<div class="zoom-month">Mar</div>
+<div class="zoom-day">07</div>
+<div class="zoom-time">11:00 AM</div>
+</div>
+<div class="zoom-content">
+<div class="zoom-title">Marketing Strategy Session</div>
+<div class="zoom-description">Planning Q2 campaigns and growth initiatives.</div>
+</div>
+<div class="zoom-action"><a class="zoom-link" href="#">Join Meeting</a></div>
+</div>
+
+<div class="zoom-meeting" data-date="2026-03-10" data-end="2026-03-10">
+<div class="zoom-date-block">
+<div class="zoom-month">Mar</div>
+<div class="zoom-day">10</div>
+<div class="zoom-time">9:00 AM</div>
+</div>
+<div class="zoom-content">
+<div class="zoom-title">Product Training</div>
+<div class="zoom-description">Deep dive walkthrough of upcoming product features.</div>
+</div>
+<div class="zoom-action"><a class="zoom-link" href="#">Join Meeting</a></div>
+</div>
+
+</div>
+
+<div class="calendar-view" id="calendarView"></div>
+
+<div class="empty-state" id="emptyState">
+No upcoming meetings scheduled.
+</div>
+
+</div>
+
+<script>
+
+var meetings=[...document.querySelectorAll('.zoom-meeting')]
+var dateInput=document.getElementById('mockDate')
+var list=document.getElementById('meetingList')
+var empty=document.getElementById('emptyState')
+var calendar=document.getElementById('calendarView')
+
+/* Accordion */
+
+meetings.forEach(m=>{
+var content=m.querySelector('.zoom-content')
+
+content.addEventListener('click',()=>{
+if(m.classList.contains('collapsing'))return
+
+var expanded=m.classList.contains('expanded')
+meetings.forEach(x=>x.classList.remove('expanded'))
+if(!expanded)m.classList.add('expanded')
+})
+})
+
+/* Expiry */
+
+function updateVisibility(date){
+
+meetings.forEach(m=>{
+var end=new Date(m.dataset.end)
+m.classList.toggle('collapsing',end<date)
+})
+
+}
+
+/* Tabs */
+
+document.querySelectorAll('.tab-nav-link').forEach(tab=>{
+tab.onclick=e=>{
+e.preventDefault()
+
+document.querySelectorAll('.tab-nav-link').forEach(t=>t.classList.remove('active'))
+tab.classList.add('active')
+
+if(tab.dataset.view==="calendar"){
+list.style.display="none"
+calendar.classList.add("active")
+}else{
+calendar.classList.remove("active")
+list.style.display=""
+}
+}
+})
+
+/* Calendar builder */
+
+function buildCalendar(){
+
+calendar.innerHTML=""
+
+var date=new Date("2026-03-01")
+
+var grid=document.createElement("div")
+grid.className="calendar-grid"
+
+var days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+days.forEach(d=>{
+var h=document.createElement("div")
+h.className="calendar-header"
+h.textContent=d
+grid.appendChild(h)
+})
+
+for(let i=0;i<35;i++){
+
+var cell=document.createElement("div")
+cell.className="calendar-day"
+
+var current=new Date(date)
+current.setDate(i+1)
+
+var day=current.getDate()
+
+cell.innerHTML="<div class='calendar-day-number'>"+day+"</div>"
+
+meetings.forEach(m=>{
+var d=new Date(m.dataset.date)
+
+if(d.getDate()===day){
+var e=document.createElement("div")
+e.className="calendar-event"
+e.textContent=m.querySelector('.zoom-title').textContent
+
+e.onclick=function(){
+list.style.display=""
+calendar.classList.remove("active")
+document.querySelector('[data-view=list]').classList.add("active")
+document.querySelector('[data-view=calendar]').classList.remove("active")
+
+m.classList.add("expanded")
+m.scrollIntoView({behavior:"smooth"})
+}
+
+cell.appendChild(e)
+}
+})
+
+grid.appendChild(cell)
+
+}
+
+calendar.appendChild(grid)
+
+}
+
+buildCalendar()
+
+dateInput.onchange=function(){
+updateVisibility(new Date(this.value))
+}
+
+</script>
+
+</body>
+</html>
