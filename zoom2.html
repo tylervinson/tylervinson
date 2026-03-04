@@ -213,18 +213,26 @@ padding:20px;
 
 .calendar-view.active{display:block}
 
+.calendar-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:12px;
+}
+
+.calendar-header button{
+background:#FFBE5F;
+border:none;
+padding:6px 12px;
+border-radius:4px;
+cursor:pointer;
+font-weight:600;
+}
+
 .calendar-grid{
 display:grid;
 grid-template-columns:repeat(7,1fr);
 gap:6px;
-}
-
-.calendar-header{
-font-size:12px;
-font-weight:600;
-text-align:center;
-color:#888;
-padding-bottom:6px;
 }
 
 .calendar-day{
@@ -295,7 +303,7 @@ background:#fff;
 
 <div class="zoom-meetings" id="meetingList">
 
-<div class="zoom-meeting" data-date="2026-03-05" data-end="2026-03-05">
+<div class="zoom-meeting" data-date="2026-03-05">
 <div class="zoom-date-block">
 <div class="zoom-month">Mar</div>
 <div class="zoom-day">05</div>
@@ -308,7 +316,7 @@ background:#fff;
 <div class="zoom-action"><a class="zoom-link" href="#">Join Meeting</a></div>
 </div>
 
-<div class="zoom-meeting" data-date="2026-03-07" data-end="2026-03-07">
+<div class="zoom-meeting" data-date="2026-03-07">
 <div class="zoom-date-block">
 <div class="zoom-month">Mar</div>
 <div class="zoom-day">07</div>
@@ -321,7 +329,7 @@ background:#fff;
 <div class="zoom-action"><a class="zoom-link" href="#">Join Meeting</a></div>
 </div>
 
-<div class="zoom-meeting" data-date="2026-03-10" data-end="2026-03-10">
+<div class="zoom-meeting" data-date="2026-03-10">
 <div class="zoom-date-block">
 <div class="zoom-month">Mar</div>
 <div class="zoom-day">10</div>
@@ -346,36 +354,20 @@ No upcoming meetings scheduled.
 
 <script>
 
-var meetings=[...document.querySelectorAll('.zoom-meeting')]
-var dateInput=document.getElementById('mockDate')
-var list=document.getElementById('meetingList')
-var empty=document.getElementById('emptyState')
-var calendar=document.getElementById('calendarView')
+let meetings=[...document.querySelectorAll('.zoom-meeting')]
+let calendar=document.getElementById('calendarView')
+let list=document.getElementById('meetingList')
+let dateInput=document.getElementById('mockDate')
 
 /* Accordion */
 
 meetings.forEach(m=>{
-var content=m.querySelector('.zoom-content')
-
-content.addEventListener('click',()=>{
-if(m.classList.contains('collapsing'))return
-
-var expanded=m.classList.contains('expanded')
+m.querySelector('.zoom-content').onclick=()=>{
+let open=m.classList.contains('expanded')
 meetings.forEach(x=>x.classList.remove('expanded'))
-if(!expanded)m.classList.add('expanded')
-})
-})
-
-/* Expiry */
-
-function updateVisibility(date){
-
-meetings.forEach(m=>{
-var end=new Date(m.dataset.end)
-m.classList.toggle('collapsing',end<date)
-})
-
+if(!open)m.classList.add('expanded')
 }
+})
 
 /* Tabs */
 
@@ -396,57 +388,68 @@ list.style.display=""
 }
 })
 
-/* Calendar builder */
+/* Calendar */
+
+let currentMonth=2
+let currentYear=2026
 
 function buildCalendar(){
 
 calendar.innerHTML=""
 
-var date=new Date("2026-03-01")
+let header=document.createElement("div")
+header.className="calendar-header"
 
-var grid=document.createElement("div")
+header.innerHTML=`
+<button id="prevMonth">Prev</button>
+<h3>${new Date(currentYear,currentMonth).toLocaleString('default',{month:'long'})} ${currentYear}</h3>
+<button id="nextMonth">Next</button>
+`
+
+calendar.appendChild(header)
+
+let grid=document.createElement("div")
 grid.className="calendar-grid"
 
-var days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-days.forEach(d=>{
-var h=document.createElement("div")
-h.className="calendar-header"
-h.textContent=d
-grid.appendChild(h)
-})
+let firstDay=new Date(currentYear,currentMonth,1).getDay()
+let days=new Date(currentYear,currentMonth+1,0).getDate()
 
-for(let i=0;i<35;i++){
+for(let i=0;i<firstDay;i++){
+grid.appendChild(document.createElement("div"))
+}
 
-var cell=document.createElement("div")
+for(let d=1;d<=days;d++){
+
+let cell=document.createElement("div")
 cell.className="calendar-day"
 
-var current=new Date(date)
-current.setDate(i+1)
+let today=new Date()
+if(d===today.getDate() && currentMonth===today.getMonth()){
+cell.classList.add("today")
+}
 
-var day=current.getDate()
-
-cell.innerHTML="<div class='calendar-day-number'>"+day+"</div>"
+cell.innerHTML=`<div class="calendar-day-number">${d}</div>`
 
 meetings.forEach(m=>{
-var d=new Date(m.dataset.date)
 
-if(d.getDate()===day){
-var e=document.createElement("div")
-e.className="calendar-event"
-e.textContent=m.querySelector('.zoom-title').textContent
+let md=new Date(m.dataset.date)
 
-e.onclick=function(){
-list.style.display=""
-calendar.classList.remove("active")
-document.querySelector('[data-view=list]').classList.add("active")
-document.querySelector('[data-view=calendar]').classList.remove("active")
+if(md.getDate()===d && md.getMonth()===currentMonth){
 
+let event=document.createElement("div")
+event.className="calendar-event"
+event.textContent=m.querySelector(".zoom-title").textContent
+
+event.onclick=()=>{
+document.querySelector('[data-view="list"]').click()
 m.classList.add("expanded")
 m.scrollIntoView({behavior:"smooth"})
 }
 
-cell.appendChild(e)
+cell.appendChild(event)
+
 }
+
 })
 
 grid.appendChild(cell)
@@ -455,13 +458,21 @@ grid.appendChild(cell)
 
 calendar.appendChild(grid)
 
+document.getElementById("prevMonth").onclick=()=>{
+currentMonth--
+if(currentMonth<0){currentMonth=11;currentYear--}
+buildCalendar()
+}
+
+document.getElementById("nextMonth").onclick=()=>{
+currentMonth++
+if(currentMonth>11){currentMonth=0;currentYear++}
+buildCalendar()
+}
+
 }
 
 buildCalendar()
-
-dateInput.onchange=function(){
-updateVisibility(new Date(this.value))
-}
 
 </script>
 
