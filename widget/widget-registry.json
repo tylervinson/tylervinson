@@ -37,7 +37,7 @@
         {
           "key": "heading",
           "label": "Section Heading",
-          "selector": ".section-title",
+          "selector": "h1",
           "type": "text"
         }
       ],
@@ -50,25 +50,25 @@
         {
           "key": "type",
           "label": "Plan Type",
-          "selector": ".plan-type",
+          "selector": ".plan-button-type",
           "type": "text"
         },
         {
           "key": "name",
           "label": "Plan Name",
-          "selector": ".plan-name",
+          "selector": ".plan-button-name",
           "type": "text"
         },
         {
           "key": "coverage",
           "label": "Coverage Type",
-          "selector": ".plan-coverage",
+          "selector": ".plan-button-coverage",
           "type": "text"
         },
         {
           "key": "price",
           "label": "Monthly Price",
-          "selector": ".plan-price",
+          "selector": ".plan-button-price",
           "type": "text",
           "syncDataAttr": "data-price",
           "syncNumeric": true,
