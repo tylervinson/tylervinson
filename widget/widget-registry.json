@@ -68,12 +68,56 @@
         {
           "key": "price",
           "label": "Monthly Price",
-          "selector": ".plan-button-price",
-          "type": "text",
-          "syncDataAttr": "data-price",
-          "syncNumeric": true,
           "gridSelector": ".comparison-grid",
-          "gridCellSelector": "[data-comparison=\"price\"] [data-plan=\"{planNum}\"]"
+          "gridCellSelector": "[data-comparison='price'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "deductible",
+          "label": "Annual Deductible",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='deductible'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "maxOutOfPocket",
+          "label": "Max Out-of-Pocket",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='maxOutOfPocket'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "coveragePercent",
+          "label": "Coverage Percentage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='coveragePercent'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "doctorVisits",
+          "label": "Doctor Visit Copay",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='doctorVisits'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "prescription",
+          "label": "Prescription Coverage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='prescription'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "emergency",
+          "label": "Emergency Care Copay",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='emergency'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "mentalHealth",
+          "label": "Mental Health Coverage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='mentalHealth'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "dentalVision",
+          "label": "Dental & Vision",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='dentalVision'] [data-plan='{planNum}']"
         }
       ]
     },
