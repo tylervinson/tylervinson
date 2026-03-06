@@ -73,7 +73,7 @@
           "syncDataAttr": "data-price",
           "syncNumeric": true,
           "gridSelector": ".comparison-grid",
-          "gridCellSelector": "[data-plan='{planNum}'] .price-cell"
+          "gridCellSelector": "[data-comparison=\"price\"] [data-plan=\"{planNum}\"]"
         }
       ]
     },
