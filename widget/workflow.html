@@ -48,29 +48,16 @@
         .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
         .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
         footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
-        .howto-section { margin-top: 120px; }
-        .content-toggle { display: flex; gap: 24px; border-bottom: 1px solid #e0e0e0; margin-bottom: 40px; }
-        .toggle-button { padding: 12px 0; background: none; border: none; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: #999; cursor: pointer; position: relative; transition: color 0.2s; }
-        .toggle-button.active { color: #1a1a1a; }
-        .toggle-button.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: #1a1a1a; }
-        .content-wrapper { display: flex; gap: 48px; align-items: flex-start; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 8px; overflow: hidden; flex-shrink: 0; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .video-container video { width: 100%; height: 100%; object-fit: contain; }
-        .content-wrapper.split-view .video-container { width: 55%; }
-        .steps-container { flex: 1; opacity: 0; transform: translateX(20px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; max-width: 0; overflow: hidden; }
-        .content-wrapper.split-view .steps-container { opacity: 1; transform: translateX(0); pointer-events: auto; max-width: 100%; }
-        .content-wrapper.video-only .steps-container { display: none; }
-        .steps { display: flex; flex-direction: column; }
-        .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; }
-        .step:last-child { border-bottom: none; }
-        .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; }
-        .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-        .step-content p { font-size: 14px; color: #666; line-height: 1.6; }
+        .content-wrapper.split-view
+        .content-wrapper.split-view
+        .content-wrapper.video-only
         @media (max-width: 1024px) {
             .project { grid-template-columns: 1fr; gap: 40px; }
             .project:nth-child(even) { direction: ltr; }
             .phase-card-grid { grid-template-columns: 1fr; }
         }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
@@ -82,8 +69,10 @@
                 <a href="overview.html" class="tab-nav-link">Extension Overview</a>
                 <a href="workflow.html" class="tab-nav-link active">Widget Workflow</a>
                 <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+                <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
             </nav>
             
+            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
         </header>
 
         <div class="project-list">
@@ -169,66 +158,6 @@
 
         </div><!-- /project-list -->
 
-        <div class="howto-section">
-            <div class="howto-header">
-                <div class="project-number" style="margin-bottom: 12px;">How to Use</div>
-                <h2 style="font-size: 36px; font-weight: 600; letter-spacing: -0.5px; color: #000; margin-bottom: 32px;">Using the Extension</h2>
-            </div>
-
-            <div class="content-toggle">
-                <button class="toggle-button active" onclick="toggleContent('usage', 'video')">Video Tutorial</button>
-                <button class="toggle-button" onclick="toggleContent('usage', 'steps')">Step-by-Step Guide</button>
-            </div>
-
-            <div id="usage-content" class="content-wrapper video-only">
-                <div class="video-container">
-                    <video controls>
-                        <source src="how-to-use-widget.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                <div class="steps-container">
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h3>Open the Content Editor</h3>
-                                <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree on the left.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h3>Select the Component</h3>
-                                <p>Click the component item in the tree. The Quick Info panel on the right will show the item ID, name, and path — the extension reads this automatically.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h3>Open the Extension</h3>
-                                <p>Click the extension icon in your Chrome toolbar to open the sidebar panel. It will detect the current component and populate the edit form immediately.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h3>Edit the Fields</h3>
-                                <p>Update any field values in the form. Repeating items like plan cards or stat blocks are grouped individually. Standalone fields like headings appear at the top. When finished click Apply Changes. The extension silently opens the HTML editor, writes the updated markup, and closes it — no manual WYSIWYG interaction needed.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">6</div>
-                            <div class="step-content">
-                                <h3>Save in Sitecore</h3>
-                                <p>Click Save in the Content Editor toolbar. Your changes are now live in Sitecore.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <footer>Sitecore Widget Editor Documentation</footer>
     </div>
 
@@ -236,22 +165,5 @@
         <button class="modal-close" onclick="closeModal()">&times;</button>
         <img class="modal-content" id="modalImage" alt="">
     </div>
-    <script>
-        function toggleContent(section, type) {
-            var wrapper = document.getElementById(section + '-content');
-            var buttons = wrapper.previousElementSibling.querySelectorAll('.toggle-button');
-            if (type === 'video') {
-                wrapper.classList.remove('split-view');
-                wrapper.classList.add('video-only');
-                buttons[0].classList.add('active');
-                buttons[1].classList.remove('active');
-            } else {
-                wrapper.classList.remove('video-only');
-                wrapper.classList.add('split-view');
-                buttons[0].classList.remove('active');
-                buttons[1].classList.add('active');
-            }
-        }
-    </script>
 </body>
 </html>
