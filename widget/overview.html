@@ -90,7 +90,7 @@
                     <h2>Visual Editing for Data-Driven Sitecore Widgets</h2>
                     <div class="project-description">
                         <p>Editing data-driven widgets in Sitecore traditionally requires navigating source code to manually update inline values, data attributes, and HTML structure. Content editors shouldn't need to touch markup to change a stat, a plan price, or a card label.</p>
-                        <p>This Chrome extension solves that. It opens as a persistent sidebar, scans the page for registered widgets, and presents a clean grouped form for each one. Hit Apply Changes and the edits sync instantly to the DOM — Sitecore's Experience Editor detects the change and enables the save button automatically.</p>
+                        <p>This Chrome extension solves that. It opens as a persistent sidebar inside the Content Editor, reads field values directly via the Sitecore SSC API, and presents a clean grouped form. Hit Apply Changes and the extension silently automates the HTML editor — opening it, writing the updated markup, and closing it — no manual WYSIWYG interaction required.</p>
                         <p>Widget support is driven entirely by a central <code>widget-registry.json</code> hosted on the server. Adding or updating a widget requires only editing that file — no changes to the extension itself.</p>
                     </div>
                     <a href="specs.html" class="cta-link">View Technical Specs &rarr;</a>
@@ -107,8 +107,8 @@
                     <div class="project-number">HOW IT WORKS</div>
                     <h2>Registry-Driven. No Code Changes Required.</h2>
                     <div class="project-description">
-                        <p>When the sidebar opens, it fetches the latest registry from the server. The registry defines every supported widget — its CSS class, which elements are editable, and how they map to form fields. The extension reads this and builds the editor UI on the fly.</p>
-                        <p>When a new widget needs to be supported, a developer adds its definition to the registry JSON and pushes it. Content authors open the sidebar the next time and the new widget is already there — no extension update required. If the registry version changes, a notification badge appears on the extension icon.</p>
+                        <p>When the sidebar opens, it fetches the latest registry from the server. It then reads the currently selected item's ID directly from the Content Editor's Quick Info panel and queries the Sitecore SSC API for all rich text fields on that item. Any field whose HTML contains a registered widget class is detected automatically — no item IDs needed in the registry.</p>
+                        <p>When a new widget needs to be supported, a developer adds its CSS class and field definitions to the registry JSON and pushes it. Content authors open the sidebar the next time and the new widget is already there — no extension update required. If the registry version changes, a notification badge appears on the extension icon.</p>
                     </div>
                 </div>
                 <div>
@@ -121,24 +121,24 @@
                     <div class="feature-grid-label">Core Capabilities</div>
                     <div class="feature-list">
                         <div class="feature-item">
-                            <h4>Automatic Widget Detection</h4>
-                            <p>Scans the DOM for any CSS class registered in the registry. Works with dynamically loaded content via MutationObserver.</p>
+                            <h4>Content Editor Integration</h4>
+                            <p>Works inside Sitecore's Content Editor. Reads the selected item from the Quick Info panel and fetches field data via the SSC API — no WYSIWYG required to read.</p>
                         </div>
                         <div class="feature-item">
                             <h4>Registry-Driven Forms</h4>
-                            <p>The sidebar form is generated entirely from field definitions in the registry — labels, input types, and grouping all come from the JSON.</p>
+                            <p>The sidebar form is generated entirely from field definitions in the registry — labels, input types, and grouping all come from the JSON. No item IDs or field IDs needed.</p>
                         </div>
                         <div class="feature-item">
                             <h4>Grouped Editor UI</h4>
                             <p>Repeating items (cards, plans) are presented as collapsible groups. Standalone fields appear above. Structure mirrors the widget itself.</p>
                         </div>
                         <div class="feature-item">
-                            <h4>DOM Synchronization</h4>
-                            <p>Applies changes to both visible text content and data attributes simultaneously, keeping animated counters and GTM tracking in sync.</p>
+                            <h4>Automated WYSIWYG Writes</h4>
+                            <p>On Apply, the extension programmatically opens the HTML editor, writes the updated markup, and closes it — the whole cycle completes silently in under a second.</p>
                         </div>
                         <div class="feature-item">
-                            <h4>Sitecore Bridge</h4>
-                            <p>Multi-strategy change notification triggers TinyMCE sync and field-level change events so Sitecore's save button activates correctly.</p>
+                            <h4>Navigation Awareness</h4>
+                            <p>Watches the Content Editor tree selection. When a different component is selected, the form clears and rescans automatically — no manual refresh needed.</p>
                         </div>
                         <div class="feature-item">
                             <h4>Live Update Notifications</h4>
@@ -154,27 +154,27 @@
                     <div class="arch-diagram">
                         <div class="arch-box">
                             <h4>widget-registry.json</h4>
-                            <p>Hosted on the server. Defines every widget — class name, field selectors, labels, repeat structure, and data attribute sync rules. Single source of truth.</p>
+                            <p>Hosted on the server. Defines every widget — class name, field selectors, labels, repeat structure, and data attribute sync rules. No item IDs required. Single source of truth.</p>
                         </div>
                         <div class="arch-box">
                             <h4>Sidepanel</h4>
-                            <p>Fetches the registry on open. Builds the editor form from field definitions. Passes the full widget definition into every message sent to the content script.</p>
+                            <p>Fetches the registry on open. Reads the selected item ID from Quick Info, detects widgets via SSC API, builds the editor form, and passes full widget definitions into every message sent to the content script.</p>
                         </div>
                         <div class="arch-box">
                             <h4>Content Script</h4>
-                            <p>Pure DOM worker. Receives widget definitions from the sidepanel. Reads and writes the page — no registry knowledge of its own.</p>
+                            <p>Handles all Sitecore interaction. Fetches field HTML via SSC API, parses it with DOMParser, and on save automates the HTML editor open/write/close cycle.</p>
                         </div>
                         <div class="arch-box">
                             <h4>Background Worker</h4>
-                            <p>Checks for registry version updates every 4 hours. Sets the extension badge and sends an UPDATE_AVAILABLE message to the sidepanel when a new version is detected.</p>
+                            <p>Routes messages between the sidepanel and content script. Checks for registry version updates every 4 hours. Sets the extension badge when a new version is detected.</p>
                         </div>
                         <div class="arch-box">
-                            <h4>Sitecore Bridge</h4>
-                            <p>Injected alongside the content script. Exposes <code>SitecoreBridge.notifyChange(el)</code> — called after every DOM write to trigger Sitecore's internal save state.</p>
+                            <h4>SSC API</h4>
+                            <p>Sitecore's aggregate content API at <code>/sitecore/api/ssc/aggregate/content/Items</code>. Used to read all rich text fields for the current item without opening any editor modal.</p>
                         </div>
                         <div class="arch-box">
                             <h4>Adding a Widget</h4>
-                            <p>Edit <code>widget-registry.json</code>, add a widget definition with class, fields, and selectors, push to server. No extension rebuild or reinstall needed.</p>
+                            <p>Edit <code>widget-registry.json</code>, add a widget definition with class, fields, and selectors, push to server. No item IDs, no extension rebuild, no reinstall needed.</p>
                         </div>
                     </div>
                 </div>

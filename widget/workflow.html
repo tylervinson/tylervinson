@@ -48,6 +48,24 @@
         .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
         .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
         footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        .howto-section { margin-top: 120px; }
+        .content-toggle { display: flex; gap: 24px; border-bottom: 1px solid #e0e0e0; margin-bottom: 40px; }
+        .toggle-button { padding: 12px 0; background: none; border: none; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: #999; cursor: pointer; position: relative; transition: color 0.2s; }
+        .toggle-button.active { color: #1a1a1a; }
+        .toggle-button.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: #1a1a1a; }
+        .content-wrapper { display: flex; gap: 48px; align-items: flex-start; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 8px; overflow: hidden; flex-shrink: 0; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .video-container video { width: 100%; height: 100%; object-fit: contain; }
+        .content-wrapper.split-view .video-container { width: 55%; }
+        .steps-container { flex: 1; opacity: 0; transform: translateX(20px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; max-width: 0; overflow: hidden; }
+        .content-wrapper.split-view .steps-container { opacity: 1; transform: translateX(0); pointer-events: auto; max-width: 100%; }
+        .content-wrapper.video-only .steps-container { display: none; }
+        .steps { display: flex; flex-direction: column; }
+        .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; }
+        .step:last-child { border-bottom: none; }
+        .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; }
+        .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+        .step-content p { font-size: 14px; color: #666; line-height: 1.6; }
         @media (max-width: 1024px) {
             .project { grid-template-columns: 1fr; gap: 40px; }
             .project:nth-child(even) { direction: ltr; }
@@ -96,7 +114,7 @@
                     <h2>Registry Registration</h2>
                     <div class="project-description">
                         <p>Open <code>widget-registry.json</code> and add a definition for the new widget. The definition specifies the widget's root CSS class, its display name, and the full set of editable fields — each with a CSS selector, a label for the sidebar form, and any data attribute sync rules.</p>
-                        <p>If the widget has repeating items (cards, plan buttons) define a <code>repeat</code> block with the selector for each item. Standalone fields like headings or descriptive text go in <code>standaloneFields</code>. Fields that update both an inline element and a separate comparison table row use <code>gridSelector</code>.</p>
+                        <p>If the widget has repeating items (cards, plan buttons) define a <code>repeat</code> block with the selector for each item. Standalone fields like headings go in <code>standaloneFields</code>. Fields that update a separate comparison table row use <code>gridSelector</code>. No Sitecore item IDs or field IDs are needed — the extension finds those automatically from the page.</p>
                         <ul class="step-list">
                             <li><strong>Open registry:</strong> Edit <code>widget-registry.json</code> on the server</li>
                             <li><strong>Add widget entry:</strong> Class name, display name, field definitions</li>
@@ -125,13 +143,14 @@
                 <div class="phase-card">
                     <div class="project-number">Phase 4</div>
                     <h3>Content Management</h3>
-                    <p>Install the extension, navigate to a page with the widget, and click the icon. The sidebar detects the widget automatically and presents the editor form.</p>
+                    <p>Install the extension, open the Content Editor, navigate to a component, and click the icon. The sidebar reads the current item via SSC API and presents the editor form immediately — no widget selection step needed.</p>
                     <ul class="compact-list">
                         <li>Install or update the extension ZIP</li>
-                        <li>Navigate to the page with the widget</li>
+                        <li>Open Sitecore Content Editor</li>
+                        <li>Navigate to a component in the tree</li>
                         <li>Open the sidebar via the extension icon</li>
                         <li>Edit fields and click Apply Changes</li>
-                        <li>Save in Sitecore Experience Editor</li>
+                        <li>Save in Sitecore</li>
                     </ul>
                 </div>
                 <div class="phase-card">
@@ -148,6 +167,73 @@
                 </div>
             </div>
 
+        </div><!-- /project-list -->
+
+        <div class="howto-section">
+            <div class="howto-header">
+                <div class="project-number" style="margin-bottom: 12px;">How to Use</div>
+                <h2 style="font-size: 36px; font-weight: 600; letter-spacing: -0.5px; color: #000; margin-bottom: 32px;">Using the Extension</h2>
+            </div>
+
+            <div class="content-toggle">
+                <button class="toggle-button active" onclick="toggleContent('usage', 'video')">Video Tutorial</button>
+                <button class="toggle-button" onclick="toggleContent('usage', 'steps')">Step-by-Step Guide</button>
+            </div>
+
+            <div id="usage-content" class="content-wrapper video-only">
+                <div class="video-container">
+                    <video controls>
+                        <source src="how-to-use.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="steps-container">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Open the Content Editor</h3>
+                                <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree on the left.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Select the Component</h3>
+                                <p>Click the component item in the tree. The Quick Info panel on the right will show the item ID, name, and path — the extension reads this automatically.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Open the Extension</h3>
+                                <p>Click the extension icon in your Chrome toolbar to open the sidebar panel. It will detect the current component and populate the edit form immediately.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Edit the Fields</h3>
+                                <p>Update any field values in the form. Repeating items like plan cards or stat blocks are grouped individually. Standalone fields like headings appear at the top.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h3>Apply Changes</h3>
+                                <p>Click <strong>Apply Changes</strong>. The extension silently opens the HTML editor, writes the updated markup, and closes it — no manual WYSIWYG interaction needed.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">6</div>
+                            <div class="step-content">
+                                <h3>Save in Sitecore</h3>
+                                <p>Click Save in the Content Editor toolbar. Your changes are now live in Sitecore.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer>Sitecore Widget Editor Documentation</footer>
@@ -158,25 +244,21 @@
         <img class="modal-content" id="modalImage" alt="">
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.project-image').forEach(function(el) {
-                el.addEventListener('click', function() {
-                    var img = this.querySelector('img');
-                    if (img && img.src) openModal(img.src);
-                });
-            });
-        });
-        function openModal(src) {
-            document.getElementById('modalImage').src = src;
-            document.getElementById('imageModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
+        function toggleContent(section, type) {
+            var wrapper = document.getElementById(section + '-content');
+            var buttons = wrapper.previousElementSibling.querySelectorAll('.toggle-button');
+            if (type === 'video') {
+                wrapper.classList.remove('split-view');
+                wrapper.classList.add('video-only');
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            } else {
+                wrapper.classList.remove('video-only');
+                wrapper.classList.add('split-view');
+                buttons[0].classList.remove('active');
+                buttons[1].classList.add('active');
+            }
         }
-        function closeModal() {
-            document.getElementById('imageModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
     </script>
 </body>
 </html>

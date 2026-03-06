@@ -84,11 +84,11 @@
                     </div>
                     <div class="spec-block-body">
                         <p>1. Sidebar opens &rarr; fetches <code>widget-registry.json</code> from the server.</p>
-                        <p>2. Registry loaded &rarr; sidepanel sends <code>GET_WIDGETS</code> to the content script, passing the full registry object.</p>
-                        <p>3. Content script queries the DOM for every widget class listed in the registry. Returns a list of matches with their index positions.</p>
-                        <p>4. Sidepanel picks the first widget (or shows a picker if multiple are found) and sends <code>GET_WIDGET_DATA</code> — passing the full field definition for that widget.</p>
-                        <p>5. Content script reads each field from the DOM using the selectors in the definition and returns the current values.</p>
-                        <p>6. Sidepanel builds the form from field definitions and populates it with the current values.</p>
+                        <p>2. Registry loaded &rarr; sidepanel reads the current item ID from the Content Editor's <code>input.scEditorHeaderQuickInfoInput</code> (the Quick Info panel) and sends <code>GET_WIDGETS</code> to the content script.</p>
+                        <p>3. Content script calls the Sitecore SSC API: <code>/sitecore/api/ssc/aggregate/content/Items('{id}')/Fields</code>. It scans every Rich Text field in the response for registered widget CSS classes and returns any matches along with the field's item ID and field ID.</p>
+                        <p>4. If a widget is found, the sidepanel immediately sends <code>GET_WIDGET_DATA</code> — passing the full field definition plus the discovered item ID and field ID.</p>
+                        <p>5. Content script fetches the field HTML again via SSC API, parses it with <code>DOMParser</code>, and reads each field value using the selectors in the definition.</p>
+                        <p>6. Sidepanel builds the form from field definitions and populates it with the current values. No WYSIWYG modal is opened at any point.</p>
                     </div>
                 </div>
                 <div class="spec-block">
@@ -97,16 +97,17 @@
                         <p>When the user clicks Apply, the sidepanel collects form values and sends them with the full field definition back to the content script.</p>
                     </div>
                     <div class="spec-block-body">
-                        <p>The content script iterates each field definition, finds the matching DOM element using the field's <code>selector</code>, and sets its <code>textContent</code>. If the field has a <code>syncDataAttr</code>, the corresponding data attribute on the repeat item is updated too. If the field has a <code>gridSelector</code>, the matching cell in the comparison table is also updated.</p>
-                        <p>After each write, <code>SitecoreBridge.notifyChange(el)</code> is called on the modified element to trigger Sitecore's internal change detection and enable the save button.</p>
+                        <p>The sidepanel collects form values and sends them with the full field definition and field ID to the content script via <code>UPDATE_WIDGET_DATA</code>.</p>
+                        <p>The content script fetches the current field HTML via SSC API, parses it, iterates each field definition, and applies updates — using <code>selector</code> for inline elements, <code>gridSelector</code>/<code>gridCellSelector</code> for comparison table cells, and <code>syncDataAttr</code> for data attributes. It then serializes the modified HTML back to a string.</p>
+                        <p>Finally it programmatically clicks the "Edit HTML" button (not "Show editor"), waits for the textarea to appear, writes the updated HTML string into it, triggers a change event, and clicks Accept. The entire open/write/close cycle completes in under a second with no visible modal interaction for the user.</p>
                     </div>
                 </div>
                 <div class="spec-block">
                     <div class="spec-block-header">
-                        <h3>Content script has no registry</h3>
+                        <h3>No item IDs in the registry</h3>
                     </div>
                     <div class="spec-block-body">
-                        <p>The content script is a pure DOM worker. It receives widget definitions directly in each message from the sidepanel — it never fetches or stores the registry itself. This means registry changes take effect as soon as the sidepanel refreshes, with no content script reload required.</p>
+                        <p>Sitecore item IDs and field IDs are discovered at runtime — the extension reads the selected item ID from the Content Editor's Quick Info panel and fetches all fields from the SSC API. This means the registry only needs CSS class names and selectors. Moving a widget to a different item or field in Sitecore requires no registry change.</p>
                     </div>
                 </div>
             </div>
@@ -347,7 +348,7 @@
                         <hr class="divider">
                         <p><strong>4. Deploy the registry.</strong> Push the updated <code>widget-registry.json</code> to the server at <code>/widget/widget-registry.json</code>. No changes to the extension are required.</p>
                         <hr class="divider">
-                        <p><strong>5. Verify.</strong> Open the extension sidebar on a page with the new widget. It should appear in the picker and display the correct form fields. If fields are missing or showing wrong values, check that the selectors resolve correctly against the live DOM.</p>
+                        <p><strong>5. Verify.</strong> Open the extension sidebar in the Content Editor and navigate to a component that contains the new widget. The form should populate automatically with the current field values. If fields are missing or blank, check that the CSS selectors resolve correctly against the HTML stored in the rich text field.</p>
                         <hr class="divider">
                         <div class="note"><strong>Version bump:</strong> Incrementing <code>version</code> in the registry causes the extension's background worker to set the update badge (<code>!</code>) for any user whose installed extension version doesn't match. This is the signal to content authors that a registry update is available.</div>
                     </div>
