@@ -75,5 +75,16 @@
     "pdfUrl": "pdfs/1772856309299_Morgan_Vinson_ARE540_Show_and_Tell.pdf",
     "thumbnailUrl": "thumbnails/1772856309299_Morgan_Vinson_ARE540_Show_and_Tell.jpg",
     "uploadDate": "2026-03-07"
+  },
+  {
+    "id": 1772856370024,
+    "title": "ARE540 Subjectivity Statement",
+    "description": "This is an initial draft of my subjectivity statement and my research focus.",
+    "tags": [
+      "PDF"
+    ],
+    "pdfUrl": "pdfs/1772856370024_Morgan_Vinson_ARE540__Subjectivity_Statement.pdf",
+    "thumbnailUrl": "thumbnails/1772856370024_Morgan_Vinson_ARE540__Subjectivity_Statement.jpg",
+    "uploadDate": "2026-03-07"
   }
 ]
