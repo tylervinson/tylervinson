@@ -27,13 +27,14 @@
         .content-wrapper.split-view .steps-container { opacity: 1; transform: translateX(0); pointer-events: auto; max-width: 100%; }
         .content-wrapper.video-only .steps-container { display: none; }
         .steps { display: flex; flex-direction: column; }
-        .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease; }
+        .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease; opacity: 0.6; }
         .step:last-child { border-bottom: none; }
-        .step.active { opacity: 1; background: #ffffff; padding: 20px; margin: 0; border-radius: 6px; }
+        .step.active { opacity: 1; background: #fffef5; padding: 20px; margin: 0 -20px; padding-left: 20px; border-radius: 6px; }
         .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; transition: all 0.3s ease; }
         .step.active .step-number { background: #FFBE5F; color: #1a1a1a; transform: scale(1.15); }
         .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
         .step-content p { font-size: 14px; color: #666; line-height: 1.6; }
+        .step.active .step-content h3 { color: #FFBE5F; }
         footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
         @media (max-width: 1024px) {
             .content-wrapper { flex-direction: column; }
@@ -80,14 +81,14 @@
                                 <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree on the left.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="8">
+                        <div class="step" data-timestamp="7">
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h3>Select the Component</h3>
                                 <p>Click the component item in the tree. The Quick Info panel on the right will show the item ID, name, and path — the extension reads this automatically.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="16">
+                        <div class="step" data-timestamp="17">
                             <div class="step-number">3</div>
                             <div class="step-content">
                                 <h3>Open the Extension</h3>
@@ -101,7 +102,7 @@
                                 <p>Update any field values in the form. Repeating items like plan cards or stat blocks are grouped individually. Standalone fields like headings appear at the top. When finished click Apply Changes. The extension silently opens the HTML editor, writes the updated markup, and closes it — no manual WYSIWYG interaction needed.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="45">
+                        <div class="step" data-timestamp="36">
                             <div class="step-number">6</div>
                             <div class="step-content">
                                 <h3>Save in Sitecore</h3>
