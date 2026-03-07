@@ -29,11 +29,12 @@
         .steps { display: flex; flex-direction: column; }
         .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease; }
         .step:last-child { border-bottom: none; }
-        .step.active { opacity: 1; background: #ffffff; padding: 20px; margin: 0; border-radius: 6px; }
+        .step.active { opacity: 1; background: #ffffff; padding: 20px; margin: 0; border-radius: 6px; position: relative; z-index: 99999; }
         .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; transition: all 0.3s ease; }
         .step.active .step-number { background: #FFBE5F; color: #1a1a1a; transform: scale(1.15); }
         .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-        .step-content p { font-size: 14px; color: #666; line-height: 1.6; }
+        .step-shadow { box-shadow: none; margin: auto; width: 90%; transition: box-shadow 0.3s ease; }
+        .step.active ~ .step-shadow { box-shadow: -2px -6px 20px 4px #000000; }
         footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
         @media (max-width: 1024px) {
             .content-wrapper { flex-direction: column; }
@@ -73,41 +74,51 @@
                 </div>
                 <div class="steps-container">
                     <div class="steps">
-                        <div class="step" data-timestamp="0">
+                        <div><div class="step" data-timestamp="0" style="cursor: pointer;">
                             <div class="step-number">1</div>
                             <div class="step-content">
                                 <h3>Open the Content Editor</h3>
                                 <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree on the left.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="10">
+<div class="step-shadow"></div>
+</div>
+                        <div><div class="step" data-timestamp="10" style="cursor: pointer;">
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h3>Select the Component</h3>
                                 <p>Click the component item in the tree. The Quick Info panel on the right will show the item ID, name, and path — the extension reads this automatically.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="26">
+<div class="step-shadow"></div>
+</div>
+                        <div><div class="step" data-timestamp="26" style="cursor: pointer;">
                             <div class="step-number">3</div>
                             <div class="step-content">
                                 <h3>Open the Extension</h3>
                                 <p>Click the extension icon in your Chrome toolbar to open the sidebar panel. It will detect the current component and populate the edit form immediately.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="38">
+<div class="step-shadow"></div>
+</div>
+                        <div><div class="step" data-timestamp="38" style="cursor: pointer;">
                             <div class="step-number">4</div>
                             <div class="step-content">
                                 <h3>Edit the Fields</h3>
                                 <p>Update any field values in the form. Repeating items like plan cards or stat blocks are grouped individually. Standalone fields like headings appear at the top. When finished click Apply Changes. The extension silently opens the HTML editor, writes the updated markup, and closes it — no manual WYSIWYG interaction needed.</p>
                             </div>
                         </div>
-                        <div class="step" data-timestamp="67">
-                            <div class="step-number">5</div>
+<div class="step-shadow"></div>
+</div>
+                        <div><div class="step" data-timestamp="67" style="cursor: pointer;">
+                            <div class="step-number">6</div>
                             <div class="step-content">
                                 <h3>Save in Sitecore</h3>
                                 <p>Click Save in the Content Editor toolbar. Your changes are now live in Sitecore.</p>
                             </div>
                         </div>
+<div class="step-shadow"></div>
+</div>
                     </div>
                 </div>
         </div>
