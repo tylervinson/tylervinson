@@ -4,401 +4,303 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON Schema Generator - Overview</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            line-height: 1.6;
-            color: #1a1a1a;
-            background: #ffffff;
-        }
-
-        header {
-            background: #1a1a1a;
-            color: white;
-            padding: 2rem 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        h1 {
-            font-weight: 300;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            font-weight: 300;
-            opacity: 0.8;
-            font-size: 1rem;
-        }
-
-        .content-section {
-            padding: 3rem 0;
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 3rem;
-            align-items: start;
-            margin-bottom: 3rem;
-        }
-
-        .thumbnail {
-            width: 100%;
-            border: 1px solid #e0e0e0;
-            background: #f9f9f9;
-            aspect-ratio: 16/10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 0.9rem;
-        }
-
-        .thumbnail img {
-            width: 100%;
-            height: auto;
-        }
-
-        .overview h2 {
-            font-weight: 400;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .overview p {
-            margin-bottom: 1.5rem;
-            color: #333;
-            line-height: 1.7;
-        }
-
-        .overview ul {
-            list-style: none;
-            margin-bottom: 2rem;
-        }
-
-        .overview ul li {
-            padding: 0.5rem 0;
-            padding-left: 1.5rem;
-            position: relative;
-            color: #333;
-        }
-
-        .overview ul li:before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: #1a1a1a;
-            font-weight: bold;
-        }
-
-        .btn {
-            padding: 0.75rem 2rem;
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 1rem;
-            text-decoration: none;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .project-list { display: flex; flex-direction: column; gap: 80px; }
+        .project { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+        .project:nth-child(even) { direction: rtl; }
+        .project:nth-child(even) > * { direction: ltr; }
+        .project-content { display: flex; flex-direction: column; gap: 24px; }
+        .project-number { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; }
+        .project h2 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: #000; }
+        .project-description { font-size: 16px; line-height: 1.7; color: #444; }
+        .project-description p + p { margin-top: 16px; }
+        .project-description code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
+        .project-description ul { list-style: none; padding: 0; margin-top: 12px; }
+        .project-description ul li { padding: 8px 0; padding-left: 18px; position: relative; font-size: 15px; color: #444; line-height: 1.5; border-bottom: 1px solid #f5f5f5; }
+        .project-description ul li:last-child { border-bottom: none; }
+        .project-description ul li::before { content: "→"; position: absolute; left: 0; color: #ccc; font-size: 12px; }
+        .project-description strong { color: #1a1a1a; font-weight: 600; }
+        .project-image { position: relative; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); cursor: pointer; }
+        .project-image:hover { opacity: 0.95; }
+        .project-image img { width: 100%; height: auto; display: block; border-radius: 8px; }
+        .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); border-radius: 8px; color: #999; font-size: 14px; }
+        .feature-grid { grid-column: 1 / -1; margin-top: 16px; }
+        .feature-grid-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+        .feature-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .feature-item { background: #fff; padding: 28px; }
+        .feature-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #1a1a1a; }
+        .feature-item p { font-size: 14px; color: #666; line-height: 1.6; }
+        .schema-display { grid-column: 1 / -1; margin-top: 16px; }
+        .schema-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+        .schema-content { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 32px; }
+        .schema-section { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #f0f0f0; }
+        .schema-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .schema-section-title { font-size: 11px; color: #999; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px; }
+        .schema-field { margin-bottom: 12px; }
+        .schema-field-label { font-size: 13px; color: #666; font-weight: 500; margin-bottom: 4px; }
+        .schema-field-value { font-size: 14px; color: #1a1a1a; }
+        .schema-nested { margin-top: 8px; padding-left: 16px; border-left: 2px solid #e0e0e0; }
+        .schema-nested > div { margin-bottom: 8px; font-size: 14px; }
+        .schema-nested > div:last-child { margin-bottom: 0; }
+        .schema-nested strong { color: #1a1a1a; font-weight: 600; }
+        .schema-nested em { color: #666; font-size: 13px; }
+        .cta-link { 
             display: inline-block;
-            transition: opacity 0.2s ease;
+            padding: 14px 28px;
+            border: 2px solid #343d3f;
+            background-color: transparent;
+            color: #343d3f;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
-
-        .schema-display {
-            margin-top: 3rem;
-            padding: 2rem;
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-        }
-
-        .schema-display h3 {
-            font-weight: 400;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .schema-content {
-            background: #ffffff;
-            padding: 1.5rem;
-            border: 1px solid #e0e0e0;
-        }
-
-        .schema-section {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .schema-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .schema-section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #999;
-            margin-bottom: 0.75rem;
-        }
-
-        .schema-field {
-            margin-bottom: 1rem;
-        }
-
-        .schema-field-label {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 0.25rem;
-        }
-
-        .schema-field-value {
-            font-size: 0.95rem;
-            color: #1a1a1a;
-        }
-
-        .schema-list {
-            list-style: none;
-            margin-top: 0.5rem;
-        }
-
-        .schema-list li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f5f5f5;
-            font-size: 0.9rem;
-        }
-
-        .schema-list li:last-child {
-            border-bottom: none;
-        }
-
-        .schema-nested {
-            margin-top: 0.5rem;
-            padding-left: 1rem;
-            border-left: 2px solid #e0e0e0;
-        }
-
-        @media (max-width: 768px) {
-            .two-column {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
+        .cta-link:hover { padding-left: 38px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+        .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .project { grid-template-columns: 1fr; gap: 40px; }
+            .project:nth-child(even) { direction: ltr; }
+            .feature-list { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
+    <div class="container">
+        <header>
             <h1>JSON-LD Schema Generator</h1>
             <p class="subtitle">Automated structured data generation, validation, and version control</p>
-        </div>
-    </header>
+            <nav class="tab-nav">
+                <a href="schema-generator-landing.html" class="tab-nav-link active">Generator Overview</a>
+                <a href="schema-generator.html" class="tab-nav-link">Schema Details</a>
+                <a href="schema-specs.html" class="tab-nav-link">Technical Specs</a>
+            </nav>
+        </header>
 
-    <div class="container content-section">
-        <div class="two-column">
-            <div class="thumbnail">
-                <img src="tool-screenshot.png" alt="JSON-LD Schema Generator Screenshot">
-                <!-- If no image, the placeholder text will show -->
-            </div>
+        <div class="project-list">
 
-            <div class="overview">
-                <h2>Overview</h2>
-                <p>A comprehensive web-based tool for automatically generating, managing, and validating JSON-LD structured data schemas for websites. It scrapes live web pages to extract metadata and creates production-ready schema markup that improves SEO and search visibility.</p>
-
-                <h3 style="font-weight: 400; font-size: 1.2rem; margin-bottom: 0.75rem;">Key Capabilities</h3>
-                <ul>
-                    <li><strong>Automated Schema Generation</strong> – Bulk processing via spreadsheet upload or single URL mode with auto-extraction of page metadata</li>
-                    <li><strong>Version Control & History</strong> – GitHub integration stores schemas with full version tracking and side-by-side diff comparison</li>
-                    <li><strong>Schema Management</strong> – Browse, search, view, and delete stored schemas without re-scraping</li>
-                    <li><strong>Quality Assurance</strong> – Comprehensive validation against schema.org standards with 0-100 scoring system</li>
-                    <li><strong>Multiple Output Formats</strong> – JSON view, HTML preview, wrapped script tags, and bulk ZIP export</li>
-                    <li><strong>Professional Features</strong> – CORS proxy support, retry logic, progress tracking, and clean minimal UI</li>
-                </ul>
-
-                <a href="" class="btn">Launch Tool</a>
-            </div>
-        </div>
-
-        <div class="schema-display">
-            <h3>Sample Generated Schema</h3>
-            <div class="schema-content">
-                
-                <!-- Basic Information -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Basic Information</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Type</div>
-                        <div class="schema-field-value">WebPage</div>
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">OVERVIEW</div>
+                    <h2>Automated Schema Generation at Scale</h2>
+                    <div class="project-description">
+                        <p>A comprehensive web-based tool for automatically generating, managing, and validating JSON-LD structured data schemas for websites. It scrapes live web pages to extract metadata and creates production-ready schema markup that improves SEO and search visibility.</p>
+                        <p>Support for bulk processing via spreadsheet upload or single URL mode. The tool auto-extracts page metadata, creates schemas against schema.org standards, and provides version control integration with GitHub for tracking schema evolution.</p>
                     </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Name</div>
-                        <div class="schema-field-value">AZ Blue | Blue Cross Blue Shield of Arizona | Health Insurance</div>
+                    <a href="schema-generator.html" class="cta-link">View Schema Details &rarr;</a>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Tool Screenshot</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">KEY CAPABILITIES</div>
+                    <h2>Comprehensive Schema Management</h2>
+                    <div class="project-description">
+                        <p>The generator supports both bulk and single-URL processing workflows. Upload a spreadsheet of URLs for batch schema generation, or enter a single URL for immediate processing. All schemas are validated against schema.org standards and assigned a quality score from 0-100.</p>
+                        <p>Version control integration with GitHub stores the complete schema history. Browse, search, view, and delete stored schemas without re-scraping. Export in multiple formats including JSON, HTML preview, script tags, and bulk ZIP archives.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Feature Screenshot</div>
                     </div>
                 </div>
 
-                <!-- Description -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Description</div>
-                    <div class="schema-field-value">
-                        Be your healthiest with Blue Cross Blue Shield of Arizona. Find health insurance plans for all health concerns and budgets for individuals, families, and businesses.
-                    </div>
-                </div>
-
-                <!-- URL & ID -->
-                <div class="schema-section">
-                    <div class="schema-section-title">URL & Identifiers</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">URL</div>
-                        <div class="schema-field-value">https://www.azblue.com/</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">@ID</div>
-                        <div class="schema-field-value">https://www.azblue.com/#webpage</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Language</div>
-                        <div class="schema-field-value">en-US</div>
-                    </div>
-                </div>
-
-                <!-- IsPartOf -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Is Part Of</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Website</div>
-                        <div class="schema-field-value">Health Insurance</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Site URL</div>
-                        <div class="schema-field-value">https://www.azblue.com</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Website ID</div>
-                        <div class="schema-field-value">https://www.azblue.com/#website</div>
-                    </div>
-                </div>
-
-                <!-- Primary Image -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Primary Image</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Image URL</div>
-                        <div class="schema-field-value">https://assets.azblue.com/m/2af89a84b70faafe/original/Homepage-Heart-Hero-Mobile.png</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Dimensions</div>
-                        <div class="schema-field-value">1200 × 630</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Image ID</div>
-                        <div class="schema-field-value">https://www.azblue.com/#primaryimage</div>
-                    </div>
-                </div>
-
-                <!-- Breadcrumbs -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Breadcrumbs</div>
-                    <div class="schema-field-value" style="color: #666;">
-                        No breadcrumb items (homepage)
-                    </div>
-                </div>
-
-                <!-- Publisher -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Publisher</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Organization</div>
-                        <div class="schema-field-value">Health Insurance</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Organization ID</div>
-                        <div class="schema-field-value">https://www.azblue.com/#organization</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Logo</div>
-                        <div class="schema-field-value">https://assets.azblue.com/m/2af89a84b70faafe/original/Homepage-Heart-Hero-Mobile.png (300 × 60)</div>
-                    </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Contact Points</div>
-                        <div class="schema-nested">
-                            <div style="margin-bottom: 0.75rem;">
-                                <strong>Customer Service</strong><br>
-                                (800)-232-2345<br>
-                                <span style="color: #666; font-size: 0.85rem;">Languages: English, Spanish | Area: US</span>
-                            </div>
-                            <div>
-                                <strong>TTY</strong><br>
-                                711<br>
-                                <span style="color: #666; font-size: 0.85rem;">Languages: English | Area: US</span>
-                            </div>
+                <div class="feature-grid">
+                    <div class="feature-grid-label">Core Capabilities</div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <h4>Bulk Processing</h4>
+                            <p>Upload a CSV or Excel spreadsheet with URLs. The generator processes all entries, extracts metadata, and generates schemas in batch.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Auto-Extraction</h4>
+                            <p>Intelligent scraping detects page titles, descriptions, images, breadcrumbs, author info, and structured markup already present.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Validation & Scoring</h4>
+                            <p>Every generated schema is validated against schema.org standards. Quality scores from 0-100 indicate completeness and compliance.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Version Control</h4>
+                            <p>GitHub integration tracks every schema version. View diffs, compare revisions, and roll back to previous versions as needed.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Multiple Export Formats</h4>
+                            <p>JSON view, HTML preview, ready-to-paste script tags, and bulk ZIP downloads for easy integration.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>CORS & Reliability</h4>
+                            <p>Built-in CORS proxy support, automatic retry logic, and progress tracking for large batch operations.</p>
                         </div>
                     </div>
                 </div>
+            </article>
 
-                <!-- About -->
-                <div class="schema-section">
-                    <div class="schema-section-title">About (Service)</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Service Name</div>
-                        <div class="schema-field-value">Sign Up For Your AZ Blue Portal</div>
+            <div class="schema-display">
+                <div class="schema-label">Sample Generated Schema</div>
+                <div class="schema-content">
+                    <!-- Basic Information -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Basic Information</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Type</div>
+                            <div class="schema-field-value">WebPage</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Name</div>
+                            <div class="schema-field-value">AZ Blue | Blue Cross Blue Shield of Arizona | Health Insurance</div>
+                        </div>
                     </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Service Type</div>
-                        <div class="schema-field-value">Information</div>
+
+                    <!-- Description -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Description</div>
+                        <div class="schema-field-value">
+                            Be your healthiest with Blue Cross Blue Shield of Arizona. Find health insurance plans for all health concerns and budgets for individuals, families, and businesses.
+                        </div>
                     </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Area Served</div>
-                        <div class="schema-field-value">United States</div>
+
+                    <!-- URL & ID -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">URL & Identifiers</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">URL</div>
+                            <div class="schema-field-value">https://www.azblue.com/</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">@ID</div>
+                            <div class="schema-field-value">https://www.azblue.com/#webpage</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Language</div>
+                            <div class="schema-field-value">en-US</div>
+                        </div>
                     </div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Description</div>
-                        <div class="schema-field-value">Be your healthiest with Blue Cross Blue Shield of Arizona. Find health insurance plans for all health concerns and budgets for individuals, families, and businesses.</div>
+
+                    <!-- IsPartOf -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Is Part Of</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Website</div>
+                            <div class="schema-field-value">Health Insurance</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Site URL</div>
+                            <div class="schema-field-value">https://www.azblue.com</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Website ID</div>
+                            <div class="schema-field-value">https://www.azblue.com/#website</div>
+                        </div>
+                    </div>
+
+                    <!-- Primary Image -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Primary Image</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Image URL</div>
+                            <div class="schema-field-value">https://assets.azblue.com/m/2af89a84b70faafe/original/Homepage-Heart-Hero-Mobile.png</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Dimensions</div>
+                            <div class="schema-field-value">1200 × 630</div>
+                        </div>
+                    </div>
+
+                    <!-- Breadcrumbs -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Breadcrumbs</div>
+                        <div class="schema-field-value">No breadcrumb items (homepage)</div>
+                    </div>
+
+                    <!-- Publisher -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">Publisher</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Organization</div>
+                            <div class="schema-field-value">Health Insurance</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Organization ID</div>
+                            <div class="schema-field-value">https://www.azblue.com/#organization</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Contact Points</div>
+                            <div class="schema-nested">
+                                <div><strong>Customer Service:</strong> (800)-232-2345 <em>English, Spanish | US</em></div>
+                                <div><strong>TTY:</strong> 711 <em>English | US</em></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="schema-section">
+                        <div class="schema-section-title">About (Service)</div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Service Name</div>
+                            <div class="schema-field-value">Sign Up For Your AZ Blue Portal</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Service Type</div>
+                            <div class="schema-field-value">Information</div>
+                        </div>
+                        <div class="schema-field">
+                            <div class="schema-field-label">Area Served</div>
+                            <div class="schema-field-value">United States</div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Main Entity -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Main Entity</div>
-                    <div class="schema-field-value" style="color: #666;">
-                        No main entity items
-                    </div>
-                </div>
-
-                <!-- Potential Actions -->
-                <div class="schema-section">
-                    <div class="schema-section-title">Potential Actions</div>
-                    <div class="schema-field">
-                        <div class="schema-field-label">Search Action</div>
-                        <div class="schema-field-value">https://www.azblue.com/search?q={search_term_string}</div>
-                    </div>
-                </div>
-
             </div>
+
         </div>
+
+        <footer>JSON-LD Schema Generator Documentation</footer>
     </div>
+
+    <div id="imageModal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modalImage" alt="">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.project-image').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var img = this.querySelector('img');
+                    if (img && img.src) openModal(img.src);
+                });
+            });
+        });
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    </script>
 </body>
 </html>

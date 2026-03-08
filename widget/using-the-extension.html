@@ -238,10 +238,13 @@
             // Optional: Allow clicking a step to jump to that timestamp
             steps.forEach(step => {
                 step.style.cursor = 'pointer';
-                step.addEventListener('click', function() {
+                step.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const timestamp = parseInt(this.getAttribute('data-timestamp'));
-                    video.currentTime = timestamp;
-                    updateActiveStep();
+                    if (!isNaN(timestamp)) {
+                        video.currentTime = timestamp;
+                        updateActiveStep();
+                    }
                 });
             });
         });

@@ -20,28 +20,60 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 80px 40px;
         }
 
         header {
             background: #ffffff;
-            padding: 2rem;
+            padding: 0;
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0;
             border-bottom: 1px solid #e0e0e0;
             margin-bottom: 2rem;
+            margin-top: 2rem;
+        }
+
+        .tab-nav-link {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #999;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s;
+        }
+
+        .tab-nav-link:hover {
+            color: #666;
+        }
+
+        .tab-nav-link.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
         }
 
         h1 {
-            font-size: 2rem;
-            font-weight: 300;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
+            font-size: 56px;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            color: #000;
         }
 
         .subtitle {
             color: #666;
-            font-size: 0.95rem;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 32px;
         }
 
         .upload-section {
@@ -384,24 +416,16 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; gap: 2rem;">
-            <div>
-                <h1>JSON-LD Schema Generator</h1>
-                <p class="subtitle">Upload URLs and automatically scrape page content to generate comprehensive schemas</p>
-            </div>
-            <div style="display: flex; gap: 1.5rem; align-items: center;">
-                <button id="browseSchemasbtn" onclick="showBrowseSchemas()" style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1a1a1a;" title="Browse Schemas">
-                    <i class="fa-regular fa-folder-open"></i>
-                </button>
-                <button id="githubSettingsBtn" onclick="showGitHubConfigModal()" style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1a1a1a;" title="GitHub Settings">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
     <div class="container">
+        <header>
+            <h1>JSON-LD Schema Generator</h1>
+            <p class="subtitle">Upload URLs and automatically scrape page content to generate comprehensive schemas</p>
+            <nav class="tab-nav">
+                <a href="schema-generator-landing.html" class="tab-nav-link">Generator Overview</a>
+                <a href="schema-generator.html" class="tab-nav-link active">Schema Details</a>
+                <a href="schema-specs.html" class="tab-nav-link">Technical Specs</a>
+            </nav>
+        </header>
         <div class="tabs" data-active="0">
             <button class="tab-btn active" onclick="switchTab('spreadsheet', 0)">Spreadsheet</button>
             <button class="tab-btn" onclick="switchTab('single', 1)">Single URL</button>
@@ -576,6 +600,7 @@
 
         function updateSettingsButtonVisibility() {
             const settingsBtn = document.getElementById('githubSettingsBtn');
+            if (!settingsBtn) return; // Button doesn't exist in this layout
             if (hasWriteAccess()) {
                 // User has configured GitHub - hide the settings button
                 settingsBtn.classList.add('hidden');
