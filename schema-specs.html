@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specifications - JSON Schema Generator</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .specs-body { display: flex; flex-direction: column; gap: 80px; }
+        .spec-section { display: grid; grid-template-columns: 280px 1fr; gap: 60px; align-items: start; }
+        .spec-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; padding-top: 4px; position: sticky; top: 40px; }
+        .spec-label h2 { font-size: 22px; font-weight: 600; color: #1a1a1a; text-transform: none; letter-spacing: -0.3px; margin-top: 8px; line-height: 1.3; }
+        .spec-label p { font-size: 14px; color: #888; font-weight: 400; text-transform: none; letter-spacing: 0; margin-top: 8px; line-height: 1.6; }
+        .spec-content { display: flex; flex-direction: column; gap: 32px; }
+        .spec-block { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .spec-block-header { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; }
+        .spec-block-header h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+        .spec-block-header p { font-size: 14px; color: #666; margin-top: 4px; line-height: 1.5; }
+        .spec-block-body { padding: 24px; }
+        .spec-block-body p { font-size: 15px; color: #444; line-height: 1.7; }
+        .spec-block-body p + p { margin-top: 12px; }
+        .spec-block-body ul { list-style: none; padding: 0; margin: 12px 0; }
+        .spec-block-body li { padding: 8px 0 8px 24px; position: relative; color: #444; line-height: 1.6; }
+        .spec-block-body li::before { content: "→"; position: absolute; left: 0; color: #ccc; font-size: 12px; }
+        pre { background: #1a1a1a; color: #e0e0e0; padding: 24px; border-radius: 6px; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; }
+        pre .key { color: #FFBE5F; }
+        pre .str { color: #98d9a4; }
+        pre .num { color: #79b8ff; }
+        pre .bool { color: #f97583; }
+        pre .cmt { color: #666; font-style: italic; }
+        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
+        .field-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .field-table th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #999; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
+        .field-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; vertical-align: top; color: #444; line-height: 1.5; }
+        .field-table tr:last-child td { border-bottom: none; }
+        .field-table td:first-child { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #1a1a1a; white-space: nowrap; }
+        .field-table td.required { color: #e05a5a; font-size: 12px; }
+        .field-table td.optional { color: #999; font-size: 12px; }
+        .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
+        .tag-required { background: #fff0f0; color: #e05a5a; border: 1px solid #ffd0d0; }
+        .tag-optional { background: #f5f5f5; color: #999; border: 1px solid #e0e0e0; }
+        .divider { border: none; border-top: 1px solid #f0f0f0; margin: 24px 0; }
+        .note { background: #fff9ee; border: 1px solid #ffd9a6; border-radius: 6px; padding: 16px 20px; font-size: 14px; color: #555; line-height: 1.6; }
+        .note strong { color: #1a1a1a; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .spec-section { grid-template-columns: 1fr; gap: 24px; }
+            .spec-label { position: static; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Technical Specifications</h1>
+        <p class="subtitle">API endpoints, data formats, and integration details</p>
+        <nav class="tab-nav">
+            <a href="schema-generator-landing.html" class="tab-nav-link">Generator Overview</a>
+            <a href="schema-generator.html" class="tab-nav-link">Schema Details</a>
+            <a href="schema-specs.html" class="tab-nav-link active">Technical Specs</a>
+        </nav>
+    </header>
+
+    <div class="specs-body">
+
+        <!-- ARCHITECTURE -->
+        <div class="spec-section">
+            <div class="spec-label">
+                Architecture
+                <h2>System Components</h2>
+                <p>How the generator scrapes, generates, validates, and stores schemas.</p>
+            </div>
+            <div class="spec-content">
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Web Scraper</h3>
+                        <p>Fetches and parses live web pages using CORS proxies and DOM parsing.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>The scraper uses a fallback chain of CORS proxies to handle cross-origin restrictions. When direct access fails, it automatically tries secondary proxies including Cloudflare Worker, AllOrigins, CorsAnywhere, and others.</p>
+                        <p>Once the HTML is retrieved, the scraper parses it with <code>DOMParser</code> to extract metadata including:</p>
+                        <ul>
+                            <li>Page title, description, and canonical URL</li>
+                            <li>Open Graph and Twitter Card metadata</li>
+                            <li>Structured data already present (microdata, JSON-LD)</li>
+                            <li>Images and image dimensions</li>
+                            <li>Breadcrumb trails</li>
+                            <li>Author and publisher information</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Schema Generator</h3>
+                        <p>Transforms extracted metadata into valid JSON-LD schemas.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>The generator creates structured data following schema.org standards. It intelligently maps extracted fields to appropriate schema types (WebPage, Organization, Article, Product, etc.) and fills in all required and recommended properties.</p>
+                        <p>The generator also:</p>
+                        <ul>
+                            <li>Validates all URLs and formats</li>
+                            <li>Generates unique @id values for each entity</li>
+                            <li>Creates proper entity relationships (isPartOf, mainEntity, etc.)</li>
+                            <li>Normalizes language codes and geographic regions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Validation Engine</h3>
+                        <p>Checks schemas against schema.org standards and assigns quality scores.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>Every generated schema is validated for completeness and correctness. The validation engine checks:</p>
+                        <ul>
+                            <li>Required properties are present</li>
+                            <li>Property types match schema.org specifications</li>
+                            <li>URLs are properly formatted and accessible</li>
+                            <li>No deprecated properties are used</li>
+                        </ul>
+                        <p>Quality is scored from 0-100 based on completeness of optional fields and presence of recommended properties.</p>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>GitHub Integration</h3>
+                        <p>Stores schemas and maintains version history in a GitHub repository.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>Schemas are persisted to GitHub for version control and archival. Each schema is stored as a separate JSON file with the format <code>schemas/[domain]/[path].json</code>.</p>
+                        <p>The integration supports:</p>
+                        <ul>
+                            <li>Automatic commit messages with URL and timestamp</li>
+                            <li>Branch selection (default: main)</li>
+                            <li>Public read access via GitHub Raw API</li>
+                            <li>Private write access using personal access tokens</li>
+                            <li>Full version history and diff comparison</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API REFERENCE -->
+        <div class="spec-section">
+            <div class="spec-label">
+                API Reference
+                <h2>Endpoints &amp; Methods</h2>
+                <p>Core functions and their parameters.</p>
+            </div>
+            <div class="spec-content">
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>scrapePage(url, corsProxy)</h3>
+                        <p>Fetches and parses a web page, returning structured metadata.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p><strong>Parameters:</strong></p>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>url</td>
+                                    <td>string</td>
+                                    <td>The full URL to scrape</td>
+                                </tr>
+                                <tr>
+                                    <td>corsProxy</td>
+                                    <td>string</td>
+                                    <td>Optional. CORS proxy to use if direct request fails</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Returns:</strong></p>
+                        <p>Object containing <code>html</code>, <code>title</code>, <code>description</code>, <code>image</code>, <code>author</code>, and other extracted metadata.</p>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>generateSchemaFromPageData(pageData, siteConfig)</h3>
+                        <p>Converts extracted page data into a complete JSON-LD schema.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p><strong>Parameters:</strong></p>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>pageData</td>
+                                    <td>object</td>
+                                    <td>Extracted metadata from scrapePage()</td>
+                                </tr>
+                                <tr>
+                                    <td>siteConfig</td>
+                                    <td>object</td>
+                                    <td>Site-wide configuration from the first page (organization, logo, etc.)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Returns:</strong></p>
+                        <p>Complete JSON-LD schema object following schema.org standards.</p>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>validateSchema(schema)</h3>
+                        <p>Validates a schema and returns a quality score.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p><strong>Parameters:</strong></p>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>schema</td>
+                                    <td>object</td>
+                                    <td>JSON-LD schema to validate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Returns:</strong></p>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>isValid</td>
+                                    <td>boolean</td>
+                                    <td>Whether schema meets minimum requirements</td>
+                                </tr>
+                                <tr>
+                                    <td>score</td>
+                                    <td>number</td>
+                                    <td>Quality score 0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>errors</td>
+                                    <td>array</td>
+                                    <td>List of validation errors (if any)</td>
+                                </tr>
+                                <tr>
+                                    <td>warnings</td>
+                                    <td>array</td>
+                                    <td>List of warnings about missing recommended fields</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>saveSchemaToGitHub(url, schema)</h3>
+                        <p>Persists a schema to GitHub with automatic version history.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p><strong>Parameters:</strong></p>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>url</td>
+                                    <td>string</td>
+                                    <td>The original source URL (used for path generation)</td>
+                                </tr>
+                                <tr>
+                                    <td>schema</td>
+                                    <td>string</td>
+                                    <td>JSON-LD schema as JSON string</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Requires:</strong></p>
+                        <p>GitHub configuration with personal access token (for write access).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA FORMATS -->
+        <div class="spec-section">
+            <div class="spec-label">
+                Data Formats
+                <h2>Schema Structure</h2>
+                <p>Example JSON-LD output and required fields.</p>
+            </div>
+            <div class="spec-content">
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Complete Schema Example</h3>
+                        <p>Sample output from the generator showing all major components.</p>
+                    </div>
+                    <div class="spec-block-body">
+<pre>{
+  <span class="key">"@context"</span>: <span class="str">"https://schema.org"</span>,
+  <span class="key">"@type"</span>: <span class="str">"WebPage"</span>,
+  <span class="key">"@id"</span>: <span class="str">"https://example.com/#webpage"</span>,
+  <span class="key">"name"</span>: <span class="str">"Page Title"</span>,
+  <span class="key">"description"</span>: <span class="str">"Page meta description"</span>,
+  <span class="key">"url"</span>: <span class="str">"https://example.com"</span>,
+  <span class="key">"inLanguage"</span>: <span class="str">"en-US"</span>,
+  <span class="key">"primaryImageOfPage"</span>: {
+    <span class="key">"@type"</span>: <span class="str">"ImageObject"</span>,
+    <span class="key">"url"</span>: <span class="str">"https://example.com/image.png"</span>,
+    <span class="key">"width"</span>: <span class="num">1200</span>,
+    <span class="key">"height"</span>: <span class="num">630</span>
+  },
+  <span class="key">"isPartOf"</span>: {
+    <span class="key">"@type"</span>: <span class="str">"WebSite"</span>,
+    <span class="key">"@id"</span>: <span class="str">"https://example.com/#website"</span>,
+    <span class="key">"name"</span>: <span class="str">"Site Name"</span>,
+    <span class="key">"url"</span>: <span class="str">"https://example.com"</span>
+  },
+  <span class="key">"publisher"</span>: {
+    <span class="key">"@type"</span>: <span class="str">"Organization"</span>,
+    <span class="key">"@id"</span>: <span class="str">"https://example.com/#organization"</span>,
+    <span class="key">"name"</span>: <span class="str">"Organization Name"</span>
+  }
+}                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Required Properties</h3>
+                        <p>Minimum fields that must be present in any valid schema.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@context</td>
+                                    <td>string</td>
+                                    <td>Must be "https://schema.org"</td>
+                                </tr>
+                                <tr>
+                                    <td>@type</td>
+                                    <td>string</td>
+                                    <td>Schema type (WebPage, Article, Product, etc.)</td>
+                                </tr>
+                                <tr>
+                                    <td>@id</td>
+                                    <td>string</td>
+                                    <td>Unique identifier with fragment (e.g., #webpage)</td>
+                                </tr>
+                                <tr>
+                                    <td>name</td>
+                                    <td>string</td>
+                                    <td>Page or content title</td>
+                                </tr>
+                                <tr>
+                                    <td>url</td>
+                                    <td>string</td>
+                                    <td>Canonical URL of the page</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTEGRATION -->
+        <div class="spec-section">
+            <div class="spec-label">
+                Integration
+                <h2>Using Schemas</h2>
+                <p>How to implement generated schemas in your website.</p>
+            </div>
+            <div class="spec-content">
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>HTML Implementation</h3>
+                        <p>Add the generated schema to your page using a script tag.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>Copy the schema JSON from the generator and paste it into your HTML page within a <code>&lt;script type="application/ld+json"&gt;</code> tag in the page <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code>:</p>
+<pre>&lt;head&gt;
+  &lt;script type=<span class="str">"application/ld+json"</span>&gt;
+  {
+    <span class="key">"@context"</span>: <span class="str">"https://schema.org"</span>,
+    <span class="key">"@type"</span>: <span class="str">"WebPage"</span>,
+    ...
+  }
+  &lt;/script&gt;
+&lt;/head&gt;                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>Testing & Validation</h3>
+                        <p>Verify your schema is correct using Google's tools.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>After implementing a schema, test it with:</p>
+                        <ul>
+                            <li><strong>Google Rich Results Test:</strong> https://search.google.com/test/rich-results</li>
+                            <li><strong>Schema.org Validator:</strong> https://validator.schema.org/</li>
+                            <li><strong>JSON-LD Playground:</strong> https://json-ld.org/playground/</li>
+                        </ul>
+                        <p>These tools will verify that your schema is valid and identify any missing or incorrect properties.</p>
+                    </div>
+                </div>
+
+                <div class="spec-block">
+                    <div class="spec-block-header">
+                        <h3>SEO Benefits</h3>
+                        <p>How structured data improves search visibility.</p>
+                    </div>
+                    <div class="spec-block-body">
+                        <p>Proper JSON-LD schemas enable search engines to:</p>
+                        <ul>
+                            <li>Display rich snippets in search results (ratings, prices, availability)</li>
+                            <li>Understand page content and relationships</li>
+                            <li>Provide accurate information in Knowledge Panels</li>
+                            <li>Improve click-through rates with enhanced appearance</li>
+                            <li>Support voice search and smart assistants</li>
+                        </ul>
+                        <p style="margin-top: 12px;">Quality schemas with all recommended properties provide the most SEO benefit. The generator's quality score helps identify which properties to prioritize.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TROUBLESHOOTING -->
+        <div class="spec-section">
+            <div class="spec-label">
+                Troubleshooting
+                <h2>Common Issues</h2>
+                <p>Solutions for typical problems and errors.</p>
+            </div>
+            <div class="spec-content">
+                <div class="spec-block">
+                    <div class="spec-block-body">
+                        <p><strong>Schema generation fails with CORS error.</strong></p>
+                        <p style="margin-top: 8px;">The page may have strict CORS restrictions. The generator automatically tries multiple CORS proxies. If all fail, check that the URL is correct and the page is publicly accessible.</p>
+                        <hr class="divider">
+
+                        <p><strong>Generated schema is missing important fields.</strong></p>
+                        <p style="margin-top: 8px;">The scraper extracts metadata from page HTML and meta tags. If fields are missing, the page may not contain that information. You can manually add missing properties to the JSON before using it.</p>
+                        <hr class="divider">
+
+                        <p><strong>Quality score is low (below 60).</strong></p>
+                        <p style="margin-top: 8px;">Add more optional recommended properties to improve the score. Common missing fields include: image dimensions, language code, publisher information, author details, and contact information. The validator tool will highlight which fields are missing.</p>
+                        <hr class="divider">
+
+                        <p><strong>URL path issues in GitHub storage.</strong></p>
+                        <p style="margin-top: 8px;">Schemas are stored with paths based on domain and page URL. Special characters are sanitized. Ensure your GitHub token has write permission to the repository and the branch exists.</p>
+                        <hr class="divider">
+
+                        <div class="note"><strong>Bulk processing hangs or times out.</strong> Large batches (100+ URLs) may take several minutes. Each page requires scraping, parsing, and validation. For very large jobs, process URLs in smaller batches of 20-50 at a time.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /specs-body -->
+
+    <footer>JSON-LD Schema Generator Documentation</footer>
+</div>
+</body>
+</html>
