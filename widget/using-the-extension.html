@@ -26,15 +26,16 @@
         .steps-container { flex: 1; opacity: 0; transform: translateX(20px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; max-width: 0; overflow: hidden; }
         .content-wrapper.split-view .steps-container { opacity: 1; transform: translateX(0); pointer-events: auto; max-width: 100%; }
         .content-wrapper.video-only .steps-container { display: none; }
-        .steps { display: flex; flex-direction: column; }
+        .steps { display: flex; flex-direction: column; padding-bottom: 40px; }
         .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.3s ease; }
         .step:last-child { border-bottom: none; }
         .step.active { opacity: 1; background: #ffffff; padding: 20px; margin: 0; border-radius: 6px; position: relative; z-index: 99999; }
         .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; transition: all 0.3s ease; }
         .step.active .step-number { background: #FFBE5F; color: #1a1a1a; transform: scale(1.15); }
         .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-        .step-shadow { box-shadow: none; margin: auto; width: 90%; transition: box-shadow 0.3s ease; }
-        .step.active ~ .step-shadow { box-shadow: -2px -6px 20px 4px #000000; }
+        .step-wrapper { position: relative; }
+        .step-shadow { box-shadow: 3px -16px 13px 1px #000000; transition: opacity 0.3s ease; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 90%; height: 1px; z-index: 0; opacity: 0; }
+        .step.active ~ .step-shadow { opacity: 1; }
         footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
         @media (max-width: 1024px) {
             .content-wrapper { flex-direction: column; }
@@ -42,8 +43,54 @@
             .steps-container { transform: translateY(20px); }
             .content-wrapper.split-view .steps-container { transform: translateY(0); }
         }
+        @media (max-width: 768px) {
+            .container { padding: 40px 20px; }
+            h1 { font-size: 36px; }
+            .tab-nav { margin-bottom: 40px; }
+            .tab-nav-link { padding: 12px 12px; font-size: 11px; }
+            .content-toggle { gap: 12px; margin-bottom: 24px; }
+            .toggle-button { padding: 8px 0; font-size: 12px; }
+            .video-container { border-radius: 6px; }
+            .step { padding: 16px 0; gap: 16px; }
+            .step.active { padding: 16px; }
+            .step-number { width: 28px; height: 28px; font-size: 12px; }
+            .step-content h3 { font-size: 14px; }
+            .step-content p { font-size: 13px; }
+            .download-btn { padding: 12px 20px; font-size: 13px; top: -35px; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 32px 16px; }
+            h1 { font-size: 28px; letter-spacing: -0.5px; }
+            .subtitle { font-size: 16px; margin-bottom: 20px; }
+            .tab-nav { flex-wrap: wrap; gap: 0; margin-bottom: 32px; }
+            .tab-nav-link { padding: 10px 8px; font-size: 10px; }
+            .content-toggle { flex-direction: row; gap: 0; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 20px; background: #ffffff; }
+            .toggle-button { flex: 1; padding: 12px 16px; font-size: 12px; border: none; border-right: 1px solid #e0e0e0; background: #fafafa; }
+            .toggle-button:last-child { border-right: none; }
+            .toggle-button.active { background: #1a1a1a; color: #ffffff; }
+            .toggle-button.active::after { display: none; }
+            .step { padding: 12px 0; gap: 12px; }
+            .step.active { padding: 12px; margin: 0; }
+            .step-number { width: 24px; height: 24px; font-size: 11px; }
+            .step-content h3 { font-size: 13px; margin-bottom: 2px; }
+            .step-content p { font-size: 12px; line-height: 1.5; }
+            .steps { padding-bottom: 30px; }
+            .download-btn { padding: 10px 16px; font-size: 12px; top: -30px; right: 16px; }
+        }
         .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
         .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .tab-nav-dropdown { display: none; }
+        @media (max-width: 480px) {
+            header { position: relative; }
+            .download-btn { position: static; display: block; width: fit-content; margin: 20px 0; }
+            .tab-nav { display: none; flex-direction: column; gap: 0; margin: 0; border: none; }
+            .tab-nav.mobile-open { display: flex; }
+            .tab-nav-link { padding: 12px 0; border: none; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+            .tab-nav-link.active { border-bottom: 2px solid #1a1a1a; color: #1a1a1a; }
+            .tab-nav-dropdown { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; margin-bottom: 16px; cursor: pointer; }
+            .tab-nav-dropdown::after { content: '▼'; font-size: 10px; margin-left: 8px; transition: transform 0.3s ease; }
+            .tab-nav-dropdown.open::after { transform: rotate(180deg); }
+        }
     </style>
 </head>
 <body>
@@ -51,13 +98,14 @@
         <header>
             <h1>Using the Extension</h1>
             <p class="subtitle">How to edit widget content in the Sitecore Content Editor</p>
+            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
+            <div class="tab-nav-dropdown" onclick="toggleMobileNav(event)">Navigation</div>
             <nav class="tab-nav">
                 <a href="overview.html" class="tab-nav-link">Extension Overview</a>
                 <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
                 <a href="specs.html" class="tab-nav-link">Technical Specs</a>
                 <a href="using-the-extension.html" class="tab-nav-link active">Using the Extension</a>
             </nav>
-            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
         </header>
 
         <div class="content-toggle">
@@ -74,7 +122,7 @@
                 </div>
                 <div class="steps-container">
                     <div class="steps">
-                        <div><div class="step" data-timestamp="0" style="cursor: pointer;">
+                        <div class="step-wrapper"><div class="step" data-timestamp="0" style="cursor: pointer;">
                             <div class="step-number">1</div>
                             <div class="step-content">
                                 <h3>Open the Content Editor</h3>
@@ -83,7 +131,7 @@
                         </div>
 <div class="step-shadow"></div>
 </div>
-                        <div><div class="step" data-timestamp="10" style="cursor: pointer;">
+                        <div class="step-wrapper"><div class="step" data-timestamp="10" style="cursor: pointer;">
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h3>Select the Component</h3>
@@ -92,7 +140,7 @@
                         </div>
 <div class="step-shadow"></div>
 </div>
-                        <div><div class="step" data-timestamp="26" style="cursor: pointer;">
+                        <div class="step-wrapper"><div class="step" data-timestamp="26" style="cursor: pointer;">
                             <div class="step-number">3</div>
                             <div class="step-content">
                                 <h3>Open the Extension</h3>
@@ -101,7 +149,7 @@
                         </div>
 <div class="step-shadow"></div>
 </div>
-                        <div><div class="step" data-timestamp="38" style="cursor: pointer;">
+                        <div class="step-wrapper"><div class="step" data-timestamp="38" style="cursor: pointer;">
                             <div class="step-number">4</div>
                             <div class="step-content">
                                 <h3>Edit the Fields</h3>
@@ -110,8 +158,8 @@
                         </div>
 <div class="step-shadow"></div>
 </div>
-                        <div><div class="step" data-timestamp="67" style="cursor: pointer;">
-                            <div class="step-number">6</div>
+                        <div class="step-wrapper"><div class="step" data-timestamp="67" style="cursor: pointer;">
+                            <div class="step-number">5</div>
                             <div class="step-content">
                                 <h3>Save in Sitecore</h3>
                                 <p>Click Save in the Content Editor toolbar. Your changes are now live in Sitecore.</p>
@@ -141,6 +189,14 @@
                 buttons[0].classList.remove('active');
                 buttons[1].classList.add('active');
             }
+        }
+
+        function toggleMobileNav(event) {
+            event.preventDefault();
+            var nav = document.querySelector('.tab-nav');
+            var dropdown = document.querySelector('.tab-nav-dropdown');
+            nav.classList.toggle('mobile-open');
+            dropdown.classList.toggle('open');
         }
 
         // Video sync functionality
