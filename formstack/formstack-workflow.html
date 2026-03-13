@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Generation Workflow - Formstack Documents Theme Generator</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .project-list { display: flex; flex-direction: column; gap: 120px; }
+        .project { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+        .project:nth-child(even) { direction: rtl; }
+        .project:nth-child(even) > * { direction: ltr; }
+        .project-content { display: flex; flex-direction: column; gap: 24px; }
+        .project-number { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; }
+        .project h2 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: #000; }
+        .project-description { font-size: 16px; line-height: 1.7; color: #444; }
+        .project-description p + p { margin-top: 16px; }
+        .project-description code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
+        .project-image { position: relative; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); cursor: pointer; }
+        .project-image:hover { opacity: 0.95; }
+        .project-image img { width: 100%; height: auto; display: block; border-radius: 8px; }
+        .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); border-radius: 8px; color: #999; font-size: 14px; }
+        .step-list { margin-top: 8px; padding: 0; list-style: none; }
+        .step-list li { padding: 10px 0; padding-left: 20px; position: relative; font-size: 15px; color: #444; border-bottom: 1px solid #f0f0f0; line-height: 1.5; }
+        .step-list li:last-child { border-bottom: none; }
+        .step-list li::before { content: "→"; position: absolute; left: 0; color: #999; }
+        .step-list li strong { color: #1a1a1a; font-weight: 600; }
+        .phase-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .phase-card { background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 16px; }
+        .phase-card .project-number { font-size: 11px; }
+        .phase-card h3 { font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: -0.3px; color: #000; }
+        .phase-card p { font-size: 15px; line-height: 1.6; color: #666; }
+        .compact-list { list-style: none; padding: 0; margin-top: 4px; }
+        .compact-list li { padding: 7px 0; padding-left: 18px; position: relative; font-size: 14px; color: #555; line-height: 1.5; border-bottom: 1px solid #f5f5f5; }
+        .compact-list li:last-child { border-bottom: none; }
+        .compact-list li::before { content: "→"; position: absolute; left: 0; color: #ccc; font-size: 12px; top: 9px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+        .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        @media (max-width: 1024px) {
+            .project { grid-template-columns: 1fr; gap: 40px; }
+            .project:nth-child(even) { direction: ltr; }
+            .phase-card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HTML Generation Workflow</h1>
+            <p class="subtitle">From form to customizable document template</p>
+            <nav class="tab-nav">
+                <a href="formstack-overview.html" class="tab-nav-link">Extension Overview</a>
+                <a href="formstack-workflow.html" class="tab-nav-link active">HTML Generation Workflow</a>
+                <a href="formstack-specs.html" class="tab-nav-link">Technical Specs</a>
+                <a href="formstack-using.html" class="tab-nav-link">Using the Extension</a>
+            </nav>
+            <a href="Formstack-Template-Maker-v1.zip" class="download-btn" download>Download Extension</a>
+        </header>
+
+        <div class="project-list">
+
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 1</div>
+                    <h2>Build Your Formstack Form</h2>
+                    <div class="project-description">
+                        <p>Create your form in Formstack using the standard form builder. Add all fields, sections, conditional logic, and styling you need. Your form design is complete when it collects the exact data you want and displays the fields in the order and grouping you prefer.</p>
+                        <p>No special configuration is required at this stage. Use Formstack's native features normally—field types, required fields, conditionals, and validation all work out of the box.</p>
+                        <ul class="step-list">
+                            <li><strong>Design your form:</strong> Use Formstack's form builder interface</li>
+                            <li><strong>Add all field types:</strong> Text, email, phone, dropdown, checkbox, file upload, etc.</li>
+                            <li><strong>Set up logic:</strong> Conditional field visibility and required field rules</li>
+                            <li><strong>Test the form:</strong> Verify all fields and conditionals work correctly</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Formstack Form Builder Screenshot</div>
+                </div>
+            </div>
+
+            <div class="project">
+                <div class="project-content">
+                    <div class="project-number">Phase 2</div>
+                    <h2>Create the Formstack Document</h2>
+                    <div class="project-description">
+                        <p>In Formstack Documents, create a new document and use the Document Builder to import your form as the data source. Select "Web" from the input dropdown, paste your form URL, and click "Import Form." This creates the Initial Template—a rendered preview of how your form data will appear in the document.</p>
+                        <p>The Initial Template serves as both the visual reference and the data source for the extension. Save your document at this point—you'll return here in Phase 4 to paste the generated HTML.</p>
+                        <ul class="step-list">
+                            <li><strong>Open Formstack Documents:</strong> Create a new document</li>
+                            <li><strong>Go to Document Builder:</strong> Access the template creation interface</li>
+                            <li><strong>Import the form:</strong> Select "Web," paste your Formstack form URL</li>
+                            <li><strong>Create Initial Template:</strong> Click "Import Form" and save</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-image">
+                    <div class="placeholder">Document Builder Screenshot</div>
+                </div>
+            </div>
+
+            <div class="phase-card-grid">
+                <div class="phase-card">
+                    <div class="project-number">Phase 3</div>
+                    <h3>Scan & Generate HTML</h3>
+                    <p>With your document open in the Document Builder, click the extension icon in your browser toolbar. The sidebar opens with a "Scan Current Page" button. Click it to detect the Initial Template on the page.</p>
+                    <ul class="compact-list">
+                        <li>Open your Formstack Document in Document Builder</li>
+                        <li>Click the extension icon to open the sidebar</li>
+                        <li>Click "Scan Current Page"</li>
+                        <li>The extension analyzes the Initial Template</li>
+                        <li>HTML and JSON are generated automatically</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="project-number">Phase 4</div>
+                    <h3>Customize & Deploy HTML</h3>
+                    <p>Copy the generated HTML from the extension and paste it into your document's Advanced HTML Editor. The HTML is fully functional and ready to use, but you can customize CSS, adjust styling, or modify the markup to match your brand.</p>
+                    <ul class="compact-list">
+                        <li>Copy HTML from the extension</li>
+                        <li>Open Advanced HTML Editor in your document</li>
+                        <li>Paste the HTML (replace existing content)</li>
+                        <li>Customize CSS and styling as needed</li>
+                        <li>Save your document</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="project-number">Phase 5</div>
+                    <h3>Test & Publish</h3>
+                    <p>Use the test data generated by the extension to verify your document renders correctly. Copy the JSON from the extension, paste it into the Test tab, and click "Test Document." Once verified, your document is ready to use with real Formstack form submissions.</p>
+                    <ul class="compact-list">
+                        <li>Copy JSON test data from extension</li>
+                        <li>Open the Test tab in your document</li>
+                        <li>Paste JSON into the final input field</li>
+                        <li>Click "Test Document" and review</li>
+                        <li>Publish your document</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div><!-- /project-list -->
+
+        <footer>Formstack Documents HTML Theme Generator Documentation</footer>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modalImage" alt="">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.project-image').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var img = this.querySelector('img');
+                    if (img && img.src) openModal(img.src);
+                });
+            });
+        });
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    </script>
+</body>
+</html>

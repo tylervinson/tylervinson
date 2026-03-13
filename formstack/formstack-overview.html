@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formstack Documents HTML Theme Generator - Overview</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .project-list { display: flex; flex-direction: column; gap: 120px; }
+        .project { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+        .project:nth-child(even) { direction: rtl; }
+        .project:nth-child(even) > * { direction: ltr; }
+        .project-content { display: flex; flex-direction: column; gap: 24px; }
+        .project-number { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; }
+        .project h2 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: #000; }
+        .project-description { font-size: 16px; line-height: 1.7; color: #444; }
+        .project-description p + p { margin-top: 16px; }
+        .project-description code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
+        .project-image { position: relative; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); cursor: pointer; }
+        .project-image:hover { opacity: 0.95; }
+        .project-image img { width: 100%; height: auto; display: block; border-radius: 8px; }
+        .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); border-radius: 8px; color: #999; font-size: 14px; }
+        .feature-grid { grid-column: 1 / -1; margin-top: 16px; }
+        .feature-grid-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+        .feature-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .feature-item { background: #fff; padding: 28px; }
+        .feature-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #1a1a1a; }
+        .feature-item p { font-size: 14px; color: #666; line-height: 1.6; }
+        .arch-section { grid-column: 1 / -1; }
+        .arch-diagram { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .arch-box { background: #fff; padding: 28px; }
+        .arch-box h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #1a1a1a; }
+        .arch-box p { font-size: 14px; color: #666; line-height: 1.6; }
+        .arch-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px; }
+        .cta-link { display: inline-block; padding: 14px 28px; border: 2px solid #343d3f; background-color: transparent; color: #343d3f; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; }
+        .cta-link:hover { padding-left: 38px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+        .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .project { grid-template-columns: 1fr; gap: 40px; }
+            .project:nth-child(even) { direction: ltr; }
+            .feature-list, .arch-diagram { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Formstack Documents HTML Theme Generator</h1>
+            <p class="subtitle">Chrome Extension for Creating Custom HTML Themes</p>
+            <nav class="tab-nav">
+                <a href="formstack-overview.html" class="tab-nav-link active">Extension Overview</a>
+                <a href="formstack-workflow.html" class="tab-nav-link">HTML Generation Workflow</a>
+                <a href="formstack-specs.html" class="tab-nav-link">Technical Specs</a>
+                <a href="formstack-using.html" class="tab-nav-link">Using the Extension</a>
+            </nav>
+            <a href="Formstack-Template-Maker-v1.zip" class="download-btn" download>Download Extension</a>
+        </header>
+
+        <div class="project-list">
+
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">OVERVIEW</div>
+                    <h2>Visual HTML Theme Generator for Formstack Documents</h2>
+                    <div class="project-description">
+                        <p>Building custom HTML themes for Formstack Documents typically requires manual HTML editing, CSS knowledge, and tedious copy-paste workflows between form builders and document templates. Content creators shouldn't need to write code to customize how their forms look when converted to documents.</p>
+                        <p>This Chrome extension eliminates that friction. It scans the current page for the Formstack Initial Template, extracts the underlying form markup, and generates a fully functional, customizable HTML template in seconds. The extension also produces JSON test data specific to your form, enabling you to preview exactly how your document will render before publishing.</p>
+                        <p>Everything happens in the browser—no server calls, no authentication headaches. Copy the HTML, paste it into your document's Advanced HTML Editor, test with one click, and you're done.</p>
+                    </div>
+                    <a href="formstack-specs.html" class="cta-link">View Technical Specs &rarr;</a>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Chrome Extension Interface Screenshot</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">HOW IT WORKS</div>
+                    <h2>Scan. Generate. Deploy.</h2>
+                    <div class="project-description">
+                        <p>The extension works by analyzing the DOM of the Initial Template directly in Formstack Documents. When you click "Scan Current Page," it detects the template container, extracts all form fields and their structure, and generates production-ready HTML with proper semantic markup, class names, and data attributes for styling and targeting.</p>
+                        <p>Unlike manual template creation, which is error-prone and requires recreation every time the form changes, this extension automates the process. When your form fields change, you rescan and regenerate in seconds. The generated HTML includes all labels, field types, and conditional logic markers so your CSS and JavaScript have complete context.</p>
+                        <p>The JSON output includes sample data for every field, allowing you to test your document instantly in the Test tab without manually filling in data.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Generation Process Screenshot</div>
+                    </div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-grid-label">Core Capabilities</div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <h4>One-Click Scanning</h4>
+                            <p>The extension detects the Initial Template directly from the page DOM. No manual selection of forms or fields required—click "Scan Current Page" and it finds everything automatically.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Complete HTML Generation</h4>
+                            <p>Produces semantically correct HTML with proper grouping, labels, field types, and data attributes. The output is immediately usable in the Advanced HTML Editor.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Automatic JSON Test Data</h4>
+                            <p>Generates realistic test data for every field in your form. Use it instantly in the Test tab to preview your document without manual data entry.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Copy & Paste Ready</h4>
+                            <p>HTML and JSON are displayed in easy-to-copy text areas. Paste directly into Formstack Documents with a single click—no downloads or file management needed.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>Form-Specific Markup</h4>
+                            <p>Generated HTML reflects your exact form structure. Field order, grouping, conditional logic markers, and data attributes are all form-specific.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>No Authentication Required</h4>
+                            <p>The extension works entirely in the browser using the DOM of the page you're viewing. No API calls, no login tokens, no server communication needed.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="project">
+                <div class="arch-section">
+                    <div class="arch-label">Architecture & Workflow</div>
+                    <div class="arch-diagram">
+                        <div class="arch-box">
+                            <h4>Initial Template</h4>
+                            <p>The rendered form displayed in Formstack Documents' Document Builder. Contains the HTML structure, all form fields, labels, and conditional logic that makes up your form.</p>
+                        </div>
+                        <div class="arch-box">
+                            <h4>Content Script</h4>
+                            <p>Runs on the Formstack Documents page. Uses DOM traversal to locate and extract the Initial Template markup, analyze field structure, and gather all necessary data.</p>
+                        </div>
+                        <div class="arch-box">
+                            <h4>Generator Engine</h4>
+                            <p>Processes raw DOM data into clean, semantically structured HTML. Applies CSS classes, data attributes, proper grouping, and readable formatting for easy styling and customization.</p>
+                        </div>
+                        <div class="arch-box">
+                            <h4>Popup Interface</h4>
+                            <p>User-facing extension interface. Displays the "Scan Current Page" button, the generated HTML and JSON in editable text areas, and copy buttons for instant clipboard access.</p>
+                        </div>
+                        <div class="arch-box">
+                            <h4>Test Data Generator</h4>
+                            <p>Analyzes form field types and creates realistic, representative test data for each field. Produces valid JSON that matches your form's expected data structure exactly.</p>
+                        </div>
+                        <div class="arch-box">
+                            <h4>Browser DOM API</h4>
+                            <p>All operations use native browser APIs: <code>document.querySelector</code>, <code>textContent</code>, <code>getAttribute</code>. No external libraries or dependencies required.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <footer>Formstack Documents HTML Theme Generator Documentation</footer>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modalImage" alt="">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.project-image').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var img = this.querySelector('img');
+                    if (img && img.src) openModal(img.src);
+                });
+            });
+        });
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    </script>
+</body>
+</html>

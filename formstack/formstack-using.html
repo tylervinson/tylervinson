@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using the Extension - Formstack Documents Theme Generator</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .guide-section { display: flex; flex-direction: column; gap: 80px; }
+        .guide-article { }
+        .guide-article h2 { font-size: 36px; font-weight: 600; letter-spacing: -0.5px; color: #000; margin-bottom: 40px; }
+        .step-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+        .step-container:nth-child(even) { direction: rtl; }
+        .step-container:nth-child(even) > * { direction: ltr; }
+        .steps-content { display: flex; flex-direction: column; gap: 32px; }
+        .step-card { background: #fff; padding: 28px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .step-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+        .step-number { flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #000; color: #fff; font-size: 18px; font-weight: 600; border-radius: 50%; }
+        .step-card h3 { font-size: 18px; font-weight: 600; color: #000; line-height: 1.3; }
+        .step-card p { font-size: 15px; color: #555; line-height: 1.7; margin-top: 12px; }
+        .step-note { background: #fafafa; border-left: 3px solid #FFBE5F; padding: 16px 20px; margin-top: 16px; font-size: 14px; color: #666; border-radius: 4px; }
+        .step-note strong { color: #1a1a1a; font-weight: 600; }
+        .side-content { }
+        .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 3/2; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); border-radius: 8px; color: #999; font-size: 14px; }
+        .faq-grid { display: grid; gap: 24px; }
+        .faq-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 28px; }
+        .faq-item h3 { font-size: 18px; font-weight: 600; color: #000; margin-bottom: 12px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+        .faq-item h3::after { content: "▼"; font-size: 12px; transition: transform 0.2s; }
+        .faq-item.open h3::after { transform: rotate(180deg); }
+        .faq-content { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f0f0; font-size: 15px; color: #555; line-height: 1.7; }
+        .faq-item.open .faq-content { display: block; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .troubleshooting { background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .troubleshooting h3 { font-size: 18px; font-weight: 600; color: #000; margin-bottom: 16px; margin-top: 0; }
+        .troubleshooting-item { margin-bottom: 28px; }
+        .troubleshooting-item:last-child { margin-bottom: 0; }
+        .troubleshooting-item strong { display: block; font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+        .troubleshooting-item p { font-size: 15px; color: #555; line-height: 1.6; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .step-container { grid-template-columns: 1fr; gap: 40px; }
+            .step-container:nth-child(even) { direction: ltr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Using the Extension</h1>
+            <p class="subtitle">Step-by-step guide to install and use the HTML Theme Generator</p>
+            <nav class="tab-nav">
+                <a href="formstack-overview.html" class="tab-nav-link">Extension Overview</a>
+                <a href="formstack-workflow.html" class="tab-nav-link">HTML Generation Workflow</a>
+                <a href="formstack-specs.html" class="tab-nav-link">Technical Specs</a>
+                <a href="formstack-using.html" class="tab-nav-link active">Using the Extension</a>
+            </nav>
+            <a href="Formstack-Template-Maker-v1.zip" class="download-btn" download>Download Extension</a>
+        </header>
+
+        <div class="guide-section">
+
+            <article class="guide-article">
+                <h2>Installation Guide</h2>
+                <div class="step-container">
+                    <div class="steps-content">
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <div>
+                                    <h3>Download the Extension</h3>
+                                </div>
+                            </div>
+                            <p>Click the "Download Extension" button at the top of this page. This will download a ZIP file containing the complete extension code.</p>
+                            <div class="step-note">
+                                <strong>Note:</strong> Keep this file in an easy-to-find location like your Downloads folder—you'll need the unzipped folder in Step 3.
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <div>
+                                    <h3>Unzip the File</h3>
+                                </div>
+                            </div>
+                            <p>Extract the ZIP file. On Mac, double-click the ZIP. On Windows, right-click and select "Extract All." You should now have a folder named something like "Formstack-Template-Maker."</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <div>
+                                    <h3>Open Chrome Extensions Page</h3>
+                                </div>
+                            </div>
+                            <p>In Google Chrome, type <code>chrome://extensions</code> in the address bar and press Enter. Alternatively, open the Chrome menu (⋯), select "More Tools," then "Extensions."</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">4</div>
+                                <div>
+                                    <h3>Enable Developer Mode</h3>
+                                </div>
+                            </div>
+                            <p>In the top right corner of the Extensions page, toggle the switch labeled "Developer mode" to ON. You should now see a blue "Load unpacked" button.</p>
+                            <div class="step-note">
+                                <strong>Important:</strong> This is a standard Chrome feature—enabling Developer mode is safe and won't affect your browser.
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">5</div>
+                                <div>
+                                    <h3>Load the Extension</h3>
+                                </div>
+                            </div>
+                            <p>Click the "Load unpacked" button. A file picker will open. Navigate to and select the unzipped extension folder (the one that contains <code>manifest.json</code>), then click "Select Folder."</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">6</div>
+                                <div>
+                                    <h3>Pin the Extension</h3>
+                                </div>
+                            </div>
+                            <p>The extension should now appear in your Chrome toolbar. Click the puzzle icon in the top right, find "Formstack Documents HTML Theme Generator," and click the pin icon to keep it visible.</p>
+                            <div class="step-note">
+                                <strong>Done!</strong> You can now use the extension whenever you're working in Formstack Documents.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="side-content">
+                        <div class="placeholder">Installation Process Screenshot</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="guide-article">
+                <h2>How to Generate an HTML Template</h2>
+                <div class="step-container">
+                    <div class="side-content">
+                        <div class="placeholder">Generation Interface Screenshot</div>
+                    </div>
+
+                    <div class="steps-content">
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <div>
+                                    <h3>Prepare Your Document</h3>
+                                </div>
+                            </div>
+                            <p>In Formstack Documents, create a new document and import your Formstack form as the data source using the Document Builder. The Initial Template should be visible.</p>
+                            <div class="step-note">
+                                Need help? See the <a href="formstack-workflow.html">HTML Generation Workflow</a> page for detailed setup instructions.
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <div>
+                                    <h3>Open the Extension</h3>
+                                </div>
+                            </div>
+                            <p>With the Formstack Documents page open, click the extension icon in your Chrome toolbar. A popup will appear with a "Scan Current Page" button.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <div>
+                                    <h3>Scan the Page</h3>
+                                </div>
+                            </div>
+                            <p>Click "Scan Current Page." The extension will analyze the Initial Template on the page, detect all form fields, and generate the HTML and test data.</p>
+                            <div class="step-note">
+                                <strong>Typical scan time:</strong> Less than 500 milliseconds.
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">4</div>
+                                <div>
+                                    <h3>Copy the HTML</h3>
+                                </div>
+                            </div>
+                            <p>Once the generation completes, you'll see the HTML in the first text area. Click the "Copy" button to copy the entire HTML to your clipboard.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">5</div>
+                                <div>
+                                    <h3>Paste into Your Document</h3>
+                                </div>
+                            </div>
+                            <p>In your Formstack Document, open the "Advanced HTML Editor." Paste the HTML from the extension (it will replace the existing template). Save your document.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">6</div>
+                                <div>
+                                    <h3>Test with JSON Data</h3>
+                                </div>
+                            </div>
+                            <p>Copy the JSON test data from the extension. In your document, open the "Test" tab, scroll to the bottom, paste the JSON, and click "Test Document" to preview how your document will render.</p>
+                            <div class="step-note">
+                                <strong>Pro tip:</strong> Save the JSON somewhere for future testing. You can use the same JSON to test multiple versions of your HTML.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="guide-article">
+                <h2>Customizing Your HTML</h2>
+                <p style="font-size: 16px; color: #555; margin-bottom: 40px;">The generated HTML is production-ready, but you can customize it to match your brand or add specific styling and functionality.</p>
+                <div class="step-container">
+                    <div class="steps-content">
+                        <div class="step-card">
+                            <h3>Adding CSS Classes for Styling</h3>
+                            <p>The generated HTML includes semantic class names like <code>.form-section</code>, <code>.form-field</code>, and <code>.field-label</code>. Add your CSS directly in the HTML editor or create a <code>&lt;style&gt;</code> block to customize fonts, colors, spacing, and layout.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <h3>Modifying Field Layout</h3>
+                            <p>You can adjust how fields are grouped or arranged. The generated HTML preserves the original form structure, but you can add CSS Grid or Flexbox rules to create multi-column layouts, adjust spacing, or reorder fields visually.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <h3>Adding Custom JavaScript</h3>
+                            <p>For dynamic functionality like field validation, calculated fields, or conditional display, add JavaScript in a <code>&lt;script&gt;</code> block. The generated HTML structure makes it easy to target elements with standard DOM selectors.</p>
+                        </div>
+
+                        <div class="step-card">
+                            <h3>Testing Your Changes</h3>
+                            <p>After making edits, save your document and use the same JSON test data to preview your changes. The Test tab will show you exactly how your customizations render with real form data.</p>
+                        </div>
+                    </div>
+
+                    <div class="side-content">
+                        <div class="placeholder">Customization Example Screenshot</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="guide-article">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h3>What if my form changes after I generate the HTML?</h3>
+                        <div class="faq-content">
+                            <p>Simply click "Scan Current Page" again to regenerate the HTML with the updated fields. You can update your document's HTML Editor with the new version. Any custom CSS or JavaScript you added will remain, as long as the field class names haven't changed significantly.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Can I use the same HTML for multiple Formstack Documents?</h3>
+                        <div class="faq-content">
+                            <p>If your forms have identical structure, you can use the same HTML as a starting point. However, if field names or structure differ between forms, you'll get better results by generating a fresh HTML template for each document.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Does the extension send my form data anywhere?</h3>
+                        <div class="faq-content">
+                            <p>No. The extension works entirely in your browser. It only analyzes the DOM of the page you're viewing. No data is sent to servers, and no information is collected or stored. Your form data remains completely private.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>What if the extension doesn't find my form?</h3>
+                        <div class="faq-content">
+                            <p>Make sure you're viewing the Formstack Documents page with the Initial Template visible. The extension scans the page DOM directly. If the template isn't rendering, the extension won't be able to detect it. Try refreshing the page or checking that your form imported successfully.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Can I edit the HTML and JSON after copying them?</h3>
+                        <div class="faq-content">
+                            <p>Yes. Both the HTML and JSON are plain text. You can edit them in the extension text areas before copying, or paste them into any text editor for more advanced editing before pasting into Formstack Documents.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Is there a limit to how many fields the extension can handle?</h3>
+                        <div class="faq-content">
+                            <p>No hard limit. The extension scans the page DOM and generates HTML for all fields present. Very large forms (200+ fields) may take slightly longer to scan, but should still complete in under a second.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="guide-article">
+                <h2>Troubleshooting</h2>
+                <div class="troubleshooting">
+                    <div class="troubleshooting-item">
+                        <strong>Extension icon doesn't appear in toolbar</strong>
+                        <p>Make sure you've loaded the extension (Step 5 of Installation). If it's loaded but not visible, click the puzzle icon (extensions menu) and pin the extension. If it doesn't appear at all, reload the page and try again.</p>
+                    </div>
+
+                    <div class="troubleshooting-item">
+                        <strong>"Cannot load extension" error during installation</strong>
+                        <p>This usually means the folder you selected doesn't contain a valid <code>manifest.json</code> file. Make sure you selected the unzipped folder itself, not a subfolder inside it. The folder should contain <code>manifest.json</code> at the root level.</p>
+                    </div>
+
+                    <div class="troubleshooting-item">
+                        <strong>"Scan Current Page" button doesn't work</strong>
+                        <p>The extension only works on Formstack Documents pages. Make sure you're viewing a document with an Initial Template visible. If you're on the right page, try refreshing and clicking the button again. You should see a message indicating the scan is in progress.</p>
+                    </div>
+
+                    <div class="troubleshooting-item">
+                        <strong>Generated HTML looks incomplete or missing fields</strong>
+                        <p>This can happen if the Initial Template isn't fully rendered when you click "Scan." Try waiting a few seconds for the page to load completely, then refresh and scan again. Very large forms may need a moment to render all fields.</p>
+                    </div>
+
+                    <div class="troubleshooting-item">
+                        <strong>Test data doesn't match my field types</strong>
+                        <p>The extension generates basic test data for each field type (email, phone, text, etc.). If you need specific test values, you can edit the JSON before pasting it into the Test tab. Update any values that don't match your needs.</p>
+                    </div>
+
+                    <div class="troubleshooting-item">
+                        <strong>Copy button doesn't work</strong>
+                        <p>The copy functionality uses your browser's clipboard API, which requires user permission. Make sure you're clicking the copy button, not trying to select and copy manually. If it still doesn't work, you can manually select all the text and copy it (Ctrl+C or Cmd+C).</p>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <footer>Formstack Documents HTML Theme Generator Documentation</footer>
+    </div>
+
+    <script>
+        document.querySelectorAll('.faq-item h3').forEach(el => {
+            el.addEventListener('click', function() {
+                const item = this.closest('.faq-item');
+                item.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specifications - Formstack Documents Theme Generator</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; }
+        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
+        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
+        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #666; }
+        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .specs-list { display: flex; flex-direction: column; gap: 80px; }
+        .spec-section { }
+        .spec-section h2 { font-size: 36px; font-weight: 600; letter-spacing: -0.5px; color: #000; margin-bottom: 40px; }
+        .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .spec-item { background: #fff; padding: 32px; }
+        .spec-item h3 { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #000; }
+        .spec-item p { font-size: 15px; line-height: 1.7; color: #555; }
+        .spec-item ul { list-style: none; margin-top: 16px; padding: 0; }
+        .spec-item li { padding: 6px 0; padding-left: 20px; position: relative; font-size: 14px; color: #555; }
+        .spec-item li::before { content: "•"; position: absolute; left: 0; color: #ccc; }
+        .code-block { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; margin-top: 16px; overflow-x: auto; }
+        .code-block code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #333; line-height: 1.5; display: block; white-space: pre-wrap; word-break: break-word; }
+        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .browser-support { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+        .browser-badge { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 12px; text-align: center; font-size: 13px; color: #555; }
+        .browser-badge strong { display: block; color: #1a1a1a; font-weight: 600; margin-bottom: 4px; }
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .comparison-table th { background: #f5f5f5; border: 1px solid #e0e0e0; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; color: #1a1a1a; }
+        .comparison-table td { border: 1px solid #e0e0e0; padding: 12px 16px; font-size: 14px; color: #555; }
+        .comparison-table tr:nth-child(even) { background: #fafafa; }
+        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
+        @media (max-width: 1024px) {
+            .spec-grid { grid-template-columns: 1fr; }
+            .browser-support { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Technical Specifications</h1>
+            <p class="subtitle">Extension architecture, requirements, and technical details</p>
+            <nav class="tab-nav">
+                <a href="formstack-overview.html" class="tab-nav-link">Extension Overview</a>
+                <a href="formstack-workflow.html" class="tab-nav-link">HTML Generation Workflow</a>
+                <a href="formstack-specs.html" class="tab-nav-link active">Technical Specs</a>
+                <a href="formstack-using.html" class="tab-nav-link">Using the Extension</a>
+            </nav>
+            <a href="Formstack-Template-Maker-v1.zip" class="download-btn" download>Download Extension</a>
+        </header>
+
+        <div class="specs-list">
+
+            <section class="spec-section">
+                <h2>System Requirements</h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <h3>Browser Compatibility</h3>
+                        <p>The extension is built for Google Chrome and Chromium-based browsers. It requires Manifest V3 and modern JavaScript ES2020+ features.</p>
+                        <div class="browser-support">
+                            <div class="browser-badge">
+                                <strong>Chrome</strong>
+                                90+
+                            </div>
+                            <div class="browser-badge">
+                                <strong>Edge</strong>
+                                90+
+                            </div>
+                            <div class="browser-badge">
+                                <strong>Brave</strong>
+                                1.0+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Performance Specifications</h3>
+                        <p>The extension is optimized for speed and minimal resource usage during the scanning and generation process.</p>
+                        <ul>
+                            <li><strong>Scan Time:</strong> &lt;500ms on typical forms</li>
+                            <li><strong>Memory Footprint:</strong> &lt;5MB resident</li>
+                            <li><strong>DOM Traversal:</strong> Single pass, O(n) complexity</li>
+                            <li><strong>No network calls:</strong> Entirely client-side</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Formstack Platform Requirements</h3>
+                        <p>The extension is designed to work with current versions of Formstack Documents and Formstack Forms.</p>
+                        <ul>
+                            <li>Formstack Documents with Document Builder access</li>
+                            <li>Formstack Forms (any version with standard HTML rendering)</li>
+                            <li>Modern form structures using semantic HTML</li>
+                            <li>No special API access or authentication needed</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Installation Requirements</h3>
+                        <p>The extension can be installed in developer mode on any supported Chrome browser. No additional software or configuration is required.</p>
+                        <ul>
+                            <li>Unzipped extension folder on local machine</li>
+                            <li>Chrome Developer Mode enabled</li>
+                            <li>Load unpacked extensions enabled</li>
+                            <li>No admin privileges required</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="spec-section">
+                <h2>Architecture & Components</h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <h3>Popup Script (popup.js)</h3>
+                        <p>The user-facing interface displayed when you click the extension icon. Handles button clicks, manages the sidebar display, and coordinates communication between the user interface and content script.</p>
+                        <ul>
+                            <li>Listens for "Scan Current Page" button click</li>
+                            <li>Sends scan request to content script</li>
+                            <li>Receives generated HTML and JSON</li>
+                            <li>Displays results in text areas for copying</li>
+                            <li>Handles copy-to-clipboard operations</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Content Script (content.js)</h3>
+                        <p>Runs in the context of the Formstack Documents page. Performs DOM analysis, locates the Initial Template, extracts form structure, and generates HTML and JSON.</p>
+                        <ul>
+                            <li>Analyzes page DOM for template container</li>
+                            <li>Extracts form fields and labels</li>
+                            <li>Generates semantic HTML markup</li>
+                            <li>Creates test data JSON</li>
+                            <li>Returns results to popup script</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Manifest File (manifest.json)</h3>
+                        <p>Declares extension permissions, content scripts, and popup interface. Uses Manifest V3 for enhanced security and modern extension standards.</p>
+                        <div class="code-block">
+                            <code>{
+  "manifest_version": 3,
+  "name": "Formstack Documents HTML Theme Generator",
+  "version": "1.0",
+  "permissions": ["activeTab"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["*://*/*"],
+    "js": ["content.js"]
+  }]
+}</code>
+                        </div>
+                    </div>
+                    <div class="spec-item">
+                        <h3>User Interface (popup.html)</h3>
+                        <p>Simple, responsive HTML interface with clearly labeled sections for scanning, HTML output, JSON output, and copy buttons. Minimal dependencies—uses vanilla CSS and JavaScript.</p>
+                        <ul>
+                            <li>"Scan Current Page" action button</li>
+                            <li>HTML code textarea with copy button</li>
+                            <li>JSON code textarea with copy button</li>
+                            <li>Status messages and error handling</li>
+                            <li>Responsive sidebar layout</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="spec-section">
+                <h2>Data Flow & Generation Process</h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <h3>Template Detection</h3>
+                        <p>When you click "Scan Current Page," the content script searches the DOM for the Initial Template container. Formstack Documents uses predictable class names and data attributes to identify form elements.</p>
+                        <ul>
+                            <li>Searches for template wrapper element</li>
+                            <li>Identifies form container by class or attribute</li>
+                            <li>Locates field groups and sections</li>
+                            <li>Extracts labels and placeholder text</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>HTML Generation</h3>
+                        <p>Once the template is detected, the extension generates clean, semantic HTML. Each field is represented with proper markup, labels, and data attributes for easy CSS targeting and JavaScript functionality.</p>
+                        <ul>
+                            <li>Creates wrapper divs for sections</li>
+                            <li>Generates labeled input elements</li>
+                            <li>Adds CSS classes for styling hooks</li>
+                            <li>Includes data attributes from template</li>
+                            <li>Preserves field order and grouping</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Test Data Generation</h3>
+                        <p>The extension analyzes each form field and generates representative test data. Field type detection enables realistic sample values: email fields get sample emails, phone fields get sample phone numbers, etc.</p>
+                        <ul>
+                            <li>Detects field input type attribute</li>
+                            <li>Generates appropriate test values</li>
+                            <li>Creates valid JSON structure</li>
+                            <li>Matches form field order</li>
+                            <li>Includes all required fields</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Output Delivery</h3>
+                        <p>The generated HTML and JSON are returned to the popup interface as strings. Both are displayed in editable text areas with one-click copy functionality. Results remain available until the next scan or extension close.</p>
+                        <ul>
+                            <li>HTML displayed in code textarea</li>
+                            <li>JSON displayed in separate textarea</li>
+                            <li>Copy buttons use native clipboard API</li>
+                            <li>Results persist during current session</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="spec-section">
+                <h2>Security & Privacy</h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <h3>No Data Transmission</h3>
+                        <p>The extension operates entirely in the browser using the DOM of the page you're viewing. No data is sent to external servers, no analytics are collected, and no user information is stored.</p>
+                        <ul>
+                            <li>All processing is client-side</li>
+                            <li>No network requests made</li>
+                            <li>No external API dependencies</li>
+                            <li>No telemetry or analytics</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Browser Storage</h3>
+                        <p>The extension does not use browser storage (localStorage, sessionStorage, or IndexedDB). Generated HTML and JSON are held in memory only and cleared when the popup closes.</p>
+                        <ul>
+                            <li>No persistent local storage</li>
+                            <li>No session data saved</li>
+                            <li>No cookies or tracking</li>
+                            <li>Data cleared on popup close</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Permissions Model</h3>
+                        <p>The extension only requests minimal permissions needed to function: access to the active tab. It cannot access user browsing history, stored passwords, or data from other sites.</p>
+                        <ul>
+                            <li><code>activeTab</code> permission only</li>
+                            <li>No history or password access</li>
+                            <li>No cross-site data access</li>
+                            <li>No persistent identity</li>
+                        </ul>
+                    </div>
+                    <div class="spec-item">
+                        <h3>Content Security</h3>
+                        <p>The extension uses inline scripts and styles to minimize attack surface. No external resources are loaded, reducing the risk of man-in-the-middle attacks or third-party compromises.</p>
+                        <ul>
+                            <li>No external script loading</li>
+                            <li>All resources bundled</li>
+                            <li>CSP headers enforced</li>
+                            <li>Manifest V3 security model</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="spec-section">
+                <h2>Field Type Support</h2>
+                <p style="margin-bottom: 32px; font-size: 16px; color: #555;">The extension recognizes and generates proper HTML for all standard Formstack field types. Test data is generated appropriately for each type.</p>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Field Type</th>
+                            <th>HTML Element</th>
+                            <th>Test Data Example</th>
+                            <th>Supported</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Text Input</td>
+                            <td><code>&lt;input type="text"&gt;</code></td>
+                            <td>Sample text value</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td><code>&lt;input type="email"&gt;</code></td>
+                            <td>user@example.com</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Phone</td>
+                            <td><code>&lt;input type="tel"&gt;</code></td>
+                            <td>555-123-4567</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Number</td>
+                            <td><code>&lt;input type="number"&gt;</code></td>
+                            <td>0 or sequential number</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Dropdown</td>
+                            <td><code>&lt;select&gt;</code></td>
+                            <td>First option selected</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Checkbox</td>
+                            <td><code>&lt;input type="checkbox"&gt;</code></td>
+                            <td>Unchecked (false)</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Radio Button</td>
+                            <td><code>&lt;input type="radio"&gt;</code></td>
+                            <td>First option selected</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Textarea</td>
+                            <td><code>&lt;textarea&gt;</code></td>
+                            <td>Multiline sample text</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>File Upload</td>
+                            <td><code>&lt;input type="file"&gt;</code></td>
+                            <td>Filename placeholder</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Date</td>
+                            <td><code>&lt;input type="date"&gt;</code></td>
+                            <td>YYYY-MM-DD format</td>
+                            <td>✓</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </div>
+
+        <footer>Formstack Documents HTML Theme Generator Documentation</footer>
+    </div>
+</body>
+</html>
