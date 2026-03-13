@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            color: #1a1a1a;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary {
+            background: #fafafa;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+            margin-top: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .grid-wrapper {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 1px;
+            aspect-ratio: 4 / 5;
+            background: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .cell {
+            position: relative;
+            cursor: pointer;
+            background: #ffffff;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: rgba(26, 26, 26, 0.4);
+            font-weight: 300;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: attr(data-id);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .cell:hover::before {
+            opacity: 0.5;
+        }
+
+        /* Pastel color palette */
+        .cell[data-row="0"][data-col="0"] { background-color: #FFE5E5; }
+        .cell[data-row="0"][data-col="1"] { background-color: #FFE5D9; }
+        .cell[data-row="0"][data-col="2"] { background-color: #FFF4E5; }
+        .cell[data-row="0"][data-col="3"] { background-color: #FFFCE5; }
+
+        .cell[data-row="1"][data-col="0"] { background-color: #F0FFE5; }
+        .cell[data-row="1"][data-col="1"] { background-color: #E5FFE5; }
+        .cell[data-row="1"][data-col="2"] { background-color: #E5FFF4; }
+        .cell[data-row="1"][data-col="3"] { background-color: #E5FFFC; }
+
+        .cell[data-row="2"][data-col="0"] { background-color: #E5F7FF; }
+        .cell[data-row="2"][data-col="1"] { background-color: #E5EFFF; }
+        .cell[data-row="2"][data-col="2"] { background-color: #F0E5FF; }
+        .cell[data-row="2"][data-col="3"] { background-color: #FCE5FF; }
+
+        .cell[data-row="3"][data-col="0"] { background-color: #FFE5F4; }
+        .cell[data-row="3"][data-col="1"] { background-color: #FFE5EB; }
+        .cell[data-row="3"][data-col="2"] { background-color: #FFEAE5; }
+        .cell[data-row="3"][data-col="3"] { background-color: #FFF7E5; }
+
+        .cell[data-row="4"][data-col="0"] { background-color: #E8F4E5; }
+        .cell[data-row="4"][data-col="1"] { background-color: #E5F0FF; }
+        .cell[data-row="4"][data-col="2"] { background-color: #F5E5FF; }
+        .cell[data-row="4"][data-col="3"] { background-color: #FFE8E5; }
+
+        /* Transparency state */
+        .cell.transparent {
+            opacity: 0;
+        }
+
+        /* Selection state for merging UI */
+        .cell.selected {
+            box-shadow: inset 0 0 0 2px #FFBE5F;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .grid-wrapper {
+                padding: 1rem;
+            }
+
+            .controls {
+                gap: 0.75rem;
+            }
+
+            button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Interactive Grid</h1>
+            <p>Click cells to toggle transparency • Select and merge cells</p>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleMergeMode()">Start Merge</button>
+            <button onclick="unmergeSelected()" class="secondary">Unmerge</button>
+            <button onclick="resetGrid()" class="secondary">Reset</button>
+            <button onclick="saveAsImage()" class="secondary">Save as Image</button>
+            <button onclick="saveAsPDF()" class="secondary">Save as PDF</button>
+        </div>
+
+        <div class="grid-wrapper">
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="info-text" id="info">
+            Click cells to toggle transparency. Click "Start Merge" to select cells for merging.
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        const ROWS = 5;
+        const COLS = 4;
+        let gridState = {}; // Maps cell ID to {row, col, transparent, mergedGroup}
+        let mergeMode = false;
+        let selectedForMerge = new Set();
+        let mergeGroups = new Map(); // Maps group ID to {cells: Set, mainColor}
+
+        const colorMap = {
+            '0-0': '#FFE5E5', '0-1': '#FFE5D9', '0-2': '#FFF4E5', '0-3': '#FFFCE5',
+            '1-0': '#F0FFE5', '1-1': '#E5FFE5', '1-2': '#E5FFF4', '1-3': '#E5FFFC',
+            '2-0': '#E5F7FF', '2-1': '#E5EFFF', '2-2': '#F0E5FF', '2-3': '#FCE5FF',
+            '3-0': '#FFE5F4', '3-1': '#FFE5EB', '3-2': '#FFEAE5', '3-3': '#FFF7E5',
+            '4-0': '#E8F4E5', '4-1': '#E5F0FF', '4-2': '#F5E5FF', '4-3': '#FFE8E5'
+        };
+
+        function initGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            gridState = {};
+            mergeGroups.clear();
+            selectedForMerge.clear();
+
+            let id = 0;
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cellId = id;
+                    gridState[cellId] = {
+                        row,
+                        col,
+                        transparent: false,
+                        mergedGroup: null
+                    };
+
+                    const cellEl = document.createElement('div');
+                    cellEl.className = 'cell';
+                    cellEl.dataset.id = cellId;
+                    cellEl.dataset.row = row;
+                    cellEl.dataset.col = col;
+                    cellEl.style.backgroundColor = colorMap[`${row}-${col}`];
+                    cellEl.onclick = (e) => handleCellClick(e, cellId);
+
+                    grid.appendChild(cellEl);
+                    id++;
+                }
+            }
+        }
+
+        function handleCellClick(e, cellId) {
+            if (mergeMode) {
+                e.stopPropagation();
+                if (selectedForMerge.has(cellId)) {
+                    selectedForMerge.delete(cellId);
+                } else {
+                    selectedForMerge.add(cellId);
+                }
+                updateSelectionUI();
+            } else {
+                // Toggle transparency - only on visible (non-merged) cells
+                const state = gridState[cellId];
+                if (state.mergedGroup === null) {
+                    state.transparent = !state.transparent;
+                    const el = document.querySelector(`[data-id="${cellId}"]`);
+                    el.classList.toggle('transparent', state.transparent);
+                }
+            }
+        }
+
+        function updateSelectionUI() {
+            document.querySelectorAll('.cell').forEach((el) => {
+                const id = parseInt(el.dataset.id);
+                el.classList.toggle('selected', selectedForMerge.has(id));
+            });
+
+            const info = document.getElementById('info');
+            if (mergeMode && selectedForMerge.size > 0) {
+                info.textContent = `${selectedForMerge.size} cell(s) selected. Click "Confirm Merge" to combine them.`;
+            }
+        }
+
+        function toggleMergeMode() {
+            mergeMode = !mergeMode;
+
+            const button = document.querySelector('button:first-of-type');
+            if (mergeMode) {
+                button.textContent = 'Confirm Merge';
+                button.style.background = '#FFBE5F';
+                button.style.color = '#1a1a1a';
+                button.style.borderColor = '#FFBE5F';
+                document.getElementById('info').textContent = 'Select cells to merge. Click "Confirm Merge" to combine them.';
+            } else {
+                if (selectedForMerge.size > 1) {
+                    mergeCells();
+                }
+                selectedForMerge.clear();
+                
+                button.textContent = 'Start Merge';
+                button.style.background = '#ffffff';
+                button.style.color = '#1a1a1a';
+                button.style.borderColor = '#e0e0e0';
+                
+                updateSelectionUI();
+                document.getElementById('info').textContent = 'Click cells to toggle transparency. Click "Start Merge" to select cells for merging.';
+            }
+        }
+
+        function mergeCells() {
+            if (selectedForMerge.size < 2) return;
+
+            const cellArray = Array.from(selectedForMerge).sort((a, b) => {
+                const stateA = gridState[a];
+                const stateB = gridState[b];
+                if (stateA.row !== stateB.row) return stateA.row - stateB.row;
+                return stateA.col - stateB.col;
+            });
+
+            // Get bounds of merged area
+            const minRow = Math.min(...cellArray.map(id => gridState[id].row));
+            const maxRow = Math.max(...cellArray.map(id => gridState[id].row));
+            const minCol = Math.min(...cellArray.map(id => gridState[id].col));
+            const maxCol = Math.max(...cellArray.map(id => gridState[id].col));
+
+            const mainCellId = cellArray[0];
+            const mainColor = colorMap[`${gridState[mainCellId].row}-${gridState[mainCellId].col}`];
+            const groupId = mainCellId;
+
+            // Create merge group
+            const groupMembers = new Set(cellArray);
+            mergeGroups.set(groupId, {
+                cells: groupMembers,
+                mainColor: mainColor
+            });
+
+            // Update main cell to span the merged area
+            // CSS Grid is 1-indexed, so we add 1 to positions
+            // Grid column: start at (minCol + 1), span (maxCol - minCol + 1) cells
+            const mainEl = document.querySelector(`[data-id="${mainCellId}"]`);
+            const colStart = minCol + 1;
+            const colSpan = maxCol - minCol + 1;
+            const rowStart = minRow + 1;
+            const rowSpan = maxRow - minRow + 1;
+            
+            mainEl.style.gridColumn = `${colStart} / span ${colSpan}`;
+            mainEl.style.gridRow = `${rowStart} / span ${rowSpan}`;
+            mainEl.style.backgroundColor = mainColor;
+
+            // Mark all cells as merged and hide the others (only the ones that aren't the main cell)
+            cellArray.forEach((cellId) => {
+                gridState[cellId].mergedGroup = groupId;
+                if (cellId !== mainCellId) {
+                    const el = document.querySelector(`[data-id="${cellId}"]`);
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        function unmergeSelected() {
+            if (selectedForMerge.size === 0) {
+                document.getElementById('info').textContent = 'Select merged cells to unmerge.';
+                return;
+            }
+
+            const groupsToUnmerge = new Set();
+            selectedForMerge.forEach(cellId => {
+                const state = gridState[cellId];
+                if (state.mergedGroup !== null) {
+                    groupsToUnmerge.add(state.mergedGroup);
+                }
+            });
+
+            groupsToUnmerge.forEach(groupId => {
+                const group = mergeGroups.get(groupId);
+                if (group) {
+                    // Restore main cell
+                    const mainEl = document.querySelector(`[data-id="${groupId}"]`);
+                    mainEl.style.gridColumn = 'auto';
+                    mainEl.style.gridRow = 'auto';
+                    
+                    // Restore all cells
+                    group.cells.forEach(cellId => {
+                        const state = gridState[cellId];
+                        const originalColor = colorMap[`${state.row}-${state.col}`];
+                        const el = document.querySelector(`[data-id="${cellId}"]`);
+                        el.style.display = 'flex';
+                        el.style.backgroundColor = originalColor;
+                        state.mergedGroup = null;
+                    });
+
+                    mergeGroups.delete(groupId);
+                }
+            });
+
+            selectedForMerge.clear();
+            updateSelectionUI();
+            document.getElementById('info').textContent = 'Cells unmerged.';
+        }
+
+        function resetGrid() {
+            initGrid();
+            mergeMode = false;
+            document.querySelector('button').textContent = 'Start Merge';
+            document.querySelector('button').style.cssText = '';
+            document.getElementById('info').textContent = 'Grid reset. Click cells to toggle transparency. Click "Start Merge" to select cells for merging.';
+        }
+
+        function saveAsImage() {
+            const gridWrapper = document.querySelector('.grid-wrapper');
+            html2canvas(gridWrapper, {
+                backgroundColor: '#ffffff',
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'grid-configuration.png';
+                link.click();
+            }).catch(err => {
+                alert('Error saving image: ' + err.message);
+            });
+        }
+
+        function saveAsPDF() {
+            const gridWrapper = document.querySelector('.grid-wrapper');
+            html2canvas(gridWrapper, {
+                backgroundColor: '#ffffff',
+                scale: 2
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                const imgWidth = 150;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const yPosition = 20;
+                
+                pdf.addImage(imgData, 'PNG', 30, yPosition, imgWidth, imgHeight);
+                pdf.save('grid-configuration.pdf');
+            }).catch(err => {
+                alert('Error saving PDF: ' + err.message);
+            });
+        }
+
+        // Initialize on page load
+        initGrid();
+    </script>
+</body>
+</html>
