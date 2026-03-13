@@ -16,8 +16,6 @@
         .tab-nav-link:hover { color: #666; }
         .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
         .extensions-content { display: flex; flex-direction: column; gap: 120px; }
-        .extension-section { display: none; }
-        .extension-section.active { display: block; }
         .project { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
         .project:nth-child(even) { direction: rtl; }
         .project:nth-child(even) > * { direction: ltr; }
@@ -50,54 +48,48 @@
             <h1>Chrome Extensions</h1>
             <p class="subtitle">Visual configuration and automation tools for Sitecore and Formstack</p>
             <nav class="tab-nav">
-                <a href="/widgets/overview" class="tab-nav-link active">Sitecore Widget Editor</a>
+                <a href="/widgets/overview" class="tab-nav-link">Sitecore Widget Editor</a>
                 <a href="/formstack/overview" class="tab-nav-link">Formstack HTML Theme Generator</a>
             </nav>
         </header>
 
         <div class="extensions-content">
 
-            <!-- SITECORE SECTION -->
-            <div id="sitecore-section" class="extension-section active">
-                <article class="project">
-                    <div class="project-content">
-                        <div class="project-number">OVERVIEW</div>
-                        <h2>Visual Editing for Data-Driven Sitecore Widgets</h2>
-                        <div class="project-description">
-                            <p>Editing data-driven widgets in Sitecore traditionally requires navigating source code to manually update inline values, data attributes, and HTML structure. Content editors shouldn't need to touch markup to change a stat, a plan price, or a card label.</p>
-                            <p>This Chrome extension solves that. It opens as a persistent sidebar inside the Content Editor, reads field values directly via the Sitecore SSC API, and presents a clean grouped form. Hit Apply Changes and the extension silently automates the HTML editor — opening it, writing the updated markup, and closing it — no manual WYSIWYG interaction required.</p>
-                            <p>Widget support is driven entirely by a central <code>widget-registry.json</code> hosted on the server. Adding or updating a widget requires only editing that file — no changes to the extension itself.</p>
-                        </div>
-                        <a href="overview.html" class="cta-link">View Full Documentation &rarr;</a>
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">OVERVIEW</div>
+                    <h2>Visual Editing for Data-Driven Sitecore Widgets</h2>
+                    <div class="project-description">
+                        <p>Editing data-driven widgets in Sitecore traditionally requires navigating source code to manually update inline values, data attributes, and HTML structure. Content editors shouldn't need to touch markup to change a stat, a plan price, or a card label.</p>
+                        <p>This Chrome extension solves that. It opens as a persistent sidebar inside the Content Editor, reads field values directly via the Sitecore SSC API, and presents a clean grouped form. Hit Apply Changes and the extension silently automates the HTML editor — opening it, writing the updated markup, and closing it — no manual WYSIWYG interaction required.</p>
+                        <p>Widget support is driven entirely by a central <code>widget-registry.json</code> hosted on the server. Adding or updating a widget requires only editing that file — no changes to the extension itself.</p>
                     </div>
-                    <div>
-                        <div class="project-image">
-                            <div class="placeholder">Sitecore Widget Editor Screenshot</div>
-                        </div>
+                    <a href="/widgets/overview" class="cta-link">View Full Documentation &rarr;</a>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Sitecore Widget Editor Screenshot</div>
                     </div>
-                </article>
-            </div>
+                </div>
+            </article>
 
-            <!-- FORMSTACK SECTION -->
-            <div id="formstack-section" class="extension-section">
-                <article class="project">
-                    <div class="project-content">
-                        <div class="project-number">OVERVIEW</div>
-                        <h2>Visual HTML Theme Generator for Formstack Documents</h2>
-                        <div class="project-description">
-                            <p>Building custom HTML themes for Formstack Documents typically requires manual HTML editing, CSS knowledge, and tedious copy-paste workflows between form builders and document templates. Content creators shouldn't need to write code to customize how their forms look when converted to documents.</p>
-                            <p>This Chrome extension eliminates that friction. It scans the current page for the Formstack Initial Template, extracts the underlying form markup, and generates a fully functional, customizable HTML template in seconds. The extension also produces JSON test data specific to your form, enabling you to preview exactly how your document will render before publishing.</p>
-                            <p>Everything happens in the browser—no server calls, no authentication headaches. Copy the HTML, paste it into your document's Advanced HTML Editor, test with one click, and you're done.</p>
-                        </div>
-                        <a href="formstack-overview.html" class="cta-link">View Full Documentation &rarr;</a>
+            <article class="project">
+                <div class="project-content">
+                    <div class="project-number">OVERVIEW</div>
+                    <h2>Visual HTML Theme Generator for Formstack Documents</h2>
+                    <div class="project-description">
+                        <p>Building custom HTML themes for Formstack Documents typically requires manual HTML editing, CSS knowledge, and tedious copy-paste workflows between form builders and document templates. Content creators shouldn't need to write code to customize how their forms look when converted to documents.</p>
+                        <p>This Chrome extension eliminates that friction. It scans the current page for the Formstack Initial Template, extracts the underlying form markup, and generates a fully functional, customizable HTML template in seconds. The extension also produces JSON test data specific to your form, enabling you to preview exactly how your document will render before publishing.</p>
+                        <p>Everything happens in the browser—no server calls, no authentication headaches. Copy the HTML, paste it into your document's Advanced HTML Editor, test with one click, and you're done.</p>
                     </div>
-                    <div>
-                        <div class="project-image">
-                            <div class="placeholder">Formstack HTML Theme Generator Screenshot</div>
-                        </div>
+                    <a href="/formstack/overview" class="cta-link">View Full Documentation &rarr;</a>
+                </div>
+                <div>
+                    <div class="project-image">
+                        <div class="placeholder">Formstack HTML Theme Generator Screenshot</div>
                     </div>
-                </article>
-            </div>
+                </div>
+            </article>
 
         </div>
 
