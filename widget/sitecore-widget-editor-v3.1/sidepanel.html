@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Widget Editor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1e2426; color: #e0e0e0; font-size: 13px; line-height: 1.5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    #updateBanner { display:none; background:#3a2e00; border-bottom:1px solid #FFBE5F; padding:8px 14px; font-size:11px; color:#FFBE5F; line-height:1.6; flex-shrink:0; }
+    #updateBanner a { color:#FFBE5F; font-weight:600; }
+    #header { padding:12px 14px 10px; border-bottom:1px solid #2c3436; flex-shrink:0; }
+    #header h1 { font-size:13px; font-weight:600; color:#fff; }
+    #header .sub { font-size:11px; color:#555; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #picker { display:none; padding:10px 14px; border-bottom:1px solid #2c3436; flex-shrink:0; }
+    #picker label { font-size:11px; color:#888; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px; }
+    #picker select { width:100%; background:#2a3133; border:1px solid #3a4446; color:#e0e0e0; font-size:12px; padding:6px 8px; border-radius:4px; outline:none; cursor:pointer; }
+    #picker select:focus { border-color:#FFBE5F; }
+    #content { flex:1; overflow-y:auto; padding:12px 14px; min-height:0; }
+    #content::-webkit-scrollbar { width:4px; }
+    #content::-webkit-scrollbar-thumb { background:#2c3436; border-radius:2px; }
+    .state-msg { color:#444; font-size:12px; text-align:center; padding:32px 16px; line-height:1.9; }
+    .section-header { font-size:10px; font-weight:600; color:#FFBE5F; text-transform:uppercase; letter-spacing:0.8px; margin:16px 0 8px; padding-bottom:4px; border-bottom:1px solid #2c3436; }
+    .section-header:first-child { margin-top:0; }
+    .field-row { margin-bottom:10px; }
+    .field-row label { display:block; font-size:11px; color:#888; margin-bottom:3px; }
+    .field-row input, .field-row textarea { width:100%; background:#2a3133; border:1px solid #3a4446; color:#e0e0e0; font-size:12px; padding:6px 8px; border-radius:4px; outline:none; font-family:inherit; transition:border-color 0.2s; }
+    .field-row input:focus, .field-row textarea:focus { border-color:#FFBE5F; }
+    .field-row textarea { resize:vertical; min-height:52px; }
+    .card-group { border:1px solid #2c3436; border-radius:5px; margin-bottom:10px; overflow:hidden; }
+    .card-group-header { background:#242b2d; padding:7px 10px; font-size:11px; font-weight:600; color:#ccc; }
+    .card-group-body { padding:10px; }
+    .sub-header { font-size:10px; color:#555; text-transform:uppercase; letter-spacing:0.5px; margin:8px 0 6px; }
+    #apply-bar { padding:10px 14px; border-top:1px solid #2c3436; flex-shrink:0; display:none; }
+    #applyBtn { display:block; width:100%; padding:9px; background:#FFBE5F; color:#1a1a1a; border:none; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.2s; }
+    #applyBtn:hover { background:#ffd080; }
+    .add-item-btn { display:block; width:100%; margin-top:4px; margin-bottom:12px; padding:7px; background:transparent; color:#FFBE5F; border:1px solid #FFBE5F; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .add-item-btn:hover { background:#FFBE5F22; }
+    .item-delete-btn { display:block; width:100%; margin-top:8px; padding:6px; background:transparent; color:#e05555; border:1px solid #e0555540; border-radius:4px; font-size:11px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+    .item-delete-btn:hover { background:#e0555515; border-color:#e05555; }
+    #footer { padding:8px 14px; border-top:1px solid #2c3436; font-size:11px; color:#555; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; }
+    #refreshBtn { background:none; border:none; color:#555; font-size:11px; cursor:pointer; padding:2px 4px; border-radius:3px; transition:color 0.2s; line-height:1; }
+    #refreshBtn:hover { color:#FFBE5F; }
+    #refreshBtn.spinning { animation: spin 0.7s linear infinite; display:inline-block; }
+    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+    #status.ok  { color:#7dbf82; }
+    #status.err { color:#e57373; }
+  
+.mode-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; margin-bottom: 4px; display: inline-block; }
+.mode-ce { background: #e8f5e9; color: #2e7d32; }
+.mode-ee { background: #e3f2fd; color: #1565c0; }
+
+        /* Image grid widget UI */
+        .ig-layout-select { width: 100%; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; background: #fff; color: #1a1a1a; margin-top: 8px; }
+        .ig-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        .ig-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; cursor: grab; user-select: none; transition: background 0.15s; }
+        .ig-row:active { cursor: grabbing; }
+        .ig-row.ig-hidden { opacity: 0.45; }
+        .ig-handle { color: #ccc; font-size: 16px; flex-shrink: 0; }
+        .ig-label { flex: 1; font-size: 13px; color: #444; }
+        .ig-toggle { flex-shrink: 0; padding: 4px 10px; font-size: 12px; font-weight: 500; border: 1px solid #e0e0e0; border-radius: 3px; background: #fafafa; color: #666; cursor: pointer; transition: all 0.15s; }
+        .ig-toggle:hover { background: #f0f0f0; }
+</style>
+</head>
+<body>
+  <div id="updateBanner"></div>
+  <div id="header">
+    <h1>Widget Editor</h1>
+    <div class="sub" id="pageUrl">Scanning page...</div>
+  </div>
+  <div id="picker">
+    <label>Widget on this page</label>
+    <select id="widgetSelect"></select>
+  </div>
+  <div id="content">
+    <div class="state-msg" id="stateMsg">Scanning for widgets...</div>
+  </div>
+  <div id="apply-bar"><button id="applyBtn">Apply Changes</button></div>
+  <div id="footer"><span id="status">Ready</span><button id="refreshBtn" title="Refresh registry">&#8635;</button></div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

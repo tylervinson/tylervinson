@@ -1,11 +1,14 @@
 {
-  "version": "1.4.0",
-  "updatedAt": "2026-03-03T12:00:00.000Z",
+  "version": "1.5.0",
+  "updatedAt": "2026-03-05T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
+  "apiKey": "{90524103-7799-489C-9E53-C0D995207FB4}",
   "widgets": [
     {
       "class": "animated-cards",
       "name": "Animated Cards",
+      "itemId": "f50e7e4a-b847-4607-a7b1-9eed9cb58335",
+      "fieldId": "7115e9d1-eab1-4400-9743-48b1984e47ab",
       "repeat": {
         "selector": ".profile-card",
         "groupLabel": "Card"
@@ -34,7 +37,7 @@
         {
           "key": "heading",
           "label": "Section Heading",
-          "selector": ".section-title",
+          "selector": "h1",
           "type": "text"
         }
       ],
@@ -47,30 +50,74 @@
         {
           "key": "type",
           "label": "Plan Type",
-          "selector": ".plan-type",
+          "selector": ".plan-button-type",
           "type": "text"
         },
         {
           "key": "name",
           "label": "Plan Name",
-          "selector": ".plan-name",
+          "selector": ".plan-button-name",
           "type": "text"
         },
         {
           "key": "coverage",
           "label": "Coverage Type",
-          "selector": ".plan-coverage",
+          "selector": ".plan-button-coverage",
           "type": "text"
         },
         {
           "key": "price",
           "label": "Monthly Price",
-          "selector": ".plan-price",
-          "type": "text",
-          "syncDataAttr": "data-price",
-          "syncNumeric": true,
           "gridSelector": ".comparison-grid",
-          "gridCellSelector": "[data-plan='{planNum}'] .price-cell"
+          "gridCellSelector": "[data-comparison='price'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "deductible",
+          "label": "Annual Deductible",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='deductible'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "maxOutOfPocket",
+          "label": "Max Out-of-Pocket",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='maxOutOfPocket'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "coveragePercent",
+          "label": "Coverage Percentage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='coveragePercent'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "doctorVisits",
+          "label": "Doctor Visit Copay",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='doctorVisits'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "prescription",
+          "label": "Prescription Coverage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='prescription'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "emergency",
+          "label": "Emergency Care Copay",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='emergency'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "mentalHealth",
+          "label": "Mental Health Coverage",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='mentalHealth'] [data-plan='{planNum}']"
+        },
+        {
+          "key": "dentalVision",
+          "label": "Dental & Vision",
+          "gridSelector": ".comparison-grid",
+          "gridCellSelector": "[data-comparison='dentalVision'] [data-plan='{planNum}']"
         }
       ]
     },
