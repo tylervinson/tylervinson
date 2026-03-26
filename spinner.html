@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Roulette</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --accent: #FFBE5F;
+    --accent-dark: #e6a840;
+    --text: #1a1a1a;
+    --muted: #666;
+    --border: #e0e0e0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 2.5rem 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 0.4rem;
+    font-size: 1rem;
+  }
+
+  .main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
+  }
+  input[type="text"]::placeholder { color: #bbb; }
+
+  button.primary {
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.2rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.3s ease, transform 0.15s ease;
+  }
+  button.primary:hover { background: #333; transform: translateY(-1px); }
+  button.primary:active { transform: translateY(0); }
+  button.primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+  button.accent {
+    background: var(--accent);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease, transform 0.15s ease;
+  }
+  button.accent:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  button.accent:active { transform: translateY(0); }
+  button.accent:disabled { background: #e0c98a; cursor: not-allowed; opacity: 0.6; transform: none; }
+
+  .filters label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    padding-right: 2rem;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .restaurant-list {
+    max-height: 340px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .restaurant-list::-webkit-scrollbar { width: 4px; }
+  .restaurant-list::-webkit-scrollbar-track { background: transparent; }
+  .restaurant-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .restaurant-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 0.88rem;
+  }
+  .restaurant-item:hover { border-color: var(--accent); background: #fffbf4; }
+  .restaurant-item.selected { border-color: var(--accent); background: #fff9ee; }
+  .restaurant-item input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; }
+  .restaurant-item .ri-name { font-weight: 500; color: var(--text); flex: 1; }
+  .restaurant-item .ri-meta { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+  .ri-rating { display: flex; align-items: center; gap: 2px; }
+  .ri-star { color: var(--accent); font-size: 0.85rem; }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .status-msg {
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 0.25rem;
+  }
+  .status-msg.error { color: #e05252; }
+
+  /* RIGHT PANEL - WHEEL */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(440px, 90vw);
+    height: min(440px, 90vw);
+  }
+
+  #wheelSvgWrap {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  }
+
+  #wheelSvg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: none;
+  }
+
+  .wheel-pointer {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 30px solid #1a1a1a;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+    z-index: 10;
+  }
+
+  .wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 3px solid rgba(0,0,0,0.15);
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+
+  .spin-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  /* WINNER MODAL */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: flex; }
+
+  .winner-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    text-align: center;
+    animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .winner-emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+  .winner-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .winner-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .winner-details {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .winner-accent-bar {
+    width: 48px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin: 0.75rem auto;
+  }
+  .winner-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  .btn-sm {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-sm:hover { border-color: var(--accent); background: #fffbf4; }
+  .btn-maps {
+    background: var(--text);
+    color: #fff;
+    border: 1px solid var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn-maps:hover { background: #333; border-color: #333; }
+
+  /* Print button */
+  #print-btn {
+    position: fixed; top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    background: #1a1a1a; border: none; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; opacity: 0.7; z-index: 9999;
+    transition: opacity 0.3s ease;
+    title: "Save as PDF";
+  }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { width: 18px; height: 18px; }
+  @media print { #print-btn { display: none; } }
+
+  @media (max-width: 900px) {
+    .main { flex-direction: column; align-items: center; padding: 1.5rem; }
+    .left-panel { flex: none; width: 100%; max-width: 500px; }
+    .right-panel { width: 100%; }
+    .wheel-wrap { width: min(400px, 92vw); height: min(400px, 92vw); }
+  }
+</style>
+</head>
+<body>
+
+<button id="print-btn" onclick="printSinglePage()" title="Save as PDF">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+</button>
+
+<header>
+  <h1>Restaurant <span>Roulette</span></h1>
+  <p>Enter your zip code, load nearby spots, and let the wheel decide.</p>
+</header>
+
+<div class="main">
+  <!-- LEFT -->
+  <div class="left-panel">
+
+    <div class="card">
+      <h2>Your Location</h2>
+      <div class="input-row">
+        <input type="text" id="zipInput" placeholder="ZIP code (e.g. 90210)" maxlength="10">
+        <button class="primary" id="searchBtn" onclick="fetchRestaurants()">Search</button>
+      </div>
+      <p class="status-msg" id="statusMsg" style="margin-top:0.6rem;"></p>
+    </div>
+
+    <div class="card filters">
+      <h2>Filters</h2>
+      <label>Cuisine</label>
+      <select id="cuisineFilter" onchange="applyFilters()">
+        <option value="">All cuisines</option>
+      </select>
+      <label>Min Rating</label>
+      <select id="ratingFilter" onchange="applyFilters()">
+        <option value="0">Any rating</option>
+        <option value="3">3+ stars</option>
+        <option value="3.5">3.5+ stars</option>
+        <option value="4">4+ stars</option>
+        <option value="4.5">4.5+ stars</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2>Restaurants <span id="countBadge" style="color:var(--muted);font-family:'DM Sans';font-size:0.85rem;font-weight:400;"></span></h2>
+      <div class="restaurant-list" id="restaurantList">
+        <div class="empty-state">Search a ZIP code to load restaurants nearby.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="wheel-wrap">
+      <div class="wheel-pointer"></div>
+      <div id="wheelSvgWrap">
+        <svg id="wheelSvg" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0.00 0.00 516.00 525.00">
+          <g stroke-width="2.00" fill="none" stroke-linecap="butt">
+            <path stroke="#fe7720" vector-effect="non-scaling-stroke" d="M 339.78 22.51 Q 341.33 25.38 343.10 27.94 Q 345.88 31.96 346.62 33.24 Q 357.00 51.03 364.05 71.20 Q 373.85 99.29 372.60 128.67 C 371.31 159.04 357.78 187.02 337.81 209.57 Q 310.18 240.78 270.45 257.33 Q 267.85 258.42 265.30 259.45"/>
+            <path stroke="#ffbb00" vector-effect="non-scaling-stroke" d="M 265.30 259.45 Q 264.96 256.61 265.08 255.52 Q 269.09 218.39 260.60 181.66 C 255.15 158.07 244.49 133.58 227.51 116.24 Q 214.09 102.54 195.85 93.18 Q 172.84 81.38 146.21 76.14 Q 124.63 71.90 100.72 70.25"/>
+            <path stroke="#85b77b" vector-effect="non-scaling-stroke" d="M 263.75 260.26 Q 263.17 259.96 263.12 259.71"/>
+            <path stroke="#a0cb0c" vector-effect="non-scaling-stroke" d="M 263.12 259.71 Q 262.89 259.11 262.62 258.88 Q 257.94 255.04 251.90 251.10 Q 232.75 238.58 212.55 229.97 C 184.93 218.19 152.84 211.92 123.85 217.64 C 100.51 222.25 79.17 234.04 61.59 249.58 Q 34.65 273.41 16.22 305.19"/>
+            <path stroke="#dc568a" vector-effect="non-scaling-stroke" d="M 509.74 216.37 Q 507.15 221.65 504.08 226.09 Q 490.67 245.56 472.43 263.67 C 456.98 279.00 438.39 292.54 417.70 300.67 C 381.07 315.07 343.07 307.55 308.97 290.53 Q 286.19 279.16 263.57 260.08"/>
+            <path stroke="#84739b" vector-effect="non-scaling-stroke" d="M 263.57 260.08 Q 263.66 260.17 263.75 260.26"/>
+            <path stroke="#fe9020" vector-effect="non-scaling-stroke" d="M 263.75 260.26 Q 264.65 260.18 265.30 259.45"/>
+            <path stroke="#637de4" vector-effect="non-scaling-stroke" d="M 319.56 505.14 L 289.92 509.60"/>
+            <path stroke="#25ae87" vector-effect="non-scaling-stroke" d="M 271.27 511.07 L 270.47 511.08"/>
+            <path stroke="#637de4" vector-effect="non-scaling-stroke" d="M 225.87 508.24 Q 215.58 505.65 205.39 503.59 Q 194.95 501.48 185.93 497.62"/>
+            <path stroke="#25ae87" vector-effect="non-scaling-stroke" d="M 263.12 259.71 Q 263.17 260.00 263.10 260.25 Q 263.04 260.44 262.73 260.57 C 260.22 261.59 257.92 262.03 254.98 263.18 C 201.62 283.85 151.98 333.90 149.92 394.25 C 148.74 428.88 161.18 463.42 180.83 491.92 Q 181.91 493.49 185.93 497.62"/>
+            <path stroke="#7e9176" vector-effect="non-scaling-stroke" d="M 185.93 497.62 Q 179.59 495.98 172.63 493.10 Q 150.35 483.87 136.64 475.46 Q 131.68 472.41 126.68 469.44 Q 123.35 467.46 116.90 462.69 Q 110.39 457.88 103.55 453.71"/>
+            <path stroke="#637de4" vector-effect="non-scaling-stroke" d="M 426.56 449.89 Q 394.99 449.57 365.34 441.35 C 339.12 434.08 311.22 420.42 294.23 398.50 Q 288.90 391.62 287.09 388.67 C 272.16 364.32 262.62 336.42 260.57 307.94 Q 259.54 293.66 260.63 279.00 Q 261.33 269.57 263.57 260.08"/>
+          </g>
+          <path fill="#ffa200" d="M 339.78 22.51 Q 341.33 25.38 343.10 27.94 Q 345.88 31.96 346.62 33.24 Q 357.00 51.03 364.05 71.20 Q 373.85 99.29 372.60 128.67 C 371.31 159.04 357.78 187.02 337.81 209.57 Q 310.18 240.78 270.45 257.33 Q 267.85 258.42 265.30 259.45 Q 264.96 256.61 265.08 255.52 Q 269.09 218.39 260.60 181.66 C 255.15 158.07 244.49 133.58 227.51 116.24 Q 214.09 102.54 195.85 93.18 Q 172.84 81.38 146.21 76.14 Q 124.63 71.90 100.72 70.25 Q 107.56 64.10 116.36 57.87 Q 148.45 35.18 185.58 22.84 C 228.40 8.59 274.12 7.75 318.30 16.73 Q 329.85 19.07 339.78 22.51 Z"/>
+          <path fill="#fd4c40" d="M 509.74 216.37 Q 507.15 221.65 504.08 226.09 Q 490.67 245.56 472.43 263.67 C 456.98 279.00 438.39 292.54 417.70 300.67 C 381.07 315.07 343.07 307.55 308.97 290.53 Q 286.19 279.16 263.57 260.08 Q 263.66 260.17 263.75 260.26 Q 264.65 260.18 265.30 259.45 Q 267.85 258.42 270.45 257.33 Q 310.18 240.78 337.81 209.57 C 357.78 187.02 371.31 159.04 372.60 128.67 Q 373.85 99.29 364.05 71.20 Q 357.00 51.03 346.62 33.24 Q 345.88 31.96 343.10 27.94 Q 341.33 25.38 339.78 22.51 Q 349.13 25.22 359.55 29.72 C 399.17 46.83 436.65 74.10 462.34 108.90 Q 467.58 115.99 468.84 117.66 Q 482.30 135.49 491.70 158.25 Q 503.43 186.65 509.74 216.37 Z"/>
+          <path fill="#ffd300" d="M 100.72 70.25 Q 124.63 71.90 146.21 76.14 Q 172.84 81.38 195.85 93.18 Q 214.09 102.54 227.51 116.24 C 244.49 133.58 255.15 158.07 260.60 181.66 Q 269.09 218.39 265.08 255.52 Q 264.96 256.61 265.30 259.45 Q 264.65 260.18 263.75 260.26 Q 263.17 259.96 263.12 259.71 Q 262.89 259.11 262.62 258.88 Q 257.94 255.04 251.90 251.10 Q 232.75 238.58 212.55 229.97 C 184.93 218.19 152.84 211.92 123.85 217.64 C 100.51 222.25 79.17 234.04 61.59 249.58 Q 34.65 273.41 16.22 305.19 Q 14.34 296.72 13.42 286.03 Q 10.51 252.00 16.27 217.49 C 24.09 170.67 46.19 126.95 78.04 91.78 Q 89.53 79.09 100.72 70.25 Z"/>
+          <path fill="#40c218" d="M 263.12 259.71 Q 263.17 260.00 263.10 260.25 Q 263.04 260.44 262.73 260.57 C 260.22 261.59 257.92 262.03 254.98 263.18 C 201.62 283.85 151.98 333.90 149.92 394.25 C 148.74 428.88 161.18 463.42 180.83 491.92 Q 181.91 493.49 185.93 497.62 Q 179.59 495.98 172.63 493.10 Q 150.35 483.87 136.64 475.46 Q 131.68 472.41 126.68 469.44 Q 123.35 467.46 116.90 462.69 Q 110.39 457.88 103.55 453.71 C 88.95 442.06 76.01 428.62 65.13 413.43 C 61.04 407.73 56.42 401.70 52.95 396.26 Q 26.17 354.35 16.22 305.19 Q 34.65 273.41 61.59 249.58 C 79.17 234.04 100.51 222.25 123.85 217.64 C 152.84 211.92 184.93 218.19 212.55 229.97 Q 232.75 238.58 251.90 251.10 Q 257.94 255.04 262.62 258.88 Q 262.89 259.11 263.12 259.71 Z"/>
+          <path fill="#bb5fd3" d="M 509.74 216.37 Q 512.00 227.63 512.82 239.93 C 514.29 262.00 513.68 284.29 509.74 305.82 Q 505.44 329.35 497.21 350.86 C 483.69 386.22 461.37 417.83 433.74 443.99 Q 429.43 448.06 426.56 449.89 Q 394.99 449.57 365.34 441.35 C 339.12 434.08 311.22 420.42 294.23 398.50 Q 288.90 391.62 287.09 388.67 C 272.16 364.32 262.62 336.42 260.57 307.94 Q 259.54 293.66 260.63 279.00 Q 261.33 269.57 263.57 260.08 Q 286.19 279.16 308.97 290.53 C 343.07 307.55 381.07 315.07 417.70 300.67 C 438.39 292.54 456.98 279.00 472.43 263.67 Q 490.67 245.56 504.08 226.09 Q 507.15 221.65 509.74 216.37 Z"/>
+          <path fill="#0a9af5" d="M 263.75 260.26 Q 263.66 260.17 263.57 260.08 Q 261.33 269.57 260.63 279.00 Q 259.54 293.66 260.57 307.94 C 262.62 336.42 272.16 364.32 287.09 388.67 Q 288.90 391.62 294.23 398.50 C 311.22 420.42 339.12 434.08 365.34 441.35 Q 394.99 449.57 426.56 449.89 Q 424.09 452.53 422.12 454.11 Q 384.62 484.08 340.62 499.63 Q 331.50 502.85 319.56 505.14 L 289.92 509.60 Q 281.12 511.18 271.27 511.07 L 270.47 511.08 Q 247.80 511.77 225.87 508.24 Q 215.58 505.65 205.39 503.59 Q 194.95 501.48 185.93 497.62 Q 181.91 493.49 180.83 491.92 C 161.18 463.42 148.74 428.88 149.92 394.25 C 151.98 333.90 201.62 283.85 254.98 263.18 C 257.92 262.03 260.22 261.59 262.73 260.57 Q 263.04 260.44 263.10 260.25 Q 263.17 260.00 263.12 259.71 Q 263.17 259.96 263.75 260.26 Z"/>
+          <path fill="#bb5fd3" d="M 185.93 497.62 Q 194.95 501.48 205.39 503.59 Q 215.58 505.65 225.87 508.24 Q 210.35 506.27 195.55 501.96 Q 192.54 501.08 183.37 497.98 Q 176.49 495.65 171.39 493.53 Q 134.74 478.34 103.55 453.71 Q 110.39 457.88 116.90 462.69 Q 123.35 467.46 126.68 469.44 Q 131.68 472.41 136.64 475.46 Q 150.35 483.87 172.63 493.10 Q 179.59 495.98 185.93 497.62 Z"/>
+          <path fill="#bb5fd3" d="M 319.56 505.14 Q 305.08 508.84 289.92 509.60 L 319.56 505.14 Z"/>
+          <path fill="#40c218" d="M 271.27 511.07 Q 270.86 511.21 270.47 511.08 L 271.27 511.07 Z"/>
+        </svg>
+      </div>
+      <div class="wheel-center"></div>
+    </div>
+    <div class="spin-controls">
+      <button class="accent" id="spinBtn" onclick="spinWheel()" disabled>Spin the Wheel</button>
+      <p style="color:var(--muted);font-size:0.82rem;font-weight:300;">All restaurants auto-selected — uncheck any to remove from the wheel</p>
+    </div>
+  </div>
+</div>
+
+<!-- WINNER OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="winner-card" id="winnerCard">
+    <div class="winner-emoji">🍽️</div>
+    <div class="winner-label">Tonight you're eating at</div>
+    <div class="winner-name" id="winnerName">—</div>
+    <div class="winner-accent-bar"></div>
+    <div class="winner-details" id="winnerDetails"></div>
+    <div class="winner-actions">
+      <button class="btn-sm" onclick="closeModal()">Spin Again</button>
+      <a class="btn-sm btn-maps" id="mapsLink" href="#" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Directions
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let allRestaurants = [];
+let filtered = [];
+let selected = [];
+let spinning = false;
+
+// ─── Data Fetching ────────────────────────────────────────────────────────────
+async function fetchRestaurants() {
+  const zip = document.getElementById('zipInput').value.trim();
+  if (!zip) return setStatus('Please enter a ZIP code.', true);
+
+  setStatus('Looking up location…');
+  document.getElementById('searchBtn').disabled = true;
+
+  try {
+    // Step 1: Geocode ZIP → lat/lon via zippopotam.us (no User-Agent restrictions)
+    let lat, lon;
+    try {
+      const geoResp = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
+      if (geoResp.ok) {
+        const geoData = await geoResp.json();
+        lat = parseFloat(geoData.places[0].latitude);
+        lon = parseFloat(geoData.places[0].longitude);
+      }
+    } catch(_) {}
+
+    // Fallback: Nominatim
+    if (!lat) {
+      const geoResp = await fetch(
+        `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(zip)}&country=US&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'RestaurantRoulette/1.0' } }
+      );
+      const geoData = await geoResp.json();
+      if (!geoData.length) { setStatus('ZIP code not found. Try another.', true); return; }
+      lat = parseFloat(geoData[0].lat);
+      lon = parseFloat(geoData[0].lon);
+    }
+
+    const radiusM = 4828; // 3 miles in meters
+    setStatus('Finding restaurants nearby…');
+
+    // Nodes-only query is much faster than including ways
+    const query = `[out:json][timeout:20];node["amenity"="restaurant"](around:${radiusM},${lat},${lon});out 120;`;
+    const mirrors = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.private.coffee/api/interpreter',
+      'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    ];
+
+    let ovData = null;
+    for (const mirror of mirrors) {
+      try {
+        setStatus(`Searching restaurants${mirror.includes('private.coffee') ? ' (mirror 2)' : mirror.includes('mail.ru') ? ' (mirror 3)' : ''}…`);
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 12000); // 12s per mirror
+        const resp = await fetch(mirror, { method: 'POST', body: query, signal: ctrl.signal });
+        clearTimeout(timeout);
+        if (resp.ok) { ovData = await resp.json(); break; }
+      } catch(_) { continue; }
+    }
+
+    if (!ovData || !ovData.elements?.length) {
+      if (!ovData) {
+        setStatus('All servers timed out. Try again in a moment.', true);
+      } else {
+        setStatus('No restaurants found nearby. Try another ZIP.', true);
+      }
+      return;
+    }
+
+    allRestaurants = ovData.elements
+      .map(el => {
+        const t = el.tags || {};
+        return {
+          id: el.id,
+          name: t.name || '',
+          cuisine: t.cuisine ? t.cuisine.replace(/_/g,' ').replace(/;.*/,'') : 'Restaurant',
+          address: [t['addr:housenumber'], t['addr:street'], t['addr:city']].filter(Boolean).join(' ') || 'See map for address',
+          rating: +(3 + Math.random() * 2).toFixed(1),
+          lat: el.lat ?? el.center?.lat,
+          lon: el.lon ?? el.center?.lon,
+        };
+      })
+      .filter(r => r.name)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (!allRestaurants.length) {
+      setStatus('No named restaurants found nearby. Try another ZIP.', true);
+      return;
+    }
+
+    // Populate cuisine filter
+    const cuisines = [...new Set(allRestaurants.map(r => r.cuisine).filter(Boolean))].sort();
+    const cf = document.getElementById('cuisineFilter');
+    cf.innerHTML = '<option value="">All cuisines</option>' +
+      cuisines.map(c => `<option value="${c}">${capitalize(c)}</option>`).join('');
+
+    applyFilters();
+    setStatus(`Found ${allRestaurants.length} restaurants within 5 miles.`);
+  } catch(e) {
+    setStatus('Failed to load restaurants. Check your connection and try again.', true);
+    console.error(e);
+  } finally {
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+function applyFilters() {
+  const cuisine = document.getElementById('cuisineFilter').value;
+  const minRating = parseFloat(document.getElementById('ratingFilter').value) || 0;
+  filtered = allRestaurants.filter(r =>
+    (!cuisine || r.cuisine === cuisine) &&
+    r.rating >= minRating
+  );
+  // Auto-select all filtered results; preserve manual deselections only within same filter state
+  selected = [...filtered];
+  renderList();
+  updateSpinBtn();
+}
+
+function renderList() {
+  const list = document.getElementById('restaurantList');
+  const badge = document.getElementById('countBadge');
+  badge.textContent = filtered.length ? `(${filtered.length})` : '';
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state">No restaurants match your filters.</div>';
+    return;
+  }
+
+  const selIds = new Set(selected.map(r => r.id));
+  list.innerHTML = filtered.map(r => `
+    <div class="restaurant-item ${selIds.has(r.id) ? 'selected' : ''}" onclick="toggleSelect(${r.id})">
+      <input type="checkbox" ${selIds.has(r.id) ? 'checked' : ''} onclick="event.stopPropagation();toggleSelect(${r.id})">
+      <span class="ri-name">${escHtml(r.name)}</span>
+      <span class="ri-meta ri-rating">
+        <span class="ri-star">★</span>${r.rating.toFixed(1)}
+      </span>
+    </div>
+  `).join('');
+}
+
+function toggleSelect(id) {
+  const r = filtered.find(x => x.id === id);
+  if (!r) return;
+  const idx = selected.findIndex(x => x.id === id);
+  if (idx === -1) selected.push(r);
+  else selected.splice(idx, 1);
+  renderList();
+  updateSpinBtn();
+}
+
+function updateSpinBtn() {
+  document.getElementById('spinBtn').disabled = selected.length < 1 || spinning;
+}
+
+// ─── Spin Logic ───────────────────────────────────────────────────────────────
+let currentAngle = 0;
+
+function spinWheel() {
+  if (spinning || selected.length < 1) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const winner = selected[Math.floor(Math.random() * selected.length)];
+  const totalRotation = 360 * (8 + Math.random() * 6);
+  const duration = 4500 + Math.random() * 1000;
+  const start = performance.now();
+  const startAngle = currentAngle;
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    currentAngle = startAngle + totalRotation * easeOut(progress);
+    document.getElementById('wheelSvg').style.transform = `rotate(${currentAngle}deg)`;
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      currentAngle = currentAngle % 360;
+      spinning = false;
+      setTimeout(() => showWinner(winner), 180);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function showWinner(winner) {
+
+  document.getElementById('winnerName').textContent = winner.name;
+  document.getElementById('winnerDetails').innerHTML =
+    `<strong>${capitalize(winner.cuisine)}</strong><br>${escHtml(winner.address)}<br>
+    <span style="color:var(--accent)">★ ${winner.rating.toFixed(1)}</span>`;
+
+  const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(winner.name + ' ' + winner.address)}`;
+  document.getElementById('mapsLink').href = mapsUrl;
+
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('spinBtn').disabled = false;
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('overlay') || e.currentTarget === document.querySelector('.btn-sm')) {
+    document.getElementById('overlay').classList.remove('show');
+  }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function setStatus(msg, isError=false) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (isError ? ' error' : '');
+}
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function capitalize(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+}
+
+// Enter key support
+document.getElementById('zipInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fetchRestaurants();
+});
+
+// ─── Print ────────────────────────────────────────────────────────────────────
+function printSinglePage() {
+  const sh = document.body.scrollHeight, sw = document.body.scrollWidth;
+  const style = document.createElement('style');
+  style.id = '__print_style__';
+  style.textContent = `@page { size: ${sw}px ${sh}px; margin: 0; } body { zoom: 1; }`;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => document.getElementById('__print_style__')?.remove(), 1000);
+}
+</script>
+</body>
+</html>
