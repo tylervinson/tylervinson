@@ -14,7 +14,7 @@
     --border: #e0e0e0;
     --text: #1a1a1a;
     --muted: #666;
-    --accent: #1a1a1a;
+    --accent: #FFBE5F;
     --accent-light: #fff8ec;
     --green: #2e7d32;
     --green-bg: #e8f5e9;
@@ -22,6 +22,26 @@
     --red-bg: #ffebee;
     --shadow: 0 1px 3px rgba(0,0,0,0.1);
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    /* ────────────────────────────────────────────────────────
+       COLUMN WIDTHS — one variable per field.
+       Controls both the preview table and mapping panel.
+       Edit any value here to resize that column everywhere.
+    ──────────────────────────────────────────────────────── */
+    --col-PRVNAME:      200px;
+    --col-GROUPNAME:    180px;
+    --col-CREDENTIALS:   90px;
+    --col-GENDER:        80px;
+    --col-LANGUAGE:     160px;
+    --col-ADDRESS:      180px;
+    --col-CITY:         100px;
+    --col-STATE:         60px;
+    --col-ZIP:           70px;
+    --col-COUNTY:       100px;
+    --col-PHONE:        120px;
+
+    /* Mapping panel arrow column — not a data field */
+    --col-mapping-arrow: 40px;
   }
 
   body {
@@ -161,7 +181,7 @@
 
   .mapping-grid {
     display: grid;
-    grid-template-columns: 1fr 40px 1fr;
+    grid-template-columns: 1fr var(--col-mapping-arrow) 1fr;
     gap: 0.5rem 0;
     align-items: center;
   }
@@ -240,7 +260,6 @@
     border-bottom: 1px solid var(--border);
     color: var(--text);
     white-space: nowrap;
-    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -426,6 +445,10 @@ const COLUMN_MAP = {
   "Provider Name (First and Last Name)": "PRVNAME",
   "PRVNAME": "PRVNAME",
   "Provider Name": "PRVNAME",
+  "Provider First Name": "FIRST_NAME",
+  "First Name": "FIRST_NAME",
+  "Provider Last Name": "LAST_NAME",
+  "Last Name": "LAST_NAME",
   "GROUPNAME": "GROUPNAME",
   "Group Name": "GROUPNAME",
   "Credential Suffix": "CREDENTIALS",
@@ -452,7 +475,7 @@ const COLUMN_MAP = {
   "Phone": "PHONE",
 };
 
-const WIDGET_FIELDS = ["PRVNAME","GROUPNAME","CREDENTIALS","GENDER","LANGUAGE","ADDRESS","CITY","STATE","ZIP","COUNTY","PHONE"];
+const WIDGET_FIELDS = ["PRVNAME","PRVNAME_LAST","GROUPNAME","CREDENTIALS","GENDER","LANGUAGE","ADDRESS","CITY","STATE","ZIP","COUNTY","PHONE"];
 
 const LANGUAGE_ALIASES = {
   "Castilian": "Spanish",
@@ -571,10 +594,44 @@ function processFile(file) {
       // Render mapping UI
       renderMapping(effectiveMap, missingFields, ignoredCols);
 
+      // ── Handle split first/last name columns ─────────────────────────────
+      const hasSplitName = effectiveMap['FIRST_NAME'] && effectiveMap['LAST_NAME'];
+      const hasFullName  = effectiveMap['PRVNAME'];
+      if (hasSplitName) {
+        log('Detected split first/last name columns — combining into PRVNAME', 'ok');
+      } else if (hasFullName) {
+        log('Detected combined name column — deriving PRVNAME_LAST from last word', 'ok');
+      }
+
+      function toTitleCase(str) {
+        return str.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+      }
+
       // Convert rows
       const records = rows.map(row => {
         const out = {};
         WIDGET_FIELDS.forEach(field => {
+          if (field === 'PRVNAME') {
+            if (hasSplitName) {
+              const first = toTitleCase(String(row[effectiveMap['FIRST_NAME']] || ''));
+              const last  = toTitleCase(String(row[effectiveMap['LAST_NAME']]  || ''));
+              out['PRVNAME'] = (first + ' ' + last).trim();
+            } else {
+              out['PRVNAME'] = toTitleCase(String(row[effectiveMap['PRVNAME']] || ''));
+            }
+            return;
+          }
+          if (field === 'PRVNAME_LAST') {
+            if (hasSplitName) {
+              out['PRVNAME_LAST'] = toTitleCase(String(row[effectiveMap['LAST_NAME']] || ''));
+            } else if (hasFullName) {
+              const full = toTitleCase(String(row[effectiveMap['PRVNAME']] || ''));
+              out['PRVNAME_LAST'] = full.trim().split(' ').pop();
+            } else {
+              out['PRVNAME_LAST'] = '';
+            }
+            return;
+          }
           const srcCol = effectiveMap[field];
           let val = srcCol ? String(row[srcCol] || '').trim() : '';
           if (field === 'LANGUAGE') val = normalizeLanguage(val);
@@ -628,20 +685,37 @@ function renderMapping(effectiveMap, missingFields, ignoredCols) {
 
   WIDGET_FIELDS.forEach(field => {
     const srcCol = effectiveMap[field];
+    const colWidth = `var(--col-${field})`;
+
+    // PRVNAME and PRVNAME_LAST are derived when split name columns are present
+    const hasSplitName = effectiveMap['FIRST_NAME'] && effectiveMap['LAST_NAME'];
+    const isDerived = field === 'PRVNAME_LAST' || (field === 'PRVNAME' && hasSplitName);
 
     const src = document.createElement('div');
-    src.className = srcCol ? 'mapping-source' : 'mapping-source missing';
-    src.textContent = srcCol || 'not found in file';
-    src.title = srcCol || '';
+    if (isDerived) {
+      src.className = 'mapping-source';
+      if (field === 'PRVNAME' && hasSplitName) {
+        src.textContent = `${effectiveMap['FIRST_NAME']} + ${effectiveMap['LAST_NAME']}`;
+      } else {
+        src.textContent = effectiveMap['LAST_NAME'] ? effectiveMap['LAST_NAME'] : (effectiveMap['PRVNAME'] ? effectiveMap['PRVNAME'] + ' (last word)' : 'derived');
+      }
+      src.style.fontStyle = 'italic';
+    } else {
+      src.className = srcCol ? 'mapping-source' : 'mapping-source missing';
+      src.textContent = srcCol || 'not found in file';
+      src.title = srcCol || '';
+    }
+    src.style.width = colWidth;
 
     const arrow = document.createElement('div');
     arrow.className = 'mapping-arrow';
-    arrow.textContent = srcCol ? '→' : '✕';
-    if (!srcCol) arrow.style.color = '#c62828';
+    arrow.textContent = (srcCol || isDerived) ? '→' : '✕';
+    if (!srcCol && !isDerived) arrow.style.color = '#c62828';
 
     const tgt = document.createElement('div');
     tgt.className = 'mapping-target';
     tgt.textContent = field;
+    tgt.style.width = colWidth;
 
     mappingGrid.appendChild(src);
     mappingGrid.appendChild(arrow);
@@ -655,6 +729,15 @@ function renderMapping(effectiveMap, missingFields, ignoredCols) {
 function renderPreview(records) {
   previewTable.innerHTML = '';
   if (!records.length) return;
+
+  // colgroup sets per-field widths from CSS variables
+  const colgroup = document.createElement('colgroup');
+  WIDGET_FIELDS.forEach(f => {
+    const col = document.createElement('col');
+    col.style.width = `var(--col-${f})`;
+    colgroup.appendChild(col);
+  });
+  previewTable.appendChild(colgroup);
 
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
