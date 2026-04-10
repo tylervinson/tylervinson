@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Archive This</title>
+</head>
+<body>
+    <script>
+        // Get the page you came from and redirect to archive.is
+        const referrer = document.referrer || window.location.href;
+        window.location.href = 'http://archive.is/' + referrer;
+    </script>
+</body>
+</body>
+</html>
