@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traditional Chinese (Taiwan) — Language Label Guidance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fafafa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #1a1a1a; font-size: 15px; line-height: 1.7; font-weight: 400; }
+    #page { max-width: 780px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+    h1 { font-size: 1.6rem; font-weight: 300; color: #1a1a1a; margin-bottom: 0.4rem; }
+    .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 2.5rem; font-weight: 400; }
+    .section { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem 1.75rem; margin-bottom: 1.25rem; page-break-inside: avoid; break-inside: avoid; }
+    .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #0B3B60; margin-bottom: 0.5rem; }
+    .section h2 { font-size: 1rem; font-weight: 500; color: #1a1a1a; margin-bottom: 0.9rem; }
+    p { color: #1a1a1a; margin-bottom: 0.75rem; }
+    p:last-child { margin-bottom: 0; }
+    ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    ul:last-child { margin-bottom: 0; }
+    li { margin-bottom: 0.35rem; color: #1a1a1a; }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; background: #f3f3f3; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1px 6px; color: #333; }
+    .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 400; }
+    .tag.bad { background: #fdf0f0; border: 1px solid #f5c0c0; color: #c0392b; }
+    .tag.good { background: #f0faf5; border: 1px solid #a8dfc0; color: #1a7d4a; }
+    .tag.neutral { background: #f5f5f5; border: 1px solid #e0e0e0; color: #444; }
+    .icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.9rem; }
+    .compare-card { border-radius: 6px; padding: 1rem 1.1rem; }
+    .compare-card.avoid { background: #fdf0f0; border: 1px solid #f0c0c0; }
+    .compare-card.use { background: #f0faf5; border: 1px solid #a8dfc0; }
+    .compare-card .card-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .compare-card.avoid .card-label { color: #c0392b; }
+    .compare-card.use .card-label { color: #1a7d4a; }
+    .compare-card .value { font-size: 1.15rem; color: #1a1a1a; }
+    .locale-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+    .locale-table th { text-align: left; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #666; padding: 0 0 8px; border-bottom: 1px solid #e0e0e0; }
+    .locale-table td { padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; vertical-align: top; }
+    .locale-table tr:last-child td { border-bottom: none; }
+    .locale-table td:first-child { width: 40%; }
+    .rec-box { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem 1.25rem; margin-top: 0.75rem; }
+    .rec-box .rec-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #555; margin-bottom: 0.4rem; }
+    .rec-box .rec-value { font-size: 1.25rem; color: #1a1a1a; }
+    .rec-box .rec-sub { font-size: 0.82rem; color: #666; margin-top: 0.3rem; }
+    .impl-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .impl-row:last-child { border-bottom: none; }
+    .arrow { color: #0B3B60; font-size: 1rem; flex-shrink: 0; }
+    .platforms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.75rem; }
+    .platform-badge { font-size: 0.78rem; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 4px; padding: 3px 10px; color: #444; }
+
+    /* Print-to-PDF button */
+    #print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0.7;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease;
+    }
+    #print-btn:hover { opacity: 1; }
+    #print-btn svg { width: 18px; height: 18px; fill: #fff; }
+    #print-btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    @media print { #print-btn { display: none; } }
+  </style>
+</head>
+<body>
+
+<div id="page">
+
+  <p class="subtitle">Language labeling standards · <code>zh-Hant-TW</code> / <code>zh-TW</code> in Google Translate API</p>
+  <h1>Traditional Chinese (Taiwan) — Language Label Guidance</h1>
+  <br>
+
+  <div class="section">
+    <div class="section-label">1 · Problem summary</div>
+    <h2>Incorrect use of "中国人 / 中國人"</h2>
+    <p>The label <strong>中国人 / 中國人</strong> is being used to represent Traditional Chinese (Taiwan) in a language selector. This is incorrect because it translates to "Chinese person" — a national or ethnic identity — not a language name. It also introduces political and cultural sensitivity, particularly for users in Taiwan.</p>
+  </div>
+
+  <div class="section" style="background: #EEF5FB; border-color: #c5ddf0;">
+    <div class="section-label">2 · TL;DR</div>
+    <h2>Summary</h2>
+    <p>Using "中国人 / 中國人" as a language label is linguistically incorrect, not aligned with industry standards (W3C, CLDR, Google, Apple, Microsoft), and likely to cause user friction — especially for Taiwan users.</p>
+    <p>Replacing it with <strong>中文（繁體）</strong> aligns with global standards and improves user experience without ambiguity or political sensitivity.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Industry standard</div>
+    <h2>Language selectors must use language names, not identities</h2>
+    <p>Per W3C Internationalization guidance, language pickers should display the name of the language in that language. Labels must represent languages, not countries or people.</p>
+    <p>Standard practice for Chinese variants:</p>
+    <div class="tag-grid">
+      <span class="tag neutral">Simplified Chinese → 中文（简体）</span>
+      <span class="tag neutral">Traditional Chinese → 中文（繁體）</span>
+    </div>
+    <p style="margin-top: 0.9rem;">Optional regional variants: 中文（台灣）&nbsp;&nbsp;中文（香港）</p>
+    <p>Key principle: use language name + script and/or region. Avoid national identity terms.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Google standard</div>
+    <h2>What Google Translate uses</h2>
+    <p>Google Translate UI uses <strong>中文（繁體）</strong> as the default label for Traditional Chinese, and sometimes <strong>中文（台灣）</strong> for regional specificity.</p>
+    <p>Important: the Google Translate API only returns codes (e.g. <code>zh-TW</code>, <code>zh-Hant</code>) — it does not provide display labels. UI labels follow CLDR localization standards.</p>
+    <p>What Google avoids:</p>
+    <div class="tag-grid">
+      <span class="tag bad"><svg class="icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.3 9.7L4.3 4.7a5 5 0 017 7zm-6.6 0a5 5 0 01-1-6.1l7.1 7.1a5 5 0 01-6.1-1z"/></svg>中国人 / 中國人</span>
+      <span class="tag bad"><svg class="icon" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.3 9.7L4.3 4.7a5 5 0 017 7zm-6.6 0a5 5 0 01-1-6.1l7.1 7.1a5 5 0 01-6.1-1z"/></svg>中国 / 中國</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Technical standard (CLDR)</div>
+    <h2>Locale structure and display names</h2>
+    <table class="locale-table">
+      <thead>
+        <tr><th>Segment</th><th>Value</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>zh</code></td><td>Chinese</td><td>Base language</td></tr>
+        <tr><td><code>Hant</code></td><td>Traditional script</td><td>Writing system</td></tr>
+        <tr><td><code>TW</code></td><td>Taiwan</td><td>Regional variant</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 1rem;">Standard display names per CLDR: <strong>中文（繁體）</strong> &nbsp;/&nbsp; <strong>中文（台灣）</strong> (optional)</p>
+    <p>Used by:</p>
+    <div class="platforms">
+      <span class="platform-badge">Google</span>
+      <span class="platform-badge">Apple</span>
+      <span class="platform-badge">Microsoft</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Recommendation</div>
+    <h2>Preferred labels</h2>
+    <div class="rec-box">
+      <div class="rec-label">Primary label (recommended default)</div>
+      <div class="rec-value">中文（繁體）</div>
+    </div>
+    <div class="rec-box" style="margin-top: 0.75rem;">
+      <div class="rec-label">If regional distinction is needed</div>
+      <div class="rec-value">中文（繁體，台灣）&nbsp;&nbsp;/&nbsp;&nbsp;中文（台灣）</div>
+      <div class="rec-sub">Use when differentiating Taiwan from Hong Kong or Macau variants</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Rationale</div>
+    <h2>Why this matters</h2>
+    <ul>
+      <li><strong>Accuracy</strong> — "中国人" refers to people, not a language</li>
+      <li><strong>Consistency</strong> — aligns with W3C, CLDR, and all major platforms</li>
+      <li><strong>User expectations</strong> — Taiwan users expect Traditional Chinese labeling</li>
+      <li><strong>Neutrality</strong> — avoids political and cultural sensitivity</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Implementation guidance</div>
+    <h2>Mapping and rules</h2>
+    <div class="impl-row">
+      <span class="arrow">→</span>
+      <span>Map <code>zh-TW</code> to <strong>中文（繁體）</strong></span>
+    </div>
+    <div class="impl-row">
+      <span class="arrow">→</span>
+      <span>Optionally map to <strong>中文（台灣）</strong> for regional specificity</span>
+    </div>
+    <div class="impl-row">
+      <span class="arrow">→</span>
+      <span>Avoid all nationality-based labels in the language selector</span>
+    </div>
+    <div class="impl-row">
+      <span class="arrow">→</span>
+      <span>Ensure consistency across all UI surfaces</span>
+    </div>
+    <div style="margin-top: 1.25rem;">
+      <div class="compare-grid">
+        <div class="compare-card avoid">
+          <div class="card-label">Avoid</div>
+          <div class="value">中国人 / 中國人</div>
+        </div>
+        <div class="compare-card use">
+          <div class="card-label">Use instead</div>
+          <div class="value">中文（繁體）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<button id="print-btn" title="Save as PDF" onclick="printSinglePage()">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 16l-4-4h2.5V4h3v8H16l-4 4zm-6 2h12v2H6v-2z"/></svg>
+</button>
+
+<script>
+  function printSinglePage() {
+    const body = document.body;
+    const h = body.scrollHeight;
+    const w = body.scrollWidth;
+    const style = document.createElement('style');
+    style.id = '_pss';
+    style.textContent = `
+      @page { size: ${w}px ${h}px; margin: 0; }
+      body { zoom: 1; width: ${w}px; height: ${h}px; overflow: hidden; }
+      * { page-break-before: avoid !important; page-break-after: avoid !important; page-break-inside: avoid !important; break-before: avoid !important; break-after: avoid !important; break-inside: avoid !important; }
+    `;
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(() => { const s = document.getElementById('_pss'); if (s) s.remove(); }, 1500);
+  }
+</script>
+
+</body>
+</html>
