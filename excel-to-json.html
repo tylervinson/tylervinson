@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Converter Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .header {
+      background: #1a1a1a;
+      color: white;
+      padding: 2rem;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e0e0e0;
+      background: #fafafa;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 400;
+      color: #666;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn:hover {
+      background: #f5f5f5;
+    }
+
+    .tab-btn.active {
+      color: #1a1a1a;
+      border-bottom-color: #1a1a1a;
+      background: #ffffff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 2rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dropzone {
+      border: 2px dashed #e0e0e0;
+      border-radius: 4px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .dropzone:hover {
+      border-color: #0b3b60;
+      background: #f0f8ff;
+    }
+
+    .dropzone.drag-over {
+      border-color: #0b3b60;
+      background: #f0f8ff;
+    }
+
+    .dropzone p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .dropzone small {
+      font-size: 12px;
+      color: #999;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .preview {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 13px;
+      color: #666;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .preview-header {
+      font-weight: 400;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 3px;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #1a1a1a;
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #333;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #1a1a1a;
+      border: 1px solid #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f5f5;
+      border-color: #0b3b60;
+    }
+
+    .output-area {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .output-area.active {
+      display: block;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .output-header h3 {
+      font-size: 14px;
+      font-weight: 400;
+      color: #1a1a1a;
+    }
+
+    .copy-btn {
+      font-size: 12px;
+      padding: 0.5rem 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 1rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+
+    .success-msg {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 3px;
+      padding: 1rem;
+      color: #2e7d32;
+      font-size: 13px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .success-msg.active {
+      display: block;
+    }
+
+    .error-msg {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 3px;
+      padding: 1rem;
+      color: #c62828;
+      font-size: 13px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .error-msg.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Data Converter Tool</h1>
+      <p>Convert Excel files to JSON format</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pcp">PCP Search Data</button>
+      <button class="tab-btn" data-tab="hub-resources">Work Requirements HUB Resources</button>
+    </div>
+
+    <!-- PCP Tab -->
+    <div id="pcp" class="tab-content active">
+      <div class="success-msg" id="pcp-success"></div>
+      <div class="error-msg" id="pcp-error"></div>
+
+      <div class="form-group">
+        <label>Upload Excel File</label>
+        <div class="dropzone" id="pcp-dropzone">
+          <p>Drag and drop your Excel file here</p>
+          <small>or click to browse</small>
+          <input type="file" id="pcp-file" accept=".xlsx,.xls,.csv">
+        </div>
+      </div>
+
+      <div id="pcp-preview" class="preview" style="display: none;">
+        <div class="preview-header">File Preview:</div>
+        <div id="pcp-preview-content"></div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" id="pcp-convert" disabled>Convert to JSON</button>
+        <button class="btn-secondary" id="pcp-clear">Clear</button>
+      </div>
+
+      <div id="pcp-output" class="output-area">
+        <div class="output-header">
+          <h3>JSON Output</h3>
+          <button class="btn-secondary copy-btn" id="pcp-copy">Copy to Clipboard</button>
+        </div>
+        <textarea id="pcp-textarea" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Work Requirements HUB Resources Tab -->
+    <div id="hub-resources" class="tab-content">
+      <div class="success-msg" id="hub-success"></div>
+      <div class="error-msg" id="hub-error"></div>
+
+      <div class="form-group">
+        <label>Upload Excel File</label>
+        <div class="dropzone" id="hub-dropzone">
+          <p>Drag and drop your Excel file here</p>
+          <small>or click to browse</small>
+          <input type="file" id="hub-file" accept=".xlsx,.xls,.csv">
+        </div>
+      </div>
+
+      <div id="hub-preview" class="preview" style="display: none;">
+        <div class="preview-header">File Preview:</div>
+        <div id="hub-preview-content"></div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" id="hub-convert" disabled>Convert to JSON</button>
+        <button class="btn-secondary" id="hub-clear">Clear</button>
+      </div>
+
+      <div id="hub-output" class="output-area">
+        <div class="output-header">
+          <h3>JSON Output</h3>
+          <button class="btn-secondary copy-btn" id="hub-copy">Copy to Clipboard</button>
+        </div>
+        <textarea id="hub-textarea" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+
+  <script>
+    function setupConverter(tabId) {
+      var fileInput = document.getElementById(tabId + '-file');
+      var dropzone = document.getElementById(tabId + '-dropzone');
+      var convertBtn = document.getElementById(tabId + '-convert');
+      var clearBtn = document.getElementById(tabId + '-clear');
+      var copyBtn = document.getElementById(tabId + '-copy');
+      var preview = document.getElementById(tabId + '-preview');
+      var previewContent = document.getElementById(tabId + '-preview-content');
+      var output = document.getElementById(tabId + '-output');
+      var textarea = document.getElementById(tabId + '-textarea');
+      var successMsg = document.getElementById(tabId + '-success');
+      var errorMsg = document.getElementById(tabId + '-error');
+
+      var fileData = null;
+
+      if (!fileInput || !dropzone || !convertBtn) return;
+
+      function handleFileSelect() {
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            if (file.name.endsWith('.csv')) {
+              parseCSV(e.target.result);
+            } else {
+              parseExcel(e.target.result);
+            }
+          } catch (err) {
+            showError('Error reading file: ' + err.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function parseCSV(data) {
+        var text = new TextDecoder().decode(data);
+        var lines = text.split('\n');
+        var headers = lines[0].split(',').map(function(h) { return h.trim(); });
+        var rows = [];
+        for (var i = 1; i < lines.length; i++) {
+          var values = lines[i].split(',').map(function(v) { return v.trim(); });
+          var obj = {};
+          for (var j = 0; j < headers.length; j++) {
+            obj[headers[j]] = values[j] || '';
+          }
+          var hasContent = false;
+          for (var k in obj) {
+            if (obj[k]) {
+              hasContent = true;
+              break;
+            }
+          }
+          if (hasContent) {
+            rows.push(obj);
+          }
+        }
+
+        fileData = { headers: headers, rows: rows };
+        showPreview(headers.slice(0, 5), rows.slice(0, 3));
+      }
+
+      function parseExcel(data) {
+        var arr = new Uint8Array(data);
+        var binary = String.fromCharCode.apply(null, arr);
+        var workbook = XLSX.read(binary, { type: 'binary' });
+        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+        var json = XLSX.utils.sheet_to_json(sheet);
+
+        if (json.length === 0) throw new Error('No data found in Excel file');
+
+        var headers = Object.keys(json[0]);
+        fileData = { headers: headers, rows: json };
+        showPreview(headers.slice(0, 5), json.slice(0, 3));
+      }
+
+      function showPreview(headers, rows) {
+        previewContent.innerHTML = '<strong>Columns: ' + headers.join(', ') + '</strong><br><strong>Rows: ' + fileData.rows.length + '</strong>';
+        preview.style.display = 'block';
+        convertBtn.disabled = false;
+        output.classList.remove('active');
+      }
+
+      function showError(msg) {
+        errorMsg.textContent = '✗ ' + msg;
+        errorMsg.classList.add('active');
+        successMsg.classList.remove('active');
+      }
+
+      fileInput.addEventListener('change', handleFileSelect);
+
+      dropzone.addEventListener('click', function() {
+        fileInput.click();
+      });
+
+      dropzone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      });
+
+      dropzone.addEventListener('dragleave', function() {
+        dropzone.classList.remove('drag-over');
+      });
+
+      dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          handleFileSelect();
+        }
+      });
+
+      convertBtn.addEventListener('click', function() {
+        if (!fileData) return;
+
+        var json = JSON.stringify(fileData.rows, null, 2);
+        textarea.value = json;
+        output.classList.add('active');
+        successMsg.textContent = '✓ Successfully converted ' + fileData.rows.length + ' rows to JSON';
+        successMsg.classList.add('active');
+        errorMsg.classList.remove('active');
+      });
+
+      clearBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        fileData = null;
+        preview.style.display = 'none';
+        output.classList.remove('active');
+        convertBtn.disabled = true;
+        textarea.value = '';
+        successMsg.classList.remove('active');
+        errorMsg.classList.remove('active');
+      });
+
+      copyBtn.addEventListener('click', function() {
+        textarea.select();
+        document.execCommand('copy');
+        var originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    // Tab switching
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    for (var i = 0; i < tabBtns.length; i++) {
+      tabBtns[i].addEventListener('click', function() {
+        var tabName = this.getAttribute('data-tab');
+        var allTabs = document.querySelectorAll('.tab-btn');
+        for (var j = 0; j < allTabs.length; j++) {
+          allTabs[j].classList.remove('active');
+        }
+        var allContent = document.querySelectorAll('.tab-content');
+        for (var k = 0; k < allContent.length; k++) {
+          allContent[k].classList.remove('active');
+        }
+        this.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    }
+
+    // Initialize both converters
+    setupConverter('pcp');
+    setupConverter('hub-resources');
+  </script>
+</body>
+</html>
