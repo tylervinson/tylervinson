@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abstract Isometric Cube Generator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --panel-bg: #ffffff;
+      --body-bg: #e9e9e9;
+      --text: #111111;
+      --muted: #666666;
+      --line: #d4d4d4;
+      --button: #111111;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--body-bg);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr;
+    }
+
+    aside {
+      height: 100vh;
+      overflow: auto;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--line);
+      box-shadow: 2px 0 18px rgba(0, 0, 0, 0.08);
+      z-index: 2;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--line);
+      padding: 14px;
+      z-index: 3;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .sub {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fafafa;
+      overflow: hidden;
+    }
+
+    details[open] { background: #ffffff; }
+
+    summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 750;
+      user-select: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    details[open] summary { border-bottom-color: var(--line); }
+
+    .section {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 36px;
+      padding: 7px 9px;
+      border: 1px solid #bdbdbd;
+      border-radius: 8px;
+      font: inherit;
+      background: white;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      min-height: 36px;
+      padding: 3px;
+      border: 1px solid #bdbdbd;
+      border-radius: 8px;
+      background: white;
+    }
+
+    input[type="range"] { width: 100%; }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .toggle input {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .value {
+      color: #444;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hidden-panel { display: none; }
+
+    .hidden-panel.active {
+      display: grid;
+      gap: 10px;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      background: var(--panel-bg);
+      border-top: 1px solid var(--line);
+    }
+
+    button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--button);
+      color: white;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    button.secondary { background: #595959; }
+
+    main {
+      min-width: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 18px;
+      background:
+        linear-gradient(45deg, rgba(0,0,0,0.035) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,0,0,0.035) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.035) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.035) 75%);
+      background-size: 28px 28px;
+      background-position: 0 0, 0 14px, 14px -14px, -14px 0px;
+    }
+
+    #stage {
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+      background: white;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      aside {
+        height: auto;
+        max-height: 52vh;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        min-height: 48vh;
+        padding: 10px;
+      }
+
+      .actions {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <header>
+      <h1>Isometric Cube Generator</h1>
+      <p class="sub">Abstract cube composition tool with face color, density, margin, aspect-ratio, and export controls.</p>
+    </header>
+
+    <form id="controls">
+      <details open>
+        <summary>Canvas</summary>
+        <div class="section">
+          <div class="grid">
+            <label>
+              Aspect ratio
+              <select id="aspectRatio">
+                <option value="free">Free / fill available space</option>
+                <option value="1:1">1:1 square</option>
+                <option value="4:3" selected>4:3 landscape</option>
+                <option value="3:4">3:4 portrait</option>
+                <option value="16:9">16:9 landscape</option>
+                <option value="9:16">9:16 portrait</option>
+              </select>
+            </label>
+
+            <label class="toggle">
+              Use custom size
+              <input id="useCustomSize" type="checkbox">
+            </label>
+
+            <label>
+              Custom width
+              <input id="customWidth" type="number" min="200" max="8000" value="1000">
+            </label>
+
+            <label>
+              Custom height
+              <input id="customHeight" type="number" min="200" max="8000" value="1000">
+            </label>
+
+            <label>
+              Canvas background hex
+              <input id="backgroundColor" type="text" value="#D35A3F">
+            </label>
+
+            <label>
+              Canvas background picker
+              <input id="backgroundColorPicker" type="color" value="#D35A3F">
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Color</summary>
+        <div class="section">
+          <div class="grid">
+            <label>
+              Top color hex
+              <input id="topColor" type="text" value="#F7F3ED">
+            </label>
+
+            <label>
+              Top color picker
+              <input id="topColorPicker" type="color" value="#F7F3ED">
+            </label>
+
+            <label>
+              Left color hex
+              <input id="leftColor" type="text" value="#B05039">
+            </label>
+
+            <label>
+              Left color picker
+              <input id="leftColorPicker" type="color" value="#B05039">
+            </label>
+
+            <label>
+              Right color hex
+              <input id="rightColor" type="text" value="#EECA79">
+            </label>
+
+            <label>
+              Right color picker
+              <input id="rightColorPicker" type="color" value="#EECA79">
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Visibility</summary>
+        <div class="section">
+          <label class="toggle">
+            Randomly hide faces
+            <input id="independentVisibility" type="checkbox" checked>
+          </label>
+
+          <div id="visibilityPanel" class="hidden-panel active">
+            <label>
+              Top density: <span id="topVisibilityValue" class="value">62%</span>
+              <input id="topVisibility" type="range" min="0" max="100" value="62">
+            </label>
+
+            <label>
+              Left density: <span id="leftVisibilityValue" class="value">69%</span>
+              <input id="leftVisibility" type="range" min="0" max="100" value="69">
+            </label>
+
+            <label>
+              Right density: <span id="rightVisibilityValue" class="value">67%</span>
+              <input id="rightVisibility" type="range" min="0" max="100" value="67">
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Composition</summary>
+        <div class="section">
+          <label class="toggle">
+            Use blank-space border
+            <input id="useBlankMargin" type="checkbox" checked>
+          </label>
+
+          <label class="toggle">
+            Animate reroll
+            <input id="animateReroll" type="checkbox" checked>
+          </label>
+
+          <div id="marginPanel" class="hidden-panel active">
+            <label>
+              Blank border: <span id="blankMarginValue" class="value">8%</span>
+              <input id="blankMargin" type="range" min="0" max="45" value="8">
+            </label>
+
+            <label>
+              Edge falloff softness: <span id="edgeFalloffValue" class="value">11%</span>
+              <input id="edgeFalloff" type="range" min="0" max="40" value="11">
+            </label>
+
+            <label>
+              Inner padding: <span id="innerPaddingValue" class="value">9%</span>
+              <input id="innerPadding" type="range" min="0" max="40" value="9">
+            </label>
+          </div>
+
+          <p class="hint">Blank border creates a no-shape zone. Edge falloff fades cube probability near the composition edge.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Cube Geometry</summary>
+        <div class="section">
+          <div class="grid">
+            <label>
+              Cube width
+              <input id="cubeWidth" type="number" min="10" max="240" value="90">
+            </label>
+
+            <label>
+              Cube height
+              <input id="cubeHeight" type="number" min="10" max="240" value="52">
+            </label>
+
+            <label class="wide">
+              Cube depth
+              <input id="cubeDepth" type="number" min="10" max="300" value="104">
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Export</summary>
+        <div class="section">
+          <div class="grid">
+            <label>
+              PNG scale
+              <select id="pngScale">
+                <option value="1">1×</option>
+                <option value="2" selected>2×</option>
+                <option value="3">3×</option>
+                <option value="4">4×</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint">SVG is vector and preferable for editing. PNG is rasterized at the selected scale.</p>
+          <div class="grid">
+            <button id="downloadSvg" type="button">Download SVG</button>
+            <button id="downloadPng" class="secondary" type="button">Download PNG</button>
+          </div>
+        </div>
+      </details>
+    </form>
+
+    <div class="actions">
+      <button id="apply" type="button">Apply</button>
+      <button id="reroll" class="secondary" type="button">Reroll</button>
+    </div>
+  </aside>
+
+  <main>
+    <div id="stage">
+      <canvas id="c"></canvas>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    const stage = document.getElementById("stage");
+    const main = document.querySelector("main");
+
+    const inputs = {
+      aspectRatio: document.getElementById("aspectRatio"),
+      useCustomSize: document.getElementById("useCustomSize"),
+      customWidth: document.getElementById("customWidth"),
+      customHeight: document.getElementById("customHeight"),
+      backgroundColor: document.getElementById("backgroundColor"),
+      backgroundColorPicker: document.getElementById("backgroundColorPicker"),
+
+      topColor: document.getElementById("topColor"),
+      topColorPicker: document.getElementById("topColorPicker"),
+      leftColor: document.getElementById("leftColor"),
+      leftColorPicker: document.getElementById("leftColorPicker"),
+      rightColor: document.getElementById("rightColor"),
+      rightColorPicker: document.getElementById("rightColorPicker"),
+
+      independentVisibility: document.getElementById("independentVisibility"),
+      visibilityPanel: document.getElementById("visibilityPanel"),
+      topVisibility: document.getElementById("topVisibility"),
+      leftVisibility: document.getElementById("leftVisibility"),
+      rightVisibility: document.getElementById("rightVisibility"),
+      topVisibilityValue: document.getElementById("topVisibilityValue"),
+      leftVisibilityValue: document.getElementById("leftVisibilityValue"),
+      rightVisibilityValue: document.getElementById("rightVisibilityValue"),
+
+      useBlankMargin: document.getElementById("useBlankMargin"),
+      animateReroll: document.getElementById("animateReroll"),
+      marginPanel: document.getElementById("marginPanel"),
+      blankMargin: document.getElementById("blankMargin"),
+      edgeFalloff: document.getElementById("edgeFalloff"),
+      innerPadding: document.getElementById("innerPadding"),
+      blankMarginValue: document.getElementById("blankMarginValue"),
+      edgeFalloffValue: document.getElementById("edgeFalloffValue"),
+      innerPaddingValue: document.getElementById("innerPaddingValue"),
+
+      cubeWidth: document.getElementById("cubeWidth"),
+      cubeHeight: document.getElementById("cubeHeight"),
+      cubeDepth: document.getElementById("cubeDepth"),
+
+      pngScale: document.getElementById("pngScale"),
+      downloadSvg: document.getElementById("downloadSvg"),
+      downloadPng: document.getElementById("downloadPng"),
+
+      apply: document.getElementById("apply"),
+      reroll: document.getElementById("reroll")
+    };
+
+    let config = {};
+    let cubes = [];
+    let logicalWidth = 1000;
+    let logicalHeight = 1000;
+    let animationFrame = null;
+
+    function parseAspectRatio(value) {
+      if (value === "free") return null;
+      const [w, h] = value.split(":").map(Number);
+      return w / h;
+    }
+
+    function percentValue(input) {
+      const n = Number(input.value);
+      if (Number.isNaN(n)) return 0;
+      return Math.max(0, Math.min(100, n)) / 100;
+    }
+
+    function syncUI() {
+      inputs.visibilityPanel.classList.toggle("active", inputs.independentVisibility.checked);
+      inputs.marginPanel.classList.toggle("active", inputs.useBlankMargin.checked);
+
+      inputs.topVisibilityValue.textContent = inputs.topVisibility.value + "%";
+      inputs.leftVisibilityValue.textContent = inputs.leftVisibility.value + "%";
+      inputs.rightVisibilityValue.textContent = inputs.rightVisibility.value + "%";
+      inputs.blankMarginValue.textContent = inputs.blankMargin.value + "%";
+      inputs.edgeFalloffValue.textContent = inputs.edgeFalloff.value + "%";
+      inputs.innerPaddingValue.textContent = inputs.innerPadding.value + "%";
+    }
+
+    function readConfig() {
+      config = {
+        aspectRatio: inputs.aspectRatio.value,
+        useCustomSize: inputs.useCustomSize.checked,
+        customWidth: Math.max(200, Number(inputs.customWidth.value) || 1000),
+        customHeight: Math.max(200, Number(inputs.customHeight.value) || 1000),
+
+        backgroundColor: inputs.backgroundColor.value.trim() || "#ffffff",
+
+        independentVisibility: inputs.independentVisibility.checked,
+
+        useBlankMargin: inputs.useBlankMargin.checked,
+        animateReroll: inputs.animateReroll.checked,
+        blankMargin: Number(inputs.blankMargin.value) / 100,
+        edgeFalloff: Number(inputs.edgeFalloff.value) / 100,
+        innerPadding: Number(inputs.innerPadding.value) / 100,
+
+        fixedColors: {
+          top: inputs.topColor.value.trim() || "#f7f3ed",
+          left: inputs.leftColor.value.trim() || "#d3d0cb",
+          right: inputs.rightColor.value.trim() || "#26333b"
+        },
+
+        visibility: {
+          top: percentValue(inputs.topVisibility),
+          left: percentValue(inputs.leftVisibility),
+          right: percentValue(inputs.rightVisibility)
+        },
+
+        cubeWidth: Math.max(10, Number(inputs.cubeWidth.value) || 90),
+        cubeHeight: Math.max(10, Number(inputs.cubeHeight.value) || 52),
+        cubeDepth: Math.max(10, Number(inputs.cubeDepth.value) || 104)
+      };
+    }
+
+    function calculateStageSize() {
+      const maxW = Math.max(200, main.clientWidth - 36);
+      const maxH = Math.max(200, main.clientHeight - 36);
+
+      if (config.useCustomSize) {
+        const scale = Math.min(maxW / config.customWidth, maxH / config.customHeight, 1);
+        logicalWidth = Math.round(config.customWidth);
+        logicalHeight = Math.round(config.customHeight);
+        stage.style.width = Math.round(config.customWidth * scale) + "px";
+        stage.style.height = Math.round(config.customHeight * scale) + "px";
+        return;
+      }
+
+      const ratio = parseAspectRatio(config.aspectRatio);
+
+      if (!ratio) {
+        logicalWidth = Math.round(maxW);
+        logicalHeight = Math.round(maxH);
+        stage.style.width = logicalWidth + "px";
+        stage.style.height = logicalHeight + "px";
+        return;
+      }
+
+      let displayW = maxW;
+      let displayH = displayW / ratio;
+
+      if (displayH > maxH) {
+        displayH = maxH;
+        displayW = displayH * ratio;
+      }
+
+      logicalWidth = Math.round(displayW);
+      logicalHeight = Math.round(displayH);
+      stage.style.width = logicalWidth + "px";
+      stage.style.height = logicalHeight + "px";
+    }
+
+    function resizeCanvas() {
+      calculateStageSize();
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = logicalWidth * dpr;
+      canvas.height = logicalHeight * dpr;
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function chance(probability) {
+      return Math.random() < probability;
+    }
+
+    function getArtBounds() {
+      if (!config.useBlankMargin) {
+        return { left: -Infinity, right: Infinity, top: -Infinity, bottom: Infinity };
+      }
+
+      const smallestSide = Math.min(logicalWidth, logicalHeight);
+      const margin = smallestSide * config.blankMargin;
+
+      const padding = smallestSide * config.innerPadding;
+
+      return {
+        left: margin + padding,
+        right: logicalWidth - margin - padding,
+        top: margin + padding,
+        bottom: logicalHeight - margin - padding
+      };
+    }
+
+    function getEdgeProbability(x, y, bounds) {
+      if (!config.useBlankMargin) return 1;
+      if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) return 0;
+      if (config.edgeFalloff <= 0) return 1;
+
+      const smallestSide = Math.min(logicalWidth, logicalHeight);
+      const falloffDistance = smallestSide * config.edgeFalloff;
+      if (falloffDistance <= 0) return 1;
+
+      const distanceToEdge = Math.min(
+        x - bounds.left,
+        bounds.right - x,
+        y - bounds.top,
+        bounds.bottom - y
+      );
+
+      return Math.max(0, Math.min(1, distanceToEdge / falloffDistance));
+    }
+
+    function visibleFor(side, edgeProbability) {
+      if (!config.independentVisibility) return true;
+      return chance(config.visibility[side] * edgeProbability);
+    }
+
+    function colorFor(side) {
+      return config.fixedColors[side];
+    }
+
+    function faceSettings(edgeProbability) {
+      return {
+        top: { visible: visibleFor("top", edgeProbability), color: colorFor("top") },
+        left: { visible: visibleFor("left", edgeProbability), color: colorFor("left") },
+        right: { visible: visibleFor("right", edgeProbability), color: colorFor("right") }
+      };
+    }
+
+    function buildGridData() {
+      const generated = [];
+
+      const w = config.cubeWidth;
+      const h = config.cubeHeight;
+      const d = config.cubeDepth;
+
+      const stepX = w * 2;
+      const stepY = h + d;
+
+      const rows = Math.ceil(logicalHeight / stepY) + 8;
+      const cols = Math.ceil(logicalWidth / stepX) + 8;
+      const bounds = getArtBounds();
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = -stepX * 3 + col * stepX + (row % 2 ? w : 0);
+          const y = -stepY * 3 + row * stepY;
+
+          const centerX = x;
+          const centerY = y + h + d / 2;
+          const edgeProbability = getEdgeProbability(centerX, centerY, bounds);
+
+          if (edgeProbability <= 0) continue;
+
+          generated.push({
+            x,
+            y,
+            offsetX: (Math.random() - 0.5) * config.cubeWidth * 0.45,
+            offsetY: (Math.random() - 0.5) * config.cubeDepth * 0.25,
+            faces: faceSettings(edgeProbability)
+          });
+        }
+      }
+
+      return generated;
+    }
+
+    function makeGrid() {
+      cubes = buildGridData();
+    }
+
+    function getCubePolygons(cube) {
+      const w = config.cubeWidth;
+      const h = config.cubeHeight;
+      const d = config.cubeDepth;
+      const cx = cube.x;
+      const cy = cube.y;
+
+      const top = { x: cx, y: cy };
+      const right = { x: cx + w, y: cy + h };
+      const bottom = { x: cx, y: cy + h * 2 };
+      const left = { x: cx - w, y: cy + h };
+
+      const rightBottom = { x: right.x, y: right.y + d };
+      const bottomBottom = { x: bottom.x, y: bottom.y + d };
+      const leftBottom = { x: left.x, y: left.y + d };
+
+      return [
+        { side: "left", visible: cube.faces.left.visible, color: cube.faces.left.color, points: [left, bottom, bottomBottom, leftBottom] },
+        { side: "right", visible: cube.faces.right.visible, color: cube.faces.right.color, points: [right, bottom, bottomBottom, rightBottom] },
+        { side: "top", visible: cube.faces.top.visible, color: cube.faces.top.color, points: [top, right, bottom, left] }
+      ];
+    }
+
+    function polygon(points, fill, context = ctx) {
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) context.lineTo(points[i].x, points[i].y);
+      context.closePath();
+      context.fillStyle = fill;
+      context.fill();
+    }
+
+    function drawToContext(context, width, height, scale = 1) {
+      context.save();
+      context.scale(scale, scale);
+      context.fillStyle = config.backgroundColor;
+      context.fillRect(0, 0, width, height);
+
+      for (const cube of cubes) {
+        for (const poly of getCubePolygons(cube)) {
+          if (poly.visible) polygon(poly.points, poly.color, context);
+        }
+      }
+
+      context.restore();
+    }
+
+    function drawPolygonsForCubes(context, cubeList, opacity = 1, offsetScale = 0) {
+      context.save();
+      context.globalAlpha = opacity;
+
+      for (const cube of cubeList) {
+        const ox = (cube.offsetX || 0) * offsetScale;
+        const oy = (cube.offsetY || 0) * offsetScale;
+
+        context.save();
+        context.translate(ox, oy);
+
+        for (const poly of getCubePolygons(cube)) {
+          if (poly.visible) polygon(poly.points, poly.color, context);
+        }
+
+        context.restore();
+      }
+
+      context.restore();
+    }
+
+    function draw() {
+      ctx.fillStyle = config.backgroundColor;
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+      drawPolygonsForCubes(ctx, cubes, 1, 0);
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateToNewCubes(previousCubes, nextCubes) {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+
+      // Single-layer animation avoids the brief strobe/flicker caused by
+      // crossfading two dense polygon sets on top of each other.
+      const duration = 520;
+      const start = performance.now();
+
+      function render(t) {
+        ctx.fillStyle = config.backgroundColor;
+        ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+        // New pattern slides gently into place at full opacity.
+        // This keeps the transition smooth without flashing.
+        drawPolygonsForCubes(ctx, nextCubes, 1, 1 - t);
+      }
+
+      // Draw the first frame immediately so there is no blank/strobe frame
+      // before requestAnimationFrame starts.
+      render(0);
+
+      function frame(now) {
+        const raw = Math.min(1, (now - start) / duration);
+        const t = easeOutCubic(raw);
+
+        render(t);
+
+        if (raw < 1) {
+          animationFrame = requestAnimationFrame(frame);
+        } else {
+          cubes = nextCubes;
+          animationFrame = null;
+          draw();
+        }
+      }
+
+      animationFrame = requestAnimationFrame(frame);
+    }
+
+    function applySettings({ reroll = true, resize = true, animate = false } = {}) {
+      syncUI();
+      readConfig();
+
+      if (resize) resizeCanvas();
+
+      if (reroll) {
+        const previousCubes = cubes;
+        const nextCubes = buildGridData();
+
+        if (animate && config.animateReroll && previousCubes.length) {
+          animateToNewCubes(previousCubes, nextCubes);
+          return;
+        }
+
+        cubes = nextCubes;
+      }
+
+      draw();
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeXml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function pointsToSvg(points) {
+      return points.map(p => `${Number(p.x.toFixed(3))},${Number(p.y.toFixed(3))}`).join(" ");
+    }
+
+    function downloadSvg() {
+      readConfig();
+
+      const parts = [];
+      parts.push(`<?xml version="1.0" encoding="UTF-8"?>`);
+      parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${logicalWidth}" height="${logicalHeight}" viewBox="0 0 ${logicalWidth} ${logicalHeight}">`);
+      parts.push(`<rect width="100%" height="100%" fill="${escapeXml(config.backgroundColor)}"/>`);
+
+      for (const cube of cubes) {
+        for (const poly of getCubePolygons(cube)) {
+          if (!poly.visible) continue;
+          parts.push(`<polygon points="${pointsToSvg(poly.points)}" fill="${escapeXml(poly.color)}"/>`);
+        }
+      }
+
+      parts.push(`</svg>`);
+
+      const blob = new Blob([parts.join("\n")], { type: "image/svg+xml;charset=utf-8" });
+      downloadBlob(blob, "isometric-cube-art.svg");
+    }
+
+    function downloadPng() {
+      readConfig();
+
+      const scale = Math.max(1, Number(inputs.pngScale.value) || 2);
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = logicalWidth * scale;
+      exportCanvas.height = logicalHeight * scale;
+
+      const exportCtx = exportCanvas.getContext("2d");
+      drawToContext(exportCtx, logicalWidth, logicalHeight, scale);
+
+      exportCanvas.toBlob(blob => {
+        downloadBlob(blob, `isometric-cube-art-${scale}x.png`);
+      }, "image/png");
+    }
+
+
+    function normalizeHex(value, fallback) {
+      const trimmed = String(value || "").trim();
+      return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : fallback;
+    }
+
+    function bindColorPair(textInput, pickerInput, fallback) {
+      textInput.addEventListener("change", () => {
+        const hex = normalizeHex(textInput.value, fallback);
+        textInput.value = hex;
+        pickerInput.value = hex;
+        applySettings({ reroll: true, resize: false });
+      });
+
+      pickerInput.addEventListener("input", () => {
+        textInput.value = pickerInput.value;
+        applySettings({ reroll: true, resize: false });
+      });
+    }
+
+    bindColorPair(inputs.backgroundColor, inputs.backgroundColorPicker, "#ffffff");
+    bindColorPair(inputs.topColor, inputs.topColorPicker, "#f7f3ed");
+    bindColorPair(inputs.leftColor, inputs.leftColorPicker, "#d3d0cb");
+    bindColorPair(inputs.rightColor, inputs.rightColorPicker, "#26333b");
+
+    inputs.apply.addEventListener("click", () => applySettings({ reroll: true, resize: true }));
+
+    // Reroll now regenerates the art without resizing the canvas, fixing the gradual-growth bug.
+    inputs.reroll.addEventListener("click", () => applySettings({ reroll: true, resize: false, animate: true }));
+
+    [
+      inputs.aspectRatio,
+      inputs.useCustomSize
+    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: true })));
+
+    [
+      inputs.independentVisibility,
+      inputs.useBlankMargin,
+      inputs.animateReroll
+    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: false })));
+
+    [
+      inputs.topVisibility,
+      inputs.leftVisibility,
+      inputs.rightVisibility,
+      inputs.blankMargin,
+      inputs.edgeFalloff,
+      inputs.innerPadding
+    ].forEach(slider => {
+      slider.addEventListener("input", syncUI);
+      slider.addEventListener("change", () => applySettings({ reroll: true, resize: false }));
+    });
+
+    [
+      inputs.cubeWidth,
+      inputs.cubeHeight,
+      inputs.cubeDepth,
+      inputs.customWidth,
+      inputs.customHeight
+    ].forEach(input => {
+      input.addEventListener("change", () => applySettings({ reroll: true, resize: true }));
+    });
+
+    inputs.downloadSvg.addEventListener("click", downloadSvg);
+    inputs.downloadPng.addEventListener("click", downloadPng);
+
+    window.addEventListener("resize", () => {
+      syncUI();
+      readConfig();
+      resizeCanvas();
+      makeGrid();
+      draw();
+    });
+
+    applySettings({ reroll: true, resize: true });
+  </script>
+</body>
+</html>
