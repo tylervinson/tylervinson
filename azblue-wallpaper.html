@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Standalone Isometric Cube Art</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background: #FBB24C;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw;
+      max-height: 100vh;
+      max-width: 177.7778vh;
+      background: #FBB24C;
+      cursor: pointer;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #FBB24C;
+    }
+
+    #downloadPng {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 10;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.72);
+      color: white;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0.18;
+      transform: translateY(-4px);
+      transition: opacity 180ms ease, transform 180ms ease, background 180ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    #downloadPng:hover,
+    #downloadPng:focus {
+      opacity: 1;
+      transform: translateY(0);
+      background: rgba(0, 0, 0, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div id="stage" aria-label="Click to reroll artwork">
+    <canvas id="c"></canvas>
+  </div>
+
+  <button id="downloadPng" type="button" aria-label="Download PNG">Download PNG</button>
+
+  <script>
+    const stage = document.getElementById("stage");
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    const downloadButton = document.getElementById("downloadPng");
+
+    const CONFIG = {
+      palette: ["#FBB24C", "#F1F9FD", "#F58220", "#0099D8"],
+
+      backgroundColor: "#FBB24C",
+
+      colors: {
+        top: "#F1F9FD",
+        left: "#F58220",
+        right: "#0099D8"
+      },
+
+      visibility: {
+        top: 0.39,
+        left: 0.52,
+        right: 0.31
+      },
+
+      blankMargin: 0.06,
+      edgeFalloff: 0.10,
+      innerPadding: 0.05,
+
+      cubeWidth: 90,
+      cubeHeight: 52,
+      cubeDepth: 104,
+
+      animationDuration: 520,
+      exportScale: 3
+    };
+
+    let logicalWidth = 1600;
+    let logicalHeight = 900;
+    let cubes = [];
+    let animationFrame = null;
+
+    function chance(probability) {
+      return Math.random() < probability;
+    }
+
+    function getArtBounds() {
+      const smallestSide = Math.min(logicalWidth, logicalHeight);
+      const margin = smallestSide * CONFIG.blankMargin;
+      const padding = smallestSide * CONFIG.innerPadding;
+
+      return {
+        left: margin + padding,
+        right: logicalWidth - margin - padding,
+        top: margin + padding,
+        bottom: logicalHeight - margin - padding
+      };
+    }
+
+    function getEdgeProbability(x, y, bounds) {
+      if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) return 0;
+
+      const smallestSide = Math.min(logicalWidth, logicalHeight);
+      const falloffDistance = smallestSide * CONFIG.edgeFalloff;
+
+      if (falloffDistance <= 0) return 1;
+
+      const distanceToEdge = Math.min(
+        x - bounds.left,
+        bounds.right - x,
+        y - bounds.top,
+        bounds.bottom - y
+      );
+
+      return Math.max(0, Math.min(1, distanceToEdge / falloffDistance));
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+
+      return array;
+    }
+
+    function randomizeCompositionColors() {
+      // Four colors total. One becomes the background, the other three become cube colors.
+      // This guarantees every color is used exactly once per generated composition.
+      const [background, c1, c2, c3] = shuffle(CONFIG.palette.slice());
+
+      CONFIG.backgroundColor = background;
+      CONFIG.colors.top = c1;
+      CONFIG.colors.left = c2;
+      CONFIG.colors.right = c3;
+    }
+
+    function faceSettings(edgeProbability) {
+      // Each cube uses the three active cube colors exactly once, randomly assigned to faces.
+      const [cTop, cLeft, cRight] = shuffle([
+        CONFIG.colors.top,
+        CONFIG.colors.left,
+        CONFIG.colors.right
+      ]);
+
+      return {
+        top: {
+          visible: chance(CONFIG.visibility.top * edgeProbability),
+          color: cTop
+        },
+        left: {
+          visible: chance(CONFIG.visibility.left * edgeProbability),
+          color: cLeft
+        },
+        right: {
+          visible: chance(CONFIG.visibility.right * edgeProbability),
+          color: cRight
+        }
+      };
+    }
+
+    function buildGridData() {
+      const generated = [];
+
+      const w = CONFIG.cubeWidth;
+      const h = CONFIG.cubeHeight;
+      const d = CONFIG.cubeDepth;
+
+      const stepX = w * 2;
+      const stepY = h + d;
+
+      const rows = Math.ceil(logicalHeight / stepY) + 8;
+      const cols = Math.ceil(logicalWidth / stepX) + 8;
+      const bounds = getArtBounds();
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = -stepX * 3 + col * stepX + (row % 2 ? w : 0);
+          const y = -stepY * 3 + row * stepY;
+
+          const centerX = x;
+          const centerY = y + h + d / 2;
+          const edgeProbability = getEdgeProbability(centerX, centerY, bounds);
+
+          if (edgeProbability <= 0) continue;
+
+          generated.push({
+            x,
+            y,
+            offsetX: (Math.random() - 0.5) * CONFIG.cubeWidth * 0.45,
+            offsetY: (Math.random() - 0.5) * CONFIG.cubeDepth * 0.25,
+            faces: faceSettings(edgeProbability)
+          });
+        }
+      }
+
+      return generated;
+    }
+
+    function getCubePolygons(cube) {
+      const w = CONFIG.cubeWidth;
+      const h = CONFIG.cubeHeight;
+      const d = CONFIG.cubeDepth;
+      const cx = cube.x;
+      const cy = cube.y;
+
+      const top = { x: cx, y: cy };
+      const right = { x: cx + w, y: cy + h };
+      const bottom = { x: cx, y: cy + h * 2 };
+      const left = { x: cx - w, y: cy + h };
+
+      const rightBottom = { x: right.x, y: right.y + d };
+      const bottomBottom = { x: bottom.x, y: bottom.y + d };
+      const leftBottom = { x: left.x, y: left.y + d };
+
+      return [
+        { visible: cube.faces.left.visible, color: cube.faces.left.color, points: [left, bottom, bottomBottom, leftBottom] },
+        { visible: cube.faces.right.visible, color: cube.faces.right.color, points: [right, bottom, bottomBottom, rightBottom] },
+        { visible: cube.faces.top.visible, color: cube.faces.top.color, points: [top, right, bottom, left] }
+      ];
+    }
+
+    function polygon(context, points, fill) {
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+
+      for (let i = 1; i < points.length; i++) {
+        context.lineTo(points[i].x, points[i].y);
+      }
+
+      context.closePath();
+      context.fillStyle = fill;
+      context.fill();
+    }
+
+    function drawPolygonsForCubes(context, cubeList, offsetScale = 0) {
+      for (const cube of cubeList) {
+        const ox = (cube.offsetX || 0) * offsetScale;
+        const oy = (cube.offsetY || 0) * offsetScale;
+
+        context.save();
+        context.translate(ox, oy);
+
+        for (const poly of getCubePolygons(cube)) {
+          if (poly.visible) polygon(context, poly.points, poly.color);
+        }
+
+        context.restore();
+      }
+    }
+
+    function syncPageBackground() {
+      document.documentElement.style.background = CONFIG.backgroundColor;
+      document.body.style.background = CONFIG.backgroundColor;
+      stage.style.background = CONFIG.backgroundColor;
+      canvas.style.background = CONFIG.backgroundColor;
+    }
+
+    function draw() {
+      syncPageBackground();
+      ctx.fillStyle = CONFIG.backgroundColor;
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+      drawPolygonsForCubes(ctx, cubes, 0);
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateToNewCubes(nextCubes) {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+
+      const start = performance.now();
+
+      function render(t) {
+        syncPageBackground();
+        ctx.fillStyle = CONFIG.backgroundColor;
+        ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+        drawPolygonsForCubes(ctx, nextCubes, 1 - t);
+      }
+
+      render(0);
+
+      function frame(now) {
+        const raw = Math.min(1, (now - start) / CONFIG.animationDuration);
+        const t = easeOutCubic(raw);
+
+        render(t);
+
+        if (raw < 1) {
+          animationFrame = requestAnimationFrame(frame);
+        } else {
+          cubes = nextCubes;
+          animationFrame = null;
+          draw();
+        }
+      }
+
+      animationFrame = requestAnimationFrame(frame);
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = stage.getBoundingClientRect();
+
+      logicalWidth = Math.round(rect.width);
+      logicalHeight = Math.round(rect.height);
+
+      canvas.width = logicalWidth * dpr;
+      canvas.height = logicalHeight * dpr;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      cubes = buildGridData();
+      draw();
+    }
+
+    function reroll() {
+      randomizeCompositionColors();
+
+      const nextCubes = buildGridData();
+      animateToNewCubes(nextCubes);
+    }
+
+    function downloadPng() {
+      const scale = CONFIG.exportScale;
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = logicalWidth * scale;
+      exportCanvas.height = logicalHeight * scale;
+
+      const exportCtx = exportCanvas.getContext("2d");
+      exportCtx.scale(scale, scale);
+      exportCtx.fillStyle = CONFIG.backgroundColor;
+      exportCtx.fillRect(0, 0, logicalWidth, logicalHeight);
+      drawPolygonsForCubes(exportCtx, cubes, 0);
+
+      exportCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "isometric-cube-art.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, "image/png");
+    }
+
+    stage.addEventListener("click", reroll);
+
+    downloadButton.addEventListener("click", event => {
+      event.stopPropagation();
+      downloadPng();
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    randomizeCompositionColors();
+    resizeCanvas();
+  </script>
+</body>
+</html>
