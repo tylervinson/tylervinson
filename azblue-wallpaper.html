@@ -24,9 +24,7 @@
     #stage {
       position: relative;
       width: 100vw;
-      height: 56.25vw;
-      max-height: 100vh;
-      max-width: 177.7778vh;
+      height: 100vh;
       background: #FBB24C;
       cursor: pointer;
     }
@@ -106,7 +104,11 @@
       cubeDepth: 104,
 
       animationDuration: 520,
-      exportScale: 3
+      exportScale: 3,
+
+      desktopAspect: 16 / 9,
+      mobileAspect: 9 / 16,
+      mobileBreakpoint: 0.9
     };
 
     let logicalWidth = 1600;
@@ -335,7 +337,39 @@
       animationFrame = requestAnimationFrame(frame);
     }
 
+    function getResponsiveAspect() {
+      const viewportAspect = window.innerWidth / window.innerHeight;
+
+      // Portrait and narrow screens use 9:16. Wider screens use 16:9.
+      return viewportAspect < CONFIG.mobileBreakpoint
+        ? CONFIG.mobileAspect
+        : CONFIG.desktopAspect;
+    }
+
+    function sizeStageToViewport() {
+      const targetAspect = getResponsiveAspect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const viewportAspect = viewportWidth / viewportHeight;
+
+      let stageWidth;
+      let stageHeight;
+
+      if (viewportAspect > targetAspect) {
+        stageHeight = viewportHeight;
+        stageWidth = stageHeight * targetAspect;
+      } else {
+        stageWidth = viewportWidth;
+        stageHeight = stageWidth / targetAspect;
+      }
+
+      stage.style.width = Math.round(stageWidth) + "px";
+      stage.style.height = Math.round(stageHeight) + "px";
+    }
+
     function resizeCanvas() {
+      sizeStageToViewport();
+
       const dpr = window.devicePixelRatio || 1;
       const rect = stage.getBoundingClientRect();
 
