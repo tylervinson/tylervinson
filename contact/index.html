@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact Us — Blue Cross Blue Shield of Arizona</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz@1,8..144&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -117,9 +118,20 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 
 /* ── HERO ── */
 .hero-wrap { background: var(--blue-navy); position: relative; overflow: hidden; }
-.hero-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 72% 40%, rgba(34,115,186,0.4) 0%, transparent 60%); pointer-events: none; }
 .hero-inner { max-width: 1344px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 420px; align-items: end; min-height: 400px; gap: 0; position: relative; z-index: 2; }
 .hero-content { padding: 64px 48px 0 0; }
+
+/* Hero content block */
+.hero-block { padding: 72px 0 72px 2rem; max-width: 1344px; margin: 0 auto; display: flex; align-items: flex-start; }
+.hero-block-inner { text-align: center; max-width: 480px; }
+.hero-h1 { font-size: 4rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.05; margin-bottom: 4px; }
+.hero-h1-italic { font-family: 'Roboto Serif', serif; font-size: 4rem; font-weight: 400; font-style: italic; color: var(--gold); line-height: 1.1; margin-bottom: 20px; display: block; }
+.hero-subtitle { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.55; margin-bottom: 28px; }
+/* Underline-only search input */
+.hero-search { display: flex; align-items: center; border-bottom: 1.5px solid var(--gray-darkest); padding-bottom: 6px; gap: 8px; }
+.hero-search input { flex: 1; border: none; outline: none; font-family: Roboto, sans-serif; font-size: 1rem; color: var(--gray-darkest); background: transparent; padding: 0; }
+.hero-search input::placeholder { color: var(--gray-medium); }
+.hero-search svg { width: 20px; height: 20px; stroke: var(--gray-darkest); fill: none; stroke-width: 2; flex-shrink: 0; }
 .hero-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; opacity: 0; animation: fadeUp 0.5s 0.1s ease forwards; }
 .hero h1 { font-family: Roboto, sans-serif; font-size: 3rem; font-weight: 300; color: white; line-height: 1.15; margin-bottom: 14px; opacity: 0; animation: fadeUp 0.5s 0.2s ease forwards; }
 .hero h1 strong { font-weight: 700; color: var(--gold); }
@@ -177,7 +189,8 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 .q-card.active { transform: translateX(4px); box-shadow: var(--shadow-card); outline: none; }
 .q-left { display: flex; align-items: center; gap: 14px; }
 /* Icon: blue-light bg, no extra border — matches system icon card style */
-.q-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.25rem; transition: background 0.15s; }
+.q-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.q-icon i { font-size: 1.1rem; color: var(--blue-navy); }
 
 /* Heading 06: Regular 16px per system */
 .q-title { font-size: 1rem; font-weight: 700; color: var(--gray-darkest); margin-bottom: 2px; line-height: 1.3; }
@@ -499,7 +512,18 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 </div>
 
 <!-- HERO -->
-<div class="hero-wrap" style="background: url('hero.jpg') center top / cover no-repeat; min-height: 500px; line-height: 0;">
+<div class="hero-wrap" style="background: url('hero.jpg') center top / cover no-repeat; min-height: 500px;">
+  <div class="hero-block">
+    <div class="hero-block-inner">
+      <h1 class="hero-h1">How can we</h1>
+      <span class="hero-h1-italic">best help you today?</span>
+      <p class="hero-subtitle">Search here for what you need, or choose an option below,<br>we'll get you to the right team.</p>
+      <div class="hero-search">
+        <input type="text" id="searchInput" placeholder="" autocomplete="off">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- QUESTION CARDS -->
@@ -509,23 +533,23 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
     <p class="section-body reveal d2">Pick the one that fits and we'll point you to the right team with answers relevant to your situation.</p>
     <div class="q-list">
       <div class="q-card reveal d2" onclick="pick(this,'coverage')" id="q-coverage">
-        <div class="q-left"><div class="q-icon">🔍</div><div><div class="q-title">I'm not sure if something is covered</div><div class="q-sub">A procedure, treatment, medication, or service you want to understand before going ahead</div></div></div>
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-shield-halved"></i></div><div><div class="q-title">I'm not sure if something is covered</div><div class="q-sub">A procedure, treatment, medication, or service you want to understand before going ahead</div></div></div>
         <div class="q-chev"></div>
       </div>
       <div class="q-card reveal d3" onclick="pick(this,'bill')" id="q-bill">
-        <div class="q-left"><div class="q-icon">📄</div><div><div class="q-title">I got a bill I wasn't expecting</div><div class="q-sub">A charge that doesn't look right, an EOB you don't understand, or a cost you'd like to dispute</div></div></div>
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div><div><div class="q-title">I got a bill I wasn't expecting</div><div class="q-sub">A charge that doesn't look right, an EOB you don't understand, or a cost you'd like to dispute</div></div></div>
         <div class="q-chev"></div>
       </div>
       <div class="q-card reveal d4" onclick="pick(this,'benefits')" id="q-benefits">
-        <div class="q-left"><div class="q-icon">💡</div><div><div class="q-title">I want to understand my benefits better</div><div class="q-sub">What's included, what you're entitled to, what you might be missing</div></div></div>
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-star"></i></div><div><div class="q-title">I want to understand my benefits better</div><div class="q-sub">What's included, what you're entitled to, what you might be missing</div></div></div>
         <div class="q-chev"></div>
       </div>
       <div class="q-card reveal d5" onclick="pick(this,'mental')" id="q-mental">
-        <div class="q-left"><div class="q-icon">🧠</div><div><div class="q-title">I have a question about mental health coverage</div><div class="q-sub">Therapy, psychiatry, counseling — how it works and what it costs</div></div></div>
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-heart"></i></div><div><div class="q-title">I have a question about mental health coverage</div><div class="q-sub">Therapy, psychiatry, counseling — how it works and what it costs</div></div></div>
         <div class="q-chev"></div>
       </div>
       <div class="q-card reveal d6" onclick="pick(this,'other')" id="q-other">
-        <div class="q-left"><div class="q-icon">💬</div><div><div class="q-title">It's something else</div><div class="q-sub">We'll figure it out together</div></div></div>
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-comment"></i></div><div><div class="q-title">It's something else</div><div class="q-sub">We'll figure it out together</div></div></div>
         <div class="q-chev"></div>
       </div>
     </div>
