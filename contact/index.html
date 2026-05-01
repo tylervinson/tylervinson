@@ -33,10 +33,6 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body { font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 400; color: var(--gray-darkest); background: var(--white); overflow-x: hidden; line-height: 1.5; }
 
 /* ── PRINT ── */
-#print-btn { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: var(--blue-navy); border: none; border-radius: 6px; cursor: pointer; opacity: 0.7; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
-#print-btn:hover { opacity: 1; }
-#print-btn svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
-@media print { #print-btn { display: none; } }
 
 /* ── UTILITY BAR — dark navy, matches PDF exactly ── */
 .util-bar { background: var(--blue-navy); height: 44px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; }
@@ -176,19 +172,19 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 
 /* Q cards — border-radius 8px, 1px gray border, system shadow per design system */
 .q-list { display: flex; flex-direction: column; gap: 8px; }
-.q-card { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: white; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; transition: all 0.15s ease-in-out; gap: 16px; box-shadow: var(--shadow-sm); }
-.q-card:hover { border-color: var(--blue); background: var(--blue-light); transform: translateX(4px); box-shadow: var(--shadow-card); }
-.q-card.active { border-color: var(--blue); border-width: 2px; background: var(--blue-light); transform: translateX(4px); box-shadow: var(--shadow-card); }
+.q-card { outline: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: white; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; transition: all 0.15s ease-in-out; gap: 16px; box-shadow: var(--shadow-sm); }
+.q-card:hover { transform: translateX(4px); box-shadow: var(--shadow-card); }
+.q-card.active { transform: translateX(4px); box-shadow: var(--shadow-card); outline: none; }
 .q-left { display: flex; align-items: center; gap: 14px; }
 /* Icon: blue-light bg, no extra border — matches system icon card style */
 .q-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.25rem; transition: background 0.15s; }
-.q-card:hover .q-icon, .q-card.active .q-icon { background: rgba(34,115,186,0.15); }
+
 /* Heading 06: Regular 16px per system */
 .q-title { font-size: 1rem; font-weight: 700; color: var(--gray-darkest); margin-bottom: 2px; line-height: 1.3; }
 /* Body Small: Regular 14px #595959 per system */
 .q-sub   { font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); line-height: 1.375rem; }
 .q-chev { width: 8px; height: 8px; border-right: 2px solid var(--gray-medium); border-top: 2px solid var(--gray-medium); transform: rotate(45deg); flex-shrink: 0; transition: border-color 0.15s; }
-.q-card:hover .q-chev, .q-card.active .q-chev { border-color: var(--blue); }
+
 
 /* ── DYNAMIC SECTIONS ── */
 .dynamic { display: none; }
@@ -318,9 +314,9 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 
 /* ── CHAT FAB ── */
 .chat-fab { position: fixed; bottom: 28px; right: 28px; z-index: 400; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-.chat-btn { width: 58px; height: 58px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(204,134,26,0.4); transition: all 0.2s; }
-.chat-btn:hover { transform: scale(1.07); box-shadow: 0 6px 24px rgba(204,134,26,0.5); }
-.chat-btn svg { width: 22px; height: 22px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.chat-btn { width: 64px; height: 64px; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: none; transition: all 0.2s; padding: 0; }
+.chat-btn:hover { transform: scale(1.08); }
+
 .chat-prompt { background: white; color: var(--gray-darkest); border-radius: 10px 10px 0 10px; padding: 11px 15px; font-size: 0.82rem; box-shadow: var(--shadow-card); max-width: 200px; line-height: 1.4; cursor: pointer; border: 1px solid var(--gray); animation: promptUp 0.4s 1.5s ease both; }
 .chat-prompt strong { font-weight: 700; display: block; margin-bottom: 2px; color: var(--blue-navy); }
 .chat-prompt span { color: var(--gray-dark); font-size: 0.72rem; }
@@ -414,9 +410,6 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 </head>
 <body id="azblue-body">
 
-<button id="print-btn" onclick="printPage()" title="Save as PDF">
-  <svg viewBox="0 0 24 24"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>
-</button>
 
 <!-- CHAT FAB -->
 <div class="chat-fab">
@@ -425,7 +418,7 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
     <span>Chat with the Benefits Team →</span>
   </div>
   <button class="chat-btn" onclick="openChat()">
-    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <img src="reyna-chat-icon.svg" alt="Chat with us" style="width:64px;height:64px;display:block;">
   </button>
 </div>
 
@@ -484,14 +477,7 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 <!-- NAV -->
 <nav>
   <div class="nav-logo">
-    <div class="nav-shield">
-      <div class="shield-cross"></div>
-      <div class="shield-mark"></div>
-    </div>
-    <div class="nav-logo-text">
-      <strong>BlueCross BlueShield</strong>
-      <span>Arizona</span>
-    </div>
+    <img src="bcbs-logo.svg" alt="BlueCross BlueShield of Arizona" height="40">
   </div>
   <div class="nav-links">
     <a href="#">Find a Plan <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
@@ -500,8 +486,8 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
     <a href="#">Find Care <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
   </div>
   <div class="nav-right">
-    <button class="btn-secondary btn-secondary-sm">Pay Bill</button>
-    <button class="btn-primary btn-primary-sm">Log In</button>
+    <button class="btn-secondary btn-secondary-sm">24/7 Help</button>
+    <button class="btn-primary btn-primary-sm">Login / Register</button>
   </div>
 </nav>
 
@@ -513,56 +499,12 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 </div>
 
 <!-- HERO -->
-<div class="hero-wrap">
-  <div class="hero-inner">
-    <div class="hero-content">
-      <div class="hero-eyebrow">Contact Us</div>
-      <h1>Hi. What can we<br><strong>help you with?</strong></h1>
-      <p class="hero-sub">Search for what you need, or choose what you're dealing with below — we'll get you to the right team.</p>
-
-      <div class="search-outer">
-        <div class="search-row">
-          <div class="search-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-          <input class="search-input" id="searchInput" type="text" placeholder='Try "billing question" or "ID card"' autocomplete="off">
-        </div>
-        <div class="search-results" id="searchResults">
-          <div class="sr" onclick="pickSearch('coverage')">
-            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div><div class="sr-title">I'm not sure if something is covered</div><div class="sr-sub">Verify coverage before a visit or procedure</div></div>
-          </div>
-          <div class="sr" onclick="pickSearch('bill')">
-            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
-            <div><div class="sr-title">I got a bill I wasn't expecting</div><div class="sr-sub">Billing questions, EOB explanations, disputes</div></div>
-          </div>
-          <div class="sr" onclick="pickSearch('benefits')">
-            <div class="sr-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <div><div class="sr-title">I want to understand my benefits</div><div class="sr-sub">What's included, what you're entitled to</div></div>
-          </div>
-          <div class="sr" onclick="pickSearch('mental')">
-            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
-            <div><div class="sr-title">Mental health coverage</div><div class="sr-sub">Therapy, psychiatry, counseling</div></div>
-          </div>
-        </div>
-        <div class="search-hint">Try: <em>"autopay" · "claim denied" · "ID card" · "find a specialist"</em></div>
-      </div>
-
-      <div class="chat-hero-cta" onclick="openChat()">
-        <div class="chc-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
-        <div class="chc-text">
-          <strong>Prefer to chat?</strong>
-          <span>A member of our Benefits Team will respond</span>
-        </div>
-        <svg class="chc-arrow" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </div>
-    </div>
-    <div class="hero-img"><span>Member photography</span></div>
-  </div>
+<div class="hero-wrap" style="background: url('hero.jpg') center top / cover no-repeat; min-height: 500px; line-height: 0;">
 </div>
 
 <!-- QUESTION CARDS -->
 <div class="q-section">
   <div class="q-inner">
-    <div class="section-eyebrow reveal">Your question</div>
     <h2 class="section-h2 reveal d1">What sounds most like <strong>what you're dealing with?</strong></h2>
     <p class="section-body reveal d2">Pick the one that fits and we'll point you to the right team with answers relevant to your situation.</p>
     <div class="q-list">
@@ -594,7 +536,6 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 <div class="full-divider dynamic" id="div-team"></div>
 <div class="resp-section dynamic" id="sec-team">
   <div class="resp-inner">
-    <div class="section-eyebrow reveal">Who can help</div>
     <h2 class="section-h2 reveal d1"><strong>Here's who</strong> handles exactly this.</h2>
     <p class="section-body reveal d2" id="teamIntro"></p>
     <div class="team-card reveal d3">
@@ -609,7 +550,6 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 <div class="full-divider dynamic" id="div-opts"></div>
 <div class="resp-section alt dynamic" id="sec-opts">
   <div class="resp-inner">
-    <div class="section-eyebrow reveal">How to reach them</div>
     <h2 class="section-h2 reveal d1">Three ways in. <strong>Pick what works for you.</strong></h2>
     <p class="section-body reveal d2">Each one gets you to the same team. The difference is speed and how you like to communicate.</p>
     <div class="copts">
@@ -679,7 +619,6 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 <div class="full-divider dynamic" id="div-faq"></div>
 <div class="resp-section dynamic" id="sec-faq">
   <div class="resp-inner">
-    <div class="section-eyebrow reveal">Quick answers</div>
     <h2 class="section-h2 reveal d1">Here's what most people <strong>ask first.</strong></h2>
     <p class="section-body reveal d2" id="faqIntro"></p>
     <div class="faq-head reveal d3">
@@ -834,10 +773,13 @@ function toggleFaq(el) {
 // SEARCH
 var sinp = document.getElementById('searchInput');
 var sres = document.getElementById('searchResults');
-sinp.addEventListener('input', function(){ sres.classList.toggle('show', this.value.length > 1); });
-sinp.addEventListener('blur', function(){ setTimeout(function(){ sres.classList.remove('show'); }, 180); });
+if (sinp && sres) {
+  sinp.addEventListener('input', function(){ sres.classList.toggle('show', this.value.length > 1); });
+  sinp.addEventListener('blur', function(){ setTimeout(function(){ sres.classList.remove('show'); }, 180); });
+}
 function pickSearch(key) {
-  sres.classList.remove('show'); sinp.value = '';
+  if (sres) sres.classList.remove('show');
+  if (sinp) sinp.value = '';
   var el = document.getElementById('q-' + key);
   if (el) el.click();
 }
@@ -882,11 +824,6 @@ function checkReveals() {
 }
 checkReveals();
 
-function printPage() {
-  var h=document.documentElement.scrollHeight, w=document.documentElement.scrollWidth;
-  var s=document.createElement('style'); s.innerHTML='@page{size:'+w+'px '+h+'px;margin:0}body{zoom:1}'; document.head.appendChild(s);
-  window.print(); setTimeout(function(){ s.remove(); }, 1000);
-}
 </script>
 </body>
 </html>
