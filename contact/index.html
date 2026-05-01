@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Blue Cross Blue Shield of Arizona</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz@1,8..144&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── REAL BCBS AZ DESIGN TOKENS ── */
+:root {
+  --blue:         #2273BA;
+  --blue-navy:    #0B3B60;
+  --blue-light:   #F1F9FD;
+  --gold:         #FFBE5F;
+  --gold-border:  #CC861A;
+  --gold-hover:   #FFD495;
+  --teal:         #28BFE0;
+  --gray:         #E6E6E6;
+  --gray-light:   #F7F7F7;
+  --gray-medium:  #AEAEAE;
+  --gray-dark:    #595959;
+  --gray-darkest: #2D2926;
+  --error:        #DD524C;
+  --white:        #FFFFFF;
+  --shadow-card:  0px 10px 26px rgba(0,0,0,0.04);
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.05);
+}
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+/* Body text: Roboto Regular 400 16px per design system */
+body { font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 400; color: var(--gray-darkest); background: var(--white); overflow-x: hidden; line-height: 1.5; }
+
+/* ── PRINT ── */
+#print-btn { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: var(--blue-navy); border: none; border-radius: 6px; cursor: pointer; opacity: 0.7; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
+#print-btn:hover { opacity: 1; }
+#print-btn svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
+@media print { #print-btn { display: none; } }
+
+/* ── UTILITY BAR — dark navy, matches PDF exactly ── */
+.util-bar { background: var(--blue-navy); height: 44px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; }
+.util-links { display: flex; align-items: center; gap: 0; }
+.util-links a { font-size: 0.875rem; font-weight: 400; color: rgba(255,255,255,0.9); text-decoration: none; padding: 0 16px; height: 44px; display: flex; align-items: center; gap: 5px; transition: color 0.15s; }
+.util-links a:first-child { padding-left: 0; }
+.util-links a:hover { color: white; }
+.util-links .chev { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.7; flex-shrink: 0; }
+/* Right items: Search, phone, Español — spaced with gap, no dividers */
+.util-right { display: flex; align-items: center; gap: 20px; }
+.util-right a { font-size: 0.875rem; font-weight: 400; color: rgba(255,255,255,0.9); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
+.util-right a:hover { color: white; }
+.util-right .u-ico { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.util-right .chev { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.7; }
+
+/* ── PRIMARY NAV — WHITE bg, navy text, blue active underline per PDF ── */
+nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; border-bottom: 1px solid var(--gray); }
+.nav-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-right: 8px; }
+
+/* Actual BCBS shield mark — two shields side by side */
+.nav-shield {
+  display: flex; align-items: center; gap: 3px; height: 48px;
+}
+.shield-cross {
+  width: 22px; height: 40px; position: relative;
+  background: var(--blue); border-radius: 2px 2px 11px 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.shield-cross::before {
+  content: '+'; font-size: 1.1rem; font-weight: 900; color: white;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%);
+  line-height: 1;
+}
+.shield-mark {
+  width: 22px; height: 40px; position: relative;
+  background: var(--blue); border-radius: 2px 2px 11px 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.shield-mark::before {
+  content: ''; position: absolute;
+  width: 12px; height: 12px; background: white; border-radius: 50%;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  opacity: 0.95;
+}
+.shield-mark::after {
+  content: ''; position: absolute;
+  bottom: 9px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 7px;
+  background: white; opacity: 0.7;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+
+.nav-logo-text { line-height: 1.25; }
+.nav-logo-text strong { display: block; font-size: 0.82rem; font-weight: 700; color: var(--blue-navy); }
+.nav-logo-text span { display: block; font-size: 0.75rem; font-weight: 400; color: var(--blue-navy); }
+
+/* Nav links — navy 700, blue underline on hover/active per PDF (NOT gold) */
+.nav-links { display: flex; align-items: center; }
+.nav-links a { font-size: 1rem; font-weight: 700; color: var(--blue-navy); text-decoration: none; padding: 0 16px; height: 72px; display: flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+.nav-links a:hover { border-bottom-color: var(--blue); color: var(--blue); }
+.nav-links .chev { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.6; flex-shrink: 0; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Brand buttons — pill shape, 16px 40px padding per design system */
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 40px; border-radius: 999px; background: var(--gold); box-shadow: var(--gold-border) 0 0 0 1px; border: none; color: var(--blue-navy); font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; text-decoration: none; }
+.btn-primary:hover { background: var(--gold-hover); box-shadow: var(--gold-border) 0 0 0 1px; }
+.btn-primary svg { width: 16px; height: 16px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 40px; border-radius: 999px; background: transparent; box-shadow: var(--blue-navy) 0 0 0 1px; border: none; color: var(--blue-navy); font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; }
+.btn-secondary:hover { background: var(--white); box-shadow: var(--blue-navy) 0 0 0 2px; }
+/* Smaller nav/inline variant */
+.btn-primary-sm { padding: 10px 22px; font-size: 0.875rem; }
+.btn-secondary-sm { padding: 10px 22px; font-size: 0.875rem; }
+/* White outline version for dark backgrounds */
+.btn-secondary-white { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 22px; border-radius: 999px; background: transparent; box-shadow: white 0 0 0 1px; border: none; color: white; font-family: Roboto, sans-serif; font-size: 0.875rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; }
+.btn-secondary-white:hover { background: rgba(255,255,255,0.1); }
+
+/* ── BREADCRUMB ── */
+.bc { background: white; border-bottom: 1px solid var(--gray); padding: 10px 2rem; font-size: 0.875rem; color: var(--gray-dark); display: flex; align-items: center; gap: 6px; }
+.bc a { color: var(--blue); text-decoration: none; }
+.bc a:hover { text-decoration: underline; }
+.bc-sep { color: var(--gray-medium); }
+
+/* ── HERO ── */
+.hero-wrap { background: var(--blue-navy); position: relative; overflow: hidden; }
+.hero-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 72% 40%, rgba(34,115,186,0.4) 0%, transparent 60%); pointer-events: none; }
+.hero-inner { max-width: 1344px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 420px; align-items: end; min-height: 400px; gap: 0; position: relative; z-index: 2; }
+.hero-content { padding: 64px 48px 0 0; }
+.hero-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; opacity: 0; animation: fadeUp 0.5s 0.1s ease forwards; }
+.hero h1 { font-family: Roboto, sans-serif; font-size: 3rem; font-weight: 300; color: white; line-height: 1.15; margin-bottom: 14px; opacity: 0; animation: fadeUp 0.5s 0.2s ease forwards; }
+.hero h1 strong { font-weight: 700; color: var(--gold); }
+/* Body Large: Regular 400 20px per design system */
+.hero-sub { font-size: 1.25rem; font-weight: 400; color: rgba(255,255,255,0.7); line-height: 1.5; max-width: 480px; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.5s 0.3s ease forwards; }
+
+/* SEARCH in hero */
+.search-outer { max-width: 500px; position: relative; margin-bottom: 28px; opacity: 0; animation: fadeUp 0.5s 0.4s ease forwards; }
+.search-row { display: flex; align-items: center; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.search-ico { padding: 0 12px 0 16px; flex-shrink: 0; display: flex; }
+.search-ico svg { width: 18px; height: 18px; stroke: var(--gray-medium); fill: none; stroke-width: 2; }
+.search-input { flex: 1; height: 52px; border: none; outline: none; font-family: Roboto, sans-serif; font-size: 1rem; color: var(--gray-darkest); background: transparent; padding-right: 14px; }
+.search-input::placeholder { color: var(--gray-medium); }
+.search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid var(--gray); }
+.search-results.show { display: block; }
+.sr { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--gray-light); cursor: pointer; transition: background 0.12s; }
+.sr:last-child { border-bottom: none; }
+.sr:hover { background: var(--blue-light); }
+.sr-ico { width: 34px; height: 34px; border-radius: 6px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sr-ico svg { width: 14px; height: 14px; stroke: var(--blue-navy); fill: none; stroke-width: 1.8; }
+.sr-title { font-size: 0.875rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.3; margin-bottom: 2px; }
+.sr-sub   { font-size: 0.75rem; color: var(--gray-dark); font-weight: 400; }
+.search-hint { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px; font-weight: 400; }
+.search-hint em { color: rgba(255,255,255,0.6); font-style: normal; }
+
+/* Chat CTA in hero */
+.chat-hero-cta { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 13px 18px; cursor: pointer; transition: all 0.2s; margin-bottom: 56px; opacity: 0; animation: fadeUp 0.5s 0.5s ease forwards; }
+.chat-hero-cta:hover { background: rgba(255,255,255,0.12); }
+.chc-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chc-icon svg { width: 15px; height: 15px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.chc-text strong { display: block; font-size: 0.9rem; font-weight: 700; color: white; margin-bottom: 1px; }
+.chc-text span { font-size: 0.75rem; color: rgba(255,255,255,0.55); font-weight: 400; }
+.chc-arrow { width: 16px; height: 16px; stroke: rgba(255,255,255,0.5); fill: none; stroke-width: 2; margin-left: auto; }
+
+/* Hero image side */
+.hero-img { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-bottom: none; border-radius: 8px 8px 0 0; height: 360px; display: flex; align-items: center; justify-content: center; align-self: flex-end; opacity: 0; animation: fadeUp 0.6s 0.35s ease forwards; }
+.hero-img span { font-size: 0.75rem; color: rgba(255,255,255,0.2); font-style: italic; }
+
+/* ── QUESTION SECTION ── */
+.q-section { background: var(--gray-light); padding: 64px 2rem; }
+.q-inner { max-width: 1248px; margin: 0 auto; }
+
+/* Section labels — uppercase 12px 700 weight, gold accent, system blue color */
+.section-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+/* Heading 03 Light = 32px 300, Heading 03 Bold = 32px 700 per design system */
+.section-h2 { font-size: 2rem; font-weight: 300; color: var(--blue-navy); line-height: 1.2; margin-bottom: 10px; }
+.section-h2 strong { font-weight: 700; }
+/* Body text: Regular 400 16px. #595959 for secondary body text per system */
+.section-body { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.563rem; margin-bottom: 36px; }
+
+/* Q cards — border-radius 8px, 1px gray border, system shadow per design system */
+.q-list { display: flex; flex-direction: column; gap: 8px; }
+.q-card { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: white; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; transition: all 0.15s ease-in-out; gap: 16px; box-shadow: var(--shadow-sm); }
+.q-card:hover { border-color: var(--blue); background: var(--blue-light); transform: translateX(4px); box-shadow: var(--shadow-card); }
+.q-card.active { border-color: var(--blue); border-width: 2px; background: var(--blue-light); transform: translateX(4px); box-shadow: var(--shadow-card); }
+.q-left { display: flex; align-items: center; gap: 14px; }
+/* Icon: blue-light bg, no extra border — matches system icon card style */
+.q-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.25rem; transition: background 0.15s; }
+.q-card:hover .q-icon, .q-card.active .q-icon { background: rgba(34,115,186,0.15); }
+/* Heading 06: Regular 16px per system */
+.q-title { font-size: 1rem; font-weight: 700; color: var(--gray-darkest); margin-bottom: 2px; line-height: 1.3; }
+/* Body Small: Regular 14px #595959 per system */
+.q-sub   { font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); line-height: 1.375rem; }
+.q-chev { width: 8px; height: 8px; border-right: 2px solid var(--gray-medium); border-top: 2px solid var(--gray-medium); transform: rotate(45deg); flex-shrink: 0; transition: border-color 0.15s; }
+.q-card:hover .q-chev, .q-card.active .q-chev { border-color: var(--blue); }
+
+/* ── DYNAMIC SECTIONS ── */
+.dynamic { display: none; }
+.dynamic.show { display: block; }
+.full-divider { height: 1px; background: var(--gray); }
+
+/* ── RESPONSE SECTIONS ── */
+.resp-section { padding: 64px 2rem; }
+.resp-section.alt { background: var(--blue-light); }
+.resp-inner { max-width: 1248px; margin: 0 auto; }
+
+/* Team card — 1px gray border, 8px radius, gold left accent, system shadow */
+.team-card { background: white; border: 1px solid var(--gray); border-radius: 8px; padding: 28px; position: relative; overflow: hidden; box-shadow: var(--shadow-card); margin-bottom: 0; }
+.team-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gold); border-radius: 0; }
+/* Tag uses gold system colors: gold bg, gold-border text — no off-system hex */
+.team-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-hover); border: 1px solid var(--gold-border); border-radius: 999px; padding: 5px 14px; font-size: 0.75rem; color: var(--blue-navy); font-weight: 700; margin-bottom: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.team-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold-border); flex-shrink: 0; }
+/* Heading 03: 32px Light per system */
+.team-name { font-size: 2rem; font-weight: 300; color: var(--blue-navy); margin-bottom: 8px; line-height: 1.2; }
+.team-name strong { font-weight: 700; }
+/* Body Default: Regular 400 16px #595959 per system */
+.team-desc { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.563rem; }
+
+/* ── ICON CARDS — matches live site icon-card-listing pattern exactly ── */
+/* grid-flow-row, md:grid-cols-3, gap-5 */
+.copts { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+
+/* Each card: rounded-lg, bg-white, shadow-card, full height, text-center */
+.copt {
+  display: flex; flex-direction: column; flex-grow: 1;
+  height: 100%; width: 100%;
+  border-radius: 0.5rem; background: var(--white);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+/* Inner: border all sides, border-gray, rounded-lg, flex-col, flex-grow, p-8, text-gray-dark */
+.copt-inner {
+  border: 1px solid var(--gray);
+  border-radius: 0.5rem;
+  display: flex; flex-direction: column; flex-grow: 1;
+  padding: 32px; /* p-8 */
+  color: var(--gray-dark);
+  align-items: center;
+  height: 100%;
+}
+/* Teal icon: mb-6, text-teal, 64px, centered */
+.copt-icon {
+  margin-bottom: 24px; /* mb-6 */
+  color: var(--teal);
+  width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: auto; margin-right: auto;
+}
+.copt-icon svg { width: 48px; height: 48px; stroke: var(--teal); fill: none; stroke-width: 1.5; }
+/* Title: heading-sm, font-light, mb-2 = ~1.25rem Light */
+.copt-title { font-size: 1.25rem; font-weight: 300; color: var(--gray-darkest); margin-bottom: 8px; line-height: 1.3; }
+/* Body: text-base, mb-8, rte */
+.copt-body { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.5; margin-bottom: 32px; } /* mb-8 */
+/* mt-auto pushes button to bottom */
+.copt-action { margin-top: auto; display: flex; justify-content: center; }
+
+/* Tertiary button — matches live site exactly */
+.btn-tertiary {
+  appearance: none; display: inline-flex; align-items: center; justify-content: center;
+  font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700;
+  color: var(--blue-navy); background: transparent; border: none;
+  cursor: pointer; padding: 4px 0; border-radius: 999px;
+  transition: color 0.2s ease; text-decoration: none; gap: 0; white-space: nowrap;
+}
+.btn-tertiary:hover { text-decoration: underline; text-underline-offset: 2px; color: var(--blue); }
+/* Arrow span: bg-btn-bg-tertiary = teal, rounded-full, h-6 w-6, pl-[2px] */
+.btn-tertiary .arrow-circle {
+  background: var(--teal);
+  content-visibility: auto; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 9999px;
+  margin-left: 6px; padding-left: 2px; flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+.btn-tertiary:hover .arrow-circle { background: var(--blue-navy); }
+.btn-tertiary .arrow-circle svg { width: 24px; height: 24px; overflow: visible; }
+/* Live site arrow classes */
+.bg-btn-bg-tertiary { background: var(--teal); transition: background 0.2s ease; }
+.btn-tertiary:hover .bg-btn-bg-tertiary { background: var(--blue-navy); }
+.btn-text-tertiary, .btn-svg-tertiary { color: white; fill: white; }
+.hover-arrow-icon--stem { transition: transform 0.2s ease; transform-origin: right; }
+.hover-arrow-icon--tip  { transition: transform 0.2s ease; }
+.btn-tertiary:hover .hover-arrow-icon--stem { transform: scaleX(1.15); }
+.btn-tertiary:hover .hover-arrow-icon--tip  { transform: translateX(2px); }
+
+/* FAQ */
+/* ── ACCORDION — matches live site pattern exactly ── */
+/* Wrapper: plain list, no outer box */
+.faq-wrap { list-style: none; padding: 0; margin: 0; background: none; border: none; border-radius: 0; box-shadow: none; }
+/* Each item: bg-gray-light, border border-gray, rounded-lg, mb-2 */
+.faq-item { background: var(--gray-light); border: 1px solid var(--gray); border-radius: 0.5rem; margin-bottom: 8px; transition: all 0.3s ease; overflow: hidden; }
+.faq-item:last-child { margin-bottom: 0; }
+/* Button: bg-white, full width, flex, p-8, rounded, text-left, border-b-0 */
+.faq-q { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 20px 32px; background: var(--white); border: none; border-bottom: 1px solid transparent; border-radius: 0.5rem; text-align: left; cursor: pointer; font-family: Roboto, sans-serif; font-size: 1.125rem; font-weight: 400; color: var(--gray-darkest); line-height: 1.5; gap: 16px; }
+.faq-item.open .faq-q { border-radius: 0.5rem 0.5rem 0 0; border-bottom-color: var(--gray); }
+.faq-q-text { display: block; flex-grow: 1; }
+/* Chevron: navy, rotates 180deg on open, uses your exact SVG path */
+.faq-chev-wrap { display: block; flex-shrink: 0; color: var(--blue-navy); transition: transform 0.2s ease-in-out; transform-origin: center; }
+.faq-item.open .faq-chev-wrap { transform: rotate(180deg); }
+.faq-chev-wrap svg { width: 24px; height: 24px; display: block; }
+/* Answer: mx-8 (32px), max-h-0 collapsed, transition-200 */
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.2s ease; margin: 0 32px; }
+.faq-item.open .faq-a { max-height: 600px; }
+.faq-a-inner { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.6; padding: 16px 0 24px; }
+.faq-a-inner a { color: var(--blue); text-decoration: underline; }
+.faq-a-inner a:hover { color: var(--blue-navy); }
+/* Head and foot stay simple */
+.faq-head { padding: 0 0 20px; }
+.faq-head h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 3px; }
+.faq-head p  { font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); }
+.faq-foot { padding: 20px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); }
+.faq-foot a { color: var(--blue); cursor: pointer; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.faq-foot a:hover { color: var(--blue-navy); }
+
+/* CTA band — Heading 02 Light 48px per design system */
+.cta-band { background: var(--blue-navy); padding: 80px 2rem; text-align: center; }
+.cta-band h2 { font-size: 3rem; font-weight: 300; color: white; margin-bottom: 10px; line-height: 1.15; }
+.cta-band h2 strong { font-weight: 700; }
+/* Body Large: Regular 400 20px per system */
+.cta-band p  { font-size: 1.25rem; font-weight: 400; color: rgba(255,255,255,0.65); margin-bottom: 36px; line-height: 1.5; }
+.cta-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+/* ── CHAT FAB ── */
+.chat-fab { position: fixed; bottom: 28px; right: 28px; z-index: 400; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.chat-btn { width: 58px; height: 58px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(204,134,26,0.4); transition: all 0.2s; }
+.chat-btn:hover { transform: scale(1.07); box-shadow: 0 6px 24px rgba(204,134,26,0.5); }
+.chat-btn svg { width: 22px; height: 22px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.chat-prompt { background: white; color: var(--gray-darkest); border-radius: 10px 10px 0 10px; padding: 11px 15px; font-size: 0.82rem; box-shadow: var(--shadow-card); max-width: 200px; line-height: 1.4; cursor: pointer; border: 1px solid var(--gray); animation: promptUp 0.4s 1.5s ease both; }
+.chat-prompt strong { font-weight: 700; display: block; margin-bottom: 2px; color: var(--blue-navy); }
+.chat-prompt span { color: var(--gray-dark); font-size: 0.72rem; }
+@keyframes promptUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* Chat window — internal font sizes match system body small/default */
+.chat-win { position: fixed; bottom: 98px; right: 28px; z-index: 400; width: 348px; background: white; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.18); display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--gray); }
+.chat-win.open { display: flex; animation: chatOpen 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes chatOpen { from{opacity:0;transform:scale(0.9) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.cw-hd { background: var(--blue-navy); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+.cw-hd-l { display: flex; align-items: center; gap: 10px; }
+.cw-av { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.625rem; font-weight: 700; color: var(--blue-navy); }
+/* Nav text: 16px 700 white */
+.cw-name { font-size: 1rem; font-weight: 700; color: white; }
+/* Body XSmall 12px */
+.cw-sub  { font-size: 0.75rem; font-weight: 400; color: rgba(255,255,255,0.55); }
+.cw-x { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 1rem; line-height: 1; padding: 4px; transition: color 0.15s; }
+.cw-x:hover { color: white; }
+.cw-body { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; background: var(--gray-light); }
+.msg { display: flex; flex-direction: column; max-width: 86%; }
+.msg.a { align-self: flex-start; }
+.msg.u { align-self: flex-end; }
+.msg-bub { padding: 9px 13px; border-radius: 12px; font-size: 0.875rem; font-weight: 400; line-height: 1.375rem; }
+.msg.a .msg-bub { background: white; color: var(--gray-darkest); border: 1px solid var(--gray); border-radius: 4px 12px 12px 12px; }
+.msg.u .msg-bub { background: var(--blue-navy); color: white; border-radius: 12px 4px 12px 12px; }
+/* Body XSmall 12px for timestamps */
+.msg-t { font-size: 0.75rem; font-weight: 400; color: var(--gray-medium); margin-top: 3px; }
+.msg.u .msg-t { text-align: right; }
+.typing { display: flex; align-items: center; gap: 4px; padding: 10px 13px; background: white; border: 1px solid var(--gray); border-radius: 4px 12px 12px 12px; align-self: flex-start; }
+.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-medium); animation: td 1.2s infinite; }
+.typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+@keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+.cw-qr { padding: 8px 12px 10px; border-top: 1px solid var(--gray); background: white; display: flex; flex-wrap: wrap; gap: 6px; }
+/* Quick reply chips: pill shape, Body Small 14px, navy text, system border */
+.qr { padding: 6px 14px; border: 1px solid var(--gray); border-radius: 999px; font-size: 0.875rem; font-weight: 400; color: var(--blue-navy); cursor: pointer; background: white; font-family: Roboto, sans-serif; transition: all 0.15s; }
+.qr:hover { border-color: var(--blue); background: var(--blue-light); }
+.cw-input-row { padding: 10px 12px; border-top: 1px solid var(--gray); background: white; display: flex; align-items: center; gap: 8px; }
+/* Input: 16px Regular, rounded, focus ring blue per system */
+.cw-in { flex: 1; border: 1px solid var(--gray); border-radius: 999px; padding: 8px 14px; font-family: Roboto, sans-serif; font-size: 0.875rem; font-weight: 400; outline: none; transition: border-color 0.2s, box-shadow 0.2s; color: var(--gray-darkest); }
+.cw-in:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(34,115,186,0.2); }
+.cw-send { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.cw-send:hover { background: var(--gold-hover); }
+.cw-send svg { width: 14px; height: 14px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+
+/* ── FOOTER — matches design system exactly ── */
+footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(--gray); }
+.ft-inner { max-width: 1344px; margin: 0 auto; padding: 0 2rem 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.ft-col h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 16px; }
+.ft-col a  { display: block; font-size: 0.875rem; font-weight: 400; color: var(--blue); text-decoration: none; margin-bottom: 8px; transition: color 0.15s; }
+.ft-col a:hover { color: var(--blue-navy); text-decoration: underline; }
+/* Social icons row */
+.ft-social { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.ft-social a { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--blue-light); color: var(--blue-navy); transition: all 0.15s; margin-bottom: 0; flex-shrink: 0; }
+.ft-social a:hover { background: var(--blue); color: white; text-decoration: none; }
+.ft-social svg { width: 15px; height: 15px; }
+/* Bottom bar — navy bg, URAC badges left, copyright right */
+.ft-bottom { border-top: 1px solid var(--gray); background: var(--blue-navy); padding: 24px 2rem; max-width: none; margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+/* URAC circular badges */
+.ft-urac { display: flex; gap: 24px; align-items: center; }
+.urac-badge { display: flex; align-items: center; gap: 10px; }
+.urac-circle { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--gold); background: rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.urac-circle strong { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold); line-height: 1; }
+.urac-circle span { font-size: 0.42rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); line-height: 1; margin-top: 2px; }
+.urac-text { font-size: 0.625rem; font-weight: 400; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.ft-bottom > div > span { font-size: 0.75rem; font-weight: 400; color: rgba(255,255,255,0.4); text-align: right; line-height: 1.5; }
+
+/* Reveal */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s}
+.d4{transition-delay:.32s} .d5{transition-delay:.4s}  .d6{transition-delay:.48s}
+
+/* Spacing utility */
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:1080px) {
+  .nav-links { display: none; }
+  .ft-inner { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:700px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-img { display: none; }
+  .copts { grid-template-columns: 1fr; }
+  .ft-inner { grid-template-columns: 1fr 1fr; }
+  .ft-bottom { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body id="azblue-body">
+
+<button id="print-btn" onclick="printPage()" title="Save as PDF">
+  <svg viewBox="0 0 24 24"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>
+</button>
+
+<!-- CHAT FAB -->
+<div class="chat-fab">
+  <div class="chat-prompt" onclick="openChat()" id="chatPrompt">
+    <strong>We're here to help.</strong>
+    <span>Chat with the Benefits Team →</span>
+  </div>
+  <button class="chat-btn" onclick="openChat()">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  </button>
+</div>
+
+<!-- CHAT WINDOW -->
+<div class="chat-win" id="chatWin">
+  <div class="cw-hd">
+    <div class="cw-hd-l">
+      <div class="cw-av">BC</div>
+      <div><div class="cw-name">Benefits Team</div><div class="cw-sub">Blue Cross Blue Shield of Arizona</div></div>
+    </div>
+    <button class="cw-x" onclick="closeChat()">✕</button>
+  </div>
+  <div class="cw-body" id="cwBody">
+    <div class="msg a">
+      <div class="msg-bub" id="openingMsg">Hi there — glad you're here. What's your benefits question about today?</div>
+      <div class="msg-t">Benefits Team</div>
+    </div>
+  </div>
+  <div class="cw-qr" id="cwQR">
+    <button class="qr" onclick="sendQR('Coverage question')">Coverage question</button>
+    <button class="qr" onclick="sendQR('Billing question')">Billing</button>
+    <button class="qr" onclick="sendQR('Find a doctor')">Find a doctor</button>
+    <button class="qr" onclick="sendQR('Something else')">Something else</button>
+  </div>
+  <div class="cw-input-row">
+    <input class="cw-in" id="cwInput" type="text" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="cw-send" onclick="sendMsg()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- UTILITY BAR -->
+<div class="util-bar">
+  <div class="util-links">
+    <a href="#">Providers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Employers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Brokers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+  </div>
+  <div class="util-right">
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search
+    </a>
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.7A2 2 0 012 .18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      (888) 888-8888
+    </a>
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      Español <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-shield">
+      <div class="shield-cross"></div>
+      <div class="shield-mark"></div>
+    </div>
+    <div class="nav-logo-text">
+      <strong>BlueCross BlueShield</strong>
+      <span>Arizona</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#">Find a Plan <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">For Members <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Insurance Basics <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Find Care <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-secondary btn-secondary-sm">Pay Bill</button>
+    <button class="btn-primary btn-primary-sm">Log In</button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="bc">
+  <a href="#">Home</a>
+  <span class="bc-sep">›</span>
+  Contact Us
+</div>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Contact Us</div>
+      <h1>Hi. What can we<br><strong>help you with?</strong></h1>
+      <p class="hero-sub">Search for what you need, or choose what you're dealing with below — we'll get you to the right team.</p>
+
+      <div class="search-outer">
+        <div class="search-row">
+          <div class="search-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <input class="search-input" id="searchInput" type="text" placeholder='Try "billing question" or "ID card"' autocomplete="off">
+        </div>
+        <div class="search-results" id="searchResults">
+          <div class="sr" onclick="pickSearch('coverage')">
+            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="sr-title">I'm not sure if something is covered</div><div class="sr-sub">Verify coverage before a visit or procedure</div></div>
+          </div>
+          <div class="sr" onclick="pickSearch('bill')">
+            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+            <div><div class="sr-title">I got a bill I wasn't expecting</div><div class="sr-sub">Billing questions, EOB explanations, disputes</div></div>
+          </div>
+          <div class="sr" onclick="pickSearch('benefits')">
+            <div class="sr-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div><div class="sr-title">I want to understand my benefits</div><div class="sr-sub">What's included, what you're entitled to</div></div>
+          </div>
+          <div class="sr" onclick="pickSearch('mental')">
+            <div class="sr-ico"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div><div class="sr-title">Mental health coverage</div><div class="sr-sub">Therapy, psychiatry, counseling</div></div>
+          </div>
+        </div>
+        <div class="search-hint">Try: <em>"autopay" · "claim denied" · "ID card" · "find a specialist"</em></div>
+      </div>
+
+      <div class="chat-hero-cta" onclick="openChat()">
+        <div class="chc-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <div class="chc-text">
+          <strong>Prefer to chat?</strong>
+          <span>A member of our Benefits Team will respond</span>
+        </div>
+        <svg class="chc-arrow" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </div>
+    <div class="hero-img"><span>Member photography</span></div>
+  </div>
+</div>
+
+<!-- QUESTION CARDS -->
+<div class="q-section">
+  <div class="q-inner">
+    <div class="section-eyebrow reveal">Your question</div>
+    <h2 class="section-h2 reveal d1">What sounds most like <strong>what you're dealing with?</strong></h2>
+    <p class="section-body reveal d2">Pick the one that fits and we'll point you to the right team with answers relevant to your situation.</p>
+    <div class="q-list">
+      <div class="q-card reveal d2" onclick="pick(this,'coverage')" id="q-coverage">
+        <div class="q-left"><div class="q-icon">🔍</div><div><div class="q-title">I'm not sure if something is covered</div><div class="q-sub">A procedure, treatment, medication, or service you want to understand before going ahead</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal d3" onclick="pick(this,'bill')" id="q-bill">
+        <div class="q-left"><div class="q-icon">📄</div><div><div class="q-title">I got a bill I wasn't expecting</div><div class="q-sub">A charge that doesn't look right, an EOB you don't understand, or a cost you'd like to dispute</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal d4" onclick="pick(this,'benefits')" id="q-benefits">
+        <div class="q-left"><div class="q-icon">💡</div><div><div class="q-title">I want to understand my benefits better</div><div class="q-sub">What's included, what you're entitled to, what you might be missing</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal d5" onclick="pick(this,'mental')" id="q-mental">
+        <div class="q-left"><div class="q-icon">🧠</div><div><div class="q-title">I have a question about mental health coverage</div><div class="q-sub">Therapy, psychiatry, counseling — how it works and what it costs</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal d6" onclick="pick(this,'other')" id="q-other">
+        <div class="q-left"><div class="q-icon">💬</div><div><div class="q-title">It's something else</div><div class="q-sub">We'll figure it out together</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHO CAN HELP (dynamic) -->
+<div class="full-divider dynamic" id="div-team"></div>
+<div class="resp-section dynamic" id="sec-team">
+  <div class="resp-inner">
+    <div class="section-eyebrow reveal">Who can help</div>
+    <h2 class="section-h2 reveal d1"><strong>Here's who</strong> handles exactly this.</h2>
+    <p class="section-body reveal d2" id="teamIntro"></p>
+    <div class="team-card reveal d3">
+      <div class="team-tag" id="teamTag"></div>
+      <div class="team-name" id="teamName"></div>
+      <div class="team-desc" id="teamDesc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO REACH THEM (dynamic) -->
+<div class="full-divider dynamic" id="div-opts"></div>
+<div class="resp-section alt dynamic" id="sec-opts">
+  <div class="resp-inner">
+    <div class="section-eyebrow reveal">How to reach them</div>
+    <h2 class="section-h2 reveal d1">Three ways in. <strong>Pick what works for you.</strong></h2>
+    <p class="section-body reveal d2">Each one gets you to the same team. The difference is speed and how you like to communicate.</p>
+    <div class="copts">
+
+      <!-- Chat -->
+      <div class="copt reveal d2">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div>
+            <h3 class="copt-title">Chat with Us</h3>
+            <p class="copt-body">Our team will respond. Best for most questions and getting to the right person quickly.</p>
+          </div>
+          <div class="copt-action">
+            <button class="btn-tertiary" onclick="openChat()">
+              Chat now
+              <span class="bg-btn-bg-tertiary content-center ease-in-out flex flex-col items-center mx-2 -my-1 pl-[2px] rounded-full svg-tertiary ml-1 h-6 w-6"><svg class="h-6 w-6 overflow-visible btn-text-tertiary btn-svg-tertiary" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g fill-rule="evenodd" class="hover-arrow-icon"><path class="hover-arrow-icon--stem w-full" d="M0,0.6C0,0.3,0.2,0,0.5,0h6.3H8c0.2,0.1,0.3,0.5,0.3,0.6S8.3,1,8,1.2H6.8H0.5C0.2,1.2,0,0.9,0,0.6z"></path><path class="hover-arrow-icon--tip w-full" d="M0.767476 7.81586C0.5378 7.577 0.545248 7.19718 0.784111 6.9675L3.93431 4L0.784111 1.0325C0.545248 0.802823 0.5378 0.422997 0.767476 0.184134C0.997152 -0.0547285 1.37698 -0.0621767 1.61584 0.167499L5.21584 3.5675C5.33349 3.68062 5.39998 3.83679 5.39998 4C5.39998 4.16321 5.33349 4.31938 5.21584 4.4325L1.61584 7.8325C1.37698 8.06218 0.997153 8.05473 0.767476 7.81586Z"></path></g></svg></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call -->
+      <div class="copt reveal d3">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.7A2 2 0 012 .18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          </div>
+          <div>
+            <h3 class="copt-title">Call Us</h3>
+            <p class="copt-body" id="phoneNote">Mon–Fri 7am–7pm. If you'd rather talk it through with someone directly.</p>
+          </div>
+          <div class="copt-action">
+            <a class="btn-tertiary" href="#" id="phoneNum">
+              (800) 232-2345
+              <span class="bg-btn-bg-tertiary content-center ease-in-out flex flex-col items-center mx-2 -my-1 pl-[2px] rounded-full svg-tertiary ml-1 h-6 w-6"><svg class="h-6 w-6 overflow-visible btn-text-tertiary btn-svg-tertiary" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g fill-rule="evenodd" class="hover-arrow-icon"><path class="hover-arrow-icon--stem w-full" d="M0,0.6C0,0.3,0.2,0,0.5,0h6.3H8c0.2,0.1,0.3,0.5,0.3,0.6S8.3,1,8,1.2H6.8H0.5C0.2,1.2,0,0.9,0,0.6z"></path><path class="hover-arrow-icon--tip w-full" d="M0.767476 7.81586C0.5378 7.577 0.545248 7.19718 0.784111 6.9675L3.93431 4L0.784111 1.0325C0.545248 0.802823 0.5378 0.422997 0.767476 0.184134C0.997152 -0.0547285 1.37698 -0.0621767 1.61584 0.167499L5.21584 3.5675C5.33349 3.68062 5.39998 3.83679 5.39998 4C5.39998 4.16321 5.33349 4.31938 5.21584 4.4325L1.61584 7.8325C1.37698 8.06218 0.997153 8.05473 0.767476 7.81586Z"></path></g></svg></span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div class="copt reveal d4">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <h3 class="copt-title">Send a Message</h3>
+            <p class="copt-body">Best if you have documents to share — an EOB, a bill, or a screenshot. We'll respond by the next business day.</p>
+          </div>
+          <div class="copt-action">
+            <button class="btn-tertiary">
+              Write to us
+              <span class="bg-btn-bg-tertiary content-center ease-in-out flex flex-col items-center mx-2 -my-1 pl-[2px] rounded-full svg-tertiary ml-1 h-6 w-6"><svg class="h-6 w-6 overflow-visible btn-text-tertiary btn-svg-tertiary" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g fill-rule="evenodd" class="hover-arrow-icon"><path class="hover-arrow-icon--stem w-full" d="M0,0.6C0,0.3,0.2,0,0.5,0h6.3H8c0.2,0.1,0.3,0.5,0.3,0.6S8.3,1,8,1.2H6.8H0.5C0.2,1.2,0,0.9,0,0.6z"></path><path class="hover-arrow-icon--tip w-full" d="M0.767476 7.81586C0.5378 7.577 0.545248 7.19718 0.784111 6.9675L3.93431 4L0.784111 1.0325C0.545248 0.802823 0.5378 0.422997 0.767476 0.184134C0.997152 -0.0547285 1.37698 -0.0621767 1.61584 0.167499L5.21584 3.5675C5.33349 3.68062 5.39998 3.83679 5.39998 4C5.39998 4.16321 5.33349 4.31938 5.21584 4.4325L1.61584 7.8325C1.37698 8.06218 0.997153 8.05473 0.767476 7.81586Z"></path></g></svg></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FAQs (dynamic) -->
+<div class="full-divider dynamic" id="div-faq"></div>
+<div class="resp-section dynamic" id="sec-faq">
+  <div class="resp-inner">
+    <div class="section-eyebrow reveal">Quick answers</div>
+    <h2 class="section-h2 reveal d1">Here's what most people <strong>ask first.</strong></h2>
+    <p class="section-body reveal d2" id="faqIntro"></p>
+    <div class="faq-head reveal d3">
+        <h4>Most common questions</h4>
+        <p id="faqHeadSub"></p>
+      </div>
+    <ul class="faq-wrap reveal d3" id="faqList"></ul>
+    <div class="faq-foot reveal d4">
+        <span id="faqFoot"></span>
+        <a onclick="openChat()">Ask in chat →</a>
+      </div>
+  </div>
+</div>
+
+<!-- CTA (dynamic) -->
+<div class="dynamic" id="div-cta">
+  <div class="cta-band">
+    <h2 id="closeHead"></h2>
+    <p id="closeSub"></p>
+    <div class="cta-btns">
+      <button class="btn-primary" onclick="openChat()">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Chat with us
+      </button>
+      <button class="btn-secondary-white">Call instead</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-inner">
+    <div class="ft-col">
+      <h4>About</h4>
+      <a href="#">About BCBS Arizona</a>
+      <a href="#">AZBlue Foundation</a>
+      <a href="#">Careers</a>
+      <a href="#">Community</a>
+      <a href="#">Corporate Governance</a>
+      <a href="#">Contact Us</a>
+    </div>
+    <div class="ft-col">
+      <h4>Latest</h4>
+      <a href="#">News</a>
+      <a href="#">Healthcare in View</a>
+      <a href="#">In the Media</a>
+    </div>
+    <div class="ft-col">
+      <h4>Resources</h4>
+      <a href="#">Forms &amp; Resources</a>
+      <a href="#">Information in Other Languages</a>
+      <a href="#">Nondiscrimination Notice</a>
+      <a href="#">Privacy &amp; Legal</a>
+      <a href="#">Privacy Practices</a>
+      <a href="#">Doing Business with BCBS Arizona</a>
+      <a href="#">Mandates</a>
+      <a href="#">Site Map</a>
+    </div>
+    <div class="ft-col">
+      <h4>Follow us</h4>
+      <div class="ft-social">
+        <a href="#" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+        <a href="#" aria-label="X / Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="#" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <div style="max-width:1344px;margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;">
+    <div class="ft-urac">
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Case Management<br>02/01/2024</div>
+      </div>
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Health Plan with Health<br>Insurance Marketplace (HIM)<br>02/01/2024</div>
+      </div>
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Health Plan<br>02/01/2024</div>
+      </div>
+    </div>
+    <span>© Blue Cross Blue Shield of Arizona.<br>An independent licensee of the Blue Cross and Blue Shield Association.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+var qData = {
+  coverage: { teamIntro:"Coverage questions go to our Benefits Specialists. They spend all day answering exactly this — is this covered, what will it cost, do I need authorization.", teamTag:"Benefits Team", teamName:"<strong>Benefits</strong> Specialists", teamDesc:"A team of specialists who know your plan the way a mechanic knows an engine. Before you schedule anything non-emergency, these are the people to call. They can verify coverage, pre-authorize if needed, and make sure you don't end up with a surprise bill.", phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · Ask for Benefits.", faqIntro:"The question we get most from members with a coverage question:", faqHead:"Saving you a call — this one comes up constantly.", faqs:[{q:"How do I know if something is covered before I go?",a:"Call us before any non-emergency procedure and ask us to verify coverage. We'll tell you yes or no, what it'll cost, and whether you need a pre-authorization. Takes about 5 minutes and can save you from a surprise bill later."},{q:"What's the difference between covered and covered at 100%?",a:"Covered means we'll pay part of it — but you might still owe a copay, coinsurance, or it might go toward your deductible first. Covered at 100% means you pay nothing. Preventive care is usually 100%. Most other care isn't — until you hit your out-of-pocket max."},{q:"Do I need a referral or pre-authorization?",a:"On a PPO plan, you don't need a referral to see a specialist. But some procedures — certain surgeries, MRIs, specialist treatments — do require pre-authorization before we'll cover them. When in doubt, call us first."}], faqFoot:"Didn't answer it?", closeHead:"You're in the right place.", closeSub:"The Benefits Team handles exactly this. Chat with us or call if you'd rather talk it through.", ctx:"I can see you have a coverage question — you're in the right place. What specifically are you trying to find out?" },
+  bill: { teamIntro:"Billing disputes go to our Claims and Billing Team. They can pull up your account, find the charge in question, and tell you exactly what happened and what your options are.", teamTag:"Claims & Billing", teamName:"Claims & <strong>Billing</strong> Team", teamDesc:"When a charge looks wrong, these are the people who can actually fix it. They have access to your full claims history, can re-process claims if needed, and can escalate a dispute if something isn't adding up.", phone:"(800) 232-2346", phoneNote:"Mon–Fri 7am–7pm · Ask for Billing.", faqIntro:"Before you call — these two questions come up most from members with a billing concern:", faqHead:"These might save you the call entirely.", faqs:[{q:"Is my EOB the same as a bill?",a:"No. An Explanation of Benefits (EOB) shows how we processed a claim — it's not a bill. Wait for a separate bill from your provider before paying anything. If numbers don't match your EOB, that's worth calling about."},{q:"My claim was denied — what do I do?",a:"Your EOB will explain the denial reason. You have the right to appeal, and you typically have 180 days to do so. Our team can walk you through the process — call us or start a chat and we'll help you put together a strong appeal."},{q:"Why does my bill look different than my EOB?",a:"It often comes down to timing, adjustments, or a coordination of benefits issue if you have more than one plan. Bring both documents to the conversation and we'll trace the discrepancy."}], faqFoot:"Still confused?", closeHead:"Let's sort this out.", closeSub:"The Claims & Billing Team has seen everything. Chat with us and we'll trace the issue together.", ctx:"I can see you have a billing concern. Can you tell me a bit more about the charge so I can get the right person?" },
+  benefits: { teamIntro:"Understanding your benefits is exactly what our Member Education team is set up for. They're patient, thorough, and genuinely enjoy explaining how things work.", teamTag:"Member Education", teamName:"Member <strong>Education</strong> Team", teamDesc:"Think of them as your benefits translator. They can walk you through your plan in plain language, make sure you know what you're entitled to, and flag anything you might be underusing. No jargon, no rush.", phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · Ask for Member Education.", faqIntro:"The things most members wish they'd known sooner:", faqHead:"You might find your answer right here.", faqs:[{q:"What benefits do most people not know they have?",a:"Telehealth (covered, usually same day), mental health visits (covered same as any other doctor), gym discounts, and free preventive care. Most members never use these — and they're paying for them."},{q:"Where do I find everything my plan covers?",a:"Log in to your member portal → My Coverage → Benefits Summary. It's a full list. If anything looks confusing, the Member Education team will walk through it with you — that's literally what they're for."},{q:"Can I change my plan mid-year?",a:"Generally no — plan changes happen during Open Enrollment (November–December). But certain life events — marriage, new baby, job change — qualify you for a Special Enrollment Period. Call us if you've had a life change."}], faqFoot:"Want someone to walk you through it?", closeHead:"Knowledge is coverage.", closeSub:"The more you know about your plan, the more you get out of it. The Member Education team genuinely loves this.", ctx:"Happy to help you make the most of your plan. What aspect of your coverage are you curious about?" },
+  mental: { teamIntro:"Mental health coverage questions go to our Behavioral Health team. They specialize in exactly this — therapy, psychiatry, counseling — and they'll give you straight answers.", teamTag:"Behavioral Health", teamName:"Behavioral <strong>Health</strong> Team", teamDesc:"A dedicated team for behavioral health benefits. They can tell you what's covered, help you find in-network therapists or psychiatrists near you, and make sure you understand exactly what you'll pay. No runaround.", phone:"(800) 232-2347", phoneNote:"Mon–Fri 8am–6pm · Direct line.", faqIntro:"The two things most people want to know about mental health coverage:", faqHead:"Straightforward answers.", faqs:[{q:"Is therapy covered the same as a regular doctor visit?",a:"Yes. Arizona state law — and federal law — require that mental health coverage is equal to physical health coverage. Same deductible, same coinsurance, same rules. If your plan covers a GP visit, it covers a therapy visit."},{q:"How do I find an in-network therapist?",a:"Log in to your portal → Find a Provider → Behavioral Health. Filter by your zip code and specialty. You can also call our Behavioral Health team and they'll do the search with you."},{q:"Is there a limit on how many therapy sessions I can have?",a:"No session limits. Your plan covers as many medically necessary visits as you need. Use your benefits."}], faqFoot:"Have a more specific question?", closeHead:"You've got support.", closeSub:"The Behavioral Health team is here to help. Reach out — they're good at this.", ctx:"Thanks for reaching out. I'm connecting you with our Behavioral Health team. What would you like to know?" },
+  other: { teamIntro:"Not sure where your question goes? That's fine. Our general Member Services team will figure it out with you and get you to the right person.", teamTag:"Member Services", teamName:"Member <strong>Services</strong>", teamDesc:"The starting point for anything that doesn't fit neatly into a category. They'll listen to what you're dealing with, figure out who can actually help, and get you there without bouncing you around.", phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · General member services.", faqIntro:"A few things that come up a lot — in case one of these is yours:", faqHead:"Common questions, quick answers.", faqs:[{q:"How do I update my contact information?",a:"Log in → My Account → Personal Information. Address, phone, and email can all be updated online."},{q:"How do I get a new ID card?",a:"Log in → My Coverage → ID Cards → Request New Card. Or download a digital copy right now — accepted everywhere your physical card is."},{q:"I think there's fraud on my account.",a:"Call our fraud hotline immediately: 1-800-000-0000. It's confidential and available 24/7. You can also report it through the Member Portal under My Account → Security."}], faqFoot:"Something else on your mind?", closeHead:"We'll figure it out.", closeSub:"Someone's ready to help. Start a chat and tell us what's going on — we'll take it from there.", ctx:"No problem — we'll figure it out together. Can you tell me a little more about what's going on?" }
+};
+
+var cur = null;
+
+function pick(el, key) {
+  var d = qData[key]; if (!d) return; cur = key;
+  document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('teamIntro').textContent   = d.teamIntro;
+  document.getElementById('teamTag').textContent     = d.teamTag;
+  document.getElementById('teamName').innerHTML      = d.teamName;
+  document.getElementById('teamDesc').textContent    = d.teamDesc;
+  document.getElementById('phoneNum').textContent    = d.phone;
+  document.getElementById('phoneNote').textContent   = d.phoneNote;
+  document.getElementById('faqIntro').textContent    = d.faqIntro;
+  document.getElementById('faqHeadSub').textContent  = d.faqHead;
+  document.getElementById('faqFoot').textContent     = d.faqFoot;
+  document.getElementById('closeHead').textContent   = d.closeHead;
+  document.getElementById('closeSub').textContent    = d.closeSub;
+  document.getElementById('faqList').innerHTML = d.faqs.map(function(f){
+    return '<li class="faq-item">'
+      + '<button class="faq-q" onclick="toggleFaq(this.parentElement)" aria-expanded="false">'
+      + '<span class="faq-q-text">'+f.q+'</span>'
+      + '<span class="faq-chev-wrap">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">'
+      + '<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>'
+      + '</svg>'
+      + '</span>'
+      + '</button>'
+      + '<div class="faq-a"><div class="faq-a-inner">'+f.a+'</div></div>'
+      + '</li>';
+  }).join('');
+  var om = document.getElementById('openingMsg');
+  if (om && d.ctx) om.textContent = d.ctx;
+  document.querySelectorAll('.dynamic').forEach(function(e){ e.classList.add('show'); });
+  setTimeout(checkReveals, 60);
+  setTimeout(function(){ document.getElementById('sec-team').scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
+}
+
+function toggleFaq(el) {
+  var open = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(f){ f.classList.remove('open'); });
+  if (!open) el.classList.add('open');
+}
+// SEARCH
+var sinp = document.getElementById('searchInput');
+var sres = document.getElementById('searchResults');
+sinp.addEventListener('input', function(){ sres.classList.toggle('show', this.value.length > 1); });
+sinp.addEventListener('blur', function(){ setTimeout(function(){ sres.classList.remove('show'); }, 180); });
+function pickSearch(key) {
+  sres.classList.remove('show'); sinp.value = '';
+  var el = document.getElementById('q-' + key);
+  if (el) el.click();
+}
+
+// CHAT
+var promptGone = false;
+function openChat() {
+  document.getElementById('chatWin').classList.add('open');
+  document.getElementById('chatPrompt').style.display = 'none';
+  promptGone = true;
+  setTimeout(function(){ document.getElementById('cwInput').focus(); }, 300);
+}
+function closeChat() { document.getElementById('chatWin').classList.remove('open'); }
+
+function sendMsg() {
+  var inp = document.getElementById('cwInput'); var txt = inp.value.trim(); if (!txt) return;
+  inp.value = ''; addMsg(txt, 'u');
+  document.getElementById('cwQR').style.display = 'none';
+  setTimeout(function(){ showTyping(); setTimeout(function(){ removeTyping(); addMsg(getReply(), 'a'); }, 1300); }, 300);
+}
+function sendQR(txt) { document.getElementById('cwInput').value = txt; sendMsg(); }
+function addMsg(txt, who) {
+  var b = document.getElementById('cwBody'); var d = document.createElement('div'); d.className = 'msg ' + who;
+  d.innerHTML = '<div class="msg-bub">'+txt+'</div><div class="msg-t">'+(who==='a'?'Benefits Team':'You')+'</div>';
+  b.appendChild(d); b.scrollTop = b.scrollHeight;
+}
+function showTyping() { var b=document.getElementById('cwBody'); var t=document.createElement('div'); t.className='typing'; t.id='typer'; t.innerHTML='<span></span><span></span><span></span>'; b.appendChild(t); b.scrollTop=b.scrollHeight; }
+function removeTyping() { var t=document.getElementById('typer'); if(t) t.remove(); }
+var ri=0; var replies=["Got it — can you share your member ID so I can pull up your account?","Of course. Can you give me a bit more detail so I can get the right person on this?","Happy to help. Give me a moment to connect you with the right specialist.","Great question. Let me get you a clear answer — can you share your member ID?"];
+function getReply() { return replies[ri++%replies.length]; }
+
+window.addEventListener('scroll', function(){
+  if (!promptGone && window.scrollY > 200) { var p=document.getElementById('chatPrompt'); if(p){p.style.transition='opacity 0.3s';p.style.opacity='0';setTimeout(function(){p.style.display='none';promptGone=true;},300);} }
+  checkReveals();
+}, { passive: true });
+
+function checkReveals() {
+  var wh = window.innerHeight;
+  document.querySelectorAll('.reveal:not(.in)').forEach(function(el){
+    if (el.getBoundingClientRect().top < wh * 0.9) el.classList.add('in');
+  });
+}
+checkReveals();
+
+function printPage() {
+  var h=document.documentElement.scrollHeight, w=document.documentElement.scrollWidth;
+  var s=document.createElement('style'); s.innerHTML='@page{size:'+w+'px '+h+'px;margin:0}body{zoom:1}'; document.head.appendChild(s);
+  window.print(); setTimeout(function(){ s.remove(); }, 1000);
+}
+</script>
+</body>
+</html>

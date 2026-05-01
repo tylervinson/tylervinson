@@ -1,521 +1,955 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Converter Tool</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCP Data Converter</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: #fafafa;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      padding: 2rem;
-      min-height: 100vh;
-    }
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --muted: #666;
+    --accent: #FFBE5F;
+    --accent-light: #fff8ec;
+    --green: #2e7d32;
+    --green-bg: #e8f5e9;
+    --red: #c62828;
+    --red-bg: #ffebee;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 4px;
-      border: 1px solid #e0e0e0;
-      overflow: hidden;
-    }
+    /* ────────────────────────────────────────────────────────
+       COLUMN WIDTHS — one variable per field.
+       Controls both the preview table and mapping panel.
+       Edit any value here to resize that column everywhere.
+    ──────────────────────────────────────────────────────── */
+    --col-PRVNAME:      200px;
+    --col-GROUPNAME:    180px;
+    --col-CREDENTIALS:   90px;
+    --col-GENDER:        80px;
+    --col-LANGUAGE:     160px;
+    --col-ADDRESS:      180px;
+    --col-CITY:         100px;
+    --col-STATE:         60px;
+    --col-ZIP:           70px;
+    --col-COUNTY:       100px;
+    --col-PHONE:        120px;
 
-    .header {
-      background: #1a1a1a;
-      color: white;
-      padding: 2rem;
-    }
+    /* Mapping panel arrow column — not a data field */
+    --col-mapping-arrow: 40px;
+  }
 
-    .header h1 {
-      font-size: 28px;
-      font-weight: 300;
-      margin-bottom: 0.5rem;
-    }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 3rem 2rem;
+  }
 
-    .header p {
-      font-size: 14px;
-      color: #ccc;
-    }
+  .wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+  }
 
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid #e0e0e0;
-      background: #fafafa;
-    }
+  /* ── Header ── */
+  .header { margin-bottom: 2.5rem; }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
 
-    .tab-btn {
-      flex: 1;
-      padding: 1rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 400;
-      color: #666;
-      transition: all 0.3s ease;
-      border-bottom: 3px solid transparent;
-    }
+  /* ── Drop Zone ── */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--card);
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .drop-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    color: var(--muted);
+  }
+  .drop-zone.dragover .drop-icon { color: var(--accent); }
+  .drop-label {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .drop-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .drop-sub span {
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 
-    .tab-btn:hover {
-      background: #f5f5f5;
-    }
+  /* ── Status / Info bar ── */
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+  }
+  .status-bar.show { display: flex; }
+  .status-bar.info  { background: var(--accent-light); border-color: var(--accent); color: var(--text); }
+  .status-bar.success { background: var(--green-bg); border-color: #a5d6a7; color: var(--green); }
+  .status-bar.error { background: var(--red-bg); border-color: #ef9a9a; color: var(--red); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .info .status-dot  { background: var(--accent); }
+  .success .status-dot { background: var(--green); }
+  .error .status-dot  { background: var(--red); }
 
-    .tab-btn.active {
-      color: #1a1a1a;
-      border-bottom-color: #1a1a1a;
-      background: #ffffff;
-    }
+  /* ── Column mapping panel ── */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    display: none;
+  }
+  .panel.show { display: block; }
+  .panel-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .panel-sub { font-size: 12px; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .panel-body { padding: 1.25rem; }
 
-    .tab-content {
-      display: none;
-      padding: 2rem;
-    }
+  .mapping-grid {
+    display: grid;
+    grid-template-columns: 1fr var(--col-mapping-arrow) 1fr;
+    gap: 0.5rem 0;
+    align-items: center;
+  }
+  .mapping-row {
+    display: contents;
+  }
+  .mapping-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    padding: 0.5rem 0;
+  }
+  .mapping-source {
+    font-size: 13px;
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mapping-source.missing {
+    color: var(--red);
+    background: var(--red-bg);
+    border-color: #ef9a9a;
+    font-style: italic;
+    font-family: var(--font);
+    font-size: 12px;
+  }
+  .mapping-arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .mapping-target {
+    font-size: 13px;
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
 
-    .tab-content.active {
-      display: block;
-    }
+  .divider { height: 1px; background: var(--border); margin: 1rem 0; grid-column: 1 / -1; }
 
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
+  /* ── Preview table ── */
+  .preview-table-wrap {
+    overflow-x: auto;
+    margin-top: 0.75rem;
+  }
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .preview-table th {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .preview-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preview-table tr:last-child td { border-bottom: none; }
+  .preview-table tr:hover td { background: var(--bg); }
 
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      color: #1a1a1a;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  /* ── Stats row ── */
+  .stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1;
+    min-width: 120px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+  }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
 
-    .dropzone {
-      border: 2px dashed #e0e0e0;
-      border-radius: 4px;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: #fafafa;
-    }
+  /* ── Actions ── */
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+  }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: var(--bg); border-color: var(--accent); }
 
-    .dropzone:hover {
-      border-color: #0b3b60;
-      background: #f0f8ff;
-    }
+  /* ── Log ── */
+  .log {
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: #ccc;
+    max-height: 180px;
+    overflow-y: auto;
+    line-height: 1.7;
+    display: none;
+  }
+  .log.show { display: block; }
+  .log-line { display: block; }
+  .log-line.ok    { color: #69db7c; }
+  .log-line.warn  { color: #ffd43b; }
+  .log-line.info  { color: #74c0fc; }
+  .log-line.error { color: #ff6b6b; }
 
-    .dropzone.drag-over {
-      border-color: #0b3b60;
-      background: #f0f8ff;
-    }
-
-    .dropzone p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 0.5rem;
-    }
-
-    .dropzone small {
-      font-size: 12px;
-      color: #999;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    .preview {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-size: 13px;
-      color: #666;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .preview-header {
-      font-weight: 400;
-      color: #1a1a1a;
-      margin-bottom: 0.5rem;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    button {
-      padding: 0.75rem 1.5rem;
-      border-radius: 3px;
-      font-size: 14px;
-      font-weight: 400;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: inherit;
-    }
-
-    .btn-primary {
-      background: #1a1a1a;
-      color: white;
-      border: none;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #333;
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background: #ffffff;
-      color: #1a1a1a;
-      border: 1px solid #e0e0e0;
-    }
-
-    .btn-secondary:hover {
-      background: #f5f5f5;
-      border-color: #0b3b60;
-    }
-
-    .output-area {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 1rem;
-      margin-top: 1rem;
-      display: none;
-    }
-
-    .output-area.active {
-      display: block;
-    }
-
-    .output-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .output-header h3 {
-      font-size: 14px;
-      font-weight: 400;
-      color: #1a1a1a;
-    }
-
-    .copy-btn {
-      font-size: 12px;
-      padding: 0.5rem 1rem;
-    }
-
-    textarea {
-      width: 100%;
-      height: 200px;
-      padding: 1rem;
-      border: 1px solid #e0e0e0;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      resize: vertical;
-    }
-
-    .success-msg {
-      background: #e8f5e9;
-      border: 1px solid #c8e6c9;
-      border-radius: 3px;
-      padding: 1rem;
-      color: #2e7d32;
-      font-size: 13px;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .success-msg.active {
-      display: block;
-    }
-
-    .error-msg {
-      background: #ffebee;
-      border: 1px solid #ffcdd2;
-      border-radius: 3px;
-      padding: 1rem;
-      color: #c62828;
-      font-size: 13px;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .error-msg.active {
-      display: block;
-    }
-  </style>
+  #print-btn { display: none; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Data Converter Tool</h1>
-      <p>Convert Excel files to JSON format</p>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="header-eyebrow">Data Converter Tools</div>
+    <h1 id="tabTitle">PCP Search Data</h1>
+    <p id="tabDescription">Drop any PCP Excel file to instantly convert it to widget-ready JSON. Runs entirely in your browser — no upload, no server.</p>
+  </div>
+
+  <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem;">
+    <button id="btnTabPCP" class="tab-btn" onclick="window.switchTab('pcp')" style="padding: 1rem; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text); border-bottom: 2px solid var(--text); transition: all 0.3s ease;">PCP Search Data</button>
+    <button id="btnTabHub" class="tab-btn" onclick="window.switchTab('hub')" style="padding: 1rem; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.3s ease;">Work Requirements HUB</button>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    <div class="drop-label">Drop your Excel file here</div>
+    <div class="drop-sub">or <span>browse to select</span> · .xlsx and .xls supported</div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText"></span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="statsRow" style="display:none">
+    <div class="stat-card">
+      <div class="stat-value" id="statRows">—</div>
+      <div class="stat-label">Records</div>
     </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="pcp">PCP Search Data</button>
-      <button class="tab-btn" data-tab="hub-resources">Work Requirements HUB Resources</button>
+    <div class="stat-card">
+      <div class="stat-value" id="statCols">—</div>
+      <div class="stat-label">Source Columns</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statMapped">—</div>
+      <div class="stat-label">Mapped Fields</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statSize">—</div>
+      <div class="stat-label">Output Size</div>
+    </div>
+  </div>
 
-    <!-- PCP Tab -->
-    <div id="pcp" class="tab-content active">
-      <div class="success-msg" id="pcp-success"></div>
-      <div class="error-msg" id="pcp-error"></div>
-
-      <div class="form-group">
-        <label>Upload Excel File</label>
-        <div class="dropzone" id="pcp-dropzone">
-          <p>Drag and drop your Excel file here</p>
-          <small>or click to browse</small>
-          <input type="file" id="pcp-file" accept=".xlsx,.xls,.csv">
-        </div>
-      </div>
-
-      <div id="pcp-preview" class="preview" style="display: none;">
-        <div class="preview-header">File Preview:</div>
-        <div id="pcp-preview-content"></div>
-      </div>
-
-      <div class="button-group">
-        <button class="btn-primary" id="pcp-convert" disabled>Convert to JSON</button>
-        <button class="btn-secondary" id="pcp-clear">Clear</button>
-      </div>
-
-      <div id="pcp-output" class="output-area">
-        <div class="output-header">
-          <h3>JSON Output</h3>
-          <button class="btn-secondary copy-btn" id="pcp-copy">Copy to Clipboard</button>
-        </div>
-        <textarea id="pcp-textarea" readonly></textarea>
+  <!-- Column mapping panel -->
+  <div class="panel" id="mappingPanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Column Mapping</div>
+        <div class="panel-sub">How source columns map to widget fields</div>
       </div>
     </div>
+    <div class="panel-body">
+      <div class="mapping-grid" id="mappingGrid"></div>
+    </div>
+  </div>
 
-    <!-- Work Requirements HUB Resources Tab -->
-    <div id="hub-resources" class="tab-content">
-      <div class="success-msg" id="hub-success"></div>
-      <div class="error-msg" id="hub-error"></div>
-
-      <div class="form-group">
-        <label>Upload Excel File</label>
-        <div class="dropzone" id="hub-dropzone">
-          <p>Drag and drop your Excel file here</p>
-          <small>or click to browse</small>
-          <input type="file" id="hub-file" accept=".xlsx,.xls,.csv">
-        </div>
+  <!-- Preview panel -->
+  <div class="panel" id="previewPanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Preview</div>
+        <div class="panel-sub">First 5 converted records</div>
       </div>
-
-      <div id="hub-preview" class="preview" style="display: none;">
-        <div class="preview-header">File Preview:</div>
-        <div id="hub-preview-content"></div>
-      </div>
-
-      <div class="button-group">
-        <button class="btn-primary" id="hub-convert" disabled>Convert to JSON</button>
-        <button class="btn-secondary" id="hub-clear">Clear</button>
-      </div>
-
-      <div id="hub-output" class="output-area">
-        <div class="output-header">
-          <h3>JSON Output</h3>
-          <button class="btn-secondary copy-btn" id="hub-copy">Copy to Clipboard</button>
-        </div>
-        <textarea id="hub-textarea" readonly></textarea>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <div class="preview-table-wrap">
+        <table class="preview-table" id="previewTable"></table>
       </div>
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+  <!-- Actions -->
+  <div class="actions" id="actionsRow" style="display:none; margin-bottom:1.5rem;">
+    <button class="btn btn-primary" id="downloadBtn" disabled>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      Download JSON
+    </button>
+    <button class="btn btn-secondary" id="resetBtn">
+      Clear &amp; start over
+    </button>
+  </div>
 
-  <script>
-    function setupConverter(tabId) {
-      var fileInput = document.getElementById(tabId + '-file');
-      var dropzone = document.getElementById(tabId + '-dropzone');
-      var convertBtn = document.getElementById(tabId + '-convert');
-      var clearBtn = document.getElementById(tabId + '-clear');
-      var copyBtn = document.getElementById(tabId + '-copy');
-      var preview = document.getElementById(tabId + '-preview');
-      var previewContent = document.getElementById(tabId + '-preview-content');
-      var output = document.getElementById(tabId + '-output');
-      var textarea = document.getElementById(tabId + '-textarea');
-      var successMsg = document.getElementById(tabId + '-success');
-      var errorMsg = document.getElementById(tabId + '-error');
+  <!-- Log -->
+  <div class="log" id="logPanel"></div>
 
-      var fileData = null;
+</div>
 
-      if (!fileInput || !dropzone || !convertBtn) return;
+<script>
+// ── Column mapping config ─────────────────────────────────────────────────
+// Keys are possible source column names; values are widget field names.
+// Panel Open is intentionally excluded.
+const COLUMN_MAP = {
+  "Provider Name (First and Last Name)": "PRVNAME",
+  "PRVNAME": "PRVNAME",
+  "Provider Name": "PRVNAME",
+  "Provider First Name": "FIRST_NAME",
+  "First Name": "FIRST_NAME",
+  "Provider Last Name": "LAST_NAME",
+  "Last Name": "LAST_NAME",
+  "GROUPNAME": "GROUPNAME",
+  "Group Name": "GROUPNAME",
+  "Credential Suffix": "CREDENTIALS",
+  "CREDENTIALS": "CREDENTIALS",
+  "Credentials": "CREDENTIALS",
+  "Gender": "GENDER",
+  "GENDER": "GENDER",
+  "Additional Spoken Languages": "LANGUAGE",
+  "LANGUAGE": "LANGUAGE",
+  "Languages": "LANGUAGE",
+  "Spoken Languages": "LANGUAGE",
+  "ADDRESS": "ADDRESS",
+  "Address": "ADDRESS",
+  "CITY": "CITY",
+  "City": "CITY",
+  "STATE": "STATE",
+  "State": "STATE",
+  "ZIP": "ZIP",
+  "Zip": "ZIP",
+  "Zip Code": "ZIP",
+  "COUNTY": "COUNTY",
+  "County": "COUNTY",
+  "PHONE": "PHONE",
+  "Phone": "PHONE",
+};
 
-      function handleFileSelect() {
-        var file = fileInput.files[0];
-        if (!file) return;
+const WIDGET_FIELDS = ["PRVNAME","PRVNAME_LAST","GROUPNAME","CREDENTIALS","GENDER","LANGUAGE","ADDRESS","CITY","STATE","ZIP","COUNTY","PHONE"];
 
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            if (file.name.endsWith('.csv')) {
-              parseCSV(e.target.result);
+const LANGUAGE_ALIASES = {
+  "Castilian": "Spanish",
+  "Panjabi": "Punjabi",
+  "Greek, Modern (1453-)": "Greek",
+  "Moldavian": "Moldovan",
+};
+
+// ── State ─────────────────────────────────────────────────────────────────
+let convertedJSON = null;
+let outputFilename = "pcp-data.json";
+
+// ── DOM refs ──────────────────────────────────────────────────────────────
+const dropZone      = document.getElementById('dropZone');
+const fileInput     = document.getElementById('fileInput');
+const statusBar     = document.getElementById('statusBar');
+const statusText    = document.getElementById('statusText');
+const statsRow      = document.getElementById('statsRow');
+const mappingPanel  = document.getElementById('mappingPanel');
+const previewPanel  = document.getElementById('previewPanel');
+const actionsRow    = document.getElementById('actionsRow');
+const downloadBtn   = document.getElementById('downloadBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const logPanel      = document.getElementById('logPanel');
+const mappingGrid   = document.getElementById('mappingGrid');
+const previewTable  = document.getElementById('previewTable');
+
+// ── Logging ───────────────────────────────────────────────────────────────
+function log(msg, type = 'info') {
+  logPanel.classList.add('show');
+  const line = document.createElement('span');
+  line.className = `log-line ${type}`;
+  line.textContent = `› ${msg}`;
+  logPanel.appendChild(line);
+  logPanel.scrollTop = logPanel.scrollHeight;
+}
+
+// ── Status bar ────────────────────────────────────────────────────────────
+function setStatus(msg, type = 'info') {
+  statusBar.className = `status-bar show ${type}`;
+  statusText.textContent = msg;
+}
+
+// ── Language normalizer ───────────────────────────────────────────────────
+function normalizeLanguage(raw) {
+  if (!raw || raw === '') return '';
+  const parts = String(raw).split(';');
+  const cleaned = [];
+  parts.forEach(p => {
+    p = p.trim();
+    for (const [alias, canonical] of Object.entries(LANGUAGE_ALIASES)) {
+      p = p.replace(alias, canonical);
+    }
+    p = p.trim();
+    if (p && !cleaned.includes(p)) cleaned.push(p);
+  });
+  return [...new Set(cleaned)].sort().join('; ');
+}
+
+// ── Clean numeric fields (strip float .0 artifacts) ──────────────────────
+function cleanNumeric(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const s = String(val).trim();
+  return s.endsWith('.0') ? s.slice(0, -2) : s;
+}
+
+// ── Main converter ────────────────────────────────────────────────────────
+function processFile(file) {
+  if (!file) return;
+  outputFilename = file.name.replace(/\.(xlsx|xls)$/i, '.txt');
+
+  log(`Reading: ${file.name}`, 'info');
+  setStatus(`Reading ${file.name}…`, 'info');
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      log(`Sheet: "${sheetName}"`, 'info');
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (rows.length === 0) {
+        setStatus('The spreadsheet appears to be empty.', 'error');
+        log('No rows found.', 'error');
+        return;
+      }
+
+      const sourceColumns = Object.keys(rows[0]);
+      log(`Found ${rows.length} rows, ${sourceColumns.length} columns`, 'ok');
+
+      // Build effective mapping: widgetField → sourceColumn
+      const effectiveMap = {}; // widgetField -> sourceCol
+      const reverseMap   = {}; // sourceCol -> widgetField
+      sourceColumns.forEach(col => {
+        if (COLUMN_MAP[col]) {
+          const target = COLUMN_MAP[col];
+          if (!effectiveMap[target]) { // first match wins
+            effectiveMap[target] = col;
+            reverseMap[col] = target;
+          }
+        }
+      });
+
+      const mappedFields  = WIDGET_FIELDS.filter(f => effectiveMap[f]);
+      const missingFields = WIDGET_FIELDS.filter(f => !effectiveMap[f]);
+      const ignoredCols   = sourceColumns.filter(col => !reverseMap[col]);
+
+      log(`Mapped ${mappedFields.length}/${WIDGET_FIELDS.length} widget fields`, mappedFields.length === WIDGET_FIELDS.length ? 'ok' : 'warn');
+      if (missingFields.length) log(`Missing fields: ${missingFields.join(', ')}`, 'warn');
+      if (ignoredCols.length)   log(`Ignored columns: ${ignoredCols.join(', ')}`, 'info');
+
+      // Render mapping UI
+      renderMapping(effectiveMap, missingFields, ignoredCols);
+
+      // ── Handle split first/last name columns ─────────────────────────────
+      const hasSplitName = effectiveMap['FIRST_NAME'] && effectiveMap['LAST_NAME'];
+      const hasFullName  = effectiveMap['PRVNAME'];
+      if (hasSplitName) {
+        log('Detected split first/last name columns — combining into PRVNAME', 'ok');
+      } else if (hasFullName) {
+        log('Detected combined name column — deriving PRVNAME_LAST from last word', 'ok');
+      }
+
+      function toTitleCase(str) {
+        return str.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      // Convert rows
+      const records = rows.map(row => {
+        const out = {};
+        WIDGET_FIELDS.forEach(field => {
+          if (field === 'PRVNAME') {
+            if (hasSplitName) {
+              const first = toTitleCase(String(row[effectiveMap['FIRST_NAME']] || ''));
+              const last  = toTitleCase(String(row[effectiveMap['LAST_NAME']]  || ''));
+              out['PRVNAME'] = (first + ' ' + last).trim();
             } else {
-              parseExcel(e.target.result);
+              out['PRVNAME'] = toTitleCase(String(row[effectiveMap['PRVNAME']] || ''));
             }
-          } catch (err) {
-            showError('Error reading file: ' + err.message);
+            return;
           }
-        };
-        reader.readAsArrayBuffer(file);
-      }
-
-      function parseCSV(data) {
-        var text = new TextDecoder().decode(data);
-        var lines = text.split('\n');
-        var headers = lines[0].split(',').map(function(h) { return h.trim(); });
-        var rows = [];
-        for (var i = 1; i < lines.length; i++) {
-          var values = lines[i].split(',').map(function(v) { return v.trim(); });
-          var obj = {};
-          for (var j = 0; j < headers.length; j++) {
-            obj[headers[j]] = values[j] || '';
-          }
-          var hasContent = false;
-          for (var k in obj) {
-            if (obj[k]) {
-              hasContent = true;
-              break;
+          if (field === 'PRVNAME_LAST') {
+            if (hasSplitName) {
+              out['PRVNAME_LAST'] = toTitleCase(String(row[effectiveMap['LAST_NAME']] || ''));
+            } else if (hasFullName) {
+              const full = toTitleCase(String(row[effectiveMap['PRVNAME']] || ''));
+              out['PRVNAME_LAST'] = full.trim().split(' ').pop();
+            } else {
+              out['PRVNAME_LAST'] = '';
             }
+            return;
           }
-          if (hasContent) {
-            rows.push(obj);
-          }
-        }
-
-        fileData = { headers: headers, rows: rows };
-        showPreview(headers.slice(0, 5), rows.slice(0, 3));
-      }
-
-      function parseExcel(data) {
-        var arr = new Uint8Array(data);
-        var binary = String.fromCharCode.apply(null, arr);
-        var workbook = XLSX.read(binary, { type: 'binary' });
-        var sheet = workbook.Sheets[workbook.SheetNames[0]];
-        var json = XLSX.utils.sheet_to_json(sheet);
-
-        if (json.length === 0) throw new Error('No data found in Excel file');
-
-        var headers = Object.keys(json[0]);
-        fileData = { headers: headers, rows: json };
-        showPreview(headers.slice(0, 5), json.slice(0, 3));
-      }
-
-      function showPreview(headers, rows) {
-        previewContent.innerHTML = '<strong>Columns: ' + headers.join(', ') + '</strong><br><strong>Rows: ' + fileData.rows.length + '</strong>';
-        preview.style.display = 'block';
-        convertBtn.disabled = false;
-        output.classList.remove('active');
-      }
-
-      function showError(msg) {
-        errorMsg.textContent = '✗ ' + msg;
-        errorMsg.classList.add('active');
-        successMsg.classList.remove('active');
-      }
-
-      fileInput.addEventListener('change', handleFileSelect);
-
-      dropzone.addEventListener('click', function() {
-        fileInput.click();
+          const srcCol = effectiveMap[field];
+          let val = srcCol ? String(row[srcCol] || '').trim() : '';
+          if (field === 'LANGUAGE') val = normalizeLanguage(val);
+          if (field === 'ZIP' || field === 'PHONE') val = cleanNumeric(val);
+          out[field] = val;
+        });
+        return out;
       });
 
-      dropzone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropzone.classList.add('drag-over');
-      });
+      convertedJSON = records;
 
-      dropzone.addEventListener('dragleave', function() {
-        dropzone.classList.remove('drag-over');
-      });
+      // Stats
+      const jsonStr  = JSON.stringify(records);
+      const sizeKB   = (new Blob([jsonStr]).size / 1024).toFixed(1);
+      document.getElementById('statRows').textContent   = records.length.toLocaleString();
+      document.getElementById('statCols').textContent   = sourceColumns.length;
+      document.getElementById('statMapped').textContent = mappedFields.length + '/' + WIDGET_FIELDS.length;
+      document.getElementById('statSize').textContent   = sizeKB + ' KB';
+      statsRow.style.display = 'flex';
 
-      dropzone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropzone.classList.remove('drag-over');
-        if (e.dataTransfer.files.length) {
-          fileInput.files = e.dataTransfer.files;
-          handleFileSelect();
-        }
-      });
+      // Preview
+      renderPreview(records.slice(0, 5));
 
-      convertBtn.addEventListener('click', function() {
-        if (!fileData) return;
+      // Actions
+      actionsRow.style.display = 'flex';
+      downloadBtn.disabled = false;
 
-        var json = JSON.stringify(fileData.rows, null, 2);
-        textarea.value = json;
-        output.classList.add('active');
-        successMsg.textContent = '✓ Successfully converted ' + fileData.rows.length + ' rows to JSON';
-        successMsg.classList.add('active');
-        errorMsg.classList.remove('active');
-      });
+      log(`Conversion complete — ${records.length} records, ${sizeKB} KB`, 'ok');
+      setStatus(`Ready to download — ${records.length} records converted successfully`, 'success');
 
-      clearBtn.addEventListener('click', function() {
-        fileInput.value = '';
-        fileData = null;
-        preview.style.display = 'none';
-        output.classList.remove('active');
-        convertBtn.disabled = true;
-        textarea.value = '';
-        successMsg.classList.remove('active');
-        errorMsg.classList.remove('active');
-      });
-
-      copyBtn.addEventListener('click', function() {
-        textarea.select();
-        document.execCommand('copy');
-        var originalText = copyBtn.textContent;
-        copyBtn.textContent = 'Copied!';
-        setTimeout(function() {
-          copyBtn.textContent = originalText;
-        }, 2000);
-      });
+    } catch (err) {
+      setStatus('Failed to parse file. Make sure it\'s a valid .xlsx or .xls file.', 'error');
+      log(`Error: ${err.message}`, 'error');
+      console.error(err);
     }
+  };
+  reader.readAsArrayBuffer(file);
+}
 
-    // Tab switching
-    var tabBtns = document.querySelectorAll('.tab-btn');
-    for (var i = 0; i < tabBtns.length; i++) {
-      tabBtns[i].addEventListener('click', function() {
-        var tabName = this.getAttribute('data-tab');
-        var allTabs = document.querySelectorAll('.tab-btn');
-        for (var j = 0; j < allTabs.length; j++) {
-          allTabs[j].classList.remove('active');
-        }
-        var allContent = document.querySelectorAll('.tab-content');
-        for (var k = 0; k < allContent.length; k++) {
-          allContent[k].classList.remove('active');
-        }
-        this.classList.add('active');
-        document.getElementById(tabName).classList.add('active');
-      });
+// ── Render column mapping grid ────────────────────────────────────────────
+function renderMapping(effectiveMap, missingFields, ignoredCols) {
+  mappingGrid.innerHTML = '';
+
+  // Header row
+  ['Source Column', '', 'Widget Field'].forEach(label => {
+    const el = document.createElement('div');
+    el.className = 'mapping-label';
+    el.textContent = label;
+    mappingGrid.appendChild(el);
+  });
+
+  WIDGET_FIELDS.forEach(field => {
+    const srcCol = effectiveMap[field];
+    const colWidth = `var(--col-${field})`;
+
+    // PRVNAME and PRVNAME_LAST are derived when split name columns are present
+    const hasSplitName = effectiveMap['FIRST_NAME'] && effectiveMap['LAST_NAME'];
+    const isDerived = field === 'PRVNAME_LAST' || (field === 'PRVNAME' && hasSplitName);
+
+    const src = document.createElement('div');
+    if (isDerived) {
+      src.className = 'mapping-source';
+      if (field === 'PRVNAME' && hasSplitName) {
+        src.textContent = `${effectiveMap['FIRST_NAME']} + ${effectiveMap['LAST_NAME']}`;
+      } else {
+        src.textContent = effectiveMap['LAST_NAME'] ? effectiveMap['LAST_NAME'] : (effectiveMap['PRVNAME'] ? effectiveMap['PRVNAME'] + ' (last word)' : 'derived');
+      }
+      src.style.fontStyle = 'italic';
+    } else {
+      src.className = srcCol ? 'mapping-source' : 'mapping-source missing';
+      src.textContent = srcCol || 'not found in file';
+      src.title = srcCol || '';
     }
+    src.style.width = colWidth;
 
-    // Initialize both converters
-    setupConverter('pcp');
-    setupConverter('hub-resources');
-  </script>
+    const arrow = document.createElement('div');
+    arrow.className = 'mapping-arrow';
+    arrow.textContent = (srcCol || isDerived) ? '→' : '✕';
+    if (!srcCol && !isDerived) arrow.style.color = '#c62828';
+
+    const tgt = document.createElement('div');
+    tgt.className = 'mapping-target';
+    tgt.textContent = field;
+    tgt.style.width = colWidth;
+
+    mappingGrid.appendChild(src);
+    mappingGrid.appendChild(arrow);
+    mappingGrid.appendChild(tgt);
+  });
+
+  mappingPanel.classList.add('show');
+}
+
+// ── Render preview table ──────────────────────────────────────────────────
+function renderPreview(records) {
+  previewTable.innerHTML = '';
+  if (!records.length) return;
+
+  // colgroup sets per-field widths from CSS variables
+  const colgroup = document.createElement('colgroup');
+  WIDGET_FIELDS.forEach(f => {
+    const col = document.createElement('col');
+    col.style.width = `var(--col-${f})`;
+    colgroup.appendChild(col);
+  });
+  previewTable.appendChild(colgroup);
+
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  WIDGET_FIELDS.forEach(f => {
+    const th = document.createElement('th');
+    th.textContent = f;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  previewTable.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  records.forEach(rec => {
+    const tr = document.createElement('tr');
+    WIDGET_FIELDS.forEach(f => {
+      const td = document.createElement('td');
+      td.textContent = rec[f] || '';
+      td.title = rec[f] || '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  previewTable.appendChild(tbody);
+  previewPanel.classList.add('show');
+}
+
+// ── Download ──────────────────────────────────────────────────────────────
+downloadBtn.addEventListener('click', () => {
+  if (!convertedJSON) return;
+  const blob = new Blob([JSON.stringify(convertedJSON)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = outputFilename;
+  a.click();
+  URL.revokeObjectURL(url);
+  log(`Downloaded: ${outputFilename}`, 'ok');
+});
+
+// ── Reset ─────────────────────────────────────────────────────────────────
+resetBtn.addEventListener('click', () => {
+  convertedJSON = null;
+  fileInput.value = '';
+  statusBar.className = 'status-bar';
+  statsRow.style.display = 'none';
+  actionsRow.style.display = 'none';
+  mappingPanel.classList.remove('show');
+  previewPanel.classList.remove('show');
+  logPanel.className = 'log';
+  logPanel.innerHTML = '';
+  downloadBtn.disabled = true;
+});
+
+// ── File input & drag-drop ────────────────────────────────────────────────
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+
+// ── Tab switching ─────────────────────────────────────────────────────────
+window.currentTab = 'pcp';
+
+window.switchTab = function(tab) {
+  window.currentTab = tab;
+  const tabTitle = document.getElementById('tabTitle');
+  const tabDesc = document.getElementById('tabDescription');
+  const btnPCP = document.getElementById('btnTabPCP');
+  const btnHub = document.getElementById('btnTabHub');
+
+  if (tab === 'pcp') {
+    tabTitle.textContent = 'PCP Search Data';
+    tabDesc.textContent = 'Drop any PCP Excel file to instantly convert it to widget-ready JSON. Runs entirely in your browser — no upload, no server.';
+    btnPCP.style.color = 'var(--text)';
+    btnPCP.style.borderBottomColor = 'var(--text)';
+    btnHub.style.color = 'var(--muted)';
+    btnHub.style.borderBottomColor = 'transparent';
+    outputFilename = 'pcp-data.json';
+  } else if (tab === 'hub') {
+    tabTitle.textContent = 'Work Requirements HUB Resources';
+    tabDesc.textContent = 'Drop any Work Requirements HUB Excel file to instantly convert it to widget-ready JSON. Runs entirely in your browser — no upload, no server.';
+    btnHub.style.color = 'var(--text)';
+    btnHub.style.borderBottomColor = 'var(--text)';
+    btnPCP.style.color = 'var(--muted)';
+    btnPCP.style.borderBottomColor = 'transparent';
+    outputFilename = 'medicaid-work-requirements.txt';
+  }
+
+  // Reset form
+  fileInput.value = '';
+  convertedJSON = null;
+  statusBar.className = 'status-bar';
+  statsRow.style.display = 'none';
+  actionsRow.style.display = 'none';
+  mappingPanel.classList.remove('show');
+  previewPanel.classList.remove('show');
+  logPanel.className = 'log';
+  logPanel.innerHTML = '';
+  downloadBtn.disabled = true;
+};
+
+// ── Override processFile for HUB tab ───────────────────────────────────────
+const originalProcessFile = processFile;
+processFile = function(file) {
+  if (window.currentTab === 'hub') {
+    processHubFile(file);
+  } else {
+    originalProcessFile(file);
+  }
+};
+
+function processHubFile(file) {
+  log(`Loading: ${file.name}`, 'info');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      log(`Sheet: "${sheetName}"`, 'info');
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (rows.length === 0) {
+        setStatus('The spreadsheet appears to be empty.', 'error');
+        log('No rows found.', 'error');
+        return;
+      }
+
+      log(`Found ${rows.length} rows`, 'ok');
+      
+      convertedJSON = rows;
+      outputFilename = 'medicaid-work-requirements.txt';
+
+      // Stats
+      const jsonStr  = JSON.stringify(rows);
+      const sizeKB   = (new Blob([jsonStr]).size / 1024).toFixed(1);
+      document.getElementById('statRows').textContent   = rows.length.toLocaleString();
+      document.getElementById('statCols').textContent   = Object.keys(rows[0]).length;
+      document.getElementById('statMapped').textContent = Object.keys(rows[0]).length + '/' + Object.keys(rows[0]).length;
+      document.getElementById('statSize').textContent   = sizeKB + ' KB';
+      statsRow.style.display = 'flex';
+
+      // Don't show mapping panel for HUB - just preview
+      previewTable.innerHTML = '';
+      if (rows.length > 0) {
+        const cols = Object.keys(rows[0]);
+        const colgroup = document.createElement('colgroup');
+        cols.forEach(c => {
+          const col = document.createElement('col');
+          col.style.width = '150px';
+          colgroup.appendChild(col);
+        });
+        previewTable.appendChild(colgroup);
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        cols.forEach(c => {
+          const th = document.createElement('th');
+          th.textContent = c;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        previewTable.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        rows.slice(0, 5).forEach(rec => {
+          const tr = document.createElement('tr');
+          cols.forEach(c => {
+            const td = document.createElement('td');
+            td.textContent = rec[c] || '';
+            td.title = rec[c] || '';
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        previewTable.appendChild(tbody);
+      }
+      previewPanel.classList.add('show');
+      
+      // Actions
+      actionsRow.style.display = 'flex';
+      downloadBtn.disabled = false;
+
+      log(`Conversion complete — ${rows.length} records, ${sizeKB} KB`, 'ok');
+      setStatus(`Ready to download — ${rows.length} records converted successfully`, 'success');
+
+    } catch (err) {
+      setStatus('Failed to parse file. Make sure it\'s a valid .xlsx or .xls file.', 'error');
+      log(`Error: ${err.message}`, 'error');
+      console.error(err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+</script>
 </body>
 </html>
