@@ -758,18 +758,19 @@ function pick(el, key) {
   var d = qData[key]; if (!d) return; cur = key;
   document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('teamIntro').textContent   = d.teamIntro;
-  document.getElementById('teamTag').textContent     = d.teamTag;
-  document.getElementById('teamName').innerHTML      = d.teamName;
-  document.getElementById('teamDesc').textContent    = d.teamDesc;
-  document.getElementById('phoneNum').textContent    = d.phone;
-  document.getElementById('phoneNote').textContent   = d.phoneNote;
-  document.getElementById('faqIntro').textContent    = d.faqIntro;
-  document.getElementById('faqHeadSub').textContent  = d.faqHead;
-  document.getElementById('faqFoot').textContent     = d.faqFoot;
-  document.getElementById('closeHead').textContent   = d.closeHead;
-  document.getElementById('closeSub').textContent    = d.closeSub;
-  document.getElementById('faqList').innerHTML = d.faqs.map(function(f){
+  function set(id, val, html) { var e = document.getElementById(id); if (!e) return; if (html) e.innerHTML = val; else e.textContent = val; }
+  set('teamIntro', d.teamIntro);
+  set('teamName',  d.teamName, true);
+  set('teamDesc',  d.teamDesc);
+  set('phoneNum',  d.phone);
+  set('phoneNote', d.phoneNote);
+  set('faqIntro',  d.faqIntro);
+  set('faqHeadSub',d.faqHead);
+  set('faqFoot',   d.faqFoot);
+  set('closeHead', d.closeHead);
+  set('closeSub',  d.closeSub);
+  var fl = document.getElementById('faqList');
+  if (fl) fl.innerHTML = d.faqs.map(function(f){
     return '<li class="faq-item">'
       + '<button class="faq-q" onclick="toggleFaq(this.parentElement)" aria-expanded="false">'
       + '<span class="faq-q-text">'+f.q+'</span>'
