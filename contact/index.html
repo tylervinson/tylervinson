@@ -122,10 +122,10 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 .hero-content { padding: 64px 48px 0 0; }
 
 /* Hero content block */
-.hero-block { padding: 72px 0 72px 2rem; max-width: 1344px; margin: 0 auto; display: flex; align-items: flex-start; }
-.hero-block-inner { text-align: center; max-width: 480px; }
-.hero-h1 { font-size: 4rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.05; margin-bottom: 4px; }
-.hero-h1-italic { font-family: 'Roboto Serif', serif; font-size: 4rem; font-weight: 400; font-style: italic; color: var(--gold); line-height: 1.1; margin-bottom: 20px; display: block; }
+.hero-block { padding: 152px 0 72px 2rem; max-width: 1344px; margin: 0 auto; display: flex; align-items: flex-start; }
+.hero-block-inner { text-align: center; max-width: 490px; }
+.hero-h1 { font-size: 4.5rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.05; margin-bottom: 4px; }
+.hero-h1-italic { font-family: 'Roboto Serif', serif; font-size: 3.2rem; font-weight: 400; font-style: italic; color: var(--gold); line-height: 1.1; margin-bottom: 20px; display: block; }
 .hero-subtitle { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.55; margin-bottom: 28px; }
 /* Underline-only search input */
 .hero-search { display: flex; align-items: center; border-bottom: 1.5px solid var(--gray-darkest); padding-bottom: 6px; gap: 8px; }
@@ -221,7 +221,13 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 /* Body Default: Regular 400 16px #595959 per system */
 .team-desc { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.563rem; }
 
-/* ── ICON CARDS — matches live site icon-card-listing pattern exactly ── */
+/* ── WAVE SECTION ── */
+.wave-section { position: relative; background: var(--blue-light); }
+.wave-section .resp-inner { position: relative; z-index: 2; }
+.wave-top, .wave-bottom { display: block; width: 100%; line-height: 0; overflow: visible; }
+.wave-top { margin-bottom: -1px; }
+.wave-bottom { margin-top: -1px; }
+.wave-top svg, .wave-bottom svg { display: block; width: 100%; overflow: visible; }
 /* grid-flow-row, md:grid-cols-3, gap-5 */
 .copts { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
 
@@ -512,15 +518,16 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 </div>
 
 <!-- HERO -->
-<div class="hero-wrap" style="background: url('hero.png') center top / cover no-repeat; min-height: 650px;">
+<div class="hero-wrap" style="background: url('hero.png') center top / cover no-repeat; min-height: 700px;">
   <div class="hero-block">
     <div class="hero-block-inner">
       <h1 class="hero-h1">How can we</h1>
       <span class="hero-h1-italic">best help you today?</span>
       <p class="hero-subtitle">Search here for what you need, or choose an option below,<br>we'll get you to the right team.</p>
-      <div class="hero-search">
-        <input type="text" id="searchInput" placeholder="" autocomplete="off">
+      <div class="hero-search" style="position:relative;">
+        <input type="text" id="searchInput" placeholder="Search for help..." autocomplete="off">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <div id="searchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);border:1px solid var(--gray);overflow:hidden;z-index:100;"></div>
       </div>
     </div>
   </div>
@@ -572,7 +579,12 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 
 <!-- HOW TO REACH THEM (dynamic) -->
 <div class="full-divider dynamic" id="div-opts"></div>
-<div class="resp-section alt dynamic" id="sec-opts">
+<div class="wave-top">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:60px;display:block;width:100%;">
+    <path d="M0,60 L0,60 Q720,60 1440,60 L1440,60 Z" fill="var(--blue-light)"/>
+  </svg>
+</div>
+<div class="resp-section alt dynamic wave-section" id="sec-opts">
   <div class="resp-inner">
     <h2 class="section-h2 reveal d1">Three ways in. <strong>Pick what works for you.</strong></h2>
     <p class="section-body reveal d2">Each one gets you to the same team. The difference is speed and how you like to communicate.</p>
@@ -637,6 +649,11 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 
     </div>
   </div>
+</div>
+<div class="wave-bottom">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:60px;display:block;width:100%;">
+    <path d="M0,0 L0,0 Q720,0 1440,0 L1440,0 Z" fill="var(--blue-light)"/>
+  </svg>
 </div>
 
 <!-- FAQs (dynamic) -->
@@ -786,6 +803,51 @@ function pick(el, key) {
   var om = document.getElementById('openingMsg');
   if (om && d.ctx) om.textContent = d.ctx;
   document.querySelectorAll('.dynamic').forEach(function(e){ e.classList.add('show'); });
+  // Trigger wave bounce on the blue section
+  setTimeout(function() {
+    var topPath   = document.querySelector('.wave-top path');
+    var botPath   = document.querySelector('.wave-bottom path');
+    if (!topPath || !botPath) return;
+
+    var duration = 900; // ms
+    var start = null;
+
+    // Spring keyframes: value of the control point Y at each time fraction
+    // Top: starts at 60 (flat), dips to -80 (inward), overshoots to 95, settles at 60
+    // Bottom: starts at 0 (flat), punches to 130 (outward), overshoots to -20, settles at 0
+    function springVal(t, keyframes) {
+      // keyframes: [[time0-1, value], ...]
+      for (var i = 0; i < keyframes.length - 1; i++) {
+        var t0 = keyframes[i][0], v0 = keyframes[i][1];
+        var t1 = keyframes[i+1][0], v1 = keyframes[i+1][1];
+        if (t <= t1) {
+          var p = (t - t0) / (t1 - t0);
+          // ease in-out within segment
+          p = p < 0.5 ? 2*p*p : -1+(4-2*p)*p;
+          return v0 + (v1 - v0) * p;
+        }
+      }
+      return keyframes[keyframes.length-1][1];
+    }
+
+    var topKeys = [[0,60],[0.2,200],[0.45,10],[0.65,72],[0.8,52],[1.0,60]];
+    var botKeys = [[0,0],[0.2,190],[0.45,-45],[0.65,18],[0.8,-8],[1.0,0]];
+
+    function frame(ts) {
+      if (!start) start = ts;
+      var t = Math.min((ts - start) / duration, 1);
+
+      var tv = springVal(t, topKeys);
+      var bv = springVal(t, botKeys);
+
+      topPath.setAttribute('d', 'M0,60 L0,60 Q720,' + tv + ' 1440,60 L1440,60 Z');
+      botPath.setAttribute('d', 'M0,0 L0,0 Q720,' + bv + ' 1440,0 L1440,0 Z');
+
+      if (t < 1) requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }, 350);
   setTimeout(checkReveals, 60);
   setTimeout(function(){ document.getElementById('sec-team').scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
 }
@@ -848,6 +910,61 @@ function checkReveals() {
   });
 }
 checkReveals();
+// ── LIVE SEARCH ──
+var searchIndex = [
+  { key: 'coverage', title: 'I\'m not sure if something is covered',       sub: 'A procedure, treatment, medication, or service you want to understand before going ahead',     keywords: 'covered coverage procedure treatment medication authorization prior auth referral' },
+  { key: 'bill',     title: 'I got a bill I wasn\'t expecting',             sub: 'A charge that doesn\'t look right, an EOB you don\'t understand, or a cost you\'d like to dispute', keywords: 'bill billing charge eob explanation of benefits claim denied dispute payment invoice' },
+  { key: 'benefits', title: 'I want to understand my benefits better',      sub: 'What\'s included, what you\'re entitled to, what you might be missing',                         keywords: 'benefits plan what is covered telehealth gym wellness deductible copay coinsurance' },
+  { key: 'mental',   title: 'I have a question about mental health coverage', sub: 'Therapy, psychiatry, counseling — how it works and what it costs',                             keywords: 'mental health therapy therapist psychiatry counseling behavioral health depression anxiety' },
+  { key: 'other',    title: 'Something else',                                sub: 'We\'ll figure it out together',                                                                  keywords: 'id card update address fraud contact general help other' }
+];
+
+var sinp = document.getElementById('searchInput');
+var sres = document.getElementById('searchResults');
+
+if (sinp && sres) {
+  sinp.addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    if (q.length < 2) { sres.style.display = 'none'; return; }
+
+    var results = searchIndex.filter(function(item) {
+      return (item.title + ' ' + item.sub + ' ' + item.keywords).toLowerCase().indexOf(q) !== -1;
+    });
+
+    if (results.length === 0) {
+      sres.innerHTML = '<div style="padding:14px 16px;font-size:0.875rem;color:var(--gray-dark);">No results — try different keywords</div>';
+    } else {
+      sres.innerHTML = results.map(function(item) {
+        // Highlight matching text
+        var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        var title = item.title.replace(re, '<strong>$1</strong>');
+        return '<div class="sr-item" onclick="pickSearch(\'' + item.key + '\')" style="display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid var(--gray-light);cursor:pointer;transition:background 0.12s;" onmouseover="this.style.background=\'var(--blue-light)\'" onmouseout="this.style.background=\'white\'">'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:0.875rem;font-weight:700;color:var(--gray-darkest);margin-bottom:2px;">' + title + '</div>'
+          + '<div style="font-size:0.75rem;color:var(--gray-dark);">' + item.sub + '</div>'
+          + '</div>'
+          + '<i class="fa-solid fa-arrow-right" style="color:var(--blue);margin-top:3px;flex-shrink:0;"></i>'
+          + '</div>';
+      }).join('');
+    }
+    sres.style.display = 'block';
+  });
+
+  sinp.addEventListener('blur', function() {
+    setTimeout(function() { sres.style.display = 'none'; }, 180);
+  });
+
+  sinp.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { sres.style.display = 'none'; sinp.blur(); }
+  });
+}
+
+function pickSearch(key) {
+  if (sres) sres.style.display = 'none';
+  if (sinp) sinp.value = '';
+  var el = document.getElementById('q-' + key);
+  if (el) el.click();
+}
 
 </script>
 </body>
