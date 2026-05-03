@@ -121,7 +121,11 @@
   /* Recommended Rewrite column */
   td.rewrite-cell {
     position: relative;
-    cursor: default;
+    cursor: pointer;
+  }
+
+  td.rewrite-cell:hover {
+    background: #fdf8ef;
   }
 
   td.rewrite-cell:hover .copy-btn {
@@ -137,7 +141,7 @@
     background: #1a1a1a;
     border: none;
     border-radius: 4px;
-    cursor: pointer;
+    pointer-events: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,8 +149,6 @@
     transition: opacity 0.2s ease, background 0.2s ease;
     flex-shrink: 0;
   }
-
-  .copy-btn:hover { background: #333; }
 
   .copy-btn svg {
     width: 13px;
@@ -162,8 +164,6 @@
     background: #4caf7d;
     opacity: 1;
   }
-
-  .copy-btn.copied svg { stroke: #ffffff; }
 
   .rewrite-text {
     padding-right: 2rem;
@@ -239,8 +239,8 @@
         <td>Thesis</td>
         <td>"Uneven representation… reveals how processes of archival inclusion and exclusion affect the construction of artistic value and legacy."</td>
         <td>Good idea, but too broad. It claims causality without defining the mechanism.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">This paper argues that Jack Stuler's uneven representation across photographic archives shows how artistic legacy is produced through institutional selection, local archival context, and later familial preservation. Rather than treating archival presence as a neutral reflection of artistic importance, Stuler's case reveals that visibility in archives helps make artistic value legible, repeatable, and historically durable.</div>
@@ -251,8 +251,8 @@
         <td>Opening claim about archives</td>
         <td>"Archives as we know them are meant to preserve data…"</td>
         <td>Too generic. It starts from a basic definition instead of the paper's actual problem.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Archives do more than preserve objects; they organize visibility. By determining what is collected, cataloged, exhibited, and made searchable, archives help shape which artists become historically legible and which remain peripheral.</div>
@@ -263,8 +263,8 @@
         <td>Northlight argument</td>
         <td>Stuler included sixteen of his own images, establishing his work as valuable and worth remembering.</td>
         <td>This risks sounding accusatory without enough evidence. It implies self-canonization, but later evidence says he was not self-promotional. That contradiction is interesting, but currently underdeveloped.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Stuler's inclusion in Northlight is complicated by his dual role as both artist and founder. His presence in the archive may be read not simply as self-promotion, but as part of the archive's founding educational structure: a local photographic ecosystem built by ASU faculty, students, and affiliated artists. Still, his ability to appear inside an archive he helped create demonstrates how proximity to institutional formation can shape archival visibility.</div>
@@ -275,8 +275,8 @@
         <td>Claim about artistic value</td>
         <td>Inclusion establishes Stuler as "valuable" and "worth remembering."</td>
         <td>Too absolute. Archives can suggest value, but they do not prove it.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Archival inclusion does not prove artistic value by itself, but it gives value institutional form. Once an artist's work is preserved, cataloged, and placed beside recognized figures, that artist becomes easier to study, cite, exhibit, and remember.</div>
@@ -287,8 +287,8 @@
         <td>Eastman Museum section</td>
         <td>Eastman included Stuler because the museum found his work notable enough to collect.</td>
         <td>Plausible, but not proven. Acquisition may have come from exhibitions, donations, collecting strategy, or institutional relationships.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Stuler's presence in the Eastman Museum collection suggests recognition beyond Northlight, but the basis of that recognition remains unclear. His inclusion in earlier exhibitions provides one possible explanation, though without acquisition records or curatorial statements, the archive's rationale cannot be stated definitively.</div>
@@ -299,8 +299,8 @@
         <td>Absence from other archives</td>
         <td>Stuler cannot be found in other major photographic archives; this shows power is contextual.</td>
         <td>This is one of the paper's most important points, but it needs methodological caution. "No search results" is not the same as confirmed exclusion.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">The absence of Stuler's name from other major photographic archive searches should be treated carefully. Database silence may reflect non-acquisition, incomplete digitization, cataloging limits, or institutional collecting priorities. Even with those limitations, the unevenness of his visibility remains significant because it shows that archival recognition is not universal; it depends on the mission, scope, and history of each institution.</div>
@@ -311,8 +311,8 @@
         <td>Use of Trouillot / Hartman</td>
         <td>Hartman and Trouillot are used to explain archival silence, then applied to Stuler.</td>
         <td>Conceptually useful but ethically uneven. Stuler's marginal archival presence is not comparable to violent racial erasure. The analogy needs to be narrower.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">The concept of archival silence must be used cautiously here. Stuler's partial absence from photographic archives is not equivalent to the silences produced by slavery, racial violence, or dispossession in the work of Trouillot and Hartman. However, their theories help clarify a broader archival principle: what is missing from the record shapes what can be known, narrated, and remembered. In Stuler's case, the silence is not one of historical violence, but of limited institutional legibility.</div>
@@ -323,8 +323,8 @@
         <td>1970s photography context</td>
         <td>The paper lists experimentation, social justice, New Topographics, color photography, and performance art.</td>
         <td>Interesting but too broad. It does not clearly connect those trends to Stuler's inclusion or exclusion.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Stuler's experimental images fit within a broader 1970s photographic climate in which process, distortion, conceptual staging, and alternative approaches to documentary vision gained visibility. This context matters because it suggests that Stuler's work was not aesthetically isolated; it participated in recognizable photographic concerns of the period. However, his limited institutional presence indicates that aesthetic alignment with a period does not guarantee long-term archival prominence.</div>
@@ -335,8 +335,8 @@
         <td>Self-promotion contradiction</td>
         <td>Kelly says Stuler disliked self-promotion, but he included his work in Northlight.</td>
         <td>This is one of the best tensions in the paper. Right now it is softened instead of fully analyzed.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">The tension between Stuler's apparent discomfort with self-promotion and his presence in an archive he helped build is central to the politics of legacy. It suggests that archival self-presence does not always operate as vanity. In this case, it may reflect the blurred boundary between personal artistic practice, institutional responsibility, and pedagogical archive-building.</div>
@@ -347,8 +347,8 @@
         <td>Definition of legacy</td>
         <td>Legacy is treated as a byproduct of archival inclusion.</td>
         <td>Too narrow. His daughter's foundation shows legacy can be built outside formal archives.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Legacy should be understood not as a direct product of archival inclusion alone, but as the result of repeated acts of preservation, narration, and recognition. Formal archives contribute to legacy by granting institutional legitimacy; family foundations and community memory contribute by sustaining visibility where institutions are silent or incomplete.</div>
@@ -359,8 +359,8 @@
         <td>Family / foundation section</td>
         <td>Kelly constructs legacy outside the archive.</td>
         <td>Strong idea, but it needs to be connected more directly to contemporary archival theory.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Kelly's work through the Jack Stuler Foundation shows that legacy-making can occur outside formal institutional archives. Her preservation of Stuler's work, stories, and educational mission demonstrates how family memory can intervene where institutional recognition is partial. This does not replace the authority of museums or archives, but it complicates the idea that institutions alone determine who is remembered.</div>
@@ -371,8 +371,8 @@
         <td>Conclusion</td>
         <td>"Gaps are not a symptom of exclusion, but a structural condition of the archive."</td>
         <td>Strong sentence, but the conclusion ends abstractly. It should return harder to Stuler.</td>
-        <td class="rewrite-cell">
-          <button class="copy-btn" title="Copy text" onclick="copyCell(this)">
+        <td class="rewrite-cell" title="Click to copy">
+          <button class="copy-btn">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
           <div class="rewrite-text">Stuler's case shows that archival gaps are not accidents outside the archive; they are part of how archives function. His strong presence in Northlight, limited presence in Eastman, and apparent absence elsewhere reveal that artistic legacy is unevenly produced across institutions with different missions and histories. His daughter's later work further shows that legacy does not end where institutional archives fall silent. Instead, Stuler's career demonstrates that artistic memory is built through a contested relationship among archives, families, educators, and the institutions that decide what becomes visible.</div>
@@ -384,17 +384,22 @@
 </div>
 
 <script>
-  function copyCell(btn) {
-    const text = btn.closest('td').querySelector('.rewrite-text').innerText.trim();
+  function copyCell(td) {
+    const text = td.querySelector('.rewrite-text').innerText.trim();
+    const btn = td.querySelector('.copy-btn');
     navigator.clipboard.writeText(text).then(() => {
       btn.classList.add('copied');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>`;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>`;
       setTimeout(() => {
         btn.classList.remove('copied');
         btn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
       }, 1800);
     });
   }
+
+  document.querySelectorAll('td.rewrite-cell').forEach(td => {
+    td.addEventListener('click', () => copyCell(td));
+  });
 
   function printSinglePage() {
     const sh = document.documentElement.scrollHeight;
