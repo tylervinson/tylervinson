@@ -205,7 +205,7 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 .full-divider { height: 1px; background: var(--gray); }
 
 /* ── RESPONSE SECTIONS ── */
-.resp-section { padding: 64px 2rem; }
+.resp-section { padding: 64px 2rem; overflow: visible; }
 .resp-section.alt { background: var(--blue-light); }
 .resp-inner { max-width: 1248px; margin: 0 auto; }
 
@@ -227,6 +227,8 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 .team-quote-body { flex: 1; }
 .team-quote-text { font-family: 'Roboto Serif', serif; font-size: 1.125rem; font-style: italic; font-weight: 400; color: var(--gray-darkest); line-height: 1.7; margin-bottom: 10px; position: relative; padding-left: 22px; }
 .team-quote-text::before { content: '\201C'; position: absolute; left: 0; top: -6px; font-size: 2.5rem; color: var(--gold); line-height: 1; font-family: 'Roboto Serif', serif; }
+.quote-char { display: inline-block; opacity: 0; }
+.quote-char.space { display: inline; }
 .team-quote-attr { font-size: 0.8rem; font-weight: 700; color: var(--blue-navy); text-align: right; }
 .team-quote-attr span { font-weight: 400; color: var(--gray-dark); }
 
@@ -502,7 +504,19 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 .reveal-h { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
 .reveal-h.in { opacity: 1; transform: translateY(0); }
 
-/* Fade in only — for backgrounds, quotes, wide elements */
+/* Quote text character animation - each char flies in from the right */
+.reveal-flip { opacity: 1; }
+.quote-char { display: inline-block; opacity: 0; }
+.quote-char.space { display: inline-block; width: 0.3em; opacity: 1; }
+@keyframes charSlide {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.reveal-flip.in .quote-char {
+  animation: charSlide 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Fade in only — for backgrounds, wide elements */
 .reveal-fade { opacity: 0; transition: opacity 0.8s ease; }
 .reveal-fade.in { opacity: 1; }
 
@@ -803,7 +817,7 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
     <div class="reveal-left d3">
       <div class="team-name" id="teamName"></div>
       <div class="team-desc" id="teamDesc"></div>
-      <div class="team-quote reveal-fade d4">
+      <div class="team-quote reveal-flip d4">
         <div class="team-quote-avatar" id="quoteInitials">MB</div>
         <div class="team-quote-body">
           <div class="team-quote-text" id="quoteText"></div>
@@ -1099,6 +1113,8 @@ function pick(el, key) {
   set('quoteText', d.quoteText);
   set('quoteAttr', d.quoteAttr, true);
   set('quoteInitials', d.quoteInitials);
+  // Set up fresh quote observer so it animates on scroll
+  setTimeout(initQuoteObserver, 200);
   set('phoneNum',  d.phone);
   set('phoneNote', d.phoneNote);
   set('faqIntro',  d.faqIntro);
@@ -1123,6 +1139,19 @@ function pick(el, key) {
   var om = document.getElementById('openingMsg');
   if (om && d.ctx) om.textContent = d.ctx;
   document.querySelectorAll('.dynamic').forEach(function(e){ e.classList.add('show'); });
+
+  // Strip .in from every reveal element inside dynamic sections
+  document.querySelectorAll('.dynamic [class*="reveal"]').forEach(function(el) {
+    el.classList.remove('in');
+  });
+
+  // Wait for scroll to finish then re-observe everything
+  setTimeout(function() {
+    initRevealObserver();
+  }, 800);
+  setTimeout(function() {
+    initQuoteObserver();
+  }, 1200);
   // Trigger wave bounce on the blue section
   setTimeout(function() {
     var topPath   = document.querySelector('.wave-top path');
@@ -1225,24 +1254,25 @@ window.addEventListener('scroll', function(){
 }, { passive: true });
 
 var revealSelectors = '.reveal, .reveal-h, .reveal-fade, .reveal-left, .reveal-right, .reveal-scale';
+var revealObserver;
 
 function initRevealObserver() {
-  var io = new IntersectionObserver(function(entries) {
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('in');
-        io.unobserve(entry.target);
+        revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
 
   document.querySelectorAll(revealSelectors).forEach(function(el) {
-    io.observe(el);
+    if (!el.classList.contains('reveal-flip')) {
+      revealObserver.observe(el);
+    }
   });
-  return io;
 }
-
-var revealObserver = initRevealObserver();
 
 // Re-observe any new elements when dynamic sections appear
 function checkReveals() {
@@ -1250,7 +1280,37 @@ function checkReveals() {
     revealObserver.observe(el);
   });
 }
-// ── WRITE TO US FORM ──
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initRevealObserver);
+} else {
+  initRevealObserver();
+}
+// ── QUOTE CHARACTER ANIMATION ──
+function animateQuoteText() {
+  var quoteEl = document.getElementById('quoteText');
+  if (!quoteEl) return;
+  var text = quoteEl.textContent.trim();
+  var words = text.split(' ');
+  quoteEl.innerHTML = words.map(function(word, i) {
+    return '<span class="quote-char" style="animation-delay:' + (i * 0.08) + 's">' + word + '</span>';
+  }).join(' ');
+}
+
+function initQuoteObserver() {
+  var quoteWrap = document.querySelector('.reveal-flip');
+  if (!quoteWrap) return;
+  quoteWrap.classList.remove('in');
+  delete quoteWrap.dataset.charSplit;
+  var obs = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) {
+      quoteWrap.classList.add('in');
+      animateQuoteText();
+      obs.disconnect();
+    }
+  }, { threshold: 0.05 });
+  obs.observe(quoteWrap);
+}
 function showWriteForm() {
   var cards = document.getElementById('optsCards');
   var form  = document.getElementById('optsForm');
