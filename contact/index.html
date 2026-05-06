@@ -205,7 +205,7 @@ nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; al
 .full-divider { height: 1px; background: var(--gray); }
 
 /* ── RESPONSE SECTIONS ── */
-.resp-section { padding: 64px 2rem; }
+.resp-section { padding: 64px 2rem; overflow: visible; }
 .resp-section.alt { background: var(--blue-light); }
 .resp-inner { max-width: 1248px; margin: 0 auto; }
 
@@ -502,7 +502,9 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
 .reveal-h { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
 .reveal-h.in { opacity: 1; transform: translateY(0); }
 
-/* Fade in only — for backgrounds, quotes, wide elements */
+
+
+/* Fade in only — for backgrounds, wide elements */
 .reveal-fade { opacity: 0; transition: opacity 0.8s ease; }
 .reveal-fade.in { opacity: 1; }
 
@@ -868,11 +870,11 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
             <img src="azb-form.svg" alt="" style="width:52px;height:52px;">
           </div>
           <div>
-            <h3 class="copt-title">Send a Message</h3>
-            <p class="copt-body">Best if you have documents to share — an EOB, a bill, or a screenshot. We'll respond by the next business day.</p>
+            <h3 class="copt-title">Submit a Request</h3>
+            <p class="copt-body">Fill out a short form and we'll get back to you. Great if you have documents to attach — an EOB, a bill, or a screenshot.</p>
           </div>
           <div class="copt-action">
-            <button class="btn-tertiary" onclick="showWriteForm()"><span class="btn-label">Write to us</span> <img src="arrow.svg" alt="" style="width:23px;height:23px;display:inline-block;vertical-align:middle;margin-left:6px;flex-shrink:0;"></button>
+            <button class="btn-tertiary" onclick="showWriteForm()"><span class="btn-label">Get in touch</span> <img src="arrow.svg" alt="" style="width:23px;height:23px;display:inline-block;vertical-align:middle;margin-left:6px;flex-shrink:0;"></button>
           </div>
         </div>
       </div>
@@ -889,32 +891,8 @@ footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(
             Back to options
           </button>
         </div>
-        <div class="write-form-body">
-          <div class="wf-two">
-            <div>
-              <label class="wf-label">Your name</label>
-              <span class="wf-hint">How should we address you?</span>
-              <input class="wf-input" type="text" placeholder="e.g. Sarah Miller">
-            </div>
-            <div>
-              <label class="wf-label">Member ID</label>
-              <span class="wf-hint">On the front of your ID card</span>
-              <input class="wf-input" type="text" placeholder="e.g. AZ-884-2291">
-            </div>
-          </div>
-          <div class="wf-row">
-            <label class="wf-label">What's going on?</label>
-            <span class="wf-hint">The more detail, the faster we can help.</span>
-            <textarea class="wf-textarea" placeholder="Tell us what's happening — no need to be formal..."></textarea>
-          </div>
-          <div class="wf-row">
-            <label class="wf-label" style="margin-bottom:8px;">Got a document? <span style="font-weight:400;color:var(--gray-medium);">Optional</span></label>
-            <div class="wf-upload"><p><strong>Drop a file here</strong> or click to browse &nbsp;·&nbsp; EOB, bill, or screenshot</p></div>
-          </div>
-          <div class="wf-foot">
-            <span class="wf-note">Typical response: same or next business day.</span>
-            <button class="btn-primary btn-primary-sm" onclick="submitWriteForm()">Send message</button>
-          </div>
+        <div class="write-form-body" style="padding:28px 28px 32px;">
+          <iframe src="https://bcbsarizona.formstack.com/forms/azblue_contact_us_v2" title="Formstack Form" width="100%" height="600" frameborder="0" style="border:none;display:block;"></iframe>
         </div>
       </div>
     </div>
@@ -1099,6 +1077,7 @@ function pick(el, key) {
   set('quoteText', d.quoteText);
   set('quoteAttr', d.quoteAttr, true);
   set('quoteInitials', d.quoteInitials);
+  // Set up fresh quote observer so it animates on scroll
   set('phoneNum',  d.phone);
   set('phoneNote', d.phoneNote);
   set('faqIntro',  d.faqIntro);
@@ -1123,6 +1102,14 @@ function pick(el, key) {
   var om = document.getElementById('openingMsg');
   if (om && d.ctx) om.textContent = d.ctx;
   document.querySelectorAll('.dynamic').forEach(function(e){ e.classList.add('show'); });
+
+  // Strip .in from every reveal element inside dynamic sections EXCEPT the quote
+  document.querySelectorAll('.dynamic [class*="reveal"]').forEach(function(el) {
+    el.classList.remove('in');
+  });
+
+  // Wait for scroll to finish then re-observe everything
+  setTimeout(initRevealObserver, 800);
   // Trigger wave bounce on the blue section
   setTimeout(function() {
     var topPath   = document.querySelector('.wave-top path');
@@ -1225,24 +1212,23 @@ window.addEventListener('scroll', function(){
 }, { passive: true });
 
 var revealSelectors = '.reveal, .reveal-h, .reveal-fade, .reveal-left, .reveal-right, .reveal-scale';
+var revealObserver;
 
 function initRevealObserver() {
-  var io = new IntersectionObserver(function(entries) {
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('in');
-        io.unobserve(entry.target);
+        revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
 
   document.querySelectorAll(revealSelectors).forEach(function(el) {
-    io.observe(el);
+    revealObserver.observe(el);
   });
-  return io;
 }
-
-var revealObserver = initRevealObserver();
 
 // Re-observe any new elements when dynamic sections appear
 function checkReveals() {
@@ -1250,7 +1236,12 @@ function checkReveals() {
     revealObserver.observe(el);
   });
 }
-// ── WRITE TO US FORM ──
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initRevealObserver);
+} else {
+  initRevealObserver();
+}
 function showWriteForm() {
   var cards = document.getElementById('optsCards');
   var form  = document.getElementById('optsForm');
@@ -1294,26 +1285,6 @@ function hideWriteForm() {
   }, 320);
 }
 
-function submitWriteForm() {
-  var fc = document.getElementById('writeFormCard');
-  if (!fc) return;
-  fc.style.transition = 'opacity 0.25s';
-  fc.style.opacity = '0';
-  setTimeout(function() {
-    fc.innerHTML = '<div class="write-confirm">'
-      + '<div class="write-confirm-ico"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
-      + '<h2>Got it. We\'re on it.</h2>'
-      + '<p>Here\'s exactly what happens next:</p>'
-      + '<div class="write-confirm-timeline">'
-      + '<div class="wct-step"><div class="wct-dot done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="wct-label">Received</div><div class="wct-when">Now</div></div>'
-      + '<div class="wct-step"><div class="wct-dot next">2</div><div class="wct-label">We read it</div><div class="wct-when">2 hrs</div></div>'
-      + '<div class="wct-step"><div class="wct-dot next">3</div><div class="wct-label">We respond</div><div class="wct-when">1 business day</div></div>'
-      + '</div>'
-      + '<button class="write-back" onclick="hideWriteForm()" style="margin:0 auto;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="15 18 9 12 15 6"/></svg> Back to options</button>'
-      + '</div>';
-    fc.style.opacity = '1';
-  }, 260);
-}
 
 // ── REYNA SPIN ──
 var reynaRays = document.getElementById('reynaRays');
