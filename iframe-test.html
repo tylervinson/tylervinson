@@ -107,18 +107,23 @@
       white-space: nowrap;
     }
 
-    .url-text {
+    #url-input {
+      font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 0.8rem;
       color: #1a1a1a;
-      font-family: 'SF Mono', 'Fira Code', monospace;
       background: #fafafa;
       border: 1px solid #e0e0e0;
       border-radius: 4px;
-      padding: 0.3rem 0.6rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 500px;
+      padding: 0.35rem 0.6rem;
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #url-input:focus {
+      border-color: #FFBE5F;
+      box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
     }
 
     .controls {
@@ -320,12 +325,10 @@
     <div class="info-bar">
       <div class="url-display">
         <span class="url-label">Target URL</span>
-        <span class="url-text" title="https://welcome.benefitrx.com/rxexternal/external-prescription-drug-list?type=ClientFormulary&var=A%E2%80%A6">
-          https://welcome.benefitrx.com/rxexternal/external-prescription-drug-list?type=ClientFormulary&var=A…
-        </span>
+        <input type="url" id="url-input" value="https://welcome.benefitrx.com/rxexternal/external-prescription-drug-list?type=ClientFormulary&var=A%E2%80%A6" placeholder="https://example.com" />
       </div>
       <div class="controls">
-        <button onclick="reloadFrame()">Reload</button>
+        <button onclick="loadURL()">Load</button>
         <button class="accent" onclick="openDirect()">Open Direct</button>
       </div>
     </div>
@@ -388,43 +391,69 @@
   </main>
 
   <script>
-    const TARGET_URL = "https://welcome.benefitrx.com/rxexternal/external-prescription-drug-list?type=ClientFormulary&var=A%E2%80%A6";
     const frame = document.getElementById('embed-frame');
+    document.getElementById('url-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadURL();
+    });
     const badge = document.getElementById('status-badge');
     const statusText = document.getElementById('status-text');
     const loadingOverlay = document.getElementById('loading-overlay');
     const blockedOverlay = document.getElementById('blocked-overlay');
     const startTime = Date.now();
 
-    // Detect load success
+    let resolved = false;
+
+    // The only reliable cross-origin signal: if the frame loads but its
+    // contentWindow.location is still 'about:blank', the browser refused to render it.
     frame.addEventListener('load', () => {
+      if (resolved) return;
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
       try {
-        // If we can access contentDocument, it loaded same-origin or unblocked
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        if (doc && doc.body) {
+        // If we can read the href, it loaded same-origin (rare). Success.
+        const href = frame.contentWindow.location.href;
+        if (href && href !== 'about:blank') {
+          resolved = true;
           setSuccess(elapsed);
         } else {
-          // Loaded but blank — likely blocked
+          // href is 'about:blank' — browser blocked the embed
+          resolved = true;
           setBlocked();
         }
       } catch (e) {
-        // Cross-origin access denied but it DID load (no X-Frame-Options block)
-        setSuccess(elapsed);
+        // SecurityError = cross-origin BUT successfully rendered (normal case for allowed embeds).
+        // We can't read the URL but the frame DID load content — check via postMessage trick below.
+        // For now, wait for the postMessage or fallback timeout.
+        scheduleBlocked(elapsed);
       }
     });
 
-    // Detect if frame stays empty after timeout (blocked silently)
-    setTimeout(() => {
-      try {
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        if (!doc || doc.URL === 'about:blank' || doc.body?.innerHTML?.trim() === '') {
+    // If the remote page is cooperative it may postMessage; if not, assume blocked after delay
+    let blockedTimer;
+    function scheduleBlocked(elapsed) {
+      blockedTimer = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
           setBlocked();
         }
-      } catch (e) {
-        // Cross-origin but loaded — probably fine, success was already set
+      }, 2000);
+    }
+
+    // Listen for any message from the frame (proves it rendered)
+    window.addEventListener('message', () => {
+      if (!resolved) {
+        clearTimeout(blockedTimer);
+        resolved = true;
+        setSuccess(((Date.now() - startTime) / 1000).toFixed(2));
       }
-    }, 6000);
+    });
+
+    // Hard fallback — if load never fires at all within 10s, it's blocked
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        setBlocked();
+      }
+    }, 10000);
 
     function setSuccess(elapsed) {
       loadingOverlay.classList.add('hidden');
@@ -453,7 +482,10 @@
       document.getElementById('res-next').textContent = 'Contact site owner to allowlist your domain.';
     }
 
-    function reloadFrame() {
+    function loadURL() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url) return;
+      resolved = false;
       loadingOverlay.classList.remove('hidden');
       blockedOverlay.classList.add('hidden');
       badge.className = 'status-badge loading';
@@ -462,11 +494,12 @@
       document.getElementById('res-status').className = 'value pending';
       document.getElementById('res-time').textContent = '—';
       document.getElementById('res-next').textContent = 'Waiting for result…';
-      frame.src = frame.src;
+      frame.src = url;
     }
 
     function openDirect() {
-      window.open(TARGET_URL, '_blank');
+      const url = document.getElementById('url-input').value.trim();
+      if (url) window.open(url, '_blank');
     }
 
     function printSinglePage() {
