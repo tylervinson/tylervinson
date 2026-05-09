@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitecore Widget Editor — Capability Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    /* Print button */
+    #print-btn {
+      position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
+      background: #1a1a1a; border: none; border-radius: 6px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.7; transition: opacity 0.3s ease; z-index: 9999;
+    }
+    #print-btn:hover { opacity: 1; }
+    #print-btn svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; }
+    @media print { #print-btn { display: none; } }
+
+    .page { max-width: 960px; margin: 0 auto; padding: 60px 40px; }
+
+    /* Header */
+    .report-header { margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid #e0e0e0; }
+    .report-header .label {
+      font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: #FFBE5F; margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 42px; font-weight: 300; letter-spacing: -1px; color: #1a1a1a;
+      margin-bottom: 8px; line-height: 1.1;
+    }
+    .report-header h1 strong { font-weight: 600; }
+    .report-header .meta { font-size: 13px; color: #999; margin-top: 16px; display: flex; gap: 24px; flex-wrap: wrap; }
+    .report-header .meta span { display: flex; align-items: center; gap: 6px; }
+    .meta-dot { width: 6px; height: 6px; border-radius: 50%; background: #FFBE5F; flex-shrink: 0; }
+
+    /* Section titles */
+    .section { margin-bottom: 56px; }
+    .section-title {
+      font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: #999; margin-bottom: 24px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* Summary cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 32px; }
+    .summary-card { background: #fff; padding: 24px 20px; }
+    .summary-card .value { font-size: 32px; font-weight: 300; letter-spacing: -1px; color: #1a1a1a; line-height: 1; }
+    .summary-card .label { font-size: 11px; color: #999; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Architecture */
+    .file-list { display: flex; flex-direction: column; gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .file-row { background: #fff; display: grid; grid-template-columns: 200px 80px 1fr; align-items: start; padding: 16px 20px; gap: 16px; }
+    .file-row:hover { background: #fafafa; }
+    .file-name { font-size: 13px; font-weight: 600; color: #1a1a1a; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .file-size { font-size: 11px; color: #bbb; padding-top: 2px; }
+    .file-desc { font-size: 13px; color: #666; }
+
+    /* Mode section */
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .mode-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; }
+    .mode-card .mode-tag {
+      display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px;
+    }
+    .mode-tag.ce { background: #f0fdf4; color: #16a34a; }
+    .mode-tag.ee { background: #eff6ff; color: #2563eb; }
+    .mode-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .mode-card p { font-size: 13px; color: #666; margin-bottom: 14px; }
+    .mode-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .mode-card ul li { font-size: 13px; color: #444; padding-left: 14px; position: relative; }
+    .mode-card ul li::before { content: '—'; position: absolute; left: 0; color: #FFBE5F; font-weight: 700; }
+
+    /* Widget cards */
+    .widget-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .widget-card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #f0f0f0; }
+    .widget-card-header h3 { font-size: 16px; font-weight: 600; }
+    .widget-type-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+    }
+    .badge-standard { background: #fefce8; color: #a16207; }
+    .badge-imagegrid { background: #fdf4ff; color: #9333ea; }
+    .widget-card-body { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .widget-card-desc { font-size: 13px; color: #555; line-height: 1.7; }
+    .widget-card-desc p { margin-bottom: 10px; }
+    .widget-card-desc p:last-child { margin-bottom: 0; }
+
+    .fields-section h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 10px; }
+    .field-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .field-tag {
+      font-size: 11px; padding: 3px 9px; border-radius: 4px;
+      background: #f5f5f5; color: #444; font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .field-tag.attr { background: #fff7ed; color: #c2410c; }
+    .field-tag.sync { background: #f0fdf4; color: #166534; }
+    .field-tag.grid { background: #eff6ff; color: #1d4ed8; }
+    .field-tag.standalone { background: #fdf4ff; color: #7e22ce; }
+
+    .class-label {
+      font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #f5f5f5; color: #666; padding: 2px 8px; border-radius: 4px;
+      display: inline-block; margin-top: 4px;
+    }
+
+    /* Capabilities */
+    .capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .cap-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; }
+    .cap-card .icon { font-size: 20px; margin-bottom: 10px; }
+    .cap-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .cap-card p { font-size: 12px; color: #666; line-height: 1.6; }
+
+    /* Notes */
+    .notes-list { display: flex; flex-direction: column; gap: 10px; }
+    .note { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; background: #fff; border: 1px solid #e0e0e0; border-left: 3px solid #FFBE5F; border-radius: 0 6px 6px 0; padding: 14px 16px; }
+    .note-icon { font-size: 13px; padding-top: 1px; }
+    .note-body { font-size: 13px; color: #555; line-height: 1.6; }
+    .note-body strong { color: #1a1a1a; font-weight: 600; }
+
+    /* Registry update flow */
+    .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin-top: 8px; }
+    .flow-step { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #444; flex: 1; min-width: 120px; text-align: center; }
+    .flow-arrow { font-size: 16px; color: #FFBE5F; padding: 0 6px; flex-shrink: 0; }
+
+    /* Footer */
+    footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+    footer span { font-size: 12px; color: #bbb; }
+
+    @media (max-width: 720px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .mode-grid { grid-template-columns: 1fr; }
+      .widget-card-body { grid-template-columns: 1fr; }
+      .capability-grid { grid-template-columns: 1fr 1fr; }
+      .file-row { grid-template-columns: 1fr 60px; }
+      .file-desc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<button id="print-btn" title="Save as PDF" onclick="printSinglePage()">
+  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+</button>
+
+<div class="page">
+
+  <div class="report-header">
+    <div class="label">Capability Report</div>
+    <h1><strong>Sitecore Widget Editor</strong> v2</h1>
+    <p style="color:#666; font-size:14px; margin-top:10px; max-width:580px;">A Chrome Manifest V3 extension that enables content editors to update Sitecore widget HTML directly from the browser sidebar — without accessing the CMS back-end directly.</p>
+    <div class="meta">
+      <span><span class="meta-dot"></span>Extension version 1.1.0</span>
+      <span><span class="meta-dot"></span>Manifest V3</span>
+      <span><span class="meta-dot"></span>Registry hosted at tylervinson.com</span>
+      <span><span class="meta-dot"></span>4 managed widgets</span>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="section">
+    <div class="section-title">At a Glance</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="value">4</div>
+        <div class="label">Managed Widgets</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">2</div>
+        <div class="label">Editor Modes</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">9</div>
+        <div class="label">Extension Files</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">↻</div>
+        <div class="label">Live Registry Refresh</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section">
+    <div class="section-title">File Architecture</div>
+    <div class="file-list">
+      <div class="file-row">
+        <div class="file-name">manifest.json</div>
+        <div class="file-size">1.1 KB</div>
+        <div class="file-desc">MV3 manifest. Declares side panel, content script injection across all URLs and frames, and permissions: sidePanel, activeTab, storage, webNavigation.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">background.js</div>
+        <div class="file-size">4.6 KB</div>
+        <div class="file-desc">Service worker. Handles sidepanel ↔ content script message routing, registry version checks every 4 hours, badge notifications, and frame-scanning coordination.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">content-script.js</div>
+        <div class="file-size">21 KB</div>
+        <div class="file-desc">Injected into every frame. Handles widget detection, SSC API reads/writes, DOM parsing, HTML diff/rebuild, CLONE_ITEM, DELETE_ITEM, and image grid operations.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">sidepanel.html</div>
+        <div class="file-size">6.3 KB</div>
+        <div class="file-desc">Dark-themed panel shell. Contains the widget picker dropdown, scrollable content area, apply bar, update banner, mode badge, and refresh button in the footer.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">sidepanel.js</div>
+        <div class="file-size">16 KB</div>
+        <div class="file-desc">Panel logic. Fetches registry, scans page, renders standard forms and image-grid UI, handles add/delete item actions, and listens for content item change events.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">sitecore-bridge.js</div>
+        <div class="file-size">1.4 KB</div>
+        <div class="file-desc">Runs in the page world. Fires Sitecore-aware events after DOM mutations — calls setModified() and resetChromes() so the Experience Editor registers changes.</div>
+      </div>
+      <div class="file-row">
+        <div class="file-name">icon16/48/128.png</div>
+        <div class="file-size">~1 KB</div>
+        <div class="file-desc">Extension icons at three sizes for the Chrome toolbar and extension management page.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor modes -->
+  <div class="section">
+    <div class="section-title">Editor Modes</div>
+    <div class="mode-grid">
+      <div class="mode-card">
+        <span class="mode-tag ce">Content Editor</span>
+        <h3>Content Editor Mode</h3>
+        <p>Detected by URL pattern and the presence of <code>scContentIframeId0</code>. Reads and writes widget HTML via the Sitecore SSC REST API, then automates the "Edit HTML → Accept" button flow to commit changes into the CMS.</p>
+        <ul>
+          <li>Reads field HTML via <code>/sitecore/api/ssc/aggregate/content/Items/Fields</code></li>
+          <li>Auto-detects current item ID from Quick Info input</li>
+          <li>Monitors tree navigation — rescans automatically on item switch</li>
+          <li>Writes back through the native HTML editor dialog</li>
+          <li>Supports all Rich Text fields on the active item</li>
+        </ul>
+      </div>
+      <div class="mode-card">
+        <span class="mode-tag ee">Experience Editor</span>
+        <h3>Experience Editor Mode</h3>
+        <p>Detected by scanning DOM across all frames for registered widget CSS classes. Reads from and writes directly to live page elements. Changes are immediately visible in the WYSIWYG canvas.</p>
+        <ul>
+          <li>Scans all frames, deduplicates widget instances</li>
+          <li>Live DOM reads and writes — no API calls required</li>
+          <li>Fires Sitecore bridge events after every change</li>
+          <li>Calls <code>PageEditor.setModified()</code> and <code>ChromeManager.resetChromes()</code></li>
+          <li>Widget picker shown when multiple widgets are found</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Widgets -->
+  <div class="section">
+    <div class="section-title">Managed Widgets</div>
+
+    <!-- Animated Cards -->
+    <div class="widget-card">
+      <div class="widget-card-header">
+        <div>
+          <h3>Animated Cards</h3>
+          <span class="class-label">.card-row</span>
+        </div>
+        <span class="widget-type-badge badge-standard">Standard Repeat</span>
+      </div>
+      <div class="widget-card-body">
+        <div class="widget-card-desc">
+          <p>A three-card statistics widget where each card displays an animated number counter and a label. Numbers count up from zero to their target value when the widget scrolls into view.</p>
+          <p>The extension manages the numeric target value and the label text on each card. When a number is written, it is also synced to the <code>data-target</code> attribute which drives the JavaScript counter animation — ensuring the displayed number and the animation target stay in sync.</p>
+        </div>
+        <div class="fields-section">
+          <h4>Repeat Item — Card</h4>
+          <div class="field-tags">
+            <span class="field-tag sync">Number (syncs data-target)</span>
+            <span class="field-tag">Card Label</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insurance Plan Comparison -->
+    <div class="widget-card">
+      <div class="widget-card-header">
+        <div>
+          <h3>Insurance Plan Comparison Tool</h3>
+          <span class="class-label">.insurance-comparison-tool</span>
+        </div>
+        <span class="widget-type-badge badge-standard">Standard Repeat + Standalone</span>
+      </div>
+      <div class="widget-card-body">
+        <div class="widget-card-desc">
+          <p>A side-by-side insurance plan comparison widget with up to 4 plans. Each plan has a selector button at the top and a detailed comparison grid below. Selecting a plan highlights its column across all comparison rows.</p>
+          <p>The extension edits both the plan selector buttons (name, coverage label, price) and the corresponding cells in the comparison grid — the <code>gridSelector</code> / <code>gridCellSelector</code> field type handles the grid cell writes. Numeric fields like price and deductible are also synced to data attributes used by the grid's JavaScript.</p>
+          <p>A standalone section heading field sits above the repeat group and controls the widget's title.</p>
+        </div>
+        <div class="fields-section">
+          <h4>Standalone Field</h4>
+          <div class="field-tags">
+            <span class="field-tag standalone">Section Heading</span>
+          </div>
+          <h4 style="margin-top:12px;">Repeat Item — Plan</h4>
+          <div class="field-tags">
+            <span class="field-tag">Plan Type</span>
+            <span class="field-tag">Plan Name</span>
+            <span class="field-tag">Coverage Type</span>
+            <span class="field-tag sync grid">Monthly Price (sync + grid)</span>
+            <span class="field-tag grid">Annual Deductible (grid)</span>
+            <span class="field-tag grid">Max Out-of-Pocket (grid)</span>
+            <span class="field-tag grid">Coverage % (grid)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zoom Meetings -->
+    <div class="widget-card">
+      <div class="widget-card-header">
+        <div>
+          <h3>Zoom Meetings</h3>
+          <span class="class-label">.zoom-meetings</span>
+        </div>
+        <span class="widget-type-badge badge-standard">Standard Repeat</span>
+      </div>
+      <div class="widget-card-body">
+        <div class="widget-card-desc">
+          <p>A scheduled meetings list where each row displays a date block (month, day, time), a title, a description, and a "Join Meeting" link. Meetings with a <code>data-end</code> date in the past are automatically hidden from view via a CSS collapse animation.</p>
+          <p>The extension can edit all fields on each meeting row including the join URL, which is read from and written to the <code>href</code> attribute of the link element rather than its text content. Meetings can be added (clones the last row with blank fields) or deleted (with a guard preventing removal of the last remaining item).</p>
+        </div>
+        <div class="fields-section">
+          <h4>Repeat Item — Meeting</h4>
+          <div class="field-tags">
+            <span class="field-tag">Month</span>
+            <span class="field-tag">Day</span>
+            <span class="field-tag">Time</span>
+            <span class="field-tag">Meeting Title</span>
+            <span class="field-tag">Description</span>
+            <span class="field-tag attr">Join URL (attr: href)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Grid -->
+    <div class="widget-card">
+      <div class="widget-card-header">
+        <div>
+          <h3>Image Grid Widget</h3>
+          <span class="class-label">.image-grid-widget</span>
+        </div>
+        <span class="widget-type-badge badge-imagegrid">Special Type: image-grid</span>
+      </div>
+      <div class="widget-card-body">
+        <div class="widget-card-desc">
+          <p>A flexible image grid with multiple layout presets. The extension renders a completely custom editing UI for this widget — instead of the standard field form, it shows a layout picker dropdown and a draggable list of images.</p>
+          <p>Layouts are defined in the registry and map to CSS snippets that are injected into the widget's internal <code>&lt;style&gt;</code> block on apply. The layout picker is context-aware, showing only layouts compatible with the current number of visible images.</p>
+          <p>Each image row has a drag handle for reordering and a Show/Hide toggle. On apply, the extension rewrites <code>data-order</code>, <code>data-hidden</code>, and CSS <code>order</code> on each image element, and replaces the style block with the selected layout CSS.</p>
+        </div>
+        <div class="fields-section">
+          <h4>Special UI Controls</h4>
+          <div class="field-tags">
+            <span class="field-tag standalone">Layout Picker (dropdown)</span>
+            <span class="field-tag">Drag-to-Reorder</span>
+            <span class="field-tag">Show / Hide per image</span>
+          </div>
+          <h4 style="margin-top:12px;">Written Attributes</h4>
+          <div class="field-tags">
+            <span class="field-tag sync">data-order</span>
+            <span class="field-tag sync">data-hidden</span>
+            <span class="field-tag grid">CSS order property</span>
+            <span class="field-tag attr">Inline &lt;style&gt; block</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core capabilities -->
+  <div class="section">
+    <div class="section-title">Core Capabilities</div>
+    <div class="capability-grid">
+      <div class="cap-card">
+        <div class="icon">＋</div>
+        <h4>Add Items</h4>
+        <p>Clones the last repeat item and clears all field values, inserting it immediately after. Panel rescans and restores the active widget on completion.</p>
+      </div>
+      <div class="cap-card">
+        <div class="icon">✕</div>
+        <h4>Delete Items</h4>
+        <p>Removes any repeat item by index. Guarded — the last remaining item cannot be deleted. Panel rescans after deletion.</p>
+      </div>
+      <div class="cap-card">
+        <div class="icon">↻</div>
+        <h4>Registry Refresh</h4>
+        <p>Refresh button in the panel footer re-fetches the live registry on demand, without reopening or reinstalling the extension.</p>
+      </div>
+      <div class="cap-card">
+        <div class="icon">!</div>
+        <h4>Update Notifications</h4>
+        <p>Background service checks for registry version changes every 4 hours. A badge and in-panel banner appear when a new version is detected.</p>
+      </div>
+      <div class="cap-card">
+        <div class="icon">⌗</div>
+        <h4>Attr Field Type</h4>
+        <p>Fields marked with <code>attr</code> read from and write to HTML attributes (e.g. <code>href</code>) rather than text content — enabling link URL editing.</p>
+      </div>
+      <div class="cap-card">
+        <div class="icon">⇄</div>
+        <h4>Data Attr Sync</h4>
+        <p>Fields marked with <code>syncDataAttr</code> write their value to both the DOM element and a specified data attribute — keeping JS-driven components in sync.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registry update flow -->
+  <div class="section">
+    <div class="section-title">Registry Update Flow</div>
+    <p style="font-size:13px; color:#666; margin-bottom:16px;">Adding new widgets or editing existing fields requires only a registry JSON push — no extension reinstall needed. An extension reinstall is only required when the core JS files change.</p>
+    <div class="flow">
+      <div class="flow-step">Edit widget-registry.json</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Push to tylervinson.com/widget/</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Bump version string</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Badge + banner appear in extension</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Author clicks ↻ or reopens panel</div>
+    </div>
+  </div>
+
+  <!-- Notes & known constraints -->
+  <div class="section">
+    <div class="section-title">Notes &amp; Known Constraints</div>
+    <div class="notes-list">
+      <div class="note">
+        <div class="note-icon">⚠</div>
+        <div class="note-body"><strong>API key is hardcoded</strong> in content-script.js as a GUID. It's not a secret credential per se, but it's bundled in the extension ZIP and visible to anyone who unpacks it.</div>
+      </div>
+      <div class="note">
+        <div class="note-icon">⚠</div>
+        <div class="note-body"><strong>Add/Delete (CLONE_ITEM / DELETE_ITEM)</strong> are only explicitly handled in the Experience Editor branch of the message handler. In Content Editor mode, these messages fall through to the EE path — behavior may differ in CE depending on page context.</div>
+      </div>
+      <div class="note">
+        <div class="note-icon">⚠</div>
+        <div class="note-body"><strong>Image Grid editing</strong> is likely only fully functional in Experience Editor mode. In Content Editor mode, UPDATE_WIDGET_DATA goes through <code>buildUpdatedHtml</code> which does not have image-grid awareness — the dedicated <code>buildImageGridHtml</code> function would not be called.</div>
+      </div>
+      <div class="note">
+        <div class="note-icon">ℹ</div>
+        <div class="note-body"><strong>No bundled registry file</strong> — the <code>onInstalled</code> handler attempts to load a <code>widget-registry.json</code> from the extension package, but no such file is included in the ZIP. The panel relies entirely on the remote registry URL from first open.</div>
+      </div>
+      <div class="note">
+        <div class="note-icon">ℹ</div>
+        <div class="note-body"><strong>Retry on scan</strong> — the panel retries widget scanning up to 6 times at 600ms intervals to handle pages where iframes or content may not be ready immediately on open.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Sitecore Widget Editor v2 — Extension Capability Report</span>
+    <span>Generated May 2026</span>
+  </footer>
+
+</div>
+
+<script>
+function printSinglePage() {
+  var body = document.body;
+  var sh = body.scrollHeight, sw = body.scrollWidth;
+  var style = document.createElement('style');
+  style.id = '__print_override';
+  style.textContent = '@page { size: ' + sw + 'px ' + sh + 'px; margin: 0; } body { width: ' + sw + 'px !important; }';
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(function() { var s = document.getElementById('__print_override'); if (s) s.remove(); }, 1000);
+}
+</script>
+
+</body>
+</html>
