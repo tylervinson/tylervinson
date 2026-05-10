@@ -871,104 +871,36 @@ function processHubFile(file) {
     try {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
-      
-      log(`Found ${workbook.SheetNames.length} sheets`, 'info');
-      
-      const commonColumns = ['Name', 'Location', 'County'];
-      const phoneVariants = ['Phone', 'Phone Number'];
-      const excludeColumns = ['Website', 'Description', 'Email'];
-      let allData = [];
-      let hiddenSheets = [];
-      
-      // Process each sheet
-      workbook.SheetNames.forEach(sheetName => {
-        // Check if sheet is hidden
-        let isHidden = false;
-        if (workbook.Workbook && workbook.Workbook.Sheets) {
-          const sheetObj = workbook.Workbook.Sheets.find(s => s.name === sheetName);
-          if (sheetObj && sheetObj.hidden === true) {
-            isHidden = true;
-          }
-        }
-        
-        if (isHidden) {
-          log(`Skipping hidden sheet: "${sheetName}"`, 'info');
-          hiddenSheets.push(sheetName);
-          return;
-        }
-        
-        log(`Processing sheet: "${sheetName}"`, 'info');
-        const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-        
-        if (rows.length === 0) {
-          log(`Sheet "${sheetName}" is empty, skipping`, 'error');
-          return;
-        }
-        
-        log(`Sheet "${sheetName}": ${rows.length} records`, 'ok');
-        
-        // Normalize and reorder columns
-        const normalizedRows = rows.map(row => {
-          const normalized = { _sheet: sheetName, _category: sheetName };
-          
-          // Add common columns first
-          commonColumns.forEach(col => {
-            normalized[col] = row[col] || '';
-          });
-          
-          // Normalize phone columns (Phone or Phone Number -> Phone)
-          phoneVariants.forEach(variant => {
-            if (row[variant]) {
-              normalized['Phone'] = row[variant];
-            }
-          });
-          
-          // Add sheet-specific columns (those that aren't common, phone variants, or excluded)
-          Object.keys(row).forEach(col => {
-            if (!commonColumns.includes(col) && !phoneVariants.includes(col) && !excludeColumns.includes(col)) {
-              normalized[col] = row[col] || '';
-            }
-          });
-          
-          // Always include special columns (Website, Description, Email) even if empty
-          excludeColumns.forEach(col => {
-            if (row[col]) {
-              normalized[col] = row[col];
-            }
-          });
-          
-          return normalized;
-        });
-        
-        allData = allData.concat(normalizedRows);
-      });
-      
-      if (allData.length === 0) {
-        setStatus('No data found in any visible sheets.', 'error');
-        log('No data found.', 'error');
+      const sheetName = workbook.SheetNames[0];
+      log(`Sheet: "${sheetName}"`, 'info');
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (rows.length === 0) {
+        setStatus('The spreadsheet appears to be empty.', 'error');
+        log('No rows found.', 'error');
         return;
       }
 
-      log(`Conversion complete — ${allData.length} records total`, 'ok');
+      log(`Found ${rows.length} rows`, 'ok');
       
-      convertedJSON = allData;
+      convertedJSON = rows;
       outputFilename = 'medicaid-work-requirements.txt';
 
       // Stats
-      const jsonStr = JSON.stringify(allData);
-      const sizeKB = (new Blob([jsonStr]).size / 1024).toFixed(1);
-      document.getElementById('statRows').textContent = allData.length.toLocaleString();
-      const uniqueSheets = [...new Set(allData.map(r => r._sheet))];
-      document.getElementById('statCols').textContent = uniqueSheets.length;
-      document.getElementById('statMapped').textContent = uniqueSheets.length + '/' + uniqueSheets.length;
-      document.getElementById('statSize').textContent = sizeKB + ' KB';
+      const jsonStr  = JSON.stringify(rows);
+      const sizeKB   = (new Blob([jsonStr]).size / 1024).toFixed(1);
+      document.getElementById('statRows').textContent   = rows.length.toLocaleString();
+      document.getElementById('statCols').textContent   = Object.keys(rows[0]).length;
+      document.getElementById('statMapped').textContent = Object.keys(rows[0]).length + '/' + Object.keys(rows[0]).length;
+      document.getElementById('statSize').textContent   = sizeKB + ' KB';
       statsRow.style.display = 'flex';
 
-      // Preview - show first 5 records with their columns
+      // Don't show mapping panel for HUB - just preview
       previewTable.innerHTML = '';
-      if (allData.length > 0) {
-        const cols = Object.keys(allData[0]).filter(c => !c.startsWith('_'));
+      if (rows.length > 0) {
+        const cols = Object.keys(rows[0]);
         const colgroup = document.createElement('colgroup');
         cols.forEach(c => {
           const col = document.createElement('col');
@@ -988,7 +920,7 @@ function processHubFile(file) {
         previewTable.appendChild(thead);
 
         const tbody = document.createElement('tbody');
-        allData.slice(0, 5).forEach(rec => {
+        rows.slice(0, 5).forEach(rec => {
           const tr = document.createElement('tr');
           cols.forEach(c => {
             const td = document.createElement('td');
@@ -1006,11 +938,8 @@ function processHubFile(file) {
       actionsRow.style.display = 'flex';
       downloadBtn.disabled = false;
 
-      if (hiddenSheets.length > 0) {
-        log(`Skipped ${hiddenSheets.length} hidden sheet(s): ${hiddenSheets.join(', ')}`, 'info');
-      }
-      
-      setStatus(`Ready to download — ${allData.length} records from ${uniqueSheets.length} sheet(s) converted successfully`, 'success');
+      log(`Conversion complete — ${rows.length} records, ${sizeKB} KB`, 'ok');
+      setStatus(`Ready to download — ${rows.length} records converted successfully`, 'success');
 
     } catch (err) {
       setStatus('Failed to parse file. Make sure it\'s a valid .xlsx or .xls file.', 'error');
