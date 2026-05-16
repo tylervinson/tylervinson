@@ -1,6 +1,6 @@
 {
-  "version": "1.6.0",
-  "updatedAt": "2026-03-05T00:00:00.000Z",
+  "version": "2.2.0",
+  "updatedAt": "2026-05-16T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
@@ -124,7 +124,7 @@
       "class": "zoom-meetings",
       "name": "Zoom Meetings",
       "repeat": {
-        "selector": ".zoom-meeting",
+        "selector": ".zmw-meeting",
         "groupLabel": "Meeting",
         "groupLabelField": "title"
       },
@@ -132,39 +132,38 @@
         {
           "key": "month",
           "label": "Month",
-          "selector": ".zoom-month",
+          "selector": ".zmw-month",
           "type": "text"
         },
         {
           "key": "day",
           "label": "Day",
-          "selector": ".zoom-day",
+          "selector": ".zmw-day",
           "type": "text"
         },
         {
           "key": "time",
           "label": "Time",
-          "selector": ".zoom-time",
+          "selector": ".zmw-time",
           "type": "text"
         },
         {
           "key": "title",
           "label": "Meeting Title",
-          "selector": ".zoom-title",
+          "selector": ".zmw-title-text",
           "type": "text"
         },
         {
           "key": "description",
-          "label": "Description",
-          "selector": ".zoom-description",
+          "label": "Short Description",
+          "selector": ".zmw-description",
           "type": "text"
         },
         {
-          "key": "link",
-          "label": "Join URL",
-          "selector": ".zoom-link",
-          "type": "text",
-          "attr": "href"
+          "key": "details",
+          "label": "Detail Body (HTML)",
+          "selector": ".zmw-extender",
+          "type": "textarea"
         }
       ]
     }
