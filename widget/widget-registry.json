@@ -1,6 +1,6 @@
 {
-  "version": "2.2.0",
-  "updatedAt": "2026-05-16T00:00:00.000Z",
+  "version": "2.1.0",
+  "updatedAt": "2026-05-09T12:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
@@ -126,26 +126,19 @@
       "repeat": {
         "selector": ".zmw-meeting",
         "groupLabel": "Meeting",
-        "groupLabelField": "title"
+        "groupLabelField": "title",
+        "dateField": "datetime",
+        "dateAttr": "data-end",
+        "newItemTemplate": "<div class=\"zmw-meeting\" data-end=\"{date}\"><div class=\"zmw-date-block\"><div class=\"zmw-month\">{month}</div><div class=\"zmw-day\">{day}</div><div class=\"zmw-time\">{time}</div></div><div class=\"zmw-content\"><div class=\"zmw-title\"><span class=\"zmw-title-text\">{title}</span><svg class=\"zmw-chevron\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M4 7l6 6 6-6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div><div class=\"zmw-description\">{description}</div><div class=\"zmw-extender\"><p>{details}</p></div></div></div>"
       },
       "fields": [
         {
-          "key": "month",
-          "label": "Month",
-          "selector": ".zmw-month",
-          "type": "text"
-        },
-        {
-          "key": "day",
-          "label": "Day",
-          "selector": ".zmw-day",
-          "type": "text"
-        },
-        {
-          "key": "time",
-          "label": "Time",
-          "selector": ".zmw-time",
-          "type": "text"
+          "key": "datetime",
+          "label": "Date & Time",
+          "selector": null,
+          "attr": "data-end",
+          "type": "datetime-local",
+          "hint": "Sets the date, time, and expiry automatically"
         },
         {
           "key": "title",
@@ -161,7 +154,7 @@
         },
         {
           "key": "details",
-          "label": "Detail Body (HTML)",
+          "label": "Detail Body",
           "selector": ".zmw-extender",
           "type": "textarea"
         }
