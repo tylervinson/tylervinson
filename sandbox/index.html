@@ -779,7 +779,567 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- QUESTION CARDS -->
 <div class="q-section">
   <div class="q-inner">
-    <div class="zoom-widget">@nbsp;</div>
+    <div class="zoom-widget">
+
+<!--
+    ================================================================
+    ZOOM MEETINGS WIDGET — Sitecore Rich Text Component
+    ================================================================
+    PASTE THIS ENTIRE FILE into a Sitecore Rich Text field.
+    Use the "Edit HTML" source view in the WYSIWYG editor.
+
+    IMPORTANT:
+    • This file contains only HTML + CSS. No JavaScript.
+    • The GTM tag (zoom-gtm-tag.html) provides all behaviour.
+    • The Widget Editor extension reads and writes this field
+      using the class names below — do not rename them.
+    • The root element must keep class="zoom-meetings" for the
+      extension to detect this widget on the item.
+    ================================================================
+-->
+
+<style id="zoom-widget-styles">
+#zoom-meetings-widget {
+    --azb-navy:       #0B3B60;
+    --azb-navy-hover: #082A45;
+    --azb-cyan-500:   #28BFE0;
+    --azb-cyan-600:   #0099D8;
+    --azb-orange-500: #FFBE5F;
+    --azb-ink:        #2D2926;
+    --azb-ink-2:      #595959;
+    --azb-grey-500:   #AEAEAE;
+    --azb-grey-300:   #E6E6E6;
+    --azb-grey-100:   #F7F7F7;
+    --azb-bg-tint:    #F1F9FD;
+    --azb-white:      #FFFFFF;
+    --font-sans:      "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-serif:     "Roboto Serif", "Roboto", Georgia, serif;
+    font-family: var(--font-sans);
+    color: var(--azb-ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+}
+#zoom-meetings-widget *, #zoom-meetings-widget *::before, #zoom-meetings-widget *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+}
+#zoom-meetings-widget .zmw-container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+#zoom-meetings-widget .zmw-controls-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0 20px; border-bottom: 1px solid var(--azb-grey-300);
+    margin-bottom: 24px; gap: 24px; flex-wrap: wrap;
+}
+#zoom-meetings-widget .zmw-controls-row h2 {
+    font-family: var(--font-sans); font-weight: 700; font-size: 24px;
+    line-height: 1.25; letter-spacing: -0.01em; color: var(--azb-ink);
+}
+#zoom-meetings-widget .zmw-controls-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+#zoom-meetings-widget .zmw-date-control { display: flex; align-items: center; gap: 12px; }
+#zoom-meetings-widget .zmw-date-control label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--azb-navy);
+}
+#zoom-meetings-widget .zmw-date-control input[type="date"] {
+    font-family: inherit; font-size: 14px; color: var(--azb-ink);
+    background: var(--azb-white); border: 1px solid var(--azb-grey-300);
+    border-radius: 4px; padding: 8px 12px; outline: none;
+    transition: border-color 150ms ease; cursor: pointer;
+}
+#zoom-meetings-widget .zmw-date-control input[type="date"]:hover { border-color: var(--azb-grey-500); }
+#zoom-meetings-widget .zmw-date-control input[type="date"]:focus {
+    border-color: var(--azb-cyan-600); box-shadow: 0 0 0 3px rgba(0,153,216,0.15);
+}
+#zoom-meetings-widget .zmw-view-toggle {
+    display: flex; align-items: center; background: var(--azb-grey-100);
+    border: 1px solid var(--azb-grey-300); border-radius: 6px; padding: 3px; gap: 2px;
+}
+#zoom-meetings-widget .zmw-view-btn {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    border: none; border-radius: 4px; background: transparent; color: var(--azb-ink-2);
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 150ms ease, color 150ms ease; white-space: nowrap;
+}
+#zoom-meetings-widget .zmw-view-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+#zoom-meetings-widget .zmw-view-btn:hover { color: var(--azb-navy); }
+#zoom-meetings-widget .zmw-view-btn.active { background: var(--azb-white); color: var(--azb-navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+#zoom-meetings-widget .zmw-month-nav { display: flex; align-items: center; gap: 8px; }
+#zoom-meetings-widget .zmw-month-nav-label { font-size: 14px; font-weight: 600; color: var(--azb-navy); min-width: 110px; text-align: center; }
+#zoom-meetings-widget .zmw-month-nav-btn {
+    width: 32px; height: 32px; border: 1px solid var(--azb-grey-300); border-radius: 6px;
+    background: var(--azb-white); cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: border-color 150ms ease, background 150ms ease; flex-shrink: 0;
+}
+#zoom-meetings-widget .zmw-month-nav-btn svg { width: 14px; height: 14px; stroke: var(--azb-navy); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+#zoom-meetings-widget .zmw-month-nav-btn:hover:not(:disabled) { background: var(--azb-bg-tint); border-color: var(--azb-navy); }
+#zoom-meetings-widget .zmw-month-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+#zoom-meetings-widget .zmw-meeting-list {
+    display: none; flex-direction: column; gap: 0;
+    border: 1px solid var(--azb-grey-300); border-radius: 8px;
+    overflow: hidden; background: var(--azb-white); position: relative;
+}
+#zoom-meetings-widget .zmw-meeting-list::before { content: ""; display: block; height: 8px; background: var(--azb-cyan-500); }
+#zoom-meetings-widget .zmw-meeting-list.active { display: flex; }
+#zoom-meetings-widget .zmw-meeting {
+    display: flex; align-items: stretch; border-bottom: 1px solid var(--azb-grey-300);
+    overflow: hidden; transition: max-height 450ms cubic-bezier(.25,.8,.25,1), opacity 200ms ease;
+    max-height: 120px; background: var(--azb-white); cursor: pointer;
+}
+#zoom-meetings-widget .zmw-meeting:last-child { border-bottom: none; }
+#zoom-meetings-widget .zmw-meeting:focus { outline: none; }
+#zoom-meetings-widget .zmw-meeting:hover { background: var(--azb-bg-tint); }
+#zoom-meetings-widget .zmw-meeting.collapsing { max-height: 0 !important; opacity: 0; pointer-events: none; }
+#zoom-meetings-widget .zmw-meeting.expanded { background: var(--azb-bg-tint); max-height: 600px; }
+#zoom-meetings-widget .zmw-date-block {
+    background: var(--azb-navy); color: var(--azb-white); padding: 20px 24px;
+    text-align: center; min-width: 112px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 1px solid #1e5580;
+}
+#zoom-meetings-widget .zmw-month { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--azb-orange-500); }
+#zoom-meetings-widget .zmw-day { font-size: 36px; font-weight: 300; line-height: 1; margin: 6px 0 4px; letter-spacing: -0.02em; }
+#zoom-meetings-widget .zmw-time { font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 500; letter-spacing: 0.02em; }
+#zoom-meetings-widget .zmw-content { padding: 22px 28px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+#zoom-meetings-widget .zmw-title { display: flex; align-items: center; width: 100%; gap: 12px; }
+#zoom-meetings-widget .zmw-title-text { font-size: 18px; font-weight: 700; color: var(--azb-navy); letter-spacing: -0.01em; line-height: 1.3; }
+#zoom-meetings-widget .zmw-chevron { flex-shrink: 0; margin-left: auto; width: 16px; height: 16px; stroke: var(--azb-grey-500); fill: none; stroke-width: 2.5; transition: transform 300ms ease; }
+#zoom-meetings-widget .zmw-meeting.expanded .zmw-chevron { transform: rotate(180deg); }
+#zoom-meetings-widget .zmw-description { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--azb-ink-2); line-height: 1.4; }
+#zoom-meetings-widget .zmw-extender { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 400ms cubic-bezier(.25,.8,.25,1), opacity 250ms ease, margin-top 250ms ease; margin-top: 0; font-size: 14px; color: var(--azb-ink); }
+#zoom-meetings-widget .zmw-extender p { margin-bottom: 6px; }
+#zoom-meetings-widget .zmw-meeting.expanded .zmw-extender { max-height: 600px; opacity: 1; margin-top: 10px; }
+#zoom-meetings-widget .zmw-cal-scaler-wrap { width: 100%; position: relative; }
+#zoom-meetings-widget .zmw-calendar { display: none; width: 1000px; transform-origin: top left; border: 1px solid var(--azb-grey-300); border-radius: 8px; overflow: hidden; background: var(--azb-white); }
+#zoom-meetings-widget .zmw-calendar.active { display: block; }
+#zoom-meetings-widget .zmw-cal-header { display: flex; align-items: center; justify-content: center; padding: 16px 24px; border-bottom: 1px solid var(--azb-grey-300); }
+#zoom-meetings-widget .zmw-cal-month-label { font-size: 16px; font-weight: 700; color: var(--azb-navy); letter-spacing: -0.01em; }
+#zoom-meetings-widget .zmw-cal-dow-row { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--azb-grey-300); background: var(--azb-grey-100); }
+#zoom-meetings-widget .zmw-cal-dow { padding: 10px 0; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--azb-grey-500); }
+#zoom-meetings-widget .zmw-cal-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+#zoom-meetings-widget .zmw-cal-cell { height: 140px; border-right: 1px solid var(--azb-grey-300); border-bottom: 1px solid var(--azb-grey-300); padding: 10px; overflow: hidden; }
+#zoom-meetings-widget .zmw-cal-cell:nth-child(5n) { border-right: none; }
+#zoom-meetings-widget .zmw-cal-cell.last-row { border-bottom: none; }
+#zoom-meetings-widget .zmw-cal-cell.outside-month { background: var(--azb-grey-100); }
+#zoom-meetings-widget .zmw-cal-cell.today .zmw-cal-day-num { background: var(--azb-navy); color: var(--azb-white); border-radius: 50%; }
+#zoom-meetings-widget .zmw-cal-day-num { font-size: 13px; font-weight: 600; color: var(--azb-ink-2); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; flex-shrink: 0; }
+#zoom-meetings-widget .zmw-cal-cell.outside-month .zmw-cal-day-num { color: var(--azb-grey-300); }
+#zoom-meetings-widget .zmw-cal-chip { display: block; background: var(--azb-navy); color: var(--azb-white); font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 3px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: background 150ms ease; }
+#zoom-meetings-widget .zmw-cal-chip:hover { background: var(--azb-navy-hover); }
+#zoom-meetings-widget .zmw-cal-chip:last-child { margin-bottom: 0; }
+#zoom-meetings-widget .zmw-cal-chip.past { background: var(--azb-grey-300); color: var(--azb-grey-500); cursor: default; pointer-events: none; }
+#zoom-meetings-widget .zmw-cal-cell.past-day .zmw-cal-day-num { color: var(--azb-grey-300); }
+#zoom-meetings-widget .zmw-cal-chip.dot-mode { width: 10px; height: 10px; border-radius: 50%; padding: 0; font-size: 0; display: inline-block; margin-right: 4px; margin-bottom: 0; vertical-align: middle; overflow: visible; }
+#zoom-meetings-widget .zmw-cal-cell.dot-clickable { cursor: pointer; }
+#zoom-meetings-widget .zmw-cal-cell.dot-clickable:hover { background: var(--azb-bg-tint); transition: background 150ms ease; }
+#zoom-meetings-widget .zmw-modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9000; align-items: center; justify-content: center; }
+#zoom-meetings-widget .zmw-modal-backdrop.open { display: flex; }
+#zoom-meetings-widget .zmw-modal { background: var(--azb-white); border-radius: 10px; width: 100%; max-width: 480px; margin: 24px; box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden; animation: zmw-modal-in 200ms cubic-bezier(.25,.8,.25,1); }
+@keyframes zmw-modal-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+#zoom-meetings-widget .zmw-modal-header { background: var(--azb-navy); color: var(--azb-white); padding: 20px 24px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+#zoom-meetings-widget .zmw-modal-date-badge { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.12); border-radius: 6px; padding: 8px 14px; flex-shrink: 0; min-width: 56px; text-align: center; }
+#zoom-meetings-widget .zmw-modal-date-month { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--azb-orange-500); }
+#zoom-meetings-widget .zmw-modal-date-day { font-size: 28px; font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; }
+#zoom-meetings-widget .zmw-modal-title-group { flex: 1; }
+#zoom-meetings-widget .zmw-modal-title { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+#zoom-meetings-widget .zmw-modal-time { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+#zoom-meetings-widget .zmw-modal-close { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 2px; line-height: 0; flex-shrink: 0; transition: color 150ms ease; }
+#zoom-meetings-widget .zmw-modal-close:hover { color: var(--azb-white); }
+#zoom-meetings-widget .zmw-modal-close svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+#zoom-meetings-widget .zmw-modal-body { padding: 24px; }
+#zoom-meetings-widget .zmw-modal-description { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--azb-ink-2); line-height: 1.6; margin-bottom: 16px; }
+#zoom-meetings-widget .zmw-modal-details { font-size: 14px; color: var(--azb-ink); line-height: 1.6; }
+#zoom-meetings-widget .zmw-modal-details p { margin-bottom: 8px; }
+#zoom-meetings-widget .zmw-modal-details p:last-child { margin-bottom: 0; }
+#zoom-meetings-widget .zmw-modal-day-header { background: var(--azb-navy); color: var(--azb-white); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#zoom-meetings-widget .zmw-modal-day-label { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+#zoom-meetings-widget .zmw-modal-event-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+#zoom-meetings-widget .zmw-modal-event-card { border: 1px solid var(--azb-grey-300); border-radius: 6px; overflow: hidden; }
+#zoom-meetings-widget .zmw-modal-event-card-header { background: var(--azb-bg-tint); padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--azb-grey-300); }
+#zoom-meetings-widget .zmw-modal-event-card-time { font-size: 12px; font-weight: 700; color: var(--azb-navy); white-space: nowrap; }
+#zoom-meetings-widget .zmw-modal-event-card-title { font-size: 14px; font-weight: 700; color: var(--azb-ink); }
+#zoom-meetings-widget .zmw-modal-event-card-body { padding: 10px 14px; }
+#zoom-meetings-widget .zmw-empty-state { display: none; padding: 64px 48px; text-align: center; color: var(--azb-ink-2); font-size: 16px; border: 1px solid var(--azb-grey-300); border-radius: 8px; background: var(--azb-bg-tint); }
+#zoom-meetings-widget .zmw-empty-state.visible { display: block; }
+#zoom-meetings-widget .zmw-empty-title { font-family: var(--font-sans); font-weight: 300; font-size: 28px; line-height: 1.2; color: var(--azb-navy); letter-spacing: -0.01em; margin-bottom: 8px; }
+#zoom-meetings-widget .zmw-empty-body { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--azb-ink-2); }
+@media (max-width: 768px) {
+    #zoom-meetings-widget .zmw-container { padding: 32px 20px 64px; }
+    #zoom-meetings-widget .zmw-controls-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+    #zoom-meetings-widget .zmw-date-block { min-width: 84px; padding: 16px; }
+    #zoom-meetings-widget .zmw-day { font-size: 28px; }
+    #zoom-meetings-widget .zmw-content { padding: 16px 20px; }
+}
+</style>
+
+<!--
+    ── ROOT ELEMENT ──────────────────────────────────────────────
+    class="zoom-meetings" is what the Widget Editor extension
+    uses to detect this widget. Do not remove it.
+    id="zoom-meetings-widget" is what the CSS and JS scope to.
+-->
+<div class="zoom-meetings" id="zoom-meetings-widget">
+  <div class="zmw-container">
+
+    <div class="zmw-controls-row">
+      <h2>Upcoming Sessions</h2>
+      <div class="zmw-controls-right">
+        <div class="zmw-view-toggle">
+          <button class="zmw-view-btn active" data-zmw="btnList" type="button">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke-linecap="round"/></svg>
+            List
+          </button>
+          <button class="zmw-view-btn" data-zmw="btnCal" type="button">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 4V2M13 4V2" stroke-linecap="round"/></svg>
+            Calendar
+          </button>
+        </div>
+        <div class="zmw-month-nav">
+          <button class="zmw-month-nav-btn" data-zmw="btnPrev" type="button" aria-label="Previous month">
+            <svg viewBox="0 0 20 20"><path d="M13 4l-6 6 6 6"/></svg>
+          </button>
+          <span class="zmw-month-nav-label" data-zmw="monthNavLabel"></span>
+          <button class="zmw-month-nav-btn" data-zmw="btnNext" type="button" aria-label="Next month">
+            <svg viewBox="0 0 20 20"><path d="M7 4l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="zmw-date-control">
+          <label for="zmwMockDate">Simulate Date</label>
+          <input type="date" data-zmw="mockDate" id="zmwMockDate">
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MEETING LIST
+         Each .zmw-meeting is one editable row.
+         Fields the Widget Editor can read/write per row:
+           .zmw-month       — month abbreviation (e.g. "May")
+           .zmw-day         — day number (e.g. "19")
+           .zmw-time        — time string (e.g. "10:00 AM")
+           .zmw-title-text  — meeting title
+           .zmw-description — short description (italic)
+           .zmw-extender    — expanded detail paragraphs
+         data-end="YYYY-MM-DD" controls expiry — update to match
+         the actual meeting date.
+    ════════════════════════════════════════════════════════════ -->
+    <div class="zmw-meeting-list active" data-zmw="meetingList">
+
+      <div class="zmw-meeting" data-end="2026-04-17">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Apr</div>
+          <div class="zmw-day">17</div>
+          <div class="zmw-time">9:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Q1 Results Town Hall</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Full company review of Q1 financial and operational results.</div>
+          <div class="zmw-extender">
+            <p>Leadership shared Q1 results across revenue, customer growth, and operational metrics. The session included a candid discussion of areas that fell short of target and the corrective actions underway heading into Q2.</p>
+            <p>A recording and slide deck are available in the internal resource library for those who were unable to attend.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-04-22">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Apr</div>
+          <div class="zmw-day">22</div>
+          <div class="zmw-time">1:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Accessibility &amp; Inclusion Workshop</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Practical training on building accessible digital experiences.</div>
+          <div class="zmw-extender">
+            <p>This workshop covered WCAG 2.1 standards, screen reader testing basics, and color contrast requirements. Participants walked away with a checklist for auditing existing content and guidance on how to raise accessibility issues through the design review process.</p>
+            <p>Completion was tracked for all product and design team members as part of the annual accessibility certification requirement.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-04-29">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Apr</div>
+          <div class="zmw-day">29</div>
+          <div class="zmw-time">3:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Vendor Partner Briefing</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Strategic update from key technology and service partners.</div>
+          <div class="zmw-extender">
+            <p>Representatives from three of our primary technology vendors presented their 2026 roadmaps, upcoming pricing changes, and new service tiers. Procurement and IT leadership attended to evaluate impact on existing contracts.</p>
+            <p>Follow-up meetings have been scheduled with two vendors to negotiate renewal terms. A summary of commitments and action items was distributed to stakeholders the following day.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-06">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">06</div>
+          <div class="zmw-time">11:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Leadership Development Series — Session 3</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Coaching skills for people managers — part of the 6-session series.</div>
+          <div class="zmw-extender">
+            <p>Session 3 focused on active listening techniques, delivering feedback that lands, and recognizing signs of burnout in direct reports. Participants worked through two role-play scenarios with peer feedback.</p>
+            <p>Pre-work for Session 4 has been distributed via email. The next session takes place in June and will focus on managing underperformance with clarity and care.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-13">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">13</div>
+          <div class="zmw-time">2:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Marketing Strategy Session</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Planning and alignment for Q2 go-to-market campaigns.</div>
+          <div class="zmw-extender">
+            <p>The marketing team walked through the Q2 campaign calendar, channel mix strategy, and content production timelines. Budget allocations for paid, owned, and earned channels were reviewed and approved by the CMO.</p>
+            <p>Brand and demand gen leads will finalize creative briefs and distribute to the agency partner by end of week. Campaign launch is targeted for the first week of June.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-19">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">19</div>
+          <div class="zmw-time">10:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Q2 Executive Kickoff</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Leadership alignment session for Q2 priorities.</div>
+          <div class="zmw-extender">
+            <p>Join senior leadership for a comprehensive review of Q2 objectives, key performance targets, and strategic initiatives. This session will cover updates from each business unit and set the tone for the quarter ahead.</p>
+            <p>Attendees are encouraged to come prepared with their team scorecards and any escalations requiring executive attention. A recording will be made available within 24 hours for those unable to attend live.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-20">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">20</div>
+          <div class="zmw-time">2:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Product Roadmap Showcase</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Previewing upcoming feature releases and platform improvements.</div>
+          <div class="zmw-extender">
+            <p>The product team will walk through the roadmap for the next two quarters, including the upcoming portal redesign, new self-service tools, and API enhancements. Live demos will be included for all major feature updates.</p>
+            <p>This session is open to all employees. Questions can be submitted in advance via the internal portal or asked live during the Q&amp;A segment at the end of the presentation.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-21">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">21</div>
+          <div class="zmw-time">11:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">New Employee Orientation</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Welcome session for May cohort new hires.</div>
+          <div class="zmw-extender">
+            <p>This orientation is mandatory for all employees who joined in May. The session covers company culture, core values, IT setup, benefits enrollment deadlines, and an introduction to department leads.</p>
+            <p>Please ensure your equipment is fully set up before joining. HR will send a pre-session checklist to all registered attendees 48 hours in advance.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-27">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">27</div>
+          <div class="zmw-time">3:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Cybersecurity Awareness Training</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Annual compliance training — all staff required to attend.</div>
+          <div class="zmw-extender">
+            <p>This annual training covers phishing awareness, secure remote access practices, password hygiene, and reporting procedures for suspected security incidents. Completion is required for compliance and will be logged in the HR system.</p>
+            <p>The session runs approximately 75 minutes including a short assessment at the end. Employees who cannot attend live must complete the on-demand version by June 6th to remain in compliance.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-05-29">
+        <div class="zmw-date-block">
+          <div class="zmw-month">May</div>
+          <div class="zmw-day">29</div>
+          <div class="zmw-time">1:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Sales Enablement Workshop</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Equipping the sales team with updated tools, talk tracks, and competitive intelligence.</div>
+          <div class="zmw-extender">
+            <p>This hands-on workshop will introduce the updated sales playbook, revised pricing tiers, and new objection-handling frameworks developed in response to Q1 win/loss analysis. Breakout groups will practice live scenarios with coaching from senior reps.</p>
+            <p>All account executives and BDRs are expected to attend. Sales managers are encouraged to join the final hour for a debrief and alignment on coaching priorities heading into June.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-06-03">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Jun</div>
+          <div class="zmw-day">03</div>
+          <div class="zmw-time">9:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Benefits Open Enrollment Info Session</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Walkthrough of plan options and enrollment deadlines for the upcoming benefit year.</div>
+          <div class="zmw-extender">
+            <p>HR and our benefits broker will present an overview of all available medical, dental, vision, and supplemental plans for the upcoming plan year. Side-by-side comparisons of coverage tiers and cost changes will be shared during the session.</p>
+            <p>This is an informational session — enrollment must be completed individually through the benefits portal by June 20th. Employees with questions about specific medical needs or dependent coverage are encouraged to book a one-on-one with HR after the session.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-06-05">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Jun</div>
+          <div class="zmw-day">05</div>
+          <div class="zmw-time">2:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Customer Experience Town Hall</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Sharing CX research findings and our service improvement roadmap.</div>
+          <div class="zmw-extender">
+            <p>The Customer Experience team will present findings from the most recent NPS survey cycle and qualitative research interviews. Key friction points in the customer journey have been identified and prioritized for remediation over the next two quarters.</p>
+            <p>This session is open to all customer-facing teams. Leaders from Product, Support, and Marketing will be present to discuss cross-functional ownership of the improvement initiatives.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-06-10">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Jun</div>
+          <div class="zmw-day">10</div>
+          <div class="zmw-time">11:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Data &amp; Analytics Summit</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Internal conference covering BI tooling, data governance, and analytics best practices.</div>
+          <div class="zmw-extender">
+            <p>A half-day virtual summit for data practitioners and business analysts across the organization. Sessions include: introduction to the new BI dashboard suite, data quality governance standards, and a panel on building data literacy within non-technical teams.</p>
+            <p>Registration is required to receive the session links and materials. All registered attendees will receive access to session recordings and slide decks within three business days of the event.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-06-17">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Jun</div>
+          <div class="zmw-day">17</div>
+          <div class="zmw-time">10:00 AM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">Mid-Year Performance Check-In</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Manager guidance session for mid-year review conversations.</div>
+          <div class="zmw-extender">
+            <p>This session is designed for people managers and covers how to structure effective mid-year check-in conversations, calibrate performance ratings fairly, and document feedback in the performance management system.</p>
+            <p>HR business partners will walk through updated rating rubrics and common scenarios. A 30-minute live Q&amp;A will follow the presentation. All managers are expected to complete their team check-ins by July 1st.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="zmw-meeting" data-end="2026-06-24">
+        <div class="zmw-date-block">
+          <div class="zmw-month">Jun</div>
+          <div class="zmw-day">24</div>
+          <div class="zmw-time">4:00 PM</div>
+        </div>
+        <div class="zmw-content">
+          <div class="zmw-title">
+            <span class="zmw-title-text">H2 Planning Kickoff</span>
+            <svg class="zmw-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="zmw-description">Cross-functional session to align on second-half goals and resource planning.</div>
+          <div class="zmw-extender">
+            <p>Department heads and planning leads will convene to begin scoping H2 initiatives, align on headcount and budget assumptions, and identify dependencies across teams. The output of this session will feed into the formal planning submissions due at the end of July.</p>
+            <p>Pre-read materials including the H1 performance summary and preliminary H2 targets will be distributed one week before the session. Attendance by department leads or designated planning representatives is required.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /zmw-meeting-list -->
+
+    <!-- Calendar view (shell only — JS populates the grid) -->
+    <div class="zmw-cal-scaler-wrap" data-zmw="calScalerWrap">
+      <div class="zmw-calendar" data-zmw="calendarView">
+        <div class="zmw-cal-header">
+          <span class="zmw-cal-month-label" data-zmw="calMonthLabel"></span>
+        </div>
+        <div class="zmw-cal-dow-row">
+          <div class="zmw-cal-dow">Mon</div>
+          <div class="zmw-cal-dow">Tue</div>
+          <div class="zmw-cal-dow">Wed</div>
+          <div class="zmw-cal-dow">Thu</div>
+          <div class="zmw-cal-dow">Fri</div>
+        </div>
+        <div class="zmw-cal-grid" data-zmw="calGrid"></div>
+      </div>
+    </div>
+
+    <!-- Modal backdrop (JS populates content) -->
+    <div class="zmw-modal-backdrop" data-zmw="modalBackdrop">
+      <div class="zmw-modal" data-zmw="modal"></div>
+    </div>
+
+    <div class="zmw-empty-state" data-zmw="emptyState">
+      <div class="zmw-empty-title">You're all caught up.</div>
+      <div class="zmw-empty-body">No upcoming meetings on the calendar.</div>
+    </div>
+
+  </div><!-- /zmw-container -->
+</div><!-- /zoom-meetings #zoom-meetings-widget -->
+
+    </div>
     <h2 class="section-h2 reveal-h d1">What sounds most like <strong>what you're dealing with?</strong></h2>
     <p class="section-body reveal-fade d2">Pick the one that fits and we'll point you to the right team with answers relevant to your situation.</p>
     <div class="q-list">
