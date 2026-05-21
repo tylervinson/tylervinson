@@ -1,13 +1,11 @@
 {
-  "version": "2.1.0",
-  "updatedAt": "2026-05-09T12:00:00.000Z",
+  "version": "2.2.0",
+  "updatedAt": "2026-05-19T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
       "class": "animated-cards",
       "name": "Animated Cards",
-      "itemId": "f50e7e4a-b847-4607-a7b1-9eed9cb58335",
-      "fieldId": "7115e9d1-eab1-4400-9743-48b1984e47ab",
       "repeat": {
         "selector": ".profile-card",
         "groupLabel": "Card"

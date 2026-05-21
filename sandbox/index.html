@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WH4ZTKNH');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Blue Cross Blue Shield of Arizona</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz@1,8..144&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── REAL BCBS AZ DESIGN TOKENS ── */
+:root {
+  --blue:         #2273BA;
+  --blue-navy:    #0B3B60;
+  --blue-light:   #F1F9FD;
+  --gold:         #FFBE5F;
+  --gold-border:  #CC861A;
+  --gold-hover:   #FFD495;
+  --teal:         #28BFE0;
+  --gray:         #E6E6E6;
+  --gray-light:   #F7F7F7;
+  --gray-medium:  #AEAEAE;
+  --gray-dark:    #595959;
+  --gray-darkest: #2D2926;
+  --error:        #DD524C;
+  --white:        #FFFFFF;
+  --shadow-card:  0px 10px 26px rgba(0,0,0,0.04);
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.05);
+}
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+/* Body text: Roboto Regular 400 16px per design system */
+body { font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 400; color: var(--gray-darkest); background: var(--white); overflow-x: hidden; line-height: 1.5; }
+
+/* ── PRINT ── */
+
+/* ── UTILITY BAR — dark navy, matches PDF exactly ── */
+.util-bar { background: var(--blue-navy); height: 44px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; }
+.util-links { display: flex; align-items: center; gap: 0; }
+.util-links a { font-size: 0.875rem; font-weight: 400; color: rgba(255,255,255,0.9); text-decoration: none; padding: 0 16px; height: 44px; display: flex; align-items: center; gap: 5px; transition: color 0.15s; }
+.util-links a:first-child { padding-left: 0; }
+.util-links a:hover { color: white; }
+.util-links .chev { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.7; flex-shrink: 0; }
+/* Right items: Search, phone, Español — spaced with gap, no dividers */
+.util-right { display: flex; align-items: center; gap: 20px; }
+.util-right a { font-size: 0.875rem; font-weight: 400; color: rgba(255,255,255,0.9); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
+.util-right a:hover { color: white; }
+.util-right .u-ico { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.util-right .chev { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.7; }
+
+/* ── PRIMARY NAV — WHITE bg, navy text, blue active underline per PDF ── */
+nav { background: var(--white); height: 72px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; border-bottom: 1px solid var(--gray); }
+.nav-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-right: 8px; }
+
+/* Actual BCBS shield mark — two shields side by side */
+.nav-shield {
+  display: flex; align-items: center; gap: 3px; height: 48px;
+}
+.shield-cross {
+  width: 22px; height: 40px; position: relative;
+  background: var(--blue); border-radius: 2px 2px 11px 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.shield-cross::before {
+  content: '+'; font-size: 1.1rem; font-weight: 900; color: white;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%);
+  line-height: 1;
+}
+.shield-mark {
+  width: 22px; height: 40px; position: relative;
+  background: var(--blue); border-radius: 2px 2px 11px 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.shield-mark::before {
+  content: ''; position: absolute;
+  width: 12px; height: 12px; background: white; border-radius: 50%;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  opacity: 0.95;
+}
+.shield-mark::after {
+  content: ''; position: absolute;
+  bottom: 9px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 7px;
+  background: white; opacity: 0.7;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+
+.nav-logo-text { line-height: 1.25; }
+.nav-logo-text strong { display: block; font-size: 0.82rem; font-weight: 700; color: var(--blue-navy); }
+.nav-logo-text span { display: block; font-size: 0.75rem; font-weight: 400; color: var(--blue-navy); }
+
+/* Nav links — navy 700, blue underline on hover/active per PDF (NOT gold) */
+.nav-links { display: flex; align-items: center; margin-left: 0; }
+.nav-links a { font-size: 1rem; font-weight: 700; color: var(--blue-navy); text-decoration: none; padding: 0 16px; height: 72px; display: flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+.nav-links a:hover { border-bottom-color: var(--blue); color: var(--blue); }
+.nav-links .chev { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; opacity: 0.6; flex-shrink: 0; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Brand buttons — pill shape, 16px 40px padding per design system */
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 40px; border-radius: 999px; background: var(--gold); box-shadow: var(--gold-border) 0 0 0 1px; border: none; color: var(--blue-navy); font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; text-decoration: none; }
+.btn-primary:hover { background: var(--gold-hover); box-shadow: var(--gold-border) 0 0 0 1px; }
+.btn-primary svg { width: 16px; height: 16px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 40px; border-radius: 999px; background: transparent; box-shadow: var(--blue-navy) 0 0 0 1px; border: none; color: var(--blue-navy); font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; }
+.btn-secondary:hover { background: var(--white); box-shadow: var(--blue-navy) 0 0 0 2px; }
+/* Smaller nav/inline variant */
+.btn-primary-sm { padding: 10px 22px; font-size: 0.875rem; }
+.btn-secondary-sm { padding: 10px 22px; font-size: 0.875rem; }
+/* White outline version for dark backgrounds */
+.btn-secondary-white { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 22px; border-radius: 999px; background: transparent; box-shadow: white 0 0 0 1px; border: none; color: white; font-family: Roboto, sans-serif; font-size: 0.875rem; font-weight: 700; cursor: pointer; line-height: 1; transition: all 0.2s ease-in-out; white-space: nowrap; }
+.btn-secondary-white:hover { background: rgba(255,255,255,0.1); }
+
+/* ── BREADCRUMB ── */
+.bc { background: white; border-bottom: 1px solid var(--gray); padding: 10px 2rem; font-size: 0.875rem; color: var(--gray-dark); display: flex; align-items: center; gap: 6px; }
+.bc a { color: var(--blue); text-decoration: none; }
+.bc a:hover { text-decoration: underline; }
+.bc-sep { color: var(--gray-medium); }
+
+/* ── HERO ── */
+.hero-wrap { background: var(--blue-navy); position: relative; overflow: hidden; }
+.hero-inner { max-width: 1344px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 420px; align-items: end; min-height: 400px; gap: 0; position: relative; z-index: 2; }
+.hero-content { padding: 64px 48px 0 0; }
+
+/* Hero content block */
+.hero-block { padding: 72px 0 72px 2rem; max-width: 1344px; margin: 0 auto; display: flex; align-items: flex-start; }
+.hero-block-inner { text-align: center; max-width: 620px; }
+.hero-h1 { font-size: 4.5rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.05; margin-bottom: 4px; }
+.hero-h1-italic { font-family: 'Roboto Serif', serif; font-size: 3.2rem; font-weight: 400; font-style: italic; color: var(--gold); line-height: 1.1; margin-bottom: 20px; display: block; }
+.hero-subtitle { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.55; margin-bottom: 28px; }
+/* Underline-only search input */
+.hero-search { display: flex; align-items: center; border-bottom: 1.5px solid var(--gray-darkest); padding-bottom: 6px; gap: 8px; }
+.hero-search input { flex: 1; border: none; outline: none; font-family: Roboto, sans-serif; font-size: 1rem; color: var(--gray-darkest); background: transparent; padding: 0; }
+.hero-search input::placeholder { color: var(--gray-medium); }
+.hero-search svg { width: 20px; height: 20px; stroke: var(--gray-darkest); fill: none; stroke-width: 2; flex-shrink: 0; }
+.hero-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; opacity: 0; animation: fadeUp 0.5s 0.1s ease forwards; }
+.hero h1 { font-family: Roboto, sans-serif; font-size: 3rem; font-weight: 300; color: white; line-height: 1.15; margin-bottom: 14px; opacity: 0; animation: fadeUp 0.5s 0.2s ease forwards; }
+.hero h1 strong { font-weight: 700; color: var(--gold); }
+/* Body Large: Regular 400 20px per design system */
+.hero-sub { font-size: 1.25rem; font-weight: 400; color: rgba(255,255,255,0.7); line-height: 1.5; max-width: 480px; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.5s 0.3s ease forwards; }
+
+/* SEARCH in hero */
+.search-outer { max-width: 500px; position: relative; margin-bottom: 28px; opacity: 0; animation: fadeUp 0.5s 0.4s ease forwards; }
+.search-row { display: flex; align-items: center; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.search-ico { padding: 0 12px 0 16px; flex-shrink: 0; display: flex; }
+.search-ico svg { width: 18px; height: 18px; stroke: var(--gray-medium); fill: none; stroke-width: 2; }
+.search-input { flex: 1; height: 52px; border: none; outline: none; font-family: Roboto, sans-serif; font-size: 1rem; color: var(--gray-darkest); background: transparent; padding-right: 14px; }
+.search-input::placeholder { color: var(--gray-medium); }
+.search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid var(--gray); }
+.search-results.show { display: block; }
+.sr { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--gray-light); cursor: pointer; transition: background 0.12s; }
+.sr:last-child { border-bottom: none; }
+.sr:hover { background: var(--blue-light); }
+.sr-ico { width: 34px; height: 34px; border-radius: 6px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sr-ico svg { width: 14px; height: 14px; stroke: var(--blue-navy); fill: none; stroke-width: 1.8; }
+.sr-title { font-size: 0.875rem; font-weight: 700; color: var(--gray-darkest); line-height: 1.3; margin-bottom: 2px; }
+.sr-sub   { font-size: 0.75rem; color: var(--gray-dark); font-weight: 400; }
+.search-hint { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px; font-weight: 400; }
+.search-hint em { color: rgba(255,255,255,0.6); font-style: normal; }
+
+/* Chat CTA in hero */
+.chat-hero-cta { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 13px 18px; cursor: pointer; transition: all 0.2s; margin-bottom: 56px; opacity: 0; animation: fadeUp 0.5s 0.5s ease forwards; }
+.chat-hero-cta:hover { background: rgba(255,255,255,0.12); }
+.chc-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chc-icon svg { width: 15px; height: 15px; stroke: var(--blue-navy); fill: none; stroke-width: 2; }
+.chc-text strong { display: block; font-size: 0.9rem; font-weight: 700; color: white; margin-bottom: 1px; }
+.chc-text span { font-size: 0.75rem; color: rgba(255,255,255,0.55); font-weight: 400; }
+.chc-arrow { width: 16px; height: 16px; stroke: rgba(255,255,255,0.5); fill: none; stroke-width: 2; margin-left: auto; }
+
+/* Hero image side */
+.hero-img { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-bottom: none; border-radius: 8px 8px 0 0; height: 360px; display: flex; align-items: center; justify-content: center; align-self: flex-end; opacity: 0; animation: fadeUp 0.6s 0.35s ease forwards; }
+.hero-img span { font-size: 0.75rem; color: rgba(255,255,255,0.2); font-style: italic; }
+
+/* ── QUESTION SECTION ── */
+.q-section { background: var(--gray-light); padding: 64px 2rem; }
+.q-inner { max-width: 1248px; margin: 0 auto; }
+
+/* Section labels — uppercase 12px 700 weight, gold accent, system blue color */
+.section-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+/* Heading 03 Light = 32px 300, Heading 03 Bold = 32px 700 per design system */
+.section-h2 { font-size: 3.5rem; font-weight: 300; color: var(--blue-navy); line-height: 1.15; margin-bottom: 10px; }
+.section-h2 strong { font-weight: 700; }
+/* Body text: Regular 400 16px. #595959 for secondary body text per system */
+.section-body { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.563rem; margin-bottom: 36px; }
+
+/* Q cards — border-radius 8px, 1px gray border, system shadow per design system */
+.q-list { display: flex; flex-direction: column; gap: 8px; }
+.q-card { outline: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: white; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; transition: all 0.15s ease-in-out; gap: 16px; box-shadow: var(--shadow-sm); }
+.q-card:hover { transform: translateX(4px); box-shadow: var(--shadow-card); }
+.q-card.active { transform: translateX(4px); box-shadow: var(--shadow-card); outline: none; }
+.q-left { display: flex; align-items: center; gap: 14px; }
+/* Icon: blue-light bg, no extra border — matches system icon card style */
+.q-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.q-icon i { font-size: 1.1rem; color: var(--blue-navy); }
+
+/* Heading 06: Regular 16px per system */
+.q-title { font-size: 1rem; font-weight: 700; color: var(--gray-darkest); margin-bottom: 2px; line-height: 1.3; }
+/* Body Small: Regular 14px #595959 per system */
+.q-sub   { font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); line-height: 1.375rem; }
+.q-chev { width: 8px; height: 8px; border-right: 2px solid var(--gray-medium); border-top: 2px solid var(--gray-medium); transform: rotate(45deg); flex-shrink: 0; transition: border-color 0.15s; }
+
+
+/* ── DYNAMIC SECTIONS ── */
+.dynamic { display: none; }
+.dynamic.show { display: block; }
+.full-divider { height: 1px; background: var(--gray); }
+
+/* ── RESPONSE SECTIONS ── */
+.resp-section { padding: 64px 2rem; overflow: visible; }
+.resp-section.alt { background: var(--blue-light); }
+.resp-inner { max-width: 1248px; margin: 0 auto; }
+
+/* Team card — 1px gray border, 8px radius, gold left accent, system shadow */
+.team-card { background: white; border: 1px solid var(--gray); border-radius: 8px; padding: 28px; position: relative; overflow: hidden; box-shadow: var(--shadow-card); margin-bottom: 0; }
+.team-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gold); border-radius: 0; }
+/* Tag uses gold system colors: gold bg, gold-border text — no off-system hex */
+.team-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-hover); border: 1px solid var(--gold-border); border-radius: 999px; padding: 5px 14px; font-size: 0.75rem; color: var(--blue-navy); font-weight: 700; margin-bottom: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.team-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold-border); flex-shrink: 0; }
+/* Heading 03: 32px Light per system */
+.team-name { font-size: 2rem; font-weight: 300; color: var(--blue-navy); margin-bottom: 8px; line-height: 1.2; }
+.team-name strong { font-weight: 700; }
+/* Body Default: Regular 400 16px #595959 per system */
+.team-desc { font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.563rem; }
+
+/* Team quote */
+.team-quote { margin-top: 100px; margin-bottom: 0; display: flex; align-items: flex-start; width: 100%; padding: 40px 80px 40px 50px; background: var(--gray-light); border-radius: 8px; }
+.team-quote-avatar { display: none; }
+.team-quote-body { flex: 1; }
+.team-quote-text { font-family: 'Roboto Serif', serif; font-size: 1.125rem; font-style: italic; font-weight: 400; color: var(--gray-darkest); line-height: 1.7; margin-bottom: 10px; position: relative; padding-left: 22px; }
+.team-quote-text::before { content: '\201C'; position: absolute; left: 0; top: -6px; font-size: 2.5rem; color: var(--gold); line-height: 1; font-family: 'Roboto Serif', serif; }
+.team-quote-attr { font-size: 0.8rem; font-weight: 700; color: var(--blue-navy); text-align: right; }
+.team-quote-attr span { font-weight: 400; color: var(--gray-dark); }
+
+/* ── WAVE SECTION ── */
+.wave-section { position: relative; background: var(--blue-light); }
+.wave-section .resp-inner { position: relative; z-index: 2; }
+.wave-top, .wave-bottom { display: block; width: 100%; line-height: 0; }
+.wave-top { margin-bottom: -1px; height: 0; overflow: visible; }
+.wave-bottom { margin-top: -1px; height: 0; overflow: visible; }
+.wave-top svg, .wave-bottom svg { display: block; width: 100%; border: none; outline: none; overflow: visible; }
+/* grid-flow-row, md:grid-cols-3, gap-5 */
+.copts { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+
+/* Each card: rounded-lg, bg-white, shadow-card, full height, text-center */
+.copt {
+  display: flex; flex-direction: column; flex-grow: 1;
+  height: 100%; width: 100%;
+  border-radius: 0.5rem; background: var(--white);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+/* Inner: border all sides, border-gray, rounded-lg, flex-col, flex-grow, p-8, text-gray-dark */
+.copt-inner {
+  border: 1px solid var(--gray);
+  border-radius: 0.5rem;
+  display: flex; flex-direction: column; flex-grow: 1;
+  padding: 32px; /* p-8 */
+  color: var(--gray-dark);
+  align-items: center;
+  height: 100%;
+}
+/* Teal icon: mb-6, text-teal, 64px, centered */
+.copt-icon {
+  margin-bottom: 24px;
+  width: 80px; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: auto; margin-right: auto;
+  border-radius: 8px;
+}
+.copt-icon svg { width: 52px; height: 52px; stroke: var(--blue-navy); fill: none; stroke-width: 1.5; }
+/* Title: heading-sm, font-light, mb-2 = ~1.25rem Light */
+.copt-title { font-size: 1.5rem; font-weight: 300; color: var(--gray-darkest); margin-bottom: 12px; line-height: 1.25; text-align: center; }
+/* Body: smaller, regular, centered */
+.copt-body { font-size: 0.9rem; font-weight: 400; color: var(--gray-dark); line-height: 1.55; margin-bottom: 28px; text-align: center; }
+/* mt-auto pushes button to bottom */
+.copt-action { margin-top: auto; display: flex; justify-content: center; }
+
+/* Tertiary button — matches live site exactly */
+.btn-tertiary {
+  appearance: none; display: inline-flex; align-items: center; justify-content: center;
+  font-family: Roboto, sans-serif; font-size: 1rem; font-weight: 700;
+  color: var(--blue-navy); background: transparent; border: none;
+  cursor: pointer; padding: 4px 0; border-radius: 999px;
+  transition: color 0.2s ease; text-decoration: none; gap: 0; white-space: nowrap;
+}
+.btn-tertiary:hover { color: var(--blue); }
+.btn-tertiary:hover .btn-label { text-decoration: underline; text-underline-offset: 2px; }
+.btn-tertiary .bg-btn-bg-tertiary { text-decoration: none; flex-shrink: 0; }
+/* Arrow span: bg-btn-bg-tertiary = teal, rounded-full, h-6 w-6, pl-[2px] */
+/* Tailwind utility classes required for the arrow span to render correctly */
+.rounded-full { border-radius: 9999px; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.h-6 { height: 1.5rem; }
+.w-6 { width: 1.5rem; }
+.ml-1 { margin-left: 0.25rem; }
+.overflow-visible { overflow: visible; }
+.content-center { align-content: center; justify-content: center; }
+.btn-tertiary .arrow-circle {
+  background: var(--teal);
+  content-visibility: auto; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 9999px;
+  margin-left: 6px; padding-left: 2px; flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+.btn-tertiary:hover .arrow-circle { background: var(--blue-navy); }
+.btn-tertiary .arrow-circle svg { width: 24px; height: 24px; overflow: visible; }
+/* Live site arrow classes */
+.bg-btn-bg-tertiary { background: var(--gold); transition: background 0.2s ease; }
+.btn-tertiary:hover .bg-btn-bg-tertiary { background: var(--gold-border); }
+.btn-text-tertiary { color: var(--blue-navy); }
+.btn-svg-tertiary { fill: var(--blue-navy); }
+.hover-arrow-icon path { fill: var(--blue-navy); }
+.hover-arrow-icon--stem { transition: transform 0.2s ease; transform-origin: right; }
+.hover-arrow-icon--tip  { transition: transform 0.2s ease; }
+.btn-tertiary:hover .hover-arrow-icon--stem { transform: scaleX(1.15); }
+.btn-tertiary:hover .hover-arrow-icon--tip  { transform: translateX(2px); }
+
+/* FAQ */
+/* ── ACCORDION — matches live site pattern exactly ── */
+/* Wrapper: plain list, no outer box */
+.faq-wrap { list-style: none; padding: 0; margin: 0; background: none; border: none; border-radius: 0; box-shadow: none; }
+/* Each item: bg-gray-light, border border-gray, rounded-lg, mb-2 */
+.faq-item { background: var(--gray-light); border: 1px solid var(--gray); border-radius: 0.5rem; margin-bottom: 8px; transition: all 0.3s ease; overflow: hidden; }
+.faq-item:last-child { margin-bottom: 0; }
+/* Button: bg-white, full width, flex, p-8, rounded, text-left, border-b-0 */
+.faq-q { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 20px 32px; background: var(--white); border: none; border-bottom: 1px solid transparent; border-radius: 0.5rem; text-align: left; cursor: pointer; font-family: Roboto, sans-serif; font-size: 1.125rem; font-weight: 400; color: var(--gray-darkest); line-height: 1.5; gap: 16px; }
+.faq-item.open .faq-q { border-radius: 0.5rem 0.5rem 0 0; border-bottom-color: var(--gray); }
+.faq-q-text { display: block; flex-grow: 1; }
+/* Chevron: navy, rotates 180deg on open, uses your exact SVG path */
+.faq-chev-wrap { display: block; flex-shrink: 0; color: var(--blue-navy); transition: transform 0.2s ease-in-out; transform-origin: center; }
+.faq-item.open .faq-chev-wrap { transform: rotate(180deg); }
+.faq-chev-wrap svg { width: 24px; height: 24px; display: block; }
+/* Answer: mx-8 (32px), max-h-0 collapsed, transition-200 */
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin: 0 32px;
+  transition: max-height 0.2s ease, opacity 0.15s ease;
+}
+.faq-item.open .faq-a {
+  max-height: 600px;
+  opacity: 1;
+  transition: max-height 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease 0.08s;
+}
+.faq-a-inner {
+  font-size: 1rem; font-weight: 400; color: var(--gray-dark); line-height: 1.6; padding: 16px 0 24px;
+  transform: translateY(-10px);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+}
+.faq-item.open .faq-a-inner {
+  transform: translateY(0);
+}
+.faq-a-inner a { color: var(--blue); text-decoration: underline; }
+.faq-a-inner a:hover { color: var(--blue-navy); }
+/* Head and foot stay simple */
+.faq-head { padding: 0 0 20px; }
+.faq-head h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 3px; }
+.faq-head p  { font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); }
+.faq-foot { padding: 20px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 0.875rem; font-weight: 400; color: var(--gray-dark); }
+.faq-foot a { color: var(--blue); cursor: pointer; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.faq-foot a:hover { color: var(--blue-navy); }
+
+/* CTA band — Heading 02 Light 48px per design system */
+.cta-band { background: var(--blue-navy); padding: 80px 2rem; text-align: center; }
+.cta-band h2 { font-size: 3rem; font-weight: 300; color: white; margin-bottom: 10px; line-height: 1.15; }
+.cta-band h2 strong { font-weight: 700; }
+/* Body Large: Regular 400 20px per system */
+.cta-band p  { font-size: 1.25rem; font-weight: 400; color: rgba(255,255,255,0.65); margin-bottom: 36px; line-height: 1.5; }
+.cta-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+/* ── CHAT FAB ── */
+.chat-fab { position: fixed; bottom: 28px; right: 28px; z-index: 400; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.chat-btn { width: auto; height: auto; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: none; transition: transform 0.2s; padding: 0; }
+.chat-btn:hover { transform: scale(1.08); }
+.reyna-wrap { background: var(--gold); border-radius: 50%; padding: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 12px 14px 22px 2px rgba(0,0,0,0.15); }
+
+.chat-prompt { background: white; color: var(--gray-darkest); border-radius: 10px 10px 0 10px; padding: 11px 15px; font-size: 0.82rem; box-shadow: var(--shadow-card); max-width: 200px; line-height: 1.4; cursor: pointer; border: 1px solid var(--gray); animation: promptUp 0.4s 1.5s ease both; }
+.chat-prompt strong { font-weight: 700; display: block; margin-bottom: 2px; color: var(--blue-navy); }
+.chat-prompt span { color: var(--gray-dark); font-size: 0.72rem; }
+@keyframes promptUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── CHAT WINDOW — matches reference UI ── */
+.chat-win { position: fixed; bottom: 110px; right: 28px; z-index: 400; width: 380px; background: white; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; }
+.chat-win.open { display: flex; animation: chatOpen 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes chatOpen { from{opacity:0;transform:scale(0.9) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+/* Header */
+.cw-hd { background: var(--blue-navy); padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+.cw-hd-l { display: flex; align-items: center; gap: 10px; }
+.cw-title { font-size: 1.1rem; font-weight: 700; color: white; line-height: 1.3; }
+.cw-x { background: none; border: none; color: white; cursor: pointer; font-size: 1.3rem; line-height: 1; padding: 2px; opacity: 0.8; transition: opacity 0.15s; font-weight: 300; }
+.cw-x:hover { opacity: 1; }
+
+/* Search bar */
+.cw-search { padding: 14px 16px; border-bottom: 1px solid var(--gray); }
+.cw-search-row { display: flex; align-items: center; border: 1.5px solid var(--blue); border-radius: 999px; padding: 8px 12px; gap: 8px; }
+.cw-search-row svg { width: 16px; height: 16px; stroke: var(--blue); fill: none; stroke-width: 2; flex-shrink: 0; }
+.cw-search-input { flex: 1; border: none; outline: none; font-family: Roboto, sans-serif; font-size: 0.9rem; color: var(--gray-darkest); background: transparent; }
+.cw-search-input::placeholder { color: var(--gray-medium); }
+.cw-search-clear { background: none; border: none; cursor: pointer; color: var(--gray-medium); font-size: 1rem; padding: 0; line-height: 1; display: none; }
+.cw-search-clear.visible { display: block; }
+
+/* Menu items */
+.cw-menu { flex: 1; overflow-y: auto; }
+.cw-item { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-bottom: 1px solid var(--gray); cursor: pointer; transition: background 0.12s; text-decoration: none; }
+.cw-item:last-of-type { border-bottom: none; }
+.cw-item:hover { background: var(--blue-light); }
+.cw-item-icon { width: 46px; height: 46px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.cw-item-icon img, .cw-item-icon svg { width: 46px; height: 46px; }
+.cw-item-label { flex: 1; font-size: 1rem; font-weight: 700; color: var(--blue-navy); }
+.cw-item-arrow { width: 30px; height: 30px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cw-item-arrow svg { width: 12px; height: 12px; stroke: var(--blue-navy); fill: none; stroke-width: 2.5; }
+
+/* Footer links */
+.cw-footer { padding: 16px 20px; border-top: 1px solid var(--gray); display: flex; flex-direction: column; gap: 12px; }
+.cw-footer-link { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--blue); text-decoration: none; font-weight: 400; cursor: pointer; }
+.cw-footer-link:hover { text-decoration: underline; }
+.cw-footer-link svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 1.8; flex-shrink: 0; }
+
+/* ── FOOTER — matches design system exactly ── */
+footer { background: var(--white); padding: 56px 0 0; border-top: 1px solid var(--gray); }
+.ft-inner { max-width: 1344px; margin: 0 auto; padding: 0 2rem 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.ft-col h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 16px; }
+.ft-col a  { display: block; font-size: 0.875rem; font-weight: 400; color: var(--blue); text-decoration: none; margin-bottom: 8px; transition: color 0.15s; }
+.ft-col a:hover { color: var(--blue-navy); text-decoration: underline; }
+/* Social icons row */
+.ft-social { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.ft-social a { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--blue-light); color: var(--blue-navy); transition: all 0.15s; margin-bottom: 0; flex-shrink: 0; }
+.ft-social a:hover { background: var(--blue); color: white; text-decoration: none; }
+.ft-social svg { width: 15px; height: 15px; }
+/* Bottom bar — navy bg, URAC badges left, copyright right */
+.ft-bottom { border-top: 1px solid var(--gray); background: var(--blue-navy); padding: 24px 2rem; max-width: none; margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+/* URAC circular badges */
+.ft-urac { display: flex; gap: 24px; align-items: center; }
+.urac-badge { display: flex; align-items: center; gap: 10px; }
+.urac-circle { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--gold); background: rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.urac-circle strong { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold); line-height: 1; }
+.urac-circle span { font-size: 0.42rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.5); line-height: 1; margin-top: 2px; }
+.urac-text { font-size: 0.625rem; font-weight: 400; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.ft-bottom > div > span { font-size: 0.75rem; font-weight: 400; color: rgba(255,255,255,0.4); text-align: right; line-height: 1.5; }
+
+/* ── WRITE TO US FORM REVEAL ── */
+.opts-cards { transition: opacity 0.35s ease, transform 0.35s ease; }
+.opts-cards.hidden { opacity: 0; transform: scale(0.96); pointer-events: none; position: absolute; }
+.opts-form { display: none; opacity: 0; transform: scale(0.96); transition: opacity 0.4s ease 0.15s, transform 0.4s cubic-bezier(0.22,1,0.36,1) 0.15s; }
+.opts-form.visible { display: block; }
+.opts-form.in { opacity: 1; transform: scale(1); }
+.opts-section-inner { position: relative; }
+
+/* Form styles */
+.write-form { background: white; border: 1px solid var(--gray); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-card); }
+.write-form-head { padding: 24px 28px; border-bottom: 1px solid var(--gray); display: flex; align-items: center; justify-content: space-between; }
+.write-form-head h3 { font-size: 1.5rem; font-weight: 300; color: var(--blue-navy); margin: 0; }
+.write-form-head h3 strong { font-weight: 700; }
+.write-back { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: Roboto, sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--blue); transition: color 0.15s; }
+.write-back:hover { color: var(--blue-navy); }
+.write-back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.write-form-body { padding: 28px; }
+.wf-row { margin-bottom: 20px; }
+.wf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.wf-label { display: block; font-size: 0.875rem; font-weight: 700; color: var(--gray-darkest); margin-bottom: 6px; }
+.wf-hint { display: block; font-size: 0.8rem; color: var(--gray-medium); font-weight: 400; margin-bottom: 6px; }
+.wf-input, .wf-textarea {
+  width: 100%; border: 1px solid var(--gray); border-radius: 8px;
+  padding: 10px 14px; font-family: Roboto, sans-serif; font-size: 0.9rem;
+  color: var(--gray-darkest); background: var(--gray-light); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.wf-input { height: 44px; }
+.wf-textarea { height: 100px; resize: vertical; line-height: 1.6; }
+.wf-input:focus, .wf-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(34,115,186,0.12); background: white; }
+.wf-upload { border: 1.5px dashed var(--gray); border-radius: 8px; padding: 20px; text-align: center; background: var(--gray-light); cursor: pointer; transition: all 0.2s; }
+.wf-upload:hover { border-color: var(--blue); background: var(--blue-light); }
+.wf-upload p { font-size: 0.875rem; color: var(--gray-dark); }
+.wf-upload strong { color: var(--blue-navy); font-weight: 700; }
+.wf-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--gray); }
+.wf-note { font-size: 0.8rem; color: var(--gray-medium); font-weight: 400; }
+
+/* Confirmation */
+.write-confirm { text-align: center; padding: 60px 28px; }
+.write-confirm-ico { width: 60px; height: 60px; border-radius: 50%; background: #edfaf3; border: 2px solid #b5e5cc; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+.write-confirm-ico svg { width: 24px; height: 24px; stroke: #1a7a4a; fill: none; stroke-width: 2.5; }
+.write-confirm h2 { font-family: 'Roboto Serif', serif; font-size: 2rem; font-style: italic; font-weight: 400; color: var(--blue-navy); margin-bottom: 8px; }
+.write-confirm p { font-size: 1rem; color: var(--gray-dark); margin-bottom: 28px; }
+.write-confirm-timeline { display: flex; justify-content: center; gap: 0; position: relative; max-width: 420px; margin: 0 auto 28px; }
+.write-confirm-timeline::before { content: ''; position: absolute; top: 17px; left: 15%; right: 15%; height: 1px; background: var(--gray); }
+.wct-step { flex: 1; text-align: center; }
+.wct-dot { width: 34px; height: 34px; border-radius: 50%; margin: 0 auto 6px; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.wct-dot.done { background: #edfaf3; border: 1.5px solid #1a7a4a; }
+.wct-dot.done svg { width: 14px; height: 14px; stroke: #1a7a4a; fill: none; stroke-width: 2.5; }
+.wct-dot.next { background: var(--gray-light); border: 1px solid var(--gray); font-size: 0.75rem; font-weight: 700; color: var(--gray-medium); }
+.wct-label { font-size: 0.75rem; font-weight: 700; color: var(--gray-darkest); }
+.wct-when { font-size: 0.65rem; color: var(--gray-medium); }
+/* Base — fade up (headings, body text, general) */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Fade up slower — for large headings */
+.reveal-h { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+.reveal-h.in { opacity: 1; transform: translateY(0); }
+
+
+
+/* Fade in only — for backgrounds, wide elements */
+.reveal-fade { opacity: 0; transition: opacity 0.8s ease; }
+.reveal-fade.in { opacity: 1; }
+
+/* Slide in from left */
+.reveal-left { opacity: 0; transform: translateX(-28px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+.reveal-left.in { opacity: 1; transform: translateX(0); }
+
+/* Slide in from right */
+.reveal-right { opacity: 0; transform: translateX(28px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+.reveal-right.in { opacity: 1; transform: translateX(0); }
+
+/* Scale up — for cards */
+.reveal-scale { opacity: 0; transform: translateY(20px) scale(0.97); transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1); }
+.reveal-scale.in { opacity: 1; transform: translateY(0) scale(1); }
+
+/* Stagger delays */
+.d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s}
+.d4{transition-delay:.32s} .d5{transition-delay:.4s}  .d6{transition-delay:.48s}
+.d7{transition-delay:.56s} .d8{transition-delay:.64s}
+
+/* Spacing utility */
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:1080px) {
+  .nav-links { display: none; }
+  .ft-inner { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:700px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-img { display: none; }
+  .copts { grid-template-columns: 1fr; }
+  .ft-inner { grid-template-columns: 1fr 1fr; }
+  .ft-bottom { flex-direction: column; align-items: flex-start; }
+}
+.hero-block {
+    padding: 172px 0 72px 2rem;
+    max-width: 1344px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+}
+.hero-h1 {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--gray-darkest);
+    line-height: 1.05;
+    margin-bottom: 4px;
+}
+.hero-h1-italic {
+    font-family: 'Roboto Serif', serif;
+    font-size: 48px;
+    font-weight: 300;
+    font-style: italic;
+    color: #D17D00;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    display: block;
+}
+.section-h2 {
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--blue-navy);
+    line-height: 1.15;
+    margin-bottom: 10px;
+}
+.q-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background:none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.team-quote {
+    margin-top: 100px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    padding: 40px 80px 40px 50px;
+    background: none;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+</style>
+</head>
+<body id="azblue-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WH4ZTKNH"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- CHAT FAB -->
+<div class="chat-fab">
+  <div class="chat-prompt" onclick="openChat()" id="chatPrompt">
+    <strong>We're here to help.</strong>
+    <span>Chat with the Benefits Team →</span>
+  </div>
+  <button class="chat-btn" onclick="openChat()" id="reynaBtn" title="Chat with us">
+    <div class="reyna-wrap">
+      <svg id="reynaSVG" xmlns="http://www.w3.org/2000/svg" width="44" height="46" viewBox="0 0 66.37 69.41">
+        <defs>
+          <style>
+            .cls-1 { stroke-width: 2.15px; }
+            .cls-1, .cls-2 { fill: none; stroke: #000; stroke-linecap: round; stroke-miterlimit: 10; }
+            .cls-2 { stroke-width: 2.03px; }
+            .cls-3 { fill: #fff; }
+            .spinning-rays { transform-origin: 33.185px 34.705px; }
+            @keyframes reynaSpin { from { transform: rotate(0deg); } to { transform: rotate(720deg); } }
+          </style>
+        </defs>
+        <g class="spinning-rays" id="reynaRays">
+          <path class="cls-1" d="M12.58,59.47c.14,1.07.47,1.95,1.16,2.46,2.54,1.85,8.41-2.64,11.47-1.65,3.05.99,5.04,8.07,8.31,8.07s5.36-7.12,8.31-8.07c2.94-.95,8.93,3.5,11.47,1.65s.1-8.86,1.97-11.42c1.87-2.56,9.26-2.35,10.25-5.4.99-3.05-5.13-7.13-5.13-10.4s6.08-7.45,5.13-10.39c-.95-2.94-8.41-2.85-10.25-5.4s.59-9.55-1.97-11.42c-2.57-1.87-8.42,2.64-11.47,1.65-3.05-.99-5.05-8.06-8.31-8.06s-5.36,7.12-8.31,8.07c-2.94.95-8.93-3.5-11.47-1.65s-.1,8.86-1.97,11.42c-1.87,2.57-9.26,2.34-10.25,5.4-.99,3.06,5.13,7.13,5.13,10.4s-6.08,7.43-5.13,10.38c.19.58.59,1.03,1.15,1.41"/>
+          <path class="cls-1" d="M1.9,42.8c-.5.95-.74,1.86-.48,2.68,1,2.98,8.39,2.71,10.31,5.28,1.92,2.57-.55,9.5,2.12,11.39s8.49-2.71,11.45-1.78c2.95.92,5.26,8.02,8.41,7.98s5.2-7.17,8.21-8.18c3.01-1.01,8.91,3.44,11.49,1.52,2.57-1.92-.06-8.78,1.83-11.45s9.27-2.56,10.19-5.51c.92-2.95-5.22-7.19-5.24-10.33s6-7.45,4.99-10.46c-1.02-3.01-8.4-2.71-10.31-5.28-1.92-2.57.54-9.5-2.12-11.38s-8.49,2.71-11.45,1.78c-2.95-.92-5.26-8.02-8.41-7.98s-5.2,7.17-8.21,8.18c-3.01,1.02-8.91-3.44-11.49-1.52-2.58,1.92.06,8.78-1.83,11.45s-9.26,2.55-10.19,5.5c-.18.58-.11,1.18.12,1.82"/>
+        </g>
+        <path class="cls-1" d="M40.42,40.05c-1.85,2.01-4.52,3.27-7.46,3.27s-5.61-1.26-7.46-3.27"/>
+        <path class="cls-1" d="M28.31,33.53v-5.01"/>
+        <path class="cls-1" d="M37.62,33.53v-5.01"/>
+        <path class="cls-2" d="M33.18,54.35c10.85,0,19.65-8.8,19.65-19.65s-8.8-19.65-19.65-19.65-19.65,8.81-19.65,19.66,8.8,19.65,19.65,19.65h0Z"/>
+        <path class="cls-3" d="M11.42,60.51c5.53,0,10.01-4.48,10.01-10.01s-4.48-10.01-10.01-10.01S1.41,44.97,1.41,50.49s4.48,10.01,10.01,10.01Z"/>
+        <path class="cls-3" d="M11.77,60.51c5.53,0,10.01-4.48,10.01-10.01s-4.48-10.01-10.01-10.01S1.76,44.97,1.76,50.49s4.48,10.01,10.01,10.01Z"/>
+        <path d="M14.76,48.07v-.02c0-1.43-.94-2.6-2.21-2.98,0,0-.43-.14-.89-.14s-.94.15-.94.15c-1.26.4-2.17,1.55-2.17,2.92,0,.5.4.91.91.91s.91-.4.91-.91c0-.69.57-1.25,1.25-1.25.74,0,1.3.57,1.3,1.25,0,.26-.07.49-.19.69,0,0-.48.6-1.06.63-1.11.06-.95,1.67-.95,1.67v1.23c0,.5.41.91.91.91s.91-.4.91-.91v-1.23c1.23-.37,2.13-1.45,2.2-2.76v-.17h.03,0Z"/>
+        <path d="M11.65,54.22h0c-.5,0-.91.41-.91.91v.52c0,.5.41.91.91.91h0c.5,0,.91-.41.91-.91v-.52c0-.5-.41-.91-.91-.91Z"/>
+        <path class="cls-1" d="M11.66,60.62c5.59,0,10.12-4.53,10.12-10.12s-4.53-10.12-10.12-10.12S1.54,44.9,1.54,50.49s4.53,10.12,10.12,10.12Z"/>
+        <path d="M60.29,55.97c-.32-.09-.56-.21-.7-.34s-.22-.3-.22-.5c0-.22.09-.41.27-.56s.41-.22.7-.22c.2,0,.37.04.52.11s.27.18.36.31.13.28.13.44h-.38c0-.17-.05-.31-.16-.41s-.26-.15-.46-.15c-.18,0-.33.04-.43.12-.1.08-.16.2-.16.34,0,.12.05.21.15.29.1.08.27.15.5.22s.42.14.55.22.23.17.3.28.1.23.1.38c0,.23-.09.42-.27.55s-.42.21-.72.21c-.2,0-.38-.04-.55-.11s-.3-.18-.39-.31-.14-.28-.14-.44h.38c0,.17.06.31.19.41s.3.15.51.15.35-.04.46-.12.16-.19.16-.33-.05-.25-.15-.32-.27-.15-.53-.23h-.02Z"/>
+        <path d="M62.31,54.39l.93,2.32.93-2.32h.49v2.84h-.38v-1.11l.04-1.2-.93,2.3h-.29l-.93-2.3.04,1.19v1.11h-.38v-2.84h.48Z"/>
+      </svg>
+    </div>
+  </button>
+</div>
+
+<!-- CHAT WINDOW -->
+<div class="chat-win" id="chatWin">
+  <!-- Header -->
+  <div class="cw-hd">
+    <div class="cw-title">How can we help you today?</div>
+    <button class="cw-x" onclick="closeChat()">✕</button>
+  </div>
+
+  <!-- Search -->
+  <div class="cw-search">
+    <div class="cw-search-row">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="cw-search-input" id="cwSearchInput" type="text" placeholder="Search">
+      <button class="cw-search-clear" id="cwSearchClear" onclick="clearCwSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- Menu items -->
+  <div class="cw-menu">
+    <div class="cw-item" onclick="pick(document.getElementById('q-coverage'),'coverage');closeChat();">
+      <div class="cw-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 7h.01M12 7h3M9 11h6"/></svg>
+      </div>
+      <div class="cw-item-label">ID Card</div>
+      <div class="cw-item-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="cw-item" onclick="pick(document.getElementById('q-bill'),'bill');closeChat();">
+      <div class="cw-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      </div>
+      <div class="cw-item-label">Billing and Payments</div>
+      <div class="cw-item-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="cw-item" onclick="pick(document.getElementById('q-benefits'),'benefits');closeChat();">
+      <div class="cw-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h4"/><circle cx="17" cy="14" r="3"/></svg>
+      </div>
+      <div class="cw-item-label">MyBlue Account</div>
+      <div class="cw-item-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="cw-item" onclick="pick(document.getElementById('q-mental'),'mental');closeChat();">
+      <div class="cw-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </div>
+      <div class="cw-item-label">Getting Care</div>
+      <div class="cw-item-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+  </div>
+
+  <!-- Footer links -->
+  <div class="cw-footer">
+    <a class="cw-footer-link" href="#">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Frequently Asked Questions
+    </a>
+    <a class="cw-footer-link" href="mailto:MemberHelp@azblue.com">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Email MemberHelp@azblue.com
+    </a>
+  </div>
+</div>
+
+<!-- UTILITY BAR -->
+<div class="util-bar">
+  <div class="util-links">
+    <a href="#">Providers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Employers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    <a href="#">Brokers <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+  </div>
+  <div class="util-right">
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search
+    </a>
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.7A2 2 0 012 .18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      (888) 888-8888
+    </a>
+    <a href="#">
+      <svg class="u-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      Español <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div style="display:flex;align-items:center;">
+    <div class="nav-logo">
+      <img src="bcbs-logo.svg" alt="BlueCross BlueShield of Arizona" height="40">
+    </div>
+    <div class="nav-links">
+      <a href="#">Find a Plan <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+      <a href="#">For Members <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+      <a href="#">Insurance Basics <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+      <a href="#">Find Care <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-secondary btn-secondary-sm">24/7 Help</button>
+    <button class="btn-primary btn-primary-sm">Login / Register</button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="bc">
+  <a href="#">Home</a>
+  <span class="bc-sep">›</span>
+  Contact Us
+</div>
+
+<!-- HERO -->
+<div class="hero-wrap" style="background: url('hero.png') center top / cover no-repeat; min-height: 700px;">
+  <div class="hero-block">
+    <div class="hero-block-inner">
+      <h1 class="hero-h1">How can we</h1>
+      <span class="hero-h1-italic">best help you today?</span>
+      <p class="hero-subtitle">Search here for what you need, or choose an option below,<br>we'll get you to the right team.</p>
+      <div class="hero-search" style="position:relative;">
+        <input type="text" id="searchInput" placeholder="Search for help..." autocomplete="off">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <div id="searchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);border:1px solid var(--gray);overflow:hidden;z-index:100;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION CARDS -->
+<div class="q-section">
+  <div class="q-inner">
+    <h2 class="section-h2 reveal-h d1">What sounds most like <strong>what you're dealing with?</strong></h2>
+    <p class="section-body reveal-fade d2">Pick the one that fits and we'll point you to the right team with answers relevant to your situation.</p>
+    <div class="q-list">
+      <div class="q-card reveal-scale d2" onclick="pick(this,'coverage')" id="q-coverage">
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-shield-halved"></i></div><div><div class="q-title">I'm not sure if something is covered</div><div class="q-sub">A procedure, treatment, medication, or service you want to understand before going ahead</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal-scale d3" onclick="pick(this,'bill')" id="q-bill">
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div><div><div class="q-title">I got a bill I wasn't expecting</div><div class="q-sub">A charge that doesn't look right, an EOB you don't understand, or a cost you'd like to dispute</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal-scale d4" onclick="pick(this,'benefits')" id="q-benefits">
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-star"></i></div><div><div class="q-title">I want to understand my benefits better</div><div class="q-sub">What's included, what you're entitled to, what you might be missing</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal-scale d5" onclick="pick(this,'mental')" id="q-mental">
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-heart"></i></div><div><div class="q-title">I have a question about mental health coverage</div><div class="q-sub">Therapy, psychiatry, counseling — how it works and what it costs</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+      <div class="q-card reveal-scale d6" onclick="pick(this,'other')" id="q-other">
+        <div class="q-left"><div class="q-icon"><i class="fa-solid fa-comment"></i></div><div><div class="q-title">It's something else</div><div class="q-sub">We'll figure it out together</div></div></div>
+        <div class="q-chev"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHO CAN HELP (dynamic) -->
+<div class="full-divider dynamic" id="div-team"></div>
+<div class="resp-section dynamic" id="sec-team" style="padding-bottom: 20px;">
+  <div class="resp-inner">
+    <h2 class="section-h2 reveal-h d1"><strong>Here's who</strong> handles exactly this.</h2>
+    <p class="section-body reveal-left d2" id="teamIntro"></p>
+    <div class="reveal-left d3">
+      <div class="team-name" id="teamName"></div>
+      <div class="team-desc" id="teamDesc"></div>
+      <div class="team-quote reveal-fade d4">
+        <div class="team-quote-avatar" id="quoteInitials">MB</div>
+        <div class="team-quote-body">
+          <div class="team-quote-text" id="quoteText"></div>
+          <div class="team-quote-attr" id="quoteAttr"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO REACH THEM (dynamic) -->
+<div class="full-divider dynamic" id="div-opts"></div>
+<div class="wave-top">
+  <svg viewBox="0 0 1440 1" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:1px;display:block;width:100%;overflow:visible;">
+    <path d="M0,0 Q720,0 1440,0 L1440,0 L0,0 Z" fill="white"/>
+  </svg>
+</div>
+<div class="resp-section alt dynamic wave-section" id="sec-opts" style="background: white; padding-top: 100px; padding-bottom: 100px;">
+  <div class="resp-inner opts-section-inner">
+    <h3 class="team-name reveal-h d1" style="margin-bottom:10px;">Three ways in. <strong>Pick what works for you.</strong></h3>
+    <p class="section-body reveal-fade d2">Each one gets you to the same team. The difference is speed and how you like to communicate.</p>
+
+    <!-- CARDS VIEW -->
+    <div class="opts-cards copts" id="optsCards">
+
+      <!-- Chat -->
+      <div class="copt reveal-scale d2">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <img src="azb-chat.svg" alt="" style="width:52px;height:52px;">
+          </div>
+          <div>
+            <h3 class="copt-title">Chat with Us</h3>
+            <p class="copt-body">Our team will respond. Best for most questions and getting to the right person quickly.</p>
+          </div>
+          <div class="copt-action">
+            <button class="btn-tertiary" onclick="openChat()"><span class="btn-label">Chat now</span> <img src="arrow.svg" alt="" style="width:23px;height:23px;display:inline-block;vertical-align:middle;margin-left:6px;flex-shrink:0;"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call -->
+      <div class="copt reveal-scale d3">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <img src="azb-phone.svg" alt="" style="width:52px;height:52px;">
+          </div>
+          <div>
+            <h3 class="copt-title">Call Us</h3>
+            <p class="copt-body" id="phoneNote">Mon–Fri 7am–7pm. If you'd rather talk it through with someone directly.</p>
+          </div>
+          <div class="copt-action">
+            <a class="btn-tertiary" href="#"><span class="btn-label" id="phoneNum">(800) 232-2345</span> <img src="arrow.svg" alt="" style="width:23px;height:23px;display:inline-block;vertical-align:middle;margin-left:6px;flex-shrink:0;"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div class="copt reveal-scale d4">
+        <div class="copt-inner">
+          <div class="copt-icon">
+            <img src="azb-form.svg" alt="" style="width:52px;height:52px;">
+          </div>
+          <div>
+            <h3 class="copt-title">Submit a Request</h3>
+            <p class="copt-body">Fill out a short form and we'll get back to you. Great if you have documents to attach — an EOB, a bill, or a screenshot.</p>
+          </div>
+          <div class="copt-action">
+            <button class="btn-tertiary" onclick="showWriteForm()"><span class="btn-label">Get in touch</span> <img src="arrow.svg" alt="" style="width:23px;height:23px;display:inline-block;vertical-align:middle;margin-left:6px;flex-shrink:0;"></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FORM VIEW -->
+    <div class="opts-form" id="optsForm">
+      <div class="write-form" id="writeFormCard">
+        <div class="write-form-head">
+          <h3><strong>Send us</strong> a message</h3>
+          <button class="write-back" onclick="hideWriteForm()">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to options
+          </button>
+        </div>
+        <div class="write-form-body" style="padding:28px 28px 32px;">
+          <iframe src="https://bcbsarizona.formstack.com/forms/azblue_contact_us_v2" title="Formstack Form" width="100%" height="600" frameborder="0" style="border:none;display:block;"></iframe>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="wave-bottom">
+  <svg viewBox="0 0 1440 1" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:1px;display:block;width:100%;overflow:visible;">
+    <path d="M0,0 Q720,0 1440,0 L1440,0 L0,0 Z" fill="white"/>
+  </svg>
+</div>
+
+<!-- FAQs (dynamic) -->
+<div class="full-divider dynamic" id="div-faq"></div>
+<div class="resp-section alt dynamic" id="sec-faq">
+  <div class="resp-inner">
+    <h2 class="section-h2 reveal-h d1">Here's what most people <strong>ask first.</strong></h2>
+    <p class="section-body reveal-fade d2" id="faqIntro"></p>
+   
+    <ul class="faq-wrap reveal d3" id="faqList"></ul>
+    <div class="faq-foot reveal-fade d4">
+        <span id="faqFoot"></span>
+        <a onclick="openChat()">Ask in chat →</a>
+      </div>
+  </div>
+</div>
+
+<!-- CTA (dynamic) -->
+<div class="dynamic" id="div-cta">
+  <div class="cta-band">
+    <h2 id="closeHead" class="reveal-h"></h2>
+    <p id="closeSub" class="reveal-fade d2"></p>
+    <div class="cta-btns reveal-fade d3">
+      <button class="btn-primary" onclick="openChat()">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Chat with us
+      </button>
+      <button class="btn-secondary-white">Call instead</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-inner">
+    <div class="ft-col">
+      <h4>About</h4>
+      <a href="#">About BCBS Arizona</a>
+      <a href="#">AZBlue Foundation</a>
+      <a href="#">Careers</a>
+      <a href="#">Community</a>
+      <a href="#">Corporate Governance</a>
+      <a href="#">Contact Us</a>
+    </div>
+    <div class="ft-col">
+      <h4>Latest</h4>
+      <a href="#">News</a>
+      <a href="#">Healthcare in View</a>
+      <a href="#">In the Media</a>
+    </div>
+    <div class="ft-col">
+      <h4>Resources</h4>
+      <a href="#">Forms &amp; Resources</a>
+      <a href="#">Information in Other Languages</a>
+      <a href="#">Nondiscrimination Notice</a>
+      <a href="#">Privacy &amp; Legal</a>
+      <a href="#">Privacy Practices</a>
+      <a href="#">Doing Business with BCBS Arizona</a>
+      <a href="#">Mandates</a>
+      <a href="#">Site Map</a>
+    </div>
+    <div class="ft-col">
+      <h4>Follow us</h4>
+      <div class="ft-social">
+        <a href="#" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+        <a href="#" aria-label="X / Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="#" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <div style="max-width:1344px;margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;">
+    <div class="ft-urac">
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Case Management<br>02/01/2024</div>
+      </div>
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Health Plan with Health<br>Insurance Marketplace (HIM)<br>02/01/2024</div>
+      </div>
+      <div class="urac-badge">
+        <div class="urac-circle"><strong>urac</strong><span>ACCREDITED</span></div>
+        <div class="urac-text">Health Plan<br>02/01/2024</div>
+      </div>
+    </div>
+    <span>© Blue Cross Blue Shield of Arizona.<br>An independent licensee of the Blue Cross and Blue Shield Association.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+var qData = {
+  coverage: {
+    teamIntro:"Coverage questions go to our Benefits Specialists. They spend all day answering exactly this — is this covered, what will it cost, do I need authorization.",
+    teamName:"<strong>Benefits</strong> Specialists", teamDesc:"A team of specialists who know your plan the way a mechanic knows an engine. Before you schedule anything non-emergency, these are the people to call. They can verify coverage, pre-authorize if needed, and make sure you don't end up with a surprise bill.",
+    quoteText:"Every day I talk to members who are afraid to use their benefits because they don't know what's covered. That's exactly why I'm here — so nobody skips care they need because of a question that takes five minutes to answer.",
+    quoteAttr:"Maria B. <span>Benefits Specialist, 9 years</span>", quoteInitials:"MB",
+    phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · Ask for Benefits.",
+    faqIntro:"The question we get most from members with a coverage question:", faqHead:"Saving you a call — this one comes up constantly.",
+    faqs:[{q:"How do I know if something is covered before I go?",a:"Call us before any non-emergency procedure and ask us to verify coverage. We'll tell you yes or no, what it'll cost, and whether you need a pre-authorization. Takes about 5 minutes and can save you from a surprise bill later."},{q:"What's the difference between covered and covered at 100%?",a:"Covered means we'll pay part of it — but you might still owe a copay, coinsurance, or it might go toward your deductible first. Covered at 100% means you pay nothing. Preventive care is usually 100%. Most other care isn't — until you hit your out-of-pocket max."},{q:"Do I need a referral or pre-authorization?",a:"On a PPO plan, you don't need a referral to see a specialist. But some procedures — certain surgeries, MRIs, specialist treatments — do require pre-authorization before we'll cover them. When in doubt, call us first."}],
+    faqFoot:"Didn't answer it?", closeHead:"You're in the right place.", closeSub:"The Benefits Team handles exactly this. Chat with us or call if you'd rather talk it through.",
+    ctx:"I can see you have a coverage question — you're in the right place. What specifically are you trying to find out?"
+  },
+  bill: {
+    teamIntro:"Billing disputes go to our Claims and Billing Team. They can pull up your account, find the charge in question, and tell you exactly what happened and what your options are.",
+    teamName:"Claims & <strong>Billing</strong> Team", teamDesc:"When a charge looks wrong, these are the people who can actually fix it. They have access to your full claims history, can re-process claims if needed, and can escalate a dispute if something isn't adding up.",
+    quoteText:"A bill that doesn't make sense isn't just frustrating — it's stressful. I take real pride in being the person who can look at something confusing and say: here's exactly what happened, and here's what we're going to do about it.",
+    quoteAttr:"James R. <span>Claims & Billing Specialist, 11 years</span>", quoteInitials:"JR",
+    phone:"(800) 232-2346", phoneNote:"Mon–Fri 7am–7pm · Ask for Billing.",
+    faqIntro:"Before you call — these two questions come up most from members with a billing concern:", faqHead:"These might save you the call entirely.",
+    faqs:[{q:"Is my EOB the same as a bill?",a:"No. An Explanation of Benefits (EOB) shows how we processed a claim — it's not a bill. Wait for a separate bill from your provider before paying anything. If numbers don't match your EOB, that's worth calling about."},{q:"My claim was denied — what do I do?",a:"Your EOB will explain the denial reason. You have the right to appeal, and you typically have 180 days to do so. Our team can walk you through the process — call us or start a chat and we'll help you put together a strong appeal."},{q:"Why does my bill look different than my EOB?",a:"It often comes down to timing, adjustments, or a coordination of benefits issue if you have more than one plan. Bring both documents to the conversation and we'll trace the discrepancy."}],
+    faqFoot:"Still confused?", closeHead:"Let's sort this out.", closeSub:"The Claims & Billing Team has seen everything. Chat with us and we'll trace the issue together.",
+    ctx:"I can see you have a billing concern. Can you tell me a bit more about the charge so I can get the right person?"
+  },
+  benefits: {
+    teamIntro:"Understanding your benefits is exactly what our Member Education team is set up for. They're patient, thorough, and genuinely enjoy explaining how things work.",
+    teamName:"Member <strong>Education</strong> Team", teamDesc:"Think of them as your benefits translator. They can walk you through your plan in plain language, make sure you know what you're entitled to, and flag anything you might be underusing. No jargon, no rush.",
+    quoteText:"Most people are paying for benefits they don't even know they have. Getting to tell someone that's already included in your plan — and watching the relief on their face — never gets old.",
+    quoteAttr:"Sandra T. <span>Member Education Specialist, 7 years</span>", quoteInitials:"ST",
+    phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · Ask for Member Education.",
+    faqIntro:"The things most members wish they'd known sooner:", faqHead:"You might find your answer right here.",
+    faqs:[{q:"What benefits do most people not know they have?",a:"Telehealth (covered, usually same day), mental health visits (covered same as any other doctor), gym discounts, and free preventive care. Most members never use these — and they're paying for them."},{q:"Where do I find everything my plan covers?",a:"Log in to your member portal > My Coverage > Benefits Summary. It's a full list. If anything looks confusing, the Member Education team will walk through it with you."},{q:"Can I change my plan mid-year?",a:"Generally no — plan changes happen during Open Enrollment (November–December). But certain life events — marriage, new baby, job change — qualify you for a Special Enrollment Period. Call us if you've had a life change."}],
+    faqFoot:"Want someone to walk you through it?", closeHead:"Knowledge is coverage.", closeSub:"The more you know about your plan, the more you get out of it. The Member Education team genuinely loves this.",
+    ctx:"Happy to help you make the most of your plan. What aspect of your coverage are you curious about?"
+  },
+  mental: {
+    teamIntro:"Mental health coverage questions go to our Behavioral Health team. They specialize in exactly this — therapy, psychiatry, counseling — and they'll give you straight answers.",
+    teamName:"Behavioral <strong>Health</strong> Team", teamDesc:"A dedicated team for behavioral health benefits. They can tell you what's covered, help you find in-network therapists or psychiatrists near you, and make sure you understand exactly what you'll pay. No runaround.",
+    quoteText:"Mental health care shouldn't feel harder to access than any other kind of care. I'm here to make sure it doesn't. If you have a question, ask it — there's no judgment here, only answers.",
+    quoteAttr:"Dr. Angela K. <span>Behavioral Health Specialist, 6 years</span>", quoteInitials:"AK",
+    phone:"(800) 232-2347", phoneNote:"Mon–Fri 8am–6pm · Direct line.",
+    faqIntro:"The two things most people want to know about mental health coverage:", faqHead:"Straightforward answers.",
+    faqs:[{q:"Is therapy covered the same as a regular doctor visit?",a:"Yes. Arizona state law — and federal law — require that mental health coverage is equal to physical health coverage. Same deductible, same coinsurance, same rules. If your plan covers a GP visit, it covers a therapy visit."},{q:"How do I find an in-network therapist?",a:"Log in to your portal > Find a Provider > Behavioral Health. Filter by your zip code and specialty. You can also call our Behavioral Health team and they'll do the search with you."},{q:"Is there a limit on how many therapy sessions I can have?",a:"No session limits. Your plan covers as many medically necessary visits as you need. Use your benefits."}],
+    faqFoot:"Have a more specific question?", closeHead:"You've got support.", closeSub:"The Behavioral Health team is here to help. Reach out — they're good at this.",
+    ctx:"Thanks for reaching out. I'm connecting you with our Behavioral Health team. What would you like to know?"
+  },
+  other: {
+    teamIntro:"Not sure where your question goes? That's fine. Our general Member Services team will figure it out with you and get you to the right person.",
+    teamName:"Member <strong>Services</strong>", teamDesc:"The starting point for anything that doesn't fit neatly into a category. They'll listen to what you're dealing with, figure out who can actually help, and get you there without bouncing you around.",
+    quoteText:"There's no such thing as a question that doesn't fit. If you're not sure where to start, that's fine — I'll help you figure out where to go. Getting you to the right person is what I do.",
+    quoteAttr:"Chris M. <span>Member Services, 5 years</span>", quoteInitials:"CM",
+    phone:"(800) 232-2345", phoneNote:"Mon–Fri 7am–7pm · General member services.",
+    faqIntro:"A few things that come up a lot — in case one of these is yours:", faqHead:"Common questions, quick answers.",
+    faqs:[{q:"How do I update my contact information?",a:"Log in > My Account > Personal Information. Address, phone, and email can all be updated online."},{q:"How do I get a new ID card?",a:"Log in > My Coverage > ID Cards > Request New Card. Or download a digital copy right now — accepted everywhere your physical card is."},{q:"I think there's fraud on my account.",a:"Call our fraud hotline immediately: 1-800-000-0000. It's confidential and available 24/7. You can also report it through the Member Portal under My Account > Security."}],
+    faqFoot:"Something else on your mind?", closeHead:"We'll figure it out.", closeSub:"Someone's ready to help. Start a chat and tell us what's going on — we'll take it from there.",
+    ctx:"No problem — we'll figure it out together. Can you tell me a little more about what's going on?"
+  }
+};
+var cur = null;
+
+function pick(el, key) {
+  var d = qData[key]; if (!d) return; cur = key;
+  document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  function set(id, val, html) { var e = document.getElementById(id); if (!e) return; if (html) e.innerHTML = val; else e.textContent = val; }
+  set('teamIntro', d.teamIntro);
+  set('teamName',  d.teamName, true);
+  set('teamDesc',  d.teamDesc);
+  set('quoteText', d.quoteText);
+  set('quoteAttr', d.quoteAttr, true);
+  set('quoteInitials', d.quoteInitials);
+  // Set up fresh quote observer so it animates on scroll
+  set('phoneNum',  d.phone);
+  set('phoneNote', d.phoneNote);
+  set('faqIntro',  d.faqIntro);
+  set('faqHeadSub',d.faqHead);
+  set('faqFoot',   d.faqFoot);
+  set('closeHead', d.closeHead);
+  set('closeSub',  d.closeSub);
+  var fl = document.getElementById('faqList');
+  if (fl) fl.innerHTML = d.faqs.map(function(f){
+    return '<li class="faq-item">'
+      + '<button class="faq-q" onclick="toggleFaq(this.parentElement)" aria-expanded="false">'
+      + '<span class="faq-q-text">'+f.q+'</span>'
+      + '<span class="faq-chev-wrap">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">'
+      + '<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"></path>'
+      + '</svg>'
+      + '</span>'
+      + '</button>'
+      + '<div class="faq-a"><div class="faq-a-inner">'+f.a+'</div></div>'
+      + '</li>';
+  }).join('');
+  var om = document.getElementById('openingMsg');
+  if (om && d.ctx) om.textContent = d.ctx;
+  document.querySelectorAll('.dynamic').forEach(function(e){ e.classList.add('show'); });
+
+  // Strip .in from every reveal element inside dynamic sections EXCEPT the quote
+  document.querySelectorAll('.dynamic [class*="reveal"]').forEach(function(el) {
+    el.classList.remove('in');
+  });
+
+  // Wait for scroll to finish then re-observe everything
+  setTimeout(initRevealObserver, 800);
+  // Trigger wave bounce on the blue section
+  setTimeout(function() {
+    var topPath   = document.querySelector('.wave-top path');
+    var botPath   = document.querySelector('.wave-bottom path');
+    if (!topPath || !botPath) return;
+
+    var duration = 900; // ms
+    var start = null;
+
+    // Spring keyframes: value of the control point Y at each time fraction
+    // Top: starts at 60 (flat), dips to -80 (inward), overshoots to 95, settles at 60
+    // Bottom: starts at 0 (flat), punches to 130 (outward), overshoots to -20, settles at 0
+    function springVal(t, keyframes) {
+      // keyframes: [[time0-1, value], ...]
+      for (var i = 0; i < keyframes.length - 1; i++) {
+        var t0 = keyframes[i][0], v0 = keyframes[i][1];
+        var t1 = keyframes[i+1][0], v1 = keyframes[i+1][1];
+        if (t <= t1) {
+          var p = (t - t0) / (t1 - t0);
+          // ease in-out within segment
+          p = p < 0.5 ? 2*p*p : -1+(4-2*p)*p;
+          return v0 + (v1 - v0) * p;
+        }
+      }
+      return keyframes[keyframes.length-1][1];
+    }
+
+    var topKeys = [[0,0],[0.2,140],[0.45,-50],[0.65,12],[0.8,-8],[1.0,0]];
+    var botKeys = [[0,0],[0.2,190],[0.45,-45],[0.65,18],[0.8,-8],[1.0,0]];
+
+    function frame(ts) {
+      if (!start) start = ts;
+      var t = Math.min((ts - start) / duration, 1);
+
+      var tv = springVal(t, topKeys);
+      var bv = springVal(t, botKeys);
+
+      topPath.setAttribute('d', 'M0,0 Q720,' + tv + ' 1440,0 L1440,0 L0,0 Z');
+      botPath.setAttribute('d', 'M0,0 Q720,' + bv + ' 1440,0 L1440,0 L0,0 Z');
+
+      if (t < 1) requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }, 350);
+  setTimeout(checkReveals, 60);
+  setTimeout(function(){ document.getElementById('sec-team').scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
+}
+
+function toggleFaq(el) {
+  var open = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(f){ f.classList.remove('open'); });
+  if (!open) el.classList.add('open');
+}
+// SEARCH
+var sinp = document.getElementById('searchInput');
+var sres = document.getElementById('searchResults');
+if (sinp && sres) {
+  sinp.addEventListener('input', function(){ sres.classList.toggle('show', this.value.length > 1); });
+  sinp.addEventListener('blur', function(){ setTimeout(function(){ sres.classList.remove('show'); }, 180); });
+}
+function pickSearch(key) {
+  if (sres) sres.classList.remove('show');
+  if (sinp) sinp.value = '';
+  var el = document.getElementById('q-' + key);
+  if (el) el.click();
+}
+
+// CHAT
+function clearCwSearch() {
+  var inp = document.getElementById('cwSearchInput');
+  var clr = document.getElementById('cwSearchClear');
+  if (inp) inp.value = '';
+  if (clr) clr.classList.remove('visible');
+}
+
+// Show/hide clear button as user types in chat search
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('cwSearchInput');
+  var clr = document.getElementById('cwSearchClear');
+  if (inp && clr) {
+    inp.addEventListener('input', function() {
+      clr.classList.toggle('visible', this.value.length > 0);
+    });
+  }
+});
+var promptGone = false;
+function openChat() {
+  document.getElementById('chatWin').classList.add('open');
+  var p = document.getElementById('chatPrompt');
+  if (p) p.style.display = 'none';
+  promptGone = true;
+  setTimeout(function(){ var s = document.getElementById('cwSearchInput'); if(s) s.focus(); }, 300);
+}
+function closeChat() { document.getElementById('chatWin').classList.remove('open'); }
+
+
+window.addEventListener('scroll', function(){
+  if (!promptGone && window.scrollY > 200) { var p=document.getElementById('chatPrompt'); if(p){p.style.transition='opacity 0.3s';p.style.opacity='0';setTimeout(function(){p.style.display='none';promptGone=true;},300);} }
+}, { passive: true });
+
+var revealSelectors = '.reveal, .reveal-h, .reveal-fade, .reveal-left, .reveal-right, .reveal-scale';
+var revealObserver;
+
+function initRevealObserver() {
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
+
+  document.querySelectorAll(revealSelectors).forEach(function(el) {
+    revealObserver.observe(el);
+  });
+}
+
+// Re-observe any new elements when dynamic sections appear
+function checkReveals() {
+  document.querySelectorAll(revealSelectors + ':not(.in)').forEach(function(el) {
+    revealObserver.observe(el);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initRevealObserver);
+} else {
+  initRevealObserver();
+}
+function showWriteForm() {
+  var cards = document.getElementById('optsCards');
+  var form  = document.getElementById('optsForm');
+  if (!cards || !form) return;
+  // Fade cards out
+  cards.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  cards.style.opacity = '0';
+  cards.style.transform = 'scale(0.96)';
+  setTimeout(function() {
+    cards.style.display = 'none';
+    form.style.display = 'block';
+    form.style.opacity = '0';
+    form.style.transform = 'scale(0.96)';
+    // Reset form content
+    document.getElementById('writeFormCard').innerHTML = document.getElementById('writeFormCard').innerHTML;
+    setTimeout(function() {
+      form.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1)';
+      form.style.opacity = '1';
+      form.style.transform = 'scale(1)';
+    }, 20);
+  }, 320);
+}
+
+function hideWriteForm() {
+  var cards = document.getElementById('optsCards');
+  var form  = document.getElementById('optsForm');
+  if (!cards || !form) return;
+  form.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  form.style.opacity = '0';
+  form.style.transform = 'scale(0.96)';
+  setTimeout(function() {
+    form.style.display = 'none';
+    cards.style.display = 'grid';
+    cards.style.opacity = '0';
+    cards.style.transform = 'scale(0.96)';
+    setTimeout(function() {
+      cards.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1)';
+      cards.style.opacity = '1';
+      cards.style.transform = 'scale(1)';
+    }, 20);
+  }, 320);
+}
+
+
+// ── REYNA SPIN ──
+var reynaRays = document.getElementById('reynaRays');
+var reynaSpinning = false;
+
+function triggerReynaSpin() {
+  if (!reynaRays || reynaSpinning) return;
+  reynaSpinning = true;
+  reynaRays.style.animation = 'reynaSpin 1.5s cubic-bezier(0.6, 0.0, 0.4, 1) forwards';
+  setTimeout(function() {
+    reynaRays.style.animation = '';
+    reynaSpinning = false;
+  }, 1500);
+}
+
+// Spin on page load
+window.addEventListener('load', function() {
+  setTimeout(triggerReynaSpin, 600);
+});
+
+// Spin on hover of ANY element that opens the chat
+document.addEventListener('mouseover', function(e) {
+  var el = e.target.closest('[onclick*="openChat"]');
+  if (el) triggerReynaSpin();
+});
+var searchIndex = [
+  { key: 'coverage', title: 'I\'m not sure if something is covered',       sub: 'A procedure, treatment, medication, or service you want to understand before going ahead',     keywords: 'covered coverage procedure treatment medication authorization prior auth referral' },
+  { key: 'bill',     title: 'I got a bill I wasn\'t expecting',             sub: 'A charge that doesn\'t look right, an EOB you don\'t understand, or a cost you\'d like to dispute', keywords: 'bill billing charge eob explanation of benefits claim denied dispute payment invoice' },
+  { key: 'benefits', title: 'I want to understand my benefits better',      sub: 'What\'s included, what you\'re entitled to, what you might be missing',                         keywords: 'benefits plan what is covered telehealth gym wellness deductible copay coinsurance' },
+  { key: 'mental',   title: 'I have a question about mental health coverage', sub: 'Therapy, psychiatry, counseling — how it works and what it costs',                             keywords: 'mental health therapy therapist psychiatry counseling behavioral health depression anxiety' },
+  { key: 'other',    title: 'Something else',                                sub: 'We\'ll figure it out together',                                                                  keywords: 'id card update address fraud contact general help other' }
+];
+
+var sinp = document.getElementById('searchInput');
+var sres = document.getElementById('searchResults');
+
+if (sinp && sres) {
+  sinp.addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    if (q.length < 2) { sres.style.display = 'none'; return; }
+
+    var results = searchIndex.filter(function(item) {
+      return (item.title + ' ' + item.sub + ' ' + item.keywords).toLowerCase().indexOf(q) !== -1;
+    });
+
+    if (results.length === 0) {
+      sres.innerHTML = '<div style="padding:14px 16px;font-size:0.875rem;color:var(--gray-dark);">No results — try different keywords</div>';
+    } else {
+      sres.innerHTML = results.map(function(item) {
+        // Highlight matching text
+        var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        var title = item.title.replace(re, '<strong>$1</strong>');
+        return '<div class="sr-item" onclick="pickSearch(\'' + item.key + '\')" style="display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid var(--gray-light);cursor:pointer;transition:background 0.12s;" onmouseover="this.style.background=\'var(--blue-light)\'" onmouseout="this.style.background=\'white\'">'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:0.875rem;font-weight:700;color:var(--gray-darkest);margin-bottom:2px;">' + title + '</div>'
+          + '<div style="font-size:0.75rem;color:var(--gray-dark);">' + item.sub + '</div>'
+          + '</div>'
+          + '<i class="fa-solid fa-arrow-right" style="color:var(--blue);margin-top:3px;flex-shrink:0;"></i>'
+          + '</div>';
+      }).join('');
+    }
+    sres.style.display = 'block';
+  });
+
+  sinp.addEventListener('blur', function() {
+    setTimeout(function() { sres.style.display = 'none'; }, 180);
+  });
+
+  sinp.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { sres.style.display = 'none'; sinp.blur(); }
+  });
+}
+
+function pickSearch(key) {
+  if (sres) sres.style.display = 'none';
+  if (sinp) sinp.value = '';
+  var el = document.getElementById('q-' + key);
+  if (el) el.click();
+}
+
+</script>
+</body>
+</html>
