@@ -600,9 +600,9 @@ function minifyJS(code) {
   var stripComments = document.getElementById('chk-comments').checked;
   var stripLogs = document.getElementById('chk-logs').checked;
 
-  /* Strip wrapping <script> / </script> tags and restore them after minification */
+  /* Strip wrapping <script> / <\/script> tags and restore them after minification */
   var openTag = '', closeTag = '';
-  var scriptMatch = code.match(/^(\s*<script[^>]*>)([\s\S]*?)(<\/script>\s*)$/i);
+  var scriptMatch = code.match(/^(\s*<script[^>]*>)([\s\S]*?)(<\/+'script'+'>\s*)$/i);
   if (scriptMatch) {
     openTag  = scriptMatch[1];
     code     = scriptMatch[2];
@@ -620,7 +620,7 @@ function minifyJS(code) {
   /* Protect string literals so operator collapsing never touches their content */
   var _strings = [];
   out = out.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g, function(m) {
-    _strings.push(m); return '\uE000S' + (_strings.length - 1) + '\uE000';
+    _strings.push(m); return '__STRLIT_' + (_strings.length - 1) + '__';
   });
   out = out
     .replace(/\r\n|\r/g, '\n').replace(/\n{2,}/g, '\n').replace(/[ \t]+/g, ' ')
@@ -628,7 +628,7 @@ function minifyJS(code) {
     .replace(/\n([{};,=+\-*\/%&|<>!?:()])/g, '$1').replace(/([{};,=+\-*\/%&|<>!?:()])\n/g, '$1')
     .replace(/\n+/g, ' ').replace(/  +/g, ' ').trim();
   /* Restore string literals */
-  out = out.replace(/\uE000S(\d+)\uE000/g, function(_, i) { return _strings[parseInt(i, 10)]; });
+  out = out.replace(/__STRLIT_(\d+)__/g, function(_, i) { return _strings[parseInt(i, 10)]; });
 
   return openTag ? openTag + '\n' + out + '\n' + closeTag.trim() : out;
 }
@@ -638,9 +638,9 @@ function minifyCSS(code) {
   var stripZeros = document.getElementById('chk-css-zeros').checked;
   var shortenColors = document.getElementById('chk-css-colors').checked;
 
-  /* Strip wrapping <style> / </style> tags and restore them after minification */
+  /* Strip wrapping <style> / <\/style> tags and restore them after minification */
   var openTag = '', closeTag = '';
-  var styleMatch = code.match(/^(\s*<style[^>]*>)([\s\S]*?)(<\/style>\s*)$/i);
+  var styleMatch = code.match(/^(\s*<style[^>]*>)([\s\S]*?)(<\x2Fstyle>\s*)$/i);
   if (styleMatch) {
     openTag  = styleMatch[1];
     code     = styleMatch[2];
