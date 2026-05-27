@@ -620,7 +620,7 @@ function minifyJS(code) {
   /* Protect string literals so operator collapsing never touches their content */
   var _strings = [];
   out = out.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g, function(m) {
-    _strings.push(m); return '\x00S' + (_strings.length - 1) + '\x00';
+    _strings.push(m); return '\uE000S' + (_strings.length - 1) + '\uE000';
   });
   out = out
     .replace(/\r\n|\r/g, '\n').replace(/\n{2,}/g, '\n').replace(/[ \t]+/g, ' ')
@@ -628,7 +628,7 @@ function minifyJS(code) {
     .replace(/\n([{};,=+\-*\/%&|<>!?:()])/g, '$1').replace(/([{};,=+\-*\/%&|<>!?:()])\n/g, '$1')
     .replace(/\n+/g, ' ').replace(/  +/g, ' ').trim();
   /* Restore string literals */
-  out = out.replace(/\x00S(\d+)\x00/g, function(_, i) { return _strings[parseInt(i, 10)]; });
+  out = out.replace(/\uE000S(\d+)\uE000/g, function(_, i) { return _strings[parseInt(i, 10)]; });
 
   return openTag ? openTag + '\n' + out + '\n' + closeTag.trim() : out;
 }
