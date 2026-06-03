@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Translation Consistency Audit — AZ Blue Diabetes Section</title>
+<style>
+  :root{
+    --bg:#fafafa; --card:#ffffff; --border:#e0e0e0;
+    --text:#1a1a1a; --muted:#666; --accent:#FFBE5F;
+    --crit:#c0392b; --crit-bg:#fbeae8;
+    --mod:#b7791f; --mod-bg:#fdf6e9;
+    --min:#666; --min-bg:#f0f0f0;
+    --ok:#2f7d4f; --ok-bg:#eaf4ee;
+    --shadow:0 1px 3px rgba(0,0,0,0.1);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    font-weight:400; line-height:1.6; padding:3rem 1.5rem 5rem;
+  }
+  .wrap{max-width:980px; margin:0 auto;}
+  h1{font-weight:300; font-size:2.1rem; letter-spacing:-0.01em; margin:0 0 .4rem;}
+  h2{font-weight:300; font-size:1.5rem; margin:2rem 0 1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border);}
+  h2:first-of-type{margin-top:0;}
+  h3{font-weight:400; font-size:1.1rem; margin:0 0 .25rem;}
+  .sub{color:var(--muted); font-size:1.02rem; margin:0 0 1.5rem;}
+  .meta{display:flex; flex-wrap:wrap; gap:.5rem 2rem; font-size:.85rem; color:var(--muted);
+    background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1rem 1.25rem; margin-bottom:1.5rem;}
+  .meta b{color:var(--text); font-weight:400;}
+
+  .summary{background:var(--card); border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:8px; padding:1.5rem 1.75rem; box-shadow:var(--shadow);}
+  .summary p{margin:0 0 .9rem;}
+  .summary p:last-child{margin-bottom:0;}
+
+  /* tab navigation */
+  .tabs{display:flex; flex-wrap:wrap; gap:.25rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem;}
+  .tab{appearance:none; border:none; background:none; cursor:pointer; font:inherit;
+    font-size:.95rem; color:var(--muted); padding:.7rem 1.1rem; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition:all .3s ease; border-radius:6px 6px 0 0;}
+  .tab:hover{color:var(--text); background:#f3f3f3;}
+  .tab[aria-selected="true"]{color:var(--text); border-bottom-color:var(--accent); font-weight:400;}
+  .tab .count{display:inline-block; font-size:.7rem; color:var(--muted); background:#f0f0f0;
+    border-radius:10px; padding:.05rem .45rem; margin-left:.4rem; vertical-align:1px;}
+  .tab[aria-selected="true"] .count{background:var(--accent); color:#1a1a1a;}
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  /* legend + filters */
+  .legend{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin:0 0 .4rem;}
+  .chip{display:inline-flex; align-items:center; gap:.45rem; font-size:.82rem; padding:.35rem .75rem;
+    border-radius:20px; border:1px solid var(--border); background:var(--card); cursor:pointer;
+    transition:all .3s ease; user-select:none;}
+  .chip .dot{width:9px; height:9px; border-radius:50%;}
+  .chip[data-active="false"]{opacity:.4;}
+  .dot.crit{background:var(--crit);} .dot.mod{background:var(--mod);}
+  .dot.min{background:var(--min);} .dot.ok{background:var(--ok);}
+  .filter-note{font-size:.78rem; color:var(--muted); margin:.25rem 0 1.5rem;}
+
+  /* callout */
+  .callout{background:var(--crit-bg); border:1px solid #f0cfca; border-radius:8px;
+    padding:1.25rem 1.5rem; margin:1.25rem 0;}
+  .callout h3{color:var(--crit);}
+  .callout ul{margin:.5rem 0 0; padding-left:1.2rem;}
+  .callout li{margin:.35rem 0;}
+
+  /* finding cards */
+  .group{background:var(--card); border:1px solid var(--border); border-radius:10px;
+    box-shadow:var(--shadow); margin-bottom:1.25rem; overflow:hidden;}
+  .group-head{padding:1.1rem 1.5rem; border-bottom:1px solid var(--border); display:flex;
+    justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap;}
+  .group-head .url{font-size:.8rem; color:var(--muted); font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .pagestat{font-size:.78rem; color:var(--muted);}
+
+  .finding{display:grid; grid-template-columns:auto auto 1fr; gap:.85rem; align-items:start;
+    padding:.95rem 1.5rem; border-top:1px solid #f0f0f0; transition:background .3s ease;}
+  .finding:first-child{border-top:none;}
+  .finding:hover{background:#fcfcfc;}
+  .badge{font-size:.66rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    padding:.2rem .5rem; border-radius:5px; white-space:nowrap; margin-top:.15rem;}
+  .badge.crit{color:var(--crit); background:var(--crit-bg);}
+  .badge.mod{color:var(--mod); background:var(--mod-bg);}
+  .badge.min{color:var(--min); background:var(--min-bg);}
+  .badge.ok{color:var(--ok); background:var(--ok-bg);}
+  .lang{font-size:.68rem; font-weight:600; letter-spacing:.03em; padding:.2rem .5rem; border-radius:5px;
+    white-space:nowrap; margin-top:.15rem; border:1px solid var(--border); color:var(--muted); background:#fff;}
+  .lang.es{border-color:#d9c6a3;} .lang.zh{border-color:#a3c4d9;} .lang.both{border-color:#cbb3d9;}
+  .ftext{font-size:.92rem;}
+  .ftext .t{font-weight:400; color:var(--text);}
+  .ftext .d{color:var(--muted); display:block; margin-top:.15rem; font-size:.86rem;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.82em;
+    background:#f3f3f3; padding:.08rem .35rem; border-radius:4px;}
+  .zh-ex{font-size:.9em;}
+
+  .foot{color:var(--muted); font-size:.8rem; margin-top:2rem; padding-top:1rem;
+    border-top:1px solid var(--border);}
+
+  /* print button (per spec) */
+  #print-btn{position:fixed; top:20px; right:20px; width:40px; height:40px; border:none;
+    border-radius:8px; background:#1a1a1a; opacity:.7; cursor:pointer; z-index:9999;
+    display:flex; align-items:center; justify-content:center; transition:opacity .3s ease;}
+  #print-btn:hover{opacity:1;}
+  #print-btn svg{width:18px; height:18px; stroke:#fff;}
+  #print-btn .tip{position:absolute; top:50%; right:48px; transform:translateY(-50%);
+    background:#1a1a1a; color:#fff; font-size:.72rem; padding:.3rem .6rem; border-radius:5px;
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .3s ease;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;}
+  #print-btn:hover .tip{opacity:1;}
+
+  @media (max-width:640px){
+    .finding{grid-template-columns:1fr; gap:.4rem;}
+    .badge,.lang{display:inline-block;}
+    .tab{padding:.6rem .7rem; font-size:.88rem;}
+  }
+  @media print{
+    #print-btn{display:none;}
+    .legend,.filter-note,.tabs{display:none;}
+    body{padding:1rem; background:#fff;}
+    .group,.summary,.meta,.callout{box-shadow:none; break-inside:avoid;}
+    .panel{display:block !important;}
+    .panel .panel-title{display:block !important;}
+    .finding[data-hidden="true"]{display:grid !important;}
+  }
+  .panel-title{display:none;}
+  @media print{ .panel-title{display:block; font-weight:300; font-size:1.5rem; margin:2rem 0 1rem;
+    padding-bottom:.5rem; border-bottom:1px solid var(--border);} }
+</style>
+</head>
+<body>
+
+<button id="print-btn" onclick="printSinglePage()" aria-label="Save as PDF">
+  <span class="tip">Save as PDF</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/>
+  </svg>
+</button>
+
+<div class="wrap">
+
+  <h1>Translation Consistency Audit</h1>
+  <p class="sub">AZ Blue (azblue.com) — Diabetes section · English vs. Spanish &amp; Traditional Chinese</p>
+
+  <div class="meta">
+    <span><b>Source of truth:</b> English (<code>/diabetes/…</code>)</span>
+    <span><b>Languages compared:</b> Spanish (<code>/es/</code>), Traditional Chinese (<code>/zh/</code>)</span>
+    <span><b>Pages in scope:</b> 6</span>
+    <span><b>Date:</b> June 3, 2026</span>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  data-panel="overview">Overview</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="sitewide">Site-Wide Issues <span class="count">6</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="bypage">By Page <span class="count">6</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="priorities">Priorities</button>
+  </div>
+
+  <!-- FILTER (persists across tabs) -->
+  <div class="legend" id="legend">
+    <span style="font-size:.82rem;color:var(--muted);margin-right:.25rem;">Filter:</span>
+    <span class="chip" data-sev="crit" data-active="true"><span class="dot crit"></span>Critical</span>
+    <span class="chip" data-sev="mod" data-active="true"><span class="dot mod"></span>Moderate</span>
+    <span class="chip" data-sev="min" data-active="true"><span class="dot min"></span>Minor</span>
+    <span class="chip" data-sev="ok" data-active="true"><span class="dot ok"></span>Verified OK</span>
+  </div>
+  <p class="filter-note">Tap a category to show/hide those findings. <b>ES</b> = Spanish, <b>ZH</b> = Traditional Chinese, <b>Both</b> = appears in both.</p>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="panel active" data-panel="overview">
+    <div class="panel-title">Overview</div>
+    <div class="summary">
+      <p>The translated sections render as real server-side content (not browser-injected), so a page-by-page comparison was possible. Overall, <b>page-body translations are largely complete and accurate</b> — especially on the data-heavy pages — but consistency breaks down in three systematic areas, and the two failure patterns differ sharply between the two languages.</p>
+      <p><b>1. Two of the six pages have no published translation at all.</b> <b>Managing Diabetes</b> and <b>Healthy Habits</b> are unreachable in both Spanish and Chinese — their navigation links are empty and the pages are not indexed. Managing Diabetes is the most clinically important page in the set (it carries emergency low/high blood-sugar guidance, sick-day rules, and "when to call your provider" instructions), making its absence the highest-priority gap.</p>
+      <p><b>2. The Chinese pages share a recurring template failure.</b> On every Chinese page the entire footer is missing, the top navigation is left untranslated in English, and the page mislabels its own language as "English." The Spanish pages keep their footer and translate their navigation.</p>
+      <p><b>3. Spanish and Chinese drop or distort different things.</b> Spanish loses some body content and has a brand-name mistranslation (JDRF → "Juvenile <i>Disaster</i> Research Foundation"); Chinese keeps the body but loses structural elements. A few broken links and a leaked HTML tag in the page title appear in both.</p>
+    </div>
+
+    <div class="callout">
+      <h3>Missing translated pages — two pages have no Spanish or Chinese version</h3>
+      <p style="margin:.5rem 0 0;color:var(--text);">On both translated sites, the navigation links for these pages point to an empty URL (<code>&lt;&gt;</code>), and neither page is indexed or reachable. They appear never to have been published in translation.</p>
+      <ul>
+        <li><b>Managing Diabetes</b> (<code>/diabetes/managing-diabetes</code>) — <b>highest priority.</b> The longest, most safety-critical page: hypoglycemia/hyperglycemia thresholds, warning signs, sick-day rules, and when to contact a provider. Spanish- and Chinese-speaking members have no translated access to any of it.</li>
+        <li><b>Healthy Habits</b> (<code>/diabetes/healthy-habits</code>) — nutrition (the "healthy plate"), physical-activity recommendations, and exercise safety tips. No translated version exists.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ SITE-WIDE ============ -->
+  <section class="panel" data-panel="sitewide">
+    <div class="panel-title">Site-Wide / Recurring Issues</div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>Recurring on all Chinese (<code>/zh/</code>) pages</h3></div>
+        <span class="pagestat">applies to every page audited</span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">The entire footer is missing on every Chinese page.</span>
+        <span class="d">About, News, Resources, "Follow Us," the URAC accreditation badges, the copyright line, and — notably — the <b>Nondiscrimination Notice</b>, <b>Privacy &amp; Legal</b>, and <b>"Information in Other Languages"</b> links are all absent. Each page simply ends after its last content section. Spanish pages retain the full footer.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">The top navigation menu is not translated.</span>
+        <span class="d">All six menu items remain in English ("Understanding Diabetes," "Prevention &amp; Screening," etc.) on every Chinese page. The Spanish nav <i>is</i> translated, so this is inconsistent between the two languages.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">The page declares its language as English.</span>
+        <span class="d">The <code>meta-language</code> value is <code>English</code> on every Chinese page (it is correctly <code>Spanish</code> on the Spanish pages). This affects SEO, screen readers, and "translate this page" behavior.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">Language selector reads "中国人" (a nationality, "Chinese person").</span>
+        <span class="d">It should name the language, e.g. <span class="zh-ex">中文</span> or <span class="zh-ex">繁體中文</span>. A Google-translation artifact rather than a hand-set label.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>Recurring on Spanish (<code>/es/</code>) pages</h3></div>
+        <span class="pagestat">applies to multiple pages</span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">Footer link "En la comunidad" (AZ Blue in Action) is empty.</span>
+        <span class="d">The link points to <code>&lt;&gt;</code> on every Spanish page that has a footer. The English equivalent links correctly to <code>/about-us/az-blue-in-action</code>.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">The "X" (Twitter) social icon's alt text is translated to "incógnita."</span>
+        <span class="d">Google translated the single letter "X" to its Spanish dictionary sense ("unknown / incógnita"). Cosmetic, but visible to screen-reader users.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>Affects both languages</h3></div>
+        <span class="pagestat">deeper pages (with "| BCBS AZ" title)</span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Raw HTML leaks into the page <code>&lt;title&gt;</code>.</span>
+        <span class="d">The browser-tab title renders a literal <code>&lt;span translate="no"&gt;BCBS AZ&lt;/span&gt;</code> instead of just "BCBS AZ" — e.g. Prevention &amp; Screening, Education &amp; Resources, and By the Numbers in both ES and ZH. An escaping bug in how the "do not translate" wrapper is emitted.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">"Managing Diabetes" and "Healthy Habits" nav links are empty in both languages.</span>
+        <span class="d">Both translated navigations point these two items to <code>&lt;&gt;</code> — the on-site symptom of the two missing pages.</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BY PAGE ============ -->
+  <section class="panel" data-panel="bypage">
+    <div class="panel-title">Page-by-Page Findings</div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>1 · Understanding Diabetes</h3><span class="url">/diabetes</span></div>
+        <span class="pagestat">ES &amp; ZH present</span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">Two body bullets are missing.</span>
+        <span class="d">Under "¿Por qué es importante el nivel de azúcar en la sangre?", the definitions of <b>glucose</b> and <b>insulin</b> (two bullets present in English) were dropped. The Chinese version keeps both.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">"gestacional" is lowercased</span> <span class="d">vs. "Gestational" (title-cased) in the English type list.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">Slightly redundant phrasing in the glucose line.</span>
+        <span class="d"><span class="zh-ex">"血糖又稱血糖 葡萄糖"</span> repeats "blood sugar"; reads awkwardly but meaning is intact.</span></span>
+      </div>
+      <div class="finding" data-sev="ok">
+        <span class="badge ok">OK</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Intro, "Know the Types," and headings translate accurately in both.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>2 · Prevention &amp; Screening</h3><span class="url">/diabetes/prevention-and-screening</span></div>
+        <span class="pagestat">ES &amp; ZH present</span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">"Screening location" mistranslated as "lugar de proyección."</span>
+        <span class="d">"Proyección" is the cinema/forecast sense of "projection," not medical screening (which would be <i>detección</i> / <i>pruebas</i>). Appears in both the section heading and the CTA, so it repeats.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">The "35 or older" screening detail is lost.</span>
+        <span class="d">English: "If you are 35 or older with risk factors, your doctor may screen you earlier…" Both ES ("si tiene más de un factor de riesgo") and ZH (<span class="zh-ex">"如果您有超過 1 個風險因素"</span>) instead say "more than one risk factor," dropping the age threshold — a factual drift shared by both.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">"Path to Wellness Screenings" became "Path to Wellness Assessment."</span>
+        <span class="d">A proper program name was partly re-worded.</span></span>
+      </div>
+      <div class="finding" data-sev="ok">
+        <span class="badge ok">OK</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">All sections (risk test, symptoms, A1C/FPG/OGTT tables, ethnicities) are present and accurately translated.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>3 · Managing Diabetes</h3><span class="url">/diabetes/managing-diabetes</span></div>
+        <span class="pagestat" style="color:var(--crit);">no translation published</span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">No Spanish or Chinese version exists.</span>
+        <span class="d">See the Overview. Given this page's emergency blood-sugar and sick-day guidance, this is the single most important item to resolve.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>4 · Healthy Habits</h3><span class="url">/diabetes/healthy-habits</span></div>
+        <span class="pagestat" style="color:var(--crit);">no translation published</span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">No Spanish or Chinese version exists.</span>
+        <span class="d">Nutrition, physical-activity recommendations, and exercise-safety guidance are unavailable in both languages.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>5 · Education &amp; Resources</h3><span class="url">/diabetes/education-and-resources</span></div>
+        <span class="pagestat">ES &amp; ZH present</span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">First blog link is broken in both languages.</span>
+        <span class="d">"Study Says Diabetes Rates Could Surge…" points to a Sitecore error page (<code>/sitecore/service/notfound.aspx?…</code>) instead of the article, in both ES and ZH.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">"JDRF" mistranslated as "Fundación para la Investigación del Desastre Juvenil."</span>
+        <span class="d">That reads "Juvenile <b>Disaster</b> Research Foundation" — "Diabetes" was rendered as "Desastre." The Chinese version translates it correctly (<span class="zh-ex">青少年糖尿病研究基金會</span>), so this error is Spanish-only.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">Moderate</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">Simplified Chinese mixed into a Traditional page.</span>
+        <span class="d">A stray repeated heading renders as <span class="zh-ex">"教育和资源"</span> (Simplified <span class="zh-ex">资</span>) while the rest of the page uses Traditional <span class="zh-ex">"教育和資源"</span> (<span class="zh-ex">資</span>). Jarring to native readers and inconsistent with the <code>/zh/</code> (Traditional) intent.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">"Understanding Diabetes Signs and Symptoms" blog link drops the locale.</span>
+        <span class="d">The last blog link points to the English URL (no <code>/es/</code> or <code>/zh/</code> prefix) in both languages.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">Minor</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Repeated stray "Education and Resources" headings.</span>
+        <span class="d">The page-title text is injected several times where the English had image captions/section breaks — a structural rendering glitch present in both.</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <div><h3>6 · By the Numbers</h3><span class="url">/diabetes/by-the-numbers</span></div>
+        <span class="pagestat">ES &amp; ZH present</span>
+      </div>
+      <div class="finding" data-sev="ok">
+        <span class="badge ok">OK</span><span class="lang es">ES</span>
+        <span class="ftext"><span class="t">Cleanest page in the set.</span>
+        <span class="d">All statistics, the Arizona cards, and "What We're Doing to Help" translate accurately; footer present. Only the site-wide recurring items apply.</span></span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">Critical</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">Footer missing (recurring ZH issue).</span>
+        <span class="d">Body content is fully and accurately translated, but the page ends after "What We're Doing to Help" with no footer — same template failure as the other Chinese pages.</span></span>
+      </div>
+      <div class="finding" data-sev="ok">
+        <span class="badge ok">OK</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">All figures (38M, 98M, 1.4M new cases/yr, AZ stats) translate correctly.</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRIORITIES ============ -->
+  <section class="panel" data-panel="priorities">
+    <div class="panel-title">Suggested Priority Order</div>
+    <div class="group">
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">1</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Publish translated <b>Managing Diabetes</b> (and fix its nav link) — safety-critical content currently unavailable.</span></span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">2</span><span class="lang zh">ZH</span>
+        <span class="ftext"><span class="t">Restore the footer on Chinese pages</span> <span class="d">— recovers Nondiscrimination Notice, Privacy &amp; Legal, and "Information in Other Languages" links (compliance-relevant for a health plan).</span></span>
+      </div>
+      <div class="finding" data-sev="crit">
+        <span class="badge crit">3</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Publish translated <b>Healthy Habits</b>; fix the broken first blog link on Education &amp; Resources; restore the missing glucose/insulin bullets on Spanish Understanding Diabetes.</span></span>
+      </div>
+      <div class="finding" data-sev="mod">
+        <span class="badge mod">4</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Translate the Chinese nav; fix the <code>meta-language</code> tag; correct "JDRF → Disaster" and "screening → proyección"; fix the leaked <code>&lt;span&gt;</code> in page titles.</span></span>
+      </div>
+      <div class="finding" data-sev="min">
+        <span class="badge min">5</span><span class="lang both">Both</span>
+        <span class="ftext"><span class="t">Polish: "中国人" label, "incógnita" alt text, lowercase "gestacional," Simplified/Traditional mixing, locale-less blog links.</span></span>
+      </div>
+    </div>
+
+    <p class="foot">Audit based on the live server-rendered HTML of each URL as fetched on June 3, 2026. Findings reflect the content returned at that time; Google-translated output can change between crawls. "Verified OK" notes confirm sections that were checked and found consistent, not an exhaustive guarantee. This report covers content/consistency only — not legal adequacy of language access, which a qualified reviewer should assess separately.</p>
+  </section>
+
+</div>
+
+<script>
+  // ---- tab navigation ----
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var target = tab.getAttribute('data-panel');
+      document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', (t===tab).toString()); });
+      document.querySelectorAll('.panel').forEach(function(p){
+        p.classList.toggle('active', p.getAttribute('data-panel') === target);
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  // ---- severity filter (applies across all tabs) ----
+  document.querySelectorAll('.chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var active = chip.getAttribute('data-active') === 'true';
+      chip.setAttribute('data-active', (!active).toString());
+      var sev = chip.getAttribute('data-sev');
+      document.querySelectorAll('.finding[data-sev="'+sev+'"]').forEach(function(f){
+        f.style.display = active ? 'none' : 'grid';
+      });
+    });
+  });
+
+  // ---- print as a single page (reveals all tabs first) ----
+  function printSinglePage(){
+    var panels = document.querySelectorAll('.panel');
+    panels.forEach(function(p){ p.dataset._wasActive = p.classList.contains('active'); p.classList.add('active'); });
+    var w = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    var h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    var style = document.createElement('style');
+    style.id = 'single-page-print';
+    style.textContent = '@page { size: ' + w + 'px ' + h + 'px; margin: 0; }';
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(function(){
+      var s = document.getElementById('single-page-print'); if(s) s.remove();
+      panels.forEach(function(p){ if(p.dataset._wasActive !== 'true'){ p.classList.remove('active'); } delete p.dataset._wasActive; });
+    }, 1000);
+  }
+</script>
+</body>
+</html>
