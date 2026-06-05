@@ -1,162 +1,9 @@
-
-Claude is responding
-
-marketing_engineering_priorities_presentation (1).html
-html
-
-Can you redesign this based on my design preferences
-
-9:15 AM
-
-Charted redesign strategy and skill consultation approach
-Charted redesign strategy and skill consultation approach
-This response didn't load.
-
-marketing_engineering_priorities_presentation (1).html
-html
-
-Can you redesign this based on my design preferences
-
-9:16 AM
-
-Weighed explicit redesign request against preservation guidelines
-Weighed explicit redesign request against preservation guidelines
-This response didn't load.
-
-marketing_engineering_priorities_presentation (1).html
-html
-
-Can you redesign this based on my design preferences
-
-9:17 AM
-
-Sought missing content to comprehend full design structure
-Sought missing content to comprehend full design structure
-Let me see the full content of the file, including the parts that were truncated.
-
-
-Sought additional file content for context
-Sought additional file content for context
-This response didn't load.
-
-marketing_engineering_priorities_presentation (1).html
-html
-
-Can you redesign this based on my design preferences
-
-9:18 AM
-
-Architected comprehensive redesign applying minimal aesthetic preferences
-Architected comprehensive redesign applying minimal aesthetic preferences
-I've reviewed the full presentation. It's a six-tab marketing-engineering priorities deck with a blue-gradient hero, Inter font, a five-color priority system, and heavy shadows. Since you've explicitly asked for a redesign, I'll rebuild it to your preferences: light backgrounds, system font stack, light heading weights, minimal borders, the amber accent, and the fixed print-to-PDF button. I'll keep all content, tabs, filtering, and backlog logic intact.
-
-
-Created a file, read a file
-Created a file, read a file
-Done. The presentation is rebuilt with your aesthetic while keeping all six tabs, the priority filtering, and the backlog logic intact.
-
-What changed:
-
-Hero went from the blue gradient to a white card with a 1px border, a light-weight (300) headline, and a thin amber rule under the eyebrow. The decorative circle is gone.
-Color system collapsed to your palette: 
-#1a1a1a text, #666 secondary, 
-#FFBE5F accent on 
-#fafafa / 
-#ffffff surfaces. The old five-color priority spectrum is now a restrained heat scale — P0 gets the amber dot/left-border, and P1–P4 step down through neutral grays, so urgency still reads at a glance without competing colors.
-Tabs became a clean underline bar (amber underline for the active tab) instead of filled blue pills.
-Typography is the system stack, headings at 300, body at 400, with spacing in rem.
-Borders and shadows are minimal — 1px 
-#e0e0e0 and the subtle 0 1px 3px shadow only on cards/tables. Filter chips and list items pick up an amber border on hover via a 0.3s transition.
-Callout flipped from the dark block to a light card with a soft amber tint and amber left accent.
-The fixed print button is in the top-right per your spec: 40×40, 
-#1a1a1a, 0.7→1 opacity on hover, download-arrow SVG, "Save as PDF" tooltip, hidden when printing. Its printSinglePage() reveals all six tab panels, measures scrollHeight/scrollWidth, injects a matching @page rule so the whole deck exports as one continuous page, then restores the interactive state afterward.
-
-One note: single-page @page sizing works best in Chrome/Edge — Firefox and Safari may still paginate a very tall page. If that matters for your audience, let me know and I can add a fallback.
-
-
-Marketing engineering priorities presentation
-Code · HTML 
-can you help me replace some of the category terminology with more friendly sort of layman terms shorter less technical?
-
-10:22 AM
-
-Strategized comprehensive terminology overhaul across priority categories and labels
-Strategized comprehensive terminology overhaul across priority categories and labels
-I'll soften the category labels into plainer language while keeping the design and all the functionality untouched. Let me apply the renames consistently across the whole file (the priority categories, workstream titles, the backlog/label taxonomy, and the scoring-criteria names).
-
-
-Identified unintended replacements in item descriptions requiring targeted fixes
-Identified unintended replacements in item descriptions requiring targeted fixes
-The renames landed, but the global swap for "Analytics and advertising" also caught three spots where it was part of an item description, not a category label, producing awkward phrases like "Tracking & ads code support." Let me fix those back to natural wording.
-
-
-Ran 2 commands, read a file
-Ran 2 commands, read a file
-Done. The design is unchanged; only the category wording is friendlier and shorter. Here's the full before → after:
-
-Priority categories
-
-Production Defects → Broken on the Live Site
-Marketing Operations → Tracking & Campaign Tools
-Authoring Efficiency → Easier Page Building
-UX / Mobile / Presentation → Look, Feel & Mobile
-Platform Architecture → Big-Picture Platform Work
-Section headings
-
-Customer-facing breakage → Broken for visitors right now
-Measurement and governance → Keeping tracking accurate
-High-value Sitecore improvements → Faster, easier page building
-Quality and accessibility → Polish & accessibility
-Strategic roadmap / discovery needed → Bigger projects that need planning
-Workstreams
-
-Localization stability → Translated pages that just work
-Analytics and advertising → Tracking & ads
-Translation workflow controls → Control over translations
-Component flexibility → More page-building options
-Mobile and presentation quality → Mobile & visual polish
-Sitecore architecture → Behind-the-scenes platform work
-Backlog / labels
-
-Defect — Localization → Translation bug
-Defect — Live Site → Live site bug
-Marketing Ops — Analytics/Tracking → Tracking
-Workflow — Translation Management → Translation control
-Component Enhancement — Authoring Efficiency → Easier editing
-Component Enhancement — UX/Presentation → Visual polish
-Architecture — Sitecore Platform → Platform work
-DevOps / Environment Management → Environment setup; Release Management → Release process; Publishing Architecture → Publishing setup; Strategic / Discovery Needed → Needs planning
-Scoring criteria
-
-Reuse potential → Helps lots of pages; Manual-work reduction → Saves repeat work; Error prevention → Prevents mistakes; No workaround → No other way to do it; Effort vs. value → Quick win; Governance risk → Could be misused; Architecture dependency → Needs deeper changes (Launch blocker kept as-is).
-I left the actual deliverable line items (GTM, Razl, Blue/Green, etc.) alone, since those are specific tasks engineering will recognize rather than category names. If any of these read too casual for your audience, point to the ones you want dialed back and I'll adjust.
-
-
-Marketing engineering priorities presentation
-Code · HTML 
-So this was supposed to be more of a organized prioritized report and it seems to be like a technical manual of how the prioritization worked. Can you restructure this using the data that's there as and make it more of a report that is prioritized rather than a document about how to prioritize a report or somethin.
-
-10:26 AM
-This is my original list of items that I needed prioritized:
-Translations: Add a Do Not Translate box - for pages, components, and data items Add a Translate to all languages box Bug fix - URL issues when translating Bug fix - Identify root cause of why the footer isn't appearing on the Chinese pages Navigation issues with language dropdowns When going from Mandarin to Spanish or English, you land on the main page Using the back button does not change the language indicator GTM dual container workflow Analytics and advertising Code fixes (Tyler) Sitecore Frontend Improvement Ability to add custom class to the Page Section component. (This would allow us to scope any custom code to a specific section on the page easily, avoiding unforeseen conflicts or compatibility issues with other elements on the page or on the site.) Sitecore Functionality Ability to insert ONE multi-column promo to a page and the capability to have a headline with the multi-column. Currently, it's 2,3 or 4 only and each column had an individual headline. Ability to have 4 image, icon, plan and general cards in a row. Table column names don't show up in mobile view, so those title should be seen on mobile as well. The icon field in the current Promo component should be optional. Currently, if you don't add an icon image, there is a blue circle that still appears (with no icon in it). Ability to exclude FAQs from FAQ search Media Contact component – hide icons if no email or phone is added in Sitecore. Flexibility on hiding items on mobile/desktop. Since we have the ability to add a background image to a page section now, we should also add an option for an overlay so that the copy in the section can be easily read and seen. Ability to insert more component options whenever using page layouts. Very limited currently. Ability to add a thumbnail image and have the play button icon show up over it when inserting a video via Media Component (like it currently does when using a Media Promo) and to be able to play the video by clicking on the thumbnail (against adding a 'watch video' button). (Swati's idea). Sitecore Architecture (Dev work support) Leverage child items for improved flexibility, scalability, and content management Content tree simplification Razl usage for environment sync, new feature testing Publishing strategy (Blue/Green deployment) Proposed publishing targets
-
-Show more
-10:27 AM
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-
-
-raw
-Marketing engineering priorities presentation · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Marketing Engineering Priorities</title>
+  <title>Marketing Engineering Priorities — Prioritized Report</title>
   <style>
     :root {
       --bg: #fafafa;
@@ -170,17 +17,16 @@ Marketing engineering priorities presentation · HTML
       --radius: 8px;
       --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
- 
-      /* Priority heat scale within the minimal palette */
+
       --p0: var(--accent);
       --p1: #1a1a1a;
       --p2: #666666;
       --p3: #9a9a9a;
       --p4: #c4c4c4;
     }
- 
+
     * { box-sizing: border-box; }
- 
+
     body {
       margin: 0;
       background: var(--bg);
@@ -190,7 +36,7 @@ Marketing engineering priorities presentation · HTML
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
- 
+
     /* ---------- Print to PDF button ---------- */
     #print-btn {
       position: fixed;
@@ -228,22 +74,15 @@ Marketing engineering priorities presentation · HTML
       transition: opacity 0.3s ease;
     }
     #print-btn:hover::after { opacity: 1; }
- 
+
     .shell {
-      width: min(1180px, calc(100% - 3rem));
+      width: min(1040px, calc(100% - 3rem));
       margin: 0 auto;
       padding: 3rem 0 4rem;
     }
- 
-    /* ---------- Hero ---------- */
-    .hero {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 3rem;
-      box-shadow: var(--shadow);
-    }
- 
+
+    /* ---------- Report header ---------- */
+    .report-head { margin-bottom: 2.5rem; }
     .eyebrow {
       text-transform: uppercase;
       letter-spacing: 0.14em;
@@ -255,142 +94,89 @@ Marketing engineering priorities presentation · HTML
       align-items: center;
       gap: 0.6rem;
     }
-    .eyebrow::before {
-      content: "";
-      width: 28px;
-      height: 2px;
-      background: var(--accent);
-    }
- 
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--accent); }
+
     h1 {
-      font-size: clamp(2rem, 4.4vw, 3.2rem);
+      font-size: clamp(2rem, 4.4vw, 3rem);
       font-weight: 300;
-      line-height: 1.08;
+      line-height: 1.1;
       letter-spacing: -0.02em;
-      margin: 0 0 1.25rem;
-      max-width: 840px;
+      margin: 0 0 1rem;
+      max-width: 820px;
       color: var(--ink);
     }
- 
-    .hero p {
-      max-width: 780px;
-      font-size: 1.05rem;
-      color: var(--muted);
-      margin: 0;
-    }
- 
-    .hero-meta {
+    .lede { max-width: 760px; font-size: 1.05rem; color: var(--muted); margin: 0 0 1.5rem; }
+
+    .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-top: 1.75rem;
-    }
- 
-    .hero-chip {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 0.5rem 0.9rem;
+      gap: 0.5rem 1rem;
       font-size: 0.85rem;
       color: var(--muted);
-      transition: border-color 0.3s ease;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
     }
-    .hero-chip:hover { border-color: var(--accent); }
- 
-    .print-note {
-      margin: 1.25rem 0 0;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
- 
-    /* ---------- Tabs ---------- */
-    .tabs {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      gap: 0.25rem;
-      flex-wrap: wrap;
-      margin: 1.5rem 0 2rem;
-      padding: 0;
-      background: rgba(250, 250, 250, 0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--line);
-    }
- 
-    .tab-btn {
-      border: 0;
-      border-bottom: 2px solid transparent;
-      background: transparent;
-      color: var(--muted);
-      padding: 0.85rem 1rem;
-      margin-bottom: -1px;
-      font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 400;
-      cursor: pointer;
-      transition: color 0.3s ease, border-color 0.3s ease;
-    }
-    .tab-btn:hover { color: var(--ink); }
-    .tab-btn.active {
+    .meta span { display: inline-flex; align-items: center; gap: 0.5rem; }
+    .meta span:not(:last-child)::after { content: ""; }
+
+    /* ---------- Sections ---------- */
+    section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.4rem;
       color: var(--ink);
-      border-bottom-color: var(--accent);
-      font-weight: 500;
     }
- 
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; animation: fade 0.3s ease; }
- 
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
- 
-    /* ---------- Grids ---------- */
-    .grid { display: grid; gap: 1rem; }
-    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
- 
-    /* ---------- Cards ---------- */
+    .section-sub { color: var(--muted); margin: 0 0 1.25rem; font-size: 0.92rem; }
+
+    /* ---------- Cards / callout ---------- */
     .card {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 1.75rem;
       box-shadow: var(--shadow);
+    }
+    .card p { margin: 0 0 0.75rem; color: var(--muted); }
+    .card p:last-child { margin-bottom: 0; }
+
+    .callout {
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+    .callout h2 { margin: 0 0 0.5rem; font-weight: 300; font-size: 1.25rem; letter-spacing: -0.01em; }
+    .callout p { margin: 0; color: #4a4a4a; }
+
+    /* ---------- Overview tier cards ---------- */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+    .tier-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
       transition: border-color 0.3s ease;
     }
-    .card:hover { border-color: #d0d0d0; }
- 
-    .card h2, .card h3 { margin-top: 0; color: var(--ink); font-weight: 300; }
-    .card h2 { font-size: 1.45rem; margin-bottom: 0.6rem; letter-spacing: -0.01em; }
-    .card h3 { font-size: 1.05rem; margin-bottom: 0.5rem; font-weight: 400; }
-    .card p { color: var(--muted); margin: 0 0 0.75rem; }
-    .card p:last-child { margin-bottom: 0; }
- 
-    .kpi { display: flex; align-items: flex-start; gap: 1rem; }
-    .kpi-number {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-weight: 300;
-      font-size: 1.25rem;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--ink);
-      flex: none;
-    }
- 
-    .priority-card { border-left: 3px solid var(--line); }
-    .p0 { border-left-color: var(--p0); }
-    .p1 { border-left-color: var(--p1); }
-    .p2 { border-left-color: var(--p2); }
-    .p3 { border-left-color: var(--p3); }
-    .p4 { border-left-color: var(--p4); }
- 
+    .tier-card:hover { border-color: #d0d0d0; }
+    .tier-card.p0 { border-left-color: var(--p0); }
+    .tier-card.p1 { border-left-color: var(--p1); }
+    .tier-card.p2 { border-left-color: var(--p2); }
+    .tier-card.p3 { border-left-color: var(--p3); }
+    .tier-card.p4 { border-left-color: var(--p4); }
+    .tier-count { font-size: 2rem; font-weight: 300; line-height: 1; margin: 0.75rem 0 0.5rem; }
+    .tier-count small { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+    .tier-card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+
     /* ---------- Badges ---------- */
     .badge {
       display: inline-flex;
@@ -401,43 +187,22 @@ Marketing engineering priorities presentation · HTML
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--ink);
-      margin-bottom: 1rem;
     }
-    .badge::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--muted);
-      flex: none;
-    }
-    .badge.red::before { background: var(--p0); }
-    .badge.orange::before { background: var(--p1); }
-    .badge.blue::before { background: var(--p2); }
-    .badge.green::before { background: var(--p3); }
-    .badge.purple::before { background: var(--p4); }
-    .badge.gray::before { background: var(--p4); }
- 
-    /* ---------- Clean lists ---------- */
-    ul.clean {
-      margin: 1rem 0 0;
-      padding: 0;
-      list-style: none;
-      display: grid;
-      gap: 0.5rem;
-    }
-    ul.clean li {
-      padding: 0.7rem 0.9rem;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      border-radius: 6px;
-      color: var(--ink);
-      font-size: 0.92rem;
-      transition: border-color 0.3s ease, background 0.3s ease;
-    }
-    ul.clean li:hover { border-color: var(--accent); background: var(--accent-soft); }
- 
-    /* ---------- Tables ---------- */
+    .badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+    .badge.p0::before { background: var(--p0); }
+    .badge.p1::before { background: var(--p1); }
+    .badge.p2::before { background: var(--p2); }
+    .badge.p3::before { background: var(--p3); }
+    .badge.p4::before { background: var(--p4); }
+
+    /* ---------- Tier blocks + tables ---------- */
+    .tier { margin-bottom: 1.75rem; }
+    .tier-head { margin-bottom: 0.85rem; }
+    .tier-head .row { display: flex; align-items: baseline; gap: 0.9rem; flex-wrap: wrap; }
+    .tier-head h3 { margin: 0; font-weight: 400; font-size: 1.15rem; color: var(--ink); }
+    .tier-head .count { font-size: 0.8rem; color: var(--muted); }
+    .tier-head .desc { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.9rem; }
+
     .matrix {
       width: 100%;
       border-collapse: separate;
@@ -449,7 +214,7 @@ Marketing engineering priorities presentation · HTML
       box-shadow: var(--shadow);
     }
     .matrix th, .matrix td {
-      padding: 0.9rem 1rem;
+      padding: 0.85rem 1rem;
       vertical-align: top;
       border-bottom: 1px solid var(--line);
       text-align: left;
@@ -464,128 +229,56 @@ Marketing engineering priorities presentation · HTML
       letter-spacing: 0.08em;
     }
     .matrix tr:last-child td { border-bottom: 0; }
-    .matrix td:first-child { font-weight: 500; width: 130px; color: var(--ink); }
-    .matrix td:nth-child(2) { width: 230px; }
-    .matrix td:last-child { color: var(--muted); }
-    .score-table td:nth-child(1) { font-weight: 500; width: 260px; }
- 
-    /* ---------- Filters ---------- */
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-    }
-    .filter-btn {
-      border: 1px solid var(--line);
-      background: var(--card);
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 0.5rem 0.9rem;
-      font-family: inherit;
-      font-size: 0.85rem;
-      font-weight: 400;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .filter-btn:hover { border-color: #1a1a1a; color: var(--ink); }
-    .filter-btn.active {
-      background: var(--accent);
-      color: #1a1a1a;
-      border-color: var(--accent);
-      font-weight: 500;
-    }
- 
-    /* ---------- Backlog tickets ---------- */
-    .backlog-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.85rem;
-    }
-    .ticket {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: var(--shadow);
-      transition: border-color 0.3s ease;
-    }
-    .ticket:hover { border-color: #d0d0d0; }
-    .ticket-title { font-weight: 400; margin: 0 0 0.75rem; color: var(--ink); }
-    .ticket-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .mini-tag {
+    .matrix td.num { width: 44px; font-family: var(--mono); color: var(--muted); font-size: 0.85rem; }
+    .matrix td.item { font-weight: 500; color: var(--ink); width: 38%; }
+    .matrix td.area { width: 130px; }
+    .matrix td.why { color: var(--muted); }
+    .matrix tbody tr { transition: background 0.3s ease; }
+    .matrix tbody tr:hover { background: #fcfcfc; }
+
+    .area-tag {
+      display: inline-block;
       background: var(--bg);
       border: 1px solid var(--line);
       color: var(--muted);
       border-radius: 999px;
-      padding: 0.25rem 0.6rem;
+      padding: 0.2rem 0.55rem;
       font-size: 0.72rem;
-      font-weight: 400;
+      white-space: nowrap;
     }
- 
-    /* ---------- Callout ---------- */
-    .callout {
-      background: var(--accent-soft);
-      border: 1px solid var(--line);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 2rem;
-      margin-top: 1.25rem;
-      box-shadow: var(--shadow);
-    }
-    .callout h2 { margin: 0 0 0.6rem; color: var(--ink); font-weight: 300; font-size: 1.45rem; letter-spacing: -0.01em; }
-    .callout p { color: #4a4a4a; margin: 0; }
- 
-    /* ---------- Timeline ---------- */
-    .timeline {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.85rem;
-    }
+
+    /* ---------- Sequence ---------- */
+    .timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; }
     .phase {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 1.5rem;
-      min-height: 220px;
       box-shadow: var(--shadow);
       transition: border-color 0.3s ease;
     }
     .phase:hover { border-color: var(--accent); }
-    .phase-num {
-      font-family: var(--mono);
-      color: var(--accent);
-      font-weight: 500;
-      font-size: 0.8rem;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.6rem;
-    }
-    .phase h3 { margin: 0 0 0.75rem; font-weight: 400; color: var(--ink); }
-    .phase p { color: var(--muted); margin: 0; font-size: 0.92rem; }
- 
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
-      margin-top: 2.5rem;
-      font-size: 0.85rem;
-    }
- 
+    .phase-num { font-family: var(--mono); color: var(--accent); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+    .phase h4 { margin: 0 0 0.6rem; font-weight: 400; font-size: 1rem; color: var(--ink); }
+    .phase p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    .footer-note { text-align: center; color: var(--muted); margin-top: 2.5rem; font-size: 0.85rem; }
+
     /* ---------- Responsive ---------- */
-    @media (max-width: 940px) {
-      .grid.two, .grid.three, .grid.four, .timeline, .backlog-grid { grid-template-columns: 1fr; }
-      .hero { padding: 2rem; }
-      .tab-btn { flex: 1 1 auto; }
+    @media (max-width: 900px) {
+      .overview-grid { grid-template-columns: repeat(2, 1fr); }
+      .timeline { grid-template-columns: 1fr; }
       .matrix { display: block; overflow-x: auto; }
       .shell { padding: 2rem 0 3rem; }
     }
- 
+
     /* ---------- Print ---------- */
     @media print {
       body { background: #ffffff; }
-      .tabs, .filters, #print-btn, .print-note { display: none !important; }
-      .tab-panel { display: block !important; page-break-after: auto; }
-      .card, .matrix, .ticket, .phase, .hero, .callout { box-shadow: none; }
+      #print-btn { display: none !important; }
+      .card, .matrix, .phase, .callout, .tier-card { box-shadow: none; }
       .shell { width: 100%; padding: 0; }
+      .tier, section { page-break-inside: avoid; }
     }
   </style>
 </head>
@@ -597,448 +290,197 @@ Marketing engineering priorities presentation · HTML
       <line x1="12" y1="15" x2="12" y2="3"></line>
     </svg>
   </button>
- 
+
   <main class="shell">
-    <section class="hero">
-      <div class="eyebrow">Marketing Department Engineering Window</div>
-      <h1>Prioritized Sitecore, Translation, Analytics, and Platform Work</h1>
-      <p>A structured presentation for aligning marketing needs with engineering capacity. The work is organized by live-site risk, campaign operations, content-authoring value, user experience, and long-term platform health.</p>
-      <div class="hero-meta">
-        <span class="hero-chip">Primary goal: fix live defects first</span>
-        <span class="hero-chip">Secondary goal: increase marketing velocity</span>
-        <span class="hero-chip">Separate tactical asks from platform roadmap</span>
+    <header class="report-head">
+      <div class="eyebrow">Marketing Engineering Priorities</div>
+      <h1>Prioritized backlog for the marketing engineering window</h1>
+      <p class="lede">All 26 requested items, ranked in recommended order and grouped into five priority tiers — from live-site defects that should be fixed first to long-term platform work that needs its own discovery.</p>
+      <div class="meta">
+        <span>26 items</span>
+        <span>·</span>
+        <span>5 priority tiers</span>
+        <span>·</span>
+        <span>Areas: Translations, Tracking &amp; ads, Sitecore authoring, UX/mobile, Platform</span>
       </div>
-      <p class="print-note">Use the tabs below for presentation mode. Use the button in the top-right corner to save a single-page PDF of the full document.</p>
-    </section>
- 
-    <nav class="tabs" aria-label="Presentation tabs">
-      <button class="tab-btn active" data-tab="overview">Overview</button>
-      <button class="tab-btn" data-tab="priority">Priority Model</button>
-      <button class="tab-btn" data-tab="workstreams">Workstreams</button>
-      <button class="tab-btn" data-tab="backlog">Backlog View</button>
-      <button class="tab-btn" data-tab="roadmap">Recommended Sequence</button>
-      <button class="tab-btn" data-tab="scoring">Scoring Model</button>
-    </nav>
- 
-    <section id="overview" class="tab-panel active">
-      <div class="grid three">
-        <article class="card kpi">
-          <div class="kpi-number">1</div>
-          <div>
-            <h3>Stabilize live international pages</h3>
-            <p>Translation routing, URL handling, page chrome, and language state issues should be treated as production defects.</p>
-          </div>
-        </article>
-        <article class="card kpi">
-          <div class="kpi-number">2</div>
-          <div>
-            <h3>Protect marketing measurement</h3>
-            <p>GTM, analytics, and advertising code work should be prioritized because campaign reporting depends on it.</p>
-          </div>
-        </article>
-        <article class="card kpi">
-          <div class="kpi-number">3</div>
-          <div>
-            <h3>Improve content-authoring speed</h3>
-            <p>Reusable component enhancements should be ranked by how often they reduce manual work or prevent layout errors.</p>
-          </div>
-        </article>
-      </div>
- 
+    </header>
+
+    <section>
       <div class="callout">
-        <h2>Core recommendation</h2>
-        <p>Do not submit this as a generic list of bugs and enhancements. Submit it as a prioritized backlog with clear categories: production defects, analytics operations, translation governance, component flexibility, mobile/accessibility quality, and platform architecture.</p>
-      </div>
- 
-      <div class="grid two" style="margin-top:1rem;">
-        <article class="card">
-          <h2>What should be in the engineering window</h2>
-          <ul class="clean">
-            <li>Live-site localization defects</li>
-            <li>Analytics and ad code support</li>
-            <li>Control over translations</li>
-            <li>Small-to-medium component enhancements with broad reuse</li>
-            <li>Mobile usability fixes affecting public pages</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>What may need separate discovery</h2>
-          <ul class="clean">
-            <li>Content tree simplification</li>
-            <li>Child item architecture</li>
-            <li>Publishing targets and Blue/Green publishing strategy</li>
-            <li>Razl workflow and environment sync strategy</li>
-            <li>Broader page-layout architecture changes</li>
-          </ul>
-        </article>
+        <h2>Recommendation</h2>
+        <p>Work the tiers in order. P0 items are live-site defects and should be treated as bugs, not feature requests. P1 protects campaign measurement and translation control. P2 and P3 are high-reuse authoring and polish wins. P4 items are valuable but broad — keep them in a separate roadmap track so they don't crowd out the quick wins.</p>
       </div>
     </section>
- 
-    <section id="priority" class="tab-panel">
-      <div class="grid two">
-        <article class="card priority-card p0">
-          <span class="badge red">P0 — Broken on the Live Site</span>
-          <h2>Broken for visitors right now</h2>
-          <p>Live behavior is broken or misleading for users. These items should be fixed before feature work.</p>
-          <ul class="clean">
-            <li>Translation URL issues</li>
-            <li>Chinese-page footer issue</li>
-            <li>Language dropdown routing problems</li>
-            <li>Mandarin to Spanish or English landing on main page</li>
-            <li>Back button not updating language indicator</li>
-          </ul>
-        </article>
- 
-        <article class="card priority-card p1">
-          <span class="badge orange">P1 — Tracking & Campaign Tools</span>
-          <h2>Keeping tracking accurate</h2>
-          <p>Work that protects analytics accuracy, ad operations, GTM workflows, and translation control.</p>
-          <ul class="clean">
-            <li>GTM dual container workflow</li>
-            <li>Analytics and ad code fixes</li>
-            <li>Do Not Translate control</li>
-            <li>Translate to all languages control</li>
-          </ul>
-        </article>
- 
-        <article class="card priority-card p2">
-          <span class="badge blue">P2 — Easier Page Building</span>
-          <h2>Faster, easier page building</h2>
-          <p>Reusable component and page-building improvements that reduce ongoing marketing friction.</p>
-          <ul class="clean">
-            <li>Custom class on Page Section</li>
-            <li>One-column promo with shared headline</li>
-            <li>Four cards in a row</li>
-            <li>Optional icon field in Promo</li>
-            <li>Exclude FAQs from FAQ search</li>
-          </ul>
-        </article>
- 
-        <article class="card priority-card p3">
-          <span class="badge green">P3 — Look, Feel & Mobile</span>
-          <h2>Polish & accessibility</h2>
-          <p>Visible improvements that improve mobile readability, reduce awkward display states, or strengthen presentation quality.</p>
-          <ul class="clean">
-            <li>Mobile table column labels</li>
-            <li>Hide media contact icons when fields are empty</li>
-            <li>Mobile/desktop visibility controls</li>
-            <li>Background image overlay option</li>
-            <li>Video thumbnail with play overlay</li>
-          </ul>
-        </article>
-      </div>
- 
-      <article class="card priority-card p4" style="margin-top:1rem;">
-        <span class="badge purple">P4 — Big-Picture Platform Work</span>
-        <h2>Bigger projects that need planning</h2>
-        <p>Important long-term platform work, but likely too broad to mix with tactical marketing enhancements unless it directly unblocks them.</p>
-        <ul class="clean">
-          <li>Leverage child items for improved flexibility, scalability, and content management</li>
-          <li>Content tree simplification</li>
-          <li>Razl usage for environment sync and feature testing</li>
-          <li>Publishing strategy, Blue/Green deployment, and proposed publishing targets</li>
-          <li>Expanded component options in page layouts</li>
-        </ul>
-      </article>
-    </section>
- 
-    <section id="workstreams" class="tab-panel">
-      <div class="grid three">
-        <article class="card">
-          <span class="badge red">Workstream 1</span>
-          <h2>Translated pages that just work</h2>
-          <p>Fix issues that create broken, inconsistent, or confusing translated-page experiences.</p>
-          <ul class="clean">
-            <li>Translation URL defects</li>
-            <li>Chinese footer issue</li>
-            <li>Language dropdown defects</li>
-            <li>Back-button language state</li>
-          </ul>
-        </article>
- 
-        <article class="card">
-          <span class="badge orange">Workstream 2</span>
-          <h2>Tracking & ads</h2>
-          <p>Ensure GTM, analytics, and advertising code are reliable and maintainable.</p>
-          <ul class="clean">
-            <li>GTM dual container workflow</li>
-            <li>Analytics code fixes</li>
-            <li>Advertising code fixes</li>
-            <li>Tyler-owned code fixes</li>
-          </ul>
-        </article>
- 
-        <article class="card">
-          <span class="badge blue">Workstream 3</span>
-          <h2>Control over translations</h2>
-          <p>Give marketing more control over what should or should not be translated.</p>
-          <ul class="clean">
-            <li>Do Not Translate for pages</li>
-            <li>Do Not Translate for components</li>
-            <li>Do Not Translate for data items</li>
-            <li>Translate to all languages</li>
-          </ul>
-        </article>
- 
-        <article class="card">
-          <span class="badge blue">Workstream 4</span>
-          <h2>More page-building options</h2>
-          <p>Improve page-building options without forcing custom one-off code.</p>
-          <ul class="clean">
-            <li>Custom class on Page Section</li>
-            <li>One-column promo support</li>
-            <li>Four-card row support</li>
-            <li>Expanded layout component options</li>
-          </ul>
-        </article>
- 
-        <article class="card">
-          <span class="badge green">Workstream 5</span>
-          <h2>Mobile & visual polish</h2>
-          <p>Improve visible page quality, especially on mobile and image-heavy sections.</p>
-          <ul class="clean">
-            <li>Mobile table labels</li>
-            <li>Background overlays</li>
-            <li>Responsive hide/show controls</li>
-            <li>Video thumbnail behavior</li>
-          </ul>
-        </article>
- 
-        <article class="card">
-          <span class="badge purple">Workstream 6</span>
-          <h2>Behind-the-scenes platform work</h2>
-          <p>Move broader platform work into a roadmap track with discovery and technical design.</p>
-          <ul class="clean">
-            <li>Child item architecture</li>
-            <li>Content tree simplification</li>
-            <li>Razl usage</li>
-            <li>Publishing strategy</li>
-          </ul>
-        </article>
-      </div>
-    </section>
- 
-    <section id="backlog" class="tab-panel">
-      <article class="card">
-        <h2>Engineering-ready backlog view</h2>
-        <p>Filter by priority to discuss scope and sequencing. Each item is labeled by priority and workstream.</p>
-        <div class="filters" aria-label="Backlog filters">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="P0">P0</button>
-          <button class="filter-btn" data-filter="P1">P1</button>
-          <button class="filter-btn" data-filter="P2">P2</button>
-          <button class="filter-btn" data-filter="P3">P3</button>
-          <button class="filter-btn" data-filter="P4">P4</button>
+
+    <section>
+      <h2 class="section-title">At a glance</h2>
+      <p class="section-sub">How the 26 items break down by priority.</p>
+      <div class="overview-grid">
+        <div class="tier-card p0">
+          <span class="badge p0">P0 · Fix first</span>
+          <div class="tier-count">5 <small>items</small></div>
+          <p>Broken on the live site.</p>
         </div>
-        <div class="backlog-grid" id="backlogGrid"></div>
-      </article>
-    </section>
- 
-    <section id="roadmap" class="tab-panel">
-      <div class="timeline">
-        <article class="phase">
-          <div class="phase-num">PHASE 01</div>
-          <h3>Stabilize public experience</h3>
-          <p>Resolve translation URL defects, missing Chinese footer, language dropdown routing, Mandarin cross-language routing, and back-button language indicator behavior.</p>
-        </article>
-        <article class="phase">
-          <div class="phase-num">PHASE 02</div>
-          <h3>Protect tracking and governance</h3>
-          <p>Complete GTM dual container workflow, analytics/ad code fixes, and translation controls for Do Not Translate and Translate to All Languages.</p>
-        </article>
-        <article class="phase">
-          <div class="phase-num">PHASE 03</div>
-          <h3>Deliver quick authoring wins</h3>
-          <p>Prioritize custom class on Page Section, optional icon logic, conditional media contact icons, mobile table labels, and high-reuse layout improvements.</p>
-        </article>
-        <article class="phase">
-          <div class="phase-num">PHASE 04</div>
-          <h3>Roadmap platform changes</h3>
-          <p>Separate architecture, content tree simplification, Razl, and publishing strategy into discovery and roadmap planning rather than treating them as small enhancements.</p>
-        </article>
+        <div class="tier-card p1">
+          <span class="badge p1">P1 · Protect</span>
+          <div class="tier-count">5 <small>items</small></div>
+          <p>Tracking &amp; translation control.</p>
+        </div>
+        <div class="tier-card p2">
+          <span class="badge p2">P2 · Build</span>
+          <div class="tier-count">5 <small>items</small></div>
+          <p>Easier page building.</p>
+        </div>
+        <div class="tier-card p3">
+          <span class="badge p3">P3 · Polish</span>
+          <div class="tier-count">5 <small>items</small></div>
+          <p>Look, feel &amp; mobile.</p>
+        </div>
+        <div class="tier-card p4">
+          <span class="badge p4">P4 · Plan</span>
+          <div class="tier-count">6 <small>items</small></div>
+          <p>Big-picture platform work.</p>
+        </div>
       </div>
- 
-      <article class="card" style="margin-top:1rem;">
-        <h2>Recommended top ten</h2>
+    </section>
+
+    <section>
+      <h2 class="section-title">Prioritized list</h2>
+      <p class="section-sub">Numbered 1–26 in recommended order. "Area" shows the original request grouping.</p>
+
+      <div class="tier">
+        <div class="tier-head">
+          <div class="row"><span class="badge p0">P0 — Fix first</span><h3>Broken on the live site</h3><span class="count">5 items</span></div>
+          <p class="desc">Live behavior is broken or misleading for visitors. Resolve these before any feature work.</p>
+        </div>
         <table class="matrix">
-          <thead>
-            <tr><th>Rank</th><th>Item</th><th>Rationale</th></tr>
-          </thead>
+          <thead><tr><th>#</th><th>Item</th><th>Area</th><th>Why it matters</th></tr></thead>
           <tbody>
-            <tr><td>1</td><td>Localization defects</td><td>Live translated-page experience is visibly broken or misleading.</td></tr>
-            <tr><td>2</td><td>GTM, analytics, and advertising fixes</td><td>Campaign measurement and paid-media reporting depend on reliable implementation.</td></tr>
-            <tr><td>3</td><td>Translation governance controls</td><td>Reduces translation errors and manual management overhead.</td></tr>
-            <tr><td>4</td><td>Custom class on Page Section</td><td>High-leverage front-end control that enables scoped fixes without broad regressions.</td></tr>
-            <tr><td>5</td><td>Mobile table headers</td><td>Improves mobile usability and content comprehension.</td></tr>
-            <tr><td>6</td><td>Optional icon and conditional icon hiding</td><td>Likely smaller fixes that improve component quality and eliminate awkward display states.</td></tr>
-            <tr><td>7</td><td>One-column promo and four-card support</td><td>Useful layout flexibility for common marketing page patterns.</td></tr>
-            <tr><td>8</td><td>FAQ exclusion from FAQ search</td><td>Improves content governance and search quality.</td></tr>
-            <tr><td>9</td><td>Mobile/desktop visibility and overlay controls</td><td>Useful, but should include governance rules to avoid misuse.</td></tr>
-            <tr><td>10</td><td>Architecture and publishing strategy</td><td>Important, but better handled as a separate roadmap track with discovery.</td></tr>
+            <tr><td class="num">1</td><td class="item">Fix translation URL issues</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Translated pages generate broken or incorrect URLs for live visitors.</td></tr>
+            <tr><td class="num">2</td><td class="item">Restore footer on Chinese pages (root-cause fix)</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">The footer is missing on a live language; needs a root-cause fix, not a patch.</td></tr>
+            <tr><td class="num">3</td><td class="item">Fix language-dropdown navigation</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Visitors can't reliably switch languages from the dropdown.</td></tr>
+            <tr><td class="num">4</td><td class="item">Stop Mandarin → Spanish/English dropping to the homepage</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Switching language loses the visitor's current page.</td></tr>
+            <tr><td class="num">5</td><td class="item">Fix back button not updating the language indicator</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Language state and the on-page indicator fall out of sync.</td></tr>
           </tbody>
         </table>
-      </article>
-    </section>
- 
-    <section id="scoring" class="tab-panel">
-      <article class="card">
-        <h2>Improvement prioritization scorecard</h2>
-        <p>Use this when engineering asks how marketing wants to rank non-bug enhancements.</p>
-        <table class="matrix score-table">
-          <thead>
-            <tr><th>Criterion</th><th>Question</th><th>Priority impact</th></tr>
-          </thead>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <div class="row"><span class="badge p1">P1 — Protect</span><h3>Tracking &amp; translation control</h3><span class="count">5 items</span></div>
+          <p class="desc">Protects campaign measurement, ad operations, and control over what gets translated.</p>
+        </div>
+        <table class="matrix">
+          <thead><tr><th>#</th><th>Item</th><th>Area</th><th>Why it matters</th></tr></thead>
           <tbody>
-            <tr><td>Launch blocker</td><td>Is this needed for an active campaign or page launch?</td><td>Move up immediately.</td></tr>
-            <tr><td>Helps lots of pages</td><td>Will this affect many pages, templates, or components?</td><td>Prioritize over one-off requests.</td></tr>
-            <tr><td>Saves repeat work</td><td>Does it reduce repeated marketing/content work?</td><td>Strong candidate for the engineering window.</td></tr>
-            <tr><td>Prevents mistakes</td><td>Does it prevent translation mistakes, tracking errors, broken layouts, or inconsistent pages?</td><td>Higher priority than pure visual polish.</td></tr>
-            <tr><td>No other way to do it</td><td>Can marketing solve it without engineering?</td><td>If no workaround exists, move it up.</td></tr>
-            <tr><td>Quick win</td><td>Is it likely small engineering effort with high marketing value?</td><td>Good quick-win candidate.</td></tr>
-            <tr><td>Could be misused</td><td>Could the feature be misused or create inconsistent pages?</td><td>Requires guardrails or discovery.</td></tr>
-            <tr><td>Needs deeper changes</td><td>Does it require deeper Sitecore structural changes?</td><td>Move to discovery unless it blocks P0/P1 work.</td></tr>
+            <tr><td class="num">6</td><td class="item">GTM dual-container workflow</td><td class="area"><span class="area-tag">Tracking &amp; ads</span></td><td class="why">Keeps tag management and campaign tracking reliable.</td></tr>
+            <tr><td class="num">7</td><td class="item">Analytics and advertising code</td><td class="area"><span class="area-tag">Tracking &amp; ads</span></td><td class="why">Campaign and paid-media reporting depend on a correct implementation.</td></tr>
+            <tr><td class="num">8</td><td class="item">Outstanding code fixes (Tyler)</td><td class="area"><span class="area-tag">Tracking &amp; ads</span></td><td class="why">Clears the known tracking/front-end fixes owned by Tyler.</td></tr>
+            <tr><td class="num">9</td><td class="item">"Do Not Translate" control — pages, components, data items</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Stops content from being translated when it shouldn't be.</td></tr>
+            <tr><td class="num">10</td><td class="item">"Translate to all languages" control</td><td class="area"><span class="area-tag">Translations</span></td><td class="why">Pushes content to every locale in one step instead of manually.</td></tr>
           </tbody>
         </table>
-      </article>
- 
-      <div class="grid two" style="margin-top:1rem;">
-        <article class="card">
-          <h2>Suggested labels</h2>
-          <ul class="clean">
-            <li>Live site bug</li>
-            <li>Translation bug</li>
-            <li>Tracking</li>
-            <li>Translation control</li>
-            <li>Easier editing</li>
-            <li>Visual polish</li>
-            <li>Platform work</li>
-            <li>Needs planning</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>Decision rule</h2>
-          <p>When two items compete for the same engineering time, choose the one that fixes live-user breakage, protects tracking accuracy, reduces recurring manual work, or improves a reusable component used across many pages.</p>
-          <p>Defer items that are broad, architectural, or dependent on unresolved platform decisions unless they directly unblock urgent work.</p>
-        </article>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <div class="row"><span class="badge p2">P2 — Build</span><h3>Easier page building</h3><span class="count">5 items</span></div>
+          <p class="desc">High-reuse Sitecore authoring improvements that cut manual work and prevent layout errors.</p>
+        </div>
+        <table class="matrix">
+          <thead><tr><th>#</th><th>Item</th><th>Area</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td class="num">11</td><td class="item">Custom class on the Page Section component</td><td class="area"><span class="area-tag">Sitecore authoring</span></td><td class="why">Scopes custom code to one section, avoiding site-wide conflicts.</td></tr>
+            <tr><td class="num">12</td><td class="item">One multi-column promo with a shared headline</td><td class="area"><span class="area-tag">Sitecore authoring</span></td><td class="why">Removes the 2/3/4-only limit and the per-column headline requirement.</td></tr>
+            <tr><td class="num">13</td><td class="item">Four cards in a row</td><td class="area"><span class="area-tag">Sitecore authoring</span></td><td class="why">Adds a 4-up layout for image, icon, plan, and general cards.</td></tr>
+            <tr><td class="num">14</td><td class="item">Make the Promo icon field optional</td><td class="area"><span class="area-tag">Sitecore authoring</span></td><td class="why">Removes the empty blue circle that shows when no icon is set.</td></tr>
+            <tr><td class="num">15</td><td class="item">Exclude FAQs from FAQ search</td><td class="area"><span class="area-tag">Sitecore authoring</span></td><td class="why">Produces cleaner, more relevant FAQ search results.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <div class="row"><span class="badge p3">P3 — Polish</span><h3>Look, feel &amp; mobile</h3><span class="count">5 items</span></div>
+          <p class="desc">Visible improvements to mobile readability, presentation quality, and awkward display states.</p>
+        </div>
+        <table class="matrix">
+          <thead><tr><th>#</th><th>Item</th><th>Area</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td class="num">16</td><td class="item">Show table column names on mobile</td><td class="area"><span class="area-tag">UX / mobile</span></td><td class="why">Column titles currently disappear on small screens.</td></tr>
+            <tr><td class="num">17</td><td class="item">Hide Media Contact icons when empty</td><td class="area"><span class="area-tag">UX / mobile</span></td><td class="why">No icon should show when there's no email or phone.</td></tr>
+            <tr><td class="num">18</td><td class="item">Show/hide items by mobile vs desktop</td><td class="area"><span class="area-tag">UX / mobile</span></td><td class="why">More control over what appears on each device.</td></tr>
+            <tr><td class="num">19</td><td class="item">Background-image overlay option</td><td class="area"><span class="area-tag">UX / mobile</span></td><td class="why">Keeps copy readable over section background images.</td></tr>
+            <tr><td class="num">20</td><td class="item">Video thumbnail with play-button overlay</td><td class="area"><span class="area-tag">UX / mobile</span></td><td class="why">Click-to-play thumbnail in the Media Component, like Media Promo (Swati's idea).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <div class="row"><span class="badge p4">P4 — Plan</span><h3>Big-picture platform work</h3><span class="count">6 items</span></div>
+          <p class="desc">Valuable long-term architecture. Keep as a separate discovery track unless an item directly unblocks the work above.</p>
+        </div>
+        <table class="matrix">
+          <thead><tr><th>#</th><th>Item</th><th>Area</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td class="num">21</td><td class="item">More component options in page layouts</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Current layout component options are very limited.</td></tr>
+            <tr><td class="num">22</td><td class="item">Leverage child items</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Improves flexibility, scalability, and content management.</td></tr>
+            <tr><td class="num">23</td><td class="item">Content tree simplification</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Streamlines the underlying content structure.</td></tr>
+            <tr><td class="num">24</td><td class="item">Razl for environment sync &amp; feature testing</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Better environment management and safer testing.</td></tr>
+            <tr><td class="num">25</td><td class="item">Publishing strategy — Blue/Green deployment</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Safer, more controlled releases.</td></tr>
+            <tr><td class="num">26</td><td class="item">Proposed publishing targets</td><td class="area"><span class="area-tag">Platform</span></td><td class="why">Defines where and how content publishes.</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
- 
+
+    <section>
+      <h2 class="section-title">Recommended delivery sequence</h2>
+      <p class="section-sub">A practical order for scheduling the work above.</p>
+      <div class="timeline">
+        <div class="phase">
+          <div class="phase-num">PHASE 01</div>
+          <h4>Stabilize the live experience</h4>
+          <p>Clear the five P0 translation and navigation defects so live visitors get correct URLs, footers, language switching, and indicators.</p>
+        </div>
+        <div class="phase">
+          <div class="phase-num">PHASE 02</div>
+          <h4>Protect tracking &amp; control</h4>
+          <p>Finish the GTM dual-container workflow, analytics/ad code, Tyler's fixes, and the Do Not Translate / Translate-to-all controls.</p>
+        </div>
+        <div class="phase">
+          <div class="phase-num">PHASE 03</div>
+          <h4>Ship authoring &amp; polish wins</h4>
+          <p>Deliver the P2 authoring improvements plus the low-effort P3 fixes (optional icon, hidden empty contact icons, mobile table headers) first.</p>
+        </div>
+        <div class="phase">
+          <div class="phase-num">PHASE 04</div>
+          <h4>Plan the platform work</h4>
+          <p>Move child items, content-tree simplification, Razl, and publishing strategy/targets into a discovery track with technical design.</p>
+        </div>
+      </div>
+    </section>
+
     <p class="footer-note">Prepared for marketing-to-engineering backlog alignment.</p>
   </main>
- 
+
   <script>
-    const tabs = document.querySelectorAll('.tab-btn');
-    const panels = document.querySelectorAll('.tab-panel');
- 
-    tabs.forEach(button => {
-      button.addEventListener('click', () => {
-        tabs.forEach(btn => btn.classList.remove('active'));
-        panels.forEach(panel => panel.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(button.dataset.tab).classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    });
- 
-    const backlogItems = [
-      { title: 'Bug fix: URL issues when translating', priority: 'P0', stream: 'Translated pages that just work', type: 'Translation bug' },
-      { title: 'Bug fix: identify root cause of footer not appearing on Chinese pages', priority: 'P0', stream: 'Translated pages that just work', type: 'Live site bug' },
-      { title: 'Navigation issues with language dropdowns', priority: 'P0', stream: 'Translated pages that just work', type: 'Translation bug' },
-      { title: 'When going from Mandarin to Spanish or English, user lands on main page', priority: 'P0', stream: 'Translated pages that just work', type: 'Translation bug' },
-      { title: 'Back button does not change language indicator', priority: 'P0', stream: 'Translated pages that just work', type: 'Translation bug' },
-      { title: 'GTM dual container workflow', priority: 'P1', stream: 'Tracking & ads', type: 'Tracking' },
-      { title: 'Analytics and ad code fixes', priority: 'P1', stream: 'Tracking & ads', type: 'Tracking' },
-      { title: 'Code fixes owned by Tyler', priority: 'P1', stream: 'Tracking & ads', type: 'Tracking / frontend' },
-      { title: 'Add a Do Not Translate box for pages, components, and data items', priority: 'P1', stream: 'Control over translations', type: 'Translation control' },
-      { title: 'Add a Translate to all languages box', priority: 'P1', stream: 'Control over translations', type: 'Translation control' },
-      { title: 'Ability to add custom class to the Page Section component', priority: 'P2', stream: 'More page-building options', type: 'Easier editing' },
-      { title: 'Ability to insert one multi-column promo to a page with a shared headline', priority: 'P2', stream: 'More page-building options', type: 'Easier editing' },
-      { title: 'Ability to have 4 image, icon, plan, and general cards in a row', priority: 'P2', stream: 'More page-building options', type: 'Easier editing' },
-      { title: 'Icon field in Promo component should be optional', priority: 'P2', stream: 'More page-building options', type: 'Visual polish' },
-      { title: 'Ability to exclude FAQs from FAQ search', priority: 'P2', stream: 'Search & content', type: 'Easier editing' },
-      { title: 'Table column names should show in mobile view', priority: 'P3', stream: 'Mobile & visual polish', type: 'Visual polish' },
-      { title: 'Media Contact component should hide icons if no email or phone is added', priority: 'P3', stream: 'Mobile & visual polish', type: 'Visual polish' },
-      { title: 'Flexibility for hiding items on mobile or desktop', priority: 'P3', stream: 'Mobile & visual polish', type: 'Visual polish' },
-      { title: 'Add overlay option for page-section background images', priority: 'P3', stream: 'Mobile & visual polish', type: 'Visual polish' },
-      { title: 'Media Component video thumbnail with play button overlay', priority: 'P3', stream: 'Mobile & visual polish', type: 'Visual polish' },
-      { title: 'Ability to insert more component options using page layouts', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Platform work' },
-      { title: 'Leverage child items for flexibility, scalability, and content management', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Platform work' },
-      { title: 'Content tree simplification', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Platform work' },
-      { title: 'Razl usage for environment sync and new feature testing', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Environment setup' },
-      { title: 'Publishing strategy: Blue/Green deployment', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Release process' },
-      { title: 'Proposed publishing targets', priority: 'P4', stream: 'Behind-the-scenes platform work', type: 'Publishing setup' }
-    ];
- 
-    const backlogGrid = document.getElementById('backlogGrid');
- 
-    function priorityBadgeClass(priority) {
-      if (priority === 'P0') return 'red';
-      if (priority === 'P1') return 'orange';
-      if (priority === 'P2') return 'blue';
-      if (priority === 'P3') return 'green';
-      if (priority === 'P4') return 'purple';
-      return 'gray';
-    }
- 
-    function renderBacklog(filter = 'all') {
-      backlogGrid.innerHTML = '';
-      backlogItems
-        .filter(item => filter === 'all' || item.priority === filter)
-        .forEach(item => {
-          const card = document.createElement('article');
-          card.className = 'ticket';
-          card.innerHTML = `
-            <div class="badge ${priorityBadgeClass(item.priority)}">${item.priority}</div>
-            <p class="ticket-title">${item.title}</p>
-            <div class="ticket-meta">
-              <span class="mini-tag">${item.stream}</span>
-              <span class="mini-tag">${item.type}</span>
-            </div>
-          `;
-          backlogGrid.appendChild(card);
-        });
-    }
- 
-    document.querySelectorAll('.filter-btn').forEach(button => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        renderBacklog(button.dataset.filter);
-      });
-    });
- 
-    renderBacklog();
- 
-    // ---------- Single-page PDF print ----------
     function printSinglePage() {
-      // Reveal every tab panel so the whole document is captured
-      panels.forEach(p => { p.dataset.prevDisplay = p.style.display; p.style.display = 'block'; });
- 
       const body = document.body;
       const html = document.documentElement;
       const width = Math.max(body.scrollWidth, html.scrollWidth, body.offsetWidth, html.offsetWidth);
       const height = Math.max(body.scrollHeight, html.scrollHeight, body.offsetHeight, html.offsetHeight);
- 
       const style = document.createElement('style');
       style.id = 'single-page-print';
       style.textContent = `@media print { @page { size: ${width}px ${height}px; margin: 0; } body { margin: 0; } }`;
       document.head.appendChild(style);
- 
       window.print();
- 
-      // Restore the interactive state after the print dialog closes
       setTimeout(() => {
         const injected = document.getElementById('single-page-print');
         if (injected) injected.remove();
-        panels.forEach(p => { p.style.display = p.dataset.prevDisplay || ''; delete p.dataset.prevDisplay; });
       }, 500);
     }
   </script>
 </body>
 </html>
- 
-
-
-
-
-Failed to download files
