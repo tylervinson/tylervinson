@@ -1,6 +1,6 @@
 {
-  "version": "2.2.0",
-  "updatedAt": "2026-05-19T00:00:00.000Z",
+  "version": "2.3.0",
+  "updatedAt": "2026-06-04T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
@@ -154,7 +154,7 @@
           "key": "details",
           "label": "Detail Body",
           "selector": ".zmw-extender",
-          "type": "textarea"
+          "type": "richtext"
         }
       ]
     }
