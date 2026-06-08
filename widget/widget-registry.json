@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.3.1",
   "updatedAt": "2026-06-04T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
@@ -127,7 +127,7 @@
         "groupLabelField": "title",
         "dateField": "datetime",
         "dateAttr": "data-end",
-        "newItemTemplate": "<div class=\"zmw-meeting\" data-end=\"{date}\"><div class=\"zmw-date-block\"><div class=\"zmw-month\">{month}</div><div class=\"zmw-day\">{day}</div><div class=\"zmw-time\">{time}</div></div><div class=\"zmw-content\"><div class=\"zmw-title\"><span class=\"zmw-title-text\">{title}</span><svg class=\"zmw-chevron\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M4 7l6 6 6-6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div><div class=\"zmw-description\">{description}</div><div class=\"zmw-extender\"><p>{details}</p></div></div></div>"
+        "newItemTemplate": "<div class=\"zmw-meeting\" data-register-url=\"\" data-end=\"{date}\"><div class=\"zmw-date-block\"><div class=\"zmw-month\">{month}</div><div class=\"zmw-day\">{day}</div><div class=\"zmw-time\">{time}</div></div><div class=\"zmw-content\"><div class=\"zmw-title\"><span class=\"zmw-title-text\">{title}</span><svg class=\"zmw-chevron\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M4 7l6 6 6-6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div><div class=\"zmw-description\">{description}</div><div class=\"zmw-extender\"><p>{details}</p></div></div><div class=\"zmw-register-wrap\" hidden><a class=\"zmw-register-btn\" target=\"_blank\" rel=\"noopener noreferrer\">Register</a></div></div>"
       },
       "fields": [
         {
@@ -149,6 +149,13 @@
           "label": "Short Description",
           "selector": ".zmw-description",
           "type": "text"
+        },
+        {
+          "key": "registerUrl",
+          "label": "Registration URL",
+          "type": "url",
+          "attr": "data-register-url",
+          "hint": "Full external URL (https://...). Leave blank to hide the Register button."
         },
         {
           "key": "details",
