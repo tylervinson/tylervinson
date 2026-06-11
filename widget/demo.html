@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Demo — Sitecore Widget Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 64px; }
+        .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+        .subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; }
+        .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #aaa; }
+        .tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+        .download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-1px); }
+
+        /* Demo intro */
+        .demo-intro { margin-bottom: 48px; }
+        .demo-intro p { font-size: 15px; color: #888; line-height: 1.75; max-width: 680px; }
+
+        /* Main demo layout */
+        .demo-wrapper { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; position: relative; }
+
+        /* ── SIDEBAR PANEL ── */
+        .sidebar-panel {
+            background: #1a1a1a;
+            border: 1px solid #2e2e2e;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 13px;
+            position: sticky;
+            top: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        .sp-header {
+            background: #141414;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sp-dot { width: 7px; height: 7px; border-radius: 50%; background: #FFBE5F; }
+        .sp-title { font-size: 13px; font-weight: 600; color: #e0e0e0; flex: 1; }
+        .sp-badge { font-size: 10px; color: #555; }
+        .sp-status-bar {
+            background: #141414;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 6px 14px;
+            font-size: 11px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sp-status-dot { width: 5px; height: 5px; border-radius: 50%; background: #7dbf82; }
+        .sp-body { padding: 12px 14px; max-height: 600px; overflow-y: auto; }
+        .sp-body::-webkit-scrollbar { width: 3px; }
+        .sp-body::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+        /* Widget label */
+        .sp-widget-label { font-size: 10px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+        /* Standalone field */
+        .sp-standalone { margin-bottom: 14px; }
+        .sp-field-label { font-size: 10px; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500; }
+        .sp-input {
+            width: 100%;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 12px;
+            padding: 7px 10px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .sp-input:focus { border-color: #FFBE5F; }
+
+        /* Card groups */
+        .sp-divider { border: none; border-top: 1px solid #242424; margin: 12px 0; }
+        .sp-group-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; margin-top: 10px; }
+        .sp-card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 5px; padding: 10px 12px; margin-bottom: 8px; }
+        .sp-card-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; padding-bottom: 8px; }
+        .sp-card-header-title { font-size: 12px; font-weight: 600; color: #ccc; }
+        .sp-card-toggle { font-size: 10px; color: #444; transition: transform 0.2s; }
+        .sp-card.collapsed .sp-card-fields { display: none; }
+        .sp-card.collapsed .sp-card-toggle { transform: rotate(-90deg); }
+        .sp-card-fields { padding-top: 2px; }
+        .sp-card-field { margin-bottom: 8px; }
+        .sp-card-field:last-child { margin-bottom: 0; }
+
+        /* Apply button */
+        .sp-apply-bar { padding: 10px 14px; border-top: 1px solid #242424; background: #141414; }
+        .sp-apply-btn {
+            width: 100%;
+            background: #FFBE5F;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .sp-apply-btn:hover { background: #FFD495; }
+        .sp-apply-btn.applied { background: #7dbf82; color: #1a1a1a; }
+        .sp-apply-btn.applying { background: #444; color: #888; cursor: default; }
+
+        /* ── WIDGET PREVIEW ── */
+        .widget-pane {
+            background: #f8f8f8;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        .widget-pane-header {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .wp-dots { display: flex; gap: 5px; }
+        .wp-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .wp-dot.red { background: #ff5f57; }
+        .wp-dot.yellow { background: #febc2e; }
+        .wp-dot.green { background: #28c840; }
+        .wp-url { font-size: 11px; color: #aaa; background: #f0f0f0; padding: 3px 10px; border-radius: 3px; font-family: 'SF Mono', monospace; margin-left: auto; }
+        .widget-pane-body {
+            padding: 0;
+        }
+
+        /* ── ANIMATED CARDS WIDGET ── */
+        .animated-cards-demo {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 60px 30px;
+            flex-wrap: wrap;
+            background: #f8f8f8;
+        }
+        .profile-card-demo {
+            background: #fff;
+            border-radius: 4px;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            padding: 24px;
+            transition: box-shadow 0.3s, transform 0.3s;
+            position: relative;
+        }
+        .profile-card-demo.highlight {
+            box-shadow: 0 0 0 2px #FFBE5F, 0 4px 20px rgba(255,190,95,0.2);
+            transform: translateY(-2px);
+        }
+        .card-divider { width: 48px; height: 3px; background: #FFBE5F; border-radius: 1px; margin-bottom: 12px; }
+        .card-number { font-size: 48px; font-weight: 300; color: #0B3B60; line-height: 1; margin-bottom: 8px; transition: all 0.3s; }
+        .card-label { font-size: 13px; color: #555; font-weight: 500; line-height: 1.3; transition: all 0.2s; }
+        .card-update-flash { position: absolute; inset: 0; background: rgba(255,190,95,0.08); border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .card-update-flash.active { opacity: 1; }
+
+        /* Demo instructions */
+        .demo-instructions {
+            margin-top: 24px;
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.7;
+        }
+        .demo-instructions strong { color: #999; }
+
+        /* Status messages */
+        .status-toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 13px;
+            color: #e0e0e0;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 999;
+            white-space: nowrap;
+        }
+        .status-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .status-toast.success { border-color: #7dbf82; color: #7dbf82; }
+
+        /* Below demo section */
+        .section { margin-top: 96px; margin-bottom: 96px; }
+        .section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        .section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+        .section p { font-size: 15px; color: #888; line-height: 1.75; }
+        .section p + p { margin-top: 12px; }
+
+        .callout-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 32px; }
+        .callout-item { background: #1e1e1e; padding: 24px; }
+        .callout-item h4 { font-size: 13px; font-weight: 600; color: #e0e0e0; margin-bottom: 8px; }
+        .callout-item p { font-size: 13px; color: #555; line-height: 1.6; }
+
+        footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #888; }
+
+        @media (max-width: 800px) {
+            .demo-wrapper { grid-template-columns: 1fr; }
+            .sidebar-panel { position: static; }
+            .animated-cards-demo { gap: 12px; padding: 40px 16px; }
+            .profile-card-demo { width: 160px; height: 160px; }
+            .card-number { font-size: 36px; }
+            h1 { font-size: 36px; }
+            .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+            .callout-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <p class="eyebrow">Sitecore Widget Editor</p>
+        <h1>Interactive Demo</h1>
+        <p class="subtitle">Edit the Animated Cards widget in a simulated Content Editor sidebar.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link active">Demo</a>
+        </nav>
+        <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>↓ Download v4.4.6</a>
+    </header>
+
+    <div class="demo-intro">
+        <p>This is a live simulation of the extension sidebar editing the Animated Cards widget. Edit any field in the sidebar panel on the left, then click <strong style="color:#e0e0e0;">Apply Changes</strong> to see the widget update in real time. In the actual extension, Apply also silently writes the updated HTML back into Sitecore's Rich Text field editor.</p>
+    </div>
+
+    <div class="demo-wrapper">
+
+        <!-- SIDEBAR PANEL -->
+        <div class="sidebar-panel">
+            <div class="sp-header">
+                <div class="sp-dot"></div>
+                <div class="sp-title">Widget Editor</div>
+                <div class="sp-badge">v4.4.6</div>
+            </div>
+            <div class="sp-status-bar">
+                <div class="sp-status-dot"></div>
+                <span>Widget detected — Animated Cards</span>
+            </div>
+            <div class="sp-body">
+                <div class="sp-widget-label">Animated Cards</div>
+
+                <hr class="sp-divider">
+                <div class="sp-group-label">Cards</div>
+
+                <!-- Card 1 -->
+                <div class="sp-card" id="card-group-0">
+                    <div class="sp-card-header" onclick="toggleCard(0)">
+                        <div class="sp-card-header-title" id="card-group-label-0">Card 1 — 37</div>
+                        <div class="sp-card-toggle">▾</div>
+                    </div>
+                    <div class="sp-card-fields">
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Statistic Value</div>
+                            <input class="sp-input" type="text" id="field-0-number" value="37" oninput="livePreview(0, 'number', this.value)">
+                        </div>
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Card Label</div>
+                            <input class="sp-input" type="text" id="field-0-text" value="Fewer Emergency Room Visits" oninput="livePreview(0, 'text', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="sp-card" id="card-group-1">
+                    <div class="sp-card-header" onclick="toggleCard(1)">
+                        <div class="sp-card-header-title" id="card-group-label-1">Card 2 — 400</div>
+                        <div class="sp-card-toggle">▾</div>
+                    </div>
+                    <div class="sp-card-fields">
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Statistic Value</div>
+                            <input class="sp-input" type="text" id="field-1-number" value="400" oninput="livePreview(1, 'number', this.value)">
+                        </div>
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Card Label</div>
+                            <input class="sp-input" type="text" id="field-1-text" value="Members Served Annually" oninput="livePreview(1, 'text', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="sp-card" id="card-group-2">
+                    <div class="sp-card-header" onclick="toggleCard(2)">
+                        <div class="sp-card-header-title" id="card-group-label-2">Card 3 — 15</div>
+                        <div class="sp-card-toggle">▾</div>
+                    </div>
+                    <div class="sp-card-fields">
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Statistic Value</div>
+                            <input class="sp-input" type="text" id="field-2-number" value="15" oninput="livePreview(2, 'number', this.value)">
+                        </div>
+                        <div class="sp-card-field">
+                            <div class="sp-field-label">Card Label</div>
+                            <input class="sp-input" type="text" id="field-2-text" value="Years of Service" oninput="livePreview(2, 'text', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="sp-apply-bar">
+                <button class="sp-apply-btn" id="applyBtn" onclick="applyChanges()">Apply Changes</button>
+            </div>
+        </div>
+
+        <!-- WIDGET PREVIEW PANE -->
+        <div>
+            <div class="widget-pane">
+                <div class="widget-pane-header">
+                    <div class="wp-dots">
+                        <div class="wp-dot red"></div>
+                        <div class="wp-dot yellow"></div>
+                        <div class="wp-dot green"></div>
+                    </div>
+                    <div class="wp-url">sitecore.example.com/content</div>
+                </div>
+                <div class="widget-pane-body">
+                    <div class="animated-cards-demo" id="widgetPreview">
+                        <div class="profile-card-demo" id="preview-card-0">
+                            <div class="card-update-flash" id="flash-0"></div>
+                            <div class="card-divider"></div>
+                            <div class="card-number" id="preview-number-0">37</div>
+                            <div class="card-label" id="preview-text-0">Fewer Emergency Room Visits</div>
+                        </div>
+                        <div class="profile-card-demo" id="preview-card-1">
+                            <div class="card-update-flash" id="flash-1"></div>
+                            <div class="card-divider"></div>
+                            <div class="card-number" id="preview-number-1">400</div>
+                            <div class="card-label" id="preview-text-1">Members Served Annually</div>
+                        </div>
+                        <div class="profile-card-demo" id="preview-card-2">
+                            <div class="card-update-flash" id="flash-2"></div>
+                            <div class="card-divider"></div>
+                            <div class="card-number" id="preview-number-2">15</div>
+                            <div class="card-label" id="preview-text-2">Years of Service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="demo-instructions">
+                <strong>Try it:</strong> Edit any field in the sidebar — numbers update as you type. Click <strong>Apply Changes</strong> to commit. In the real extension, Apply silently writes the updated HTML into the Sitecore Rich Text field's source editor.
+            </div>
+        </div>
+    </div>
+
+    <!-- WHAT THE DEMO SHOWS -->
+    <div class="section">
+        <div class="section-label">What This Demonstrates</div>
+        <h2>The key behaviours on display</h2>
+        <div class="callout-grid">
+            <div class="callout-item">
+                <h4>Live label updates</h4>
+                <p>The group headers in the sidebar update as you type — this is driven by the <code>groupLabelField</code> in the registry definition, which tells the sidebar which field's value to use as the group heading.</p>
+            </div>
+            <div class="callout-item">
+                <h4>Field definition drives the form</h4>
+                <p>The sidebar form is entirely generated from the registry. The extension has no knowledge of "Animated Cards" — it only knows "fields with these selectors". Change the registry and the form changes with it.</p>
+            </div>
+            <div class="callout-item">
+                <h4>Apply writes to the HTML source</h4>
+                <p>In the real extension, Apply triggers a silent HTML editor automation cycle: open textarea, write updated markup, close. The widget preview here simulates the DOM update that would result on the live Sitecore page.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Sitecore Widget Editor v4.4.6 — Registry v2.3.5 &nbsp;·&nbsp;
+        <a href="overview.html">Overview</a> &nbsp;·&nbsp;
+        <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
+        <a href="specs.html">Specs</a> &nbsp;·&nbsp;
+        <a href="using-the-extension.html">Using the Extension</a>
+    </footer>
+</div>
+
+<div class="status-toast" id="toast"></div>
+
+<script>
+    // Track pending values (pre-apply) vs committed values
+    var pendingValues = [
+        { number: '37',  text: 'Fewer Emergency Room Visits' },
+        { number: '400', text: 'Members Served Annually' },
+        { number: '15',  text: 'Years of Service' }
+    ];
+    var committedValues = JSON.parse(JSON.stringify(pendingValues));
+
+    // Live preview as user types — update group label and highlight card
+    function livePreview(cardIdx, field, value) {
+        pendingValues[cardIdx][field] = value;
+
+        // Update group label
+        var numEl = document.getElementById('field-' + cardIdx + '-number');
+        var label = document.getElementById('card-group-label-' + cardIdx);
+        label.textContent = 'Card ' + (cardIdx + 1) + ' — ' + (numEl ? numEl.value || '…' : '…');
+
+        // Highlight the card being edited
+        document.querySelectorAll('.profile-card-demo').forEach(function(c) { c.classList.remove('highlight'); });
+        document.getElementById('preview-card-' + cardIdx).classList.add('highlight');
+
+        // Live-update the number as user types
+        if (field === 'number') {
+            document.getElementById('preview-number-' + cardIdx).textContent = value || '—';
+        }
+    }
+
+    function toggleCard(idx) {
+        var card = document.getElementById('card-group-' + idx);
+        card.classList.toggle('collapsed');
+    }
+
+    function applyChanges() {
+        var btn = document.getElementById('applyBtn');
+        btn.classList.add('applying');
+        btn.textContent = 'Applying…';
+
+        // Simulate the "open textarea, write, close" cycle with a brief delay
+        setTimeout(function() {
+            // Commit all values to the preview
+            for (var i = 0; i < 3; i++) {
+                var numVal = document.getElementById('field-' + i + '-number').value;
+                var txtVal = document.getElementById('field-' + i + '-text').value;
+
+                document.getElementById('preview-number-' + i).textContent = numVal || '—';
+                document.getElementById('preview-text-' + i).textContent = txtVal;
+
+                // Flash the card
+                flashCard(i);
+            }
+
+            committedValues = JSON.parse(JSON.stringify(pendingValues));
+
+            // Remove all highlights
+            document.querySelectorAll('.profile-card-demo').forEach(function(c) { c.classList.remove('highlight'); });
+
+            btn.classList.remove('applying');
+            btn.classList.add('applied');
+            btn.textContent = '✓ Changes Applied';
+            showToast('HTML written to Rich Text field — Save in Sitecore to persist.', 'success');
+
+            setTimeout(function() {
+                btn.classList.remove('applied');
+                btn.textContent = 'Apply Changes';
+            }, 2500);
+        }, 600);
+    }
+
+    function flashCard(idx) {
+        var flash = document.getElementById('flash-' + idx);
+        flash.classList.add('active');
+        setTimeout(function() { flash.classList.remove('active'); }, 600);
+    }
+
+    function showToast(msg, type) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'status-toast show' + (type ? ' ' + type : '');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function() {
+            toast.classList.remove('show');
+        }, 3500);
+    }
+
+    // Collapse non-first cards on load for cleaner initial state
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('card-group-1').classList.add('collapsed');
+        document.getElementById('card-group-2').classList.add('collapsed');
+    });
+</script>
+</body>
+</html>

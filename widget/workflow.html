@@ -3,168 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Widget Workflow - Sitecore Widget Editor</title>
+    <title>Widget Workflow — Sitecore Widget Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
-        header { position: relative; }
-        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
-        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
-        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
-        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
-        .tab-nav-link:hover { color: #666; }
-        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-        .project-list { display: flex; flex-direction: column; gap: 120px; }
-        .project { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-        .project:nth-child(even) { direction: rtl; }
-        .project:nth-child(even) > * { direction: ltr; }
-        .project-content { display: flex; flex-direction: column; gap: 24px; }
-        .project-number { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; }
-        .project h2 { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: #000; }
-        .project-description { font-size: 16px; line-height: 1.7; color: #444; }
-        .project-description p + p { margin-top: 16px; }
-        .project-description code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
-        .project-image { position: relative; width: 100%; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); cursor: pointer; }
-        .project-image:hover { opacity: 0.95; }
-        .project-image img { width: 100%; height: auto; display: block; border-radius: 8px; }
-        .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); border-radius: 8px; }
-        .step-list { margin-top: 8px; padding: 0; list-style: none; }
-        .step-list li { padding: 10px 0; padding-left: 20px; position: relative; font-size: 15px; color: #444; border-bottom: 1px solid #f0f0f0; line-height: 1.5; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 64px; }
+        .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+        .subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; }
+        .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #aaa; }
+        .tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+        .download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-1px); }
+        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+
+        /* Sections */
+        .section { margin-bottom: 96px; }
+        .section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        .section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+        .section > p { font-size: 15px; color: #888; line-height: 1.75; margin-bottom: 12px; }
+
+        /* Phase cards */
+        .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 32px; }
+        .phase-card { background: #1e1e1e; padding: 28px 24px; display: flex; flex-direction: column; gap: 14px; }
+        .phase-num { font-size: 11px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: 0.8px; }
+        .phase-card h3 { font-size: 18px; font-weight: 500; color: #e0e0e0; line-height: 1.3; }
+        .phase-card p { font-size: 13px; color: #666; line-height: 1.6; }
+        .step-list { list-style: none; padding: 0; margin-top: 4px; }
+        .step-list li { padding: 7px 0 7px 18px; position: relative; font-size: 13px; color: #555; border-bottom: 1px solid #242424; line-height: 1.5; }
         .step-list li:last-child { border-bottom: none; }
-        .step-list li::before { content: "→"; position: absolute; left: 0; color: #999; }
-        .step-list li strong { color: #1a1a1a; font-weight: 600; }
-        .phase-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .phase-card { background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 16px; }
-        .phase-card .project-number { font-size: 11px; }
-        .phase-card h3 { font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: -0.3px; color: #000; }
-        .phase-card p { font-size: 15px; line-height: 1.6; color: #666; }
-        .compact-list { list-style: none; padding: 0; margin-top: 4px; }
-        .compact-list li { padding: 7px 0; padding-left: 18px; position: relative; font-size: 14px; color: #555; line-height: 1.5; border-bottom: 1px solid #f5f5f5; }
-        .compact-list li:last-child { border-bottom: none; }
-        .compact-list li::before { content: "→"; position: absolute; left: 0; color: #ccc; font-size: 12px; top: 9px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
-        .modal-close { position: fixed; top: 24px; right: 32px; background: none; border: none; color: #fff; font-size: 36px; cursor: pointer; line-height: 1; }
-        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
-        .content-wrapper.split-view
-        .content-wrapper.split-view
-        .content-wrapper.video-only
-        @media (max-width: 1024px) {
-            .project { grid-template-columns: 1fr; gap: 40px; }
-            .project:nth-child(even) { direction: ltr; }
-            .phase-card-grid { grid-template-columns: 1fr; }
+        .step-list li::before { content: "→"; position: absolute; left: 0; color: #444; font-size: 11px; top: 9px; }
+        .step-list li strong { color: #888; font-weight: 500; }
+
+        /* Big steps (numbered workflow) */
+        .big-steps { display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+        .big-step { display: grid; grid-template-columns: 80px 1fr; gap: 24px; padding: 32px 0; border-bottom: 1px solid #242424; align-items: start; }
+        .big-step:last-child { border-bottom: none; }
+        .big-step-num { font-size: 48px; font-weight: 300; color: #2a2a2a; letter-spacing: -2px; line-height: 1; padding-top: 4px; }
+        .big-step-body h3 { font-size: 20px; font-weight: 500; color: #e0e0e0; margin-bottom: 10px; }
+        .big-step-body p { font-size: 14px; color: #777; line-height: 1.75; }
+        .big-step-body p + p { margin-top: 10px; }
+        .big-step-body .note { margin-top: 14px; background: #1e2118; border: 1px solid #2a3420; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #7dbf82; line-height: 1.6; }
+        .big-step-body .warn { margin-top: 14px; background: #201e18; border: 1px solid #34301e; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #c4a55a; line-height: 1.6; }
+
+        /* Two-column layout for step with checklist */
+        .step-with-list { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 12px; }
+        .check-list { list-style: none; padding: 0; margin: 0; }
+        .check-list li { padding: 8px 0 8px 22px; position: relative; font-size: 13px; color: #666; border-bottom: 1px solid #242424; }
+        .check-list li:last-child { border-bottom: none; }
+        .check-list li::before { content: "✓"; position: absolute; left: 0; color: #FFBE5F; font-size: 11px; top: 10px; }
+
+        /* Inline code callout box */
+        .callout { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; padding: 20px 24px; margin-top: 16px; }
+        .callout-label { font-size: 10px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+        .callout code { display: block; font-size: 13px; color: #aaa; padding: 6px 0; background: none; border: none; }
+
+        /* Day-by-day content authoring workflow */
+        .authoring-flow { display: flex; flex-direction: column; gap: 2px; margin-top: 32px; }
+        .authoring-step { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; padding: 20px 24px; display: grid; grid-template-columns: 32px 1fr; gap: 16px; align-items: start; }
+        .authoring-step-num { width: 32px; height: 32px; border-radius: 50%; background: #242424; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #FFBE5F; flex-shrink: 0; }
+        .authoring-step h4 { font-size: 14px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; }
+        .authoring-step p { font-size: 13px; color: #666; line-height: 1.6; }
+
+        footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #888; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .phase-grid { grid-template-columns: 1fr; }
+            .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+            .big-step { grid-template-columns: 48px 1fr; }
+            .big-step-num { font-size: 32px; }
+            .step-with-list { grid-template-columns: 1fr; }
         }
-        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
-        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <p class="eyebrow" style="position: absolute;">Sitecore Widget Editor</p>
-            <h1>Widget Workflow</h1>
-            <p class="subtitle">From development to day-to-day content management</p>
-            <nav class="tab-nav">
-                <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-                <a href="workflow.html" class="tab-nav-link active">Widget Workflow</a>
-                <a href="specs.html" class="tab-nav-link">Technical Specs</a>
-                <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
-            </nav>
-            
-            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
-        </header>
+<div class="container">
+    <header>
+        <p class="eyebrow">Sitecore Widget Editor</p>
+        <h1>Widget Workflow</h1>
+        <p class="subtitle">End-to-end — from building a new widget to day-to-day content updates.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link active">Widget Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+        </nav>
+        <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>↓ Download v4.4.6</a>
+    </header>
 
-        <div class="project-list">
+    <!-- FIVE-PHASE OVERVIEW -->
+    <section class="section">
+        <div class="section-label">The Full Lifecycle</div>
+        <h2>Five phases from zero to managed widget</h2>
+        <p>New widgets follow a consistent five-phase lifecycle. Once set up, ongoing content updates skip all the way to Phase 5 — authors open the sidebar and edit, nothing else changes.</p>
+        <div class="phase-grid">
+            <div class="phase-card">
+                <div class="phase-num">Phase 1</div>
+                <h3>Build the Widget</h3>
+                <p>Author the HTML, CSS, and JS as a standard self-contained widget. Assign a unique root CSS class — this is the only selector the extension needs to discover the widget.</p>
+                <ul class="step-list">
+                    <li><strong>Root class</strong> — unique, e.g. <code>.animated-cards</code></li>
+                    <li><strong>Repeat items</strong> — consistent child selector</li>
+                    <li><strong>Field selectors</strong> — stable classes on editable elements</li>
+                    <li><strong>Data attributes</strong> — if values need syncing</li>
+                </ul>
+            </div>
+            <div class="phase-card">
+                <div class="phase-num">Phase 2</div>
+                <h3>Split HTML and JS</h3>
+                <p>Separate the widget into two deployable pieces. This is required — not optional.</p>
+                <ul class="step-list">
+                    <li><strong>Sitecore RTE</strong> — CSS in a scoped <code>&lt;style&gt;</code> tag + all HTML markup</li>
+                    <li><strong>GTM Custom HTML</strong> — JavaScript only</li>
+                    <li>GTM tag triggers on DOM Ready</li>
+                    <li>No JS in the Sitecore field</li>
+                </ul>
+            </div>
+            <div class="phase-card">
+                <div class="phase-num">Phase 3</div>
+                <h3>Register the Widget</h3>
+                <p>Add a widget definition to <code>widget-registry.json</code> on the server. No extension files change.</p>
+                <ul class="step-list">
+                    <li>Add entry to <code>widgets</code> array</li>
+                    <li>Specify root class and display name</li>
+                    <li>Define fields with selectors and labels</li>
+                    <li>Bump the registry <code>version</code> string</li>
+                    <li>Push JSON to server</li>
+                </ul>
+            </div>
+            <div class="phase-card">
+                <div class="phase-num">Phase 4</div>
+                <h3>Deploy to Sitecore</h3>
+                <p>Paste the Sitecore component HTML into a Rich Text field. Add the GTM tag to the appropriate container.</p>
+                <ul class="step-list">
+                    <li>Paste HTML into Sitecore RTE via "Edit HTML"</li>
+                    <li>Publish the item</li>
+                    <li>Add GTM tag, trigger on affected pages</li>
+                    <li>Verify widget renders correctly</li>
+                    <li>Confirm extension detects the widget</li>
+                </ul>
+            </div>
+            <div class="phase-card">
+                <div class="phase-num">Phase 5</div>
+                <h3>Content Management</h3>
+                <p>All ongoing content updates happen through the sidebar. No code changes needed for data edits.</p>
+                <ul class="step-list">
+                    <li>Open Content Editor</li>
+                    <li>Navigate to the component item</li>
+                    <li>Open sidebar via extension icon</li>
+                    <li>Edit fields, click Apply Changes</li>
+                    <li>Save in Sitecore</li>
+                </ul>
+            </div>
+            <div class="phase-card">
+                <div class="phase-num">Ongoing</div>
+                <h3>Adding / Updating Widgets</h3>
+                <p>Structural changes (new fields, new widgets) require only a registry edit. No extension rebuild, no reinstall for users.</p>
+                <ul class="step-list">
+                    <li>Edit <code>widget-registry.json</code> on server</li>
+                    <li>Bump the version string</li>
+                    <li>Push — sidebar picks it up on next open</li>
+                    <li>Extension icon badge notifies users of update</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-            <div class="project">
-                <div class="project-content">
-                    <div class="project-number">Phase 1</div>
-                    <h2>Design &amp; Development</h2>
-                    <div class="project-description">
-                        <p>Build the widget as you normally would — clean HTML, CSS, and JavaScript. No special attributes or classes are needed at this stage. Focus on getting the markup and visual output right.</p>
-                        <p>Once the widget is working correctly, decide which elements content authors will need to edit. These become the field definitions in Phase 2.</p>
-                        <ul class="step-list">
-                            <li><strong>Design:</strong> Finalize mockups and visual design</li>
-                            <li><strong>Build:</strong> Write HTML, CSS, and JavaScript</li>
-                            <li><strong>Test:</strong> Verify the widget renders and behaves correctly</li>
-                            <li><strong>Identify fields:</strong> Note which text nodes and attributes need to be editable</li>
+    <!-- HTML/GTM SPLIT DETAIL -->
+    <section class="section">
+        <div class="section-label">The HTML / GTM Split</div>
+        <h2>Why every widget is two files</h2>
+        <div class="big-steps">
+            <div class="big-step">
+                <div class="big-step-num">01</div>
+                <div class="big-step-body">
+                    <h3>Sitecore Rich Text Component — HTML + CSS only</h3>
+                    <p>The component pasted into the Sitecore Rich Text field contains the scoped <code>&lt;style&gt;</code> block and all HTML markup. This is the version the extension reads and writes. It must contain no JavaScript.</p>
+                    <div class="step-with-list">
+                        <ul class="check-list">
+                            <li>Scoped <code>&lt;style class="[widget]-styles"&gt;</code> tag</li>
+                            <li>Root element with the registry CSS class</li>
+                            <li>All repeat items (<code>.profile-card</code>, <code>.plan-button</code>, etc.)</li>
+                            <li>All editable elements with stable class selectors</li>
+                        </ul>
+                        <ul class="check-list">
+                            <li>Data attributes where values need syncing (e.g. <code>data-target</code>)</li>
+                            <li>No inline <code>&lt;script&gt;</code> tags</li>
+                            <li>No external JS imports</li>
+                            <li>CSS scoped inside the root selector</li>
                         </ul>
                     </div>
-                </div>
-                <div class="project-image">
-                    <div class="placeholder"><img src="admin04.png"></div>
+                    <div class="warn">⚠ If JS lives in the Sitecore field, GTM will re-inject it on every page load and overwrite the extension's DOM edits before the author can save. Keep JS in GTM only.</div>
                 </div>
             </div>
-
-            <div class="project">
-                <div class="project-content">
-                    <div class="project-number">Phase 2</div>
-                    <h2>Registry Registration</h2>
-                    <div class="project-description">
-                        <p>Open <code>widget-registry.json</code> and add a definition for the new widget. The definition specifies the widget's root CSS class, its display name, and the full set of editable fields — each with a CSS selector, a label for the sidebar form, and any data attribute sync rules.</p>
-                        <p>If the widget has repeating items (cards, plan buttons) define a <code>repeat</code> block with the selector for each item. Standalone fields like headings go in <code>standaloneFields</code>. Fields that update a separate comparison table row use <code>gridSelector</code>. No Sitecore item IDs or field IDs are needed — the extension finds those automatically from the page.</p>
-                        <ul class="step-list">
-                            <li><strong>Open registry:</strong> Edit <code>widget-registry.json</code> on the server</li>
-                            <li><strong>Add widget entry:</strong> Class name, display name, field definitions</li>
-                            <li><strong>Define fields:</strong> Selector, label, type, sync attribute if needed</li>
-                            <li><strong>Push to server:</strong> Update the version number and deploy</li>
+            <div class="big-step">
+                <div class="big-step-num">02</div>
+                <div class="big-step-body">
+                    <h3>GTM Custom HTML Tag — JavaScript only</h3>
+                    <p>The GTM tag contains only the widget's behavior script. It reads the HTML structure from the DOM that Sitecore rendered — it does not inject or re-render HTML itself.</p>
+                    <div class="step-with-list">
+                        <ul class="check-list">
+                            <li>Wrapped in an IIFE <code>(function () { ... })()</code></li>
+                            <li>Trigger: DOM Ready</li>
+                            <li>Scoped to pages where the widget appears</li>
+                            <li>Reads from existing DOM elements by selector</li>
+                        </ul>
+                        <ul class="check-list">
+                            <li>No HTML template strings</li>
+                            <li>No <code>innerHTML</code> overwrites of the widget root</li>
+                            <li>IntersectionObserver for scroll-triggered effects</li>
+                            <li>Guarded with existence checks before DOM queries</li>
                         </ul>
                     </div>
-                </div>
-                <div class="project-image">
-                    <div class="placeholder"><img src="admin05.png"></div>
+                    <div class="note">The GTM tag's job is to animate or enhance what's already in the DOM — never to recreate it.</div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="phase-card-grid">
-                <div class="phase-card">
-                    <div class="project-number">Phase 3</div>
-                    <h3>Sitecore Deployment</h3>
-                    <p>Deploy the widget HTML to Sitecore as you normally would. No special markup is required — the registry selectors do the mapping.</p>
-                    <ul class="compact-list">
-                        <li>Paste widget HTML into Sitecore component</li>
-                        <li>Include CSS and JS assets as usual</li>
-                        <li>Publish to staging or production</li>
-                        <li>Verify widget renders correctly on the page</li>
-                    </ul>
-                </div>
-                <div class="phase-card">
-                    <div class="project-number">Phase 4</div>
-                    <h3>Content Management</h3>
-                    <p>Install the extension, open the Content Editor, navigate to a component, and click the icon. The sidebar reads the current item via SSC API and presents the editor form immediately — no widget selection step needed.</p>
-                    <ul class="compact-list">
-                        <li>Install or update the extension ZIP</li>
-                        <li>Open Sitecore Content Editor</li>
-                        <li>Navigate to a component in the tree</li>
-                        <li>Open the sidebar via the extension icon</li>
-                        <li>Edit fields and click Apply Changes</li>
-                        <li>Save in Sitecore</li>
-                    </ul>
-                </div>
-                <div class="phase-card">
-                    <div class="project-number">Phase 5</div>
-                    <h3>Ongoing Maintenance</h3>
-                    <p>Content updates happen entirely through the sidebar. Structural changes require only a registry edit and server push — no extension rebuild.</p>
-                    <ul class="compact-list">
-                        <li>Content updates via sidebar form</li>
-                        <li>New fields or widgets via registry edit</li>
-                        <li>Push updated JSON to server</li>
-                        <li>Badge icon notifies authors of registry update</li>
-                        <li>No extension reinstall required for registry changes</li>
-                    </ul>
+    <!-- REGISTRY EDIT WORKFLOW -->
+    <section class="section">
+        <div class="section-label">Registry Updates</div>
+        <h2>Adding or changing a widget — no extension rebuild</h2>
+        <p>The registry is the only file that needs to change when adding a new widget or updating field definitions. The extension has no awareness of specific widgets until it fetches the registry at runtime.</p>
+        <div class="big-steps">
+            <div class="big-step">
+                <div class="big-step-num">01</div>
+                <div class="big-step-body">
+                    <h3>Open widget-registry.json on the server</h3>
+                    <p>Hosted at <code>tylervinson.com/widget/widget-registry.json</code>. Edit directly or via your deployment workflow.</p>
                 </div>
             </div>
+            <div class="big-step">
+                <div class="big-step-num">02</div>
+                <div class="big-step-body">
+                    <h3>Add or modify the widget definition</h3>
+                    <p>Each widget entry needs a unique <code>class</code> (the CSS selector on the root element), a <code>name</code> for the sidebar UI, and an array of field definitions. Repeating items go in <code>repeat</code> + <code>fields</code>; top-level fields go in <code>standaloneFields</code>.</p>
+                    <div class="callout">
+                        <div class="callout-label">Minimum widget entry</div>
+                        <code>{ "class": "my-widget", "name": "My Widget", "fields": [ ... ] }</code>
+                    </div>
+                </div>
+            </div>
+            <div class="big-step">
+                <div class="big-step-num">03</div>
+                <div class="big-step-body">
+                    <h3>Bump the version string</h3>
+                    <p>The top-level <code>"version"</code> in the registry is compared against the locally cached version. Any change — including minor edits — should bump this string so the update badge appears on the extension icon for users who already have it open.</p>
+                    <div class="callout">
+                        <div class="callout-label">Version bump example</div>
+                        <code>"version": "2.3.5" → "2.3.6"</code>
+                    </div>
+                </div>
+            </div>
+            <div class="big-step">
+                <div class="big-step-num">04</div>
+                <div class="big-step-body">
+                    <h3>Push to server — done</h3>
+                    <p>No extension ZIP rebuild. No reinstall prompt for users. The next time any author opens the sidebar, the new registry is fetched automatically. If the version changed, the icon badge and in-sidebar banner appear.</p>
+                    <div class="note">Changes are live for all users the moment the file is deployed. There is no caching layer in the extension — <code>widget-registry.json</code> is always fetched fresh.</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        </div><!-- /project-list -->
+    <!-- DAILY AUTHORING -->
+    <section class="section">
+        <div class="section-label">Day-to-Day Use</div>
+        <h2>Content update workflow for authors</h2>
+        <p>Once a widget is deployed, content authors follow a simple repeatable flow — no code, no WYSIWYG source editing required.</p>
+        <div class="authoring-flow">
+            <div class="authoring-step">
+                <div class="authoring-step-num">1</div>
+                <div>
+                    <h4>Open Sitecore Content Editor</h4>
+                    <p>Navigate to the Sitecore item that contains the widget in its Rich Text field. The Quick Info panel on the right shows the item ID — the extension reads this automatically.</p>
+                </div>
+            </div>
+            <div class="authoring-step">
+                <div class="authoring-step-num">2</div>
+                <div>
+                    <h4>Click the extension icon</h4>
+                    <p>The sidebar opens. If a registered widget is detected on the current item, the editor form populates immediately. If no widget is found, a "no widgets detected" message is shown.</p>
+                </div>
+            </div>
+            <div class="authoring-step">
+                <div class="authoring-step-num">3</div>
+                <div>
+                    <h4>Edit fields in the form</h4>
+                    <p>Standalone fields (headings, subheadings) appear at the top. Repeating items appear as collapsed groups labeled with the item name (e.g. "Plan 1 — Bronze"). Expand any group to edit its fields. Rich text fields open a Quill editor.</p>
+                </div>
+            </div>
+            <div class="authoring-step">
+                <div class="authoring-step-num">4</div>
+                <div>
+                    <h4>Click Apply Changes</h4>
+                    <p>The extension fetches the current field HTML via the SSC API, applies all edits using the registry selectors, then silently automates the HTML editor: opens it, writes the updated markup, and closes it. The entire cycle completes in under a second.</p>
+                </div>
+            </div>
+            <div class="authoring-step">
+                <div class="authoring-step-num">5</div>
+                <div>
+                    <h4>Save in Sitecore</h4>
+                    <p>Click Save in the Content Editor toolbar (or use Ctrl+S). The extension's bridge has already fired all four change-notification strategies, so the Save button is active and ready. The item is saved and can be published as normal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <footer>Sitecore Widget Editor Documentation</footer>
-    </div>
-
-    <div id="imageModal" class="modal">
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-        <img class="modal-content" id="modalImage" alt="">
-    </div>
+    <footer>
+        Sitecore Widget Editor v4.4.6 — Registry v2.3.5 &nbsp;·&nbsp;
+        <a href="overview.html">Overview</a> &nbsp;·&nbsp;
+        <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
+        <a href="specs.html">Specs</a> &nbsp;·&nbsp;
+        <a href="using-the-extension.html">Using the Extension</a>
+    </footer>
+</div>
 </body>
 </html>
