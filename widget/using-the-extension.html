@@ -575,13 +575,17 @@
         vsteps.forEach(function (step) {
             step.addEventListener('click', function () {
                 var ts = parseInt(this.getAttribute('data-timestamp'), 10);
+                console.log('Step clicked, ts:', ts, 'video.readyState:', video.readyState, 'video.currentTime before:', video.currentTime);
                 video.pause();
                 video.currentTime = ts;
+                console.log('video.currentTime after set:', video.currentTime);
                 updateActiveStep();
                 var playPromise = video.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(function () {
-                        // Autoplay blocked — video stays at the seeked position, paused
+                    playPromise.then(function() {
+                        console.log('play() succeeded, currentTime:', video.currentTime);
+                    }).catch(function (err) {
+                        console.log('play() blocked:', err, 'currentTime:', video.currentTime);
                     });
                 }
             });
