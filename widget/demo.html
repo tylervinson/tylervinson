@@ -171,8 +171,8 @@
             box-shadow: 0 0 0 2px #FFBE5F, 0 4px 20px rgba(255,190,95,0.2);
             transform: translateY(-2px);
         }
-        .card-divider { width: 48px; height: 3px; background: #FFBE5F; border-radius: 1px; margin-bottom: 12px; }
-        .card-number { font-size: 48px; font-weight: 300; color: #0B3B60; line-height: 1; margin-bottom: 8px; transition: all 0.3s; }
+        .card-divider { width: 48px; height: 3px; background: #FFBE5F; border-radius: 1px; margin-top: 10px; margin-bottom: 10px; }
+        .card-number { font-size: 48px; font-weight: 300; color: #0B3B60; line-height: 1; transition: all 0.3s; }
         .card-label { font-size: 13px; color: #555; font-weight: 500; line-height: 1.3; transition: all 0.2s; }
         .card-update-flash { position: absolute; inset: 0; background: rgba(255,190,95,0.08); border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .card-update-flash.active { opacity: 1; }
@@ -254,8 +254,9 @@
             <a href="specs.html" class="tab-nav-link">Technical Specs</a>
             <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
             <a href="demo.html" class="tab-nav-link active">Demo</a>
+            <a href="install.html" class="tab-nav-link">Install</a>
         </nav>
-        <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>↓ Download v4.4.6</a>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
     </header>
 
     <div class="demo-intro">
@@ -356,20 +357,20 @@
                     <div class="animated-cards-demo" id="widgetPreview">
                         <div class="profile-card-demo" id="preview-card-0">
                             <div class="card-update-flash" id="flash-0"></div>
-                            <div class="card-divider"></div>
                             <div class="card-number" id="preview-number-0">37</div>
+                            <div class="card-divider"></div>
                             <div class="card-label" id="preview-text-0">Fewer Emergency Room Visits</div>
                         </div>
                         <div class="profile-card-demo" id="preview-card-1">
                             <div class="card-update-flash" id="flash-1"></div>
-                            <div class="card-divider"></div>
                             <div class="card-number" id="preview-number-1">400</div>
+                            <div class="card-divider"></div>
                             <div class="card-label" id="preview-text-1">Members Served Annually</div>
                         </div>
                         <div class="profile-card-demo" id="preview-card-2">
                             <div class="card-update-flash" id="flash-2"></div>
-                            <div class="card-divider"></div>
                             <div class="card-number" id="preview-number-2">15</div>
+                            <div class="card-divider"></div>
                             <div class="card-label" id="preview-text-2">Years of Service</div>
                         </div>
                     </div>
@@ -406,14 +407,15 @@
         <a href="overview.html">Overview</a> &nbsp;·&nbsp;
         <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
         <a href="specs.html">Specs</a> &nbsp;·&nbsp;
-        <a href="using-the-extension.html">Using the Extension</a>
+        <a href="using-the-extension.html">Using the Extension</a> &nbsp;·&nbsp;
+        <a href="demo.html">Demo</a> &nbsp;·&nbsp;
+        <a href="install.html">Install</a>
     </footer>
 </div>
 
 <div class="status-toast" id="toast"></div>
 
 <script>
-    // Track pending values (pre-apply) vs committed values
     var pendingValues = [
         { number: '37',  text: 'Fewer Emergency Room Visits' },
         { number: '400', text: 'Members Served Annually' },
@@ -421,52 +423,80 @@
     ];
     var committedValues = JSON.parse(JSON.stringify(pendingValues));
 
-    // Live preview as user types — update group label and highlight card
+    // ── Counter animation ────────────────────────────────────────────────────
+    var DURATION = 1800;
+
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function animateCounter(el, target, delay) {
+        delay = delay || 0;
+        var numeric = parseInt(target, 10);
+        if (isNaN(numeric)) { el.textContent = target; return; }
+        el.textContent = '0';
+        setTimeout(function() {
+            var start = null;
+            function step(ts) {
+                if (!start) start = ts;
+                var elapsed  = ts - start;
+                var progress = Math.min(elapsed / DURATION, 1);
+                var eased    = easeOutCubic(progress);
+                el.textContent = Math.round(eased * numeric);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = numeric;
+            }
+            requestAnimationFrame(step);
+        }, delay);
+    }
+
+    function animateAllCounters(values) {
+        for (var i = 0; i < 3; i++) {
+            animateCounter(
+                document.getElementById('preview-number-' + i),
+                values[i].number,
+                i * 120   // stagger slightly
+            );
+        }
+    }
+
+    // ── Live preview ─────────────────────────────────────────────────────────
     function livePreview(cardIdx, field, value) {
         pendingValues[cardIdx][field] = value;
 
-        // Update group label
         var numEl = document.getElementById('field-' + cardIdx + '-number');
         var label = document.getElementById('card-group-label-' + cardIdx);
         label.textContent = 'Card ' + (cardIdx + 1) + ' — ' + (numEl ? numEl.value || '…' : '…');
 
-        // Highlight the card being edited
         document.querySelectorAll('.profile-card-demo').forEach(function(c) { c.classList.remove('highlight'); });
         document.getElementById('preview-card-' + cardIdx).classList.add('highlight');
 
-        // Live-update the number as user types
+        // Show raw typed value while editing (no animation mid-type)
         if (field === 'number') {
-            document.getElementById('preview-number-' + cardIdx).textContent = value || '—';
+            document.getElementById('preview-number-' + cardIdx).textContent = value || '0';
         }
     }
 
     function toggleCard(idx) {
-        var card = document.getElementById('card-group-' + idx);
-        card.classList.toggle('collapsed');
+        document.getElementById('card-group-' + idx).classList.toggle('collapsed');
     }
 
+    // ── Apply Changes ─────────────────────────────────────────────────────────
     function applyChanges() {
         var btn = document.getElementById('applyBtn');
         btn.classList.add('applying');
         btn.textContent = 'Applying…';
 
-        // Simulate the "open textarea, write, close" cycle with a brief delay
         setTimeout(function() {
-            // Commit all values to the preview
+            // Update text labels
             for (var i = 0; i < 3; i++) {
-                var numVal = document.getElementById('field-' + i + '-number').value;
                 var txtVal = document.getElementById('field-' + i + '-text').value;
-
-                document.getElementById('preview-number-' + i).textContent = numVal || '—';
                 document.getElementById('preview-text-' + i).textContent = txtVal;
-
-                // Flash the card
                 flashCard(i);
             }
 
+            // Re-run counter animation from 0 to new values
             committedValues = JSON.parse(JSON.stringify(pendingValues));
+            animateAllCounters(committedValues);
 
-            // Remove all highlights
             document.querySelectorAll('.profile-card-demo').forEach(function(c) { c.classList.remove('highlight'); });
 
             btn.classList.remove('applying');
@@ -492,15 +522,15 @@
         toast.textContent = msg;
         toast.className = 'status-toast show' + (type ? ' ' + type : '');
         clearTimeout(toast._t);
-        toast._t = setTimeout(function() {
-            toast.classList.remove('show');
-        }, 3500);
+        toast._t = setTimeout(function() { toast.classList.remove('show'); }, 3500);
     }
 
-    // Collapse non-first cards on load for cleaner initial state
+    // ── Init ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('card-group-1').classList.add('collapsed');
         document.getElementById('card-group-2').classList.add('collapsed');
+        // Count up from 0 on page load
+        animateAllCounters(committedValues);
     });
 </script>
 </body>
