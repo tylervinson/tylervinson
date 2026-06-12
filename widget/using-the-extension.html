@@ -577,11 +577,13 @@
                 var ts = parseInt(this.getAttribute('data-timestamp'), 10);
                 video.pause();
                 video.currentTime = ts;
-                video.addEventListener('seeked', function onSeeked() {
-                    video.removeEventListener('seeked', onSeeked);
-                    video.play();
-                    updateActiveStep();
-                });
+                updateActiveStep();
+                var playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(function () {
+                        // Autoplay blocked — video stays at the seeked position, paused
+                    });
+                }
             });
         });
     });
