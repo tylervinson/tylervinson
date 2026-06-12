@@ -251,6 +251,7 @@
       <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
       <span class="score" id="discoverStatus"></span>
     </div>
+    <div id="discoverDiag"></div>
     <div class="toolbar" style="margin-top:.6rem;">
       <button class="ghost" onclick="exportState()">Save to file</button>
       <button class="ghost" onclick="document.getElementById('importFile').click()">Load from file</button>
@@ -310,7 +311,7 @@
    always type the passphrase instead.
    Languages are defined just below — edit the `langs` list to change them.
    ======================================================================= */
-const WORKER_URL = 'schema-cors-proxy.bcbs-of-az.workers.dev';
+const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
 /* ===================================================================== */
@@ -390,25 +391,32 @@ async function discoverPages(){
   const setErr = (t) => { status.textContent = t; status.style.color = 'var(--critical)'; };
 
   if(!WORKER_URL || WORKER_URL.includes('your-worker')){ setErr('Set WORKER_URL in the config block first.'); return; }
+  document.getElementById('discoverDiag').innerHTML = '';
   setS('Looking for a sitemap…');
 
   const root = SITE_URL.replace(/\/+$/,'');
   const siteHost = (()=>{ try { return new URL(SITE_URL).hostname; } catch(e){ return ''; } })();
+  const diag = []; // { url, status, note }
+  const looksHtml = (t) => /^\s*<(!doctype html|html)\b/i.test(t||'');
 
   // 1) robots.txt → Sitemap: directives
   let sitemaps = [];
   try {
     const r = await fetchPage(root + '/robots.txt');
-    if(r.ok){
+    if(r.ok && r.text && !looksHtml(r.text)){
       r.text.split(/\r?\n/).forEach(line => {
         const m = line.match(/^\s*sitemap:\s*(\S+)/i);
         if(m) sitemaps.push(m[1].trim());
       });
+      diag.push({ url: root+'/robots.txt', status: r.status, note: sitemaps.length ? `${sitemaps.length} sitemap line(s) found` : 'loaded, but no Sitemap: line' });
+    } else {
+      diag.push({ url: root+'/robots.txt', status: r.status, note: r.error ? r.error : (looksHtml(r.text) ? 'returned HTML, not robots.txt' : 'not available') });
     }
-  } catch(e){}
+  } catch(e){ diag.push({ url: root+'/robots.txt', status: 0, note: e.message }); }
 
   // 2) fallbacks
-  if(!sitemaps.length){ sitemaps = [root + '/sitemap.xml', root + '/sitemap_index.xml', root + '/sitemap-index.xml']; }
+  const guessed = !sitemaps.length;
+  if(guessed){ sitemaps = [root + '/sitemap.xml', root + '/sitemap_index.xml', root + '/sitemap-index.xml']; }
 
   const MAX_SITEMAPS = 60, MAX_URLS = 3000;
   const seenSm = new Set();
@@ -421,21 +429,27 @@ async function discoverPages(){
     seenSm.add(sm);
     setS(`Reading sitemap ${seenSm.size}… (${foundUrls.size} pages found)`);
     let r;
-    try { r = await fetchPage(sm); } catch(e){ continue; }
-    if(!r.ok || !r.text) continue;
+    try { r = await fetchPage(sm); } catch(e){ diag.push({ url: sm, status: 0, note: e.message }); continue; }
+    if(!r.ok || !r.text){ diag.push({ url: sm, status: r.status, note: r.error ? r.error : 'no content' }); continue; }
     const doc = new DOMParser().parseFromString(r.text, 'text/xml');
-    if(doc.querySelector('parsererror')) continue;
+    if(doc.querySelector('parsererror')){
+      diag.push({ url: sm, status: r.status, note: looksHtml(r.text) ? 'got an HTML page, not XML (WAF or error page?)' : 'not valid XML' });
+      continue;
+    }
     const rootTag = doc.documentElement ? doc.documentElement.tagName.toLowerCase() : '';
     const locs = [...doc.querySelectorAll('loc')].map(l => clean(l.textContent)).filter(Boolean);
     if(rootTag.indexOf('sitemapindex') !== -1){
       locs.forEach(u => { if(!seenSm.has(u)) queue.push(u); }); // child sitemaps
+      diag.push({ url: sm, status: r.status, note: `sitemap index → ${locs.length} child sitemap(s)` });
     } else {
       locs.forEach(u => foundUrls.add(u));
+      diag.push({ url: sm, status: r.status, note: `${locs.length} page URL(s)` });
     }
   }
 
   if(!foundUrls.size){
-    setErr('No sitemap found (or it was empty/blocked). You can add pages manually below.');
+    renderDiscoverDiag(diag, guessed, siteHost);
+    setErr('No pages found in a sitemap — see the breakdown below, or add pages manually.');
     return;
   }
 
@@ -463,12 +477,48 @@ async function discoverPages(){
   Object.keys(dirCounts).forEach(dir => dirInclude[dir] = true);
   pageExclude = {};
   document.getElementById('discoveredPanel').style.display = 'block';
+  document.getElementById('discoverDiag').innerHTML = '';
   renderDiscovered();
   updateRunHint();
 
   let msg = `Found ${discovered.length} page(s) across ${Object.keys(dirCounts).length} director${Object.keys(dirCounts).length===1?'y':'ies'}.`;
   if(truncated) msg += ' Very large sitemap — list may be partial.';
   setS(msg);
+}
+
+function renderDiscoverDiag(diag, guessed, siteHost){
+  const box = document.getElementById('discoverDiag');
+  if(!diag.length){ box.innerHTML = ''; return; }
+
+  // work out the most likely cause for a targeted hint
+  const statuses = diag.map(d => d.status);
+  const all403 = diag.length && diag.every(d => d.status === 403);
+  const anyHtml = diag.some(d => /HTML/i.test(d.note));
+  const offHost = diag.find(d => { try { return new URL(d.url).hostname !== siteHost; } catch(e){ return false; } });
+  let hint = '';
+  if(all403){
+    hint = 'Every request came back 403 — the worker is rejecting them. Check that the passphrase you typed matches the worker\'s AUDIT_KEY exactly.';
+  } else if(offHost && (offHost.status === 403 || offHost.status === 0)){
+    let host = ''; try { host = new URL(offHost.url).hostname; } catch(e){}
+    hint = `Your sitemap lives on ${host}, which the worker\'s allowlist blocks. Add "${host}" to ALLOWED_HOSTS in the worker and redeploy.`;
+  } else if(anyHtml){
+    hint = 'A request returned an HTML page instead of XML — often a WAF challenge or a "not found" page dressed up as 200. Open the URL below via Test connection to see what the server actually sends.';
+  } else if(guessed && statuses.every(s => s === 404 || s === 0)){
+    hint = 'No sitemap at robots.txt or the common filenames. If you know the real sitemap URL, tell me and I can point discovery straight at it.';
+  } else {
+    hint = 'Discovery reached the server but found no page URLs. The breakdown below shows each attempt.';
+  }
+
+  const rows = diag.map(d => {
+    const bad = !(d.status >= 200 && d.status < 300);
+    return `<li><span class="code ${bad?'bad':''}">${d.status || '—'}</span><span style="word-break:break-all;">${escapeHtml(d.url)}</span><span style="margin-left:auto;color:var(--muted-2);">${escapeHtml(d.note)}</span></li>`;
+  }).join('');
+
+  box.innerHTML = `<div style="margin-top:.8rem; border:1px solid var(--border); border-radius:8px; padding:1rem;">
+    <div class="err-note" style="margin-bottom:.8rem;">${escapeHtml(hint)}</div>
+    <div class="section-label" style="margin-top:0;">What discovery tried</div>
+    <ul class="tech">${rows}</ul>
+  </div>`;
 }
 
 /* ---- directory facets over the discovered list ---- */
