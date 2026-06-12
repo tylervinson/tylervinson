@@ -4,19 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multilingual Site Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #fafafa;
-    --card: #ffffff;
-    --border: #e0e0e0;
-    --text: #1a1a1a;
-    --muted: #666;
-    --accent: #5fdaff;
-    --accent-deep: #1597bd;
-    --critical: #d9534f;
-    --warning: #d99e00;
-    --ok: #2f9e6f;
-    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --bg: #1a1a1a;
+    --card: #242424;
+    --card-alt: #1e1e1e;
+    --border: #2e2e2e;
+    --border-soft: #2a2a2a;
+    --text: #f0f0f0;
+    --muted: #888;
+    --muted-2: #666;
+    --accent: #FFBE5F;
+    --accent-hover: #FFD495;
+    --accent-deep: #FFBE5F;
+    --critical: #d98a84;
+    --warning: #d8a24a;
+    --ok: #7dbf82;
+    --shadow: 0 4px 12px rgba(0,0,0,0.35);
     --radius: 8px;
   }
   * { box-sizing: border-box; }
@@ -24,15 +31,16 @@
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     font-weight: 400;
-    line-height: 1.55;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   header.page-head { margin-bottom: 2.5rem; }
-  header.page-head h1 { font-weight: 300; font-size: 2.1rem; margin: 0 0 .4rem; letter-spacing: -0.01em; }
-  header.page-head p { color: var(--muted); margin: 0; max-width: 60ch; }
+  header.page-head .eyebrow { font-size: .7rem; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin: 0 0 .8rem; }
+  header.page-head h1 { font-weight: 300; font-size: 2.6rem; margin: 0 0 .5rem; letter-spacing: -1px; line-height: 1.1; }
+  header.page-head p { color: var(--muted); margin: 0; max-width: 62ch; font-size: 1.02rem; }
 
   .card {
     background: var(--card);
@@ -41,25 +49,27 @@
     padding: 2rem;
     margin-bottom: 1.5rem;
   }
-  .card h2 { font-weight: 300; font-size: 1.3rem; margin: 0 0 .35rem; }
-  .card .hint { color: var(--muted); font-size: .9rem; margin: 0 0 1.5rem; max-width: 70ch; }
+  .card h2 { font-weight: 300; font-size: 1.5rem; letter-spacing: -0.5px; margin: 0 0 .4rem; color: var(--text); }
+  .card .hint { color: var(--muted); font-size: .9rem; margin: 0 0 1.5rem; max-width: 72ch; line-height: 1.65; }
+  code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .82em; background: var(--border-soft); padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: var(--accent); }
 
   label.field-label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .4rem; letter-spacing: .01em; }
-  input[type=text], input[type=url], input[type=number] {
+  input[type=text], input[type=url], input[type=number], input[type=password] {
     width: 100%;
     padding: .65rem .75rem;
-    border: 1px solid var(--border);
+    border: 1px solid #333;
     border-radius: 6px;
     font: inherit;
     font-weight: 400;
     color: var(--text);
-    background: #fff;
+    background: var(--card-alt);
     transition: border-color .3s ease, box-shadow .3s ease;
   }
+  input::placeholder { color: var(--muted-2); }
   input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(95,218,255,0.18);
+    box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
   }
   .row { display: flex; gap: 1rem; flex-wrap: wrap; }
   .row > div { flex: 1; min-width: 180px; }
@@ -70,25 +80,27 @@
   button {
     font: inherit;
     cursor: pointer;
-    border: 1px solid var(--border);
-    background: #fff;
+    border: 1px solid #333;
+    background: var(--card-alt);
     color: var(--text);
     padding: .55rem 1rem;
     border-radius: 6px;
     font-weight: 400;
-    transition: all .3s ease;
+    transition: all .2s ease;
   }
-  button:hover { border-color: var(--accent); }
+  button:hover { border-color: var(--accent); color: var(--accent); }
   button.primary {
-    background: var(--text);
-    color: #fff;
-    border-color: var(--text);
+    background: var(--accent);
+    color: #1a1a1a;
+    border-color: var(--accent);
     padding: .75rem 1.6rem;
-    font-size: 1rem;
+    font-size: .95rem;
+    font-weight: 600;
   }
-  button.primary:hover { background: #000; }
-  button.primary:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #1a1a1a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.2); }
+  button.primary:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
   button.ghost { font-size: .82rem; padding: .4rem .7rem; color: var(--muted); }
+  button.ghost:hover { color: var(--accent); }
   button.tiny { padding: .25rem .55rem; font-size: .78rem; }
 
   .lang-tags { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
@@ -106,102 +118,91 @@
 
   .toolbar { display: flex; gap: .75rem; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; }
 
+  /* discovery directory facets */
+  .disc-summary { font-size: .92rem; margin-bottom: 1rem; }
+  .dir-controls { display: flex; gap: .5rem; margin-bottom: .7rem; }
+  .dir-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .45rem; }
+  .dir-row { display: flex; align-items: center; gap: .55rem; border: 1px solid var(--border); border-radius: 6px; padding: .5rem .7rem; font-size: .88rem; cursor: pointer; transition: opacity .3s ease, border-color .3s ease; }
+  .dir-row input { width: auto; }
+  .dir-row .count { margin-left: auto; color: var(--muted); font-size: .76rem; }
+  .dir-row.off { opacity: .45; }
+  .disc-results { margin-top: .6rem; border: 1px solid var(--border); border-radius: 6px; max-height: 260px; overflow: auto; }
+  .disc-results .res { display: flex; align-items: center; gap: .55rem; padding: .4rem .7rem; border-bottom: 1px dashed var(--border); font-size: .82rem; }
+  .disc-results .res:last-child { border-bottom: none; }
+  .disc-results .res input { width: auto; }
+  .disc-results .res .path { word-break: break-all; }
+  .disc-results .res .tag { margin-left: auto; font-size: .72rem; white-space: nowrap; }
+  .disc-results .tag.in { color: var(--ok); }
+  .disc-results .tag.out { color: var(--muted); }
+
   /* progress + summary */
   #progress { font-size: .9rem; color: var(--muted); margin-top: 1rem; min-height: 1.2em; }
-  .bar { height: 4px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: .6rem; }
+  .bar { height: 4px; background: var(--border-soft); border-radius: 4px; overflow: hidden; margin-top: .6rem; }
   .bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
 
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
-  .stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
-  .stat .num { font-size: 1.9rem; font-weight: 300; line-height: 1; }
-  .stat .lbl { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border-soft); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
+  .stat { background: var(--card-alt); padding: 1.3rem 1.4rem; }
+  .stat .num { font-size: 2.1rem; font-weight: 300; line-height: 1; letter-spacing: -1px; color: var(--text); }
+  .stat .lbl { font-size: .78rem; color: var(--muted-2); margin-top: .5rem; }
   .stat.crit .num { color: var(--critical); }
   .stat.warn .num { color: var(--warning); }
   .stat.ok .num { color: var(--ok); }
 
   /* result cards */
-  .page-result { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: #fff; overflow: hidden; }
+  .page-result { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--card); overflow: hidden; }
   .page-result > summary { list-style: none; cursor: pointer; padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: .8rem; }
   .page-result > summary::-webkit-details-marker { display: none; }
   .page-result > summary .chev { transition: transform .3s ease; color: var(--muted); }
   .page-result[open] > summary .chev { transform: rotate(90deg); }
-  .page-result .title { font-weight: 400; }
-  .page-result .url-sub { font-size: .78rem; color: var(--muted); word-break: break-all; }
+  .page-result .title { font-weight: 500; color: var(--text); }
+  .page-result .url-sub { font-size: .78rem; color: var(--muted-2); word-break: break-all; }
   .pill { font-size: .72rem; padding: .15rem .55rem; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
-  .pill.crit { color: var(--critical); border-color: rgba(217,83,79,.4); }
-  .pill.warn { color: var(--warning); border-color: rgba(217,158,0,.4); }
-  .pill.ok { color: var(--ok); border-color: rgba(47,158,111,.4); }
+  .pill.crit { color: var(--critical); border-color: rgba(217,138,132,.4); }
+  .pill.warn { color: var(--warning); border-color: rgba(216,162,74,.4); }
+  .pill.ok { color: var(--ok); border-color: rgba(125,191,130,.4); }
   .spacer { flex: 1; }
 
   .result-body { padding: 0 1.4rem 1.4rem; }
   .lang-block { border-top: 1px solid var(--border); padding-top: 1.2rem; margin-top: 1rem; }
   .lang-block:first-child { border-top: none; margin-top: 0; }
-  .lang-block h4 { font-weight: 400; font-size: 1rem; margin: 0 0 .25rem; }
-  .section-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 1.1rem 0 .5rem; }
+  .lang-block h4 { font-weight: 600; font-size: 1rem; margin: 0 0 .25rem; color: var(--text); }
+  .section-label { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; color: var(--accent); margin: 1.3rem 0 .6rem; }
 
-  .issue { border-left: 3px solid var(--border); padding: .5rem .9rem; margin-bottom: .5rem; background: #fcfcfc; border-radius: 0 6px 6px 0; }
+  .issue { border-left: 3px solid var(--border); padding: .55rem .9rem; margin-bottom: .5rem; background: var(--card-alt); border-radius: 0 6px 6px 0; }
   .issue.critical { border-left-color: var(--critical); }
   .issue.warning { border-left-color: var(--warning); }
   .issue.info { border-left-color: var(--accent); }
   .issue .ihead { display: flex; gap: .5rem; align-items: baseline; }
-  .issue .cat { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-  .issue .exp { font-size: .9rem; margin: .25rem 0 0; }
+  .issue .cat { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted-2); }
+  .issue .exp { font-size: .9rem; margin: .25rem 0 0; color: var(--text); }
   .issue .compare { font-size: .82rem; margin-top: .4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  .issue .compare div { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: .4rem .55rem; }
-  .issue .compare .k { font-size: .68rem; color: var(--muted); display: block; margin-bottom: .15rem; }
-  .issue .sugg { font-size: .82rem; margin-top: .4rem; color: var(--accent-deep); }
+  .issue .compare div { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .4rem .55rem; }
+  .issue .compare .k { font-size: .68rem; color: var(--muted-2); display: block; margin-bottom: .15rem; }
+  .issue .sugg { font-size: .82rem; margin-top: .4rem; color: var(--accent); }
   .clean { font-size: .88rem; color: var(--ok); padding: .3rem 0; }
-  .err-note { font-size: .85rem; color: var(--critical); background: #fdf3f3; border: 1px solid rgba(217,83,79,.3); border-radius: 6px; padding: .6rem .8rem; }
+  .err-note { font-size: .85rem; color: var(--critical); background: rgba(217,138,132,0.12); border: 1px solid rgba(217,138,132,.3); border-radius: 6px; padding: .6rem .8rem; }
 
   ul.tech { list-style: none; padding: 0; margin: 0; }
   ul.tech li { font-size: .86rem; padding: .35rem 0; border-bottom: 1px dashed var(--border); display: flex; gap: .6rem; align-items: baseline; }
   ul.tech li:last-child { border-bottom: none; }
-  ul.tech .code { font-size: .72rem; padding: .05rem .4rem; border-radius: 4px; background: #f2f2f2; color: var(--muted); }
-  ul.tech .code.bad { background: #fdeaea; color: var(--critical); }
-  ul.tech a { color: var(--accent-deep); text-decoration: none; word-break: break-all; }
+  ul.tech .code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .72rem; padding: .05rem .4rem; border-radius: 4px; background: var(--border-soft); color: var(--muted); }
+  ul.tech .code.bad { background: rgba(217,138,132,.18); color: var(--critical); }
+  ul.tech a { color: var(--accent); text-decoration: none; word-break: break-all; }
   ul.tech a:hover { text-decoration: underline; }
   .score { font-size: .82rem; color: var(--muted); }
   .empty-msg { color: var(--muted); font-size: .9rem; }
 
-  /* PDF button (per spec) */
-  #print-btn {
-    position: fixed; top: 20px; right: 20px;
-    width: 40px; height: 40px;
-    background: #1a1a1a; opacity: .7;
-    border: none; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 9999;
-    transition: opacity .3s ease;
-  }
-  #print-btn:hover { opacity: 1; }
-  #print-btn svg { stroke: #fff; }
-  #print-btn .tip {
-    position: absolute; top: 50%; right: 48px; transform: translateY(-50%);
-    background: #1a1a1a; color: #fff; font-size: .72rem; white-space: nowrap;
-    padding: .25rem .55rem; border-radius: 4px; opacity: 0; pointer-events: none;
-    transition: opacity .3s ease;
-  }
-  #print-btn:hover .tip { opacity: .95; }
-
   @media (max-width: 640px) {
     .issue .compare { grid-template-columns: 1fr; }
-  }
-  @media print {
-    #print-btn { display: none; }
-    .card.no-print, .toolbar, #progress, header.page-head { }
+    header.page-head h1 { font-size: 2rem; }
   }
 </style>
 </head>
 <body>
-<button id="print-btn" onclick="printSinglePage()" aria-label="Save as PDF">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
-  </svg>
-  <span class="tip">Save as PDF</span>
-</button>
 
 <div class="wrap">
   <header class="page-head">
+    <p class="eyebrow">Localization QA</p>
     <h1>Multilingual Site Audit</h1>
     <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
   </header>
@@ -232,12 +233,29 @@
 
   <!-- PAGES -->
   <section class="card no-print">
-    <h2>Pages</h2>
-    <p class="hint">Enter just the path for each page (e.g. <code>plans/medicare</code>), or discover them automatically from your sitemap. Leave a path blank for the home page. The tool builds every language URL for you.</p>
-    <div class="toolbar" style="margin-bottom:1rem;">
+    <h2>Pages to audit</h2>
+    <p class="hint">Discover your pages from the sitemap, then pick which directories to include. Add anything the sitemap misses by hand below.</p>
+    <div class="toolbar" style="margin-bottom:0;">
       <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
       <span class="score" id="discoverStatus"></span>
     </div>
+
+    <!-- discovered filter panel (hidden until discovery runs) -->
+    <div id="discoveredPanel" style="display:none; margin-top:1.5rem;">
+      <div class="disc-summary" id="discSummary"></div>
+      <div class="section-label" style="margin-top:0;">Include directories</div>
+      <div class="dir-controls">
+        <button class="tiny ghost" onclick="setAllDirs(true)">Select all</button>
+        <button class="tiny ghost" onclick="setAllDirs(false)">Select none</button>
+      </div>
+      <div class="dir-list" id="dirList"></div>
+
+      <div class="section-label">Find a page</div>
+      <input type="text" id="discSearch" placeholder="Type part of a path to confirm it's included…" oninput="renderDiscSearch()">
+      <div id="discSearchResults"></div>
+    </div>
+
+    <div class="section-label" style="margin-top:1.5rem;">Add individual pages</div>
     <div style="overflow-x:auto;">
       <table class="pages" id="pagesTable"></table>
     </div>
@@ -270,7 +288,7 @@
    always type the passphrase instead.
    Languages are defined just below — edit the `langs` list to change them.
    ======================================================================= */
-const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
+const WORKER_URL = 'https://your-worker.workers.dev';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
 /* ===================================================================== */
@@ -287,6 +305,9 @@ let langs = [
 let pages = [
   { id: p(), name: 'Home', path: '' }
 ];
+let discovered = [];   // full sitemap list, kept in memory (not all rendered)
+let dirInclude = {};   // directory -> included?
+let pageExclude = {};  // path -> individually excluded?
 function p(){ return 'p' + Math.random().toString(36).slice(2,8); }
 
 /* ----------------------------- rendering inputs ----------------------------- */
@@ -307,10 +328,10 @@ function renderPages(){
     tbl.appendChild(tr);
   });
 }
-function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg) pg.name=v; }
-function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); } }
-function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'' }); renderPages(); }
-function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); }
+function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.name=v; updateRunHint(); } }
+function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); updateRunHint(); } }
+function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'' }); renderPages(); updateRunHint(); }
+function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); updateRunHint(); }
 
 function buildUrl(site, dir, path){
   let base = (site||'').replace(/\/+$/,'');
@@ -367,7 +388,7 @@ async function discoverPages(){
   // 2) fallbacks
   if(!sitemaps.length){ sitemaps = [root + '/sitemap.xml', root + '/sitemap_index.xml', root + '/sitemap-index.xml']; }
 
-  const MAX_SITEMAPS = 30, MAX_URLS = 600;
+  const MAX_SITEMAPS = 60, MAX_URLS = 3000;
   const seenSm = new Set();
   const foundUrls = new Set();
   let queue = [...sitemaps];
@@ -398,7 +419,7 @@ async function discoverPages(){
 
   // normalize → unique paths on our host, minus assets
   const paths = new Set();
-  let truncated = foundUrls.size >= MAX_URLS;
+  const truncated = foundUrls.size >= MAX_URLS;
   foundUrls.forEach(u => {
     try {
       const url = new URL(u);
@@ -409,17 +430,93 @@ async function discoverPages(){
     } catch(e){}
   });
 
-  const list = [...paths].sort((a,b)=> a.length - b.length || a.localeCompare(b));
-  const MAX_ROWS = 250;
-  const finalList = list.slice(0, MAX_ROWS);
-  pages = finalList.map(path => ({ id: p(), name: prettyName(path), path }));
-  if(!pages.length){ setErr('Sitemap had entries but none matched your site host.'); return; }
-  renderPages();
+  const list = [...paths].sort((a,b)=> a.localeCompare(b));
+  if(!list.length){ setErr('Sitemap had entries but none matched your site host.'); return; }
 
-  let msg = `Found ${list.length} page(s) and filled the table below — review and remove any you don't want to audit.`;
-  if(list.length > MAX_ROWS) msg += ` (Showing the first ${MAX_ROWS}.)`;
-  if(truncated) msg += ' Sitemap was large and may be partial.';
+  // keep full list in memory; surface directory facets, not raw rows
+  discovered = list.map(path => ({ path }));
+  const dirCounts = {};
+  discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
+  dirInclude = {};
+  Object.keys(dirCounts).forEach(dir => dirInclude[dir] = true);
+  pageExclude = {};
+  document.getElementById('discoveredPanel').style.display = 'block';
+  renderDiscovered();
+  updateRunHint();
+
+  let msg = `Found ${discovered.length} page(s) across ${Object.keys(dirCounts).length} director${Object.keys(dirCounts).length===1?'y':'ies'}.`;
+  if(truncated) msg += ' Very large sitemap — list may be partial.';
   setS(msg);
+}
+
+/* ---- directory facets over the discovered list ---- */
+function dirOf(path){
+  if(path === '') return '(home)';
+  const segs = path.split('/');
+  return segs.length === 1 ? '(top level)' : segs[0];
+}
+function pageIncluded(path){ return !!dirInclude[dirOf(path)] && !pageExclude[path]; }
+function effectiveDiscovered(){ return discovered.filter(d => pageIncluded(d.path)); }
+
+function toggleDir(dir, on){ dirInclude[dir] = on; renderDiscovered(); updateRunHint(); }
+function setAllDirs(on){ Object.keys(dirInclude).forEach(d => dirInclude[d] = on); renderDiscovered(); updateRunHint(); }
+function togglePage(path, on){ if(on) delete pageExclude[path]; else pageExclude[path] = true; renderDiscSummary(); renderDiscSearch(); updateRunHint(); }
+
+function renderDiscovered(){
+  const dirCounts = {};
+  discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
+  const dirs = Object.keys(dirCounts).sort((a,b)=> dirCounts[b]-dirCounts[a] || a.localeCompare(b));
+  document.getElementById('dirList').innerHTML = dirs.map(dir => {
+    const on = dirInclude[dir];
+    return `<label class="dir-row ${on?'':'off'}">
+      <input type="checkbox" ${on?'checked':''} data-dir="${escapeAttr(dir)}" onchange="toggleDir(this.getAttribute('data-dir'), this.checked)">
+      <span>${escapeHtml(dir)}</span>
+      <span class="count">${dirCounts[dir]}</span>
+    </label>`;
+  }).join('');
+  renderDiscSummary();
+  renderDiscSearch();
+}
+function renderDiscSummary(){
+  const total = discovered.length;
+  const sel = effectiveDiscovered().length;
+  const excl = Object.keys(pageExclude).filter(k=>pageExclude[k] && dirInclude[dirOf(k)]).length;
+  document.getElementById('discSummary').innerHTML =
+    `<strong>${sel}</strong> of ${total} discovered pages selected for audit` +
+    (excl ? ` (${excl} individually excluded)` : '') + '.';
+}
+function renderDiscSearch(){
+  const box = document.getElementById('discSearchResults');
+  const q = (document.getElementById('discSearch').value||'').trim().toLowerCase();
+  if(!q){ box.innerHTML = ''; return; }
+  const matches = discovered.filter(d => ('/'+d.path).toLowerCase().includes(q));
+  if(!matches.length){ box.innerHTML = `<div class="disc-results"><div class="res"><span class="path">No matching pages found.</span></div></div>`; return; }
+  const CAP = 60;
+  const rows = matches.slice(0, CAP).map(d => {
+    const dirOn = !!dirInclude[dirOf(d.path)];
+    const inc = pageIncluded(d.path);
+    const tag = inc ? 'included' : (dirOn ? 'excluded' : 'directory off');
+    return `<div class="res">
+      <input type="checkbox" ${inc?'checked':''} ${dirOn?'':'disabled'} data-path="${escapeAttr(d.path)}" onchange="togglePage(this.getAttribute('data-path'), this.checked)">
+      <span class="path">/${escapeHtml(d.path)}</span>
+      <span class="tag ${inc?'in':'out'}">${tag}</span>
+    </div>`;
+  }).join('');
+  const more = matches.length > CAP ? `<div class="res"><span class="path">…and ${matches.length-CAP} more — refine your search.</span></div>` : '';
+  box.innerHTML = `<div class="disc-results">${rows}${more}</div>`;
+}
+
+/* combined audit set: selected discovered pages + manual rows, deduped by path */
+function getAuditPages(){
+  const map = new Map();
+  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path }));
+  pages.forEach(pg => { if(pg && pg.name) map.set(pg.path, { name: pg.name, path: pg.path }); });
+  return [...map.values()];
+}
+function updateRunHint(){
+  const n = getAuditPages().length;
+  const t = langs.filter(l=>!l.ref).length;
+  document.getElementById('runHint').textContent = n ? `Will audit ${n} page${n===1?'':'s'} × ${t} language${t===1?'':'s'}.` : '';
 }
 
 /* ----------------------------- fetching ----------------------------- */
@@ -456,17 +553,16 @@ async function testConnection(){
   const url = (document.getElementById('testUrl').value || '').trim();
   if(!url){ el.innerHTML = `<div class="err-note" style="margin-top:1rem;">Enter a page URL to test.</div>`; return; }
   el.innerHTML = `<div class="score" style="margin-top:1rem;">Requesting…</div>`;
-  const requested = proxify(url);
   const r = await fetchPage(url);
   const snippet = (r.text||'').slice(0,300).replace(/\s+/g,' ').trim();
   const okClass = r.ok ? 'ok' : 'crit';
   el.innerHTML = `<div style="margin-top:1rem; border:1px solid var(--border); border-radius:8px; padding:1rem;">
-    <div class="score">Requested URL:</div>
-    <div style="font-size:.8rem; word-break:break-all; margin:.25rem 0 .8rem;"><a href="${escapeAttr(requested)}" target="_blank" rel="noopener" style="color:var(--accent-deep); text-decoration:none;">${escapeHtml(requested)}</a></div>
+    <div class="score">Tested address:</div>
+    <div style="font-size:.8rem; word-break:break-all; margin:.25rem 0 .8rem;"><a href="${escapeAttr(url)}" target="_blank" rel="noopener" style="color:var(--accent-deep); text-decoration:none;">${escapeHtml(url)}</a></div>
     <div class="score">Response: <span class="pill ${okClass}">${r.error ? 'network error' : ('HTTP ' + r.status)}</span></div>
     ${r.error ? `<div class="err-note" style="margin-top:.6rem;">${escapeHtml(r.error)} — usually a CORS or unreachable-worker problem.</div>` : ''}
-    ${snippet ? `<div class="score" style="margin-top:.8rem;">First bytes returned:</div><div style="font-size:.78rem; color:var(--muted); background:#f7f7f7; border-radius:6px; padding:.5rem .6rem; margin-top:.3rem; word-break:break-all;">${escapeHtml(snippet)}…</div>` : ''}
-    <div class="score" style="margin-top:.8rem;">Open the requested URL above in a new tab — whatever your worker says there is the real error to fix.</div>
+    ${snippet ? `<div class="score" style="margin-top:.8rem;">First bytes returned:</div><div style="font-size:.78rem; color:var(--muted); background:var(--card-alt); border:1px solid var(--border); border-radius:6px; padding:.5rem .6rem; margin-top:.3rem; word-break:break-all;">${escapeHtml(snippet)}…</div>` : ''}
+    <div class="score" style="margin-top:.8rem;">A 200 means the proxy and passphrase are working. A 403 means the passphrase doesn't match the worker; other codes come from the site itself.</div>
   </div>`;
 }
 async function checkResource(url){
@@ -636,8 +732,8 @@ async function runAudit(){
   }
   if(!SITE_URL){ setProgress('Set SITE_URL in the config block at the top of this file before running.', true); return; }
   const site = SITE_URL;
-  const activePages = pages.filter(pg => pg.path !== undefined && pg.name);
-  if(!activePages.length){ setProgress('Add at least one page.', true); return; }
+  const activePages = getAuditPages();
+  if(!activePages.length){ setProgress('Discover pages or add at least one page.', true); return; }
 
   const refLang = langs.find(l=>l.ref);
   const transLangs = langs.filter(l=>!l.ref);
@@ -920,20 +1016,6 @@ function escapeAttr(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, m=>({'&
 function setProgress(msg, warn){ const el=document.getElementById('progress'); el.textContent = msg; el.style.color = warn?'var(--critical)':'var(--muted)'; }
 function setBar(pct){ document.getElementById('bar').style.width = pct + '%'; }
 
-/* ----------------------------- PDF export ----------------------------- */
-function printSinglePage(){
-  document.querySelectorAll('.page-result').forEach(d => d.open = true);
-  const w = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
-  const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-  const style = document.createElement('style');
-  style.id = 'single-page-print';
-  style.textContent = `@page { size: ${w}px ${h}px; margin: 0; }
-    @media print { body { width: ${w}px; } }`;
-  document.head.appendChild(style);
-  window.print();
-  setTimeout(() => { const s=document.getElementById('single-page-print'); if(s) s.remove(); }, 500);
-}
-
 /* ----------------------------- init ----------------------------- */
 (function initConfigDisplay(){
   const siteEl = document.getElementById('cfgSite');
@@ -941,6 +1023,7 @@ function printSinglePage(){
   if(WORKER_KEY) document.getElementById('pass').value = WORKER_KEY;
 })();
 renderPages();
+updateRunHint();
 </script>
 </body>
 </html>
