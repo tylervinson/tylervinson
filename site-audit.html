@@ -118,6 +118,16 @@
 
   .toolbar { display: flex; gap: .75rem; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; }
 
+  /* accordion */
+  .accordion { border: 1px solid var(--border); border-radius: 6px; margin-top: 1.5rem; }
+  .accordion > summary { list-style: none; cursor: pointer; padding: .7rem 1rem; font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .55rem; transition: color .2s ease; }
+  .accordion > summary::-webkit-details-marker { display: none; }
+  .accordion > summary:hover { color: var(--accent); }
+  .accordion > summary .chev { font-size: .7rem; transition: transform .3s ease; }
+  .accordion[open] > summary .chev { transform: rotate(90deg); }
+  .accordion[open] > summary { color: var(--text); border-bottom: 1px solid var(--border); }
+  .accordion-body { padding: 1rem; }
+
   /* discovery directory facets */
   .disc-summary { font-size: .92rem; margin-bottom: 1rem; }
   .dir-controls { display: flex; gap: .5rem; margin-bottom: .7rem; }
@@ -216,19 +226,21 @@
     <p class="hint" style="margin:.4rem 0 0;">Sent to the worker as the access key. Held in memory for this session only — never written to the file.</p>
     <div class="row" style="margin-top:1.25rem;">
       <div>
-        <label class="field-label" for="maxlinks">Max links to verify per page</label>
-        <input type="number" id="maxlinks" value="40" min="0" max="300">
-      </div>
-      <div>
-        <label class="field-label" for="conc">Concurrent requests</label>
+        <label class="field-label" for="conc">Concurrent link checks</label>
         <input type="number" id="conc" value="5" min="1" max="20">
       </div>
     </div>
-    <div class="toolbar">
-      <button class="ghost" onclick="testConnection()">Test connection</button>
-      <input type="url" id="testUrl" placeholder="https://www.azblue.com/es" style="flex:1; min-width:220px;">
-    </div>
-    <div id="testResult"></div>
+    <details class="accordion">
+      <summary><span class="chev">▶</span> Test connection</summary>
+      <div class="accordion-body">
+        <p class="hint" style="margin-bottom:.7rem;">Enter any page URL on your site to check the proxy and passphrase are working before running a full audit.</p>
+        <div class="toolbar" style="margin-top:0;">
+          <input type="url" id="testUrl" style="flex:1; min-width:220px;">
+          <button class="ghost" onclick="testConnection()">Test</button>
+        </div>
+        <div id="testResult"></div>
+      </div>
+    </details>
   </section>
 
   <!-- PAGES -->
@@ -238,6 +250,12 @@
     <div class="toolbar" style="margin-bottom:0;">
       <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
       <span class="score" id="discoverStatus"></span>
+    </div>
+    <div class="toolbar" style="margin-top:.6rem;">
+      <button class="ghost" onclick="exportState()">Save to file</button>
+      <button class="ghost" onclick="document.getElementById('importFile').click()">Load from file</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importState(this.files && this.files[0]); this.value='';">
+      <span class="score" id="saveStatus"></span>
     </div>
 
     <!-- discovered filter panel (hidden until discovery runs) -->
@@ -261,7 +279,11 @@
     </div>
     <button class="ghost" style="margin-top:1rem;" onclick="addPage()">+ Add page</button>
 
-    <div class="toolbar">
+    <label class="check-line" style="margin-top:1.5rem;">
+      <input type="checkbox" id="reverify">
+      Re-verify every link this run (ignore saved link results)
+    </label>
+    <div class="toolbar" style="margin-top:.6rem;">
       <button class="primary" id="runBtn" onclick="runAudit()">Run audit</button>
       <span class="score" id="runHint"></span>
     </div>
@@ -519,6 +541,57 @@ function updateRunHint(){
   document.getElementById('runHint').textContent = n ? `Will audit ${n} page${n===1?'':'s'} × ${t} language${t===1?'':'s'}.` : '';
 }
 
+/* ----------------------------- save / load to JSON ----------------------------- */
+function setSaveStatus(msg, err){ const el = document.getElementById('saveStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
+
+function exportState(){
+  const data = {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    site: SITE_URL,
+    languages: langs.map(l => ({ label:l.label, dir:l.dir, ref:!!l.ref })),
+    discovered: discovered,
+    dirInclude: dirInclude,
+    pageExclude: pageExclude,
+    manualPages: pages.map(pg => ({ name:pg.name, path:pg.path })),
+    linkResults: [...linkResults.entries()]
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const host = (()=>{ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } })();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `audit-${host}-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  setSaveStatus(`Saved ${discovered.length} page(s) and ${linkResults.size} link result(s).`);
+}
+
+function importState(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== 'object') throw new Error('bad file');
+      discovered = Array.isArray(data.discovered) ? data.discovered : [];
+      dirInclude = data.dirInclude && typeof data.dirInclude === 'object' ? data.dirInclude : {};
+      pageExclude = data.pageExclude && typeof data.pageExclude === 'object' ? data.pageExclude : {};
+      if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'' }));
+      linkResults = new Map(Array.isArray(data.linkResults) ? data.linkResults : []);
+      if(discovered.length){ document.getElementById('discoveredPanel').style.display = 'block'; renderDiscovered(); }
+      renderPages();
+      updateRunHint();
+      const when = data.savedAt ? new Date(data.savedAt).toLocaleString() : 'unknown date';
+      let note = `Loaded ${discovered.length} page(s) and ${linkResults.size} saved link result(s) from ${when}.`;
+      if(data.site && data.site !== SITE_URL) note += ` (Saved site was ${data.site} — current is ${SITE_URL}.)`;
+      setSaveStatus(note);
+    } catch(e){
+      setSaveStatus('Could not read that file — is it a saved audit JSON?', true);
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ----------------------------- fetching ----------------------------- */
 function proxify(target){
   const base = WORKER_URL.trim();
@@ -565,13 +638,25 @@ async function testConnection(){
     <div class="score" style="margin-top:.8rem;">A 200 means the proxy and passphrase are working. A 403 means the passphrase doesn't match the worker; other codes come from the site itself.</div>
   </div>`;
 }
-async function checkResource(url){
-  try {
-    const res = await fetch(proxify(url), fetchOpts());
-    return { url, status: res.status, ok: res.ok };
-  } catch(e){
-    return { url, status:0, ok:false, error:e.message };
-  }
+let linkCache = new Map();   // url -> Promise<result>, dedupes within a single run
+let linkResults = new Map(); // url -> resolved {url,status,ok,ts}, persists across runs + saved to file
+function checkResource(url){
+  const reverify = document.getElementById('reverify') && document.getElementById('reverify').checked;
+  if(!reverify && linkResults.has(url)) return Promise.resolve(linkResults.get(url));
+  if(linkCache.has(url)) return linkCache.get(url);
+  const pr = (async () => {
+    let r;
+    try {
+      const res = await fetch(proxify(url), fetchOpts());
+      r = { url, status: res.status, ok: res.ok, ts: Date.now() };
+    } catch(e){
+      r = { url, status:0, ok:false, error:e.message, ts: Date.now() };
+    }
+    linkResults.set(url, r);
+    return r;
+  })();
+  linkCache.set(url, pr);
+  return pr;
 }
 async function pool(items, worker, concurrency){
   const out = []; let i = 0;
@@ -737,7 +822,6 @@ async function runAudit(){
 
   const refLang = langs.find(l=>l.ref);
   const transLangs = langs.filter(l=>!l.ref);
-  const maxLinks = +document.getElementById('maxlinks').value || 0;
   const conc = +document.getElementById('conc').value || 5;
 
   document.getElementById('runBtn').disabled = true;
@@ -746,6 +830,7 @@ async function runAudit(){
   document.getElementById('barWrap').style.display = 'block';
 
   auditState = { results: [], crit:0, warn:0, info:0, broken:0, pages:0 };
+  linkCache.clear();
 
   const totalUnits = activePages.length;
   let done = 0;
@@ -768,7 +853,7 @@ async function runAudit(){
 
     // reference technical pass (links + code)
     if(refData){
-      result.refTech = await technicalPass(refData, refLang.label, maxLinks, conc, auditState);
+      result.refTech = await technicalPass(refData, refLang.label, conc, auditState);
     }
 
     // each translation
@@ -783,7 +868,7 @@ async function runAudit(){
       block.data = tData;
 
       // technical pass for this language
-      block.tech = await technicalPass(tData, tl.label, maxLinks, conc, auditState);
+      block.tech = await technicalPass(tData, tl.label, conc, auditState);
 
       // structural parity vs reference: regions first, then counts
       if(refData){
@@ -824,7 +909,7 @@ async function runAudit(){
 
 function bump(s, sev){ if(sev==='critical') s.crit++; else if(sev==='warning') s.warn++; else s.info++; }
 
-async function technicalPass(data, label, maxLinks, conc, state){
+async function technicalPass(data, label, conc, state){
   const tech = { code: [], links: [] };
   // code-level issues
   if(data.emptyLinks) tech.code.push({ sev:'warning', text: data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).' });
@@ -835,8 +920,8 @@ async function technicalPass(data, label, maxLinks, conc, state){
   if(!data.htmlLang) tech.code.push({ sev:'warning', text: 'Missing lang attribute on <html>.' });
   tech.code.forEach(c => bump(state, c.sev));
 
-  // link verification
-  const toCheck = data.links.slice(0, maxLinks);
+  // link verification — check every link on the page
+  const toCheck = data.links;
   if(toCheck.length){
     const checked = await pool(toCheck, checkResource, conc);
     tech.links = checked.filter(c => !c.ok || c.status >= 400 || c.status === 0);
