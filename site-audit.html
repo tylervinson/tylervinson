@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multilingual Site Audit</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --muted: #666;
+    --accent: #5fdaff;
+    --accent-deep: #1597bd;
+    --critical: #d9534f;
+    --warning: #d99e00;
+    --ok: #2f9e6f;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  header.page-head { margin-bottom: 2.5rem; }
+  header.page-head h1 { font-weight: 300; font-size: 2.1rem; margin: 0 0 .4rem; letter-spacing: -0.01em; }
+  header.page-head p { color: var(--muted); margin: 0; max-width: 60ch; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h2 { font-weight: 300; font-size: 1.3rem; margin: 0 0 .35rem; }
+  .card .hint { color: var(--muted); font-size: .9rem; margin: 0 0 1.5rem; max-width: 70ch; }
+
+  label.field-label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .4rem; letter-spacing: .01em; }
+  input[type=text], input[type=url], input[type=number] {
+    width: 100%;
+    padding: .65rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 400;
+    color: var(--text);
+    background: #fff;
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(95,218,255,0.18);
+  }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 180px; }
+
+  .check-line { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: .9rem; color: var(--muted); }
+  .check-line input { width: auto; }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: .55rem 1rem;
+    border-radius: 6px;
+    font-weight: 400;
+    transition: all .3s ease;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+    padding: .75rem 1.6rem;
+    font-size: 1rem;
+  }
+  button.primary:hover { background: #000; }
+  button.primary:disabled { opacity: .45; cursor: not-allowed; }
+  button.ghost { font-size: .82rem; padding: .4rem .7rem; color: var(--muted); }
+  button.tiny { padding: .25rem .55rem; font-size: .78rem; }
+
+  .lang-tags { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .lang-tag { display: flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 20px; padding: .25rem .4rem .25rem .8rem; }
+  .lang-tag input { width: 92px; padding: .25rem .4rem; border: none; border-bottom: 1px dashed var(--border); border-radius: 0; }
+  .lang-tag input:focus { box-shadow: none; }
+  .lang-tag.ref { border-color: var(--accent); }
+  .lang-tag .badge { font-size: .68rem; color: var(--accent-deep); font-weight: 400; }
+
+  table.pages { width: 100%; border-collapse: collapse; }
+  table.pages th { text-align: left; font-weight: 400; font-size: .78rem; color: var(--muted); padding: .5rem .5rem; border-bottom: 1px solid var(--border); }
+  table.pages td { padding: .4rem .5rem; vertical-align: top; }
+  table.pages input { font-size: .85rem; }
+  .name-cell input { font-weight: 400; }
+
+  .toolbar { display: flex; gap: .75rem; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; }
+
+  /* progress + summary */
+  #progress { font-size: .9rem; color: var(--muted); margin-top: 1rem; min-height: 1.2em; }
+  .bar { height: 4px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: .6rem; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+  .stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
+  .stat .num { font-size: 1.9rem; font-weight: 300; line-height: 1; }
+  .stat .lbl { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
+  .stat.crit .num { color: var(--critical); }
+  .stat.warn .num { color: var(--warning); }
+  .stat.ok .num { color: var(--ok); }
+
+  /* result cards */
+  .page-result { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: #fff; overflow: hidden; }
+  .page-result > summary { list-style: none; cursor: pointer; padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: .8rem; }
+  .page-result > summary::-webkit-details-marker { display: none; }
+  .page-result > summary .chev { transition: transform .3s ease; color: var(--muted); }
+  .page-result[open] > summary .chev { transform: rotate(90deg); }
+  .page-result .title { font-weight: 400; }
+  .page-result .url-sub { font-size: .78rem; color: var(--muted); word-break: break-all; }
+  .pill { font-size: .72rem; padding: .15rem .55rem; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+  .pill.crit { color: var(--critical); border-color: rgba(217,83,79,.4); }
+  .pill.warn { color: var(--warning); border-color: rgba(217,158,0,.4); }
+  .pill.ok { color: var(--ok); border-color: rgba(47,158,111,.4); }
+  .spacer { flex: 1; }
+
+  .result-body { padding: 0 1.4rem 1.4rem; }
+  .lang-block { border-top: 1px solid var(--border); padding-top: 1.2rem; margin-top: 1rem; }
+  .lang-block:first-child { border-top: none; margin-top: 0; }
+  .lang-block h4 { font-weight: 400; font-size: 1rem; margin: 0 0 .25rem; }
+  .section-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 1.1rem 0 .5rem; }
+
+  .issue { border-left: 3px solid var(--border); padding: .5rem .9rem; margin-bottom: .5rem; background: #fcfcfc; border-radius: 0 6px 6px 0; }
+  .issue.critical { border-left-color: var(--critical); }
+  .issue.warning { border-left-color: var(--warning); }
+  .issue.info { border-left-color: var(--accent); }
+  .issue .ihead { display: flex; gap: .5rem; align-items: baseline; }
+  .issue .cat { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .issue .exp { font-size: .9rem; margin: .25rem 0 0; }
+  .issue .compare { font-size: .82rem; margin-top: .4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .issue .compare div { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: .4rem .55rem; }
+  .issue .compare .k { font-size: .68rem; color: var(--muted); display: block; margin-bottom: .15rem; }
+  .issue .sugg { font-size: .82rem; margin-top: .4rem; color: var(--accent-deep); }
+  .clean { font-size: .88rem; color: var(--ok); padding: .3rem 0; }
+  .err-note { font-size: .85rem; color: var(--critical); background: #fdf3f3; border: 1px solid rgba(217,83,79,.3); border-radius: 6px; padding: .6rem .8rem; }
+
+  ul.tech { list-style: none; padding: 0; margin: 0; }
+  ul.tech li { font-size: .86rem; padding: .35rem 0; border-bottom: 1px dashed var(--border); display: flex; gap: .6rem; align-items: baseline; }
+  ul.tech li:last-child { border-bottom: none; }
+  ul.tech .code { font-size: .72rem; padding: .05rem .4rem; border-radius: 4px; background: #f2f2f2; color: var(--muted); }
+  ul.tech .code.bad { background: #fdeaea; color: var(--critical); }
+  ul.tech a { color: var(--accent-deep); text-decoration: none; word-break: break-all; }
+  ul.tech a:hover { text-decoration: underline; }
+  .score { font-size: .82rem; color: var(--muted); }
+  .empty-msg { color: var(--muted); font-size: .9rem; }
+
+  /* PDF button (per spec) */
+  #print-btn {
+    position: fixed; top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    background: #1a1a1a; opacity: .7;
+    border: none; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 9999;
+    transition: opacity .3s ease;
+  }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { stroke: #fff; }
+  #print-btn .tip {
+    position: absolute; top: 50%; right: 48px; transform: translateY(-50%);
+    background: #1a1a1a; color: #fff; font-size: .72rem; white-space: nowrap;
+    padding: .25rem .55rem; border-radius: 4px; opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  #print-btn:hover .tip { opacity: .95; }
+
+  @media (max-width: 640px) {
+    .issue .compare { grid-template-columns: 1fr; }
+  }
+  @media print {
+    #print-btn { display: none; }
+    .card.no-print, .toolbar, #progress, header.page-head { }
+  }
+</style>
+</head>
+<body>
+<button id="print-btn" onclick="printSinglePage()" aria-label="Save as PDF">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
+  </svg>
+  <span class="tip">Save as PDF</span>
+</button>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Multilingual Site Audit</h1>
+    <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
+  </header>
+
+  <!-- SETTINGS -->
+  <section class="card no-print">
+    <h2>Settings</h2>
+    <p class="hint">Auditing <strong id="cfgSite"></strong> through your configured proxy. To change the site, proxy, or languages, edit the config block at the top of this file.</p>
+    <label class="field-label" for="pass">Access passphrase</label>
+    <input type="password" id="pass" placeholder="type your worker passphrase" autocomplete="off">
+    <p class="hint" style="margin:.4rem 0 0;">Sent to the worker as the access key. Held in memory for this session only — never written to the file.</p>
+    <div class="row" style="margin-top:1.25rem;">
+      <div>
+        <label class="field-label" for="maxlinks">Max links to verify per page</label>
+        <input type="number" id="maxlinks" value="40" min="0" max="300">
+      </div>
+      <div>
+        <label class="field-label" for="conc">Concurrent requests</label>
+        <input type="number" id="conc" value="5" min="1" max="20">
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="ghost" onclick="testConnection()">Test connection</button>
+      <input type="url" id="testUrl" placeholder="https://www.azblue.com/es" style="flex:1; min-width:220px;">
+    </div>
+    <div id="testResult"></div>
+  </section>
+
+  <!-- PAGES -->
+  <section class="card no-print">
+    <h2>Pages</h2>
+    <p class="hint">Enter just the path for each page (e.g. <code>plans/medicare</code>), or discover them automatically from your sitemap. Leave a path blank for the home page. The tool builds every language URL for you.</p>
+    <div class="toolbar" style="margin-bottom:1rem;">
+      <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
+      <span class="score" id="discoverStatus"></span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="pages" id="pagesTable"></table>
+    </div>
+    <button class="ghost" style="margin-top:1rem;" onclick="addPage()">+ Add page</button>
+
+    <div class="toolbar">
+      <button class="primary" id="runBtn" onclick="runAudit()">Run audit</button>
+      <span class="score" id="runHint"></span>
+    </div>
+    <div id="progress"></div>
+    <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="card" id="summaryCard" style="display:none;">
+    <h2>Summary</h2>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+</div>
+
+<script>
+/* =======================================================================
+   CONFIG — edit these once. WORKER_URL is just an endpoint, not a secret,
+   but keep the file local anyway. The access passphrase is typed into the
+   tool at runtime (Settings card) and never stored here. WORKER_KEY below
+   is an optional fallback if you'd rather hardcode it; leave it empty to
+   always type the passphrase instead.
+   Languages are defined just below — edit the `langs` list to change them.
+   ======================================================================= */
+const WORKER_URL = 'https://your-worker.workers.dev';
+const SITE_URL   = 'https://www.azblue.com';
+const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
+/* ===================================================================== */
+
+/* ----------------------------- languages ----------------------------- */
+// English is the reference (dir ''). Each translation is a path prefix.
+let langs = [
+  { id: 'ref', label: 'English', dir: '', ref: true },
+  { id: 'l1', label: 'Spanish', dir: 'es', ref: false },
+  { id: 'l2', label: 'Chinese Traditional', dir: 'zh', ref: false }
+];
+
+/* ----------------------------- state ----------------------------- */
+let pages = [
+  { id: p(), name: 'Home', path: '' }
+];
+function p(){ return 'p' + Math.random().toString(36).slice(2,8); }
+
+/* ----------------------------- rendering inputs ----------------------------- */
+function renderPages(){
+  const tbl = document.getElementById('pagesTable');
+  tbl.innerHTML = '';
+  const head = document.createElement('tr');
+  head.innerHTML = '<th style="min-width:140px;">Page name</th><th style="min-width:160px;">Path</th><th>Resolves to</th><th></th>';
+  tbl.appendChild(head);
+  pages.forEach(pg => {
+    const tr = document.createElement('tr');
+    const preview = langs.map(l => escapeHtml(buildUrl(SITE_URL, l.dir, pg.path))).join('<br>');
+    tr.innerHTML =
+      `<td class="name-cell"><input type="text" value="${escapeAttr(pg.name)}" oninput="updatePageName('${pg.id}', this.value)" placeholder="Page name"></td>` +
+      `<td><input type="text" value="${escapeAttr(pg.path)}" placeholder="(home)" oninput="updatePagePath('${pg.id}', this.value)"></td>` +
+      `<td style="font-size:.72rem;color:var(--muted);line-height:1.5;word-break:break-all;">${preview}</td>` +
+      `<td><button class="tiny ghost" onclick="removePage('${pg.id}')">✕</button></td>`;
+    tbl.appendChild(tr);
+  });
+}
+function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg) pg.name=v; }
+function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); } }
+function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'' }); renderPages(); }
+function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); }
+
+function buildUrl(site, dir, path){
+  let base = (site||'').replace(/\/+$/,'');
+  dir = (dir||'').replace(/^\/+|\/+$/g,'');
+  path = (path||'').replace(/^\/+|\/+$/g,'');
+  let out = base;
+  if(dir) out += '/' + dir;
+  if(path) out += '/' + path;
+  return out;
+}
+
+/* ----------------------------- sitemap discovery ----------------------------- */
+const SKIP_EXT = /\.(pdf|jpe?g|png|gif|webp|svg|ico|css|js|json|xml|zip|gz|mp4|mp3|woff2?|ttf|eot)$/i;
+
+function urlToPath(u){
+  try {
+    const url = new URL(u);
+    let path = url.pathname.replace(/^\/+|\/+$/g,'');
+    const dirs = langs.map(l=>l.dir).filter(Boolean); // e.g. ['es','zh']
+    const parts = path ? path.split('/') : [];
+    if(parts.length && dirs.includes(parts[0])) parts.shift(); // drop language prefix
+    return parts.join('/');
+  } catch(e){ return null; }
+}
+function prettyName(path){
+  if(!path) return 'Home';
+  const seg = path.split('/').pop();
+  return seg.replace(/[-_]+/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+async function discoverPages(){
+  const status = document.getElementById('discoverStatus');
+  const setS = (t) => { status.textContent = t; status.style.color = 'var(--muted)'; };
+  const setErr = (t) => { status.textContent = t; status.style.color = 'var(--critical)'; };
+
+  if(!WORKER_URL || WORKER_URL.includes('your-worker')){ setErr('Set WORKER_URL in the config block first.'); return; }
+  setS('Looking for a sitemap…');
+
+  const root = SITE_URL.replace(/\/+$/,'');
+  const siteHost = (()=>{ try { return new URL(SITE_URL).hostname; } catch(e){ return ''; } })();
+
+  // 1) robots.txt → Sitemap: directives
+  let sitemaps = [];
+  try {
+    const r = await fetchPage(root + '/robots.txt');
+    if(r.ok){
+      r.text.split(/\r?\n/).forEach(line => {
+        const m = line.match(/^\s*sitemap:\s*(\S+)/i);
+        if(m) sitemaps.push(m[1].trim());
+      });
+    }
+  } catch(e){}
+
+  // 2) fallbacks
+  if(!sitemaps.length){ sitemaps = [root + '/sitemap.xml', root + '/sitemap_index.xml', root + '/sitemap-index.xml']; }
+
+  const MAX_SITEMAPS = 30, MAX_URLS = 600;
+  const seenSm = new Set();
+  const foundUrls = new Set();
+  let queue = [...sitemaps];
+
+  while(queue.length && seenSm.size < MAX_SITEMAPS && foundUrls.size < MAX_URLS){
+    const sm = queue.shift();
+    if(!sm || seenSm.has(sm)) continue;
+    seenSm.add(sm);
+    setS(`Reading sitemap ${seenSm.size}… (${foundUrls.size} pages found)`);
+    let r;
+    try { r = await fetchPage(sm); } catch(e){ continue; }
+    if(!r.ok || !r.text) continue;
+    const doc = new DOMParser().parseFromString(r.text, 'text/xml');
+    if(doc.querySelector('parsererror')) continue;
+    const rootTag = doc.documentElement ? doc.documentElement.tagName.toLowerCase() : '';
+    const locs = [...doc.querySelectorAll('loc')].map(l => clean(l.textContent)).filter(Boolean);
+    if(rootTag.indexOf('sitemapindex') !== -1){
+      locs.forEach(u => { if(!seenSm.has(u)) queue.push(u); }); // child sitemaps
+    } else {
+      locs.forEach(u => foundUrls.add(u));
+    }
+  }
+
+  if(!foundUrls.size){
+    setErr('No sitemap found (or it was empty/blocked). You can add pages manually below.');
+    return;
+  }
+
+  // normalize → unique paths on our host, minus assets
+  const paths = new Set();
+  let truncated = foundUrls.size >= MAX_URLS;
+  foundUrls.forEach(u => {
+    try {
+      const url = new URL(u);
+      if(siteHost && url.hostname !== siteHost) return;
+      if(SKIP_EXT.test(url.pathname)) return;
+      const path = urlToPath(u);
+      if(path !== null) paths.add(path);
+    } catch(e){}
+  });
+
+  const list = [...paths].sort((a,b)=> a.length - b.length || a.localeCompare(b));
+  const MAX_ROWS = 250;
+  const finalList = list.slice(0, MAX_ROWS);
+  pages = finalList.map(path => ({ id: p(), name: prettyName(path), path }));
+  if(!pages.length){ setErr('Sitemap had entries but none matched your site host.'); return; }
+  renderPages();
+
+  let msg = `Found ${list.length} page(s) and filled the table below — review and remove any you don't want to audit.`;
+  if(list.length > MAX_ROWS) msg += ` (Showing the first ${MAX_ROWS}.)`;
+  if(truncated) msg += ' Sitemap was large and may be partial.';
+  setS(msg);
+}
+
+/* ----------------------------- fetching ----------------------------- */
+function proxify(target){
+  const base = WORKER_URL.trim();
+  try {
+    const u = new URL(base);
+    u.searchParams.set('url', target);
+    return u.href;
+  } catch(e){
+    // fallback if base isn't a valid URL yet
+    return base + (base.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(target);
+  }
+}
+function fetchOpts(extra){
+  const opts = Object.assign({ method:'GET' }, extra || {});
+  const key = ((document.getElementById('pass') && document.getElementById('pass').value) || WORKER_KEY || '').trim();
+  if(key){ opts.headers = Object.assign({}, opts.headers, { 'X-Audit-Key': key }); }
+  return opts;
+}
+async function fetchPage(url){
+  const requested = proxify(url);
+  try {
+    const res = await fetch(requested, fetchOpts());
+    const text = await res.text();
+    return { ok: res.ok, status: res.status, text, requested };
+  } catch(e){
+    return { ok:false, status:0, text:'', error: e.message, requested };
+  }
+}
+
+async function testConnection(){
+  const el = document.getElementById('testResult');
+  const url = (document.getElementById('testUrl').value || '').trim();
+  if(!url){ el.innerHTML = `<div class="err-note" style="margin-top:1rem;">Enter a page URL to test.</div>`; return; }
+  el.innerHTML = `<div class="score" style="margin-top:1rem;">Requesting…</div>`;
+  const requested = proxify(url);
+  const r = await fetchPage(url);
+  const snippet = (r.text||'').slice(0,300).replace(/\s+/g,' ').trim();
+  const okClass = r.ok ? 'ok' : 'crit';
+  el.innerHTML = `<div style="margin-top:1rem; border:1px solid var(--border); border-radius:8px; padding:1rem;">
+    <div class="score">Requested URL:</div>
+    <div style="font-size:.8rem; word-break:break-all; margin:.25rem 0 .8rem;"><a href="${escapeAttr(requested)}" target="_blank" rel="noopener" style="color:var(--accent-deep); text-decoration:none;">${escapeHtml(requested)}</a></div>
+    <div class="score">Response: <span class="pill ${okClass}">${r.error ? 'network error' : ('HTTP ' + r.status)}</span></div>
+    ${r.error ? `<div class="err-note" style="margin-top:.6rem;">${escapeHtml(r.error)} — usually a CORS or unreachable-worker problem.</div>` : ''}
+    ${snippet ? `<div class="score" style="margin-top:.8rem;">First bytes returned:</div><div style="font-size:.78rem; color:var(--muted); background:#f7f7f7; border-radius:6px; padding:.5rem .6rem; margin-top:.3rem; word-break:break-all;">${escapeHtml(snippet)}…</div>` : ''}
+    <div class="score" style="margin-top:.8rem;">Open the requested URL above in a new tab — whatever your worker says there is the real error to fix.</div>
+  </div>`;
+}
+async function checkResource(url){
+  try {
+    const res = await fetch(proxify(url), fetchOpts());
+    return { url, status: res.status, ok: res.ok };
+  } catch(e){
+    return { url, status:0, ok:false, error:e.message };
+  }
+}
+async function pool(items, worker, concurrency){
+  const out = []; let i = 0;
+  const runners = Array.from({length: Math.min(concurrency, items.length||1)}, async () => {
+    while(i < items.length){ const idx = i++; out[idx] = await worker(items[idx], idx); }
+  });
+  await Promise.all(runners);
+  return out;
+}
+
+/* ----------------------------- parsing ----------------------------- */
+function extract(html, baseUrl){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const abs = (href) => { try { return new URL(href, baseUrl).href; } catch(e){ return null; } };
+
+  const headings = [...doc.querySelectorAll('h1,h2,h3,h4,h5,h6')]
+    .map(h => ({ level: +h.tagName[1], text: clean(h.textContent) })).filter(h=>h.text);
+
+  const anchors = [...doc.querySelectorAll('a[href]')];
+  const links = [];
+  anchors.forEach(a => {
+    const raw = a.getAttribute('href');
+    if(!raw) return;
+    if(/^(mailto:|tel:|javascript:|#)/i.test(raw)) return;
+    const u = abs(raw);
+    if(u && /^https?:/i.test(u)) links.push(u);
+  });
+
+  const images = [...doc.querySelectorAll('img')].map(img => ({
+    src: abs(img.getAttribute('src')||''), alt: img.getAttribute('alt')
+  }));
+
+  // visible-ish text
+  const bodyClone = doc.body ? doc.body.cloneNode(true) : doc.cloneNode(true);
+  bodyClone.querySelectorAll('script,style,noscript,svg,template').forEach(n=>n.remove());
+  const textContent = clean(bodyClone.textContent || '');
+
+  return {
+    title: clean(doc.querySelector('title')?.textContent || ''),
+    metaDesc: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+    htmlLang: doc.documentElement.getAttribute('lang') || '',
+    headings,
+    links: [...new Set(links)],
+    images,
+    counts: {
+      headings: headings.length,
+      links: anchors.length,
+      images: images.length,
+      forms: doc.querySelectorAll('form').length,
+      inputs: doc.querySelectorAll('input,textarea,select').length,
+      buttons: doc.querySelectorAll('button').length
+    },
+    emptyLinks: anchors.filter(a => { const h=a.getAttribute('href'); return !h || h==='#' || h.trim()===''; }).length,
+    missingAlt: images.filter(i => i.alt === null).length,
+    duplicateIds: findDuplicateIds(doc),
+    regions: detectRegions(doc),
+    textContent
+  };
+}
+
+/* ---- major page regions (landmarks) ---- */
+const REGION_DEFS = [
+  { key:'header', label:'Header',             sel:'header, [role="banner"]',                 cls:/(^|[-_ ])(site[-_]?header|page[-_]?header|masthead|header)([-_ ]|$)/i,  major:true },
+  { key:'nav',    label:'Primary navigation', sel:'nav, [role="navigation"]',                cls:/(^|[-_ ])(primary[-_]?nav|main[-_]?nav|navbar|navigation|nav|menu)([-_ ]|$)/i, major:true },
+  { key:'main',   label:'Main content',       sel:'main, [role="main"]',                    cls:/(^|[-_ ])(main[-_]?content|page[-_]?content|content[-_]?main|main|content)([-_ ]|$)/i, major:true },
+  { key:'aside',  label:'Sidebar',            sel:'aside, [role="complementary"]',          cls:/(^|[-_ ])(sidebar|complementary|aside)([-_ ]|$)/i, major:false },
+  { key:'footer', label:'Footer',             sel:'footer, [role="contentinfo"]',           cls:/(^|[-_ ])(site[-_]?footer|page[-_]?footer|footer)([-_ ]|$)/i, major:true },
+  { key:'search', label:'Search',             sel:'[role="search"], form[role="search"]',   cls:/(^|[-_ ])(search[-_]?form|site[-_]?search|search)([-_ ]|$)/i, major:false }
+];
+function detectRegion(doc, def){
+  let els = [...doc.querySelectorAll(def.sel)];
+  if(!els.length){
+    els = [...doc.querySelectorAll('div,section,header,footer,nav,aside')].filter(el => {
+      const idc = (el.getAttribute('id')||'') + ' ' + (el.getAttribute('class')||'');
+      return def.cls.test(idc);
+    });
+  }
+  if(!els.length) return { present:false, textLen:0, links:0 };
+  let best = els[0], bestLen = -1;
+  els.forEach(el => {
+    const l = clean(el.textContent||'').length;
+    if(l > bestLen){ bestLen = l; best = el; }
+  });
+  return { present:true, textLen:bestLen, links:best.querySelectorAll('a[href]').length };
+}
+function detectRegions(doc){
+  const out = {};
+  REGION_DEFS.forEach(def => { out[def.key] = detectRegion(doc, def); });
+  return out;
+}
+function regionDiff(refRegions, transRegions){
+  const issues = [];
+  REGION_DEFS.forEach(def => {
+    const r = refRegions[def.key], t = transRegions[def.key];
+    if(!r || !r.present) return; // only compare regions that exist on the English page
+    if(!t || !t.present){
+      const words = Math.round(r.textLen / 6);
+      issues.push({
+        category:'missing',
+        severity: def.major ? 'critical' : 'warning',
+        explanation: `${def.label} is present on the English page but missing entirely from the translation — on English it holds ${r.links} link(s) and roughly ${words} word(s). This alone can explain element-count gaps below.`,
+        suggestion: `Add the ${def.label.toLowerCase()} to the translated page so it mirrors English.`
+      });
+    } else if(r.textLen > 250 && t.textLen < r.textLen * 0.4){
+      issues.push({
+        category:'missing',
+        severity:'warning',
+        explanation: `${def.label} exists but is much smaller than English (about ${Math.round(t.textLen / Math.max(r.textLen,1) * 100)}% of its text). Part of it may be missing.`,
+        suggestion: `Review the ${def.label.toLowerCase()} for dropped content.`
+      });
+    }
+  });
+  return issues;
+}
+function findDuplicateIds(doc){
+  const seen = {}, dups = new Set();
+  doc.querySelectorAll('[id]').forEach(el => {
+    const id = el.id; if(seen[id]) dups.add(id); else seen[id]=1;
+  });
+  return [...dups];
+}
+
+/* ----------------------------- AI analysis ----------------------------- */
+async function analyzeTranslation(refData, transData, refLabel, transLabel){
+  const cap = (s) => (s||'').slice(0, 6000);
+  const refBlock = 'Headings:\n' + refData.headings.map(h=>'  '.repeat(h.level-1)+'- '+h.text).join('\n') +
+    '\n\nBody text:\n' + cap(refData.textContent);
+  const transBlock = 'Headings:\n' + transData.headings.map(h=>'  '.repeat(h.level-1)+'- '+h.text).join('\n') +
+    '\n\nBody text:\n' + cap(transData.textContent);
+
+  const system = `You are a localization QA reviewer. Compare a reference page (in ${refLabel}) with its ${transLabel} translation. Find: mistranslations, awkward or inaccurate phrasing, tone or register inconsistencies, strings left untranslated in ${refLabel}, content present in the reference but missing from the translation, and content added that is not in the reference. Reply with ONLY a JSON object, no markdown fences and no commentary. Schema: {"parityScore": <0-100 integer>, "summary": "<one or two sentences>", "issues": [{"category": "translation"|"tone"|"untranslated"|"missing"|"added", "severity": "critical"|"warning"|"info", "reference": "<short ${refLabel} snippet or empty>", "translation": "<short ${transLabel} snippet or empty>", "explanation": "<what's wrong>", "suggestion": "<how to fix, or empty>"}]}. If the translation is sound, return an empty issues array and a high parityScore.`;
+
+  const userMsg = `=== REFERENCE (${refLabel}) ===\n${refBlock}\n\n=== TRANSLATION (${transLabel}) ===\n${transBlock}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      system,
+      messages: [{ role:'user', content: userMsg }]
+    })
+  });
+  if(!res.ok) throw new Error('API request failed (' + res.status + ')');
+  const data = await res.json();
+  const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  const cleaned = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+  return JSON.parse(cleaned);
+}
+
+/* ----------------------------- orchestration ----------------------------- */
+let auditState = null;
+
+async function runAudit(){
+  if(!WORKER_URL || WORKER_URL.includes('your-worker')){
+    setProgress('Set WORKER_URL in the config block at the top of this file before running.', true); return;
+  }
+  if(!SITE_URL){ setProgress('Set SITE_URL in the config block at the top of this file before running.', true); return; }
+  const site = SITE_URL;
+  const activePages = pages.filter(pg => pg.path !== undefined && pg.name);
+  if(!activePages.length){ setProgress('Add at least one page.', true); return; }
+
+  const refLang = langs.find(l=>l.ref);
+  const transLangs = langs.filter(l=>!l.ref);
+  const maxLinks = +document.getElementById('maxlinks').value || 0;
+  const conc = +document.getElementById('conc').value || 5;
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('summaryCard').style.display = 'none';
+  document.getElementById('barWrap').style.display = 'block';
+
+  auditState = { results: [], crit:0, warn:0, info:0, broken:0, pages:0 };
+
+  const totalUnits = activePages.length;
+  let done = 0;
+
+  for(const pg of activePages){
+    setProgress(`Auditing “${pg.name}”…`);
+    const result = { page: pg, languages: [], refData: null, refError: null };
+
+    // fetch reference
+    let refData = null;
+    const refUrl = buildUrl(site, refLang.dir, pg.path);
+    {
+      const r = await fetchPage(refUrl);
+      if(r.ok){ refData = extract(r.text, refUrl); }
+      else { result.refError = r.error ? r.error : ('HTTP ' + r.status); }
+      result.refData = refData;
+      result.refStatus = r.status;
+      result.refUrl = refUrl;
+    }
+
+    // reference technical pass (links + code)
+    if(refData){
+      result.refTech = await technicalPass(refData, refLang.label, maxLinks, conc, auditState);
+    }
+
+    // each translation
+    for(const tl of transLangs){
+      const url = buildUrl(site, tl.dir, pg.path);
+      setProgress(`Auditing “${pg.name}” — ${tl.label}…`);
+      const block = { lang: tl, url };
+      const tr = await fetchPage(url);
+      if(!tr.ok){ block.error = tr.error ? tr.error : ('HTTP ' + tr.status); result.languages.push(block); auditState.crit++; continue; }
+      block.status = tr.status;
+      const tData = extract(tr.text, url);
+      block.data = tData;
+
+      // technical pass for this language
+      block.tech = await technicalPass(tData, tl.label, maxLinks, conc, auditState);
+
+      // structural parity vs reference: regions first, then counts
+      if(refData){
+        const regionIssues = regionDiff(refData.regions, tData.regions);
+        const missingMajor = regionIssues.some(i => i.severity === 'critical');
+        const countIssues = structuralDiff(refData, tData, missingMajor);
+        block.parity = [...regionIssues, ...countIssues];
+        block.parity.forEach(i => bump(auditState, i.severity));
+      }
+
+      // AI translation analysis
+      if(refData){
+        try {
+          const ai = await analyzeTranslation(refData, tData, refLang.label, tl.label);
+          block.ai = ai;
+          (ai.issues||[]).forEach(i => bump(auditState, i.severity));
+        } catch(e){
+          block.aiError = e.message;
+        }
+      } else {
+        block.aiError = 'No English reference page to compare against.';
+      }
+      result.languages.push(block);
+    }
+
+    auditState.results.push(result);
+    auditState.pages++;
+    renderResult(result, refLang);
+    done++;
+    setBar(done/totalUnits*100);
+  }
+
+  document.getElementById('runBtn').disabled = false;
+  setProgress('Audit complete — ' + auditState.pages + ' page(s) reviewed.');
+  setBar(100);
+  renderSummary();
+}
+
+function bump(s, sev){ if(sev==='critical') s.crit++; else if(sev==='warning') s.warn++; else s.info++; }
+
+async function technicalPass(data, label, maxLinks, conc, state){
+  const tech = { code: [], links: [] };
+  // code-level issues
+  if(data.emptyLinks) tech.code.push({ sev:'warning', text: data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).' });
+  if(data.missingAlt) tech.code.push({ sev:'warning', text: data.missingAlt + ' image(s) without alt text.' });
+  if(data.duplicateIds.length) tech.code.push({ sev:'warning', text: 'Duplicate id attribute(s): ' + data.duplicateIds.slice(0,8).join(', ') + (data.duplicateIds.length>8?'…':'') });
+  if(!data.title) tech.code.push({ sev:'critical', text: 'Missing <title>.' });
+  if(!data.metaDesc) tech.code.push({ sev:'info', text: 'No meta description.' });
+  if(!data.htmlLang) tech.code.push({ sev:'warning', text: 'Missing lang attribute on <html>.' });
+  tech.code.forEach(c => bump(state, c.sev));
+
+  // link verification
+  const toCheck = data.links.slice(0, maxLinks);
+  if(toCheck.length){
+    const checked = await pool(toCheck, checkResource, conc);
+    tech.links = checked.filter(c => !c.ok || c.status >= 400 || c.status === 0);
+    state.broken += tech.links.length;
+    tech.linksChecked = toCheck.length;
+    tech.linksTotal = data.links.length;
+  } else {
+    tech.linksChecked = 0; tech.linksTotal = data.links.length;
+  }
+  return tech;
+}
+
+function structuralDiff(ref, trans, hasMissingRegion){
+  const issues = [];
+  const fields = [
+    ['headings','headings'], ['images','images'], ['links','links'],
+    ['forms','forms'], ['inputs','form fields'], ['buttons','buttons']
+  ];
+  fields.forEach(([key, name]) => {
+    const a = ref.counts[key], b = trans.counts[key];
+    if(a !== b){
+      const missing = a - b;
+      let severity = Math.abs(missing) >= Math.max(2, a*0.3) ? 'warning' : 'info';
+      let note = '';
+      if(hasMissingRegion && missing > 0){ severity = 'info'; note = ' (likely accounted for by the missing section above)'; }
+      issues.push({
+        category:'count',
+        severity,
+        explanation: missing > 0
+          ? `Translation has ${b} ${name} vs ${a} in English — ${missing} fewer${note}.`
+          : `Translation has ${b} ${name} vs ${a} in English — ${-missing} extra.`
+      });
+    }
+  });
+  return issues;
+}
+
+/* ----------------------------- result rendering ----------------------------- */
+function renderResult(result, refLang){
+  const wrap = document.getElementById('results');
+  const det = document.createElement('details');
+  det.className = 'page-result';
+  det.open = true;
+
+  // count issues for this page
+  let c=0,w=0,i=0,broken=0;
+  const tally = (sev) => { if(sev==='critical')c++; else if(sev==='warning')w++; else i++; };
+  if(result.refTech){ result.refTech.code.forEach(x=>tally(x.sev)); broken += result.refTech.links.length; }
+  result.languages.forEach(b => {
+    if(b.error) c++;
+    if(b.tech){ b.tech.code.forEach(x=>tally(x.sev)); broken += b.tech.links.length; }
+    (b.parity||[]).forEach(x=>tally(x.severity));
+    (b.ai && b.ai.issues || []).forEach(x=>tally(x.severity));
+  });
+
+  const pills = [];
+  if(c) pills.push(`<span class="pill crit">${c} critical</span>`);
+  if(w) pills.push(`<span class="pill warn">${w} warnings</span>`);
+  if(broken) pills.push(`<span class="pill crit">${broken} broken links</span>`);
+  if(!c && !w && !broken) pills.push(`<span class="pill ok">clean</span>`);
+
+  const summary = document.createElement('summary');
+  summary.innerHTML = `<span class="chev">▶</span>
+    <span><span class="title">${escapeHtml(result.page.name)}</span></span>
+    <span class="spacer"></span>${pills.join(' ')}`;
+  det.appendChild(summary);
+
+  const body = document.createElement('div');
+  body.className = 'result-body';
+
+  // reference page block (technical only)
+  if(result.refError){
+    body.innerHTML += `<div class="lang-block"><h4>${escapeHtml(refLang.label)} (reference)</h4>
+      <div class="err-note">Could not load reference page: ${escapeHtml(result.refError)}</div></div>`;
+  } else if(result.refData){
+    body.innerHTML += `<div class="lang-block"><h4>${escapeHtml(refLang.label)} (reference)</h4>
+      <div class="url-sub">${escapeHtml(result.refUrl)}</div>
+      ${renderTech(result.refTech)}</div>`;
+  }
+
+  // translation blocks
+  result.languages.forEach(b => {
+    let html = `<div class="lang-block"><h4>${escapeHtml(b.lang.label)}</h4>`;
+    html += `<div class="url-sub">${escapeHtml(b.url)}</div>`;
+    if(b.error){
+      html += `<div class="err-note">Could not load page: ${escapeHtml(b.error)}</div></div>`;
+      body.innerHTML += html; return;
+    }
+
+    // AI translation
+    html += `<div class="section-label">Translation &amp; tone</div>`;
+    if(b.aiError){
+      html += `<div class="err-note">Analysis unavailable: ${escapeHtml(b.aiError)}</div>`;
+    } else if(b.ai){
+      if(typeof b.ai.parityScore === 'number'){
+        html += `<div class="score">Parity score: ${b.ai.parityScore}/100 — ${escapeHtml(b.ai.summary||'')}</div>`;
+      }
+      const issues = (b.ai.issues||[]).filter(x=>['translation','tone','untranslated','added'].includes(x.category) || true);
+      const aiIssues = (b.ai.issues||[]);
+      if(aiIssues.length){
+        aiIssues.forEach(is => html += renderIssue(is));
+      } else {
+        html += `<div class="clean">No translation issues found.</div>`;
+      }
+    }
+
+    // content parity
+    html += `<div class="section-label">Page sections &amp; content parity</div>`;
+    if(b.parity && b.parity.length){
+      b.parity.forEach(is => html += renderIssue(is));
+    } else {
+      html += `<div class="clean">All major sections present and element counts match English.</div>`;
+    }
+
+    // technical
+    html += renderTech(b.tech);
+    html += `</div>`;
+    body.innerHTML += html;
+  });
+
+  det.appendChild(body);
+  wrap.appendChild(det);
+}
+
+function renderTech(tech){
+  if(!tech) return '';
+  let html = `<div class="section-label">Code &amp; rendering</div>`;
+  if(tech.code.length){
+    tech.code.forEach(c => html += renderIssue({ category:'code', severity:c.sev, explanation:c.text }));
+  } else {
+    html += `<div class="clean">No code-level issues detected.</div>`;
+  }
+  html += `<div class="section-label">Links${tech.linksChecked!=null?` (checked ${tech.linksChecked} of ${tech.linksTotal})`:''}</div>`;
+  if(tech.links && tech.links.length){
+    html += `<ul class="tech">`;
+    tech.links.forEach(l => {
+      const code = l.status ? l.status : 'no response';
+      html += `<li><span class="code bad">${code}</span><a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.url)}</a></li>`;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<div class="clean">${tech.linksChecked? 'All checked links responded OK.' : 'No outbound links to check.'}</div>`;
+  }
+  return html;
+}
+
+function renderIssue(is){
+  const sev = is.severity || 'info';
+  let html = `<div class="issue ${sev}"><div class="ihead"><span class="cat">${escapeHtml(is.category||'issue')}</span></div>`;
+  html += `<p class="exp">${escapeHtml(is.explanation||'')}</p>`;
+  if(is.reference || is.translation){
+    html += `<div class="compare">
+      <div><span class="k">Reference</span>${escapeHtml(is.reference||'—')}</div>
+      <div><span class="k">Translation</span>${escapeHtml(is.translation||'—')}</div></div>`;
+  }
+  if(is.suggestion) html += `<div class="sugg">→ ${escapeHtml(is.suggestion)}</div>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderSummary(){
+  const s = auditState;
+  document.getElementById('summaryCard').style.display = 'block';
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = `
+    <div class="stat"><div class="num">${s.pages}</div><div class="lbl">Pages reviewed</div></div>
+    <div class="stat crit"><div class="num">${s.crit}</div><div class="lbl">Critical issues</div></div>
+    <div class="stat warn"><div class="num">${s.warn}</div><div class="lbl">Warnings</div></div>
+    <div class="stat crit"><div class="num">${s.broken}</div><div class="lbl">Broken links</div></div>
+    <div class="stat"><div class="num">${s.info}</div><div class="lbl">Notes</div></div>`;
+}
+
+/* ----------------------------- helpers ----------------------------- */
+function clean(s){ return (s||'').replace(/\s+/g,' ').trim(); }
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function escapeAttr(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function setProgress(msg, warn){ const el=document.getElementById('progress'); el.textContent = msg; el.style.color = warn?'var(--critical)':'var(--muted)'; }
+function setBar(pct){ document.getElementById('bar').style.width = pct + '%'; }
+
+/* ----------------------------- PDF export ----------------------------- */
+function printSinglePage(){
+  document.querySelectorAll('.page-result').forEach(d => d.open = true);
+  const w = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+  const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+  const style = document.createElement('style');
+  style.id = 'single-page-print';
+  style.textContent = `@page { size: ${w}px ${h}px; margin: 0; }
+    @media print { body { width: ${w}px; } }`;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => { const s=document.getElementById('single-page-print'); if(s) s.remove(); }, 500);
+}
+
+/* ----------------------------- init ----------------------------- */
+(function initConfigDisplay(){
+  const siteEl = document.getElementById('cfgSite');
+  try { siteEl.textContent = new URL(SITE_URL).host; } catch(e){ siteEl.textContent = SITE_URL || '(SITE_URL not set)'; }
+  if(WORKER_KEY) document.getElementById('pass').value = WORKER_KEY;
+})();
+renderPages();
+</script>
+</body>
+</html>
