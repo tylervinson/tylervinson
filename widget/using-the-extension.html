@@ -290,7 +290,7 @@
                             <div class="vstep-time">0:38</div>
                         </div>
                     </div>
-                    <div class="vstep" data-timestamp="66">
+                    <div class="vstep" data-timestamp="67">
                         <div class="vstep-num">5</div>
                         <div class="vstep-body">
                             <h3>Save in Sitecore</h3>
@@ -575,12 +575,11 @@
         vsteps.forEach(function (step) {
             step.addEventListener('click', function () {
                 var ts = parseInt(this.getAttribute('data-timestamp'), 10);
-                var wasPlaying = !video.paused;
                 video.pause();
                 video.currentTime = ts;
                 video.addEventListener('seeked', function onSeeked() {
                     video.removeEventListener('seeked', onSeeked);
-                    if (wasPlaying) video.play();
+                    video.play();
                     updateActiveStep();
                 });
             });
