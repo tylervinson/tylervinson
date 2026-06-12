@@ -266,36 +266,36 @@
                             <div class="vstep-time">0:00</div>
                         </div>
                     </div>
-                    <div class="vstep" data-timestamp="8">
+                    <div class="vstep" data-timestamp="9">
                         <div class="vstep-num">2</div>
                         <div class="vstep-body">
                             <h3>Select the Component</h3>
                             <p>Click the item in the tree. The Quick Info panel shows the item ID — the extension reads this automatically.</p>
-                            <div class="vstep-time">0:08</div>
+                            <div class="vstep-time">0:09</div>
                         </div>
                     </div>
-                    <div class="vstep" data-timestamp="16">
+                    <div class="vstep" data-timestamp="25">
                         <div class="vstep-num">3</div>
                         <div class="vstep-body">
                             <h3>Open the Extension</h3>
                             <p>Click the extension icon in your Chrome toolbar. The sidebar opens and populates the editor form immediately.</p>
-                            <div class="vstep-time">0:16</div>
+                            <div class="vstep-time">0:25</div>
                         </div>
                     </div>
-                    <div class="vstep" data-timestamp="24">
+                    <div class="vstep" data-timestamp="38">
                         <div class="vstep-num">4</div>
                         <div class="vstep-body">
                             <h3>Edit the Fields</h3>
                             <p>Update field values in the form. Click Apply Changes — the extension silently opens the HTML editor, writes the markup, and closes it.</p>
-                            <div class="vstep-time">0:24</div>
+                            <div class="vstep-time">0:38</div>
                         </div>
                     </div>
-                    <div class="vstep" data-timestamp="45">
+                    <div class="vstep" data-timestamp="66">
                         <div class="vstep-num">5</div>
                         <div class="vstep-body">
                             <h3>Save in Sitecore</h3>
                             <p>Click Save in the Content Editor toolbar. Your changes are now saved and ready to publish.</p>
-                            <div class="vstep-time">0:45</div>
+                            <div class="vstep-time">1:06</div>
                         </div>
                     </div>
                 </div>
@@ -575,9 +575,14 @@
         vsteps.forEach(function (step) {
             step.addEventListener('click', function () {
                 var ts = parseInt(this.getAttribute('data-timestamp'), 10);
+                var wasPlaying = !video.paused;
+                video.pause();
                 video.currentTime = ts;
-                if (video.paused) video.play();
-                updateActiveStep();
+                video.addEventListener('seeked', function onSeeked() {
+                    video.removeEventListener('seeked', onSeeked);
+                    if (wasPlaying) video.play();
+                    updateActiveStep();
+                });
             });
         });
     });
