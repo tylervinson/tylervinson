@@ -1,13 +1,11 @@
 {
-  "version": "1.6.0",
-  "updatedAt": "2026-03-05T00:00:00.000Z",
+  "version": "2.3.5",
+  "updatedAt": "2026-06-04T00:00:00.000Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
       "class": "animated-cards",
       "name": "Animated Cards",
-      "itemId": "f50e7e4a-b847-4607-a7b1-9eed9cb58335",
-      "fieldId": "7115e9d1-eab1-4400-9743-48b1984e47ab",
       "repeat": {
         "selector": ".profile-card",
         "groupLabel": "Card"
@@ -124,47 +122,46 @@
       "class": "zoom-meetings",
       "name": "Zoom Meetings",
       "repeat": {
-        "selector": ".zoom-meeting",
+        "selector": ".zmw-meeting",
         "groupLabel": "Meeting",
-        "groupLabelField": "title"
+        "groupLabelField": "title",
+        "dateField": "datetime",
+        "dateAttr": "data-end",
+        "newItemTemplate": "<div class=\"zmw-meeting\" data-register-url=\"\" data-end=\"{date}\"><div class=\"zmw-date-block\"><div class=\"zmw-month\">{month}</div><div class=\"zmw-day\">{day}</div><div class=\"zmw-time\">{time}</div></div><div class=\"zmw-content\"><div class=\"zmw-title\"><span class=\"zmw-title-text\">{title}</span><div class=\"zmw-register-wrap\" hidden><a class=\"zmw-register-btn appearance-none duration-200 ease-in-out align-middle inline-flex items-center justify-center leading-none rounded-full text-sm transition-colors whitespace-pre-line sm:whitespace-pre bg-btn-bg-secondary font-bolder hover:bg-btn-bg-secondary-hover hover:ring-2 hover:ring-btn-border-secondary-hover hover:text-btn-text-secondary-hover ring-1 ring-btn-border-secondary text-btn-text-secondary text-base sm:w-auto w-full px-8 py-2\" target=\"_blank\" rel=\"noopener noreferrer\">Register Here</a></div><svg class=\"zmw-chevron\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M4 7l6 6 6-6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div><div class=\"zmw-description\">{description}</div><div class=\"zmw-extender\"><p>{details}</p></div></div></div>"
       },
       "fields": [
         {
-          "key": "month",
-          "label": "Month",
-          "selector": ".zoom-month",
-          "type": "text"
-        },
-        {
-          "key": "day",
-          "label": "Day",
-          "selector": ".zoom-day",
-          "type": "text"
-        },
-        {
-          "key": "time",
-          "label": "Time",
-          "selector": ".zoom-time",
-          "type": "text"
+          "key": "datetime",
+          "label": "Date & Time",
+          "selector": null,
+          "attr": "data-end",
+          "type": "datetime-local",
+          "hint": "Sets the date, time, and expiry automatically"
         },
         {
           "key": "title",
           "label": "Meeting Title",
-          "selector": ".zoom-title",
+          "selector": ".zmw-title-text",
           "type": "text"
         },
         {
           "key": "description",
-          "label": "Description",
-          "selector": ".zoom-description",
+          "label": "Short Description",
+          "selector": ".zmw-description",
           "type": "text"
         },
         {
-          "key": "link",
-          "label": "Join URL",
-          "selector": ".zoom-link",
-          "type": "text",
-          "attr": "href"
+          "key": "registerUrl",
+          "label": "Registration URL",
+          "type": "url",
+          "attr": "data-register-url",
+          "hint": "Full external URL (https://...). Leave blank to hide the Register button."
+        },
+        {
+          "key": "details",
+          "label": "Detail Body",
+          "selector": ".zmw-extender",
+          "type": "richtext"
         }
       ]
     }

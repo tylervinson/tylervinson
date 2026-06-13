@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f5f2; --card: #ffffff; --text: #1a1a1a; --muted: #888;
+    --border: #e4e0da; --accent: #FFBE5F; --accent-dark: #e6a53e;
+    --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif; --radius: 3px;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 460px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .badge { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem; }
+  h1 { font-weight: 200; font-size: 1.75rem; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 0.4rem; }
+  h1 span { color: var(--accent-dark); }
+  .sub { font-size: 0.85rem; color: var(--muted); font-weight: 300; margin-bottom: 2rem; line-height: 1.5; }
+  .sub code { font-family: var(--mono); font-size: 0.8rem; background: var(--bg); padding: 0.1em 0.3em; border-radius: 2px; border: 1px solid var(--border); }
+  label { display: block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+  input[type="password"] { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-family: var(--mono); font-size: 0.85rem; color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 1.2rem; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,190,95,0.15); }
+  .btn { width: 100%; padding: 0.75rem 1rem; background: var(--text); color: #fff; border: none; border-radius: var(--radius); font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn:hover:not(:disabled) { background: #333; }
+  .btn:active:not(:disabled) { transform: scale(0.99); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .dropzone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: var(--bg); position: relative; margin-bottom: 1.2rem; }
+  .dropzone.dragover { border-color: var(--accent); background: rgba(255,190,95,0.06); }
+  .dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { width: 28px; height: 28px; margin: 0 auto 0.6rem; opacity: 0.3; }
+  .drop-text { font-size: 0.82rem; color: var(--muted); font-weight: 300; pointer-events: none; }
+  .drop-text strong { color: var(--text); font-weight: 400; }
+  #file-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.2rem; }
+  .file-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.7rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--mono); font-size: 0.75rem; animation: fadeUp 0.2s ease both; }
+  .file-item.chunked { border-color: rgba(255,190,95,0.5); }
+  .file-left { display: flex; flex-direction: column; gap: 0.15rem; overflow: hidden; max-width: 78%; }
+  .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-meta { color: var(--muted); font-size: 0.7rem; }
+  .file-meta.warn { color: var(--accent-dark); }
+  .file-remove { cursor: pointer; color: var(--muted); background: none; border: none; font-size: 1rem; line-height: 1; padding: 0 0.2rem; transition: color 0.15s; flex-shrink: 0; }
+  .file-remove:hover { color: #e05050; }
+
+  /* Per-file progress */
+  .file-progress { height: 2px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 0.35rem; display: none; }
+  .file-progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s ease; }
+
+  /* Overall progress */
+  .progress-wrap { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 1.2rem; display: none; }
+  .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+  #status { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem; max-height: 220px; overflow-y: auto; }
+  .msg { padding: 0.6rem 0.8rem; border-radius: var(--radius); font-family: var(--mono); font-size: 0.75rem; animation: fadeUp 0.2s ease both; line-height: 1.5; }
+  .msg.success { background: #f0faf3; border: 1px solid #b6e8c4; color: #2d7a48; }
+  .msg.error   { background: #fff5f5; border: 1px solid #f5c0c0; color: #b33a3a; }
+  .msg.info    { background: #fffbf0; border: 1px solid #ffe0a0; color: #8a6200; }
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.3s ease both; }
+  .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- LOGIN -->
+  <div id="login" class="screen active">
+    <div class="badge">/ secure upload</div>
+    <h1>Drop files<br>into <span>the repo</span></h1>
+    <p class="sub">Enter the upload password to continue.</p>
+    <label for="pw">Password</label>
+    <input type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn" id="login-btn" onclick="checkPassword()">Unlock</button>
+    <div id="login-error"></div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div id="uploader" class="screen">
+    <div class="badge">/ file upload</div>
+    <h1>Upload to<br><span id="repo-label"></span></h1>
+    <p class="sub">Files land in <code id="folder-label"></code>. Large files are split automatically.</p>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="file-input" multiple>
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 20h16"/>
+      </svg>
+      <div class="drop-text"><strong>Choose files</strong> or drag here</div>
+    </div>
+    <div id="file-list"></div>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <button class="btn" id="upload-btn" onclick="uploadFiles()" disabled>Upload files</button>
+    <div id="status"></div>
+  </div>
+
+</div>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CONFIG — edit these four values, then follow SETUP below
+// ═══════════════════════════════════════════════════════════════
+const OWNER         = 'tylervinson';
+const REPO          = 'tylervinson';
+const UPLOAD_FOLDER = 'clairabarbera';
+const CHUNK_SIZE    = 20 * 1024 * 1024; // 20 MB per chunk
+
+// Encrypted token blob — generated by running setupEncryption() in the
+// browser console (see SETUP instructions in the comment below).
+// Replace this entire object with the output of that function.
+const ENCRYPTED_TOKEN = {
+  "salt": "/mZt7AWueLyK/igtcUGOSw==",
+  "iv": "KxuxsAeP31Dj9dtq",
+  "ct": "lAXMMRgWX2El9SdEoN+10rCgo4XRQzDf1U1wWOiz9yj5qeQ01GZWppx/UrHY1Qd9IkSL/2lZ6R4="
+};
+// ═══════════════════════════════════════════════════════════════
+
+// One-time setup helper — run in console, then remove if you like
+async function setupEncryption(token, password) {
+  const enc  = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const b64  = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const keyMat = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key    = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:200000, hash:'SHA-256' },
+    keyMat, { name:'AES-GCM', length:256 }, false, ['encrypt']
+  );
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, enc.encode(token));
+  const result = { salt: b64(salt), iv: b64(iv), ct: b64(ct) };
+  console.log('%cPaste this as ENCRYPTED_TOKEN:', 'color:#e6a53e;font-weight:bold');
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+// ── Auth ──────────────────────────────────────────────────────
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+async function checkPassword() {
+  const pw    = document.getElementById('pw').value;
+  const btn   = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  if (!pw) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Unlocking…';
+  errEl.innerHTML = '';
+  try {
+    const token = await decryptToken(pw);
+    sessionStorage.setItem('upload_auth', '1');
+    sessionStorage.setItem('upload_token', token);
+    showUploader(token);
+  } catch (_) {
+    btn.disabled = false;
+    btn.textContent = 'Unlock';
+    errEl.innerHTML = '<div class="msg error" style="margin-top:1rem">Incorrect password.</div>';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+  }
+}
+
+async function decryptToken(password) {
+  const enc    = new TextEncoder();
+  const b64to  = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const keyMat = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key    = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64to(ENCRYPTED_TOKEN.salt), iterations:200000, hash:'SHA-256' },
+    keyMat, { name:'AES-GCM', length:256 }, false, ['decrypt']
+  );
+  const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64to(ENCRYPTED_TOKEN.iv) }, key, b64to(ENCRYPTED_TOKEN.ct));
+  return new TextDecoder().decode(plain);
+}
+
+function showUploader(token) {
+  window._ghToken = token;
+  document.getElementById('login').classList.remove('active');
+  document.getElementById('uploader').classList.add('active');
+  document.getElementById('repo-label').textContent = `${OWNER}/${REPO}`;
+  document.getElementById('folder-label').textContent = `/${UPLOAD_FOLDER}/`;
+}
+
+if (sessionStorage.getItem('upload_auth') === '1') {
+  showUploader(sessionStorage.getItem('upload_token'));
+}
+
+// ── File handling ─────────────────────────────────────────────
+let selectedFiles = [];
+const dropzone  = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const fileList  = document.getElementById('file-list');
+const uploadBtn = document.getElementById('upload-btn');
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); addFiles([...e.dataTransfer.files]); });
+fileInput.addEventListener('change', () => { addFiles([...fileInput.files]); fileInput.value = ''; });
+
+function addFiles(f) {
+  f.forEach(x => { if (!selectedFiles.find(s => s.name===x.name && s.size===x.size)) selectedFiles.push(x); });
+  render();
+}
+function removeFile(i) { selectedFiles.splice(i,1); render(); }
+
+function render() {
+  fileList.innerHTML = '';
+  selectedFiles.forEach((f,i) => {
+    const chunked  = f.size > CHUNK_SIZE;
+    const numChunks = Math.ceil(f.size / CHUNK_SIZE);
+    const el = document.createElement('div');
+    el.className = 'file-item' + (chunked ? ' chunked' : '');
+    el.id = `fi-${i}`;
+    el.innerHTML = `
+      <div class="file-left">
+        <span class="file-name">${esc(f.name)}</span>
+        <span class="file-meta ${chunked?'warn':''}">
+          ${fmt(f.size)}${chunked ? ` · split into ${numChunks} parts` : ''}
+        </span>
+        <div class="file-progress" id="fp-${i}">
+          <div class="file-progress-bar" id="fpb-${i}"></div>
+        </div>
+      </div>
+      <button class="file-remove" onclick="removeFile(${i})">×</button>`;
+    fileList.appendChild(el);
+  });
+  uploadBtn.disabled = !selectedFiles.length;
+}
+
+function fmt(b) { return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':b<1073741824?(b/1048576).toFixed(1)+' MB':(b/1073741824).toFixed(2)+' GB'; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Upload ────────────────────────────────────────────────────
+async function uploadFiles() {
+  if (!selectedFiles.length) return;
+  const token    = window._ghToken;
+  const statusEl = document.getElementById('status');
+  const progWrap = document.getElementById('progress-wrap');
+  const progBar  = document.getElementById('progress-bar');
+
+  statusEl.innerHTML = '';
+  progWrap.style.display = 'block';
+  progBar.style.width = '0%';
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = 'Uploading…';
+
+  // Count total chunks across all files for overall progress
+  const totalChunks = selectedFiles.reduce((acc, f) => acc + Math.ceil(f.size / CHUNK_SIZE), 0);
+  let doneChunks = 0;
+
+  const failed = [];
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file    = selectedFiles[i];
+    const chunked = file.size > CHUNK_SIZE;
+    const fpEl    = document.getElementById(`fp-${i}`);
+    const fpbEl   = document.getElementById(`fpb-${i}`);
+
+    if (fpEl) fpEl.style.display = 'block';
+
+    try {
+      if (!chunked) {
+        // ── Single upload ──
+        const inf = addMsg(statusEl, 'info', `Uploading ${file.name}…`);
+        const b64 = await sliceToB64(file, 0, file.size);
+        await ghPut(token, `${UPLOAD_FOLDER}/${file.name}`, b64, `upload: ${file.name}`);
+        inf.remove();
+        addMsg(statusEl, 'success', `${file.name} — uploaded`);
+        if (fpbEl) fpbEl.style.width = '100%';
+        doneChunks++;
+
+      } else {
+        // ── Chunked upload ──
+        const numChunks = Math.ceil(file.size / CHUNK_SIZE);
+        const inf = addMsg(statusEl, 'info', `${file.name} — uploading part 1 of ${numChunks}…`);
+
+        for (let c = 0; c < numChunks; c++) {
+          const start    = c * CHUNK_SIZE;
+          const end      = Math.min(start + CHUNK_SIZE, file.size);
+          const partName = `${file.name}.part${String(c+1).padStart(3,'0')}`;
+          const b64      = await sliceToB64(file, start, end);
+
+          inf.textContent = `${file.name} — uploading part ${c+1} of ${numChunks}…`;
+          await ghPut(token, `${UPLOAD_FOLDER}/${partName}`, b64, `upload: ${partName}`);
+
+          doneChunks++;
+          if (fpbEl) fpbEl.style.width = `${((c+1)/numChunks)*100}%`;
+          progBar.style.width = `${(doneChunks/totalChunks)*100}%`;
+        }
+
+        // Upload manifest
+        const manifest = [
+          `filename=${file.name}`,
+          `parts=${numChunks}`,
+          `size=${file.size}`,
+          `assembled_with=cat ${file.name}.part* > ${file.name}`,
+        ].join('\n');
+        const manifestB64 = btoa(unescape(encodeURIComponent(manifest)));
+        await ghPut(token, `${UPLOAD_FOLDER}/${file.name}.parts`, manifestB64, `upload: ${file.name}.parts manifest`);
+
+        inf.remove();
+        addMsg(statusEl, 'success', `${file.name} — ${numChunks} parts uploaded`);
+      }
+
+    } catch(err) {
+      addMsg(statusEl, 'error', `${file.name} — ${err.message}`);
+      failed.push(file.name);
+    }
+
+    progBar.style.width = `${(doneChunks/totalChunks)*100}%`;
+  }
+
+  if (!failed.length) {
+    selectedFiles = []; render();
+    uploadBtn.textContent = 'Done ✓';
+    setTimeout(() => { uploadBtn.textContent = 'Upload files'; progWrap.style.display='none'; }, 3000);
+  } else {
+    selectedFiles = selectedFiles.filter(f => failed.includes(f.name)); render();
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = 'Retry failed';
+  }
+}
+
+// Read a byte slice of a File as base64
+function sliceToB64(file, start, end) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file.slice(start, end));
+  });
+}
+
+// PUT a file to GitHub Contents API, handling existing file SHA
+async function ghPut(token, path, b64content, message) {
+  const url  = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  const hdrs = { Authorization:`token ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' };
+  let sha;
+  try { const c = await fetch(url,{headers:hdrs}); if(c.ok) sha=(await c.json()).sha; } catch(_){}
+  const res = await fetch(url, {
+    method: 'PUT', headers: hdrs,
+    body: JSON.stringify({ message, content: b64content, ...(sha?{sha}:{}) })
+  });
+  if (!res.ok) throw new Error((await res.json()).message || res.statusText);
+}
+
+function addMsg(c, type, text) {
+  const el = document.createElement('div');
+  el.className = `msg ${type}`;
+  el.textContent = text;
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+  return el;
+}
+</script>
+</body>
+</html>

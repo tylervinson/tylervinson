@@ -3,252 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Using the Extension - Sitecore Widget Editor</title>
+    <title>Using the Extension — Sitecore Widget Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
-        header { position: relative; }
-        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
-        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
-        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
-        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
-        .tab-nav-link:hover { color: #666; }
-        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-        .content-toggle { display: flex; gap: 24px; border-bottom: 1px solid #e0e0e0; margin-bottom: 40px; }
-        .toggle-button { padding: 12px 0; background: none; border: none; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: #999; cursor: pointer; position: relative; transition: color 0.2s; }
-        .toggle-button.active { color: #1a1a1a; }
-        .toggle-button.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: #1a1a1a; }
-        .content-wrapper { display: flex; gap: 48px; align-items: flex-start; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 8px; overflow: hidden; flex-shrink: 0; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .video-container video { width: 100%; height: 100%; object-fit: contain; }
-        .content-wrapper.split-view .video-container { width: 55%; }
-        .steps-container { flex: 1; opacity: 0; transform: translateX(20px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; max-width: 0; overflow: hidden; }
-        .content-wrapper.split-view .steps-container { opacity: 1; transform: translateX(0); pointer-events: auto; max-width: 100%; }
-        .content-wrapper.video-only .steps-container { display: none; }
-        .steps { display: flex; flex-direction: column; padding-bottom: 40px; }
-        .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f0f0f0; transition: opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease, border-radius 0.3s ease; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 64px; }
+        .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+        .subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+        .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; white-space: nowrap; }
+        .tab-nav-link:hover { color: #aaa; }
+        .tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+        .download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-1px); }
+        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+
+        /* ── Sections ── */
+        .section { margin-bottom: 96px; }
+        .section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        .section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+        .section > p { font-size: 15px; color: #888; line-height: 1.75; margin-bottom: 12px; }
+
+        /* ── Video / Steps toggle ── */
+        .content-toggle {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #2e2e2e;
+            margin-bottom: 32px;
+        }
+        .toggle-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            cursor: pointer;
+            position: relative;
+            bottom: -1px;
+            transition: color 0.2s;
+        }
+        .toggle-button:hover { color: #aaa; }
+        .toggle-button.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+
+        /* ── Video + steps layout ── */
+        .content-wrapper {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+        .video-container {
+            width: 100%;
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+        .content-wrapper.split-view .video-container { width: 58%; }
+
+        .steps-container {
+            flex: 1;
+            min-width: 0;
+            opacity: 0;
+            transform: translateX(16px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+            overflow: hidden;
+            max-width: 0;
+        }
+        .content-wrapper.split-view .steps-container {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+            max-width: 600px;
+        }
+
+        /* ── Video steps list ── */
+        .vsteps { display: flex; flex-direction: column; gap: 0; }
+        .vstep {
+            display: flex;
+            gap: 14px;
+            padding: 14px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #242424;
+        }
+        .vstep:last-child { border-bottom: none; }
+        .vstep:hover { background: #1e1e1e; }
+        .vstep.active {
+            background: #1e1e1e;
+            border-bottom-color: transparent;
+        }
+        .vstep-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #242424;
+            border: 1px solid #2e2e2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            flex-shrink: 0;
+            transition: all 0.25s;
+        }
+        .vstep.active .vstep-num {
+            background: #FFBE5F;
+            border-color: #FFBE5F;
+            color: #1a1a1a;
+            transform: scale(1.1);
+        }
+        .vstep-body { min-width: 0; }
+        .vstep-body h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 3px;
+            transition: color 0.2s;
+        }
+        .vstep.active .vstep-body h3 { color: #e0e0e0; }
+        .vstep-body p {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.6;
+            transition: color 0.2s;
+        }
+        .vstep.active .vstep-body p { color: #777; }
+        .vstep-time {
+            font-size: 10px;
+            color: #3a3a3a;
+            font-family: 'SF Mono', monospace;
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+        .vstep.active .vstep-time { color: #FFBE5F; }
+
+        /* ── Steps (written guide) ── */
+        .steps { display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+        .step { display: grid; grid-template-columns: 64px 1fr; gap: 24px; padding: 28px 0; border-bottom: 1px solid #242424; align-items: start; }
         .step:last-child { border-bottom: none; }
-        .step.active { opacity: 1; background: #ffffff; padding: 20px; margin: 0; border-radius: 6px; position: relative; z-index: 99999; }
-        .step-number { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #fff; background: #1a1a1a; border-radius: 50%; transition: all 0.3s ease; }
-        .step.active .step-number { background: #FFBE5F; color: #1a1a1a; transform: scale(1.15); }
-        .step-content h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-        .step-wrapper { position: relative; }
-        .step-shadow { box-shadow: 3px -16px 13px 1px #000000; transition: opacity 0.3s ease; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 90%; height: 1px; z-index: 0; opacity: 0; }
-        .step.active ~ .step-shadow { opacity: 1; }
-        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
-        @media (max-width: 1024px) {
-            .content-wrapper { flex-direction: column; }
-            .content-wrapper.split-view .video-container { width: 100%; }
-            .steps-container { transform: translateY(20px); }
-            .content-wrapper.split-view .steps-container { transform: translateY(0); }
-        }
+        .step-num { width: 40px; height: 40px; border-radius: 50%; background: #242424; border: 1px solid #2e2e2e; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #FFBE5F; flex-shrink: 0; margin-top: 2px; }
+        .step-body h3 { font-size: 18px; font-weight: 500; color: #e0e0e0; margin-bottom: 10px; }
+        .step-body p { font-size: 14px; color: #777; line-height: 1.75; }
+        .step-body p + p { margin-top: 8px; }
+        .step-body .note { margin-top: 12px; background: #1e2118; border: 1px solid #2a3420; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #7dbf82; line-height: 1.6; }
+        .step-body .tip  { margin-top: 12px; background: #1e1e28; border: 1px solid #2a2a40; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #7a9fd4; line-height: 1.6; }
+
+        /* Sub-list */
+        .sub-list { list-style: none; padding: 0; margin-top: 10px; }
+        .sub-list li { padding: 7px 0 7px 18px; position: relative; font-size: 13px; color: #555; border-bottom: 1px solid #242424; line-height: 1.5; }
+        .sub-list li:last-child { border-bottom: none; }
+        .sub-list li::before { content: "→"; position: absolute; left: 0; color: #3a3a3a; font-size: 11px; top: 9px; }
+
+        /* Panel mock */
+        .panel-anatomy { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 24px; }
+        .panel-header-mock { background: #1e1e1e; border-bottom: 1px solid #2a2a2a; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+        .panel-header-mock .mock-icon { width: 8px; height: 8px; border-radius: 50%; background: #FFBE5F; }
+        .panel-header-mock .mock-title { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .panel-header-mock .mock-sub { font-size: 11px; color: #444; margin-left: auto; }
+        .panel-body-mock { padding: 16px; }
+        .panel-section-mock { margin-bottom: 16px; }
+        .panel-section-mock-label { font-size: 10px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+        .panel-item-mock { background: #1e1e1e; border: 1px solid #242424; border-radius: 4px; padding: 10px 12px; margin-bottom: 3px; display: flex; align-items: center; gap: 10px; }
+        .panel-item-mock-icon { width: 20px; height: 20px; background: #242424; border-radius: 3px; flex-shrink: 0; }
+        .panel-item-mock-text { flex: 1; }
+        .panel-item-mock-name { height: 8px; background: #2a2a2a; border-radius: 2px; width: 60%; margin-bottom: 4px; }
+        .panel-item-mock-sub { height: 6px; background: #222; border-radius: 2px; width: 40%; }
+
+        /* UI callout boxes */
+        .ui-callout { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; overflow: hidden; margin-top: 16px; }
+        .ui-callout-header { padding: 16px 20px; border-bottom: 1px solid #242424; }
+        .ui-callout-header h4 { font-size: 14px; font-weight: 600; color: #e0e0e0; }
+        .ui-callout-header p { font-size: 13px; color: #666; margin-top: 4px; }
+        .ui-callout-body { padding: 16px 20px; }
+        .ui-callout-body p { font-size: 13px; color: #777; line-height: 1.7; }
+        .ui-callout-body p + p { margin-top: 8px; }
+
+        /* Update flow */
+        .update-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 24px; }
+        .update-step { background: #1e1e1e; padding: 20px; }
+        .update-step-num { font-size: 11px; font-weight: 600; color: #FFBE5F; margin-bottom: 8px; }
+        .update-step h4 { font-size: 13px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; }
+        .update-step p { font-size: 12px; color: #555; line-height: 1.6; }
+
+        footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #888; }
+
         @media (max-width: 768px) {
-            .container { padding: 40px 20px; }
             h1 { font-size: 36px; }
-            .tab-nav { margin-bottom: 40px; }
-            .tab-nav-link { padding: 12px 12px; font-size: 11px; }
-            .content-toggle { gap: 12px; margin-bottom: 24px; }
-            .toggle-button { padding: 8px 0; font-size: 12px; }
-            .video-container { border-radius: 6px; }
-            .step { padding: 16px 0; gap: 16px; }
-            .step.active { padding: 16px; }
-            .step-number { width: 28px; height: 28px; font-size: 12px; }
-            .step-content h3 { font-size: 14px; }
-            .step-content p { font-size: 13px; }
-            .download-btn { padding: 12px 20px; font-size: 13px; top: -35px; }
-        }
-        @media (max-width: 480px) {
-            .container { padding: 32px 16px; }
-            h1 { font-size: 28px; letter-spacing: -0.5px; }
-            .subtitle { font-size: 16px; margin-bottom: 20px; }
-            .tab-nav { flex-wrap: wrap; gap: 0; margin-bottom: 32px; }
-            .tab-nav-link { padding: 10px 8px; font-size: 10px; }
-            .content-toggle { flex-direction: row; gap: 0; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 20px; background: #ffffff; }
-            .toggle-button { flex: 1; padding: 12px 16px; font-size: 12px; border: none; border-right: 1px solid #e0e0e0; background: #fafafa; }
-            .toggle-button:last-child { border-right: none; }
-            .toggle-button.active { background: #1a1a1a; color: #ffffff; }
-            .toggle-button.active::after { display: none; }
-            .step { padding: 12px 0; gap: 12px; }
-            .step.active { padding: 12px; margin: 0; }
-            .step-number { width: 24px; height: 24px; font-size: 11px; }
-            .step-content h3 { font-size: 13px; margin-bottom: 2px; }
-            .step-content p { font-size: 12px; line-height: 1.5; }
-            .steps { padding-bottom: 30px; }
-            .download-btn { padding: 10px 16px; font-size: 12px; top: -30px; right: 16px; }
-        }
-        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
-        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .tab-nav-dropdown { display: none; }
-        @media (max-width: 480px) {
-            header { position: relative; }
-            .download-btn { position: static; display: block; width: fit-content; margin: 20px 0; }
-            .tab-nav { display: none; flex-direction: column; gap: 0; margin: 0; border: none; }
-            .tab-nav.mobile-open { display: flex; }
-            .tab-nav-link { padding: 12px 0; border: none; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
-            .tab-nav-link.active { border-bottom: 2px solid #1a1a1a; color: #1a1a1a; }
-            .tab-nav-dropdown { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; margin-bottom: 16px; cursor: pointer; }
-            .tab-nav-dropdown::after { content: '▼'; font-size: 10px; margin-left: 8px; transition: transform 0.3s ease; }
-            .tab-nav-dropdown.open::after { transform: rotate(180deg); }
+            .step { grid-template-columns: 48px 1fr; }
+            .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+            .update-flow { grid-template-columns: repeat(2, 1fr); }
+            .content-wrapper.split-view { flex-direction: column; }
+            .content-wrapper.split-view .video-container { width: 100%; }
+            .content-wrapper.split-view .steps-container { max-width: 100%; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <p class="eyebrow" style="position: absolute;">Sitecore Widget Editor</p>
-            <h1>Using the Extension</h1>
-            <p class="subtitle">How to edit widget content in the Sitecore Content Editor</p>
-            <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
-            <div class="tab-nav-dropdown" onclick="toggleMobileNav(event)">Navigation</div>
-            <nav class="tab-nav">
-                <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-                <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
-                <a href="specs.html" class="tab-nav-link">Technical Specs</a>
-                <a href="using-the-extension.html" class="tab-nav-link active">Using the Extension</a>
-            </nav>
-        </header>
+<div class="container">
+    <header>
+        <p class="eyebrow">Sitecore Widget Editor</p>
+        <h1>Using the Extension</h1>
+        <p class="subtitle">Installation, the dashboard, editing widgets, and handling updates.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link active">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link">Install</a>
+        </nav>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
+    </header>
+
+    <!-- VIDEO TUTORIAL -->
+    <section class="section">
+        <div class="section-label">Video Tutorial</div>
+        <h2>Watch the walkthrough</h2>
+        <p>A full walkthrough of installing and using the extension. Switch to the step-by-step view to follow along — each step is synced to the video and clickable to jump to that point.</p>
 
         <div class="content-toggle">
-            <button class="toggle-button active" onclick="toggleContent('video')">Video Tutorial</button>
-            <button class="toggle-button" onclick="toggleContent('steps')">Step-by-Step Guide</button>
+            <button class="toggle-button active" id="btn-video" onclick="toggleContent('video')">Video only</button>
+            <button class="toggle-button" id="btn-steps" onclick="toggleContent('steps')">Video + steps</button>
         </div>
 
         <div id="usage-content" class="content-wrapper video-only">
-            <div class="video-container">
-                    <video controls>
-                        <source src="how-to-use-widget.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                <div class="steps-container">
-                    <div class="steps">
-                        <div class="step-wrapper"><div class="step" data-timestamp="0" style="cursor: pointer;">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h3>Open the Content Editor</h3>
-                                <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree on the left.</p>
-                            </div>
+            <div class="video-container" id="videoContainer">
+                <video id="tutorialVideo" controls>
+                    <source src="how-to-use-widget.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="steps-container" id="stepsContainer">
+                <div class="vsteps" id="vstepsList">
+                    <div class="vstep active" data-timestamp="0">
+                        <div class="vstep-num">1</div>
+                        <div class="vstep-body">
+                            <h3>Open the Content Editor</h3>
+                            <p>Navigate to Sitecore's Content Editor and find the component you want to edit in the content tree.</p>
+                            <div class="vstep-time">0:00</div>
                         </div>
-<div class="step-shadow"></div>
-</div>
-                        <div class="step-wrapper"><div class="step" data-timestamp="10" style="cursor: pointer;">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h3>Select the Component</h3>
-                                <p>Click the component item in the tree. The Quick Info panel on the right will show the item ID, name, and path — the extension reads this automatically.</p>
-                            </div>
+                    </div>
+                    <div class="vstep" data-timestamp="9">
+                        <div class="vstep-num">2</div>
+                        <div class="vstep-body">
+                            <h3>Select the Component</h3>
+                            <p>Click the item in the tree. The Quick Info panel shows the item ID — the extension reads this automatically.</p>
+                            <div class="vstep-time">0:09</div>
                         </div>
-<div class="step-shadow"></div>
-</div>
-                        <div class="step-wrapper"><div class="step" data-timestamp="26" style="cursor: pointer;">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h3>Open the Extension</h3>
-                                <p>Click the extension icon in your Chrome toolbar to open the sidebar panel. It will detect the current component and populate the edit form immediately.</p>
-                            </div>
+                    </div>
+                    <div class="vstep" data-timestamp="25">
+                        <div class="vstep-num">3</div>
+                        <div class="vstep-body">
+                            <h3>Open the Extension</h3>
+                            <p>Click the extension icon in your Chrome toolbar. The sidebar opens and populates the editor form immediately.</p>
+                            <div class="vstep-time">0:25</div>
                         </div>
-<div class="step-shadow"></div>
-</div>
-                        <div class="step-wrapper"><div class="step" data-timestamp="38" style="cursor: pointer;">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h3>Edit the Fields</h3>
-                                <p>Update any field values in the form. Repeating items like plan cards or stat blocks are grouped individually. Standalone fields like headings appear at the top. When finished click Apply Changes. The extension silently opens the HTML editor, writes the updated markup, and closes it — no manual WYSIWYG interaction needed.</p>
-                            </div>
+                    </div>
+                    <div class="vstep" data-timestamp="38">
+                        <div class="vstep-num">4</div>
+                        <div class="vstep-body">
+                            <h3>Edit the Fields</h3>
+                            <p>Update field values in the form. Click Apply Changes — the extension silently opens the HTML editor, writes the markup, and closes it.</p>
+                            <div class="vstep-time">0:38</div>
                         </div>
-<div class="step-shadow"></div>
-</div>
-                        <div class="step-wrapper"><div class="step" data-timestamp="67" style="cursor: pointer;">
-                            <div class="step-number">5</div>
-                            <div class="step-content">
-                                <h3>Save in Sitecore</h3>
-                                <p>Click Save in the Content Editor toolbar. Your changes are now live in Sitecore.</p>
-                            </div>
+                    </div>
+                    <div class="vstep" data-timestamp="67">
+                        <div class="vstep-num">5</div>
+                        <div class="vstep-body">
+                            <h3>Save in Sitecore</h3>
+                            <p>Click Save in the Content Editor toolbar. Your changes are now saved and ready to publish.</p>
+                            <div class="vstep-time">1:06</div>
                         </div>
-<div class="step-shadow"></div>
-</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE DASHBOARD -->
+    <section class="section">
+        <div class="section-label">The Dashboard</div>
+        <h2>What opens when you click the icon</h2>
+        <p>When the sidebar opens on a Sitecore Content Editor page, the first thing you see is the dashboard — not the widget editor. The dashboard is a lightweight content management hub.</p>
+
+        <div class="panel-anatomy">
+            <div class="panel-header-mock">
+                <div class="mock-icon"></div>
+                <div class="mock-title">Widget Editor</div>
+                <div class="mock-sub">dashboard</div>
+            </div>
+            <div class="panel-body-mock">
+                <div class="panel-section-mock">
+                    <div class="panel-section-mock-label">Recently Viewed</div>
+                    <div class="panel-item-mock"><div class="panel-item-mock-icon"></div><div class="panel-item-mock-text"><div class="panel-item-mock-name"></div><div class="panel-item-mock-sub"></div></div></div>
+                    <div class="panel-item-mock"><div class="panel-item-mock-icon"></div><div class="panel-item-mock-text"><div class="panel-item-mock-name" style="width:45%"></div><div class="panel-item-mock-sub" style="width:30%"></div></div></div>
+                </div>
+                <div class="panel-section-mock">
+                    <div class="panel-section-mock-label">Checked Out</div>
+                    <div class="panel-item-mock"><div class="panel-item-mock-icon"></div><div class="panel-item-mock-text"><div class="panel-item-mock-name" style="width:70%"></div><div class="panel-item-mock-sub" style="width:50%"></div></div></div>
+                </div>
+            </div>
         </div>
 
-        <footer>Sitecore Widget Editor Documentation</footer>
-    </div>
+        <div class="ui-callout" style="margin-top:24px">
+            <div class="ui-callout-header">
+                <h4>Search</h4>
+                <p>Full-text Sitecore content search from the sidebar</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>Type in the search bar at the top of the dashboard to search across Sitecore content. Results appear as clickable items — click any result to navigate the Content Editor to that item directly.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header">
+                <h4>Recently Viewed</h4>
+                <p>Items you've navigated to during this session</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>The sidebar records each item you've opened and displays the most recent 10 in the dashboard. Click any item to navigate back to it in the Content Editor. Recents persist across sessions using Chrome's local storage.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header">
+                <h4>Checked Out</h4>
+                <p>All items currently locked by any user</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>The "Checked Out" panel fetches all items currently locked in Sitecore and lists them by item name and path. This is useful for seeing at a glance what's in progress across the team without navigating to each item individually.</p>
+            </div>
+        </div>
+    </section>
 
-    <script>
-        function toggleContent(type) {
-            var wrapper = document.getElementById('usage-content');
-            var buttons = document.querySelectorAll('.toggle-button');
-            if (type === 'video') {
-                wrapper.classList.remove('split-view');
-                wrapper.classList.add('video-only');
-                buttons[0].classList.add('active');
-                buttons[1].classList.remove('active');
-            } else {
-                wrapper.classList.remove('video-only');
-                wrapper.classList.add('split-view');
-                buttons[0].classList.remove('active');
-                buttons[1].classList.add('active');
+    <!-- EDITING A WIDGET -->
+    <section class="section">
+        <div class="section-label">Editing Widgets</div>
+        <h2>From detection to save</h2>
+        <p>When the sidebar detects a registered widget on the current Sitecore item, it switches from the dashboard to the widget editor view automatically.</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h3>Navigate to the component in the Content Editor</h3>
+                    <p>In Sitecore's Content Editor, select the item in the tree that contains the widget in one of its Rich Text fields. The Quick Info panel on the right will show the item name, ID, and path — the extension reads the item ID from there automatically.</p>
+                    <div class="tip">The extension works in the Content Editor only. It does not support Experience Editor.</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h3>Open the sidebar</h3>
+                    <p>Click the extension icon in the Chrome toolbar. The sidebar opens and immediately fetches the latest registry from the server, then scans all Rich Text fields on the current item via the SSC API.</p>
+                    <p>If a registered widget is found, the editor form loads. If none is found, a "no widgets detected" message is shown. If you've navigated to a different item since the last scan, click the refresh button (↻) in the sidebar footer.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h3>Edit fields in the form</h3>
+                    <p>The widget editor form is organized by the registry definition:</p>
+                    <ul class="sub-list">
+                        <li><strong>Standalone fields</strong> — appear at the top. These are single non-repeating elements like headings or subheadings.</li>
+                        <li><strong>Repeat groups</strong> — each repeating item (plan, card, meeting) gets its own collapsible labeled group. Groups are named automatically: "Plan 1", "Card 2", etc. If a <code>groupLabelField</code> is set, the group header shows the current value of that field live as you type.</li>
+                        <li><strong>Rich text fields</strong> — open a Quill editor inline. Supports bold, italic, links, ordered and unordered lists.</li>
+                        <li><strong>Date/time fields</strong> — render a native <code>datetime-local</code> picker.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h3>Click Apply Changes</h3>
+                    <p>The extension silently automates the WYSIWYG HTML editor: it fetches the current field HTML via the SSC API, applies all edits using the registry selectors, serializes the result, then opens the "Edit HTML" dialog, pastes the updated markup, and accepts. The entire cycle completes in under a second with no visible modal.</p>
+                    <div class="note">Data attributes that require syncing (like <code>data-target</code> on the Animated Cards widget) are updated automatically alongside the visible text content.</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                    <h3>Save in Sitecore</h3>
+                    <p>Click <strong style="color:#e0e0e0;">Save</strong> in the Content Editor toolbar (or Ctrl+S). The extension's bridge layer has already fired all four change-notification strategies, so the Save button is active. Publish the item as normal when ready.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MANAGING REPEAT ITEMS -->
+    <section class="section">
+        <div class="section-label">Managing Repeat Items</div>
+        <h2>Adding, reordering, and removing items</h2>
+
+        <div class="ui-callout" style="margin-top:0">
+            <div class="ui-callout-header">
+                <h4>Adding a new item</h4>
+                <p>e.g. adding a fourth plan card or a new meeting</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>At the bottom of the repeat group list, click <strong style="color:#e0e0e0;">+ Add [Item]</strong>. A new group appears with blank fields. Fill in the fields and click Apply Changes. The extension appends the new item to the HTML after all existing items.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header">
+                <h4>Removing an item</h4>
+                <p>e.g. removing an expired plan or past meeting</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>Click the <strong style="color:#e0e0e0;">×</strong> button on a group header to mark it for removal. The group collapses and is excluded when you click Apply Changes. The item is removed from the HTML on save.</p>
+                <p>For the Zoom Meetings widget, past meetings are flagged visually in the sidebar using the <code>data-end</code> attribute — items where the end date is in the past are shown with a faded style to indicate they can safely be removed.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- UPDATE WORKFLOW -->
+    <section class="section">
+        <div class="section-label">Updates</div>
+        <h2>Handling extension and registry updates</h2>
+        <p>There are two types of updates: registry updates (new widgets or field changes) and extension updates (new extension code).</p>
+
+        <div class="ui-callout" style="margin-top:0;margin-bottom:16px">
+            <div class="ui-callout-header">
+                <h4>Registry updates — automatic, no reinstall</h4>
+                <p>New widgets, modified fields, updated selectors</p>
+            </div>
+            <div class="ui-callout-body">
+                <p>The registry is fetched fresh every time the sidebar opens. If the <code>version</code> string in the registry changes, a gold badge appears on the extension icon and an in-sidebar banner displays with a note about the update. No action is required from the user — the new registry is already active.</p>
+            </div>
+        </div>
+
+        <p>Extension updates (new zip) follow a four-step process:</p>
+        <div class="update-flow">
+            <div class="update-step">
+                <div class="update-step-num">Step 1</div>
+                <h4>Badge appears</h4>
+                <p>A gold badge on the extension icon and a banner in the sidebar indicate a new extension version is available, with a download link.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 2</div>
+                <h4>Download ZIP</h4>
+                <p>Visit the <a href="install.html" style="color:#FFBE5F;">Install page</a> to download the latest <code>.zip</code>. Extract it to a folder.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 3</div>
+                <h4>Remove old extension</h4>
+                <p>Go to <code>chrome://extensions</code> and remove the old version of Sitecore Widget Editor before loading the new one.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 4</div>
+                <h4>Load unpacked</h4>
+                <p>Click "Load unpacked" and select the newly extracted folder. The extension reloads with the new version — settings and recents are preserved in Chrome storage.</p>
+            </div>
+        </div>
+        <div style="margin-top:16px; background:#1e1e1e; border:1px solid #2a2a2a; border-radius:6px; padding:16px 20px; font-size:13px; color:#666; line-height:1.7;">
+            <strong style="color:#888;">Why not the Chrome Web Store?</strong> — The extension is an internal tool that calls a Sitecore-specific SSC API with a hardcoded API key scoped to a specific Sitecore instance. Publishing it publicly would expose that key and would serve no purpose for users outside that environment. Load-unpacked distribution is intentional.
+        </div>
+    </section>
+
+    <!-- TROUBLESHOOTING -->
+    <section class="section">
+        <div class="section-label">Troubleshooting</div>
+        <h2>Common issues</h2>
+
+        <div class="ui-callout" style="margin-top:0">
+            <div class="ui-callout-header"><h4>"No widgets detected" — but a widget is on the page</h4></div>
+            <div class="ui-callout-body">
+                <p>This means the widget's root CSS class isn't in the registry, or the item selected in the Content Editor tree isn't the item that contains the Rich Text field with the widget HTML.</p>
+                <p>Check that you're on the correct item (the one whose Rich Text field holds the widget markup) and that the widget's class is registered in <code>widget-registry.json</code>.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header"><h4>Apply Changes completes but Sitecore Save button stays inactive</h4></div>
+            <div class="ui-callout-body">
+                <p>The bridge fires four change-notification strategies, but some Sitecore configurations may not respond to all of them. Try clicking inside the Rich Text field in the Content Editor after applying, then saving manually. If the issue is persistent, the bridge strategies may need tuning for your specific Sitecore version.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header"><h4>The sidebar shows a startup error or blank white panel</h4></div>
+            <div class="ui-callout-body">
+                <p>This usually means the extension loaded from a folder where one of the bundled files is missing or corrupted. Re-extract the ZIP to a clean folder and reload via <code>chrome://extensions</code>. The most common cause is a partial extraction or a moved folder after loading.</p>
+            </div>
+        </div>
+        <div class="ui-callout">
+            <div class="ui-callout-header"><h4>Rich text fields show as plain text inputs</h4></div>
+            <div class="ui-callout-body">
+                <p>This means <code>quill.js</code> failed to load. Check that the extension folder contains <code>quill.js</code> and <code>quill.snow.css</code> at the root. If Quill fails to initialize, the field falls back to a plain text input so data is not lost — but formatting is unavailable.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        Sitecore Widget Editor v4.4.6 — Registry v2.3.5 &nbsp;·&nbsp;
+        <a href="overview.html">Overview</a> &nbsp;·&nbsp;
+        <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
+        <a href="specs.html">Specs</a> &nbsp;·&nbsp;
+        <a href="using-the-extension.html">Using the Extension</a> &nbsp;·&nbsp;
+        <a href="demo.html">Demo</a> &nbsp;·&nbsp;
+        <a href="install.html">Install</a>
+    </footer>
+</div>
+
+<script>
+    // ── Toggle between video-only and video+steps ────────────────────────────
+    function toggleContent(mode) {
+        var wrapper  = document.getElementById('usage-content');
+        var btnVideo = document.getElementById('btn-video');
+        var btnSteps = document.getElementById('btn-steps');
+
+        if (mode === 'video') {
+            wrapper.classList.remove('split-view');
+            wrapper.classList.add('video-only');
+            btnVideo.classList.add('active');
+            btnSteps.classList.remove('active');
+        } else {
+            wrapper.classList.remove('video-only');
+            wrapper.classList.add('split-view');
+            btnSteps.classList.add('active');
+            btnVideo.classList.remove('active');
+        }
+    }
+
+    // ── Video ↔ steps sync ───────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        var video = document.getElementById('tutorialVideo');
+        var vsteps = document.querySelectorAll('.vstep');
+
+        if (!video) return;
+
+        function updateActiveStep() {
+            var t = video.currentTime;
+            var active = null;
+
+            vsteps.forEach(function (step, i) {
+                var ts   = parseInt(step.getAttribute('data-timestamp'), 10);
+                var next = vsteps[i + 1];
+                var nextTs = next ? parseInt(next.getAttribute('data-timestamp'), 10) : Infinity;
+                if (t >= ts && t < nextTs) active = step;
+            });
+
+            vsteps.forEach(function (s) { s.classList.remove('active'); });
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
 
-        function toggleMobileNav(event) {
-            event.preventDefault();
-            var nav = document.querySelector('.tab-nav');
-            var dropdown = document.querySelector('.tab-nav-dropdown');
-            nav.classList.toggle('mobile-open');
-            dropdown.classList.toggle('open');
-        }
+        video.addEventListener('timeupdate', updateActiveStep);
 
-        // Video sync functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.querySelector('video');
-            const steps = document.querySelectorAll('.step');
-            
-            if (!video) return;
+        // Click a step → jump video to that timestamp
+        vsteps.forEach(function (step) {
+            step.addEventListener('click', function () {
+                var ts = parseInt(this.getAttribute('data-timestamp'), 10);
 
-            function updateActiveStep() {
-                const currentTime = video.currentTime;
-                let activeStep = null;
-
-                // Find the step that should be active based on current time
-                steps.forEach((step, index) => {
-                    const timestamp = parseInt(step.getAttribute('data-timestamp'));
-                    const nextStep = steps[index + 1];
-                    const nextTimestamp = nextStep ? parseInt(nextStep.getAttribute('data-timestamp')) : Infinity;
-
-                    if (currentTime >= timestamp && currentTime < nextTimestamp) {
-                        activeStep = step;
-                    }
-                });
-
-                // Remove active class from all steps
-                steps.forEach(step => step.classList.remove('active'));
-
-                // Add active class to current step
-                if (activeStep) {
-                    activeStep.classList.add('active');
-                    // Smooth scroll into view when step becomes active
-                    activeStep.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                function doSeek() {
+                    video.currentTime = ts;
+                    console.log('doSeek called, ts:', ts, 'currentTime:', video.currentTime);
                 }
-            }
 
-            // Update on video timeupdate
-            video.addEventListener('timeupdate', updateActiveStep);
-            
-            // Optional: Allow clicking a step to jump to that timestamp
-            steps.forEach(step => {
-                step.style.cursor = 'pointer';
-                step.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const timestamp = parseInt(this.getAttribute('data-timestamp'));
-                    if (!isNaN(timestamp)) {
-                        video.currentTime = timestamp;
-                        updateActiveStep();
-                    }
+                if (video.readyState >= 2) {
+                    doSeek();
+                } else {
+                    video.addEventListener('loadeddata', function onLoaded() {
+                        video.removeEventListener('loadeddata', onLoaded);
+                        doSeek();
+                    });
+                }
+
+                video.addEventListener('seeked', function onSeeked() {
+                    video.removeEventListener('seeked', onSeeked);
+                    console.log('seeked fired, currentTime:', video.currentTime);
+                    var p = video.play();
+                    if (p) p.catch(function(e) { console.log('play blocked:', e); });
+                    updateActiveStep();
                 });
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>

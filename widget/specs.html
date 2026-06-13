@@ -3,367 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Technical Specs - Sitecore Widget Editor</title>
+    <title>Technical Specs — Sitecore Widget Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 80px 40px; }
-        header { position: relative; }
-        h1 { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; margin-bottom: 12px; color: #000; }
-        .subtitle { font-size: 18px; color: #666; font-weight: 400; margin-bottom: 32px; }
-        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 64px; }
-        .tab-nav-link { padding: 12px 20px; text-decoration: none; color: #999; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
-        .tab-nav-link:hover { color: #666; }
-        .tab-nav-link.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-        .specs-body { display: flex; flex-direction: column; gap: 80px; }
-        .spec-section { display: grid; grid-template-columns: 280px 1fr; gap: 60px; align-items: start; }
-        .spec-label { font-size: 13px; color: #999; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; padding-top: 4px; position: sticky; top: 40px; }
-        .spec-label h2 { font-size: 22px; font-weight: 600; color: #1a1a1a; text-transform: none; letter-spacing: -0.3px; margin-top: 8px; line-height: 1.3; }
-        .spec-label p { font-size: 14px; color: #888; font-weight: 400; text-transform: none; letter-spacing: 0; margin-top: 8px; line-height: 1.6; }
-        .spec-content { display: flex; flex-direction: column; gap: 32px; }
-        .spec-block { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-        .spec-block-header { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; }
-        .spec-block-header h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-        .spec-block-header p { font-size: 14px; color: #666; margin-top: 4px; line-height: 1.5; }
-        .spec-block-body { padding: 24px; }
-        .spec-block-body p { font-size: 15px; color: #444; line-height: 1.7; }
-        .spec-block-body p + p { margin-top: 12px; }
-        pre { background: #1a1a1a; color: #e0e0e0; padding: 24px; border-radius: 6px; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; }
-        pre .key { color: #FFBE5F; }
-        pre .str { color: #98d9a4; }
-        pre .num { color: #79b8ff; }
-        pre .bool { color: #f97583; }
-        pre .cmt { color: #666; font-style: italic; }
-        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 13px; background: #fff4e6; padding: 2px 6px; border-radius: 3px; border: 1px solid #ffd9a6; color: #1a1a1a; }
-        .field-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        .field-table th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #999; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
-        .field-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; vertical-align: top; color: #444; line-height: 1.5; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 64px; }
+        .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+        .subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+        .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+        .tab-nav-link:hover { color: #aaa; }
+        .tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+        .download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+        .download-btn:hover { background: #FFD495; transform: translateY(-1px); }
+
+        /* Sections */
+        .section { margin-bottom: 96px; }
+        .section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        .section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+        .section > p { font-size: 15px; color: #888; line-height: 1.75; margin-bottom: 12px; }
+
+        /* Spec blocks */
+        .spec-block { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; margin-top: 16px; overflow: hidden; }
+        .spec-block + .spec-block { margin-top: 12px; }
+        .spec-block-header { padding: 20px 24px 0; }
+        .spec-block-header h3 { font-size: 16px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; }
+        .spec-block-header p { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 14px; }
+        .spec-block-body { padding: 0 24px 20px; }
+        .spec-block-body p { font-size: 13px; color: #777; line-height: 1.7; margin-top: 10px; }
+
+        /* Code blocks */
+        pre { background: #141414; border: 1px solid #252525; border-radius: 5px; padding: 20px; margin: 16px 0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+        .key { color: #7aa2d4; }
+        .str { color: #98c379; }
+        .cmt { color: #4a5a4a; font-style: italic; }
+        .num { color: #d19a66; }
+        .bool { color: #c678dd; }
+        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+
+        /* Field table */
+        .field-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+        .field-table th { text-align: left; padding: 8px 12px; background: #141414; color: #555; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252525; }
+        .field-table td { padding: 10px 12px; border-bottom: 1px solid #242424; vertical-align: top; color: #777; line-height: 1.5; }
         .field-table tr:last-child td { border-bottom: none; }
-        .field-table td:first-child { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #1a1a1a; white-space: nowrap; }
-        .field-table td.required { color: #e05a5a; font-size: 12px; }
-        .field-table td.optional { color: #999; font-size: 12px; }
-        .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
-        .tag-required { background: #fff0f0; color: #e05a5a; border: 1px solid #ffd0d0; }
-        .tag-optional { background: #f5f5f5; color: #999; border: 1px solid #e0e0e0; }
-        .divider { border: none; border-top: 1px solid #f0f0f0; margin: 24px 0; }
-        .note { background: #fff9ee; border: 1px solid #ffd9a6; border-radius: 6px; padding: 16px 20px; font-size: 14px; color: #555; line-height: 1.6; }
-        .note strong { color: #1a1a1a; }
-        footer { margin-top: 140px; padding-top: 40px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #999; }
-        @media (max-width: 1024px) {
-            .spec-section { grid-template-columns: 1fr; gap: 24px; }
-            .spec-label { position: static; }
+        .field-table td:first-child { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: #aaa; white-space: nowrap; }
+        .tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+        .tag-required { background: #2e1e1e; color: #e06c75; border: 1px solid #4a2a2a; }
+        .tag-optional { background: #1e2530; color: #61afef; border: 1px solid #2a3545; }
+
+        /* Message type table */
+        .msg-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+        .msg-table th { text-align: left; padding: 8px 12px; background: #141414; color: #555; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252525; }
+        .msg-table td { padding: 10px 12px; border-bottom: 1px solid #242424; vertical-align: top; color: #777; line-height: 1.5; }
+        .msg-table tr:last-child td { border-bottom: none; }
+        .msg-table td:first-child { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: #c678dd; white-space: nowrap; }
+        .msg-table td:nth-child(2) { color: #888; font-size: 12px; }
+
+        /* File roles table */
+        .file-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+        .file-table th { text-align: left; padding: 8px 12px; background: #141414; color: #555; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252525; }
+        .file-table td { padding: 10px 12px; border-bottom: 1px solid #242424; vertical-align: top; color: #777; line-height: 1.5; }
+        .file-table tr:last-child td { border-bottom: none; }
+        .file-table td:first-child { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: #FFBE5F; white-space: nowrap; }
+
+        .note { margin-top: 12px; background: #1e2118; border: 1px solid #2a3420; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #7dbf82; line-height: 1.6; }
+
+        footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #888; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+            pre { font-size: 11px; }
         }
-        .download-btn { display: inline-block; padding: 14px 28px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; transition: all 0.2s ease; position: absolute; top: -40px; right: 0; }
-        .download-btn:hover { background: #FFD495; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <p class="eyebrow" style="position: absolute;">Sitecore Widget Editor</p>
+        <p class="eyebrow">Sitecore Widget Editor</p>
         <h1>Technical Specs</h1>
-        <p class="subtitle">Registry schema, field definitions, and how the extension works</p>
+        <p class="subtitle">Registry schema, field definitions, message types, and the request/response flow.</p>
         <nav class="tab-nav">
             <a href="overview.html" class="tab-nav-link">Extension Overview</a>
             <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
             <a href="specs.html" class="tab-nav-link active">Technical Specs</a>
             <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link">Install</a>
         </nav>
-        <a href="/widget/Sitecore-Widget-Editor.zip" class="download-btn" download>Download Extension</a>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
     </header>
 
-    <div class="specs-body">
+    <!-- REQUEST/RESPONSE FLOW -->
+    <section class="section">
+        <div class="section-label">How It Works</div>
+        <h2>Request &amp; response flow</h2>
+        <p>What happens from the moment the sidebar opens to when Apply Changes is pressed.</p>
 
-        <!-- HOW IT WORKS -->
-        <div class="spec-section">
-            <div class="spec-label">
-                How It Works
-                <h2>Request &amp; Response Flow</h2>
-                <p>What happens from the moment the sidebar opens to when Apply Changes is pressed.</p>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Startup sequence</h3>
+                <p>Every open fetches the latest registry before any Sitecore interaction.</p>
             </div>
-            <div class="spec-content">
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Startup sequence</h3>
-                        <p>Every time the sidebar opens, it fetches the latest registry from the server before doing anything else.</p>
-                    </div>
-                    <div class="spec-block-body">
-                        <p>1. Sidebar opens &rarr; fetches <code>widget-registry.json</code> from the server.</p>
-                        <p>2. Registry loaded &rarr; sidepanel reads the current item ID from the Content Editor's <code>input.scEditorHeaderQuickInfoInput</code> (the Quick Info panel) and sends <code>GET_WIDGETS</code> to the content script.</p>
-                        <p>3. Content script calls the Sitecore SSC API: <code>/sitecore/api/ssc/aggregate/content/Items('{id}')/Fields</code>. It scans every Rich Text field in the response for registered widget CSS classes and returns any matches along with the field's item ID and field ID.</p>
-                        <p>4. If a widget is found, the sidepanel immediately sends <code>GET_WIDGET_DATA</code> — passing the full field definition plus the discovered item ID and field ID.</p>
-                        <p>5. Content script fetches the field HTML again via SSC API, parses it with <code>DOMParser</code>, and reads each field value using the selectors in the definition.</p>
-                        <p>6. Sidepanel builds the form from field definitions and populates it with the current values. No WYSIWYG modal is opened at any point.</p>
-                    </div>
-                </div>
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Apply Changes</h3>
-                        <p>When the user clicks Apply, the sidepanel collects form values and sends them with the full field definition back to the content script.</p>
-                    </div>
-                    <div class="spec-block-body">
-                        <p>The sidepanel collects form values and sends them with the full field definition and field ID to the content script via <code>UPDATE_WIDGET_DATA</code>.</p>
-                        <p>The content script fetches the current field HTML via SSC API, parses it, iterates each field definition, and applies updates — using <code>selector</code> for inline elements, <code>gridSelector</code>/<code>gridCellSelector</code> for comparison table cells, and <code>syncDataAttr</code> for data attributes. It then serializes the modified HTML back to a string.</p>
-                        <p>Finally it programmatically clicks the "Edit HTML" button (not "Show editor"), waits for the textarea to appear, writes the updated HTML string into it, triggers a change event, and clicks Accept. The entire open/write/close cycle completes in under a second with no visible modal interaction for the user.</p>
-                    </div>
-                </div>
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>No item IDs in the registry</h3>
-                    </div>
-                    <div class="spec-block-body">
-                        <p>Sitecore item IDs and field IDs are discovered at runtime — the extension reads the selected item ID from the Content Editor's Quick Info panel and fetches all fields from the SSC API. This means the registry only needs CSS class names and selectors. Moving a widget to a different item or field in Sitecore requires no registry change.</p>
-                    </div>
-                </div>
+            <div class="spec-block-body">
+                <p>1. Sidebar opens → fetches <code>widget-registry.json</code> from the server (no cache).</p>
+                <p>2. Registry loaded → sidepanel reads the current item ID from <code>input.scEditorHeaderQuickInfoInput</code> (the Content Editor's Quick Info panel) and sends <code>GET_WIDGETS</code> to the content script with the full registry.</p>
+                <p>3. Content script calls the SSC API: <code>/sitecore/api/ssc/aggregate/content/Items('{id}')/Fields</code>. It scans every Rich Text field in the response for registered widget CSS classes and returns any matches, including field ID and item ID.</p>
+                <p>4. If a widget is found, sidepanel sends <code>GET_WIDGET_DATA</code> with the full widget definition plus the discovered item and field IDs.</p>
+                <p>5. Content script fetches the field HTML via SSC API again, parses it with <code>DOMParser</code>, and reads each field value using the selectors from the definition.</p>
+                <p>6. Sidepanel builds the editor form from the field definitions and populates it with the current values. No WYSIWYG modal is opened at any point during read.</p>
             </div>
         </div>
 
-
-        <!-- REGISTRY SCHEMA -->
-        <div class="spec-section">
-            <div class="spec-label">
-                Registry Schema
-                <h2>widget-registry.json</h2>
-                <p>The single file that defines every supported widget. Hosted at <code>/widget/widget-registry.json</code>.</p>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Apply Changes</h3>
+                <p>The full write cycle — from form collection to Sitecore save activation.</p>
             </div>
-            <div class="spec-content">
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Top-level structure</h3>
-                    </div>
-                    <div class="spec-block-body">
-<pre>{
-  <span class="key">"version"</span>: <span class="str">"1.3.0"</span>,        <span class="cmt">// checked against extension version for update badge</span>
-  <span class="key">"widgets"</span>: [ ... ]      <span class="cmt">// array of widget definitions</span>
-}</pre>
-                    </div>
-                </div>
+            <div class="spec-block-body">
+                <p>1. Sidepanel collects all form values and sends them with the full field definition and field ID to the content script via <code>UPDATE_WIDGET_DATA</code>.</p>
+                <p>2. Content script fetches the current field HTML via SSC API and parses it with <code>DOMParser</code>.</p>
+                <p>3. It iterates all field definitions, applying updates: <code>selector</code> for standard elements, <code>gridSelector</code>/<code>gridCellSelector</code> for comparison table cells (with <code>{planNum}</code> substitution), and <code>syncDataAttr</code> to keep data attributes in sync with text content.</p>
+                <p>4. The modified DOM is serialized back to an HTML string.</p>
+                <p>5. The content script programmatically clicks the "Edit HTML" button in the WYSIWYG toolbar (not "Show editor"), waits for the textarea to appear, writes the updated HTML string into it, triggers a change event, and clicks Accept. The entire cycle completes in under a second.</p>
+                <p>6. <code>sitecore-bridge.js</code> fires all 4 change-notification strategies to activate the Sitecore Save button.</p>
+            </div>
+        </div>
 
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Widget definition</h3>
-                        <p>One object per widget in the <code>widgets</code> array.</p>
-                    </div>
-                    <div class="spec-block-body">
-<pre>{
-  <span class="key">"class"</span>: <span class="str">"insurance-comparison-tool"</span>,  <span class="cmt">// CSS class on the widget root element</span>
-  <span class="key">"name"</span>: <span class="str">"Insurance Plan Comparison"</span>,    <span class="cmt">// display name in sidebar picker</span>
-  <span class="key">"repeat"</span>: { ... },                   <span class="cmt">// optional — defines repeating items</span>
-  <span class="key">"fields"</span>: [ ... ],                   <span class="cmt">// fields on each repeat item</span>
-  <span class="key">"standaloneFields"</span>: [ ... ]          <span class="cmt">// optional — fields on the widget root</span>
-}</pre>
-                        <table class="field-table" style="margin-top: 20px;">
-                            <thead>
-                                <tr>
-                                    <th>Property</th>
-                                    <th></th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>class</td><td class="required"><span class="tag tag-required">Required</span></td><td>CSS class on the widget's root element. Used to detect the widget on the page.</td></tr>
-                                <tr><td>name</td><td class="required"><span class="tag tag-required">Required</span></td><td>Human-readable label shown in the sidebar widget picker when multiple widgets are on the page.</td></tr>
-                                <tr><td>repeat</td><td class="optional"><span class="tag tag-optional">Optional</span></td><td>Defines a repeating group of items (e.g. plan buttons, stat cards). If omitted, only <code>standaloneFields</code> are used.</td></tr>
-                                <tr><td>fields</td><td class="optional"><span class="tag tag-optional">Optional</span></td><td>Array of field definitions scoped to each repeat item. Required if <code>repeat</code> is defined.</td></tr>
-                                <tr><td>standaloneFields</td><td class="optional"><span class="tag tag-optional">Optional</span></td><td>Array of field definitions scoped to the widget root — headings, descriptions, or any non-repeating element.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>No item IDs or field IDs in the registry</h3>
+            </div>
+            <div class="spec-block-body">
+                <p>Sitecore item IDs and field IDs are discovered at runtime from the Quick Info panel and SSC API. The registry only contains CSS class names and selectors. Moving a widget to a different Sitecore item or renaming a field requires no registry change.</p>
+            </div>
+        </div>
+    </section>
 
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>repeat block</h3>
-                        <p>Defines the repeating item pattern for a widget with multiple cards, rows, or buttons.</p>
-                    </div>
-                    <div class="spec-block-body">
+    <!-- REGISTRY SCHEMA -->
+    <section class="section">
+        <div class="section-label">Registry Schema</div>
+        <h2>widget-registry.json</h2>
+        <p>The single source of truth for all widgets. Hosted at <code>tylervinson.com/widget/widget-registry.json</code>. Currently at version <strong style="color:#e0e0e0;">2.3.5</strong>.</p>
+
+        <div class="spec-block">
+            <div class="spec-block-header"><h3>Top-level structure</h3></div>
+            <div class="spec-block-body">
+<pre>{
+  <span class="key">"version"</span>:    <span class="str">"2.3.5"</span>,            <span class="cmt">// bump to trigger update badge in extension</span>
+  <span class="key">"updatedAt"</span>:  <span class="str">"2026-06-04T00:00:00.000Z"</span>,
+  <span class="key">"downloadUrl"</span>: <span class="str">"https://www.tylervinson.com/widget/"</span>,
+  <span class="key">"widgets"</span>:    <span class="cmt">[ ...widget definitions ]</span>
+}</pre>
+            </div>
+        </div>
+
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Widget definition object</h3>
+                <p>One entry per widget in the <code>widgets</code> array.</p>
+            </div>
+            <div class="spec-block-body">
+<pre>{
+  <span class="key">"class"</span>:           <span class="str">"animated-cards"</span>,  <span class="cmt">// CSS class on the widget root element</span>
+  <span class="key">"name"</span>:            <span class="str">"Animated Cards"</span>,  <span class="cmt">// display name shown in sidebar</span>
+  <span class="key">"standaloneFields"</span>: <span class="cmt">[ ... ],           // optional — fields scoped to root</span>
+  <span class="key">"repeat"</span>:          <span class="cmt">{ ... },            // optional — defines repeating items</span>
+  <span class="key">"fields"</span>:          <span class="cmt">[ ... ]             // fields inside each repeat item</span>
+}</pre>
+                <table class="field-table">
+                    <thead><tr><th>Property</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>class</td><td><span class="tag tag-required">Required</span></td><td>CSS class on the widget's root element. Used to detect the widget in Rich Text field HTML.</td></tr>
+                        <tr><td>name</td><td><span class="tag tag-required">Required</span></td><td>Human-readable label shown in the sidebar widget picker when multiple widgets are found.</td></tr>
+                        <tr><td>repeat</td><td><span class="tag tag-optional">Optional</span></td><td>Defines a repeating group of items (cards, plans, meetings). If omitted, only <code>standaloneFields</code> are used.</td></tr>
+                        <tr><td>fields</td><td><span class="tag tag-optional">Optional</span></td><td>Array of field definitions scoped to each repeat item. Required when <code>repeat</code> is defined.</td></tr>
+                        <tr><td>standaloneFields</td><td><span class="tag tag-optional">Optional</span></td><td>Fields scoped to the widget root — headings, subheadings, or any single non-repeating element.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>repeat block</h3>
+                <p>Defines the repeating item pattern and how groups are labeled in the sidebar.</p>
+            </div>
+            <div class="spec-block-body">
 <pre><span class="key">"repeat"</span>: {
-  <span class="key">"selector"</span>: <span class="str">".plan-button"</span>,       <span class="cmt">// CSS selector for each item, relative to widget root</span>
-  <span class="key">"groupLabel"</span>: <span class="str">"Plan"</span>,             <span class="cmt">// label for each group in the sidebar (e.g. "Plan 1", "Plan 2")</span>
-  <span class="key">"groupLabelField"</span>: <span class="str">"name"</span>         <span class="cmt">// optional — field key whose value is appended to the group header</span>
+  <span class="key">"selector"</span>:       <span class="str">".profile-card"</span>,  <span class="cmt">// CSS selector for each item, relative to widget root</span>
+  <span class="key">"groupLabel"</span>:     <span class="str">"Card"</span>,           <span class="cmt">// label prefix — "Card 1", "Card 2", etc.</span>
+  <span class="key">"groupLabelField"</span>: <span class="str">"title"</span>,          <span class="cmt">// optional — appends the value of this field to the label</span>
+  <span class="key">"dateField"</span>:      <span class="str">"datetime"</span>,      <span class="cmt">// optional — field key used for date expiry checks</span>
+  <span class="key">"dateAttr"</span>:       <span class="str">"data-end"</span>        <span class="cmt">// optional — data attribute holding the ISO end date</span>
 }</pre>
-                        <table class="field-table" style="margin-top: 20px;">
-                            <thead>
-                                <tr><th>Property</th><th></th><th>Description</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>selector</td><td class="required"><span class="tag tag-required">Required</span></td><td>CSS selector used to find each repeated item within the widget root.</td></tr>
-                                <tr><td>groupLabel</td><td class="required"><span class="tag tag-required">Required</span></td><td>Word used to label each group in the sidebar. Groups are numbered automatically: "Plan 1", "Plan 2", etc.</td></tr>
-                                <tr><td>groupLabelField</td><td class="optional"><span class="tag tag-optional">Optional</span></td><td>Key of a field in <code>fields</code> whose current value is appended to the group header. As the user edits the name field, the header updates live.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <table class="field-table">
+                    <thead><tr><th>Property</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>selector</td><td><span class="tag tag-required">Required</span></td><td>CSS selector for each repeated item, evaluated relative to the widget root.</td></tr>
+                        <tr><td>groupLabel</td><td><span class="tag tag-required">Required</span></td><td>Word used to prefix each group header. "Plan" produces "Plan 1", "Plan 2", etc.</td></tr>
+                        <tr><td>groupLabelField</td><td><span class="tag tag-optional">Optional</span></td><td>Key of a field whose current value is appended to the group header. Updates live as the user types.</td></tr>
+                        <tr><td>dateField</td><td><span class="tag tag-optional">Optional</span></td><td>Field key for a datetime field — used to visually flag expired items in the editor.</td></tr>
+                        <tr><td>dateAttr</td><td><span class="tag tag-optional">Optional</span></td><td>Data attribute on the repeat item that holds the ISO end date string for expiry detection.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-
-        <!-- FIELD DEFINITIONS -->
-        <div class="spec-section">
-            <div class="spec-label">
-                Field Definitions
-                <h2>Mapping Selectors to Form Fields</h2>
-                <p>Every editable element in the widget is described by a field definition object.</p>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Field definition objects</h3>
+                <p>Each editable element in the widget has a field definition in <code>fields</code> or <code>standaloneFields</code>.</p>
             </div>
-            <div class="spec-content">
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Standard field</h3>
-                        <p>A field that reads and writes a single DOM element within each repeat item.</p>
-                    </div>
-                    <div class="spec-block-body">
-<pre>{
-  <span class="key">"key"</span>: <span class="str">"name"</span>,                     <span class="cmt">// internal identifier, used as form field ID</span>
-  <span class="key">"label"</span>: <span class="str">"Plan Name"</span>,             <span class="cmt">// label shown above the input in the sidebar</span>
-  <span class="key">"selector"</span>: <span class="str">".plan-button-name"</span>, <span class="cmt">// CSS selector relative to the repeat item</span>
-  <span class="key">"type"</span>: <span class="str">"text"</span>                    <span class="cmt">// "text" (default) or "textarea"</span>
-}</pre>
-                        <table class="field-table" style="margin-top: 20px;">
-                            <thead>
-                                <tr><th>Property</th><th></th><th>Description</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>key</td><td class="required"><span class="tag tag-required">Required</span></td><td>Unique identifier for this field within the widget. Used internally as the form input ID and data key.</td></tr>
-                                <tr><td>label</td><td class="required"><span class="tag tag-required">Required</span></td><td>Human-readable label shown above the form input in the sidebar.</td></tr>
-                                <tr><td>selector</td><td class="required"><span class="tag tag-required">Required</span></td><td>CSS selector for the target element, evaluated relative to the repeat item (or widget root for standalone fields).</td></tr>
-                                <tr><td>type</td><td class="optional"><span class="tag tag-optional">Optional</span></td><td>Input type. <code>text</code> (single-line, default) or <code>textarea</code> (multi-line).</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="spec-block-body">
+<pre><span class="cmt">// Standard text field</span>
+{ <span class="key">"key"</span>: <span class="str">"name"</span>, <span class="key">"label"</span>: <span class="str">"Plan Name"</span>, <span class="key">"selector"</span>: <span class="str">".plan-button-name"</span>, <span class="key">"type"</span>: <span class="str">"text"</span> }
 
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Data attribute sync</h3>
-                        <p>Fields that also need to update a <code>data-*</code> attribute — used for animated counters and GTM tracking.</p>
-                    </div>
-                    <div class="spec-block-body">
-<pre>{
-  <span class="key">"key"</span>: <span class="str">"price"</span>,
-  <span class="key">"label"</span>: <span class="str">"Monthly Price"</span>,
-  <span class="key">"selector"</span>: <span class="str">".plan-button-price"</span>,
-  <span class="key">"syncDataAttr"</span>: <span class="str">"data-price"</span>,    <span class="cmt">// attribute name to set on the repeat item element</span>
-  <span class="key">"syncNumeric"</span>: <span class="bool">true</span>              <span class="cmt">// strips non-numeric characters before writing the attribute</span>
-}</pre>
-                        <hr class="divider">
-                        <div class="note"><strong>syncNumeric:</strong> When <code>true</code>, the value written to the data attribute has all non-numeric characters stripped. For example, "$299/mo" becomes "299". Use this for animated counter targets and any attribute that expects a raw number.</div>
-                    </div>
-                </div>
+<span class="cmt">// Textarea field</span>
+{ <span class="key">"key"</span>: <span class="str">"body"</span>, <span class="key">"label"</span>: <span class="str">"Description"</span>, <span class="key">"selector"</span>: <span class="str">".meeting-body"</span>, <span class="key">"type"</span>: <span class="str">"textarea"</span> }
 
-                <div class="spec-block">
-                    <div class="spec-block-header">
-                        <h3>Grid fields</h3>
-                        <p>Fields that update a value in a separate comparison table row in addition to (or instead of) the repeat item itself.</p>
-                    </div>
-                    <div class="spec-block-body">
-<pre>{
-  <span class="key">"key"</span>: <span class="str">"deductible"</span>,
-  <span class="key">"label"</span>: <span class="str">"Deductible"</span>,
-  <span class="key">"gridSelector"</span>: <span class="str">"[data-comparison='deductible']"</span>, <span class="cmt">// selects the table row, relative to widget root</span>
-  <span class="key">"gridCellSelector"</span>: <span class="str">"[data-plan='{planNum}']"</span>           <span class="cmt">// selects the cell within the row; {planNum} is replaced with 1-based item index</span>
-}</pre>
-                        <hr class="divider">
-                        <p>Grid-only fields have no <code>selector</code> — they write exclusively to the comparison table. Fields with both <code>selector</code> and <code>gridSelector</code> write to both locations when Apply Changes is pressed.</p>
-                        <hr class="divider">
-                        <div class="note"><strong>{planNum}:</strong> The placeholder <code>{planNum}</code> in <code>gridCellSelector</code> is replaced at runtime with the 1-based index of the current repeat item. Item 0 becomes plan 1, item 1 becomes plan 2, and so on.</div>
-                    </div>
-                </div>
+<span class="cmt">// Rich text field (Quill editor)</span>
+{ <span class="key">"key"</span>: <span class="str">"detail"</span>, <span class="key">"label"</span>: <span class="str">"Detail Body"</span>, <span class="key">"selector"</span>: <span class="str">".detail"</span>, <span class="key">"type"</span>: <span class="str">"richtext"</span> }
+
+<span class="cmt">// Field with data attribute sync</span>
+{ <span class="key">"key"</span>: <span class="str">"number"</span>, <span class="key">"label"</span>: <span class="str">"Statistic Value"</span>, <span class="key">"selector"</span>: <span class="str">".number"</span>, <span class="key">"syncDataAttr"</span>: <span class="str">"data-target"</span>, <span class="key">"syncNumeric"</span>: <span class="bool">true</span> }
+
+<span class="cmt">// Comparison grid cell (uses {planNum} substitution)</span>
+{ <span class="key">"key"</span>: <span class="str">"price"</span>, <span class="key">"label"</span>: <span class="str">"Monthly Price"</span>, <span class="key">"gridSelector"</span>: <span class="str">".comparison-grid"</span>, <span class="key">"gridCellSelector"</span>: <span class="str">"[data-comparison='price'] [data-plan='{planNum}']"</span> }</pre>
+                <table class="field-table">
+                    <thead><tr><th>Property</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td><span class="tag tag-required">Required</span></td><td>Unique identifier within the widget. Used as the form input ID.</td></tr>
+                        <tr><td>label</td><td><span class="tag tag-required">Required</span></td><td>Human-readable label shown above the input in the sidebar.</td></tr>
+                        <tr><td>selector</td><td><span class="tag tag-required">Required*</span></td><td>CSS selector for the target element, relative to the repeat item or widget root. Required unless using <code>gridSelector</code>.</td></tr>
+                        <tr><td>type</td><td><span class="tag tag-optional">Optional</span></td><td><code>text</code> (default), <code>textarea</code>, <code>richtext</code> (Quill editor), or <code>datetime-local</code>.</td></tr>
+                        <tr><td>syncDataAttr</td><td><span class="tag tag-optional">Optional</span></td><td>If specified, the data attribute on the target element is also updated to match the field value on Apply.</td></tr>
+                        <tr><td>syncNumeric</td><td><span class="tag tag-optional">Optional</span></td><td>Boolean. When <code>true</code>, the <code>syncDataAttr</code> value is written as a number (no trailing whitespace or symbols).</td></tr>
+                        <tr><td>gridSelector</td><td><span class="tag tag-optional">Optional</span></td><td>CSS selector for a comparison grid container. Used instead of <code>selector</code> for grid cell targeting.</td></tr>
+                        <tr><td>gridCellSelector</td><td><span class="tag tag-optional">Optional</span></td><td>Selector with <code>{planNum}</code> placeholder (1-based index). Resolved at runtime to target the correct column cell.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+    </section>
 
+    <!-- FULL WIDGET EXAMPLES -->
+    <section class="section">
+        <div class="section-label">Registered Widget Definitions</div>
+        <h2>All three current registry entries</h2>
 
-        <!-- FULL EXAMPLE -->
-        <div class="spec-section">
-            <div class="spec-label">
-                Full Example
-                <h2>Annotated Widget Definition</h2>
-                <p>A complete registry entry for the Insurance Plan Comparison widget.</p>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Animated Cards</h3>
+                <p>Scroll-triggered stat cards. Each card has a statistic value (synced to <code>data-target</code> for the JS counter) and a label. Simple repeat, no standalone fields.</p>
             </div>
-            <div class="spec-content">
-                <div class="spec-block">
-                    <div class="spec-block-body">
+            <div class="spec-block-body">
 <pre>{
-  <span class="key">"class"</span>: <span class="str">"insurance-comparison-tool"</span>,
-  <span class="key">"name"</span>: <span class="str">"Insurance Plan Comparison"</span>,
-
-  <span class="cmt">// Standalone fields — scoped to the widget root, not to repeat items</span>
-  <span class="key">"standaloneFields"</span>: [
-    { <span class="key">"key"</span>: <span class="str">"title"</span>,    <span class="key">"label"</span>: <span class="str">"Heading"</span>,    <span class="key">"selector"</span>: <span class="str">"h1"</span> },
-    { <span class="key">"key"</span>: <span class="str">"subtitle"</span>, <span class="key">"label"</span>: <span class="str">"Subheading"</span>, <span class="key">"selector"</span>: <span class="str">".subtitle"</span> },
-    { <span class="key">"key"</span>: <span class="str">"instructionHeading"</span>, <span class="key">"label"</span>: <span class="str">"Instruction Heading"</span>, <span class="key">"selector"</span>: <span class="str">".instruction-content h2"</span> },
-    { <span class="key">"key"</span>: <span class="str">"instructionBody"</span>,    <span class="key">"label"</span>: <span class="str">"Instruction Body"</span>,    <span class="key">"selector"</span>: <span class="str">".instruction-content p"</span>, <span class="key">"type"</span>: <span class="str">"textarea"</span> }
-  ],
-
-  <span class="cmt">// Repeat block — each .plan-button is one group in the sidebar</span>
+  <span class="key">"class"</span>: <span class="str">"animated-cards"</span>,
+  <span class="key">"name"</span>:  <span class="str">"Animated Cards"</span>,
   <span class="key">"repeat"</span>: {
-    <span class="key">"selector"</span>: <span class="str">".plan-button"</span>,
-    <span class="key">"groupLabel"</span>: <span class="str">"Plan"</span>,
-    <span class="key">"groupLabelField"</span>: <span class="str">"name"</span>   <span class="cmt">// group header shows live value of the "name" field</span>
+    <span class="key">"selector"</span>:   <span class="str">".profile-card"</span>,
+    <span class="key">"groupLabel"</span>: <span class="str">"Card"</span>
   },
-
-  <span class="cmt">// Fields scoped to each repeat item (.plan-button)</span>
   <span class="key">"fields"</span>: [
-
-    <span class="cmt">// Writes to .plan-button-name AND syncs data-plan-name attribute</span>
     {
-      <span class="key">"key"</span>: <span class="str">"name"</span>, <span class="key">"label"</span>: <span class="str">"Plan Name"</span>,
-      <span class="key">"selector"</span>: <span class="str">".plan-button-name"</span>,
-      <span class="key">"syncDataAttr"</span>: <span class="str">"data-plan-name"</span>
+      <span class="key">"key"</span>:          <span class="str">"number"</span>,
+      <span class="key">"label"</span>:        <span class="str">"Statistic Value"</span>,
+      <span class="key">"selector"</span>:     <span class="str">".number"</span>,
+      <span class="key">"type"</span>:          <span class="str">"text"</span>,
+      <span class="key">"syncDataAttr"</span>: <span class="str">"data-target"</span>,  <span class="cmt">// keeps data-target in sync with .number text</span>
+      <span class="key">"syncNumeric"</span>:  <span class="bool">true</span>
     },
-
-    <span class="cmt">// Writes to .plan-button-price, syncs data-price as numeric, AND updates comparison table cell</span>
     {
-      <span class="key">"key"</span>: <span class="str">"price"</span>, <span class="key">"label"</span>: <span class="str">"Price"</span>,
-      <span class="key">"selector"</span>: <span class="str">".plan-button-price"</span>,
-      <span class="key">"syncDataAttr"</span>: <span class="str">"data-price"</span>, <span class="key">"syncNumeric"</span>: <span class="bool">true</span>,
-      <span class="key">"gridSelector"</span>: <span class="str">"[data-comparison='price']"</span>,
-      <span class="key">"gridCellSelector"</span>: <span class="str">"[data-plan='{planNum}']"</span>
-    },
-
-    <span class="cmt">// Grid-only field — no .plan-button element, writes only to the comparison table</span>
-    {
-      <span class="key">"key"</span>: <span class="str">"deductible"</span>, <span class="key">"label"</span>: <span class="str">"Deductible"</span>,
-      <span class="key">"gridSelector"</span>: <span class="str">"[data-comparison='deductible']"</span>,
-      <span class="key">"gridCellSelector"</span>: <span class="str">"[data-plan='{planNum}']"</span>
+      <span class="key">"key"</span>:      <span class="str">"text"</span>,
+      <span class="key">"label"</span>:   <span class="str">"Card Label"</span>,
+      <span class="key">"selector"</span>: <span class="str">".copy-text"</span>,
+      <span class="key">"type"</span>:    <span class="str">"text"</span>
     }
-
-    <span class="cmt">// ... additional fields follow the same patterns</span>
   ]
 }</pre>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- ADDING A WIDGET -->
-        <div class="spec-section">
-            <div class="spec-label">
-                Adding a Widget
-                <h2>Step-by-Step</h2>
-                <p>What a developer needs to do to make a new widget editable.</p>
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Insurance Plan Comparison Tool</h3>
+                <p>Side-by-side plan comparison with a button row and a comparison grid. Plan buttons are the repeat items; grid cells use <code>{planNum}</code> substitution for column targeting. Heading is a standalone field.</p>
             </div>
-            <div class="spec-content">
-                <div class="spec-block">
-                    <div class="spec-block-body">
-                        <p><strong>1. Identify the widget root class.</strong> Every widget needs a unique CSS class on its outermost container element. If the widget doesn't have one, add it.</p>
-                        <hr class="divider">
-                        <p><strong>2. Map the editable fields.</strong> For each element a content author needs to edit, note its CSS selector relative to the widget root (or relative to each repeating item, if applicable). Decide which fields need data attribute sync and which update a grid table.</p>
-                        <hr class="divider">
-                        <p><strong>3. Add the widget definition to the registry.</strong> Open <code>widget-registry.json</code>, add a new entry to the <code>widgets</code> array following the schema above. Increment the <code>version</code> string.</p>
-                        <hr class="divider">
-                        <p><strong>4. Deploy the registry.</strong> Push the updated <code>widget-registry.json</code> to the server at <code>/widget/widget-registry.json</code>. No changes to the extension are required.</p>
-                        <hr class="divider">
-                        <p><strong>5. Verify.</strong> Open the extension sidebar in the Content Editor and navigate to a component that contains the new widget. The form should populate automatically with the current field values. If fields are missing or blank, check that the CSS selectors resolve correctly against the HTML stored in the rich text field.</p>
-                        <hr class="divider">
-                        <div class="note"><strong>Version bump:</strong> Incrementing <code>version</code> in the registry causes the extension's background worker to set the update badge (<code>!</code>) for any user whose installed extension version doesn't match. This is the signal to content authors that a registry update is available.</div>
-                    </div>
-                </div>
+            <div class="spec-block-body">
+<pre>{
+  <span class="key">"class"</span>: <span class="str">"insurance-comparison-tool"</span>,
+  <span class="key">"name"</span>:  <span class="str">"Insurance Plan Comparison Tool"</span>,
+  <span class="key">"standaloneFields"</span>: [
+    { <span class="key">"key"</span>: <span class="str">"heading"</span>, <span class="key">"label"</span>: <span class="str">"Section Heading"</span>, <span class="key">"selector"</span>: <span class="str">"h1"</span>, <span class="key">"type"</span>: <span class="str">"text"</span> }
+  ],
+  <span class="key">"repeat"</span>: {
+    <span class="key">"selector"</span>:       <span class="str">".plan-button"</span>,
+    <span class="key">"groupLabel"</span>:     <span class="str">"Plan"</span>,
+    <span class="key">"groupLabelField"</span>: <span class="str">"name"</span>  <span class="cmt">// group header reads from the plan name field live</span>
+  },
+  <span class="key">"fields"</span>: [
+    { <span class="key">"key"</span>: <span class="str">"type"</span>,     <span class="key">"label"</span>: <span class="str">"Plan Type"</span>,     <span class="key">"selector"</span>: <span class="str">".plan-button-type"</span> },
+    { <span class="key">"key"</span>: <span class="str">"name"</span>,     <span class="key">"label"</span>: <span class="str">"Plan Name"</span>,     <span class="key">"selector"</span>: <span class="str">".plan-button-name"</span> },
+    { <span class="key">"key"</span>: <span class="str">"coverage"</span>, <span class="key">"label"</span>: <span class="str">"Coverage Type"</span>, <span class="key">"selector"</span>: <span class="str">".plan-button-coverage"</span> },
+    <span class="cmt">// Grid fields — no selector; use gridSelector + gridCellSelector with {planNum}</span>
+    { <span class="key">"key"</span>: <span class="str">"price"</span>,        <span class="key">"label"</span>: <span class="str">"Monthly Price"</span>,       <span class="key">"gridSelector"</span>: <span class="str">".comparison-grid"</span>, <span class="key">"gridCellSelector"</span>: <span class="str">"[data-comparison='price'] [data-plan='{planNum}']"</span> },
+    { <span class="key">"key"</span>: <span class="str">"deductible"</span>,   <span class="key">"label"</span>: <span class="str">"Annual Deductible"</span>,    <span class="key">"gridSelector"</span>: <span class="str">".comparison-grid"</span>, <span class="key">"gridCellSelector"</span>: <span class="str">"[data-comparison='deductible'] [data-plan='{planNum}']"</span> },
+    <span class="cmt">// ...additional grid fields: maxOutOfPocket, coveragePercent, doctorVisits,</span>
+    <span class="cmt">//    prescription, emergency, mentalHealth, dentalVision</span>
+  ]
+}</pre>
             </div>
         </div>
 
-    </div><!-- /specs-body -->
+        <div class="spec-block">
+            <div class="spec-block-header">
+                <h3>Zoom Meetings</h3>
+                <p>Upcoming-sessions calendar. Each meeting is a repeat item with date/time, location, link, and rich text description. The <code>dateAttr</code> enables auto-expiry of past meetings. All internal elements use <code>zmw-</code> prefix to avoid collisions.</p>
+            </div>
+            <div class="spec-block-body">
+<pre>{
+  <span class="key">"class"</span>: <span class="str">"zoom-meetings"</span>,
+  <span class="key">"name"</span>:  <span class="str">"Zoom Meetings"</span>,
+  <span class="key">"repeat"</span>: {
+    <span class="key">"selector"</span>:        <span class="str">".zmw-meeting"</span>,
+    <span class="key">"groupLabel"</span>:      <span class="str">"Meeting"</span>,
+    <span class="key">"groupLabelField"</span>: <span class="str">"title"</span>,
+    <span class="key">"dateField"</span>:       <span class="str">"datetime"</span>,  <span class="cmt">// field key for date display/expiry</span>
+    <span class="key">"dateAttr"</span>:        <span class="str">"data-end"</span>   <span class="cmt">// DOM attribute holding ISO end date</span>
+  },
+  <span class="key">"fields"</span>: [
+    { <span class="key">"key"</span>: <span class="str">"title"</span>,    <span class="key">"label"</span>: <span class="str">"Meeting Title"</span>,  <span class="key">"selector"</span>: <span class="str">".zmw-title"</span>,    <span class="key">"type"</span>: <span class="str">"text"</span> },
+    { <span class="key">"key"</span>: <span class="str">"datetime"</span>, <span class="key">"label"</span>: <span class="str">"Date &amp; Time"</span>,    <span class="key">"selector"</span>: <span class="str">".zmw-datetime"</span>, <span class="key">"type"</span>: <span class="str">"datetime-local"</span> },
+    { <span class="key">"key"</span>: <span class="str">"location"</span>, <span class="key">"label"</span>: <span class="str">"Location"</span>,       <span class="key">"selector"</span>: <span class="str">".zmw-location"</span>, <span class="key">"type"</span>: <span class="str">"text"</span> },
+    { <span class="key">"key"</span>: <span class="str">"link"</span>,     <span class="key">"label"</span>: <span class="str">"Zoom Link URL"</span>, <span class="key">"selector"</span>: <span class="str">".zmw-link"</span>,     <span class="key">"type"</span>: <span class="str">"text"</span> },
+    { <span class="key">"key"</span>: <span class="str">"detail"</span>,   <span class="key">"label"</span>: <span class="str">"Detail Body"</span>,   <span class="key">"selector"</span>: <span class="str">".zmw-detail"</span>,   <span class="key">"type"</span>: <span class="str">"richtext"</span> }
+  ]
+}</pre>
+            </div>
+        </div>
+    </section>
 
-    <footer>Sitecore Widget Editor Documentation</footer>
+    <!-- MESSAGE TYPES -->
+    <section class="section">
+        <div class="section-label">Chrome Messaging</div>
+        <h2>Message types — sidepanel ↔ content script</h2>
+        <p>All communication between <code>sidepanel.js</code> and <code>content-script.js</code> uses Chrome's <code>chrome.tabs.sendMessage</code> with typed message objects.</p>
+
+        <div class="spec-block">
+            <div class="spec-block-body">
+                <table class="msg-table">
+                    <thead><tr><th>type</th><th>Direction</th><th>Purpose</th></tr></thead>
+                    <tbody>
+                        <tr><td>GET_WIDGETS</td><td>→ content</td><td>Scan all Rich Text fields on the current item via SSC API. Payload includes the full registry. Returns array of detected widget matches.</td></tr>
+                        <tr><td>GET_WIDGET_DATA</td><td>→ content</td><td>Read field values for a specific widget. Payload includes widget definition, item ID, and field ID. Returns a keyed data object.</td></tr>
+                        <tr><td>UPDATE_WIDGET_DATA</td><td>→ content</td><td>Apply field changes. Payload includes updated values, widget definition, field ID. Automates the HTML editor write cycle.</td></tr>
+                        <tr><td>GET_SC_USERNAME</td><td>→ content</td><td>Read the logged-in Sitecore username from the Content Editor DOM for the dashboard header.</td></tr>
+                        <tr><td>GET_LOCKED_ITEMS</td><td>→ content</td><td>Fetch all checked-out (locked) items via SSC API for the dashboard "Checked Out" panel.</td></tr>
+                        <tr><td>GET_SC_ITEM_NAME</td><td>→ content</td><td>Read the current item ID, name, and path from the Content Editor Quick Info panel (used to populate recents).</td></tr>
+                        <tr><td>NAVIGATE_TO_ITEM</td><td>→ content</td><td>Navigate the Content Editor to a specific item ID via <code>scForm.invoke('item:load')</code>.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FILE ROLES -->
+    <section class="section">
+        <div class="section-label">Extension Files</div>
+        <h2>File roles — v4.4.6</h2>
+
+        <div class="spec-block">
+            <div class="spec-block-body">
+                <table class="file-table">
+                    <thead><tr><th>File</th><th>Role</th></tr></thead>
+                    <tbody>
+                        <tr><td>manifest.json</td><td>MV3 manifest. Declares <code>sidePanel</code>, <code>activeTab</code>, <code>storage</code>, <code>webNavigation</code> permissions. Registers content script load order (<code>sitecore-bridge.js</code> first, then <code>content-script.js</code>).</td></tr>
+                        <tr><td>background.js</td><td>Service worker. Opens the side panel on icon click. Checks registry version every 4 hours. Sets gold extension badge when an update is detected.</td></tr>
+                        <tr><td>sidepanel.html</td><td>Panel shell. Hosts the dashboard view and widget editor view. Loads <code>quill.js</code> and <code>sidepanel.js</code>.</td></tr>
+                        <tr><td>sidepanel.js</td><td>Main panel logic. Fetches registry, drives dashboard (search, recents, locked items), detects and renders widget editor forms, routes all messages to content script.</td></tr>
+                        <tr><td>content-script.js</td><td>Sitecore interface layer. Handles all SSC API calls, widget detection, field reads, HTML editor automation, and Sitecore navigation. Injected into all frames.</td></tr>
+                        <tr><td>sitecore-bridge.js</td><td>Injected first in every frame. Fires 4 change-notification strategies on any DOM write. Also handles <code>__sitecoreBridgeNavigate</code> events for item navigation.</td></tr>
+                        <tr><td>widget-registry.json</td><td>Server-hosted only (not bundled in the ZIP). The sole source of widget definitions. Fetched fresh on every sidebar open.</td></tr>
+                        <tr><td>quill.js / quill.snow.css</td><td>Bundled Quill rich text editor. Used for <code>richtext</code> type fields in the widget editor form.</td></tr>
+                    </tbody>
+                </table>
+                <div class="note">The extension ZIP does not include <code>widget-registry.json</code>. The registry is always served from the server and never cached in the extension bundle.</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        Sitecore Widget Editor v4.4.6 — Registry v2.3.5 &nbsp;·&nbsp;
+        <a href="overview.html">Overview</a> &nbsp;·&nbsp;
+        <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
+        <a href="specs.html">Specs</a> &nbsp;·&nbsp;
+        <a href="using-the-extension.html">Using the Extension</a> &nbsp;·&nbsp;
+        <a href="demo.html">Demo</a> &nbsp;·&nbsp;
+        <a href="install.html">Install</a>
+    </footer>
 </div>
 </body>
 </html>

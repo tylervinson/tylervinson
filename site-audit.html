@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multilingual Site Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --card: #242424;
+    --card-alt: #1e1e1e;
+    --border: #2e2e2e;
+    --border-soft: #2a2a2a;
+    --text: #f0f0f0;
+    --muted: #888;
+    --muted-2: #666;
+    --accent: #FFBE5F;
+    --accent-hover: #FFD495;
+    --accent-deep: #FFBE5F;
+    --critical: #d98a84;
+    --warning: #d8a24a;
+    --ok: #7dbf82;
+    --shadow: 0 4px 12px rgba(0,0,0,0.35);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  header.page-head { margin-bottom: 2.5rem; }
+  header.page-head .eyebrow { font-size: .7rem; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin: 0 0 .8rem; }
+  header.page-head h1 { font-weight: 300; font-size: 2.6rem; margin: 0 0 .5rem; letter-spacing: -1px; line-height: 1.1; }
+  header.page-head p { color: var(--muted); margin: 0; max-width: 62ch; font-size: 1.02rem; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h2 { font-weight: 300; font-size: 1.5rem; letter-spacing: -0.5px; margin: 0 0 .4rem; color: var(--text); }
+  .card .hint { color: var(--muted); font-size: .9rem; margin: 0 0 1.5rem; max-width: 72ch; line-height: 1.65; }
+  code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .82em; background: var(--border-soft); padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: var(--accent); }
+
+  label.field-label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .4rem; letter-spacing: .01em; }
+  input[type=text], input[type=url], input[type=number], input[type=password] {
+    width: 100%;
+    padding: .65rem .75rem;
+    border: 1px solid #333;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--card-alt);
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  input::placeholder { color: var(--muted-2); }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
+  }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 180px; }
+
+  .check-line { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: .9rem; color: var(--muted); }
+  .check-line input { width: auto; }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid #333;
+    background: var(--card-alt);
+    color: var(--text);
+    padding: .55rem 1rem;
+    border-radius: 6px;
+    font-weight: 400;
+    transition: all .2s ease;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    color: #1a1a1a;
+    border-color: var(--accent);
+    padding: .75rem 1.6rem;
+    font-size: .95rem;
+    font-weight: 600;
+  }
+  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #1a1a1a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.2); }
+  button.primary:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+  button.ghost { font-size: .82rem; padding: .4rem .7rem; color: var(--muted); }
+  button.ghost:hover { color: var(--accent); }
+  button.tiny { padding: .25rem .55rem; font-size: .78rem; }
+
+  .lang-tags { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .lang-tag { display: flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 20px; padding: .25rem .4rem .25rem .8rem; }
+  .lang-tag input { width: 92px; padding: .25rem .4rem; border: none; border-bottom: 1px dashed var(--border); border-radius: 0; }
+  .lang-tag input:focus { box-shadow: none; }
+  .lang-tag.ref { border-color: var(--accent); }
+  .lang-tag .badge { font-size: .68rem; color: var(--accent-deep); font-weight: 400; }
+
+  table.pages { width: 100%; border-collapse: collapse; }
+  table.pages th { text-align: left; font-weight: 400; font-size: .78rem; color: var(--muted); padding: .5rem .5rem; border-bottom: 1px solid var(--border); }
+  table.pages td { padding: .4rem .5rem; vertical-align: top; }
+  table.pages input { font-size: .85rem; }
+  .name-cell input { font-weight: 400; }
+
+  .toolbar { display: flex; gap: .75rem; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; }
+
+  /* accordion */
+  .accordion { border: 1px solid var(--border); border-radius: 6px; margin-top: 1.5rem; }
+  .accordion > summary { list-style: none; cursor: pointer; padding: .7rem 1rem; font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .55rem; transition: color .2s ease; }
+  .accordion > summary::-webkit-details-marker { display: none; }
+  .accordion > summary:hover { color: var(--accent); }
+  .accordion > summary .chev { font-size: .7rem; transition: transform .3s ease; }
+  .accordion[open] > summary .chev { transform: rotate(90deg); }
+  .accordion[open] > summary { color: var(--text); border-bottom: 1px solid var(--border); }
+  .accordion-body { padding: 1rem; }
+
+  /* discovery directory facets */
+  .disc-summary { font-size: .92rem; margin-bottom: 1rem; }
+  .dir-controls { display: flex; gap: .5rem; margin-bottom: .7rem; }
+  .dir-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .45rem; }
+  .dir-row { display: flex; align-items: center; gap: .55rem; border: 1px solid var(--border); border-radius: 6px; padding: .5rem .7rem; font-size: .88rem; cursor: pointer; transition: opacity .3s ease, border-color .3s ease; }
+  .dir-row input { width: auto; }
+  .dir-row .count { margin-left: auto; color: var(--muted); font-size: .76rem; }
+  .dir-row.off { opacity: .45; }
+  .disc-results { margin-top: .6rem; border: 1px solid var(--border); border-radius: 6px; max-height: 260px; overflow: auto; }
+  .disc-results .res { display: flex; align-items: center; gap: .55rem; padding: .4rem .7rem; border-bottom: 1px dashed var(--border); font-size: .82rem; }
+  .disc-results .res:last-child { border-bottom: none; }
+  .disc-results .res input { width: auto; }
+  .disc-results .res .path { word-break: break-all; }
+  .disc-results .res .tag { margin-left: auto; font-size: .72rem; white-space: nowrap; }
+  .disc-results .tag.in { color: var(--ok); }
+  .disc-results .tag.out { color: var(--muted); }
+
+  /* progress + summary */
+  #progress { font-size: .9rem; color: var(--muted); margin-top: 1rem; min-height: 1.2em; }
+  .bar { height: 4px; background: var(--border-soft); border-radius: 4px; overflow: hidden; margin-top: .6rem; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border-soft); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
+  .stat { background: var(--card-alt); padding: 1.3rem 1.4rem; }
+  .stat .num { font-size: 2.1rem; font-weight: 300; line-height: 1; letter-spacing: -1px; color: var(--text); }
+  .stat .lbl { font-size: .78rem; color: var(--muted-2); margin-top: .5rem; }
+  .stat.crit .num { color: var(--critical); }
+  .stat.warn .num { color: var(--warning); }
+  .stat.ok .num { color: var(--ok); }
+
+  /* result cards */
+  .page-result { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--card); overflow: hidden; }
+  .page-result > summary { list-style: none; cursor: pointer; padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: .8rem; }
+  .page-result > summary::-webkit-details-marker { display: none; }
+  .page-result > summary .chev { transition: transform .3s ease; color: var(--muted); }
+  .page-result[open] > summary .chev { transform: rotate(90deg); }
+  .page-result .title { font-weight: 500; color: var(--text); }
+  .page-result .url-sub { font-size: .78rem; color: var(--muted-2); word-break: break-all; }
+  .pill { font-size: .72rem; padding: .15rem .55rem; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+  .pill.crit { color: var(--critical); border-color: rgba(217,138,132,.4); }
+  .pill.warn { color: var(--warning); border-color: rgba(216,162,74,.4); }
+  .pill.ok { color: var(--ok); border-color: rgba(125,191,130,.4); }
+  .spacer { flex: 1; }
+
+  .result-body { padding: 0 1.4rem 1.4rem; }
+  .lang-block { border-top: 1px solid var(--border); padding-top: 1.2rem; margin-top: 1rem; }
+  .lang-block:first-child { border-top: none; margin-top: 0; }
+  .lang-block h4 { font-weight: 600; font-size: 1rem; margin: 0 0 .25rem; color: var(--text); }
+  .section-label { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; color: var(--accent); margin: 1.3rem 0 .6rem; }
+
+  .issue { border-left: 3px solid var(--border); padding: .55rem .9rem; margin-bottom: .5rem; background: var(--card-alt); border-radius: 0 6px 6px 0; }
+  .issue.critical { border-left-color: var(--critical); }
+  .issue.warning { border-left-color: var(--warning); }
+  .issue.info { border-left-color: var(--accent); }
+  .issue .ihead { display: flex; gap: .5rem; align-items: baseline; }
+  .issue .cat { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted-2); }
+  .issue .exp { font-size: .9rem; margin: .25rem 0 0; color: var(--text); }
+  .issue .compare { font-size: .82rem; margin-top: .4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .issue .compare div { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .4rem .55rem; }
+  .issue .compare .k { font-size: .68rem; color: var(--muted-2); display: block; margin-bottom: .15rem; }
+  .issue .sugg { font-size: .82rem; margin-top: .4rem; color: var(--accent); }
+  .clean { font-size: .88rem; color: var(--ok); padding: .3rem 0; }
+  .err-note { font-size: .85rem; color: var(--critical); background: rgba(217,138,132,0.12); border: 1px solid rgba(217,138,132,.3); border-radius: 6px; padding: .6rem .8rem; }
+
+  ul.tech { list-style: none; padding: 0; margin: 0; }
+  ul.tech li { font-size: .86rem; padding: .35rem 0; border-bottom: 1px dashed var(--border); display: flex; gap: .6rem; align-items: baseline; }
+  ul.tech li:last-child { border-bottom: none; }
+  ul.tech .code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .72rem; padding: .05rem .4rem; border-radius: 4px; background: var(--border-soft); color: var(--muted); }
+  ul.tech .code.bad { background: rgba(217,138,132,.18); color: var(--critical); }
+  ul.tech a { color: var(--accent); text-decoration: none; word-break: break-all; }
+  ul.tech a:hover { text-decoration: underline; }
+  .score { font-size: .82rem; color: var(--muted); }
+  .empty-msg { color: var(--muted); font-size: .9rem; }
+
+  @media (max-width: 640px) {
+    .issue .compare { grid-template-columns: 1fr; }
+    header.page-head h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Localization QA</p>
+    <h1>Multilingual Site Audit</h1>
+    <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
+  </header>
+
+  <!-- SETTINGS -->
+  <section class="card no-print">
+    <h2>Settings</h2>
+    <p class="hint">Auditing <strong id="cfgSite"></strong> through your configured proxy. To change the site, proxy, or languages, edit the config block at the top of this file.</p>
+    <label class="field-label" for="pass">Access passphrase</label>
+    <input type="password" id="pass" placeholder="type your worker passphrase" autocomplete="off">
+    <p class="hint" style="margin:.4rem 0 0;">Sent to the worker as the access key. Held in memory for this session only — never written to the file.</p>
+    <div class="row" style="margin-top:1.25rem;">
+      <div>
+        <label class="field-label" for="conc">Concurrent link checks</label>
+        <input type="number" id="conc" value="5" min="1" max="20">
+      </div>
+    </div>
+    <details class="accordion">
+      <summary><span class="chev">▶</span> Test connection</summary>
+      <div class="accordion-body">
+        <p class="hint" style="margin-bottom:.7rem;">Enter any page URL on your site to check the proxy and passphrase are working before running a full audit.</p>
+        <div class="toolbar" style="margin-top:0;">
+          <input type="url" id="testUrl" style="flex:1; min-width:220px;">
+          <button class="ghost" onclick="testConnection()">Test</button>
+        </div>
+        <div id="testResult"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- PAGES -->
+  <section class="card no-print">
+    <h2>Pages to audit</h2>
+    <p class="hint">Discover your pages from the sitemap, then pick which directories to include. Add anything the sitemap misses by hand below.</p>
+    <div class="toolbar" style="margin-bottom:0;">
+      <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
+      <span class="score" id="discoverStatus"></span>
+    </div>
+    <div id="discoverDiag"></div>
+    <div class="toolbar" style="margin-top:.6rem;">
+      <button class="ghost" onclick="exportState()">Save to file</button>
+      <button class="ghost" onclick="document.getElementById('importFile').click()">Load from file</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importState(this.files && this.files[0]); this.value='';">
+      <span class="score" id="saveStatus"></span>
+    </div>
+
+    <!-- discovered filter panel (hidden until discovery runs) -->
+    <div id="discoveredPanel" style="display:none; margin-top:1.5rem;">
+      <div class="disc-summary" id="discSummary"></div>
+      <div class="section-label" style="margin-top:0;">Include directories</div>
+      <div class="dir-controls">
+        <button class="tiny ghost" onclick="setAllDirs(true)">Select all</button>
+        <button class="tiny ghost" onclick="setAllDirs(false)">Select none</button>
+      </div>
+      <div class="dir-list" id="dirList"></div>
+
+      <div class="section-label">Find a page</div>
+      <input type="text" id="discSearch" placeholder="Type part of a path to confirm it's included…" oninput="renderDiscSearch()">
+      <div id="discSearchResults"></div>
+    </div>
+
+    <div class="section-label" style="margin-top:1.5rem;">Add individual pages</div>
+    <div style="overflow-x:auto;">
+      <table class="pages" id="pagesTable"></table>
+    </div>
+    <button class="ghost" style="margin-top:1rem;" onclick="addPage()">+ Add page</button>
+
+    <label class="check-line" style="margin-top:1.5rem;">
+      <input type="checkbox" id="reverify">
+      Re-verify every link this run (ignore saved link results)
+    </label>
+    <div class="toolbar" style="margin-top:.6rem;">
+      <button class="primary" id="runBtn" onclick="runAudit()">Run audit</button>
+      <span class="score" id="runHint"></span>
+    </div>
+    <div id="progress"></div>
+    <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="card" id="summaryCard" style="display:none;">
+    <h2>Summary</h2>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+</div>
+
+<script>
+/* =======================================================================
+   CONFIG — edit these once. WORKER_URL is just an endpoint, not a secret,
+   but keep the file local anyway. The access passphrase is typed into the
+   tool at runtime (Settings card) and never stored here. WORKER_KEY below
+   is an optional fallback if you'd rather hardcode it; leave it empty to
+   always type the passphrase instead.
+   Languages are defined just below — edit the `langs` list to change them.
+   ======================================================================= */
+const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
+const SITE_URL   = 'https://www.azblue.com';
+const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
+/* ===================================================================== */
+
+/* ----------------------------- languages ----------------------------- */
+// English is the reference (dir ''). Each translation is a path prefix.
+let langs = [
+  { id: 'ref', label: 'English', dir: '', ref: true },
+  { id: 'l1', label: 'Spanish', dir: 'es', ref: false },
+  { id: 'l2', label: 'Chinese Traditional', dir: 'zh', ref: false }
+];
+
+/* ----------------------------- state ----------------------------- */
+let pages = [
+  { id: p(), name: 'Home', path: '' }
+];
+let discovered = [];   // full sitemap list, kept in memory (not all rendered)
+let dirInclude = {};   // directory -> included?
+let pageExclude = {};  // path -> individually excluded?
+function p(){ return 'p' + Math.random().toString(36).slice(2,8); }
+
+/* ----------------------------- rendering inputs ----------------------------- */
+function renderPages(){
+  const tbl = document.getElementById('pagesTable');
+  tbl.innerHTML = '';
+  const head = document.createElement('tr');
+  head.innerHTML = '<th style="min-width:140px;">Page name</th><th style="min-width:160px;">Path</th><th>Resolves to</th><th></th>';
+  tbl.appendChild(head);
+  pages.forEach(pg => {
+    const tr = document.createElement('tr');
+    const preview = langs.map(l => escapeHtml(buildUrl(SITE_URL, l.dir, pg.path))).join('<br>');
+    tr.innerHTML =
+      `<td class="name-cell"><input type="text" value="${escapeAttr(pg.name)}" oninput="updatePageName('${pg.id}', this.value)" placeholder="Page name"></td>` +
+      `<td><input type="text" value="${escapeAttr(pg.path)}" placeholder="(home)" oninput="updatePagePath('${pg.id}', this.value)"></td>` +
+      `<td style="font-size:.72rem;color:var(--muted);line-height:1.5;word-break:break-all;">${preview}</td>` +
+      `<td><button class="tiny ghost" onclick="removePage('${pg.id}')">✕</button></td>`;
+    tbl.appendChild(tr);
+  });
+}
+function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.name=v; updateRunHint(); } }
+function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); updateRunHint(); } }
+function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'' }); renderPages(); updateRunHint(); }
+function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); updateRunHint(); }
+
+function buildUrl(site, dir, path){
+  let base = (site||'').replace(/\/+$/,'');
+  dir = (dir||'').replace(/^\/+|\/+$/g,'');
+  path = (path||'').replace(/^\/+|\/+$/g,'');
+  let out = base;
+  if(dir) out += '/' + dir;
+  if(path) out += '/' + path;
+  return out;
+}
+
+/* ----------------------------- sitemap discovery ----------------------------- */
+const SKIP_EXT = /\.(pdf|jpe?g|png|gif|webp|svg|ico|css|js|json|xml|zip|gz|mp4|mp3|woff2?|ttf|eot)$/i;
+
+function urlToPath(u){
+  try {
+    const url = new URL(u);
+    let path = url.pathname.replace(/^\/+|\/+$/g,'');
+    const dirs = langs.map(l=>l.dir).filter(Boolean); // e.g. ['es','zh']
+    const parts = path ? path.split('/') : [];
+    if(parts.length && dirs.includes(parts[0])) parts.shift(); // drop language prefix
+    return parts.join('/');
+  } catch(e){ return null; }
+}
+function prettyName(path){
+  if(!path) return 'Home';
+  const seg = path.split('/').pop();
+  return seg.replace(/[-_]+/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+async function discoverPages(){
+  const status = document.getElementById('discoverStatus');
+  const setS = (t) => { status.textContent = t; status.style.color = 'var(--muted)'; };
+  const setErr = (t) => { status.textContent = t; status.style.color = 'var(--critical)'; };
+
+  if(!WORKER_URL || WORKER_URL.includes('your-worker')){ setErr('Set WORKER_URL in the config block first.'); return; }
+  document.getElementById('discoverDiag').innerHTML = '';
+  setS('Looking for a sitemap…');
+
+  const root = SITE_URL.replace(/\/+$/,'');
+  const siteHost = (()=>{ try { return new URL(SITE_URL).hostname; } catch(e){ return ''; } })();
+  const diag = []; // { url, status, note }
+  const looksHtml = (t) => /^\s*<(!doctype html|html)\b/i.test(t||'');
+
+  // 1) robots.txt → Sitemap: directives
+  let sitemaps = [];
+  try {
+    const r = await fetchPage(root + '/robots.txt');
+    if(r.ok && r.text && !looksHtml(r.text)){
+      r.text.split(/\r?\n/).forEach(line => {
+        const m = line.match(/^\s*sitemap:\s*(\S+)/i);
+        if(m) sitemaps.push(m[1].trim());
+      });
+      diag.push({ url: root+'/robots.txt', status: r.status, note: sitemaps.length ? `${sitemaps.length} sitemap line(s) found` : 'loaded, but no Sitemap: line' });
+    } else {
+      diag.push({ url: root+'/robots.txt', status: r.status, note: r.error ? r.error : (looksHtml(r.text) ? 'returned HTML, not robots.txt' : 'not available') });
+    }
+  } catch(e){ diag.push({ url: root+'/robots.txt', status: 0, note: e.message }); }
+
+  // 2) fallbacks
+  const guessed = !sitemaps.length;
+  if(guessed){ sitemaps = [root + '/sitemap.xml', root + '/sitemap_index.xml', root + '/sitemap-index.xml']; }
+
+  const MAX_SITEMAPS = 60, MAX_URLS = 3000;
+  const seenSm = new Set();
+  const foundUrls = new Set();
+  let queue = [...sitemaps];
+
+  while(queue.length && seenSm.size < MAX_SITEMAPS && foundUrls.size < MAX_URLS){
+    const sm = queue.shift();
+    if(!sm || seenSm.has(sm)) continue;
+    seenSm.add(sm);
+    setS(`Reading sitemap ${seenSm.size}… (${foundUrls.size} pages found)`);
+    let r;
+    try { r = await fetchPage(sm); } catch(e){ diag.push({ url: sm, status: 0, note: e.message }); continue; }
+    if(!r.ok || !r.text){ diag.push({ url: sm, status: r.status, note: r.error ? r.error : 'no content' }); continue; }
+    const doc = new DOMParser().parseFromString(r.text, 'text/xml');
+    if(doc.querySelector('parsererror')){
+      diag.push({ url: sm, status: r.status, note: looksHtml(r.text) ? 'got an HTML page, not XML (WAF or error page?)' : 'not valid XML' });
+      continue;
+    }
+    const rootTag = doc.documentElement ? doc.documentElement.tagName.toLowerCase() : '';
+    const locs = [...doc.querySelectorAll('loc')].map(l => clean(l.textContent)).filter(Boolean);
+    if(rootTag.indexOf('sitemapindex') !== -1){
+      locs.forEach(u => { if(!seenSm.has(u)) queue.push(u); }); // child sitemaps
+      diag.push({ url: sm, status: r.status, note: `sitemap index → ${locs.length} child sitemap(s)` });
+    } else {
+      locs.forEach(u => foundUrls.add(u));
+      diag.push({ url: sm, status: r.status, note: `${locs.length} page URL(s)` });
+    }
+  }
+
+  if(!foundUrls.size){
+    renderDiscoverDiag(diag, guessed, siteHost);
+    setErr('No pages found in a sitemap — see the breakdown below, or add pages manually.');
+    return;
+  }
+
+  // normalize → unique paths on our host, minus assets
+  const paths = new Set();
+  const truncated = foundUrls.size >= MAX_URLS;
+  foundUrls.forEach(u => {
+    try {
+      const url = new URL(u);
+      if(siteHost && url.hostname !== siteHost) return;
+      if(SKIP_EXT.test(url.pathname)) return;
+      const path = urlToPath(u);
+      if(path !== null) paths.add(path);
+    } catch(e){}
+  });
+
+  const list = [...paths].sort((a,b)=> a.localeCompare(b));
+  if(!list.length){ setErr('Sitemap had entries but none matched your site host.'); return; }
+
+  // keep full list in memory; surface directory facets, not raw rows
+  discovered = list.map(path => ({ path }));
+  const dirCounts = {};
+  discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
+  dirInclude = {};
+  Object.keys(dirCounts).forEach(dir => dirInclude[dir] = true);
+  pageExclude = {};
+  document.getElementById('discoveredPanel').style.display = 'block';
+  document.getElementById('discoverDiag').innerHTML = '';
+  renderDiscovered();
+  updateRunHint();
+
+  let msg = `Found ${discovered.length} page(s) across ${Object.keys(dirCounts).length} director${Object.keys(dirCounts).length===1?'y':'ies'}.`;
+  if(truncated) msg += ' Very large sitemap — list may be partial.';
+  setS(msg);
+}
+
+function renderDiscoverDiag(diag, guessed, siteHost){
+  const box = document.getElementById('discoverDiag');
+  if(!diag.length){ box.innerHTML = ''; return; }
+
+  // work out the most likely cause for a targeted hint
+  const statuses = diag.map(d => d.status);
+  const all403 = diag.length && diag.every(d => d.status === 403);
+  const anyHtml = diag.some(d => /HTML/i.test(d.note));
+  const offHost = diag.find(d => { try { return new URL(d.url).hostname !== siteHost; } catch(e){ return false; } });
+  let hint = '';
+  if(all403){
+    hint = 'Every request came back 403 — the worker is rejecting them. Check that the passphrase you typed matches the worker\'s AUDIT_KEY exactly.';
+  } else if(offHost && (offHost.status === 403 || offHost.status === 0)){
+    let host = ''; try { host = new URL(offHost.url).hostname; } catch(e){}
+    hint = `Your sitemap lives on ${host}, which the worker\'s allowlist blocks. Add "${host}" to ALLOWED_HOSTS in the worker and redeploy.`;
+  } else if(anyHtml){
+    hint = 'A request returned an HTML page instead of XML — often a WAF challenge or a "not found" page dressed up as 200. Open the URL below via Test connection to see what the server actually sends.';
+  } else if(guessed && statuses.every(s => s === 404 || s === 0)){
+    hint = 'No sitemap at robots.txt or the common filenames. If you know the real sitemap URL, tell me and I can point discovery straight at it.';
+  } else {
+    hint = 'Discovery reached the server but found no page URLs. The breakdown below shows each attempt.';
+  }
+
+  const rows = diag.map(d => {
+    const bad = !(d.status >= 200 && d.status < 300);
+    return `<li><span class="code ${bad?'bad':''}">${d.status || '—'}</span><span style="word-break:break-all;">${escapeHtml(d.url)}</span><span style="margin-left:auto;color:var(--muted-2);">${escapeHtml(d.note)}</span></li>`;
+  }).join('');
+
+  box.innerHTML = `<div style="margin-top:.8rem; border:1px solid var(--border); border-radius:8px; padding:1rem;">
+    <div class="err-note" style="margin-bottom:.8rem;">${escapeHtml(hint)}</div>
+    <div class="section-label" style="margin-top:0;">What discovery tried</div>
+    <ul class="tech">${rows}</ul>
+  </div>`;
+}
+
+/* ---- directory facets over the discovered list ---- */
+function dirOf(path){
+  if(path === '') return '(home)';
+  const segs = path.split('/');
+  return segs.length === 1 ? '(top level)' : segs[0];
+}
+function pageIncluded(path){ return !!dirInclude[dirOf(path)] && !pageExclude[path]; }
+function effectiveDiscovered(){ return discovered.filter(d => pageIncluded(d.path)); }
+
+function toggleDir(dir, on){ dirInclude[dir] = on; renderDiscovered(); updateRunHint(); }
+function setAllDirs(on){ Object.keys(dirInclude).forEach(d => dirInclude[d] = on); renderDiscovered(); updateRunHint(); }
+function togglePage(path, on){ if(on) delete pageExclude[path]; else pageExclude[path] = true; renderDiscSummary(); renderDiscSearch(); updateRunHint(); }
+
+function renderDiscovered(){
+  const dirCounts = {};
+  discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
+  const dirs = Object.keys(dirCounts).sort((a,b)=> dirCounts[b]-dirCounts[a] || a.localeCompare(b));
+  document.getElementById('dirList').innerHTML = dirs.map(dir => {
+    const on = dirInclude[dir];
+    return `<label class="dir-row ${on?'':'off'}">
+      <input type="checkbox" ${on?'checked':''} data-dir="${escapeAttr(dir)}" onchange="toggleDir(this.getAttribute('data-dir'), this.checked)">
+      <span>${escapeHtml(dir)}</span>
+      <span class="count">${dirCounts[dir]}</span>
+    </label>`;
+  }).join('');
+  renderDiscSummary();
+  renderDiscSearch();
+}
+function renderDiscSummary(){
+  const total = discovered.length;
+  const sel = effectiveDiscovered().length;
+  const excl = Object.keys(pageExclude).filter(k=>pageExclude[k] && dirInclude[dirOf(k)]).length;
+  document.getElementById('discSummary').innerHTML =
+    `<strong>${sel}</strong> of ${total} discovered pages selected for audit` +
+    (excl ? ` (${excl} individually excluded)` : '') + '.';
+}
+function renderDiscSearch(){
+  const box = document.getElementById('discSearchResults');
+  const q = (document.getElementById('discSearch').value||'').trim().toLowerCase();
+  if(!q){ box.innerHTML = ''; return; }
+  const matches = discovered.filter(d => ('/'+d.path).toLowerCase().includes(q));
+  if(!matches.length){ box.innerHTML = `<div class="disc-results"><div class="res"><span class="path">No matching pages found.</span></div></div>`; return; }
+  const CAP = 60;
+  const rows = matches.slice(0, CAP).map(d => {
+    const dirOn = !!dirInclude[dirOf(d.path)];
+    const inc = pageIncluded(d.path);
+    const tag = inc ? 'included' : (dirOn ? 'excluded' : 'directory off');
+    return `<div class="res">
+      <input type="checkbox" ${inc?'checked':''} ${dirOn?'':'disabled'} data-path="${escapeAttr(d.path)}" onchange="togglePage(this.getAttribute('data-path'), this.checked)">
+      <span class="path">/${escapeHtml(d.path)}</span>
+      <span class="tag ${inc?'in':'out'}">${tag}</span>
+    </div>`;
+  }).join('');
+  const more = matches.length > CAP ? `<div class="res"><span class="path">…and ${matches.length-CAP} more — refine your search.</span></div>` : '';
+  box.innerHTML = `<div class="disc-results">${rows}${more}</div>`;
+}
+
+/* combined audit set: selected discovered pages + manual rows, deduped by path */
+function getAuditPages(){
+  const map = new Map();
+  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path }));
+  pages.forEach(pg => { if(pg && pg.name) map.set(pg.path, { name: pg.name, path: pg.path }); });
+  return [...map.values()];
+}
+function updateRunHint(){
+  const n = getAuditPages().length;
+  const t = langs.filter(l=>!l.ref).length;
+  document.getElementById('runHint').textContent = n ? `Will audit ${n} page${n===1?'':'s'} × ${t} language${t===1?'':'s'}.` : '';
+}
+
+/* ----------------------------- save / load to JSON ----------------------------- */
+function setSaveStatus(msg, err){ const el = document.getElementById('saveStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
+
+function exportState(){
+  const data = {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    site: SITE_URL,
+    languages: langs.map(l => ({ label:l.label, dir:l.dir, ref:!!l.ref })),
+    discovered: discovered,
+    dirInclude: dirInclude,
+    pageExclude: pageExclude,
+    manualPages: pages.map(pg => ({ name:pg.name, path:pg.path })),
+    linkResults: [...linkResults.entries()]
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const host = (()=>{ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } })();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `audit-${host}-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  setSaveStatus(`Saved ${discovered.length} page(s) and ${linkResults.size} link result(s).`);
+}
+
+function importState(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== 'object') throw new Error('bad file');
+      discovered = Array.isArray(data.discovered) ? data.discovered : [];
+      dirInclude = data.dirInclude && typeof data.dirInclude === 'object' ? data.dirInclude : {};
+      pageExclude = data.pageExclude && typeof data.pageExclude === 'object' ? data.pageExclude : {};
+      if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'' }));
+      linkResults = new Map(Array.isArray(data.linkResults) ? data.linkResults : []);
+      if(discovered.length){ document.getElementById('discoveredPanel').style.display = 'block'; renderDiscovered(); }
+      renderPages();
+      updateRunHint();
+      const when = data.savedAt ? new Date(data.savedAt).toLocaleString() : 'unknown date';
+      let note = `Loaded ${discovered.length} page(s) and ${linkResults.size} saved link result(s) from ${when}.`;
+      if(data.site && data.site !== SITE_URL) note += ` (Saved site was ${data.site} — current is ${SITE_URL}.)`;
+      setSaveStatus(note);
+    } catch(e){
+      setSaveStatus('Could not read that file — is it a saved audit JSON?', true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ----------------------------- fetching ----------------------------- */
+function proxify(target){
+  const base = WORKER_URL.trim();
+  try {
+    const u = new URL(base);
+    u.searchParams.set('url', target);
+    return u.href;
+  } catch(e){
+    // fallback if base isn't a valid URL yet
+    return base + (base.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(target);
+  }
+}
+function fetchOpts(extra){
+  const opts = Object.assign({ method:'GET' }, extra || {});
+  const key = ((document.getElementById('pass') && document.getElementById('pass').value) || WORKER_KEY || '').trim();
+  if(key){ opts.headers = Object.assign({}, opts.headers, { 'X-Audit-Key': key }); }
+  return opts;
+}
+async function fetchPage(url){
+  const requested = proxify(url);
+  try {
+    const res = await fetch(requested, fetchOpts());
+    const text = await res.text();
+    return { ok: res.ok, status: res.status, text, requested };
+  } catch(e){
+    return { ok:false, status:0, text:'', error: e.message, requested };
+  }
+}
+
+async function testConnection(){
+  const el = document.getElementById('testResult');
+  const url = (document.getElementById('testUrl').value || '').trim();
+  if(!url){ el.innerHTML = `<div class="err-note" style="margin-top:1rem;">Enter a page URL to test.</div>`; return; }
+  el.innerHTML = `<div class="score" style="margin-top:1rem;">Requesting…</div>`;
+  const r = await fetchPage(url);
+  const snippet = (r.text||'').slice(0,300).replace(/\s+/g,' ').trim();
+  const okClass = r.ok ? 'ok' : 'crit';
+  el.innerHTML = `<div style="margin-top:1rem; border:1px solid var(--border); border-radius:8px; padding:1rem;">
+    <div class="score">Tested address:</div>
+    <div style="font-size:.8rem; word-break:break-all; margin:.25rem 0 .8rem;"><a href="${escapeAttr(url)}" target="_blank" rel="noopener" style="color:var(--accent-deep); text-decoration:none;">${escapeHtml(url)}</a></div>
+    <div class="score">Response: <span class="pill ${okClass}">${r.error ? 'network error' : ('HTTP ' + r.status)}</span></div>
+    ${r.error ? `<div class="err-note" style="margin-top:.6rem;">${escapeHtml(r.error)} — usually a CORS or unreachable-worker problem.</div>` : ''}
+    ${snippet ? `<div class="score" style="margin-top:.8rem;">First bytes returned:</div><div style="font-size:.78rem; color:var(--muted); background:var(--card-alt); border:1px solid var(--border); border-radius:6px; padding:.5rem .6rem; margin-top:.3rem; word-break:break-all;">${escapeHtml(snippet)}…</div>` : ''}
+    <div class="score" style="margin-top:.8rem;">A 200 means the proxy and passphrase are working. A 403 means the passphrase doesn't match the worker; other codes come from the site itself.</div>
+  </div>`;
+}
+let linkCache = new Map();   // url -> Promise<result>, dedupes within a single run
+let linkResults = new Map(); // url -> resolved {url,status,ok,ts}, persists across runs + saved to file
+function checkResource(url){
+  const reverify = document.getElementById('reverify') && document.getElementById('reverify').checked;
+  if(!reverify && linkResults.has(url)) return Promise.resolve(linkResults.get(url));
+  if(linkCache.has(url)) return linkCache.get(url);
+  const pr = (async () => {
+    let r;
+    try {
+      const res = await fetch(proxify(url), fetchOpts());
+      r = { url, status: res.status, ok: res.ok, ts: Date.now() };
+    } catch(e){
+      r = { url, status:0, ok:false, error:e.message, ts: Date.now() };
+    }
+    linkResults.set(url, r);
+    return r;
+  })();
+  linkCache.set(url, pr);
+  return pr;
+}
+async function pool(items, worker, concurrency){
+  const out = []; let i = 0;
+  const runners = Array.from({length: Math.min(concurrency, items.length||1)}, async () => {
+    while(i < items.length){ const idx = i++; out[idx] = await worker(items[idx], idx); }
+  });
+  await Promise.all(runners);
+  return out;
+}
+
+/* ----------------------------- parsing ----------------------------- */
+function extract(html, baseUrl){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const abs = (href) => { try { return new URL(href, baseUrl).href; } catch(e){ return null; } };
+
+  const headings = [...doc.querySelectorAll('h1,h2,h3,h4,h5,h6')]
+    .map(h => ({ level: +h.tagName[1], text: clean(h.textContent) })).filter(h=>h.text);
+
+  const anchors = [...doc.querySelectorAll('a[href]')];
+  const links = [];
+  anchors.forEach(a => {
+    const raw = a.getAttribute('href');
+    if(!raw) return;
+    if(/^(mailto:|tel:|javascript:|#)/i.test(raw)) return;
+    const u = abs(raw);
+    if(u && /^https?:/i.test(u)) links.push(u);
+  });
+
+  const images = [...doc.querySelectorAll('img')].map(img => ({
+    src: abs(img.getAttribute('src')||''), alt: img.getAttribute('alt')
+  }));
+
+  // visible-ish text
+  const bodyClone = doc.body ? doc.body.cloneNode(true) : doc.cloneNode(true);
+  bodyClone.querySelectorAll('script,style,noscript,svg,template').forEach(n=>n.remove());
+  const textContent = clean(bodyClone.textContent || '');
+
+  return {
+    title: clean(doc.querySelector('title')?.textContent || ''),
+    metaDesc: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+    htmlLang: doc.documentElement.getAttribute('lang') || '',
+    headings,
+    links: [...new Set(links)],
+    images,
+    counts: {
+      headings: headings.length,
+      links: anchors.length,
+      images: images.length,
+      forms: doc.querySelectorAll('form').length,
+      inputs: doc.querySelectorAll('input,textarea,select').length,
+      buttons: doc.querySelectorAll('button').length
+    },
+    emptyLinks: anchors.filter(a => { const h=a.getAttribute('href'); return !h || h==='#' || h.trim()===''; }).length,
+    missingAlt: images.filter(i => i.alt === null).length,
+    duplicateIds: findDuplicateIds(doc),
+    regions: detectRegions(doc),
+    textContent
+  };
+}
+
+/* ---- major page regions (landmarks) ---- */
+const REGION_DEFS = [
+  { key:'header', label:'Header',             sel:'header, [role="banner"]',                 cls:/(^|[-_ ])(site[-_]?header|page[-_]?header|masthead|header)([-_ ]|$)/i,  major:true },
+  { key:'nav',    label:'Primary navigation', sel:'nav, [role="navigation"]',                cls:/(^|[-_ ])(primary[-_]?nav|main[-_]?nav|navbar|navigation|nav|menu)([-_ ]|$)/i, major:true },
+  { key:'main',   label:'Main content',       sel:'main, [role="main"]',                    cls:/(^|[-_ ])(main[-_]?content|page[-_]?content|content[-_]?main|main|content)([-_ ]|$)/i, major:true },
+  { key:'aside',  label:'Sidebar',            sel:'aside, [role="complementary"]',          cls:/(^|[-_ ])(sidebar|complementary|aside)([-_ ]|$)/i, major:false },
+  { key:'footer', label:'Footer',             sel:'footer, [role="contentinfo"]',           cls:/(^|[-_ ])(site[-_]?footer|page[-_]?footer|footer)([-_ ]|$)/i, major:true },
+  { key:'search', label:'Search',             sel:'[role="search"], form[role="search"]',   cls:/(^|[-_ ])(search[-_]?form|site[-_]?search|search)([-_ ]|$)/i, major:false }
+];
+function detectRegion(doc, def){
+  let els = [...doc.querySelectorAll(def.sel)];
+  if(!els.length){
+    els = [...doc.querySelectorAll('div,section,header,footer,nav,aside')].filter(el => {
+      const idc = (el.getAttribute('id')||'') + ' ' + (el.getAttribute('class')||'');
+      return def.cls.test(idc);
+    });
+  }
+  if(!els.length) return { present:false, textLen:0, links:0 };
+  let best = els[0], bestLen = -1;
+  els.forEach(el => {
+    const l = clean(el.textContent||'').length;
+    if(l > bestLen){ bestLen = l; best = el; }
+  });
+  return { present:true, textLen:bestLen, links:best.querySelectorAll('a[href]').length };
+}
+function detectRegions(doc){
+  const out = {};
+  REGION_DEFS.forEach(def => { out[def.key] = detectRegion(doc, def); });
+  return out;
+}
+function regionDiff(refRegions, transRegions){
+  const issues = [];
+  REGION_DEFS.forEach(def => {
+    const r = refRegions[def.key], t = transRegions[def.key];
+    if(!r || !r.present) return; // only compare regions that exist on the English page
+    if(!t || !t.present){
+      const words = Math.round(r.textLen / 6);
+      issues.push({
+        category:'missing',
+        severity: def.major ? 'critical' : 'warning',
+        explanation: `${def.label} is present on the English page but missing entirely from the translation — on English it holds ${r.links} link(s) and roughly ${words} word(s). This alone can explain element-count gaps below.`,
+        suggestion: `Add the ${def.label.toLowerCase()} to the translated page so it mirrors English.`
+      });
+    } else if(r.textLen > 250 && t.textLen < r.textLen * 0.4){
+      issues.push({
+        category:'missing',
+        severity:'warning',
+        explanation: `${def.label} exists but is much smaller than English (about ${Math.round(t.textLen / Math.max(r.textLen,1) * 100)}% of its text). Part of it may be missing.`,
+        suggestion: `Review the ${def.label.toLowerCase()} for dropped content.`
+      });
+    }
+  });
+  return issues;
+}
+function findDuplicateIds(doc){
+  const seen = {}, dups = new Set();
+  doc.querySelectorAll('[id]').forEach(el => {
+    const id = el.id; if(seen[id]) dups.add(id); else seen[id]=1;
+  });
+  return [...dups];
+}
+
+/* ----------------------------- AI analysis ----------------------------- */
+async function analyzeTranslation(refData, transData, refLabel, transLabel){
+  const cap = (s) => (s||'').slice(0, 6000);
+  const refBlock = 'Headings:\n' + refData.headings.map(h=>'  '.repeat(h.level-1)+'- '+h.text).join('\n') +
+    '\n\nBody text:\n' + cap(refData.textContent);
+  const transBlock = 'Headings:\n' + transData.headings.map(h=>'  '.repeat(h.level-1)+'- '+h.text).join('\n') +
+    '\n\nBody text:\n' + cap(transData.textContent);
+
+  const system = `You are a localization QA reviewer. Compare a reference page (in ${refLabel}) with its ${transLabel} translation. Find: mistranslations, awkward or inaccurate phrasing, tone or register inconsistencies, strings left untranslated in ${refLabel}, content present in the reference but missing from the translation, and content added that is not in the reference. Reply with ONLY a JSON object, no markdown fences and no commentary. Schema: {"parityScore": <0-100 integer>, "summary": "<one or two sentences>", "issues": [{"category": "translation"|"tone"|"untranslated"|"missing"|"added", "severity": "critical"|"warning"|"info", "reference": "<short ${refLabel} snippet or empty>", "translation": "<short ${transLabel} snippet or empty>", "explanation": "<what's wrong>", "suggestion": "<how to fix, or empty>"}]}. If the translation is sound, return an empty issues array and a high parityScore.`;
+
+  const userMsg = `=== REFERENCE (${refLabel}) ===\n${refBlock}\n\n=== TRANSLATION (${transLabel}) ===\n${transBlock}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      system,
+      messages: [{ role:'user', content: userMsg }]
+    })
+  });
+  if(!res.ok) throw new Error('API request failed (' + res.status + ')');
+  const data = await res.json();
+  const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  const cleaned = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+  return JSON.parse(cleaned);
+}
+
+/* ----------------------------- orchestration ----------------------------- */
+let auditState = null;
+
+async function runAudit(){
+  if(!WORKER_URL || WORKER_URL.includes('your-worker')){
+    setProgress('Set WORKER_URL in the config block at the top of this file before running.', true); return;
+  }
+  if(!SITE_URL){ setProgress('Set SITE_URL in the config block at the top of this file before running.', true); return; }
+  const site = SITE_URL;
+  const activePages = getAuditPages();
+  if(!activePages.length){ setProgress('Discover pages or add at least one page.', true); return; }
+
+  const refLang = langs.find(l=>l.ref);
+  const transLangs = langs.filter(l=>!l.ref);
+  const conc = +document.getElementById('conc').value || 5;
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('summaryCard').style.display = 'none';
+  document.getElementById('barWrap').style.display = 'block';
+
+  auditState = { results: [], crit:0, warn:0, info:0, broken:0, pages:0 };
+  linkCache.clear();
+
+  const totalUnits = activePages.length;
+  let done = 0;
+
+  for(const pg of activePages){
+    setProgress(`Auditing “${pg.name}”…`);
+    const result = { page: pg, languages: [], refData: null, refError: null };
+
+    // fetch reference
+    let refData = null;
+    const refUrl = buildUrl(site, refLang.dir, pg.path);
+    {
+      const r = await fetchPage(refUrl);
+      if(r.ok){ refData = extract(r.text, refUrl); }
+      else { result.refError = r.error ? r.error : ('HTTP ' + r.status); }
+      result.refData = refData;
+      result.refStatus = r.status;
+      result.refUrl = refUrl;
+    }
+
+    // reference technical pass (links + code)
+    if(refData){
+      result.refTech = await technicalPass(refData, refLang.label, conc, auditState);
+    }
+
+    // each translation
+    for(const tl of transLangs){
+      const url = buildUrl(site, tl.dir, pg.path);
+      setProgress(`Auditing “${pg.name}” — ${tl.label}…`);
+      const block = { lang: tl, url };
+      const tr = await fetchPage(url);
+      if(!tr.ok){ block.error = tr.error ? tr.error : ('HTTP ' + tr.status); result.languages.push(block); auditState.crit++; continue; }
+      block.status = tr.status;
+      const tData = extract(tr.text, url);
+      block.data = tData;
+
+      // technical pass for this language
+      block.tech = await technicalPass(tData, tl.label, conc, auditState);
+
+      // structural parity vs reference: regions first, then counts
+      if(refData){
+        const regionIssues = regionDiff(refData.regions, tData.regions);
+        const missingMajor = regionIssues.some(i => i.severity === 'critical');
+        const countIssues = structuralDiff(refData, tData, missingMajor);
+        block.parity = [...regionIssues, ...countIssues];
+        block.parity.forEach(i => bump(auditState, i.severity));
+      }
+
+      // AI translation analysis
+      if(refData){
+        try {
+          const ai = await analyzeTranslation(refData, tData, refLang.label, tl.label);
+          block.ai = ai;
+          (ai.issues||[]).forEach(i => bump(auditState, i.severity));
+        } catch(e){
+          block.aiError = e.message;
+        }
+      } else {
+        block.aiError = 'No English reference page to compare against.';
+      }
+      result.languages.push(block);
+    }
+
+    auditState.results.push(result);
+    auditState.pages++;
+    renderResult(result, refLang);
+    done++;
+    setBar(done/totalUnits*100);
+  }
+
+  document.getElementById('runBtn').disabled = false;
+  setProgress('Audit complete — ' + auditState.pages + ' page(s) reviewed.');
+  setBar(100);
+  renderSummary();
+}
+
+function bump(s, sev){ if(sev==='critical') s.crit++; else if(sev==='warning') s.warn++; else s.info++; }
+
+async function technicalPass(data, label, conc, state){
+  const tech = { code: [], links: [] };
+  // code-level issues
+  if(data.emptyLinks) tech.code.push({ sev:'warning', text: data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).' });
+  if(data.missingAlt) tech.code.push({ sev:'warning', text: data.missingAlt + ' image(s) without alt text.' });
+  if(data.duplicateIds.length) tech.code.push({ sev:'warning', text: 'Duplicate id attribute(s): ' + data.duplicateIds.slice(0,8).join(', ') + (data.duplicateIds.length>8?'…':'') });
+  if(!data.title) tech.code.push({ sev:'critical', text: 'Missing <title>.' });
+  if(!data.metaDesc) tech.code.push({ sev:'info', text: 'No meta description.' });
+  if(!data.htmlLang) tech.code.push({ sev:'warning', text: 'Missing lang attribute on <html>.' });
+  tech.code.forEach(c => bump(state, c.sev));
+
+  // link verification — check every link on the page
+  const toCheck = data.links;
+  if(toCheck.length){
+    const checked = await pool(toCheck, checkResource, conc);
+    tech.links = checked.filter(c => !c.ok || c.status >= 400 || c.status === 0);
+    state.broken += tech.links.length;
+    tech.linksChecked = toCheck.length;
+    tech.linksTotal = data.links.length;
+  } else {
+    tech.linksChecked = 0; tech.linksTotal = data.links.length;
+  }
+  return tech;
+}
+
+function structuralDiff(ref, trans, hasMissingRegion){
+  const issues = [];
+  const fields = [
+    ['headings','headings'], ['images','images'], ['links','links'],
+    ['forms','forms'], ['inputs','form fields'], ['buttons','buttons']
+  ];
+  fields.forEach(([key, name]) => {
+    const a = ref.counts[key], b = trans.counts[key];
+    if(a !== b){
+      const missing = a - b;
+      let severity = Math.abs(missing) >= Math.max(2, a*0.3) ? 'warning' : 'info';
+      let note = '';
+      if(hasMissingRegion && missing > 0){ severity = 'info'; note = ' (likely accounted for by the missing section above)'; }
+      issues.push({
+        category:'count',
+        severity,
+        explanation: missing > 0
+          ? `Translation has ${b} ${name} vs ${a} in English — ${missing} fewer${note}.`
+          : `Translation has ${b} ${name} vs ${a} in English — ${-missing} extra.`
+      });
+    }
+  });
+  return issues;
+}
+
+/* ----------------------------- result rendering ----------------------------- */
+function renderResult(result, refLang){
+  const wrap = document.getElementById('results');
+  const det = document.createElement('details');
+  det.className = 'page-result';
+  det.open = true;
+
+  // count issues for this page
+  let c=0,w=0,i=0,broken=0;
+  const tally = (sev) => { if(sev==='critical')c++; else if(sev==='warning')w++; else i++; };
+  if(result.refTech){ result.refTech.code.forEach(x=>tally(x.sev)); broken += result.refTech.links.length; }
+  result.languages.forEach(b => {
+    if(b.error) c++;
+    if(b.tech){ b.tech.code.forEach(x=>tally(x.sev)); broken += b.tech.links.length; }
+    (b.parity||[]).forEach(x=>tally(x.severity));
+    (b.ai && b.ai.issues || []).forEach(x=>tally(x.severity));
+  });
+
+  const pills = [];
+  if(c) pills.push(`<span class="pill crit">${c} critical</span>`);
+  if(w) pills.push(`<span class="pill warn">${w} warnings</span>`);
+  if(broken) pills.push(`<span class="pill crit">${broken} broken links</span>`);
+  if(!c && !w && !broken) pills.push(`<span class="pill ok">clean</span>`);
+
+  const summary = document.createElement('summary');
+  summary.innerHTML = `<span class="chev">▶</span>
+    <span><span class="title">${escapeHtml(result.page.name)}</span></span>
+    <span class="spacer"></span>${pills.join(' ')}`;
+  det.appendChild(summary);
+
+  const body = document.createElement('div');
+  body.className = 'result-body';
+
+  // reference page block (technical only)
+  if(result.refError){
+    body.innerHTML += `<div class="lang-block"><h4>${escapeHtml(refLang.label)} (reference)</h4>
+      <div class="err-note">Could not load reference page: ${escapeHtml(result.refError)}</div></div>`;
+  } else if(result.refData){
+    body.innerHTML += `<div class="lang-block"><h4>${escapeHtml(refLang.label)} (reference)</h4>
+      <div class="url-sub">${escapeHtml(result.refUrl)}</div>
+      ${renderTech(result.refTech)}</div>`;
+  }
+
+  // translation blocks
+  result.languages.forEach(b => {
+    let html = `<div class="lang-block"><h4>${escapeHtml(b.lang.label)}</h4>`;
+    html += `<div class="url-sub">${escapeHtml(b.url)}</div>`;
+    if(b.error){
+      html += `<div class="err-note">Could not load page: ${escapeHtml(b.error)}</div></div>`;
+      body.innerHTML += html; return;
+    }
+
+    // AI translation
+    html += `<div class="section-label">Translation &amp; tone</div>`;
+    if(b.aiError){
+      html += `<div class="err-note">Analysis unavailable: ${escapeHtml(b.aiError)}</div>`;
+    } else if(b.ai){
+      if(typeof b.ai.parityScore === 'number'){
+        html += `<div class="score">Parity score: ${b.ai.parityScore}/100 — ${escapeHtml(b.ai.summary||'')}</div>`;
+      }
+      const issues = (b.ai.issues||[]).filter(x=>['translation','tone','untranslated','added'].includes(x.category) || true);
+      const aiIssues = (b.ai.issues||[]);
+      if(aiIssues.length){
+        aiIssues.forEach(is => html += renderIssue(is));
+      } else {
+        html += `<div class="clean">No translation issues found.</div>`;
+      }
+    }
+
+    // content parity
+    html += `<div class="section-label">Page sections &amp; content parity</div>`;
+    if(b.parity && b.parity.length){
+      b.parity.forEach(is => html += renderIssue(is));
+    } else {
+      html += `<div class="clean">All major sections present and element counts match English.</div>`;
+    }
+
+    // technical
+    html += renderTech(b.tech);
+    html += `</div>`;
+    body.innerHTML += html;
+  });
+
+  det.appendChild(body);
+  wrap.appendChild(det);
+}
+
+function renderTech(tech){
+  if(!tech) return '';
+  let html = `<div class="section-label">Code &amp; rendering</div>`;
+  if(tech.code.length){
+    tech.code.forEach(c => html += renderIssue({ category:'code', severity:c.sev, explanation:c.text }));
+  } else {
+    html += `<div class="clean">No code-level issues detected.</div>`;
+  }
+  html += `<div class="section-label">Links${tech.linksChecked!=null?` (checked ${tech.linksChecked} of ${tech.linksTotal})`:''}</div>`;
+  if(tech.links && tech.links.length){
+    html += `<ul class="tech">`;
+    tech.links.forEach(l => {
+      const code = l.status ? l.status : 'no response';
+      html += `<li><span class="code bad">${code}</span><a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.url)}</a></li>`;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<div class="clean">${tech.linksChecked? 'All checked links responded OK.' : 'No outbound links to check.'}</div>`;
+  }
+  return html;
+}
+
+function renderIssue(is){
+  const sev = is.severity || 'info';
+  let html = `<div class="issue ${sev}"><div class="ihead"><span class="cat">${escapeHtml(is.category||'issue')}</span></div>`;
+  html += `<p class="exp">${escapeHtml(is.explanation||'')}</p>`;
+  if(is.reference || is.translation){
+    html += `<div class="compare">
+      <div><span class="k">Reference</span>${escapeHtml(is.reference||'—')}</div>
+      <div><span class="k">Translation</span>${escapeHtml(is.translation||'—')}</div></div>`;
+  }
+  if(is.suggestion) html += `<div class="sugg">→ ${escapeHtml(is.suggestion)}</div>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderSummary(){
+  const s = auditState;
+  document.getElementById('summaryCard').style.display = 'block';
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = `
+    <div class="stat"><div class="num">${s.pages}</div><div class="lbl">Pages reviewed</div></div>
+    <div class="stat crit"><div class="num">${s.crit}</div><div class="lbl">Critical issues</div></div>
+    <div class="stat warn"><div class="num">${s.warn}</div><div class="lbl">Warnings</div></div>
+    <div class="stat crit"><div class="num">${s.broken}</div><div class="lbl">Broken links</div></div>
+    <div class="stat"><div class="num">${s.info}</div><div class="lbl">Notes</div></div>`;
+}
+
+/* ----------------------------- helpers ----------------------------- */
+function clean(s){ return (s||'').replace(/\s+/g,' ').trim(); }
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function escapeAttr(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function setProgress(msg, warn){ const el=document.getElementById('progress'); el.textContent = msg; el.style.color = warn?'var(--critical)':'var(--muted)'; }
+function setBar(pct){ document.getElementById('bar').style.width = pct + '%'; }
+
+/* ----------------------------- init ----------------------------- */
+(function initConfigDisplay(){
+  const siteEl = document.getElementById('cfgSite');
+  try { siteEl.textContent = new URL(SITE_URL).host; } catch(e){ siteEl.textContent = SITE_URL || '(SITE_URL not set)'; }
+  if(WORKER_KEY) document.getElementById('pass').value = WORKER_KEY;
+})();
+renderPages();
+updateRunHint();
+</script>
+</body>
+</html>

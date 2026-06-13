@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downtime Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --muted: #666;
+    --accent: #FFBE5F;
+    --red: #e05252;
+    --green: #52b788;
+    --yellow: #f4a261;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  header h1 { font-family: var(--mono); font-weight: 500; font-size: 1.1rem; letter-spacing: -0.02em; }
+  .subtitle  { font-size: 0.78rem; color: var(--muted); font-family: var(--mono); }
+
+  .live-badge {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  .live-dot.stale { background: var(--yellow); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── Config panel ── */
+  .config-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+  .config-panel h2 {
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media(max-width:600px){ .config-grid { grid-template-columns: 1fr; } }
+
+  .field label {
+    display: block; font-family: var(--mono); font-size: 0.65rem;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+  .field input {
+    width: 100%; padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border); border-radius: 5px;
+    font-family: var(--mono); font-size: 0.78rem; color: var(--text);
+    background: var(--bg); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,190,95,0.15); }
+
+  .config-footer { display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; flex-wrap: wrap; }
+  .btn {
+    padding: 0.45rem 1.1rem;
+    border-radius: 5px; border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 0.75rem; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+  .btn-primary:hover { background: #333; }
+  .btn-demo { background: var(--card); color: var(--muted); }
+  .btn-demo:hover { border-color: var(--accent); color: var(--text); }
+  .config-note { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+
+  /* ── Device tabs ── */
+  .tab-row {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .tab {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border); border-radius: 20px;
+    font-family: var(--mono); font-size: 0.72rem; cursor: pointer;
+    transition: all 0.2s; color: var(--muted); background: var(--card);
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .tab .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── Stats ── */
+  .status-bar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem 1.4rem; min-width: 120px;
+    box-shadow: var(--shadow); flex: 1;
+  }
+  .stat-label {
+    font-size: 0.65rem; font-family: var(--mono); color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;
+  }
+  .stat-value { font-size: 1.5rem; font-weight: 300; font-family: var(--mono); color: var(--text); line-height: 1; }
+  .stat-value.red { color: var(--red); }
+  .stat-value.accent { color: var(--accent); }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-family: var(--mono); font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin-bottom: 0.6rem;
+  }
+
+  /* ── 24h Ribbon ── */
+  .ribbon-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem 1.2rem; margin-bottom: 2rem; box-shadow: var(--shadow);
+  }
+  .ribbon { display: flex; height: 28px; border-radius: 4px; overflow: hidden; gap: 1px; background: var(--border); }
+  .ribbon-seg { flex: 1; cursor: default; transition: opacity 0.15s; }
+  .ribbon-seg:hover { opacity: 0.7; }
+  .ribbon-labels {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-top: 0.4rem;
+  }
+
+  /* ── Calendar grid ── */
+  .grid-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.2rem; margin-bottom: 2rem;
+    box-shadow: var(--shadow); overflow-x: auto;
+  }
+  .calendar-grid { display: flex; gap: 3px; flex-wrap: nowrap; }
+  .day-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .day-label { font-family: var(--mono); font-size: 0.58rem; color: var(--muted); margin-bottom: 2px; white-space: nowrap; }
+  .day-cell {
+    width: 18px; height: 18px; border-radius: 3px; cursor: default;
+    transition: transform 0.15s ease; position: relative;
+  }
+  .day-cell:hover { transform: scale(1.35); z-index: 2; }
+  .cell-ok    { background: var(--green); }
+  .cell-minor { background: var(--yellow); }
+  .cell-major { background: var(--red); }
+  .cell-empty { background: #ececec; }
+  .cell-today { box-shadow: 0 0 0 2px var(--accent); }
+
+  /* ── Table ── */
+  .log-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.2rem; box-shadow: var(--shadow); overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; }
+  th {
+    text-align: left; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.65rem;
+    padding: 0 0.6rem 0.6rem; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f5f5f5; }
+  .pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.65rem; font-weight: 500; }
+  .pill-minor { background: #fff3e0; color: #b45309; }
+  .pill-major { background: #fde8e8; color: var(--red); }
+  .duration-bar { display: flex; align-items: center; gap: 0.5rem; }
+  .bar-track { flex:1; max-width:80px; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:2px; background:var(--red); transition: width 0.4s ease; }
+
+  /* ── Legend ── */
+  .legend { display:flex; gap:1rem; font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-top:0.7rem; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:0.35rem; }
+  .legend-dot { width:10px; height:10px; border-radius:2px; }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    position:fixed; background:#1a1a1a; color:#fff;
+    font-family:var(--mono); font-size:0.7rem; padding:0.35rem 0.65rem;
+    border-radius:4px; pointer-events:none; z-index:9998; white-space:nowrap;
+    display:none; line-height:1.6;
+  }
+
+  /* ── Compare view ── */
+  .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .device-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1.1rem; box-shadow: var(--shadow);
+  }
+  .device-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.8rem;
+  }
+  .device-name { font-family: var(--mono); font-size: 0.8rem; font-weight: 500; }
+  .device-mini-stats { display: flex; gap: 0.8rem; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+  .device-mini-ribbon { display:flex; height:14px; border-radius:3px; overflow:hidden; gap:1px; background:var(--border); }
+  .device-mini-seg { flex:1; }
+
+  /* ── Print btn ── */
+  #print-btn {
+    position:fixed; top:20px; right:20px; width:40px; height:40px;
+    border-radius:8px; background:#1a1a1a; opacity:0.7; border:none;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    z-index:9999; transition:opacity 0.2s ease;
+  }
+  #print-btn:hover { opacity:1; }
+  #print-btn svg { width:18px; height:18px; fill:#fff; }
+  @media print { #print-btn { display:none; } }
+
+  .hidden { display:none !important; }
+  .empty-state { text-align:center; padding:2rem; font-family:var(--mono); font-size:0.8rem; color:var(--muted); }
+  .error-msg { font-family:var(--mono); font-size:0.72rem; color:var(--red); margin-top:0.4rem; }
+</style>
+</head>
+<body>
+
+<button id="print-btn" title="Save as PDF" onclick="printSinglePage()">
+  <svg viewBox="0 0 24 24"><path d="M12 16l-5-5 1.41-1.41L11 13.17V4h2v9.17l2.59-2.58L17 11l-5 5zm-7 2h14v2H5v-2z"/></svg>
+</button>
+
+<div class="tooltip" id="tooltip"></div>
+
+<header>
+  <h1>downtime_monitor</h1>
+  <span class="subtitle">multi-device dashboard</span>
+  <div class="live-badge" id="liveBadge" style="display:none">
+    <div class="live-dot" id="liveDot"></div>
+    <span id="liveLabel">live</span>
+  </div>
+  <button onclick="resetConfig()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:0.68rem;color:var(--muted);padding:0.2rem 0.4rem;border-radius:4px;transition:color 0.2s;" title="Change credentials" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">⚙ settings</button>
+</header>
+
+<!-- Config -->
+<div class="config-panel" id="configPanel">
+  <h2>Supabase connection</h2>
+  <div class="config-grid">
+    <div class="field" style="grid-column:1/-1">
+      <label>Project URL</label>
+      <input id="cfgUrl" type="text" placeholder="https://xxxxxxxxxxxx.supabase.co" spellcheck="false">
+    </div>
+    <div class="field" style="grid-column:1/-1">
+      <label>Anon / Public Key</label>
+      <input id="cfgKey" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." spellcheck="false">
+    </div>
+  </div>
+  <div class="config-footer">
+    <button class="btn btn-primary" onclick="connect()">Connect</button>
+    <button class="btn btn-demo" onclick="loadDemo()">Load demo data</button>
+    <span class="config-note">Keys are stored in localStorage, never sent anywhere except Supabase.</span>
+  </div>
+  <div class="error-msg hidden" id="cfgError"></div>
+</div>
+
+<!-- Device tabs -->
+<div class="tab-row hidden" id="tabRow"></div>
+
+<!-- Stats -->
+<div class="status-bar hidden" id="statsBar"></div>
+
+<!-- 24h Ribbon -->
+<div class="hidden" id="ribbonSection">
+  <div class="section-title">Last 24 hours — 5-min buckets</div>
+  <div class="ribbon-wrap">
+    <div class="ribbon" id="ribbon"></div>
+    <div class="ribbon-labels">
+      <span>24h ago</span><span>18h ago</span><span>12h ago</span><span>6h ago</span><span>now</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>online</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>offline</div>
+    </div>
+  </div>
+</div>
+
+<!-- Compare view (all tab) -->
+<div class="hidden" id="compareSection">
+  <div class="section-title">All devices — 24h overview</div>
+  <div class="compare-grid" id="compareGrid"></div>
+</div>
+
+<!-- Calendar grid -->
+<div class="hidden" id="calSection">
+  <div class="section-title">Daily reliability — last 90 days</div>
+  <div class="grid-wrap">
+    <div class="calendar-grid" id="calGrid"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>0 outages</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>&lt;5 min</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>5+ min</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ececec"></div>no data</div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="hidden" id="logSection">
+  <div class="section-title">Outage log</div>
+  <div class="log-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Device</th><th>Start</th><th>End</th><th>Duration</th><th>Severity</th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ── Tooltip ───────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+document.addEventListener('mousemove', e => {
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top  = (e.clientY + 14) + 'px';
+});
+function showTip(html) { tooltip.innerHTML = html; tooltip.style.display = 'block'; }
+function hideTip()     { tooltip.style.display = 'none'; }
+
+// ── State ─────────────────────────────────────────────────
+let allData     = [];   // full outage array
+let devices     = [];   // distinct device names
+let activeDevice = 'all';
+let supabaseUrl = '';
+let supabaseKey = '';
+let pollTimer   = null;
+
+// Device colour palette
+const DEVICE_COLORS = ['#FFBE5F','#52b788','#e05252','#6ea8fe','#c77dff','#f4a261'];
+function deviceColor(name) {
+  const idx = devices.indexOf(name);
+  return DEVICE_COLORS[idx % DEVICE_COLORS.length];
+}
+
+// ── Restore saved config & auto-connect ──────────────────
+(function() {
+  const u = localStorage.getItem('sb_url');
+  const k = localStorage.getItem('sb_key');
+  if(u) document.getElementById('cfgUrl').value = u;
+  if(k) document.getElementById('cfgKey').value = k;
+  if(u && k) {
+    // Auto-connect silently on page load
+    supabaseUrl = u; supabaseKey = k;
+    document.getElementById('configPanel').style.display = 'none';
+    startLive();
+  }
+})();
+
+// ── Supabase connect ──────────────────────────────────────
+async function connect() {
+  const url = document.getElementById('cfgUrl').value.trim().replace(/\/$/, '');
+  const key = document.getElementById('cfgKey').value.trim();
+  const errEl = document.getElementById('cfgError');
+  errEl.classList.add('hidden');
+
+  if(!url || !key) { showErr('Please fill in both fields.'); return; }
+
+  try {
+    const r = await fetch(`${url}/rest/v1/outages?select=id&limit=1`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` }
+    });
+    if(!r.ok) { showErr(`Connection failed: ${r.status} ${r.statusText}`); return; }
+  } catch(e) { showErr(`Could not reach Supabase: ${e.message}`); return; }
+
+  supabaseUrl = url; supabaseKey = key;
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  document.getElementById('configPanel').style.display = 'none';
+  startLive();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('cfgError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+
+// ── Fetch from Supabase ───────────────────────────────────
+async function fetchOutages() {
+  const ninety = new Date(Date.now() - 90*86400*1000).toISOString();
+  const r = await fetch(
+    `${supabaseUrl}/rest/v1/outages?select=device,start_time,end_time,duration_sec&start_time=gte.${ninety}&order=start_time.desc&limit=5000`,
+    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+  );
+  if(!r.ok) throw new Error(r.statusText);
+  return r.json();
+}
+
+// ── Live polling ──────────────────────────────────────────
+function startLive() {
+  document.getElementById('liveBadge').style.display = 'flex';
+  doFetch();
+  pollTimer = setInterval(doFetch, 60000); // refresh every 60s
+}
+
+async function doFetch() {
+  try {
+    const rows = await fetchOutages();
+    // normalise field names to match demo format
+    allData = rows.map(r => ({
+      device: r.device,
+      start:  r.start_time,
+      end:    r.end_time,
+      duration_sec: r.duration_sec,
+    }));
+    devices = [...new Set(allData.map(r => r.device))].sort();
+    document.getElementById('liveDot').classList.remove('stale');
+    document.getElementById('liveLabel').textContent = 'live · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    renderAll();
+  } catch(e) {
+    document.getElementById('liveDot').classList.add('stale');
+    document.getElementById('liveLabel').textContent = 'fetch failed';
+  }
+}
+
+// ── Demo data ─────────────────────────────────────────────
+function loadDemo() {
+  document.getElementById('configPanel').style.display = 'none';
+  const deviceNames = ['macbook-pro', 'raspberry-pi', 'office-pc'];
+  const entries = [];
+  const now = Date.now();
+  deviceNames.forEach(d => {
+    for(let i = 0; i < 15; i++) {
+      const start = new Date(now - Math.random() * 60 * 86400000);
+      const dur   = Math.floor(Math.random() * 900 + 20);
+      entries.push({ device: d, start: start.toISOString(), end: new Date(start.getTime()+dur*1000).toISOString(), duration_sec: dur });
+    }
+  });
+  entries.sort((a,b) => new Date(a.start)-new Date(b.start));
+  allData = entries;
+  devices = deviceNames;
+  document.getElementById('liveBadge').style.display = 'flex';
+  document.getElementById('liveDot').classList.add('stale');
+  document.getElementById('liveLabel').textContent = 'demo mode';
+  renderAll();
+}
+
+// ── Filter helper ─────────────────────────────────────────
+function visibleData() {
+  return activeDevice === 'all' ? allData : allData.filter(e => e.device === activeDevice);
+}
+
+// ── Render all ────────────────────────────────────────────
+function renderAll() {
+  renderTabs();
+  const data = visibleData();
+  renderStats(data);
+  renderRibbon(data);
+  renderCompare();
+  renderCalendar(data);
+  renderTable(data);
+  show('statsBar'); show('ribbonSection'); show('calSection'); show('logSection');
+}
+
+function show(id)  { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)  { document.getElementById(id).classList.add('hidden'); }
+
+// ── Tabs ──────────────────────────────────────────────────
+function renderTabs() {
+  const row = document.getElementById('tabRow');
+  row.classList.remove('hidden');
+  const tabs = ['all', ...devices];
+  row.innerHTML = tabs.map(d => {
+    const color = d === 'all' ? '#1a1a1a' : deviceColor(d);
+    const active = d === activeDevice ? 'active' : '';
+    const dot = d !== 'all' ? `<span class="dot" style="background:${color}"></span>` : '';
+    return `<button class="tab ${active}" onclick="switchTab('${d}')">${dot}${d}</button>`;
+  }).join('');
+}
+
+function switchTab(device) {
+  activeDevice = device;
+  const data = visibleData();
+  renderTabs();
+  renderStats(data);
+  renderRibbon(data);
+  if(device === 'all') { show('compareSection'); hide('ribbonSection'); }
+  else { hide('compareSection'); show('ribbonSection'); }
+  renderCalendar(data);
+  renderTable(data);
+}
+
+// ── Stats ─────────────────────────────────────────────────
+function renderStats(data) {
+  const total  = data.reduce((s,e) => s+e.duration_sec, 0);
+  const longest = data.length ? Math.max(...data.map(e=>e.duration_sec)) : 0;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="stat-label">Outages</div><div class="stat-value red">${data.length}</div></div>
+    <div class="stat"><div class="stat-label">Total downtime</div><div class="stat-value accent">${fmtDur(total)}</div></div>
+    <div class="stat"><div class="stat-label">Longest</div><div class="stat-value">${fmtDur(longest)}</div></div>
+    <div class="stat"><div class="stat-label">Avg per outage</div><div class="stat-value">${data.length ? fmtDur(Math.round(total/data.length)) : '—'}</div></div>
+  `;
+}
+
+// ── 24h Ribbon ────────────────────────────────────────────
+function renderRibbon(data) {
+  const ribbon = document.getElementById('ribbon');
+  ribbon.innerHTML = '';
+  const now = Date.now(), windowMs = 24*3600*1000, segs = 288;
+  const bucketMs = windowMs / segs;
+  for(let i = 0; i < segs; i++) {
+    const bS = now - windowMs + i * bucketMs, bE = bS + bucketMs;
+    const down = data.some(e => new Date(e.start).getTime() < bE && new Date(e.end).getTime() > bS);
+    const seg = document.createElement('div');
+    seg.className = 'ribbon-seg';
+    seg.style.background = down ? 'var(--red)' : 'var(--green)';
+    const label = new Date(bS).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    seg.addEventListener('mouseenter', () => showTip(`${label}<br>${down?'🔴 offline':'🟢 online'}`));
+    seg.addEventListener('mouseleave', hideTip);
+    ribbon.appendChild(seg);
+  }
+}
+
+// ── Compare (all devices, mini ribbons) ───────────────────
+function renderCompare() {
+  const grid = document.getElementById('compareGrid');
+  if(activeDevice !== 'all') return;
+  grid.innerHTML = '';
+  if(!devices.length) { hide('compareSection'); return; }
+  show('compareSection');
+
+  devices.forEach(d => {
+    const dData = allData.filter(e => e.device === d);
+    const total = dData.reduce((s,e)=>s+e.duration_sec,0);
+    const color = deviceColor(d);
+
+    const card = document.createElement('div');
+    card.className = 'device-card';
+    card.innerHTML = `
+      <div class="device-card-header">
+        <span class="device-name" style="color:${color}">${d}</span>
+        <div class="device-mini-stats">
+          <span>${dData.length} outage${dData.length!==1?'s':''}</span>
+          <span>${fmtDur(total)}</span>
+        </div>
+      </div>
+      <div class="device-mini-ribbon" id="mini-${d}"></div>
+    `;
+    grid.appendChild(card);
+
+    // Mini ribbon — 24h, 96 buckets
+    const now = Date.now(), windowMs = 24*3600*1000, segs = 96;
+    const bucketMs = windowMs / segs;
+    const ribbon = card.querySelector(`#mini-${d}`);
+    for(let i = 0; i < segs; i++) {
+      const bS = now - windowMs + i*bucketMs, bE = bS+bucketMs;
+      const down = dData.some(e => new Date(e.start).getTime() < bE && new Date(e.end).getTime() > bS);
+      const seg = document.createElement('div');
+      seg.className = 'device-mini-seg';
+      seg.style.background = down ? 'var(--red)' : 'var(--green)';
+      const t = new Date(bS).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      seg.addEventListener('mouseenter', () => showTip(`${d}<br>${t}<br>${down?'🔴 offline':'🟢 online'}`));
+      seg.addEventListener('mouseleave', hideTip);
+      ribbon.appendChild(seg);
+    }
+
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => switchTab(d));
+  });
+}
+
+// ── Calendar ──────────────────────────────────────────────
+function renderCalendar(data) {
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const today = new Date(); today.setHours(23,59,59,999);
+  const dayMap = {};
+  data.forEach(e => {
+    const k = new Date(e.start).toDateString();
+    dayMap[k] = (dayMap[k] || 0) + e.duration_sec;
+  });
+
+  const cells = [];
+  for(let i = 89; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate()-i); cells.push(d);
+  }
+
+  let col = null;
+  cells.forEach((d, idx) => {
+    if(idx%7===0 || !col) {
+      col = document.createElement('div'); col.className = 'day-col';
+      const lbl = document.createElement('div'); lbl.className = 'day-label';
+      lbl.textContent = d.toLocaleDateString([],{month:'short',day:'numeric'});
+      col.appendChild(lbl); grid.appendChild(col);
+    }
+    const cell = document.createElement('div'); cell.className = 'day-cell';
+    const key = d.toDateString();
+    const isFuture = d > new Date();
+    if(isFuture) cell.classList.add('cell-empty');
+    else if(!dayMap[key]) cell.classList.add('cell-ok');
+    else if(dayMap[key] < 300) cell.classList.add('cell-minor');
+    else cell.classList.add('cell-major');
+    if(d.toDateString()===new Date().toDateString()) cell.classList.add('cell-today');
+    const tip = d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+    const dur = dayMap[key] ? fmtDur(dayMap[key]) : 'No outages';
+    cell.addEventListener('mouseenter', () => showTip(`${tip}<br>${dur}`));
+    cell.addEventListener('mouseleave', hideTip);
+    col.appendChild(cell);
+  });
+}
+
+// ── Table ─────────────────────────────────────────────────
+function renderTable(data) {
+  const body = document.getElementById('logBody');
+  if(!data.length) { body.innerHTML='<tr><td colspan="6" class="empty-state">No outages.</td></tr>'; return; }
+  const maxDur = Math.max(...data.map(e=>e.duration_sec));
+  const sorted = [...data].sort((a,b)=>new Date(b.start)-new Date(a.start));
+  body.innerHTML = sorted.map((e,i) => {
+    const pct = Math.round(e.duration_sec/maxDur*100);
+    const sev = e.duration_sec >= 300 ? 'major' : 'minor';
+    const color = deviceColor(e.device);
+    return `<tr>
+      <td style="color:var(--muted)">${sorted.length-i}</td>
+      <td><span style="font-weight:500;color:${color}">${e.device}</span></td>
+      <td>${fmtTime(e.start)}</td>
+      <td>${fmtTime(e.end)}</td>
+      <td><div class="duration-bar"><span>${fmtDur(e.duration_sec)}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div></td>
+      <td><span class="pill pill-${sev}">${sev==='major'?'5+ min':'< 5 min'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function fmtTime(s) {
+  return new Date(s).toLocaleString([],{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function fmtDur(sec) {
+  if(sec<60) return sec+'s';
+  if(sec<3600) return Math.floor(sec/60)+'m '+(sec%60)+'s';
+  return Math.floor(sec/3600)+'h '+Math.floor((sec%3600)/60)+'m';
+}
+
+// ── Reset config ──────────────────────────────────────────
+function resetConfig() {
+  localStorage.removeItem('sb_url');
+  localStorage.removeItem('sb_key');
+  clearInterval(pollTimer);
+  document.getElementById('configPanel').style.display = 'block';
+  document.getElementById('liveBadge').style.display = 'none';
+  hide('statsBar'); hide('ribbonSection'); hide('compareSection');
+  hide('calSection'); hide('logSection'); hide('tabRow');
+}
+
+// ── Print ─────────────────────────────────────────────────
+function printSinglePage() {
+  const h = document.documentElement.scrollHeight, w = document.documentElement.scrollWidth;
+  const s = document.createElement('style'); s.id='_print';
+  s.textContent=`@page{size:${w}px ${h}px;margin:0}body{zoom:1}`;
+  document.head.appendChild(s); window.print();
+  setTimeout(()=>document.getElementById('_print')?.remove(), 1000);
+}
+</script>
+</body>
+</html>

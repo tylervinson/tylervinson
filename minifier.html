@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS & CSS Minifier</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fafafa; --surface: #ffffff; --border: #e0e0e0;
+    --text: #1a1a1a; --muted: #666; --accent: #FFBE5F;
+    --green: #3B6D11; --green-bg: #EAF3DE; --green-border: #97C459;
+    --red: #A32D2D; --red-bg: #FCEBEB; --red-border: #F09595;
+    --amber: #854F0B; --amber-bg: #FAEEDA; --amber-border: #EF9F27;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08); --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    --editor-lh: 1.65;
+    --editor-fs: 12.5px;
+    --editor-pad: 14px;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 300; font-size: 16px; letter-spacing: -0.02em; color: var(--text); text-decoration: none; }
+  .logo-icon { width: 28px; height: 28px; background: var(--text); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-icon svg { width: 16px; height: 16px; fill: var(--accent); }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+  .mode-tabs { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; gap: 2px; }
+  .mode-tab { font-family: var(--font); font-size: 12px; font-weight: 500; padding: 5px 14px; border: none; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s; letter-spacing: 0.02em; }
+  .mode-tab.active { background: var(--text); color: #fff; }
+  .mode-tab:hover:not(.active) { background: var(--border); color: var(--text); }
+  main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  .toolbar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .options-group { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-wrap: wrap; }
+  .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; }
+  .checkbox-label input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--text); cursor: pointer; }
+  .opt-js { display: inline-flex; }
+  .opt-css { display: none; }
+  body.css-mode .opt-js { display: none; }
+  body.css-mode .opt-css { display: inline-flex; }
+  .editors { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .editor-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: border-color 0.25s ease; }
+  .editor-panel.valid { border-color: var(--green-border); }
+  .editor-panel.error { border-color: var(--red-border); }
+  .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #f5f5f5; flex-shrink: 0; }
+  .panel-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .char-badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .lang-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; text-transform: none; letter-spacing: 0; background: #e8f0fe; color: #1a56db; }
+  body.css-mode .lang-badge { background: #fdf2f8; color: #9d174d; }
+
+  /* ── Editor with highlight overlay ── */
+  .editor-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 320px;
+    overflow: hidden;
+  }
+  /* Shared typographic contract for both layers */
+  .editor-wrap textarea,
+  .editor-wrap .highlight-layer {
+    font-family: var(--mono);
+    font-size: var(--editor-fs);
+    line-height: var(--editor-lh);
+    padding: var(--editor-pad);
+    tab-size: 2;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-wrap: normal;
+    /* Scrolling handled together */
+    overflow: auto;
+  }
+  /* Highlight layer: sits behind, not interactive */
+  .highlight-layer {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    color: transparent; /* text invisible; only marks show */
+    pointer-events: none;
+    z-index: 1;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+  /* The actual textarea: transparent bg so highlights show through */
+  .editor-wrap textarea {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    caret-color: var(--text);
+  }
+  .editor-wrap textarea::placeholder { color: #bbb; }
+  /* Error line highlight */
+  .err-line {
+    background: rgba(227, 75, 74, 0.13);
+    border-left: 3px solid #E24B4A;
+    display: block;
+    /* negative margin trick to extend bg full width */
+    margin-left: calc(-1 * var(--editor-pad));
+    padding-left: calc(var(--editor-pad) - 3px);
+    /* extend right past viewport */
+    padding-right: 9999px;
+    margin-right: -9999px;
+  }
+  /* Warning line highlight */
+  .warn-line {
+    background: rgba(239, 159, 39, 0.12);
+    border-left: 3px solid #EF9F27;
+    display: block;
+    margin-left: calc(-1 * var(--editor-pad));
+    padding-left: calc(var(--editor-pad) - 3px);
+    padding-right: 9999px;
+    margin-right: -9999px;
+  }
+
+  /* Output textarea (plain, no overlay needed) */
+  .output-textarea {
+    width: 100%; height: 320px;
+    font-family: var(--mono); font-size: var(--editor-fs);
+    line-height: var(--editor-lh); padding: var(--editor-pad);
+    border: none; background: #fafafa; color: var(--text);
+    resize: vertical; outline: none; tab-size: 2; cursor: default;
+  }
+  .output-textarea::placeholder { color: #bbb; }
+
+  /* Error gutter — line number list shown on errors */
+  .error-gutter {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 14px;
+    background: #fff8f8;
+    border-top: 1px solid var(--red-border);
+  }
+  .error-gutter.visible { display: flex; }
+  .gutter-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .gutter-line-no {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: #fff;
+    background: #E24B4A;
+    border-radius: 4px;
+    padding: 1px 6px;
+    min-width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .gutter-line-no.warn { background: #EF9F27; }
+  .gutter-msg { color: var(--red); font-size: 12px; line-height: 1.4; }
+  .gutter-msg.warn { color: var(--amber); }
+
+  .status-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px; min-height: 40px; margin-bottom: 16px; font-size: 13px; color: var(--muted); box-shadow: var(--shadow); transition: background 0.25s ease, border-color 0.25s ease; }
+  .status-bar.valid { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+  .status-bar.invalid { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+  .status-bar.warning { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+  .status-icon { flex-shrink: 0; margin-top: 1px; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+  .metric-card:hover { transform: translateY(-1px); }
+  .metric-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .metric-value { font-size: 22px; font-weight: 300; color: var(--text); letter-spacing: -0.02em; }
+  .metric-card.accent-card { background: var(--text); border-color: var(--text); }
+  .metric-card.accent-card .metric-label { color: rgba(255,255,255,0.5); }
+  .metric-card.accent-card .metric-value { color: var(--accent); }
+  button { font-family: var(--font); font-size: 13px; padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s ease, transform 0.1s ease; white-space: nowrap; line-height: 1; }
+  button:hover { background: var(--bg); }
+  button:active { transform: scale(0.97); }
+  button.primary { background: var(--text); color: #fff; border-color: var(--text); font-weight: 400; }
+  button.primary:hover { opacity: 0.85; background: var(--text); }
+  button.sm { font-size: 11px; padding: 4px 9px; }
+  button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  button.primary svg { stroke: #fff; }
+  #print-btn { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background: #1a1a1a; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.7; z-index: 9999; transition: opacity 0.2s ease; padding: 0; }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { width: 18px; height: 18px; stroke: #FFBE5F; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @media print { #print-btn { display: none; } }
+  @media (max-width: 768px) { main { padding: 1rem; } .editors { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2, 1fr); } .options-group { margin-left: 0; } header { padding: 0 1rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 16 16"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h10v2H2z"/></svg>
+    </div>
+    Minifier
+  </a>
+  <div class="header-actions">
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-js" onclick="setMode('js')">JavaScript</button>
+      <button class="mode-tab" id="tab-css" onclick="setMode('css')">CSS</button>
+    </div>
+    <button onclick="loadSample()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Load sample
+    </button>
+    <button onclick="clearAll()">
+      <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/></svg>
+      Clear
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="primary" onclick="runAll()">
+      <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21 5,3"/></svg>
+      Minify &amp; Check
+    </button>
+    <div class="toolbar-divider"></div>
+    <button id="btn-check" onclick="checkOnly()">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Syntax check only
+    </button>
+    <div class="options-group">
+      <label class="checkbox-label opt-js">
+        <input type="checkbox" id="chk-comments" checked>
+        Strip comments
+      </label>
+      <label class="checkbox-label opt-js">
+        <input type="checkbox" id="chk-logs">
+        Strip console.log
+      </label>
+      <label class="checkbox-label opt-css">
+        <input type="checkbox" id="chk-css-comments" checked>
+        Strip comments
+      </label>
+      <label class="checkbox-label opt-css">
+        <input type="checkbox" id="chk-css-zeros" checked>
+        Remove zero units
+      </label>
+      <label class="checkbox-label opt-css">
+        <input type="checkbox" id="chk-css-colors" checked>
+        Shorten hex colors
+      </label>
+    </div>
+  </div>
+
+  <div class="editors">
+    <!-- Input panel with highlight overlay -->
+    <div class="editor-panel" id="input-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span id="input-label">Input JavaScript</span>
+          <span class="char-badge" id="in-chars">0 chars</span>
+        </span>
+        <span class="lang-badge" id="lang-badge">JS</span>
+      </div>
+      <div class="editor-wrap" id="editor-wrap">
+        <pre class="highlight-layer" id="highlight-layer" aria-hidden="true"></pre>
+        <textarea id="input"
+          placeholder="Paste your JavaScript here..."
+          oninput="onInputChange()"
+          onscroll="syncScroll()"
+          spellcheck="false"></textarea>
+      </div>
+      <div class="error-gutter" id="error-gutter"></div>
+    </div>
+
+    <!-- Output panel (plain) -->
+    <div class="editor-panel" id="output-panel">
+      <div class="panel-header">
+        <span class="panel-title">Minified output</span>
+        <button class="sm" onclick="copyOutput()">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <textarea id="output" class="output-textarea" readonly placeholder="Minified code appears here..." spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div id="status-bar" class="status-bar">
+    <svg class="status-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="status-text">Paste JavaScript above and click <strong>Minify &amp; Check</strong>.</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-label">Original size</div>
+      <div class="metric-value" id="m-orig">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Minified size</div>
+      <div class="metric-value" id="m-min">—</div>
+    </div>
+    <div class="metric-card accent-card">
+      <div class="metric-label">Size saved</div>
+      <div class="metric-value" id="m-saved">—</div>
+    </div>
+    <div class="metric-card accent-card">
+      <div class="metric-label">Reduction</div>
+      <div class="metric-value" id="m-pct">—</div>
+    </div>
+  </div>
+</main>
+
+<button id="print-btn" onclick="printSinglePage()" title="Save as PDF">
+  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+</button>
+
+<script>
+var currentMode = 'js';
+
+/* ── line annotations: map of lineIndex(0-based) -> 'error'|'warning' ── */
+var lineAnnotations = {};
+
+var JS_SAMPLE = '// GTM Custom HTML Tag - Example\n// Tracks button click events and sends to dataLayer\n\n(function() {\n  // Helper: get cookie value by name\n  function getCookieValue(cookieName) {\n    var name = cookieName + "=";\n    var cookies = document.cookie.split(";");\n    for (var i = 0; i < cookies.length; i++) {\n      var cookie = cookies[i].trim();\n      if (cookie.indexOf(name) === 0) {\n        return cookie.substring(name.length, cookie.length);\n      }\n    }\n    return null;\n  }\n\n  /* Push event to dataLayer with user context */\n  var userId = getCookieValue("user_id");\n  var sessionId = getCookieValue("session_id");\n\n  console.log("Firing GTM event tag");\n  console.log("User ID:", userId);\n\n  window.dataLayer = window.dataLayer || [];\n  window.dataLayer.push({\n    event: "custom_button_click",\n    user_id: userId,\n    session_id: sessionId,\n    page_path: window.location.pathname,\n    timestamp: new Date().toISOString()\n  });\n})();';
+
+var CSS_SAMPLE = '/* GTM Custom HTML Tag - Injected Styles */\n/* Used for banner/overlay components */\n\n.gtm-banner {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  position: fixed;\n  top: 0px;\n  left: 0px;\n  right: 0px;\n  z-index: 99999;\n  background-color: #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  padding: 12px 24px;\n  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;\n  font-size: 14px;\n  color: #1a1a1a;\n  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.10);\n  transition: opacity 0.3s ease;\n}\n\n/* Close button */\n.gtm-banner__close {\n  background: transparent;\n  border: 0px none;\n  cursor: pointer;\n  padding: 4px 8px;\n  margin-left: auto;\n  color: #666666;\n  font-size: 18px;\n  line-height: 1;\n}\n\n.gtm-banner__close:hover {\n  color: #000000;\n}\n\n/* Visible state */\n.gtm-banner.is-visible {\n  opacity: 1;\n  pointer-events: auto;\n}\n\n/* Hidden state */\n.gtm-banner.is-hidden {\n  opacity: 0;\n  pointer-events: none;\n}';
+
+/* ── Mode switch ── */
+function setMode(mode) {
+  currentMode = mode;
+  document.body.classList.toggle('css-mode', mode === 'css');
+  document.getElementById('tab-js').classList.toggle('active', mode === 'js');
+  document.getElementById('tab-css').classList.toggle('active', mode === 'css');
+  document.getElementById('input-label').textContent = mode === 'js' ? 'Input JavaScript' : 'Input CSS';
+  document.getElementById('lang-badge').textContent = mode === 'js' ? 'JS' : 'CSS';
+  document.getElementById('input').placeholder = mode === 'js' ? 'Paste your JavaScript here...' : 'Paste your CSS here...';
+  document.getElementById('btn-check').style.display = mode === 'js' ? '' : 'none';
+  clearAll();
+}
+
+/* ── Highlight overlay ── */
+
+/* Keep textarea and pre scrolled together */
+function syncScroll() {
+  var ta = document.getElementById('input');
+  var hl = document.getElementById('highlight-layer');
+  hl.scrollTop = ta.scrollTop;
+  hl.scrollLeft = ta.scrollLeft;
+}
+
+/* Escape HTML entities so pre renders safely */
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/* Rebuild the highlight layer from current annotations */
+function renderHighlights() {
+  var ta = document.getElementById('input');
+  var hl = document.getElementById('highlight-layer');
+  var lines = ta.value.split('\n');
+  var html = '';
+  for (var i = 0; i < lines.length; i++) {
+    var ann = lineAnnotations[i];
+    var content = escHtml(lines[i]) || ' '; /* keep empty lines visible */
+    if (ann === 'error') {
+      html += '<span class="err-line">' + content + '</span>\n';
+    } else if (ann === 'warning') {
+      html += '<span class="warn-line">' + content + '</span>\n';
+    } else {
+      html += content + '\n';
+    }
+  }
+  /* trailing newline for cursor-at-end height parity */
+  hl.innerHTML = html;
+  syncScroll();
+}
+
+/* Clear all highlights */
+function clearHighlights() {
+  lineAnnotations = {};
+  renderHighlights();
+  document.getElementById('error-gutter').className = 'error-gutter';
+  document.getElementById('error-gutter').innerHTML = '';
+}
+
+/* Parse JS error message to extract line number (1-based) */
+function parseJSErrorLine(msg, code) {
+  /* V8: "Unexpected token ... (line X)" or just guess from context */
+  var m = msg.match(/line\s+(\d+)/i);
+  if (m) return parseInt(m[1], 10);
+  /* Try running with line-numbered wrapper to extract column info */
+  /* Fallback: scan for the token mentioned in the error */
+  return null;
+}
+
+/* Get precise JS error line by injecting line markers */
+function getJSErrorLine(code) {
+  var lines = code.split('\n');
+  /* Wrap each line; when the error fires the Function constructor
+     reports a line offset we can use */
+  try {
+    new Function(code);
+    return null; /* no error */
+  } catch(e) {
+    /* Chrome/Edge: "SyntaxError: Unexpected token 'X' (line N, col M)" */
+    var m1 = e.message.match(/\(line\s+(\d+)/i);
+    if (m1) return parseInt(m1[1], 10);
+
+    /* Firefox: message includes nothing, but e.lineNumber exists */
+    if (e.lineNumber && e.lineNumber > 1) return e.lineNumber - 1; /* offset for Function() wrapper */
+
+    /* Heuristic: try each prefix and find first that parses */
+    for (var i = 0; i < lines.length; i++) {
+      var snippet = lines.slice(0, i + 1).join('\n');
+      try { new Function(snippet); } catch(e2) {
+        /* if same error type, this line or earlier is culprit */
+        if (e2.constructor === e.constructor) return i + 1;
+      }
+    }
+    return null;
+  }
+}
+
+/* Build gutter rows and annotate the highlight layer */
+function applyAnnotations(annotations) {
+  /* annotations: array of {line: 1-based|null, msg: str, type: 'error'|'warning'} */
+  lineAnnotations = {};
+  var gutter = document.getElementById('error-gutter');
+  gutter.innerHTML = '';
+  var hasAny = annotations.length > 0;
+
+  for (var i = 0; i < annotations.length; i++) {
+    var ann = annotations[i];
+    var lineIdx = ann.line != null ? ann.line - 1 : null; /* 0-based */
+
+    if (lineIdx != null && lineIdx >= 0) {
+      /* Don't downgrade an error line to warning */
+      if (!(lineAnnotations[lineIdx] === 'error' && ann.type === 'warning')) {
+        lineAnnotations[lineIdx] = ann.type;
+      }
+    }
+
+    /* Gutter row */
+    var row = document.createElement('div');
+    row.className = 'gutter-row';
+    var badge = document.createElement('span');
+    badge.className = 'gutter-line-no' + (ann.type === 'warning' ? ' warn' : '');
+    badge.textContent = ann.line != null ? 'L' + ann.line : '—';
+    if (ann.line != null) {
+      /* clicking badge jumps to line */
+      (function(ln) {
+        badge.style.cursor = 'pointer';
+        badge.title = 'Jump to line ' + ln;
+        badge.addEventListener('click', function() { jumpToLine(ln); });
+      })(ann.line);
+    }
+    var msgEl = document.createElement('span');
+    msgEl.className = 'gutter-msg' + (ann.type === 'warning' ? ' warn' : '');
+    msgEl.textContent = ann.msg;
+    row.appendChild(badge);
+    row.appendChild(msgEl);
+    gutter.appendChild(row);
+  }
+
+  if (hasAny) gutter.className = 'error-gutter visible';
+  else gutter.className = 'error-gutter';
+
+  renderHighlights();
+}
+
+/* Jump textarea cursor to a specific line */
+function jumpToLine(lineNo) {
+  var ta = document.getElementById('input');
+  var lines = ta.value.split('\n');
+  var pos = 0;
+  for (var i = 0; i < Math.min(lineNo - 1, lines.length); i++) {
+    pos += lines[i].length + 1;
+  }
+  ta.focus();
+  ta.setSelectionRange(pos, pos + (lines[lineNo - 1] || '').length);
+  /* Scroll line into view */
+  var lineH = parseFloat(getComputedStyle(ta).lineHeight);
+  ta.scrollTop = (lineNo - 3) * lineH;
+  syncScroll();
+}
+
+/* Called on every keystroke — clears stale highlights live */
+function onInputChange() {
+  updateInputCount();
+  /* Clear highlights as user edits, so stale marks don't linger */
+  clearHighlights();
+  document.getElementById('input-panel').className = 'editor-panel';
+}
+
+function updateInputCount() {
+  var v = document.getElementById('input').value;
+  document.getElementById('in-chars').textContent = v.length.toLocaleString() + ' chars';
+}
+
+var ICONS = {
+  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>',
+  x: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  warn: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  clip: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>'
+};
+
+function setStatus(type, iconPath, html) {
+  var bar = document.getElementById('status-bar');
+  bar.className = 'status-bar' + (type ? ' ' + type : '');
+  bar.innerHTML = '<svg class="status-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconPath + '</svg><span>' + html + '</span>';
+}
+
+/* ── JS syntax ── */
+function checkSyntaxJS(code) {
+  var errors = [];
+  var errorLine = null;
+  try {
+    new Function(code);
+  } catch(e) {
+    errors.push({ msg: e.message, line: null });
+    errorLine = getJSErrorLine(code);
+    if (errorLine) errors[0].line = errorLine;
+  }
+  var warnings = [];
+  var lines = code.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    var ln = lines[i];
+    if (/\beval\s*\(/.test(ln)) warnings.push({ msg: 'eval() detected — security risk', line: i + 1 });
+    if (/document\.write\s*\(/.test(ln)) warnings.push({ msg: 'document.write() may block rendering', line: i + 1 });
+    if (/var\s+\w+\s*=\s*new\s+Function\s*\(/.test(ln)) warnings.push({ msg: 'new Function() constructor detected', line: i + 1 });
+  }
+  return { errors: errors, warnings: warnings };
+}
+
+/* ── CSS syntax ── */
+function checkSyntaxCSS(code) {
+  var errors = [];
+  var warnings = [];
+  var lines = code.split('\n');
+
+  var open = (code.match(/\{/g) || []).length;
+  var close = (code.match(/\}/g) || []).length;
+  if (open !== close) {
+    /* Find first unmatched brace */
+    var depth = 0; var errLine = null;
+    for (var i = 0; i < lines.length; i++) {
+      for (var c = 0; c < lines[i].length; c++) {
+        if (lines[i][c] === '{') depth++;
+        else if (lines[i][c] === '}') { depth--; if (depth < 0) { errLine = i + 1; break; } }
+      }
+      if (errLine) break;
+    }
+    errors.push({ msg: 'Unbalanced braces: ' + open + ' opening { vs ' + close + ' closing }', line: errLine });
+  }
+
+  var commentOpens = (code.match(/\/\*/g) || []).length;
+  var commentCloses = (code.match(/\*\//g) || []).length;
+  if (commentOpens !== commentCloses) {
+    /* Find line of unclosed comment */
+    var unclosedLine = null;
+    var inComment = false;
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
+      for (var ci = 0; ci < l.length - 1; ci++) {
+        if (l[ci] === '/' && l[ci+1] === '*') { inComment = true; unclosedLine = i + 1; }
+        if (l[ci] === '*' && l[ci+1] === '/') { inComment = false; unclosedLine = null; }
+      }
+    }
+    errors.push({ msg: 'Unclosed block comment (/* without matching */)', line: unclosedLine });
+  }
+
+  var emptyRules = (code.match(/[^{}]+\{\s*\}/g) || []).length;
+  if (emptyRules > 0) warnings.push({ msg: emptyRules + ' empty rule' + (emptyRules > 1 ? 's' : '') + ' found (can be removed)', line: null });
+
+  var importantCount = (code.match(/!important/g) || []).length;
+  if (importantCount > 3) {
+    /* Find first !important */
+    var impLine = null;
+    for (var i = 0; i < lines.length; i++) {
+      if (/!important/.test(lines[i])) { impLine = i + 1; break; }
+    }
+    warnings.push({ msg: importantCount + ' uses of !important — consider refactoring specificity', line: impLine });
+  }
+
+  if (/transition:|animation:|transform:/.test(code) && !/-webkit-/.test(code)) {
+    var prefLine = null;
+    for (var i = 0; i < lines.length; i++) {
+      if (/transition:|animation:|transform:/.test(lines[i])) { prefLine = i + 1; break; }
+    }
+    warnings.push({ msg: 'Consider -webkit- prefixes for transition/animation/transform', line: prefLine });
+  }
+
+  return { errors: errors, warnings: warnings };
+}
+
+/* ── Minifiers ── */
+function minifyJS(code) {
+  var stripComments = document.getElementById('chk-comments').checked;
+  var stripLogs = document.getElementById('chk-logs').checked;
+
+  /* Strip wrapping <script> / <\/script> tags and restore them after minification */
+  var openTag = '', closeTag = '';
+  var scriptMatch = code.match(/^(\s*<script[^>]*>)([\s\S]*?)(<\/+'script'+'>\s*)$/i);
+  if (scriptMatch) {
+    openTag  = scriptMatch[1];
+    code     = scriptMatch[2];
+    closeTag = scriptMatch[3];
+  }
+
+  var out = code;
+  if (stripComments) {
+    out = out.replace(/\/\*[\s\S]*?\*\//g, '');
+    out = out.replace(/(?<![:'"\/])\/\/[^\n]*/g, '');
+  }
+  if (stripLogs) {
+    out = out.replace(/console\.(log|warn|info|debug|error)\s*\([^)]*\)\s*;?/g, '');
+  }
+  /* Protect string literals so operator collapsing never touches their content */
+  var _strings = [];
+  out = out.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g, function(m) {
+    _strings.push(m); return '__STRLIT_' + (_strings.length - 1) + '__';
+  });
+  out = out
+    .replace(/\r\n|\r/g, '\n').replace(/\n{2,}/g, '\n').replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*/g, '\n').replace(/\s*([{};,=+\-*\/%&|<>!?:()])\s*/g, '$1')
+    .replace(/\n([{};,=+\-*\/%&|<>!?:()])/g, '$1').replace(/([{};,=+\-*\/%&|<>!?:()])\n/g, '$1')
+    .replace(/\n+/g, ' ').replace(/  +/g, ' ').trim();
+  /* Restore string literals */
+  out = out.replace(/__STRLIT_(\d+)__/g, function(_, i) { return _strings[parseInt(i, 10)]; });
+
+  return openTag ? openTag + '\n' + out + '\n' + closeTag.trim() : out;
+}
+
+function minifyCSS(code) {
+  var stripComments = document.getElementById('chk-css-comments').checked;
+  var stripZeros = document.getElementById('chk-css-zeros').checked;
+  var shortenColors = document.getElementById('chk-css-colors').checked;
+
+  /* Strip wrapping <style> / <\/style> tags and restore them after minification */
+  var openTag = '', closeTag = '';
+  var styleMatch = code.match(/^(\s*<style[^>]*>)([\s\S]*?)(<\x2Fstyle>\s*)$/i);
+  if (styleMatch) {
+    openTag  = styleMatch[1];
+    code     = styleMatch[2];
+    closeTag = styleMatch[3];
+  }
+
+  var out = code;
+  if (stripComments) out = out.replace(/\/\*[\s\S]*?\*\//g, '');
+  out = out
+    .replace(/\r\n|\r/g, '\n').replace(/\s*\{\s*/g, '{').replace(/\s*\}\s*/g, '}')
+    .replace(/\s*:\s*/g, ':').replace(/\s*;\s*/g, ';').replace(/\s*,\s*/g, ',')
+    .replace(/\n+/g, ' ').replace(/[ \t]+/g, ' ').trim();
+  out = out.replace(/;}/g, '}');
+  if (stripZeros) {
+    out = out.replace(/\b0(px|em|rem|%|vh|vw|vmin|vmax|pt|pc|cm|mm|in|ex|ch)\b/g, '0');
+    out = out.replace(/:0\.(\d)/g, ':.$1');
+    out = out.replace(/ 0\.(\d)/g, ' .$1');
+  }
+  if (shortenColors) {
+    out = out.replace(/#([0-9a-fA-F])\1([0-9a-fA-F])\2([0-9a-fA-F])\3\b/g, '#$1$2$3');
+    out = out.replace(/([:,\s(])white\b/g, '$1#fff');
+    out = out.replace(/([:,\s(])black\b/g, '$1#000');
+  }
+
+  return openTag ? openTag + '\n' + out + '\n' + closeTag.trim() : out;
+}
+
+/* ── Shared run logic ── */
+function formatBytes(n) {
+  if (n < 1024) return n + ' B';
+  return (n / 1024).toFixed(1) + ' KB';
+}
+
+function applyResults(errors, warnings, doMinify) {
+  var code = document.getElementById('input').value.trim();
+  var inputPanel = document.getElementById('input-panel');
+  var outputPanel = document.getElementById('output-panel');
+  var outputEl = document.getElementById('output');
+
+  /* Build annotation list for gutter + highlights */
+  var annotations = [];
+  for (var i = 0; i < errors.length; i++)
+    annotations.push({ line: errors[i].line, msg: errors[i].msg, type: 'error' });
+  for (var i = 0; i < warnings.length; i++)
+    annotations.push({ line: warnings[i].line, msg: warnings[i].msg, type: 'warning' });
+
+  applyAnnotations(annotations);
+
+  if (errors.length) {
+    inputPanel.className = 'editor-panel error';
+    outputPanel.className = 'editor-panel';
+    outputEl.value = '';
+    var lineInfo = errors[0].line ? ' on line ' + errors[0].line : '';
+    setStatus('invalid', ICONS.x, '<strong>' + (currentMode === 'css' ? 'CSS error' : 'Syntax error') + lineInfo + '.</strong> ' + errors.length + ' error' + (errors.length > 1 ? 's' : '') + ' highlighted below.');
+    ['m-orig','m-min','m-saved','m-pct'].forEach(function(id) { document.getElementById(id).textContent = '—'; });
+    return;
+  }
+
+  if (doMinify) {
+    var minified = currentMode === 'css' ? minifyCSS(code) : minifyJS(code);
+    outputEl.value = minified;
+    var origBytes = new Blob([code]).size;
+    var minBytes = new Blob([minified]).size;
+    var saved = origBytes - minBytes;
+    var pct = origBytes > 0 ? Math.round((saved / origBytes) * 100) : 0;
+    document.getElementById('m-orig').textContent = formatBytes(origBytes);
+    document.getElementById('m-min').textContent = formatBytes(minBytes);
+    document.getElementById('m-saved').textContent = formatBytes(saved);
+    document.getElementById('m-pct').textContent = pct + '%';
+    inputPanel.className = 'editor-panel' + (warnings.length ? '' : ' valid');
+    outputPanel.className = 'editor-panel' + (warnings.length ? '' : ' valid');
+    var msg = '<strong>Valid.</strong> Minified successfully — ' + pct + '% smaller.';
+    if (warnings.length) {
+      msg = '<strong>Minified with ' + warnings.length + ' warning' + (warnings.length > 1 ? 's' : '') + '.</strong> Check highlighted lines.';
+      setStatus('warning', ICONS.warn, msg);
+    } else {
+      setStatus('valid', ICONS.check, msg);
+    }
+  } else {
+    inputPanel.className = 'editor-panel' + (warnings.length ? '' : ' valid');
+    var msg = '<strong>Syntax valid.</strong> No errors found.';
+    if (warnings.length) {
+      msg = '<strong>Valid with ' + warnings.length + ' warning' + (warnings.length > 1 ? 's' : '') + '.</strong> Check highlighted lines.';
+      setStatus('warning', ICONS.warn, msg);
+    } else {
+      setStatus('valid', ICONS.check, msg);
+    }
+  }
+}
+
+function runAll() {
+  var code = document.getElementById('input').value.trim();
+  var lang = currentMode === 'css' ? 'CSS' : 'JavaScript';
+  if (!code) { setStatus('warning', ICONS.warn, 'No input — paste your ' + lang + ' first.'); return; }
+  var result = currentMode === 'css' ? checkSyntaxCSS(code) : checkSyntaxJS(code);
+  applyResults(result.errors, result.warnings, true);
+}
+
+function checkOnly() {
+  var code = document.getElementById('input').value.trim();
+  if (!code) { setStatus('warning', ICONS.warn, 'No input — paste your JavaScript first.'); return; }
+  var result = currentMode === 'css' ? checkSyntaxCSS(code) : checkSyntaxJS(code);
+  applyResults(result.errors, result.warnings, false);
+}
+
+function copyOutput() {
+  var out = document.getElementById('output').value;
+  if (!out) return;
+  navigator.clipboard.writeText(out).then(function() {
+    setStatus('valid', ICONS.clip, 'Copied to clipboard!');
+    setTimeout(function() { setStatus('', ICONS.info, 'Ready.'); }, 2000);
+  });
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').value = '';
+  document.getElementById('input-panel').className = 'editor-panel';
+  document.getElementById('output-panel').className = 'editor-panel';
+  document.getElementById('in-chars').textContent = '0 chars';
+  ['m-orig','m-min','m-saved','m-pct'].forEach(function(id) { document.getElementById(id).textContent = '—'; });
+  clearHighlights();
+  var lang = currentMode === 'css' ? 'CSS' : 'JavaScript';
+  setStatus('', ICONS.info, 'Paste ' + lang + ' above and click <strong>Minify &amp; Check</strong>.');
+}
+
+function loadSample() {
+  document.getElementById('input').value = currentMode === 'css' ? CSS_SAMPLE : JS_SAMPLE;
+  updateInputCount();
+  clearHighlights();
+  document.getElementById('input-panel').className = 'editor-panel';
+  setStatus('', ICONS.info, 'Sample loaded — click <strong>Minify &amp; Check</strong> to run.');
+}
+
+function printSinglePage() {
+  var sh = document.body.scrollHeight, sw = document.body.scrollWidth;
+  var style = document.createElement('style');
+  style.id = '_print_override';
+  style.textContent = '@page { size: ' + sw + 'px ' + sh + 'px; margin: 0; } body { zoom: 1; }';
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(function() { var s = document.getElementById('_print_override'); if (s) s.remove(); }, 1000);
+}
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runAll(); }
+});
+
+/* Initial highlight render (empty) */
+renderHighlights();
+</script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation — Sitecore Widget Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 40px; }
+        header { position: relative; margin-bottom: 64px; }
+        .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+        h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+        .subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+        .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; white-space: nowrap; }
+        .tab-nav-link:hover { color: #aaa; }
+        .tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+        code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+
+        /* Download CTA — large, centred above steps */
+        .download-cta {
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 32px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+        .download-cta-text h2 { font-size: 22px; font-weight: 500; color: #f0f0f0; margin-bottom: 6px; }
+        .download-cta-text p { font-size: 14px; color: #666; line-height: 1.6; }
+        .download-cta-text p span { color: #555; }
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: #FFBE5F;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .dl-btn:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,190,95,0.25); }
+        .dl-btn svg { flex-shrink: 0; }
+
+        /* Section */
+        .section { margin-bottom: 80px; }
+        .section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 20px; }
+
+        /* Steps */
+        .steps { display: flex; flex-direction: column; gap: 0; }
+        .step {
+            display: grid;
+            grid-template-columns: 72px 1fr 340px;
+            gap: 28px;
+            padding: 36px 0;
+            border-bottom: 1px solid #242424;
+            align-items: start;
+        }
+        .step:last-child { border-bottom: none; }
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid #2e2e2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFBE5F;
+            flex-shrink: 0;
+            background: #1e1e1e;
+            margin-top: 4px;
+        }
+        .step-body h3 { font-size: 20px; font-weight: 500; color: #f0f0f0; margin-bottom: 10px; line-height: 1.3; }
+        .step-body p { font-size: 14px; color: #777; line-height: 1.8; }
+        .step-body p + p { margin-top: 10px; }
+        .step-body .note {
+            margin-top: 14px;
+            background: #1e2118;
+            border: 1px solid #2a3420;
+            border-radius: 5px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #7dbf82;
+            line-height: 1.6;
+        }
+        .step-body .warn {
+            margin-top: 14px;
+            background: #201e18;
+            border: 1px solid #34301e;
+            border-radius: 5px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #c4a55a;
+            line-height: 1.6;
+        }
+        .step-body .tip {
+            margin-top: 14px;
+            background: #1e1e28;
+            border: 1px solid #2a2a40;
+            border-radius: 5px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #7a9fd4;
+            line-height: 1.6;
+        }
+
+        /* ── UI MOCKUPS ── */
+        .ui-mock {
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 7px;
+            overflow: hidden;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Chrome toolbar mockup */
+        .chrome-toolbar {
+            background: #292929;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .chrome-dots { display: flex; gap: 4px; }
+        .chrome-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .chrome-dot.r { background: #ff5f57; }
+        .chrome-dot.y { background: #febc2e; }
+        .chrome-dot.g { background: #28c840; }
+        .chrome-omni { flex: 1; background: #1e1e1e; border-radius: 4px; padding: 5px 10px; font-size: 11px; color: #555; font-family: 'SF Mono', monospace; margin: 0 8px; }
+        .chrome-ext-icon {
+            width: 28px; height: 28px;
+            background: #1e1e1e;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #2a2a2a;
+            cursor: pointer;
+        }
+
+        /* Extensions page mockup */
+        .ext-page { padding: 14px; }
+        .ext-page-title { font-size: 11px; color: #555; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ext-toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .ext-toggle-label { font-size: 11px; color: #888; }
+        .ext-toggle {
+            width: 32px; height: 18px;
+            background: #FFBE5F;
+            border-radius: 9px;
+            position: relative;
+        }
+        .ext-toggle::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 12px; height: 12px;
+            background: #1a1a1a;
+            border-radius: 50%;
+        }
+        .ext-load-btn {
+            background: #1e4080;
+            color: #7aa8e0;
+            border: 1px solid #2a4a90;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .ext-load-btn.highlight { background: #FFBE5F; color: #1a1a1a; border-color: #FFBE5F; }
+
+        /* Extension card mockup */
+        .ext-card {
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .ext-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .ext-card-icon { width: 24px; height: 24px; background: #FFBE5F; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
+        .ext-card-name { font-size: 12px; font-weight: 600; color: #e0e0e0; }
+        .ext-card-version { font-size: 10px; color: #555; }
+        .ext-card-desc { font-size: 11px; color: #555; line-height: 1.5; }
+        .ext-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+        .ext-enabled-toggle {
+            width: 28px; height: 16px;
+            background: #FFBE5F;
+            border-radius: 8px;
+            position: relative;
+        }
+        .ext-enabled-toggle::after {
+            content: '';
+            position: absolute;
+            right: 2px; top: 2px;
+            width: 12px; height: 12px;
+            background: #1a1a1a;
+            border-radius: 50%;
+        }
+        .ext-card-id { font-size: 9px; color: #333; font-family: 'SF Mono', monospace; }
+
+        /* Toolbar pin mockup */
+        .pin-popup {
+            background: #292929;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .pin-popup-header { padding: 8px 12px; font-size: 11px; color: #888; border-bottom: 1px solid #222; font-weight: 600; }
+        .pin-popup-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #222;
+        }
+        .pin-popup-item:last-child { border-bottom: none; }
+        .pin-item-icon { width: 18px; height: 18px; background: #FFBE5F; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #1a1a1a; flex-shrink: 0; }
+        .pin-item-name { font-size: 11px; color: #aaa; flex: 1; }
+        .pin-btn {
+            width: 16px; height: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pin-btn svg { opacity: 0.8; }
+
+        /* Sidebar open mockup */
+        .browser-with-sidebar { display: flex; gap: 0; }
+        .browser-page { flex: 1; background: #f0f0f0; border-right: 1px solid #2a2a2a; }
+        .browser-page-content { padding: 16px; }
+        .sc-header-mock { background: #003865; height: 32px; display: flex; align-items: center; padding: 0 12px; }
+        .sc-header-mock span { font-size: 11px; color: rgba(255,255,255,0.5); }
+        .sc-tree-mock { background: #f5f5f5; padding: 8px; border-right: 1px solid #ddd; font-size: 10px; color: #888; width: 100%; }
+        .sc-tree-item { padding: 3px 6px; border-radius: 3px; display: flex; align-items: center; gap: 4px; }
+        .sc-tree-item.active { background: #003865; color: #fff; }
+        .sc-tree-item::before { content: '▶'; font-size: 7px; opacity: 0.4; }
+        .sidebar-mock {
+            width: 120px;
+            background: #1a1a1a;
+            border-left: 1px solid #2a2a2a;
+            font-size: 10px;
+        }
+        .sidebar-mock-header { background: #141414; padding: 8px; border-bottom: 1px solid #2a2a2a; }
+        .sidebar-mock-dot { width: 5px; height: 5px; background: #FFBE5F; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .sidebar-mock-title { color: #e0e0e0; font-size: 10px; font-weight: 600; }
+        .sidebar-mock-body { padding: 8px; }
+        .sidebar-mock-label { font-size: 8px; color: #FFBE5F; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .sidebar-mock-field { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px; padding: 5px 6px; margin-bottom: 4px; }
+        .sidebar-mock-field-label { font-size: 8px; color: #555; margin-bottom: 2px; }
+        .sidebar-mock-field-val { font-size: 9px; color: #888; }
+        .sidebar-mock-apply { background: #FFBE5F; color: #1a1a1a; border-radius: 3px; text-align: center; padding: 5px; font-size: 9px; font-weight: 700; margin-top: 6px; }
+
+        /* Update section */
+        .update-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 24px; }
+        .update-step { background: #1e1e1e; padding: 20px; }
+        .update-step-num { font-size: 10px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .update-step h4 { font-size: 13px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; }
+        .update-step p { font-size: 12px; color: #555; line-height: 1.6; }
+
+        /* Requirements */
+        .req-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-bottom: 48px; }
+        .req-item { background: #1e1e1e; padding: 20px 24px; }
+        .req-item h4 { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .req-item p { font-size: 13px; color: #555; line-height: 1.6; }
+        .req-item p strong { color: #e0e0e0; font-weight: 500; }
+
+        footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; margin-top: 96px; }
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #888; }
+
+        @media (max-width: 900px) {
+            .step { grid-template-columns: 56px 1fr; }
+            .step .ui-mock { display: none; }
+            .download-cta { flex-direction: column; align-items: flex-start; gap: 16px; }
+            h1 { font-size: 36px; }
+            .update-grid { grid-template-columns: repeat(2, 1fr); }
+            .req-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <p class="eyebrow">Sitecore Widget Editor</p>
+        <h1>Installation</h1>
+        <p class="subtitle">Download, extract, and load the extension in four steps.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Widget Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link active">Install</a>
+        </nav>
+    </header>
+
+    <!-- REQUIREMENTS -->
+    <div class="req-grid">
+        <div class="req-item">
+            <h4>Browser</h4>
+            <p><strong>Google Chrome</strong> — any recent version. The extension uses Manifest V3 and the Chrome Side Panel API.</p>
+        </div>
+        <div class="req-item">
+            <h4>Environment</h4>
+            <p><strong>Sitecore Content Editor</strong> — the extension works in the Content Editor only. Experience Editor is not supported.</p>
+        </div>
+        <div class="req-item">
+            <h4>Distribution</h4>
+            <p><strong>Load unpacked</strong> — not available on the Chrome Web Store. Developer mode must be enabled in Chrome.</p>
+        </div>
+    </div>
+
+    <!-- DOWNLOAD CTA -->
+    <div class="download-cta">
+        <div class="download-cta-text">
+            <h2>Sitecore Widget Editor v4.4.6</h2>
+            <p>Extension ZIP · Chrome MV3 · Registry v2.3.5<br>
+            <span>Includes: manifest.json, background.js, content-script.js, sidepanel.html, sidepanel.js, sitecore-bridge.js, quill.js, quill.snow.css, icons</span></p>
+        </div>
+        <a href="/widget/Sitecore-Widget-Editor.zip" class="dl-btn" download>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 13h12" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Download ZIP
+        </a>
+    </div>
+
+    <!-- STEPS -->
+    <div class="section">
+        <div class="section-label">Installation Steps</div>
+        <div class="steps">
+
+            <!-- STEP 1 -->
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h3>Download and extract the ZIP</h3>
+                    <p>Click the download button above. Save the ZIP somewhere you won't accidentally move it — Chrome references the folder by its path on disk after loading. A stable location like <code>~/Documents/chrome-extensions/sitecore-widget-editor/</code> works well.</p>
+                    <p>Extract the ZIP. The extracted folder should contain <code>manifest.json</code> at its root alongside the other extension files. Do not rename or restructure the folder.</p>
+                    <div class="warn">⚠ Do not move the folder after loading it in Chrome. Chrome stores the path and will show an error if the folder is relocated. Re-load it from the new path if you ever move it.</div>
+                </div>
+                <div class="ui-mock">
+                    <div style="padding:14px;">
+                        <div style="font-size:10px;color:#555;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Extracted folder contents</div>
+                        <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:2;color:#666;">
+                            <div style="color:#FFBE5F;">sitecore-widget-editor/</div>
+                            <div style="padding-left:16px;">├── <span style="color:#7aa2d4;">manifest.json</span></div>
+                            <div style="padding-left:16px;">├── background.js</div>
+                            <div style="padding-left:16px;">├── content-script.js</div>
+                            <div style="padding-left:16px;">├── sidepanel.html</div>
+                            <div style="padding-left:16px;">├── sidepanel.js</div>
+                            <div style="padding-left:16px;">├── sitecore-bridge.js</div>
+                            <div style="padding-left:16px;">├── quill.js</div>
+                            <div style="padding-left:16px;">├── quill.snow.css</div>
+                            <div style="padding-left:16px;">├── icon16.png</div>
+                            <div style="padding-left:16px;">├── icon48.png</div>
+                            <div style="padding-left:16px;">└── icon128.png</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h3>Open Chrome Extensions and enable Developer mode</h3>
+                    <p>In Chrome, navigate to <code>chrome://extensions</code> in the address bar (or open the Chrome menu → More tools → Extensions).</p>
+                    <p>In the top-right corner of the Extensions page, find the <strong style="color:#e0e0e0;">Developer mode</strong> toggle and turn it on. Three new buttons will appear: "Load unpacked", "Pack extension", and "Update".</p>
+                    <div class="tip">Developer mode must remain enabled for the extension to keep working. Chrome will occasionally remind you that developer extensions are active — this is normal for load-unpacked extensions.</div>
+                </div>
+                <div class="ui-mock">
+                    <div class="chrome-toolbar">
+                        <div class="chrome-dots">
+                            <div class="chrome-dot r"></div>
+                            <div class="chrome-dot y"></div>
+                            <div class="chrome-dot g"></div>
+                        </div>
+                        <div class="chrome-omni">chrome://extensions</div>
+                    </div>
+                    <div class="ext-page">
+                        <div class="ext-page-title">Extensions</div>
+                        <div class="ext-toggle-row">
+                            <span class="ext-toggle-label">Developer mode</span>
+                            <div class="ext-toggle"></div>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <div class="ext-load-btn highlight">Load unpacked</div>
+                            <div class="ext-load-btn">Pack extension</div>
+                            <div class="ext-load-btn">Update</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h3>Load the unpacked extension folder</h3>
+                    <p>Click <strong style="color:#e0e0e0;">Load unpacked</strong>. A system file picker opens. Navigate to and select the extracted extension folder — the one that has <code>manifest.json</code> at its root. Click "Select Folder" (or "Open" on macOS).</p>
+                    <p>The extension will appear in your extensions list with the name <strong style="color:#e0e0e0;">Sitecore Widget Editor</strong> and version <strong style="color:#e0e0e0;">4.4.6</strong>. Its icon will also appear in the Chrome toolbar.</p>
+                    <div class="note">If you see an error like "Manifest file is missing or unreadable" it means you selected the wrong folder level — open one level deeper until you see <code>manifest.json</code> inside.</div>
+                </div>
+                <div class="ui-mock">
+                    <div class="ext-page" style="padding-top:12px;">
+                        <div class="ext-card">
+                            <div class="ext-card-header">
+                                <div class="ext-card-icon">SW</div>
+                                <div>
+                                    <div class="ext-card-name">Sitecore Widget Editor</div>
+                                    <div class="ext-card-version">4.4.6 · Unpacked</div>
+                                </div>
+                            </div>
+                            <div class="ext-card-desc">Edit Sitecore widget content directly from the Content Editor via the browser sidebar.</div>
+                            <div class="ext-card-footer">
+                                <div class="ext-card-id">ID: abcxyz123...</div>
+                                <div class="ext-enabled-toggle"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;font-size:10px;color:#333;padding:0 2px;">✓ Extension loaded from disk</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h3>Pin the extension to your toolbar</h3>
+                    <p>The extension icon may be hidden in the extensions overflow menu (the puzzle-piece icon <strong style="color:#e0e0e0;">⧉</strong> in the toolbar). Click it to see all installed extensions, find <strong style="color:#e0e0e0;">Sitecore Widget Editor</strong>, and click the pin icon to make it permanently visible in the toolbar.</p>
+                    <p>Once pinned, clicking the icon on any Sitecore Content Editor page will open the sidebar. Installation is complete.</p>
+                </div>
+                <div class="ui-mock">
+                    <div class="chrome-toolbar">
+                        <div class="chrome-dots">
+                            <div class="chrome-dot r"></div>
+                            <div class="chrome-dot y"></div>
+                            <div class="chrome-dot g"></div>
+                        </div>
+                        <div class="chrome-omni">sitecore.example.com/...</div>
+                        <div class="chrome-ext-icon">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2a1 1 0 00-1 1v1H3a1 1 0 00-1 1v2a1 1 0 001 1h1v1a1 1 0 001 1h4a1 1 0 001-1V9h1a1 1 0 001-1V6a1 1 0 00-1-1h-1V3a1 1 0 00-1-1H5z" stroke="#888" stroke-width="1.2"/></svg>
+                        </div>
+                    </div>
+                    <div class="pin-popup">
+                        <div class="pin-popup-header">Extensions</div>
+                        <div class="pin-popup-item">
+                            <div class="pin-item-icon">SW</div>
+                            <div class="pin-item-name">Sitecore Widget Editor</div>
+                            <div class="pin-btn">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v2M6 9v2M1 6h2M9 6h2M3.5 3.5l1.5 1.5M7 7l1.5 1.5M3.5 8.5L5 7M7 5l1.5-1.5" stroke="#FFBE5F" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="pin-popup-item" style="opacity:0.3;">
+                            <div class="pin-item-icon" style="background:#888;">?</div>
+                            <div class="pin-item-name">Another Extension</div>
+                            <div class="pin-btn">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v2M6 9v2M1 6h2M9 6h2" stroke="#555" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5 — Using it -->
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                    <h3>Open the sidebar in the Content Editor</h3>
+                    <p>Navigate to Sitecore's Content Editor and select an item in the tree that contains a registered widget in a Rich Text field. Click the <strong style="color:#e0e0e0;">Sitecore Widget Editor</strong> icon in the toolbar.</p>
+                    <p>The sidebar opens on the right side of the browser window. It shows the <strong style="color:#e0e0e0;">dashboard</strong> first — with content search, recently viewed items, and checked-out items. When a widget is detected on the selected item, the editor form loads automatically.</p>
+                </div>
+                <div class="ui-mock">
+                    <div class="chrome-toolbar">
+                        <div class="chrome-dots">
+                            <div class="chrome-dot r"></div>
+                            <div class="chrome-dot y"></div>
+                            <div class="chrome-dot g"></div>
+                        </div>
+                        <div class="chrome-omni">sitecore.example.com/sitecore/shell</div>
+                        <div class="chrome-ext-icon" style="background:#FFBE5F;border-color:#FFBE5F;">
+                            <span style="font-size:8px;font-weight:800;color:#1a1a1a;">SW</span>
+                        </div>
+                    </div>
+                    <div class="browser-with-sidebar">
+                        <div class="browser-page">
+                            <div class="sc-header-mock"><span>Sitecore Content Editor</span></div>
+                            <div class="browser-page-content">
+                                <div class="sc-tree-mock">
+                                    <div class="sc-tree-item">sitecore</div>
+                                    <div class="sc-tree-item" style="padding-left:14px;">content</div>
+                                    <div class="sc-tree-item active" style="padding-left:24px;">Insurance Page</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sidebar-mock">
+                            <div class="sidebar-mock-header">
+                                <span class="sidebar-mock-dot"></span>
+                                <span class="sidebar-mock-title">Widget Editor</span>
+                            </div>
+                            <div class="sidebar-mock-body">
+                                <div class="sidebar-mock-label">Insurance Plan Comparison</div>
+                                <div class="sidebar-mock-field">
+                                    <div class="sidebar-mock-field-label">Section Heading</div>
+                                    <div class="sidebar-mock-field-val">Compare Our Plans</div>
+                                </div>
+                                <div class="sidebar-mock-field">
+                                    <div class="sidebar-mock-field-label">Plan 1 — Bronze</div>
+                                    <div class="sidebar-mock-field-val" style="color:#555;">▾ expanded</div>
+                                </div>
+                                <div class="sidebar-mock-apply">Apply Changes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- UPDATE WORKFLOW -->
+    <div class="section">
+        <div class="section-label">Updating the Extension</div>
+        <div style="font-size:15px;color:#888;line-height:1.75;margin-bottom:24px;max-width:640px;">When a new version is available, a gold <strong style="color:#FFBE5F;">!</strong> badge appears on the extension icon and a download banner shows inside the sidebar. Registry updates (new widgets or field changes) apply automatically — no reinstall needed. Extension code updates require a manual reinstall.</div>
+        <div class="update-grid">
+            <div class="update-step">
+                <div class="update-step-num">Step 1</div>
+                <h4>Badge appears</h4>
+                <p>Gold <code>!</code> badge on the icon and a banner inside the sidebar with a download link.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 2</div>
+                <h4>Download new ZIP</h4>
+                <p>Click the link in the banner or download from this page. Extract to a folder.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 3</div>
+                <h4>Remove old version</h4>
+                <p>Go to <code>chrome://extensions</code>, find Sitecore Widget Editor, and click <strong>Remove</strong>.</p>
+            </div>
+            <div class="update-step">
+                <div class="update-step-num">Step 4</div>
+                <h4>Load unpacked</h4>
+                <p>Click "Load unpacked" and select the new folder. Done — recents and settings are preserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TROUBLESHOOTING -->
+    <div class="section">
+        <div class="section-label">Common Issues</div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+
+            <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:6px;">"Manifest file is missing or unreadable"</div>
+                <div style="font-size:13px;color:#666;line-height:1.7;">You selected the wrong folder level. Open one level deeper — the folder you select must contain <code>manifest.json</code> directly inside it, not inside a subfolder.</div>
+            </div>
+
+            <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:6px;">Extension icon doesn't appear in toolbar</div>
+                <div style="font-size:13px;color:#666;line-height:1.7;">Click the puzzle-piece (⧉) icon in the Chrome toolbar. Find "Sitecore Widget Editor" in the list and click the pin icon next to it to make it permanently visible.</div>
+            </div>
+
+            <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:6px;">"Extension could not be loaded" after moving files</div>
+                <div style="font-size:13px;color:#666;line-height:1.7;">Chrome stores the path to the extension folder. If you moved it, remove the broken extension from <code>chrome://extensions</code> and re-load it from its new location using "Load unpacked".</div>
+            </div>
+
+            <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:6px;">Sidebar opens but shows nothing / blank white panel</div>
+                <div style="font-size:13px;color:#666;line-height:1.7;">A bundled file is likely missing or corrupt. Re-extract the ZIP to a clean folder and reload. Check that the extracted folder has all 11 files listed in Step 1.</div>
+            </div>
+
+            <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:6px;">Chrome shows "This extension is not from the Chrome Web Store"</div>
+                <div style="font-size:13px;color:#666;line-height:1.7;">This is expected. The extension is an internal tool distributed as a load-unpacked extension. Click <strong style="color:#888;">Keep it</strong> or <strong style="color:#888;">Enable anyway</strong> when Chrome shows this warning. It does not indicate a security problem — it means the extension is not from the Chrome Web Store, which is correct.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        Sitecore Widget Editor v4.4.6 — Registry v2.3.5 &nbsp;·&nbsp;
+        <a href="overview.html">Overview</a> &nbsp;·&nbsp;
+        <a href="workflow.html">Workflow</a> &nbsp;·&nbsp;
+        <a href="specs.html">Specs</a> &nbsp;·&nbsp;
+        <a href="using-the-extension.html">Using the Extension</a> &nbsp;·&nbsp;
+        <a href="demo.html">Demo</a> &nbsp;·&nbsp;
+        <a href="install.html">Install</a>
+    </footer>
+
+</div>
+</body>
+</html>
