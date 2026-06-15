@@ -115,6 +115,21 @@
   button.ghost:hover { color: var(--accent); }
   button.tiny { padding: .25rem .55rem; font-size: .78rem; }
 
+  /* secondary buttons: primary's size/shape, dark grey, default border on hover */
+  .btn-5050 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .btn-secondary {
+    width: 100%;
+    background: var(--card-alt);
+    color: var(--text);
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: .75rem 1.6rem;
+    font-size: .95rem;
+    font-weight: 600;
+  }
+  .btn-secondary:hover { border-color: #333; color: var(--text); background: var(--border-soft); }
+  @media (max-width: 480px) { .btn-5050 { grid-template-columns: 1fr; } }
+
   .lang-tags { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
   .lang-tag { display: flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 20px; padding: .25rem .4rem .25rem .8rem; }
   .lang-tag input { width: 92px; padding: .25rem .4rem; border: none; border-bottom: 1px dashed var(--border); border-radius: 0; }
@@ -275,20 +290,22 @@
   <section class="card no-print">
     <h2>Pages to audit</h2>
     <p class="hint">Discover your pages from the sitemap, then pick which directories to include. Add anything the sitemap misses by hand below.</p>
-    <div class="toolbar" style="margin-bottom:0;">
-      <button class="ghost" onclick="discoverPages()">Discover pages from sitemap</button>
-      <span class="score" id="discoverStatus"></span>
-    </div>
-    <div id="discoverDiag"></div>
-    <div class="toolbar" style="margin-top:.6rem;">
-      <button class="ghost" onclick="exportState()">Save to file</button>
-      <button class="ghost" onclick="document.getElementById('importFile').click()">Load from file</button>
+
+    <div class="section-label" style="margin-top:0;">Add Sitemap</div>
+    <div class="btn-5050">
+      <button class="btn-secondary" onclick="discoverPages()">Discover pages from sitemap</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Load from file</button>
       <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importState(this.files && this.files[0]); this.value='';">
-      <span class="score" id="saveStatus"></span>
     </div>
+    <div class="score" id="discoverStatus" style="margin-top:.6rem;"></div>
+    <div id="discoverDiag"></div>
 
     <!-- discovered filter panel (hidden until discovery runs) -->
     <div id="discoveredPanel" style="display:none; margin-top:1.5rem;">
+      <div class="toolbar" style="margin-top:0; margin-bottom:1rem;">
+        <button class="ghost" onclick="exportState()">Save sitemap to file</button>
+        <span class="score" id="saveStatus"></span>
+      </div>
       <div class="disc-summary" id="discSummary"></div>
       <div class="section-label" style="margin-top:0;">Include directories</div>
       <div class="dir-controls">
@@ -312,10 +329,8 @@
       <input type="checkbox" id="reverify">
       Re-verify every link this run (ignore saved link results)
     </label>
-    <div class="toolbar" style="margin-top:.6rem;">
-      <button class="primary" id="runBtn" onclick="runAudit()">Run audit</button>
-      <span class="score" id="runHint"></span>
-    </div>
+    <button class="primary" id="runBtn" onclick="runAudit()" style="width:100%; margin-top:.6rem;">Run audit</button>
+    <div class="score" id="runHint" style="margin-top:.5rem;"></div>
     <div id="progress"></div>
     <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
   </section>
@@ -328,6 +343,7 @@
       <button class="ghost" onclick="exportReport()">Save report (HTML)</button>
       <button class="ghost" onclick="exportCsv()">Export issues (CSV)</button>
     </div>
+    <div class="score" id="reportStatus" style="margin:-.75rem 0 1.25rem;"></div>
     <div class="summary-grid" id="summaryGrid"></div>
   </section>
 
@@ -635,6 +651,7 @@ function onTransToggle(){
 
 /* ----------------------------- save / load to JSON ----------------------------- */
 function setSaveStatus(msg, err){ const el = document.getElementById('saveStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
+function setReportStatus(msg, err){ const el = document.getElementById('reportStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
 
 function exportState(){
   const data = {
@@ -698,7 +715,7 @@ function downloadBlob(content, mime, filename){
 function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
 
 function exportReport(){
-  if(!auditState || !auditState.results || !auditState.results.length){ setSaveStatus('Run an audit first.', true); return; }
+  if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
   const css = document.querySelector('style') ? document.querySelector('style').textContent : '';
   const summary = document.getElementById('summaryGrid').innerHTML;
   // open all page sections in the static report
@@ -724,7 +741,7 @@ function exportReport(){
 </div></body></html>`;
 
   downloadBlob(doc, 'text/html', `audit-report-${reportHost()}-${new Date().toISOString().slice(0,10)}.html`);
-  setSaveStatus('Report saved.');
+  setReportStatus('Report saved.');
 }
 
 function collectRows(){
@@ -755,13 +772,13 @@ function collectRows(){
 }
 function csvCell(v){ v = (v==null?'':String(v)); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }
 function exportCsv(){
-  if(!auditState || !auditState.results || !auditState.results.length){ setSaveStatus('Run an audit first.', true); return; }
+  if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
   const rows = collectRows();
   const header = ['Page','Language','Section','Severity','Category','Detail','Reference / link','Translation / status'];
   const lines = [header.join(',')];
   rows.forEach(r => lines.push([r.page, r.lang, r.section, r.severity, r.category, r.detail, r.a, r.b].map(csvCell).join(',')));
   downloadBlob('\ufeff' + lines.join('\r\n'), 'text/csv', `audit-issues-${reportHost()}-${new Date().toISOString().slice(0,10)}.csv`);
-  setSaveStatus(`Exported ${rows.length} issue row(s) to CSV.`);
+  setReportStatus(`Exported ${rows.length} issue row(s) to CSV.`);
 }
 
 /* ----------------------------- fetching ----------------------------- */
