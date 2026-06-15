@@ -54,7 +54,7 @@
   code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .82em; background: var(--border-soft); padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: var(--accent); }
 
   label.field-label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .4rem; letter-spacing: .01em; }
-  input[type=text], input[type=url], input[type=number], input[type=password] {
+  input[type=text], input[type=url], input[type=number], input[type=password], select, textarea {
     width: 100%;
     padding: .65rem .75rem;
     border: 1px solid #333;
@@ -65,8 +65,20 @@
     background: var(--card-alt);
     transition: border-color .3s ease, box-shadow .3s ease;
   }
-  input::placeholder { color: var(--muted-2); }
-  input:focus {
+  textarea { resize: vertical; line-height: 1.5; }
+  select { cursor: pointer; }
+  select:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* sliding toggle */
+  .switch { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
+  .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .switch .slider { position: absolute; inset: 0; cursor: pointer; background: var(--border); border: 1px solid #333; border-radius: 24px; transition: background .25s ease, border-color .25s ease; }
+  .switch .slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: var(--muted); border-radius: 50%; transition: transform .25s ease, background .25s ease; }
+  .switch input:checked + .slider { background: rgba(255,190,95,0.25); border-color: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(18px); background: var(--accent); }
+  .switch input:focus-visible + .slider { box-shadow: 0 0 0 3px rgba(255,190,95,0.15); }
+  input::placeholder, textarea::placeholder { color: var(--muted-2); }
+  input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
@@ -225,10 +237,26 @@
     <input type="password" id="pass" placeholder="type your worker passphrase" autocomplete="off">
     <p class="hint" style="margin:.4rem 0 0;">Sent to the worker as the access key. Held in memory for this session only — never written to the file.</p>
     <div class="row" style="margin-top:1.25rem;">
-      <div>
-        <label class="field-label" for="conc">Concurrent link checks</label>
-        <input type="number" id="conc" value="5" min="1" max="20">
+      <div style="flex:0 1 auto; min-width:0;">
+        <label class="field-label">Translation check</label>
+        <div style="display:flex; align-items:center; gap:.7rem;">
+          <label class="switch">
+            <input type="checkbox" id="transToggle" onchange="onTransToggle()">
+            <span class="slider"></span>
+          </label>
+          <span id="transToggleLabel" class="score" style="min-width:1.5rem;">Off</span>
+          <select id="engine" disabled style="flex:0 1 260px; min-width:200px;">
+            <option value="google" selected>Drift from Google source</option>
+            <option value="claude">Claude analysis</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
       </div>
+    </div>
+    <div style="margin-top:1.25rem;">
+      <label class="field-label" for="noTranslate">Do-not-translate list (one word or phrase per line)</label>
+      <textarea id="noTranslate" rows="3" placeholder="Brand names, product names, legal terms your pipeline leaves in English…"></textarea>
+      <p class="hint" style="margin:.4rem 0 0;">These are protected before the tool regenerates the Google translation, so terms your pipeline keeps in English aren't flagged as drift. Saved with your audit file.</p>
     </div>
     <details class="accordion">
       <summary><span class="chev">▶</span> Test connection</summary>
@@ -294,7 +322,12 @@
 
   <!-- SUMMARY -->
   <section class="card" id="summaryCard" style="display:none;">
-    <h2>Summary</h2>
+    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+      <h2 style="margin:0;">Summary</h2>
+      <span class="spacer" style="flex:1;"></span>
+      <button class="ghost" onclick="exportReport()">Save report (HTML)</button>
+      <button class="ghost" onclick="exportCsv()">Export issues (CSV)</button>
+    </div>
     <div class="summary-grid" id="summaryGrid"></div>
   </section>
 
@@ -314,14 +347,17 @@
 const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
+const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (via your worker)
 /* ===================================================================== */
 
 /* ----------------------------- languages ----------------------------- */
 // English is the reference (dir ''). Each translation is a path prefix.
+// gcode = the Google Translate target code (e.g. 'es', 'zh-TW', 'fr', 'de').
+const SOURCE_GCODE = 'en'; // source language Google translates FROM
 let langs = [
-  { id: 'ref', label: 'English', dir: '', ref: true },
-  { id: 'l1', label: 'Spanish', dir: 'es', ref: false },
-  { id: 'l2', label: 'Chinese Traditional', dir: 'zh', ref: false }
+  { id: 'ref', label: 'English', dir: '', ref: true, gcode: 'en' },
+  { id: 'l1', label: 'Spanish', dir: 'es', ref: false, gcode: 'es' },
+  { id: 'l2', label: 'Chinese Traditional', dir: 'zh', ref: false, gcode: 'zh-TW' }
 ];
 
 /* ----------------------------- state ----------------------------- */
@@ -591,6 +627,12 @@ function updateRunHint(){
   document.getElementById('runHint').textContent = n ? `Will audit ${n} page${n===1?'':'s'} × ${t} language${t===1?'':'s'}.` : '';
 }
 
+function onTransToggle(){
+  const on = document.getElementById('transToggle').checked;
+  document.getElementById('engine').disabled = !on;
+  document.getElementById('transToggleLabel').textContent = on ? 'On' : 'Off';
+}
+
 /* ----------------------------- save / load to JSON ----------------------------- */
 function setSaveStatus(msg, err){ const el = document.getElementById('saveStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
 
@@ -604,6 +646,7 @@ function exportState(){
     dirInclude: dirInclude,
     pageExclude: pageExclude,
     manualPages: pages.map(pg => ({ name:pg.name, path:pg.path })),
+    noTranslate: (document.getElementById('noTranslate') && document.getElementById('noTranslate').value) || '',
     linkResults: [...linkResults.entries()]
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -627,6 +670,7 @@ function importState(file){
       dirInclude = data.dirInclude && typeof data.dirInclude === 'object' ? data.dirInclude : {};
       pageExclude = data.pageExclude && typeof data.pageExclude === 'object' ? data.pageExclude : {};
       if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'' }));
+      if(typeof data.noTranslate === 'string' && document.getElementById('noTranslate')) document.getElementById('noTranslate').value = data.noTranslate;
       linkResults = new Map(Array.isArray(data.linkResults) ? data.linkResults : []);
       if(discovered.length){ document.getElementById('discoveredPanel').style.display = 'block'; renderDiscovered(); }
       renderPages();
@@ -640,6 +684,84 @@ function importState(file){
     }
   };
   reader.readAsText(file);
+}
+
+/* ----------------------------- export results as a report ----------------------------- */
+function downloadBlob(content, mime, filename){
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+}
+function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
+
+function exportReport(){
+  if(!auditState || !auditState.results || !auditState.results.length){ setSaveStatus('Run an audit first.', true); return; }
+  const css = document.querySelector('style') ? document.querySelector('style').textContent : '';
+  const summary = document.getElementById('summaryGrid').innerHTML;
+  // open all page sections in the static report
+  const results = document.getElementById('results').innerHTML.replace(/<details class="page-result"/g, '<details class="page-result" open');
+  const engineSel = (document.getElementById('engine') && document.getElementById('engine').options[document.getElementById('engine').selectedIndex].text) || '';
+  const when = new Date().toLocaleString();
+  const transLangs = langs.filter(l=>!l.ref).map(l=>l.label).join(', ');
+
+  const doc = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit report — ${escapeHtml(reportHost())} — ${escapeHtml(new Date().toISOString().slice(0,10))}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>${css}</style></head>
+<body><div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Localization QA report</p>
+    <h1>${escapeHtml(reportHost())}</h1>
+    <p>Generated ${escapeHtml(when)} · Languages: ${escapeHtml(transLangs)} · Translation check: ${escapeHtml(engineSel)}</p>
+  </header>
+  <section class="card"><h2 style="margin-bottom:1.5rem;">Summary</h2><div class="summary-grid">${summary}</div></section>
+  <div>${results}</div>
+</div></body></html>`;
+
+  downloadBlob(doc, 'text/html', `audit-report-${reportHost()}-${new Date().toISOString().slice(0,10)}.html`);
+  setSaveStatus('Report saved.');
+}
+
+function collectRows(){
+  const rows = [];
+  (auditState && auditState.results || []).forEach(r => {
+    const page = r.page.name;
+    if(r.refError) rows.push({ page, lang:'English (reference)', section:'Fetch', severity:'critical', category:'load error', detail:r.refError, a:'', b:'' });
+    if(r.refTech){
+      r.refTech.code.forEach(c => rows.push({ page, lang:'English (reference)', section:'Code', severity:c.sev, category:'code', detail:c.text, a:'', b:'' }));
+      r.refTech.links.forEach(l => rows.push({ page, lang:'English (reference)', section:'Links', severity:'critical', category:'broken link', detail:l.url, a:'', b:String(l.status||'no response') }));
+    }
+    (r.languages||[]).forEach(bk => {
+      const lang = bk.lang.label;
+      if(bk.error){ rows.push({ page, lang, section:'Fetch', severity:'critical', category:'load error', detail:bk.error, a:'', b:'' }); return; }
+      const push = (arr, section) => (arr||[]).forEach(is => rows.push({ page, lang, section, severity:is.severity||'info', category:is.category||'', detail:is.explanation||'', a:is.reference||'', b:is.translation||'' }));
+      if(bk.drift) push(bk.drift.issues, 'Drift from Google');
+      if(bk.driftError) rows.push({ page, lang, section:'Drift from Google', severity:'info', category:'unavailable', detail:bk.driftError, a:'', b:'' });
+      if(bk.ai) push(bk.ai.issues, 'Translation (Claude)');
+      if(bk.aiError) rows.push({ page, lang, section:'Translation (Claude)', severity:'info', category:'unavailable', detail:bk.aiError, a:'', b:'' });
+      push(bk.parity, 'Sections & parity');
+      if(bk.tech){
+        bk.tech.code.forEach(c => rows.push({ page, lang, section:'Code', severity:c.sev, category:'code', detail:c.text, a:'', b:'' }));
+        bk.tech.links.forEach(l => rows.push({ page, lang, section:'Links', severity:'critical', category:'broken link', detail:l.url, a:'', b:String(l.status||'no response') }));
+      }
+    });
+  });
+  return rows;
+}
+function csvCell(v){ v = (v==null?'':String(v)); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }
+function exportCsv(){
+  if(!auditState || !auditState.results || !auditState.results.length){ setSaveStatus('Run an audit first.', true); return; }
+  const rows = collectRows();
+  const header = ['Page','Language','Section','Severity','Category','Detail','Reference / link','Translation / status'];
+  const lines = [header.join(',')];
+  rows.forEach(r => lines.push([r.page, r.lang, r.section, r.severity, r.category, r.detail, r.a, r.b].map(csvCell).join(',')));
+  downloadBlob('\ufeff' + lines.join('\r\n'), 'text/csv', `audit-issues-${reportHost()}-${new Date().toISOString().slice(0,10)}.csv`);
+  setSaveStatus(`Exported ${rows.length} issue row(s) to CSV.`);
 }
 
 /* ----------------------------- fetching ----------------------------- */
@@ -688,8 +810,14 @@ async function testConnection(){
     <div class="score" style="margin-top:.8rem;">A 200 means the proxy and passphrase are working. A 403 means the passphrase doesn't match the worker; other codes come from the site itself.</div>
   </div>`;
 }
+function siteHostName(){ try { return new URL(SITE_URL).hostname; } catch(e){ return ''; } }
+function proxifyCheck(target){
+  const base = WORKER_URL.trim();
+  try { const u = new URL(base); u.searchParams.set('check','1'); u.searchParams.set('url', target); return u.href; }
+  catch(e){ return base + (base.includes('?')?'&':'?') + 'check=1&url=' + encodeURIComponent(target); }
+}
 let linkCache = new Map();   // url -> Promise<result>, dedupes within a single run
-let linkResults = new Map(); // url -> resolved {url,status,ok,ts}, persists across runs + saved to file
+let linkResults = new Map(); // url -> resolved {url,status,ok,...}, persists across runs + saved to file
 function checkResource(url){
   const reverify = document.getElementById('reverify') && document.getElementById('reverify').checked;
   if(!reverify && linkResults.has(url)) return Promise.resolve(linkResults.get(url));
@@ -697,8 +825,20 @@ function checkResource(url){
   const pr = (async () => {
     let r;
     try {
-      const res = await fetch(proxify(url), fetchOpts());
-      r = { url, status: res.status, ok: res.ok, ts: Date.now() };
+      const res = await fetch(proxifyCheck(url), fetchOpts());
+      const ct = res.headers.get('content-type') || '';
+      if(ct.includes('application/json')){
+        const d = await res.json();
+        r = { url, status: d.status||0, ok: !!d.ok, ts: Date.now() };
+      } else {
+        // worker's check endpoint not deployed yet — degrade gracefully
+        let body=''; try { body = await res.text(); } catch(e){}
+        if(res.status === 403 && /Target host not allowed/i.test(body)){
+          r = { url, status: 0, ok:false, blocked:true, note:'worker check endpoint not enabled', ts: Date.now() };
+        } else {
+          r = { url, status: res.status, ok: res.status>=200 && res.status<400, ts: Date.now() };
+        }
+      }
     } catch(e){
       r = { url, status:0, ok:false, error:e.message, ts: Date.now() };
     }
@@ -744,6 +884,15 @@ function extract(html, baseUrl){
   bodyClone.querySelectorAll('script,style,noscript,svg,template').forEach(n=>n.remove());
   const textContent = clean(bodyClone.textContent || '');
 
+  // ordered text segments (for Pattern A drift comparison)
+  const segments = [];
+  doc.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li').forEach(el => {
+    if(el.tagName === 'LI' && el.querySelector('li,ul,ol')) return; // outer list container; inner captured
+    if(el.tagName === 'P' && el.querySelector('p')) return;
+    const t = clean(el.textContent || '');
+    if(t.length >= 3) segments.push(t);
+  });
+
   return {
     title: clean(doc.querySelector('title')?.textContent || ''),
     metaDesc: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
@@ -763,6 +912,7 @@ function extract(html, baseUrl){
     missingAlt: images.filter(i => i.alt === null).length,
     duplicateIds: findDuplicateIds(doc),
     regions: detectRegions(doc),
+    segments,
     textContent
   };
 }
@@ -830,6 +980,98 @@ function findDuplicateIds(doc){
 }
 
 /* ----------------------------- AI analysis ----------------------------- */
+/* ----------------------------- Pattern A: drift from Google source ----------------------------- */
+function passKey(){ return ((document.getElementById('pass') && document.getElementById('pass').value) || WORKER_KEY || '').trim(); }
+function getNoTranslateTerms(){
+  const raw = (document.getElementById('noTranslate') && document.getElementById('noTranslate').value) || '';
+  return raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).sort((a,b)=> b.length - a.length); // longest first
+}
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function stripTags(s){ return (s||'').replace(/<[^>]+>/g, ''); }
+function decodeEntities(s){
+  try { return new DOMParser().parseFromString(s, 'text/html').documentElement.textContent || s; }
+  catch(e){ return s; }
+}
+function protectTerms(text, terms){
+  let t = text;
+  terms.forEach(term => { if(term) t = t.replace(new RegExp(escapeRegex(term), 'gi'), m => `<span class="notranslate">${m}</span>`); });
+  return t;
+}
+function normForCompare(s){ return (s||'').toLowerCase().replace(/\s+/g,'').replace(/[.,!?;:'"()\[\]{}«»¡¿…\-–—]/g,''); }
+function similarity(a, b){
+  a = normForCompare(a); b = normForCompare(b);
+  if(a === b) return 1;
+  if(a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const grams = s => { const g = new Map(); for(let i=0;i<s.length-1;i++){ const k=s.slice(i,i+2); g.set(k,(g.get(k)||0)+1); } return g; };
+  const ga = grams(a), gb = grams(b);
+  let inter = 0; ga.forEach((c,k)=>{ if(gb.has(k)) inter += Math.min(c, gb.get(k)); });
+  const total = (a.length-1) + (b.length-1);
+  return total ? (2*inter)/total : 0;
+}
+
+async function googleTranslate(segments, target){
+  let tUrl;
+  try { const u = new URL(WORKER_URL); u.searchParams.set('translate','1'); tUrl = u.href; }
+  catch(e){ tUrl = WORKER_URL + (WORKER_URL.includes('?')?'&':'?') + 'translate=1'; }
+  const key = passKey();
+  const out = [];
+  const CHUNK = 100;
+  for(let i=0;i<segments.length;i+=CHUNK){
+    const chunk = segments.slice(i, i+CHUNK);
+    const res = await fetch(tUrl, {
+      method:'POST',
+      headers: Object.assign({ 'Content-Type':'application/json' }, key ? { 'X-Audit-Key': key } : {}),
+      body: JSON.stringify({ q: chunk, source: SOURCE_GCODE, target, format: 'html' })
+    });
+    if(!res.ok){
+      let d=''; try { d = (await res.text()).slice(0,160); } catch(e){}
+      throw new Error('Translate request failed (HTTP ' + res.status + (d?'): '+d:')'));
+    }
+    const data = await res.json();
+    if(data && data.error){ throw new Error('Google error: ' + (data.error.message || 'unknown')); }
+    const trs = (data && data.data && data.data.translations) || [];
+    chunk.forEach((_, j) => out.push(stripTags(decodeEntities((trs[j] && trs[j].translatedText) || ''))));
+  }
+  return out;
+}
+
+async function driftCheck(refData, transData, lang){
+  const terms = getNoTranslateTerms();
+  const enSegs = refData.segments || [];
+  const liveSegs = transData.segments || [];
+  if(!enSegs.length) return { error: 'No comparable text found on the English page.' };
+
+  const toTranslate = terms.length ? enSegs.map(s => protectTerms(s, terms)) : enSegs;
+  const expected = await googleTranslate(toTranslate, lang.gcode);
+
+  const issues = [];
+  const n = Math.min(expected.length, liveSegs.length);
+  let matched = 0;
+  const THRESH = 0.6;
+  for(let i=0;i<n;i++){
+    const sim = similarity(expected[i], liveSegs[i]);
+    if(sim >= THRESH){ matched++; }
+    else {
+      issues.push({
+        category:'drift', severity:'warning',
+        reference: expected[i].slice(0,300),
+        translation: liveSegs[i].slice(0,300),
+        explanation:`Published text differs from the Google translation of the English source (about ${Math.round(sim*100)}% similar).`,
+        suggestion:''
+      });
+    }
+  }
+  if(expected.length !== liveSegs.length){
+    issues.unshift({
+      category:'drift', severity:'warning',
+      explanation:`Segment count differs — ${expected.length} text block(s) expected from the source vs ${liveSegs.length} on the published page. A section may have been added or dropped.`
+    });
+  }
+  const denom = Math.max(expected.length, liveSegs.length) || 1;
+  const score = Math.round(matched / denom * 100);
+  return { parityScore: score, summary: `${matched} of ${denom} text block(s) match the Google translation of the source.`, issues, engine:'google' };
+}
+
 async function analyzeTranslation(refData, transData, refLabel, transLabel){
   const cap = (s) => (s||'').slice(0, 6000);
   const refBlock = 'Headings:\n' + refData.headings.map(h=>'  '.repeat(h.level-1)+'- '+h.text).join('\n') +
@@ -841,18 +1083,29 @@ async function analyzeTranslation(refData, transData, refLabel, transLabel){
 
   const userMsg = `=== REFERENCE (${refLabel}) ===\n${refBlock}\n\n=== TRANSLATION (${transLabel}) ===\n${transBlock}`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  // Route through the worker (it holds the Anthropic API key and adds CORS).
+  let aiUrl;
+  try { const u = new URL(WORKER_URL); u.searchParams.set('ai', '1'); aiUrl = u.href; }
+  catch(e){ aiUrl = WORKER_URL + (WORKER_URL.includes('?') ? '&' : '?') + 'ai=1'; }
+
+  const key = ((document.getElementById('pass') && document.getElementById('pass').value) || WORKER_KEY || '').trim();
+  const res = await fetch(aiUrl, {
     method:'POST',
-    headers: { 'Content-Type':'application/json' },
+    headers: Object.assign({ 'Content-Type':'application/json' }, key ? { 'X-Audit-Key': key } : {}),
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: AI_MODEL,
       max_tokens: 2048,
       system,
       messages: [{ role:'user', content: userMsg }]
     })
   });
-  if(!res.ok) throw new Error('API request failed (' + res.status + ')');
+  if(!res.ok){
+    let detail = '';
+    try { detail = (await res.text()).slice(0,160); } catch(e){}
+    throw new Error('AI request failed (HTTP ' + res.status + (detail ? '): ' + detail : ')'));
+  }
   const data = await res.json();
+  if(data && data.type === 'error'){ throw new Error('AI error: ' + (data.error && data.error.message || 'unknown')); }
   const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
   const cleaned = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
   return JSON.parse(cleaned);
@@ -872,7 +1125,7 @@ async function runAudit(){
 
   const refLang = langs.find(l=>l.ref);
   const transLangs = langs.filter(l=>!l.ref);
-  const conc = +document.getElementById('conc').value || 5;
+  const conc = 2;
 
   document.getElementById('runBtn').disabled = true;
   document.getElementById('results').innerHTML = '';
@@ -929,17 +1182,26 @@ async function runAudit(){
         block.parity.forEach(i => bump(auditState, i.severity));
       }
 
-      // AI translation analysis
-      if(refData){
-        try {
-          const ai = await analyzeTranslation(refData, tData, refLang.label, tl.label);
-          block.ai = ai;
-          (ai.issues||[]).forEach(i => bump(auditState, i.severity));
-        } catch(e){
-          block.aiError = e.message;
+      // translation analysis — Google drift (Pattern A) and/or Claude
+      const transOn = document.getElementById('transToggle') && document.getElementById('transToggle').checked;
+      if(refData && transOn){
+        const engine = (document.getElementById('engine') && document.getElementById('engine').value) || 'google';
+        if(engine === 'google' || engine === 'both'){
+          try {
+            const d = await driftCheck(refData, tData, tl);
+            if(d.error){ block.driftError = d.error; }
+            else { block.drift = d; (d.issues||[]).forEach(i => bump(auditState, i.severity)); }
+          } catch(e){ block.driftError = e.message; }
         }
-      } else {
-        block.aiError = 'No English reference page to compare against.';
+        if(engine === 'claude' || engine === 'both'){
+          try {
+            const ai = await analyzeTranslation(refData, tData, refLang.label, tl.label);
+            block.ai = ai;
+            (ai.issues||[]).forEach(i => bump(auditState, i.severity));
+          } catch(e){ block.aiError = e.message; }
+        }
+      } else if(transOn && !refData){
+        block.driftError = 'No English reference page to compare against.';
       }
       result.languages.push(block);
     }
@@ -970,17 +1232,20 @@ async function technicalPass(data, label, conc, state){
   if(!data.htmlLang) tech.code.push({ sev:'warning', text: 'Missing lang attribute on <html>.' });
   tech.code.forEach(c => bump(state, c.sev));
 
-  // link verification — check every link on the page
-  const toCheck = data.links;
-  if(toCheck.length){
-    const checked = await pool(toCheck, checkResource, conc);
-    tech.links = checked.filter(c => !c.ok || c.status >= 400 || c.status === 0);
-    state.broken += tech.links.length;
-    tech.linksChecked = toCheck.length;
-    tech.linksTotal = data.links.length;
-  } else {
-    tech.linksChecked = 0; tech.linksTotal = data.links.length;
+  // link verification — report only genuinely broken links; ignore auth/blocked (401/403/429)
+  const broken = [];
+  if(data.links.length){
+    const checked = await pool(data.links, checkResource, conc);
+    checked.forEach(c => {
+      if(c.ok) return;
+      if(c.status === 401 || c.status === 403 || c.status === 429 || c.blocked) return; // responded but refused us — ignore
+      broken.push(c); // 404, 410, 5xx, or no response
+    });
   }
+  tech.links = broken;
+  tech.linksChecked = data.links.length;
+  tech.linksTotal = data.links.length;
+  state.broken += broken.length;
   return tech;
 }
 
@@ -1061,20 +1326,31 @@ function renderResult(result, refLang){
       body.innerHTML += html; return;
     }
 
-    // AI translation
-    html += `<div class="section-label">Translation &amp; tone</div>`;
-    if(b.aiError){
-      html += `<div class="err-note">Analysis unavailable: ${escapeHtml(b.aiError)}</div>`;
-    } else if(b.ai){
-      if(typeof b.ai.parityScore === 'number'){
-        html += `<div class="score">Parity score: ${b.ai.parityScore}/100 — ${escapeHtml(b.ai.summary||'')}</div>`;
+    // Google drift (Pattern A)
+    if(b.drift || b.driftError){
+      html += `<div class="section-label">Drift from Google source</div>`;
+      if(b.driftError){
+        html += `<div class="err-note">Check unavailable: ${escapeHtml(b.driftError)}</div>`;
+      } else if(b.drift){
+        html += `<div class="score">Match score: ${b.drift.parityScore}/100 — ${escapeHtml(b.drift.summary||'')}</div>`;
+        const di = b.drift.issues||[];
+        if(di.length){ di.forEach(is => html += renderIssue(is)); }
+        else { html += `<div class="clean">Published page matches the Google translation of the source.</div>`; }
       }
-      const issues = (b.ai.issues||[]).filter(x=>['translation','tone','untranslated','added'].includes(x.category) || true);
-      const aiIssues = (b.ai.issues||[]);
-      if(aiIssues.length){
-        aiIssues.forEach(is => html += renderIssue(is));
-      } else {
-        html += `<div class="clean">No translation issues found.</div>`;
+    }
+
+    // Claude analysis
+    if(b.ai || b.aiError){
+      html += `<div class="section-label">Translation &amp; tone (Claude)</div>`;
+      if(b.aiError){
+        html += `<div class="err-note">Analysis unavailable: ${escapeHtml(b.aiError)}</div>`;
+      } else if(b.ai){
+        if(typeof b.ai.parityScore === 'number'){
+          html += `<div class="score">Parity score: ${b.ai.parityScore}/100 — ${escapeHtml(b.ai.summary||'')}</div>`;
+        }
+        const aiIssues = (b.ai.issues||[]);
+        if(aiIssues.length){ aiIssues.forEach(is => html += renderIssue(is)); }
+        else { html += `<div class="clean">No translation issues found.</div>`; }
       }
     }
 
@@ -1104,7 +1380,7 @@ function renderTech(tech){
   } else {
     html += `<div class="clean">No code-level issues detected.</div>`;
   }
-  html += `<div class="section-label">Links${tech.linksChecked!=null?` (checked ${tech.linksChecked} of ${tech.linksTotal})`:''}</div>`;
+  html += `<div class="section-label">Links${tech.linksChecked!=null?` (checked ${tech.linksChecked})`:''}</div>`;
   if(tech.links && tech.links.length){
     html += `<ul class="tech">`;
     tech.links.forEach(l => {
@@ -1113,7 +1389,7 @@ function renderTech(tech){
     });
     html += `</ul>`;
   } else {
-    html += `<div class="clean">${tech.linksChecked? 'All checked links responded OK.' : 'No outbound links to check.'}</div>`;
+    html += `<div class="clean">${tech.linksChecked? 'All links resolved (no 404s or server errors).' : 'No outbound links to check.'}</div>`;
   }
   return html;
 }
@@ -1159,6 +1435,7 @@ function setBar(pct){ document.getElementById('bar').style.width = pct + '%'; }
 })();
 renderPages();
 updateRunHint();
+onTransToggle();
 </script>
 </body>
 </html>
