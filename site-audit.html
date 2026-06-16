@@ -978,15 +978,32 @@ function findAnchor(doc, url, baseUrl){
   });
   return found;
 }
-function buildSnippet(el){
-  if(!el) return '';
-  const cap = (s) => { s = s || ''; return s.length > 400 ? s.slice(0,400) + '…' : s; };
-  let html = '';
-  const prev = el.previousElementSibling, next = el.nextElementSibling;
-  if(prev) html += `<span class="snip-ctx">${escapeHtml(cap(prev.outerHTML))}</span>`;
-  html += `<span class="snip-hit">${escapeHtml(cap(el.outerHTML))}</span>`;
-  if(next) html += `<span class="snip-ctx">${escapeHtml(cap(next.outerHTML))}</span>`;
-  return html;
+function srcSnippet(rawHtml, el){
+  if(!rawHtml || !el) return '';
+  // find where this element lives in the actual served source
+  const cand = [];
+  const href = el.getAttribute && el.getAttribute('href');
+  const id = el.getAttribute && el.getAttribute('id');
+  if(href){ cand.push('href="'+href+'"', "href='"+href+"'"); }
+  if(id){ cand.push('id="'+id+'"', "id='"+id+"'"); }
+  const txt = clean(el.textContent || '');
+  if(txt) cand.push(txt.slice(0, 40));
+  let idx = -1;
+  for(const c of cand){ if(c && c.length >= 3){ idx = rawHtml.indexOf(c); if(idx !== -1) break; } }
+  if(idx === -1) return '';
+  // start at the opening '<' of the tag holding this, plus some leading container context
+  let tagStart = rawHtml.lastIndexOf('<', idx);
+  if(tagStart === -1) tagStart = Math.max(0, idx - 40);
+  const ctxStart = Math.max(0, tagStart - 200);
+  const ctxEnd = Math.min(rawHtml.length, idx + 360);
+  let slice = rawHtml.slice(ctxStart, ctxEnd);
+  // trim to clean tag boundaries
+  const firstLt = slice.indexOf('<'); if(firstLt > 0) slice = slice.slice(firstLt);
+  const lastGt = slice.lastIndexOf('>'); if(lastGt !== -1) slice = slice.slice(0, lastGt + 1);
+  slice = slice.replace(/^\s+|\s+$/g, '');
+  if(ctxStart > 0) slice = '…\n' + slice;
+  if(ctxEnd < rawHtml.length) slice = slice + '\n…';
+  return escapeHtml(slice);
 }
 
 /* ---- major page regions (landmarks) ---- */
@@ -1131,7 +1148,7 @@ async function driftCheck(refData, transData, lang){
         translation: liveSegs[i].slice(0,300),
         explanation:`Published text differs from the Google translation of the English source (about ${Math.round(sim*100)}% similar).`,
         suggestion:'',
-        snippet: buildSnippet(findByText(liveDoc, liveSegs[i]))
+        snippet: srcSnippet(transData.rawHtml, findByText(liveDoc, liveSegs[i]))
       });
     }
   }
@@ -1186,7 +1203,7 @@ async function analyzeTranslation(refData, transData, refLabel, transLabel){
   const liveDoc = parseDoc(transData.rawHtml);
   (parsed.issues||[]).forEach(is => {
     const el = findByText(liveDoc, is.translation || is.reference);
-    if(el) is.snippet = buildSnippet(el);
+    if(el) is.snippet = srcSnippet(transData.rawHtml, el);
   });
   return parsed;
 }
@@ -1320,7 +1337,7 @@ async function technicalPass(data, label, conc, state){
     checked.forEach(c => {
       if(c.ok) return;
       if(c.status === 401 || c.status === 403 || c.status === 429 || c.blocked) return; // responded but refused us — ignore
-      broken.push(Object.assign({}, c, { snippet: buildSnippet(findAnchor(doc, c.url, data.baseUrl)) })); // 404, 410, 5xx, no response
+      broken.push(Object.assign({}, c, { snippet: srcSnippet(data.rawHtml, findAnchor(doc, c.url, data.baseUrl)) })); // 404, 410, 5xx, no response
     });
   }
   tech.links = broken;
@@ -1484,14 +1501,9 @@ function renderIssue(is){
   const sev = is.severity || 'info';
   let inner = `<div class="ihead"><span class="cat">${escapeHtml(is.category||'issue')}</span></div>`;
   inner += `<p class="exp">${escapeHtml(is.explanation||'')}</p>`;
-  if(is.reference || is.translation){
-    inner += `<div class="compare">
-      <div><span class="k">Reference</span>${escapeHtml(is.reference||'—')}</div>
-      <div><span class="k">Translation</span>${escapeHtml(is.translation||'—')}</div></div>`;
-  }
   if(is.suggestion) inner += `<div class="sugg">→ ${escapeHtml(is.suggestion)}</div>`;
   if(is.snippet){
-    return `<details class="issue ${sev} snip-issue"><summary>${inner}<span class="snip-hint">▸ show markup</span></summary><pre class="snip">${is.snippet}</pre></details>`;
+    return `<details class="issue ${sev} snip-issue"><summary>${inner}<span class="snip-hint">▸ show source</span></summary><pre class="snip">${is.snippet}</pre></details>`;
   }
   return `<div class="issue ${sev}">${inner}</div>`;
 }
