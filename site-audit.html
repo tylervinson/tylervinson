@@ -83,6 +83,10 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(255,190,95,0.15);
   }
+  input.input-error, input.input-error:focus {
+    border-color: var(--critical);
+    box-shadow: 0 0 0 3px rgba(217,138,132,0.2);
+  }
   .row { display: flex; gap: 1rem; flex-wrap: wrap; }
   .row > div { flex: 1; min-width: 180px; }
 
@@ -269,6 +273,7 @@
     <p class="hint">Auditing <strong id="cfgSite"></strong> through your configured proxy. To change the site, proxy, or languages, edit the config block at the top of this file.</p>
     <label class="field-label" for="pass">Access passphrase</label>
     <input type="password" id="pass" placeholder="type your worker passphrase" autocomplete="off">
+    <div id="passError" class="err-note" style="display:none; margin-top:.5rem;"></div>
     <p class="hint" style="margin:.4rem 0 0;">Sent to the worker as the access key. Held in memory for this session only — never written to the file.</p>
     <div class="row" style="margin-top:1.25rem;">
       <div style="flex:0 1 auto; min-width:0;">
@@ -359,8 +364,11 @@
     <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
       <h2 style="margin:0;">Summary</h2>
       <span class="spacer" style="flex:1;"></span>
-      <button class="ghost" onclick="exportReport()">Save report (HTML)</button>
+      <button class="ghost" onclick="exportDashboard()">Save dashboard (HTML)</button>
       <button class="ghost" onclick="exportCsv()">Export issues (CSV)</button>
+      <button class="ghost" onclick="exportSnapshot()">Save snapshot</button>
+      <button class="ghost" onclick="document.getElementById('baselineFile').click()">Load baseline</button>
+      <input type="file" id="baselineFile" accept="application/json,.json" style="display:none" onchange="loadBaseline(this.files && this.files[0]); this.value='';">
     </div>
     <div class="score" id="reportStatus" style="margin:-.75rem 0 1.25rem;"></div>
     <div class="summary-grid" id="summaryGrid"></div>
@@ -492,6 +500,7 @@ async function discoverPages(){
   const MAX_SITEMAPS = 60, MAX_URLS = 3000;
   const seenSm = new Set();
   const foundUrls = new Set();
+  const lastmodMap = {};
   let queue = [...sitemaps];
 
   while(queue.length && seenSm.size < MAX_SITEMAPS && foundUrls.size < MAX_URLS){
@@ -513,6 +522,14 @@ async function discoverPages(){
       locs.forEach(u => { if(!seenSm.has(u)) queue.push(u); }); // child sitemaps
       diag.push({ url: sm, status: r.status, note: `sitemap index → ${locs.length} child sitemap(s)` });
     } else {
+      [...doc.querySelectorAll('url')].forEach(node => {
+        const loc = clean(node.querySelector('loc')?.textContent || '');
+        if(!loc) return;
+        foundUrls.add(loc);
+        const lm = clean(node.querySelector('lastmod')?.textContent || '');
+        if(lm) lastmodMap[loc] = lm;
+      });
+      // fallback if structure was flat
       locs.forEach(u => foundUrls.add(u));
       diag.push({ url: sm, status: r.status, note: `${locs.length} page URL(s)` });
     }
@@ -526,6 +543,7 @@ async function discoverPages(){
 
   // normalize → unique paths on our host, minus assets
   const paths = new Set();
+  const pathLastmod = {};
   const truncated = foundUrls.size >= MAX_URLS;
   foundUrls.forEach(u => {
     try {
@@ -533,7 +551,11 @@ async function discoverPages(){
       if(siteHost && url.hostname !== siteHost) return;
       if(SKIP_EXT.test(url.pathname)) return;
       const path = urlToPath(u);
-      if(path !== null) paths.add(path);
+      if(path !== null){
+        paths.add(path);
+        const lm = lastmodMap[u];
+        if(lm && (!pathLastmod[path] || lm > pathLastmod[path])) pathLastmod[path] = lm;
+      }
     } catch(e){}
   });
 
@@ -541,7 +563,7 @@ async function discoverPages(){
   if(!list.length){ setErr('Sitemap had entries but none matched your site host.'); return; }
 
   // keep full list in memory; surface directory facets, not raw rows
-  discovered = list.map(path => ({ path }));
+  discovered = list.map(path => ({ path, lastmod: pathLastmod[path] || '' }));
   const dirCounts = {};
   discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
   dirInclude = {};
@@ -652,8 +674,8 @@ function renderDiscSearch(){
 /* combined audit set: selected discovered pages + manual rows, deduped by path */
 function getAuditPages(){
   const map = new Map();
-  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path }));
-  pages.forEach(pg => { if(pg && pg.name) map.set(pg.path, { name: pg.name, path: pg.path }); });
+  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
+  pages.forEach(pg => { if(pg && pg.name) map.set(pg.path, { name: pg.name, path: pg.path, lastmod: (map.get(pg.path)||{}).lastmod || '' }); });
   return [...map.values()];
 }
 function updateRunHint(){
@@ -733,34 +755,294 @@ function downloadBlob(content, mime, filename){
 }
 function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
 
-function exportReport(){
+/* ---- unified findings model (one normalized row per issue, with a stable key) ---- */
+function findingSubject(f){
+  if(f.section === 'Links') return f.detail;          // the URL identifies the link
+  if(f.category === 'placeholder text') return f.detail;
+  return '';                                           // otherwise the issue is category-level
+}
+function keyFor(f){
+  return [f.path||'', f.lang||'', f.section||'', f.category||'', findingSubject(f)].join('||').toLowerCase();
+}
+function flattenFindings(){
+  const out = [];
+  (auditState.results||[]).forEach(r => {
+    const page = r.page.name, path = r.page.path || '';
+    const dir = (dirOf(path) || '(top level)');
+    const base = (lang, section, cat, sev, detail, suggestion, snippet) =>
+      out.push({ page, path, dir, lang, section, category: cat, severity: sev, detail: detail||'', suggestion: suggestion||'', snippet: snippet||'' });
+    const fromIssue = (lang, section, is) => base(lang, section, is.category||section.toLowerCase(), is.severity||'info', is.explanation||'', is.suggestion||'', is.snippet||'');
+
+    if(r.refError) base('English (reference)','Fetch','load error','critical', r.refError);
+    if(r.refTech){
+      r.refTech.code.forEach(c => base('English (reference)','Code','code', c.sev, c.text, '', c.snippet));
+      r.refTech.links.forEach(l => base('English (reference)','Links','broken link','critical', l.url, '', l.snippet));
+    }
+    (r.languages||[]).forEach(b => {
+      const lang = b.lang.label;
+      if(b.error){ base(lang,'Fetch','load error','critical', b.error); return; }
+      if(b.drift) (b.drift.issues||[]).forEach(is => fromIssue(lang,'Drift', is));
+      if(b.ai) (b.ai.issues||[]).forEach(is => fromIssue(lang,'Translation (Claude)', is));
+      (b.parity||[]).forEach(is => fromIssue(lang,'Sections & parity', is));
+      (b.content||[]).forEach(is => fromIssue(lang,'Content & SEO', is));
+      if(b.tech){
+        b.tech.code.forEach(c => base(lang,'Code','code', c.sev, c.text, '', c.snippet));
+        b.tech.links.forEach(l => base(lang,'Links','broken link','critical', l.url, '', l.snippet));
+      }
+    });
+  });
+  out.forEach(f => f.key = keyFor(f));
+  return out;
+}
+function countBy(arr, prop){ const o = {}; arr.forEach(x => { const k = x[prop]||'—'; o[k] = (o[k]||0)+1; }); return o; }
+
+/* ---- snapshot save + baseline load for trend tracking ---- */
+let baseline = null;
+function buildSnapshotObj(){
+  const f = flattenFindings();
+  return {
+    type:'audit-snapshot', version:1, site: reportHost(),
+    date: new Date().toISOString(),
+    counts: { critical:auditState.crit, warning:auditState.warn, info:auditState.info, broken:auditState.broken, pages:auditState.pages },
+    total: f.length,
+    keys: f.map(x => x.key),
+    byCategory: countBy(f, 'category'),
+    byLang: countBy(f, 'lang')
+  };
+}
+function exportSnapshot(){
   if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
-  const css = document.querySelector('style') ? document.querySelector('style').textContent : '';
-  const summary = document.getElementById('summaryGrid').innerHTML;
-  // open all page sections in the static report
-  const results = document.getElementById('results').innerHTML.replace(/<details class="page-result"/g, '<details class="page-result" open');
-  const engineSel = (document.getElementById('engine') && document.getElementById('engine').options[document.getElementById('engine').selectedIndex].text) || '';
-  const when = new Date().toLocaleString();
-  const transLangs = langs.filter(l=>!l.ref).map(l=>l.label).join(', ');
+  downloadBlob(JSON.stringify(buildSnapshotObj()), 'application/json', `audit-snapshot-${reportHost()}-${new Date().toISOString().slice(0,10)}.json`);
+  setReportStatus('Snapshot saved. Load it as the baseline before your next audit to track what changed.');
+}
+function loadBaseline(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const j = JSON.parse(e.target.result);
+      if(j.type !== 'audit-snapshot') throw new Error('bad type');
+      baseline = j;
+      setReportStatus(`Baseline loaded from ${new Date(j.date).toLocaleDateString()} (${j.keys.length} prior finding(s)). The dashboard will show changes since then.`);
+    } catch(err){ setReportStatus('That isn’t a valid audit snapshot file.', true); }
+  };
+  reader.readAsText(file);
+}
+function trendVsBaseline(currentKeys){
+  if(!baseline) return { hasBaseline:false };
+  const cur = new Set(currentKeys), base = new Set(baseline.keys);
+  let resolved = 0, persisting = 0, added = 0;
+  base.forEach(k => { if(cur.has(k)) persisting++; else resolved++; });
+  cur.forEach(k => { if(!base.has(k)) added++; });
+  return { hasBaseline:true, date: baseline.date, resolved, persisting, added,
+           wasTotal: baseline.total, nowTotal: currentKeys.length,
+           wasCounts: baseline.counts };
+}
 
-  const doc = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audit report — ${escapeHtml(reportHost())} — ${escapeHtml(new Date().toISOString().slice(0,10))}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>${css}</style></head>
-<body><div class="wrap">
-  <header class="page-head">
-    <p class="eyebrow">Localization QA report</p>
-    <h1>${escapeHtml(reportHost())}</h1>
-    <p>Generated ${escapeHtml(when)} · Languages: ${escapeHtml(transLangs)} · Translation check: ${escapeHtml(engineSel)}</p>
-  </header>
-  <section class="card"><h2 style="margin-bottom:1.5rem;">Summary</h2><div class="summary-grid">${summary}</div></section>
-  <div>${results}</div>
-</div></body></html>`;
+/* ---- two-view dashboard (Authors + Leaders) ---- */
+function buildDashboardData(){
+  const findings = flattenFindings();
+  const missing = {};
+  (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
+  const freshness = (auditState.results||[])
+    .map(r => ({ path: r.page.path || '(home)', lastmod: r.page.lastmod || '' }))
+    .filter(x => x.lastmod)
+    .sort((a,b) => a.lastmod < b.lastmod ? -1 : 1)
+    .slice(0, 25);
+  return {
+    meta: {
+      host: reportHost(),
+      generated: new Date().toLocaleString(),
+      langs: langs.filter(l=>!l.ref).map(l=>l.label),
+      translationCheck: (document.getElementById('transToggle') && document.getElementById('transToggle').checked)
+        ? ((document.getElementById('engine')||{}).value || 'on') : 'off'
+    },
+    summary: { critical:auditState.crit, warning:auditState.warn, info:auditState.info, broken:auditState.broken, pages:auditState.pages },
+    findings,
+    rollups: {
+      byLang: countBy(findings.filter(f=>f.severity!=='info' || true), 'lang'),
+      byCategory: countBy(findings, 'category'),
+      byDir: countBy(findings, 'dir'),
+      bySeverity: countBy(findings, 'severity')
+    },
+    coverage: {
+      discovered: (discovered && discovered.length) || 0,
+      audited: auditState.pages,
+      missing: Object.keys(missing).map(k => ({ lang:k, count:missing[k] }))
+    },
+    freshness,
+    trend: trendVsBaseline(findings.map(f => f.key))
+  };
+}
+function exportReport(){ exportDashboard(); } // back-compat
+function exportDashboard(){
+  if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
+  const data = buildDashboardData();
+  let json = JSON.stringify(data).replace(/<\/script>/gi, '<\\/script>');
+  const html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<title>Audit dashboard — ' + escapeHtml(data.meta.host) + '</title>'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">'
+    + '<style>' + dashboardCss() + '</style></head><body><div class="wrap" id="app"></div>'
+    + '<script>window.__DASH_DATA__=' + json + ';(' + dashboardApp.toString() + ')();<\/script>'
+    + '</body></html>';
+  downloadBlob(html, 'text/html', 'audit-dashboard-' + reportHost() + '-' + new Date().toISOString().slice(0,10) + '.html');
+  setReportStatus('Dashboard saved' + (baseline ? ' (with trend vs the loaded baseline).' : '. Tip: load a baseline snapshot to add trend tracking.'));
+}
+function dashboardCss(){
+  return [
+    ':root{--bg:#1a1a1a;--card:#242424;--card-alt:#1e1e1e;--border:#2e2e2e;--text:#f0f0f0;--muted:#888;--muted2:#666;--accent:#FFBE5F;--crit:#d98a84;--warn:#d8a24a;--ok:#7dbf82}',
+    '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-weight:300;line-height:1.6}',
+    '.wrap{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem}',
+    '.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.13em;font-size:.7rem;font-weight:500;margin:0}',
+    'h1{font-weight:300;font-size:2rem;margin:.2rem 0}.sub{color:var(--muted);font-size:.88rem;margin:.3rem 0 0}',
+    '.tabs{display:flex;gap:.4rem;margin:2rem 0 1.5rem;border-bottom:1px solid var(--border)}',
+    '.tab{background:none;border:none;color:var(--muted);padding:.7rem 1.1rem;cursor:pointer;font-size:.95rem;border-bottom:2px solid transparent;font-family:inherit}',
+    '.tab.active{color:var(--accent);border-bottom-color:var(--accent)}',
+    '.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem}',
+    '.label{color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;font-weight:500;margin:0 0 1rem}',
+    '.grid{display:grid;gap:1rem}.stats{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}',
+    '.stat .n{font-size:1.9rem;font-weight:300;line-height:1}.stat .l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;margin-top:.3rem}',
+    '.crit{color:var(--crit)}.warn{color:var(--warn)}.ok{color:var(--ok)}.accent{color:var(--accent)}.muted{color:var(--muted)}',
+    'table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--border)}',
+    'th{color:var(--muted);font-weight:500;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}',
+    '.filters{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}',
+    'select,input{background:var(--card-alt);border:1px solid #333;color:var(--text);border-radius:6px;padding:.5rem .7rem;font-size:.85rem;font-family:inherit}',
+    '.finding{border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:6px;margin:.5rem 0;background:var(--card-alt)}',
+    '.finding.s-critical{border-left-color:var(--crit)}.finding.s-warning{border-left-color:var(--warn)}.finding.s-info{border-left-color:var(--muted2)}',
+    '.finding .body{padding:.6rem .85rem}.cat{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}',
+    '.det{margin:.25rem 0 0;font-size:.9rem}.sugg{color:var(--ok);font-size:.82rem;margin-top:.35rem}',
+    '.finding details{margin:.1rem .85rem .7rem}.finding summary{cursor:pointer;color:var(--accent);font-size:.72rem;list-style:none}.finding summary::-webkit-details-marker{display:none}',
+    'pre.src{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.72rem;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.6rem;margin:.4rem 0 0}',
+    '.pagegrp{margin-bottom:1.3rem}.pagegrp h3{font-size:1rem;font-weight:400;margin:.5rem 0 .1rem}.pagegrp .p{color:var(--muted2);font-size:.76rem}',
+    '.trend{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center}.delta{font-size:1.9rem;font-weight:300}',
+    '.barrow{display:flex;align-items:center;gap:.6rem;margin:.3rem 0;font-size:.82rem}.bartrack{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}.barfill{height:100%;background:var(--accent)}',
+    '.empty{color:var(--muted);font-size:.88rem}'
+  ].join('');
+}
+function dashboardApp(){
+  var D = window.__DASH_DATA__;
+  var esc = function(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }); };
+  var sevRank = { critical:0, warning:1, info:2 };
+  var app = document.getElementById('app');
 
-  downloadBlob(doc, 'text/html', `audit-report-${reportHost()}-${new Date().toISOString().slice(0,10)}.html`);
-  setReportStatus('Report saved.');
+  app.innerHTML =
+    '<p class="eyebrow">Localization QA dashboard</p>'
+    + '<h1>' + esc(D.meta.host) + '</h1>'
+    + '<p class="sub">Generated ' + esc(D.meta.generated) + ' · ' + esc(D.meta.langs.join(', ')) + ' · translation check: ' + esc(D.meta.translationCheck) + '</p>'
+    + '<div class="tabs"><button class="tab active" id="tab-authors">Authors</button><button class="tab" id="tab-leaders">Leaders</button></div>'
+    + '<div id="view-authors"></div><div id="view-leaders" style="display:none"></div>';
+
+  function show(t){
+    document.getElementById('view-authors').style.display = t==='authors'?'block':'none';
+    document.getElementById('view-leaders').style.display = t==='leaders'?'block':'none';
+    document.getElementById('tab-authors').className = 'tab' + (t==='authors'?' active':'');
+    document.getElementById('tab-leaders').className = 'tab' + (t==='leaders'?' active':'');
+  }
+  document.getElementById('tab-authors').onclick = function(){ show('authors'); };
+  document.getElementById('tab-leaders').onclick = function(){ show('leaders'); };
+
+  /* ---------- Authors ---------- */
+  var langOpts = Array.from(new Set(D.findings.map(function(f){return f.lang;}))).sort();
+  var catOpts = Array.from(new Set(D.findings.map(function(f){return f.category;}))).sort();
+  var av = document.getElementById('view-authors');
+  av.innerHTML =
+    '<div class="card"><div class="filters">'
+    + '<select id="f-lang"><option value="">All languages</option>' + langOpts.map(function(l){return '<option>'+esc(l)+'</option>';}).join('') + '</select>'
+    + '<select id="f-sev"><option value="">All severities</option><option>critical</option><option>warning</option><option>info</option></select>'
+    + '<select id="f-cat"><option value="">All categories</option>' + catOpts.map(function(c){return '<option>'+esc(c)+'</option>';}).join('') + '</select>'
+    + '<input id="f-q" placeholder="Search text or page…" style="flex:1;min-width:160px">'
+    + '</div><div id="f-count" class="muted" style="font-size:.8rem;margin-bottom:1rem"></div><div id="author-list"></div></div>';
+
+  function renderAuthors(){
+    var l = document.getElementById('f-lang').value, s = document.getElementById('f-sev').value,
+        c = document.getElementById('f-cat').value, q = document.getElementById('f-q').value.toLowerCase();
+    var rows = D.findings.filter(function(f){
+      return (!l || f.lang===l) && (!s || f.severity===s) && (!c || f.category===c)
+        && (!q || (f.detail+' '+f.page+' '+f.path).toLowerCase().indexOf(q) !== -1);
+    });
+    document.getElementById('f-count').textContent = rows.length + ' finding(s)';
+    var groups = {};
+    rows.forEach(function(f){ var k = f.page + '||' + f.path; (groups[k] = groups[k] || []).push(f); });
+    var keys = Object.keys(groups).sort();
+    if(!keys.length){ document.getElementById('author-list').innerHTML = '<p class="empty">No findings match these filters.</p>'; return; }
+    var html = '';
+    keys.forEach(function(k){
+      var items = groups[k].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity]) || a.lang.localeCompare(b.lang); });
+      var head = k.split('||');
+      html += '<div class="pagegrp"><h3>' + esc(head[0]) + '</h3><div class="p">/' + esc(head[1]) + '</div>';
+      items.forEach(function(f){
+        html += '<div class="finding s-' + f.severity + '"><div class="body">'
+          + '<span class="cat">' + esc(f.lang) + ' · ' + esc(f.category) + ' · ' + f.severity + '</span>'
+          + '<div class="det">' + esc(f.detail) + '</div>'
+          + (f.suggestion ? '<div class="sugg">→ ' + esc(f.suggestion) + '</div>' : '')
+          + '</div>'
+          + (f.snippet ? '<details><summary>▸ show source</summary><pre class="src">' + f.snippet + '</pre></details>' : '')
+          + '</div>';
+      });
+      html += '</div>';
+    });
+    document.getElementById('author-list').innerHTML = html;
+  }
+  ['f-lang','f-sev','f-cat'].forEach(function(id){ document.getElementById(id).onchange = renderAuthors; });
+  document.getElementById('f-q').oninput = renderAuthors;
+  renderAuthors();
+
+  /* ---------- Leaders ---------- */
+  function statCard(n, label, cls){ return '<div class="stat"><div class="n ' + (cls||'') + '">' + n + '</div><div class="l">' + label + '</div></div>'; }
+  function barTable(obj, order){
+    var entries = Object.keys(obj).map(function(k){ return [k, obj[k]]; });
+    entries.sort(function(a,b){ return b[1]-a[1]; });
+    var max = entries.length ? entries[0][1] : 1;
+    return entries.map(function(e){
+      var pct = Math.round(e[1]/max*100);
+      return '<div class="barrow"><span style="min-width:130px">' + esc(e[0]) + '</span><span class="bartrack"><span class="barfill" style="width:' + pct + '%"></span></span><span class="num" style="min-width:32px;text-align:right">' + e[1] + '</span></div>';
+    }).join('') || '<p class="empty">None.</p>';
+  }
+  var lv = document.getElementById('view-leaders');
+  var t = D.trend;
+  var trendHtml;
+  if(t.hasBaseline){
+    var net = t.nowTotal - t.wasTotal;
+    trendHtml = '<div class="card"><p class="label">Change since last audit (' + esc(new Date(t.date).toLocaleDateString()) + ')</p>'
+      + '<div class="trend">'
+      + '<div><div class="delta ok">' + t.resolved + '</div><div class="l muted">Resolved</div></div>'
+      + '<div><div class="delta crit">' + t.added + '</div><div class="l muted">New</div></div>'
+      + '<div><div class="delta warn">' + t.persisting + '</div><div class="l muted">Still open</div></div>'
+      + '</div>'
+      + '<p class="sub" style="text-align:center;margin-top:1rem">Total findings ' + t.wasTotal + ' → ' + t.nowTotal + ' · '
+      + (net < 0 ? '<span class="ok">down ' + Math.abs(net) + ' (issues being resolved)</span>'
+         : net > 0 ? '<span class="crit">up ' + net + ' (issues accumulating)</span>'
+         : '<span class="muted">no net change</span>') + '</p></div>';
+  } else {
+    trendHtml = '<div class="card"><p class="label">Trend</p><p class="empty">No baseline loaded. In the audit tool, save a snapshot after a run, then load it as the baseline before the next run to see what was resolved, what is new, and what persists.</p></div>';
+  }
+  var cov = D.coverage;
+  var covMissing = cov.missing.length
+    ? cov.missing.map(function(m){ return '<div class="barrow"><span style="min-width:130px">' + esc(m.lang) + '</span><span class="crit">' + m.count + ' page(s) missing / errored</span></div>'; }).join('')
+    : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
+  var fresh = D.freshness.length
+    ? '<table><thead><tr><th>Page</th><th>Last modified</th></tr></thead><tbody>'
+      + D.freshness.map(function(x){ return '<tr><td>/' + esc(x.path) + '</td><td>' + esc((x.lastmod||'').slice(0,10)) + '</td></tr>'; }).join('')
+      + '</tbody></table>'
+    : '<p class="empty">No last-modified dates were available from the sitemap.</p>';
+
+  lv.innerHTML =
+    trendHtml
+    + '<div class="card"><p class="label">This audit</p><div class="grid stats">'
+      + statCard(D.summary.pages, 'Pages', 'accent')
+      + statCard(D.summary.critical, 'Critical', 'crit')
+      + statCard(D.summary.warning, 'Warnings', 'warn')
+      + statCard(D.summary.broken, 'Broken links', D.summary.broken?'crit':'')
+      + statCard(D.findings.length, 'Total findings', '')
+      + '</div></div>'
+    + '<div class="card"><p class="label">Findings by language</p>' + barTable(D.rollups.byLang) + '</div>'
+    + '<div class="card"><p class="label">Findings by category</p>' + barTable(D.rollups.byCategory) + '</div>'
+    + '<div class="card"><p class="label">Findings by section / directory</p>' + barTable(D.rollups.byDir) + '</div>'
+    + '<div class="card"><p class="label">Translation coverage</p>'
+      + '<p class="sub">' + cov.audited + ' page(s) audited of ' + cov.discovered + ' discovered in the sitemap.</p>' + covMissing + '</div>'
+    + '<div class="card"><p class="label">Oldest content (freshness)</p>' + fresh + '</div>';
 }
 
 function collectRows(){
@@ -781,6 +1063,7 @@ function collectRows(){
       if(bk.ai) push(bk.ai.issues, 'Translation (Claude)');
       if(bk.aiError) rows.push({ page, lang, section:'Translation (Claude)', severity:'info', category:'unavailable', detail:bk.aiError, a:'', b:'' });
       push(bk.parity, 'Sections & parity');
+      push(bk.content, 'Content & SEO');
       if(bk.tech){
         bk.tech.code.forEach(c => rows.push({ page, lang, section:'Code', severity:c.sev, category:'code', detail:c.text, a:'', b:'' }));
         bk.tech.links.forEach(l => rows.push({ page, lang, section:'Links', severity:'critical', category:'broken link', detail:l.url, a:'', b:String(l.status||'no response') }));
@@ -929,10 +1212,45 @@ function extract(html, baseUrl){
     if(t.length >= 3) segments.push(t);
   });
 
+  const title = clean(doc.querySelector('title')?.textContent || '');
+  const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
+
+  // hreflang alternates
+  const hreflang = [...doc.querySelectorAll('link[rel="alternate"][hreflang]')]
+    .map(l => ({ lang: (l.getAttribute('hreflang')||'').toLowerCase(), href: abs(l.getAttribute('href')||'') }));
+
+  // canonical + robots
+  const canonical = abs(doc.querySelector('link[rel="canonical"]')?.getAttribute('href') || '');
+  const robotsMeta = (doc.querySelector('meta[name="robots"]')?.getAttribute('content') || '').toLowerCase();
+  const noindex = /noindex/.test(robotsMeta);
+
+  // structured data (JSON-LD)
+  const schemaTypes = [];
+  doc.querySelectorAll('script[type="application/ld+json"]').forEach(s => {
+    try {
+      const j = JSON.parse(s.textContent || '{}');
+      const collect = (o) => { if(!o) return; if(Array.isArray(o)) return o.forEach(collect); if(o['@type']) [].concat(o['@type']).forEach(t => schemaTypes.push(String(t))); if(o['@graph']) collect(o['@graph']); };
+      collect(j);
+    } catch(e){}
+  });
+
+  // headings detail
+  const h1Count = headings.filter(h => h.level === 1).length;
+  let skipped = false;
+  for(let i=1;i<headings.length;i++){ if(headings[i].level - headings[i-1].level > 1){ skipped = true; break; } }
+
+  // word count + placeholders
+  const words = textContent ? textContent.split(/\s+/).filter(Boolean).length : 0;
+  const placeholders = (textContent.match(/lorem ipsum|lipsum|\bTODO\b|coming soon|placeholder text|dummy text/gi) || []);
+
   return {
-    title: clean(doc.querySelector('title')?.textContent || ''),
-    metaDesc: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+    title, metaDesc,
+    titleLen: title.length, metaDescLen: metaDesc.length,
     htmlLang: doc.documentElement.getAttribute('lang') || '',
+    hreflang, canonical, noindex,
+    schemaTypes: [...new Set(schemaTypes)],
+    h1Count, headingSkip: skipped,
+    words, placeholders: [...new Set(placeholders.map(p=>p.toLowerCase()))],
     headings,
     links: [...new Set(links)],
     images,
@@ -1036,7 +1354,19 @@ function detectRegions(doc){
   REGION_DEFS.forEach(def => { out[def.key] = detectRegion(doc, def); });
   return out;
 }
-function regionDiff(refRegions, transRegions){
+function regionElement(doc, def){
+  if(!doc) return null;
+  let els = [...doc.querySelectorAll(def.sel)];
+  if(!els.length){
+    els = [...doc.querySelectorAll('div,section,header,footer,nav,aside')].filter(el =>
+      def.cls.test((el.getAttribute('id')||'') + ' ' + (el.getAttribute('class')||'')));
+  }
+  if(!els.length) return null;
+  let best = els[0], bestLen = -1;
+  els.forEach(el => { const l = clean(el.textContent||'').length; if(l > bestLen){ bestLen = l; best = el; } });
+  return best;
+}
+function regionDiff(refRegions, transRegions, liveDoc, liveRawHtml){
   const issues = [];
   REGION_DEFS.forEach(def => {
     const r = refRegions[def.key], t = transRegions[def.key];
@@ -1050,14 +1380,93 @@ function regionDiff(refRegions, transRegions){
         suggestion: `Add the ${def.label.toLowerCase()} to the translated page so it mirrors English.`
       });
     } else if(r.textLen > 250 && t.textLen < r.textLen * 0.4){
+      const el = regionElement(liveDoc, def);
       issues.push({
         category:'missing',
         severity:'warning',
         explanation: `${def.label} exists but is much smaller than English (about ${Math.round(t.textLen / Math.max(r.textLen,1) * 100)}% of its text). Part of it may be missing.`,
-        suggestion: `Review the ${def.label.toLowerCase()} for dropped content.`
+        suggestion: `Review the ${def.label.toLowerCase()} for dropped content.`,
+        snippet: el ? srcSnippet(liveRawHtml, el) : ''
       });
     }
   });
+  return issues;
+}
+function isLikelyEnglish(text){
+  // crude heuristic: share of common English stopwords among the first words
+  if(!text) return false;
+  const words = text.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 80);
+  if(words.length < 10) return false;
+  const stop = new Set(['the','and','to','of','a','in','for','is','on','that','with','your','you','our','we','this','are','or','from','at','by','an','be','as','it','will','more','about','have','can','if','all','not','what','when','how']);
+  let hits = 0; words.forEach(w => { if(stop.has(w.replace(/[^a-z]/g,''))) hits++; });
+  return hits / words.length > 0.2;
+}
+function contentChecks(refData, tData, lang, pg){
+  const issues = [];
+  const add = (severity, category, explanation, suggestion, snippet) =>
+    issues.push({ severity, category, explanation, suggestion: suggestion||'', snippet: snippet||'' });
+
+  // lang attribute correctness
+  const want = (lang.gcode||lang.dir||'').toLowerCase().split('-')[0];
+  const got = (tData.htmlLang||'').toLowerCase().split('-')[0];
+  if(!tData.htmlLang) add('warning','lang attribute',`<html> has no lang attribute. It should declare ${lang.label} (e.g. lang="${lang.gcode||lang.dir}").`,'Set the lang attribute so browsers and search engines know the page language.');
+  else if(want && got && got !== want) add('warning','lang attribute',`<html lang="${tData.htmlLang}"> doesn't match the expected ${lang.label} ("${lang.gcode||lang.dir}").`,'Correct the lang attribute to the page\'s actual language.');
+
+  // hreflang presence + self reference
+  if(!tData.hreflang.length) add('warning','hreflang',`No hreflang alternate tags. Search engines won't know this is the ${lang.label} version of an English page.`,'Add reciprocal hreflang link tags across all language versions.');
+  else {
+    const codes = tData.hreflang.map(h=>h.lang);
+    const wantCode = (lang.gcode||lang.dir||'').toLowerCase();
+    const hasSelf = codes.some(c => c === wantCode || c.split('-')[0] === want);
+    if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.');
+  }
+
+  // noindex
+  if(tData.noindex) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
+
+  // canonical
+  if(tData.canonical && refData && refData.canonical && tData.canonical === refData.canonical && lang.dir){
+    add('critical','canonical',`Canonical URL points to the English page (${tData.canonical}). This tells search engines to ignore the ${lang.label} version.`,'Set the canonical to this page\'s own URL.');
+  } else if(tData.canonical && lang.dir && !tData.canonical.includes('/'+lang.dir)){
+    add('warning','canonical',`Canonical URL (${tData.canonical}) doesn't include the ${lang.dir} path — verify it points to this translation, not English.`,'Point the canonical at the translated URL.');
+  }
+
+  // untranslated metadata
+  if(refData){
+    if(tData.title && refData.title && tData.title === refData.title) add('warning','metadata','The page title is identical to English — it may not be translated.','Translate the <title> for this language.', srcSnippet(tData.rawHtml, parseDoc(tData.rawHtml)?.querySelector('title')));
+    if(tData.metaDesc && refData.metaDesc && tData.metaDesc === refData.metaDesc) add('warning','metadata','The meta description is identical to English — it may not be translated.','Translate the meta description.');
+  }
+  if(!tData.title) add('critical','metadata','Missing page <title>.','Add a translated <title>.');
+  else if(tData.titleLen > 65) add('info','metadata',`Title is ${tData.titleLen} characters — may be truncated in search beyond ~60.`,'Shorten the title.');
+  if(!tData.metaDesc) add('info','metadata','No meta description.','Add a translated meta description (~150 chars).');
+  else if(tData.metaDescLen > 165) add('info','metadata',`Meta description is ${tData.metaDescLen} characters — may be truncated beyond ~160.`,'Trim the meta description.');
+
+  // untranslated body text
+  if(lang.dir && isLikelyEnglish(tData.textContent)) add('warning','untranslated',`Body text reads as mostly English on a ${lang.label} page — sections may be untranslated.`,'Review the page for English content that should be translated.');
+
+  // schema parity vs English
+  if(refData){
+    const refS = refData.schemaTypes||[], tS = tData.schemaTypes||[];
+    if(refS.length && !tS.length) add('warning','structured data',`English has structured data (${refS.slice(0,4).join(', ')}) but this translation has none.`,'Mirror the schema.org markup on the translated page.');
+    else {
+      const missing = refS.filter(t => !tS.includes(t));
+      if(missing.length) add('info','structured data',`Translation is missing schema types present on English: ${missing.slice(0,4).join(', ')}.`,'Add the missing structured-data types.');
+    }
+  }
+
+  // heading hierarchy
+  if(tData.h1Count === 0) add('warning','headings','No H1 heading on the page.','Add a single, descriptive H1.');
+  else if(tData.h1Count > 1) add('info','headings',`${tData.h1Count} H1 headings — there should usually be one.`,'Use a single H1 and demote the rest.');
+  if(tData.headingSkip) add('info','headings','Heading levels skip (e.g. H2 → H4), which hurts structure and accessibility.','Use sequential heading levels.');
+
+  // word-count parity
+  if(refData && refData.words > 120 && tData.words < refData.words * 0.5){
+    add('warning','content volume',`This page has ${tData.words} words vs ${refData.words} on English (${Math.round(tData.words/Math.max(refData.words,1)*100)}%). Content may be missing.`,'Compare against English for dropped sections.');
+  }
+
+  // placeholders
+  if(tData.placeholders.length) add('warning','placeholder text',`Placeholder/boilerplate text found: ${tData.placeholders.join(', ')}.`,'Replace placeholder text with real translated content.');
+
   return issues;
 }
 function findDuplicateIds(doc){
@@ -1211,6 +1620,21 @@ async function analyzeTranslation(refData, transData, refLabel, transLabel){
 /* ----------------------------- orchestration ----------------------------- */
 let auditState = null;
 
+function flagPassphrase(msg){
+  const el = document.getElementById('pass');
+  const err = document.getElementById('passError');
+  if(err){ err.textContent = msg; err.style.display = 'block'; }
+  if(el){
+    el.classList.add('input-error');
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+    setTimeout(() => el.focus(), 300);
+    el.addEventListener('input', () => {
+      el.classList.remove('input-error');
+      if(err) err.style.display = 'none';
+    }, { once:true });
+  }
+}
+
 async function runAudit(){
   if(!WORKER_URL || WORKER_URL.includes('your-worker')){
     setProgress('Set WORKER_URL in the config block at the top of this file before running.', true); return;
@@ -1219,6 +1643,18 @@ async function runAudit(){
   const site = SITE_URL;
   const activePages = getAuditPages();
   if(!activePages.length){ setProgress('Discover pages or add at least one page.', true); return; }
+
+  // passphrase validation — empty, then verify the worker accepts it
+  const passEl = document.getElementById('pass');
+  const key = ((passEl && passEl.value) || WORKER_KEY || '').trim();
+  if(!key){ flagPassphrase('Enter your access passphrase before running the audit.'); return; }
+  setProgress('Checking access…');
+  const pf = await fetchPage(SITE_URL);
+  if(pf.status === 403 && /passphrase|forbidden/i.test(pf.text || '')){
+    flagPassphrase('The worker rejected this passphrase. Check that it matches the worker’s AUDIT_KEY.');
+    setProgress('');
+    return;
+  }
 
   const refLang = langs.find(l=>l.ref);
   const transLangs = langs.filter(l=>!l.ref);
@@ -1272,12 +1708,16 @@ async function runAudit(){
 
       // structural parity vs reference: regions first, then counts
       if(refData){
-        const regionIssues = regionDiff(refData.regions, tData.regions);
+        const regionIssues = regionDiff(refData.regions, tData.regions, parseDoc(tData.rawHtml), tData.rawHtml);
         const missingMajor = regionIssues.some(i => i.severity === 'critical');
         const countIssues = structuralDiff(refData, tData, missingMajor);
         block.parity = [...regionIssues, ...countIssues];
         block.parity.forEach(i => bump(auditState, i.severity));
       }
+
+      // content-quality checks (SEO, metadata, freshness, coverage signals)
+      block.content = contentChecks(refData, tData, tl, pg);
+      block.content.forEach(i => bump(auditState, i.severity));
 
       // translation analysis — Google drift (Pattern A) and/or Claude
       const transOn = document.getElementById('transToggle') && document.getElementById('transToggle').checked;
@@ -1320,20 +1760,22 @@ function bump(s, sev){ if(sev==='critical') s.crit++; else if(sev==='warning') s
 
 async function technicalPass(data, label, conc, state){
   const tech = { code: [], links: [] };
+  const doc = parseDoc(data.rawHtml);
+  const firstEmptyLink = doc ? [...doc.querySelectorAll('a')].find(a => { const h=a.getAttribute('href'); return !h || h==='#' || h.trim()===''; }) : null;
+  const pushCode = (sev, text, el) => tech.code.push({ sev, text, snippet: el ? srcSnippet(data.rawHtml, el) : '' });
   // code-level issues
-  if(data.emptyLinks) tech.code.push({ sev:'warning', text: data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).' });
-  if(data.missingAlt) tech.code.push({ sev:'warning', text: data.missingAlt + ' image(s) without alt text.' });
-  if(data.duplicateIds.length) tech.code.push({ sev:'warning', text: 'Duplicate id attribute(s): ' + data.duplicateIds.slice(0,8).join(', ') + (data.duplicateIds.length>8?'…':'') });
-  if(!data.title) tech.code.push({ sev:'critical', text: 'Missing <title>.' });
-  if(!data.metaDesc) tech.code.push({ sev:'info', text: 'No meta description.' });
-  if(!data.htmlLang) tech.code.push({ sev:'warning', text: 'Missing lang attribute on <html>.' });
+  if(data.emptyLinks) pushCode('warning', data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).', firstEmptyLink);
+  if(data.missingAlt) pushCode('warning', data.missingAlt + ' image(s) without alt text.', doc && doc.querySelector('img:not([alt])'));
+  if(data.duplicateIds.length) pushCode('warning', 'Duplicate id attribute(s): ' + data.duplicateIds.slice(0,8).join(', ') + (data.duplicateIds.length>8?'…':''), doc && doc.getElementById(data.duplicateIds[0]));
+  if(!data.title) pushCode('critical', 'Missing <title>.', null);
+  if(!data.metaDesc) pushCode('info', 'No meta description.', null);
+  if(!data.htmlLang) pushCode('warning', 'Missing lang attribute on <html>.', null);
   tech.code.forEach(c => bump(state, c.sev));
 
   // link verification — report only genuinely broken links; ignore auth/blocked (401/403/429)
   const broken = [];
   if(data.links.length){
     const checked = await pool(data.links, checkResource, conc);
-    const doc = parseDoc(data.rawHtml);
     checked.forEach(c => {
       if(c.ok) return;
       if(c.status === 401 || c.status === 403 || c.status === 429 || c.blocked) return; // responded but refused us — ignore
@@ -1387,6 +1829,7 @@ function renderResult(result, refLang){
     if(b.error) c++;
     if(b.tech){ b.tech.code.forEach(x=>tally(x.sev)); broken += b.tech.links.length; }
     (b.parity||[]).forEach(x=>tally(x.severity));
+    (b.content||[]).forEach(x=>tally(x.severity));
     (b.ai && b.ai.issues || []).forEach(x=>tally(x.severity));
   });
 
@@ -1460,6 +1903,14 @@ function renderResult(result, refLang){
       html += `<div class="clean">All major sections present and element counts match English.</div>`;
     }
 
+    // content & SEO quality
+    html += `<div class="section-label">Content &amp; SEO</div>`;
+    if(b.content && b.content.length){
+      b.content.forEach(is => html += renderIssue(is));
+    } else {
+      html += `<div class="clean">No metadata, hreflang, indexing, or content-quality issues found.</div>`;
+    }
+
     // technical
     html += renderTech(b.tech);
     html += `</div>`;
@@ -1474,7 +1925,7 @@ function renderTech(tech){
   if(!tech) return '';
   let html = `<div class="section-label">Code &amp; rendering</div>`;
   if(tech.code.length){
-    tech.code.forEach(c => html += renderIssue({ category:'code', severity:c.sev, explanation:c.text }));
+    tech.code.forEach(c => html += renderIssue({ category:'code', severity:c.sev, explanation:c.text, snippet:c.snippet }));
   } else {
     html += `<div class="clean">No code-level issues detected.</div>`;
   }
