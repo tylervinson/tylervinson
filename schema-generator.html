@@ -20,60 +20,28 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 80px 40px;
+            padding: 2rem;
         }
 
         header {
             background: #ffffff;
-            padding: 0;
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .tab-nav {
-            display: flex;
-            gap: 0;
+            padding: 2rem;
             border-bottom: 1px solid #e0e0e0;
             margin-bottom: 2rem;
-            margin-top: 2rem;
-        }
-
-        .tab-nav-link {
-            padding: 12px 20px;
-            text-decoration: none;
-            color: #999;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid transparent;
-            transition: color 0.2s;
-        }
-
-        .tab-nav-link:hover {
-            color: #666;
-        }
-
-        .tab-nav-link.active {
-            color: #1a1a1a;
-            border-bottom-color: #1a1a1a;
         }
 
         h1 {
-            font-size: 56px;
-            font-weight: 600;
-            letter-spacing: -1.5px;
-            margin-bottom: 12px;
-            color: #000;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
         }
 
         .subtitle {
             color: #666;
-            font-size: 18px;
-            font-weight: 400;
-            margin-bottom: 32px;
+            font-size: 0.95rem;
         }
 
         .upload-section {
@@ -416,16 +384,27 @@
     </style>
 </head>
 <body>
+    <header>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; gap: 2rem;">
+            <div>
+                <h1>JSON-LD Schema Generator</h1>
+                <p class="subtitle">Upload URLs and automatically scrape page content to generate comprehensive schemas</p>
+            </div>
+            <div style="display: flex; gap: 1.5rem; align-items: center;">
+                <button id="passphraseBtn" onclick="showPassphraseModal()" style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1a1a1a;" title="Enter proxy passphrase">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+                <button id="browseSchemasbtn" onclick="showBrowseSchemas()" style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1a1a1a;" title="Browse Schemas">
+                    <i class="fa-regular fa-folder-open"></i>
+                </button>
+                <button id="githubSettingsBtn" onclick="showGitHubConfigModal()" style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1a1a1a;" title="GitHub Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>JSON-LD Schema Generator</h1>
-            <p class="subtitle">Upload URLs and automatically scrape page content to generate comprehensive schemas</p>
-            <nav class="tab-nav">
-                <a href="schema-generator-landing.html" class="tab-nav-link">Generator Overview</a>
-                <a href="schema-generator.html" class="tab-nav-link active">Schema Details</a>
-                <a href="schema-specs.html" class="tab-nav-link">Technical Specs</a>
-            </nav>
-        </header>
         <div class="tabs" data-active="0">
             <button class="tab-btn active" onclick="switchTab('spreadsheet', 0)">Spreadsheet</button>
             <button class="tab-btn" onclick="switchTab('single', 1)">Single URL</button>
@@ -530,6 +509,85 @@
             return publicGitHubConfig;
         }
 
+        // Show passphrase modal for the CORS proxy
+        function showPassphraseModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem;';
+
+            const current = getProxyPassphrase();
+
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = 'background: white; max-width: 480px; width: 100%; padding: 2rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;';
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0;">
+                    <h2 style="margin: 0; font-weight: 300; font-size: 1.5rem;">Proxy Passphrase</h2>
+                    <button onclick="this.closest('.modal-overlay').remove()" style="background: transparent; border: none; cursor: pointer; padding: 0; font-size: 1.5rem; color: #1a1a1a; display: flex; align-items: center;" title="Close" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                    Enter the passphrase for the CORS proxy. It is kept only for this browser session and is never saved to the page or to disk.
+                </p>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 400; font-size: 0.9rem;">Passphrase</label>
+                    <input type="password" id="passphraseInput" value="${escapeHtml(current)}" placeholder="Enter passphrase" style="width: 100%; padding: 0.75rem; border: 1px solid #e0e0e0; font-family: inherit; font-size: 1rem;">
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button id="savePassphraseBtn" style="padding: 0.75rem 2rem; background: #1a1a1a; color: white; border: none; cursor: pointer; font-family: inherit; font-size: 1rem;">Save</button>
+                    ${current ? '<button id="clearPassphraseBtn" style="padding: 0.75rem 2rem; background: transparent; color: #1a1a1a; border: 1px solid #1a1a1a; cursor: pointer; font-family: inherit; font-size: 1rem;">Clear</button>' : ''}
+                </div>
+            `;
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+
+            const input = document.getElementById('passphraseInput');
+            input.focus();
+
+            const save = () => {
+                const value = input.value.trim();
+                if (value) {
+                    sessionStorage.setItem('proxy_passphrase', value);
+                } else {
+                    sessionStorage.removeItem('proxy_passphrase');
+                }
+                updatePassphraseButtonState();
+                modal.remove();
+            };
+
+            document.getElementById('savePassphraseBtn').addEventListener('click', save);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') save();
+            });
+
+            const clearBtn = document.getElementById('clearPassphraseBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    sessionStorage.removeItem('proxy_passphrase');
+                    updatePassphraseButtonState();
+                    modal.remove();
+                });
+            }
+        }
+
+        // Reflect whether a passphrase is set on the key icon
+        function updatePassphraseButtonState() {
+            const btn = document.getElementById('passphraseBtn');
+            if (!btn) return;
+            if (getProxyPassphrase()) {
+                btn.style.color = '#2e7d32';
+                btn.title = 'Proxy passphrase set (click to change)';
+            } else {
+                btn.style.color = '#1a1a1a';
+                btn.title = 'Enter proxy passphrase';
+            }
+        }
+
         // Show GitHub config modal on first use
         function showGitHubConfigModal() {
             const modal = document.createElement('div');
@@ -600,7 +658,6 @@
 
         function updateSettingsButtonVisibility() {
             const settingsBtn = document.getElementById('githubSettingsBtn');
-            if (!settingsBtn) return; // Button doesn't exist in this layout
             if (hasWriteAccess()) {
                 // User has configured GitHub - hide the settings button
                 settingsBtn.classList.add('hidden');
@@ -614,6 +671,7 @@
         // Check and hide button on page load
         window.addEventListener('DOMContentLoaded', () => {
             updateSettingsButtonVisibility();
+            updatePassphraseButtonState();
             disableAccordion(); // Start with accordion disabled
         });
 
@@ -1203,6 +1261,13 @@
         generateBtn.addEventListener('click', async () => {
             if (uploadedData.length === 0) return;
 
+            // Make sure the proxy passphrase is set before doing any scraping
+            if (!getProxyPassphrase()) {
+                alert('Please enter the proxy passphrase first (click the key icon in the top-right).');
+                showPassphraseModal();
+                return;
+            }
+
             // Collapse upload section
             uploadSection.classList.add('collapsed');
             
@@ -1261,100 +1326,82 @@
             generateBtn.disabled = false;
         });
 
+        // CORS proxy configuration (passphrase is entered by the user, not stored in markup)
+        const CORS_PROXY = {
+            url: 'https://schema-cors-proxy.bcbs-of-az.workers.dev/'
+        };
+
+        function getProxyPassphrase() {
+            return sessionStorage.getItem('proxy_passphrase') || '';
+        }
+
         async function scrapePage(url) {
-            // List of CORS proxies to try - Cloudflare Worker first (most reliable)
-            const proxies = [
-                { name: 'CloudflareWorker', url: `https://schema-cors-proxy.bcbs-of-az.workers.dev/?url=${encodeURIComponent(url)}` },
-                { name: 'Direct', url: url }, // Try direct in case CORS is allowed
-                { name: 'AllOrigins', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, parseResponse: (data) => JSON.parse(data).contents },
-                { name: 'CorsAnywhere', url: `https://cors-anywhere.herokuapp.com/${url}` },
-                { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}` },
-                { name: 'CorsProxy', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
-                { name: 'ProxyThis', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` }
-            ];
-            
-            let lastError = null;
-            
-            // Try each proxy
-            for (let i = 0; i < proxies.length; i++) {
-                const proxy = proxies[i];
-                try {
-                    console.log(`Attempting to fetch via: ${proxy.name}`);
-                    
-                    // Show clock icon and update text when trying proxies
-                    const progressClock = document.getElementById('progressClock');
-                    const statusTextContent = document.getElementById('statusTextContent');
-                    if (statusTextContent && i > 0) {
-                        // Only show clock on retry attempts
-                        if (progressClock) progressClock.style.display = 'inline-block';
-                        statusTextContent.textContent = `Fetching ${url}...`;
-                    }
-                    
-                    const response = await fetch(proxy.url, {
-                        method: 'GET',
-                        headers: proxy.name === 'Direct' ? {
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                        } : {}
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    let html = await response.text();
-                    
-                    // Use custom parser if provided (e.g., for AllOrigins JSON response)
-                    if (proxy.parseResponse) {
-                        try {
-                            html = proxy.parseResponse(html);
-                        } catch (parseError) {
-                            throw new Error(`Failed to parse proxy response: ${parseError.message}`);
-                        }
-                    }
-                    
-                    // Validate that we got actual HTML
-                    if (!html || html.trim().length < 100) {
-                        throw new Error('Response too short or empty');
-                    }
-                    
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    
-                    // Check if parsing was successful
-                    if (!doc || !doc.body) {
-                        throw new Error('Failed to parse HTML');
-                    }
-                    
-                    console.log(`✓ Successfully fetched via: ${proxy.name}`);
-                    
-                    // Hide clock on success
-                    if (progressClock) progressClock.style.display = 'none';
-                    
-                    return {
-                        url: url,
-                        doc: doc,
-                        html: html
-                    };
-                } catch (error) {
-                    console.warn(`✗ Failed with ${proxy.name}: ${error.message}`);
-                    lastError = error;
-                    // Continue to next proxy
-                    
-                    // Add small delay between proxy attempts to avoid hammering
-                    if (i < proxies.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                }
+            const progressClock = document.getElementById('progressClock');
+            const statusTextContent = document.getElementById('statusTextContent');
+
+            const passphrase = getProxyPassphrase();
+            if (!passphrase) {
+                throw new Error('No proxy passphrase set. Click the key icon in the header to enter the passphrase before generating schemas.');
             }
-            
-            // All proxies failed - provide helpful error message
-            const errorMsg = `Unable to fetch ${url}. All fetch methods failed. This may be due to:\n` +
-                           `• Site blocking automated requests\n` +
-                           `• CORS proxy rate limits or downtime\n` +
-                           `• Network connectivity issues\n\n` +
-                           `Suggestion: Try again in a few minutes or use a different URL.\n\n` +
-                           `Last error: ${lastError.message}`;
-            throw new Error(errorMsg);
+
+            try {
+                console.log(`Fetching via CORS proxy: ${url}`);
+
+                if (progressClock) progressClock.style.display = 'inline-block';
+                if (statusTextContent) statusTextContent.textContent = `Fetching ${url}...`;
+
+                const proxyUrl = `${CORS_PROXY.url}?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-Audit-Key': passphrase
+                    }
+                });
+
+                if (!response.ok) {
+                    // Surface the worker's plain-text reason (e.g. host not allowed, bad passphrase)
+                    let detail = '';
+                    try {
+                        detail = await response.text();
+                    } catch (e) { /* ignore */ }
+
+                    if (response.status === 403) {
+                        throw new Error(detail || 'Forbidden — check the passphrase or that the URL host is allowed by the proxy.');
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}${detail ? ' — ' + detail : ''}`);
+                }
+
+                const html = await response.text();
+
+                if (!html || html.trim().length < 100) {
+                    throw new Error('Response too short or empty');
+                }
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                if (!doc || !doc.body) {
+                    throw new Error('Failed to parse HTML');
+                }
+
+                console.log(`✓ Successfully fetched: ${url}`);
+                if (progressClock) progressClock.style.display = 'none';
+
+                return {
+                    url: url,
+                    doc: doc,
+                    html: html
+                };
+            } catch (error) {
+                if (progressClock) progressClock.style.display = 'none';
+                console.error(`✗ Failed to fetch ${url}: ${error.message}`);
+
+                const errorMsg = `Unable to fetch ${url}.\n\n` +
+                               `${error.message}\n\n` +
+                               `Note: This proxy only allows approved hosts (azblue.com). ` +
+                               `Make sure the URL is on an allowed domain.`;
+                throw new Error(errorMsg);
+            }
         }
 
         function extractSiteConfig(pageData) {
