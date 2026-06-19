@@ -368,7 +368,9 @@
       <button class="ghost" onclick="exportCsv()">Export issues (CSV)</button>
       <button class="ghost" onclick="exportSnapshot()">Save snapshot</button>
       <button class="ghost" onclick="document.getElementById('baselineFile').click()">Load baseline</button>
+      <button class="ghost" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
       <input type="file" id="baselineFile" accept="application/json,.json" style="display:none" onchange="loadBaseline(this.files && this.files[0]); this.value='';">
+      <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
     </div>
     <div class="score" id="reportStatus" style="margin:-.75rem 0 1.25rem;"></div>
     <div class="summary-grid" id="summaryGrid"></div>
@@ -391,6 +393,9 @@ const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
 const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (via your worker)
+// Sitecore content root for the "Items last updated" export — used to turn item
+// paths into clean relative paths in the stale-content view.
+const SITECORE_ROOT = '/sitecore/content/bcbs az/azblue/home';
 /* ===================================================================== */
 
 /* ----------------------------- languages ----------------------------- */
@@ -839,16 +844,54 @@ function trendVsBaseline(currentKeys){
            wasCounts: baseline.counts };
 }
 
+/* ---- Sitecore content dates (from the "Items last updated" export) ---- */
+let contentDates = null; // array of { name, path, updated, updatedBy, created, createdBy, isComponent }
+function parseScDate(s){
+  if(!s) return '';
+  const d = new Date(s);                 // handles "6/1/2026 10:43:28 PM"
+  return isNaN(d.getTime()) ? '' : d.toISOString();
+}
+function scRelPath(fullPath){
+  let p = (fullPath||'').toLowerCase().replace(/\\/g,'/');
+  if(p.startsWith(SITECORE_ROOT)) p = p.slice(SITECORE_ROOT.length);
+  return p.replace(/^\/+|\/+$/g,'');
+}
+function loadContentDates(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = JSON.parse(e.target.result);
+      if(!Array.isArray(rows) || !rows.length || !('Updated' in rows[0]) || !('Path' in rows[0])) throw new Error('shape');
+      contentDates = rows.map(r => {
+        const rel = scRelPath(r.Path);
+        return {
+          name: r.Name || '',
+          path: rel || '(home)',
+          updated: parseScDate(r.Updated),
+          updatedBy: (r['Updated by']||'').replace(/^sitecore\\/i,''),
+          created: parseScDate(r.Created),
+          createdBy: (r['Created by']||'').replace(/^sitecore\\/i,''),
+          isComponent: /(^|\/)(page datasources|datasources)(\/|$)/.test(rel)
+        };
+      });
+      const pages = contentDates.filter(r => !r.isComponent).length;
+      setReportStatus(`Loaded ${contentDates.length} Sitecore item(s) — ${pages} page(s) with real publish dates. They’ll drive the stale-content view in the dashboard.`);
+    } catch(err){
+      setReportStatus('That isn’t a valid "Items last updated" JSON export.', true);
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ---- two-view dashboard (Authors + Leaders) ---- */
 function buildDashboardData(){
   const findings = flattenFindings();
   const missing = {};
   (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
-  const freshness = (auditState.results||[])
-    .map(r => ({ path: r.page.path || '(home)', lastmod: r.page.lastmod || '' }))
-    .filter(x => x.lastmod)
-    .sort((a,b) => a.lastmod < b.lastmod ? -1 : 1)
-    .slice(0, 25);
+  const pages = (auditState.results||[]).map(r => ({
+    path: r.page.path || '(home)', name: r.page.name, lastmod: r.page.lastmod || ''
+  }));
   return {
     meta: {
       host: reportHost(),
@@ -857,10 +900,11 @@ function buildDashboardData(){
       translationCheck: (document.getElementById('transToggle') && document.getElementById('transToggle').checked)
         ? ((document.getElementById('engine')||{}).value || 'on') : 'off'
     },
+    now: Date.now(),
     summary: { critical:auditState.crit, warning:auditState.warn, info:auditState.info, broken:auditState.broken, pages:auditState.pages },
     findings,
     rollups: {
-      byLang: countBy(findings.filter(f=>f.severity!=='info' || true), 'lang'),
+      byLang: countBy(findings, 'lang'),
       byCategory: countBy(findings, 'category'),
       byDir: countBy(findings, 'dir'),
       bySeverity: countBy(findings, 'severity')
@@ -870,7 +914,8 @@ function buildDashboardData(){
       audited: auditState.pages,
       missing: Object.keys(missing).map(k => ({ lang:k, count:missing[k] }))
     },
-    freshness,
+    pages,
+    contentDates: (contentDates ? contentDates.filter(r => !r.isComponent) : null),
     trend: trendVsBaseline(findings.map(f => f.key))
   };
 }
@@ -1022,11 +1067,8 @@ function dashboardApp(){
   var covMissing = cov.missing.length
     ? cov.missing.map(function(m){ return '<div class="barrow"><span style="min-width:130px">' + esc(m.lang) + '</span><span class="crit">' + m.count + ' page(s) missing / errored</span></div>'; }).join('')
     : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
-  var fresh = D.freshness.length
-    ? '<table><thead><tr><th>Page</th><th>Last modified</th></tr></thead><tbody>'
-      + D.freshness.map(function(x){ return '<tr><td>/' + esc(x.path) + '</td><td>' + esc((x.lastmod||'').slice(0,10)) + '</td></tr>'; }).join('')
-      + '</tbody></table>'
-    : '<p class="empty">No last-modified dates were available from the sitemap.</p>';
+  var fresh = D.freshness && D.freshness.length
+    ? '' : '';
 
   lv.innerHTML =
     trendHtml
@@ -1037,12 +1079,62 @@ function dashboardApp(){
       + statCard(D.summary.broken, 'Broken links', D.summary.broken?'crit':'')
       + statCard(D.findings.length, 'Total findings', '')
       + '</div></div>'
+    + '<div class="card"><p class="label">Stale content</p>'
+      + '<div class="filters"><label class="muted" style="align-self:center">Flag pages not updated in over</label>'
+      + '<select id="stale-threshold"><option value="3">3 months</option><option value="6">6 months</option>'
+      + '<option value="12" selected>12 months</option><option value="18">18 months</option><option value="24">24 months</option></select></div>'
+      + '<div id="stale-body"></div></div>'
     + '<div class="card"><p class="label">Findings by language</p>' + barTable(D.rollups.byLang) + '</div>'
     + '<div class="card"><p class="label">Findings by category</p>' + barTable(D.rollups.byCategory) + '</div>'
     + '<div class="card"><p class="label">Findings by section / directory</p>' + barTable(D.rollups.byDir) + '</div>'
     + '<div class="card"><p class="label">Translation coverage</p>'
-      + '<p class="sub">' + cov.audited + ' page(s) audited of ' + cov.discovered + ' discovered in the sitemap.</p>' + covMissing + '</div>'
-    + '<div class="card"><p class="label">Oldest content (freshness)</p>' + fresh + '</div>';
+      + '<p class="sub">' + cov.audited + ' page(s) audited of ' + cov.discovered + ' discovered in the sitemap.</p>' + covMissing + '</div>';
+
+  function parseDate(s){
+    if(!s) return null;
+    var m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/.exec(s);   // Sitecore format
+    if(m){ return new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6])); }
+    var t = Date.parse(s); return isNaN(t) ? null : new Date(t);       // ISO / sitemap format
+  }
+  function fmtAge(days){
+    if(days < 60) return days + 'd';
+    var mo = Math.floor(days / 30.44);
+    if(mo < 24) return mo + 'mo';
+    return (days / 365).toFixed(1) + 'y';
+  }
+  function renderStale(){
+    var months = +document.getElementById('stale-threshold').value;
+    var now = D.now || Date.now();
+    var cutoff = now - months * 30.44 * 86400000;
+    var useSc = D.contentDates && D.contentDates.length;
+    var src = useSc
+      ? D.contentDates.map(function(r){ return { path:r.path, by:r.updatedBy, date:parseDate(r.updated) }; })
+      : (D.pages || []).map(function(p){ return { path:p.path, by:'', date:parseDate(p.lastmod) }; });
+    var dated = src.filter(function(r){ return r.date; }).sort(function(a,b){ return a.date - b.date; });
+    var undated = src.filter(function(r){ return !r.date; });
+    var staleCount = dated.filter(function(r){ return r.date.getTime() < cutoff; }).length;
+    var html = '<p class="sub">' + (useSc ? 'Real publish dates from Sitecore. ' : '')
+      + staleCount + ' of ' + dated.length + ' page(s) not updated in over ' + months + ' month(s)'
+      + (undated.length ? ' · ' + undated.length + ' with no date' : '') + '.</p>';
+    if(!dated.length){
+      html += '<p class="empty">No usable dates. Load the Sitecore "Items last updated" export in the audit tool to populate this with real publish dates.</p>';
+    } else {
+      html += '<table><thead><tr><th>Page</th>' + (useSc ? '<th>Updated by</th>' : '') + '<th>Last updated</th><th class="num">Age</th><th>Status</th></tr></thead><tbody>';
+      dated.forEach(function(r){
+        var ageDays = Math.floor((now - r.date.getTime()) / 86400000);
+        var stale = r.date.getTime() < cutoff;
+        html += '<tr><td>/' + esc(r.path) + '</td>'
+          + (useSc ? '<td class="muted">' + esc(r.by||'—') + '</td>' : '')
+          + '<td>' + esc(r.date.toISOString().slice(0,10)) + '</td>'
+          + '<td class="num">' + fmtAge(ageDays) + '</td>'
+          + '<td>' + (stale ? '<span class="crit">stale</span>' : '<span class="ok">current</span>') + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    document.getElementById('stale-body').innerHTML = html;
+  }
+  document.getElementById('stale-threshold').onchange = renderStale;
+  renderStale();
 }
 
 function collectRows(){
