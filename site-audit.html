@@ -385,17 +385,16 @@
     <div class="summary-grid" id="summaryGrid"></div>
   </section>
 
-  <!-- VIEW TABS: Results (detailed) · Authors · Leaders -->
+  <!-- VIEW TABS: Author · Leadership -->
   <div id="viewTabs" class="viewtabs" style="display:none;">
-    <button class="vtab active" data-view="results" onclick="showView('results')">Results</button>
-    <button class="vtab" data-view="authors" onclick="showView('authors')">Author view</button>
+    <button class="vtab active" data-view="authors" onclick="showView('authors')">Author view</button>
     <button class="vtab" data-view="leaders" onclick="showView('leaders')">Leadership view</button>
     <span class="spacer" style="flex:1;"></span>
-    <span class="score" style="align-self:center;">Author &amp; leadership views also export via “Save dashboard”.</span>
+    <span class="score" style="align-self:center;">Both views also export via “Save dashboard”.</span>
   </div>
 
-  <!-- RESULTS (detailed, native) -->
-  <div id="panel-results"><div id="results"></div></div>
+  <!-- detailed per-page render still runs into here (hidden; feeds nothing visible) -->
+  <div id="panel-results" style="display:none;"><div id="results"></div></div>
 
   <!-- AUTHORS / LEADERS (embedded dashboard, isolated) -->
   <iframe id="dashFrame" class="dashframe" title="Dashboard view" style="display:none;"></iframe>
@@ -795,13 +794,22 @@ function flattenFindings(){
   (auditState.results||[]).forEach(r => {
     const page = r.page.name, path = r.page.path || '';
     const dir = (dirOf(path) || '(top level)');
-    const base = (lang, section, cat, sev, detail, suggestion, snippet) =>
-      out.push({ page, path, dir, lang, section, category: cat, severity: sev, detail: detail||'', suggestion: suggestion||'', snippet: snippet||'' });
-    const fromIssue = (lang, section, is) => base(lang, section, is.category||section.toLowerCase(), is.severity||'info', is.explanation||'', is.suggestion||'', is.snippet||'');
+    const base = (lang, section, cat, sev, detail, suggestion, snippet, items, evidenceLabel) =>
+      out.push({ page, path, dir, lang, section, category: cat, severity: sev, detail: detail||'', suggestion: suggestion||'', snippet: snippet||'', items: items||null, evidenceLabel: evidenceLabel||'' });
+    const fromIssue = (lang, section, is) => {
+      let items = is.items || null, label = is.evidenceLabel || '';
+      if(!items && (is.reference || is.translation)){
+        items = [];
+        if(is.reference) items.push('Expected (source): ' + is.reference);
+        if(is.translation) items.push('On the page: ' + is.translation);
+        label = 'Compared text';
+      }
+      base(lang, section, is.category||section.toLowerCase(), is.severity||'info', is.explanation||'', is.suggestion||'', is.snippet||'', items, label);
+    };
 
     if(r.refError) base('English (reference)','Fetch','load error','critical', r.refError);
     if(r.refTech){
-      r.refTech.code.forEach(c => base('English (reference)','Code','code', c.sev, c.text, '', c.snippet));
+      r.refTech.code.forEach(c => base('English (reference)','Code','code', c.sev, c.text, '', c.snippet, c.items, c.evidenceLabel));
       r.refTech.links.forEach(l => base('English (reference)','Links','broken link','critical', l.url, '', l.snippet));
     }
     (r.languages||[]).forEach(b => {
@@ -812,7 +820,7 @@ function flattenFindings(){
       (b.parity||[]).forEach(is => fromIssue(lang,'Sections & parity', is));
       (b.content||[]).forEach(is => fromIssue(lang,'Content & SEO', is));
       if(b.tech){
-        b.tech.code.forEach(c => base(lang,'Code','code', c.sev, c.text, '', c.snippet));
+        b.tech.code.forEach(c => base(lang,'Code','code', c.sev, c.text, '', c.snippet, c.items, c.evidenceLabel));
         b.tech.links.forEach(l => base(lang,'Links','broken link','critical', l.url, '', l.snippet));
       }
     });
@@ -961,11 +969,10 @@ function ensureDashFrame(targetTab){
   }
 }
 function showView(v){
+  if(v === 'results') v = 'authors';
   document.querySelectorAll('#viewTabs .vtab').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  const showDash = (v === 'authors' || v === 'leaders');
-  document.getElementById('panel-results').style.display = showDash ? 'none' : 'block';
-  document.getElementById('dashFrame').style.display = showDash ? 'block' : 'none';
-  if(showDash) ensureDashFrame(v);
+  document.getElementById('dashFrame').style.display = 'block';
+  ensureDashFrame(v);
 }
 function buildDashboardHtml(){
   const data = buildDashboardData();
@@ -1014,6 +1021,10 @@ function dashboardCss(){
     '.trend{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center}.delta{font-size:1.9rem;font-weight:300}',
     '.empty{color:var(--muted);font-size:.88rem}',
     'details.drill{border-bottom:1px solid var(--border)}details.drill>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.7rem;padding:.55rem 0;font-size:.88rem}details.drill>summary::-webkit-details-marker{display:none}',
+    '.finding details.evidence{margin:.1rem .85rem .7rem}.finding details.evidence>summary{cursor:pointer;color:var(--accent);font-size:.72rem;list-style:none}.finding details.evidence>summary::-webkit-details-marker{display:none}',
+    'ul.evlist{list-style:none;margin:.4rem 0 0;padding:0;border:1px solid var(--border);border-radius:6px;background:var(--bg);max-height:320px;overflow:auto}',
+    'ul.evlist li{font-size:.78rem;padding:.35rem .6rem;border-bottom:1px solid var(--border);word-break:break-word;font-family:"SF Mono",Monaco,Consolas,monospace}ul.evlist li:last-child{border-bottom:none}',
+    'ul.evlist li.evhead{font-family:Inter,sans-serif;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:.66rem;background:var(--card-alt)}',
     'details.drill>summary:hover .drill-label{color:var(--accent)}.drill-label{min-width:170px}.drill-label .chev{color:var(--muted2);margin-right:.4rem;font-size:.7rem;display:inline-block;width:.7rem;transition:transform .2s}details.drill[open]>summary .chev{transform:rotate(90deg)}',
     '.bartrack{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;max-width:340px}.barfill{height:100%;background:var(--accent)}.drill-count{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}',
     '.drill-body{padding:.3rem 0 .9rem}',
@@ -1035,6 +1046,22 @@ function dashboardApp(){
   var chev = '<span class="chev">\u25B6</span>';
   var app = document.getElementById('app');
 
+  function evidenceBlock(f){
+    var out = '';
+    if(f.items && f.items.length){
+      var label = (f.evidenceLabel || 'items');
+      var rows = f.items.map(function(it){
+        var s = String(it);
+        if(/^—.*—$/.test(s)) return '<li class="evhead">' + esc(s.replace(/—/g,'').trim()) + '</li>';
+        return '<li>' + esc(s) + '</li>';
+      }).join('');
+      out += '<details class="evidence"><summary>\u25B8 ' + esc(label) + ' (' + f.items.length + ')</summary><ul class="evlist">' + rows + '</ul></details>';
+    }
+    if(f.snippet){
+      out += '<details class="evidence"><summary>\u25B8 show source</summary><pre class="src">' + f.snippet + '</pre></details>';
+    }
+    return out;
+  }
   function findingCard(f){
     return '<div class="finding s-' + f.severity + '"><div class="body">'
       + '<span class="cat">' + esc(f.lang) + ' \u00B7 ' + esc(f.category) + ' \u00B7 ' + f.severity + '</span>'
@@ -1042,7 +1069,7 @@ function dashboardApp(){
       + (f.suggestion ? '<div class="sugg">\u2192 ' + esc(f.suggestion) + '</div>' : '')
       + '<div class="path-mini">/' + esc(f.path) + '</div>'
       + '</div>'
-      + (f.snippet ? '<details><summary>\u25B8 show source</summary><pre class="src">' + f.snippet + '</pre></details>' : '')
+      + evidenceBlock(f)
       + '</div>';
   }
 
@@ -1597,14 +1624,14 @@ function isLikelyEnglish(text){
 }
 function contentChecks(refData, tData, lang, pg){
   const issues = [];
-  const add = (severity, category, explanation, suggestion, snippet) =>
-    issues.push({ severity, category, explanation, suggestion: suggestion||'', snippet: snippet||'' });
+  const add = (severity, category, explanation, suggestion, snippet, items, evidenceLabel) =>
+    issues.push({ severity, category, explanation, suggestion: suggestion||'', snippet: snippet||'', items: items||null, evidenceLabel: evidenceLabel||'' });
 
   // lang attribute correctness
   const want = (lang.gcode||lang.dir||'').toLowerCase().split('-')[0];
   const got = (tData.htmlLang||'').toLowerCase().split('-')[0];
   if(!tData.htmlLang) add('warning','lang attribute',`<html> has no lang attribute. It should declare ${lang.label} (e.g. lang="${lang.gcode||lang.dir}").`,'Set the lang attribute so browsers and search engines know the page language.');
-  else if(want && got && got !== want) add('warning','lang attribute',`<html lang="${tData.htmlLang}"> doesn't match the expected ${lang.label} ("${lang.gcode||lang.dir}").`,'Correct the lang attribute to the page\'s actual language.');
+  else if(want && got && got !== want) add('warning','lang attribute',`<html lang="${tData.htmlLang}"> doesn't match the expected ${lang.label} ("${lang.gcode||lang.dir}").`,'Correct the lang attribute to the page\'s actual language.', '', ['Found: lang="'+tData.htmlLang+'"', 'Expected: lang="'+(lang.gcode||lang.dir)+'"'], 'Language attribute');
 
   // hreflang presence + self reference
   if(!tData.hreflang.length) add('warning','hreflang',`No hreflang alternate tags. Search engines won't know this is the ${lang.label} version of an English page.`,'Add reciprocal hreflang link tags across all language versions.');
@@ -1612,7 +1639,7 @@ function contentChecks(refData, tData, lang, pg){
     const codes = tData.hreflang.map(h=>h.lang);
     const wantCode = (lang.gcode||lang.dir||'').toLowerCase();
     const hasSelf = codes.some(c => c === wantCode || c.split('-')[0] === want);
-    if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.');
+    if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.', '', codes.map(c=>c||'(empty)'), 'hreflang codes present');
   }
 
   // noindex
@@ -1620,38 +1647,41 @@ function contentChecks(refData, tData, lang, pg){
 
   // canonical
   if(tData.canonical && refData && refData.canonical && tData.canonical === refData.canonical && lang.dir){
-    add('critical','canonical',`Canonical URL points to the English page (${tData.canonical}). This tells search engines to ignore the ${lang.label} version.`,'Set the canonical to this page\'s own URL.');
+    add('critical','canonical',`Canonical URL points to the English page. This tells search engines to ignore the ${lang.label} version.`,'Set the canonical to this page\'s own URL.', '', [tData.canonical], 'Canonical URL');
   } else if(tData.canonical && lang.dir && !tData.canonical.includes('/'+lang.dir)){
-    add('warning','canonical',`Canonical URL (${tData.canonical}) doesn't include the ${lang.dir} path — verify it points to this translation, not English.`,'Point the canonical at the translated URL.');
+    add('warning','canonical',`Canonical URL doesn't include the ${lang.dir} path — verify it points to this translation, not English.`,'Point the canonical at the translated URL.', '', [tData.canonical], 'Canonical URL');
   }
 
   // untranslated metadata
   if(refData){
-    if(tData.title && refData.title && tData.title === refData.title) add('warning','metadata','The page title is identical to English — it may not be translated.','Translate the <title> for this language.', srcSnippet(tData.rawHtml, parseDoc(tData.rawHtml)?.querySelector('title')));
-    if(tData.metaDesc && refData.metaDesc && tData.metaDesc === refData.metaDesc) add('warning','metadata','The meta description is identical to English — it may not be translated.','Translate the meta description.');
+    if(tData.title && refData.title && tData.title === refData.title) add('warning','metadata','The page title is identical to English — it may not be translated.','Translate the <title> for this language.', '', [tData.title], 'Title (same on both)');
+    if(tData.metaDesc && refData.metaDesc && tData.metaDesc === refData.metaDesc) add('warning','metadata','The meta description is identical to English — it may not be translated.','Translate the meta description.', '', [tData.metaDesc], 'Meta description (same on both)');
   }
   if(!tData.title) add('critical','metadata','Missing page <title>.','Add a translated <title>.');
-  else if(tData.titleLen > 65) add('info','metadata',`Title is ${tData.titleLen} characters — may be truncated in search beyond ~60.`,'Shorten the title.');
+  else if(tData.titleLen > 65) add('info','metadata',`Title is ${tData.titleLen} characters — may be truncated in search beyond ~60.`,'Shorten the title.', '', [tData.title], 'Current title');
   if(!tData.metaDesc) add('info','metadata','No meta description.','Add a translated meta description (~150 chars).');
-  else if(tData.metaDescLen > 165) add('info','metadata',`Meta description is ${tData.metaDescLen} characters — may be truncated beyond ~160.`,'Trim the meta description.');
+  else if(tData.metaDescLen > 165) add('info','metadata',`Meta description is ${tData.metaDescLen} characters — may be truncated beyond ~160.`,'Trim the meta description.', '', [tData.metaDesc], 'Current meta description');
 
   // untranslated body text
-  if(lang.dir && isLikelyEnglish(tData.textContent)) add('warning','untranslated',`Body text reads as mostly English on a ${lang.label} page — sections may be untranslated.`,'Review the page for English content that should be translated.');
+  if(lang.dir && isLikelyEnglish(tData.textContent)){
+    const sample = (tData.textContent||'').slice(0, 400);
+    add('warning','untranslated',`Body text reads as mostly English on a ${lang.label} page — sections may be untranslated.`,'Review the page for English content that should be translated.', '', [sample + ((tData.textContent||'').length > 400 ? '…' : '')], 'English-looking text on this page');
+  }
 
   // schema parity vs English
   if(refData){
     const refS = refData.schemaTypes||[], tS = tData.schemaTypes||[];
-    if(refS.length && !tS.length) add('warning','structured data',`English has structured data (${refS.slice(0,4).join(', ')}) but this translation has none.`,'Mirror the schema.org markup on the translated page.');
+    if(refS.length && !tS.length) add('warning','structured data',`English has structured data but this translation has none.`,'Mirror the schema.org markup on the translated page.', '', refS, 'Schema types on English (missing here)');
     else {
       const missing = refS.filter(t => !tS.includes(t));
-      if(missing.length) add('info','structured data',`Translation is missing schema types present on English: ${missing.slice(0,4).join(', ')}.`,'Add the missing structured-data types.');
+      if(missing.length) add('info','structured data',`Translation is missing schema types present on English.`,'Add the missing structured-data types.', '', missing, 'Missing schema types');
     }
   }
 
   // heading hierarchy
   if(tData.h1Count === 0) add('warning','headings','No H1 heading on the page.','Add a single, descriptive H1.');
-  else if(tData.h1Count > 1) add('info','headings',`${tData.h1Count} H1 headings — there should usually be one.`,'Use a single H1 and demote the rest.');
-  if(tData.headingSkip) add('info','headings','Heading levels skip (e.g. H2 → H4), which hurts structure and accessibility.','Use sequential heading levels.');
+  else if(tData.h1Count > 1) add('info','headings',`${tData.h1Count} H1 headings — there should usually be one.`,'Use a single H1 and demote the rest.', '', (tData.headings||[]).filter(h=>h.level===1).map(h=>h.text), 'H1 headings on this page');
+  if(tData.headingSkip) add('info','headings','Heading levels skip (e.g. H2 → H4), which hurts structure and accessibility.','Use sequential heading levels.', '', (tData.headings||[]).map(h=>'H'+h.level+': '+h.text), 'Heading outline');
 
   // word-count parity
   if(refData && refData.words > 120 && tData.words < refData.words * 0.5){
@@ -1659,7 +1689,7 @@ function contentChecks(refData, tData, lang, pg){
   }
 
   // placeholders
-  if(tData.placeholders.length) add('warning','placeholder text',`Placeholder/boilerplate text found: ${tData.placeholders.join(', ')}.`,'Replace placeholder text with real translated content.');
+  if(tData.placeholders.length) add('warning','placeholder text',`Placeholder/boilerplate text found.`,'Replace placeholder text with real translated content.', '', tData.placeholders, 'Placeholder text found');
 
   return issues;
 }
@@ -1956,11 +1986,17 @@ async function technicalPass(data, label, conc, state){
   const tech = { code: [], links: [] };
   const doc = parseDoc(data.rawHtml);
   const firstEmptyLink = doc ? [...doc.querySelectorAll('a')].find(a => { const h=a.getAttribute('href'); return !h || h==='#' || h.trim()===''; }) : null;
-  const pushCode = (sev, text, el) => tech.code.push({ sev, text, snippet: el ? srcSnippet(data.rawHtml, el) : '' });
+  const pushCode = (sev, text, el, items, evidenceLabel) => tech.code.push({ sev, text, snippet: el ? srcSnippet(data.rawHtml, el) : '', items: items||null, evidenceLabel: evidenceLabel||'' });
   // code-level issues
-  if(data.emptyLinks) pushCode('warning', data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).', firstEmptyLink);
-  if(data.missingAlt) pushCode('warning', data.missingAlt + ' image(s) without alt text.', doc && doc.querySelector('img:not([alt])'));
-  if(data.duplicateIds.length) pushCode('warning', 'Duplicate id attribute(s): ' + data.duplicateIds.slice(0,8).join(', ') + (data.duplicateIds.length>8?'…':''), doc && doc.getElementById(data.duplicateIds[0]));
+  if(data.emptyLinks){
+    const empties = doc ? [...doc.querySelectorAll('a')].filter(a => { const h=a.getAttribute('href'); return !h || h==='#' || h.trim()===''; }).map(a => (clean(a.textContent) || '(empty link text)')) : null;
+    pushCode('warning', data.emptyLinks + ' empty or placeholder link(s) (href="#" or blank).', firstEmptyLink, empties, 'Empty links (by their text)');
+  }
+  if(data.missingAlt){
+    const noAlt = (data.images || []).filter(i => i.alt === null).map(i => imgName(i.src));
+    pushCode('warning', data.missingAlt + ' image(s) without alt text.', doc && doc.querySelector('img:not([alt])'), noAlt, 'Images missing alt text');
+  }
+  if(data.duplicateIds.length) pushCode('warning', data.duplicateIds.length + ' duplicate id attribute(s).', doc && doc.getElementById(data.duplicateIds[0]), data.duplicateIds, 'Duplicate ids');
   if(!data.title) pushCode('critical', 'Missing <title>.', null);
   if(!data.metaDesc) pushCode('info', 'No meta description.', null);
   if(!data.htmlLang) pushCode('warning', 'Missing lang attribute on <html>.', null);
@@ -1983,6 +2019,12 @@ async function technicalPass(data, label, conc, state){
   return tech;
 }
 
+function imgName(src){
+  if(!src) return '(no src)';
+  try { const u = new URL(src); src = u.pathname; } catch(e){}
+  const base = src.split('/').filter(Boolean).pop() || src;
+  return base.split('?')[0];
+}
 function structuralDiff(ref, trans, hasMissingRegion){
   const issues = [];
   const fields = [
@@ -1996,12 +2038,39 @@ function structuralDiff(ref, trans, hasMissingRegion){
       let severity = Math.abs(missing) >= Math.max(2, a*0.3) ? 'warning' : 'info';
       let note = '';
       if(hasMissingRegion && missing > 0){ severity = 'info'; note = ' (likely accounted for by the missing section above)'; }
+
+      // attach the actual evidence where we can identify specific items
+      let items = null, evidenceLabel = '';
+      if(key === 'links'){
+        const tSet = new Set(trans.links || []);
+        const rSet = new Set(ref.links || []);
+        const onlyEn = (ref.links || []).filter(u => !tSet.has(u));
+        const onlyTr = (trans.links || []).filter(u => !rSet.has(u));
+        if(missing > 0 && onlyEn.length){ items = onlyEn; evidenceLabel = 'Links on English but not on this page'; }
+        else if(missing < 0 && onlyTr.length){ items = onlyTr; evidenceLabel = 'Links on this page but not on English'; }
+      } else if(key === 'images'){
+        const tNames = (trans.images || []).map(i => imgName(i.src));
+        const rNames = (ref.images || []).map(i => imgName(i.src));
+        const tSet = new Set(tNames), rSet = new Set(rNames);
+        const onlyEn = rNames.filter(n => !tSet.has(n));
+        const onlyTr = tNames.filter(n => !rSet.has(n));
+        if(missing > 0 && onlyEn.length){ items = onlyEn; evidenceLabel = 'Images on English but not on this page'; }
+        else if(missing < 0 && onlyTr.length){ items = onlyTr; evidenceLabel = 'Images on this page but not on English'; }
+      } else if(key === 'headings'){
+        // heading text differs by language, so show both lists rather than a diff
+        const rH = (ref.headings || []).map(h => 'H' + h.level + ': ' + h.text);
+        const tH = (trans.headings || []).map(h => 'H' + h.level + ': ' + h.text);
+        items = ['— English (' + rH.length + ') —', ...rH, '— This page (' + tH.length + ') —', ...tH];
+        evidenceLabel = 'Headings on both pages';
+      }
+
       issues.push({
         category:'count',
         severity,
         explanation: missing > 0
           ? `Translation has ${b} ${name} vs ${a} in English — ${missing} fewer${note}.`
-          : `Translation has ${b} ${name} vs ${a} in English — ${-missing} extra.`
+          : `Translation has ${b} ${name} vs ${a} in English — ${-missing} extra.`,
+        items, evidenceLabel
       });
     }
   });
@@ -2158,7 +2227,7 @@ function renderSummary(){
   document.getElementById('summaryCard').style.display = 'block';
   document.getElementById('viewTabs').style.display = 'flex';
   markDashStale();
-  showView('results');
+  showView('authors');
   const grid = document.getElementById('summaryGrid');
   grid.innerHTML = `
     <div class="stat"><div class="num">${s.pages}</div><div class="lbl">Pages reviewed</div></div>
