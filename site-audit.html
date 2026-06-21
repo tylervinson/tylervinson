@@ -1026,7 +1026,7 @@ function dashboardCss(){
     'ul.evlist li{font-size:.78rem;padding:.35rem .6rem;border-bottom:1px solid var(--border);word-break:break-word;font-family:"SF Mono",Monaco,Consolas,monospace}ul.evlist li:last-child{border-bottom:none}',
     'ul.evlist li.evhead{font-family:Inter,sans-serif;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:.66rem;background:var(--card-alt)}',
     'details.drill>summary:hover .drill-label{color:var(--accent)}.drill-label{min-width:170px}.drill-label .chev{color:var(--muted2);margin-right:.4rem;font-size:.7rem;display:inline-block;width:.7rem;transition:transform .2s}details.drill[open]>summary .chev{transform:rotate(90deg)}',
-    '.bartrack{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;max-width:340px}.barfill{height:100%;background:var(--accent)}.drill-count{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}',
+    '.bartrack{flex:1;height:9px;background:#33322f;border-radius:5px;overflow:hidden;max-width:none}.barfill{height:100%;background:linear-gradient(90deg,#ffce85,#f0a63a);border-radius:5px;min-width:3px}.drill-count{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-weight:400}',
     '.drill-body{padding:.3rem 0 .9rem}',
     'details.pagecard{border:1px solid var(--border);border-radius:8px;margin-bottom:.7rem;background:var(--card-alt)}details.pagecard>summary{list-style:none;cursor:pointer;padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}details.pagecard>summary::-webkit-details-marker{display:none}',
     '.pc-name{font-weight:400;font-size:1rem;flex:1;min-width:160px}.pc-name .chev{color:var(--muted2);margin-right:.5rem;font-size:.7rem;display:inline-block;transition:transform .2s}details.pagecard[open]>summary .pc-name .chev{transform:rotate(90deg)}',
@@ -1036,7 +1036,19 @@ function dashboardCss(){
     'details.stale{border:1px solid var(--border);border-radius:8px;margin-bottom:.5rem;background:var(--card-alt)}details.stale.is-stale{border-left:3px solid var(--crit)}details.stale>summary{list-style:none;cursor:pointer;padding:.65rem 1rem;display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;align-items:center;font-size:.85rem}details.stale>summary::-webkit-details-marker{display:none}',
     '.st-path{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.78rem;overflow:hidden;text-overflow:ellipsis}.st-age{color:var(--muted);font-variant-numeric:tabular-nums;min-width:48px;text-align:right}.st-date{color:var(--muted);min-width:84px;text-align:right}',
     '.st-body{padding:.2rem 1rem .8rem;font-size:.82rem;color:var(--muted);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem 1.5rem}.st-body .k{color:var(--muted2);text-transform:uppercase;font-size:.66rem;letter-spacing:.05em}.st-body .v{color:var(--text)}',
-    '.headrow{display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;padding:0 1rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2)}'
+    '.headrow{display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;padding:0 1rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2)}',
+    '.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.25rem}',
+    '.kpi{appearance:none;text-align:left;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:1.1rem 1.2rem;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:.4rem;transition:border-color .2s,transform .2s,background .2s}',
+    '.kpi:hover{transform:translateY(-2px);background:#2a2a2a}.kpi .kpi-n{font-size:2.3rem;font-weight:300;line-height:1;color:var(--text)}.kpi .kpi-l{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}',
+    '.kpi.crit{border-left-color:var(--crit)}.kpi.crit:hover{border-color:var(--crit)}.kpi.crit .kpi-n{color:var(--crit)}',
+    '.kpi.warn{border-left-color:var(--warn)}.kpi.warn:hover{border-color:var(--warn)}.kpi.warn .kpi-n{color:var(--warn)}',
+    '.kpi.accent{border-left-color:var(--accent)}.kpi.accent:hover{border-color:var(--accent)}',
+    '.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-grid .card{margin:0}',
+    '.label{display:flex;align-items:center;gap:.5rem}.label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex:0 0 auto}',
+    '.sevmix{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.donut{width:148px;height:148px;flex:0 0 auto}.donut-n{fill:var(--text);font-size:30px;font-weight:300}.donut-l{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}',
+    '.legend{display:flex;flex-direction:column;gap:.65rem;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:.6rem;font-size:.88rem}.swatch{width:11px;height:11px;border-radius:3px;flex:0 0 auto}.legend-row .ln{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text)}.legend-row .lt{color:var(--muted)}',
+    '.covrow{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.7rem}.covrow .big{font-size:1.8rem;font-weight:300;color:var(--accent);line-height:1}.barrow{display:flex;gap:.6rem;margin:.3rem 0;font-size:.85rem}',
+    '@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}}'
   ].join('');
 }
 function dashboardApp(){
@@ -1157,8 +1169,31 @@ function dashboardApp(){
   renderAuthors();
 
   /* ===== Leaders ===== */
-  function statCard(n, label, cls, sev){
-    return '<div class="stat" onclick="__drillSev(\'' + (sev||'') + '\')"><div class="n ' + (cls||'') + '">' + n + '</div><div class="l">' + label + '</div></div>';
+  function kpi(n, label, cls, sev){
+    return '<button class="kpi ' + (cls||'') + '" onclick="__drillSev(\'' + (sev||'') + '\')">'
+      + '<span class="kpi-n">' + n + '</span><span class="kpi-l">' + label + '</span></button>';
+  }
+  function donut(parts, total){
+    var r=58, c=2*Math.PI*r, cx=74, cy=74, off=0;
+    var segs = parts.filter(function(p){return p.n>0;}).map(function(p){
+      var len = total ? c*(p.n/total) : 0;
+      var s = '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+p.color+'" stroke-width="15" '
+        + 'stroke-dasharray="'+len+' '+(c-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
+      off += len; return s;
+    }).join('');
+    return '<svg viewBox="0 0 148 148" class="donut">'
+      + '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="15"/>'
+      + (total ? segs : '')
+      + '<text x="74" y="72" text-anchor="middle" class="donut-n">'+total+'</text>'
+      + '<text x="74" y="90" text-anchor="middle" class="donut-l">findings</text></svg>';
+  }
+  function legRow(color, label, n, tot){
+    var pct = tot ? Math.round(n/tot*100) : 0;
+    return '<div class="legend-row"><span class="swatch" style="background:'+color+'"></span>'
+      + '<span class="lt">'+label+'</span><span class="ln">'+n+' \u00B7 '+pct+'%</span></div>';
+  }
+  function panel(title, inner){
+    return '<section class="card"><p class="label">'+title+'</p>'+inner+'</section>';
   }
   window.__drillSev = function(sev){
     show('authors');
@@ -1181,44 +1216,56 @@ function dashboardApp(){
     }).join('');
   }
 
-  var t=D.trend, trendHtml;
+  var t=D.trend, trendInner;
   if(t.hasBaseline){
     var net=t.nowTotal-t.wasTotal;
-    trendHtml='<div class="card"><p class="label">Change since last audit ('+esc(new Date(t.date).toLocaleDateString())+')</p>'
-      +'<div class="trend">'
+    trendInner='<div class="trend">'
       +'<div><div class="delta ok">'+t.resolved+'</div><div class="l muted">Resolved</div></div>'
       +'<div><div class="delta crit">'+t.added+'</div><div class="l muted">New</div></div>'
       +'<div><div class="delta warn">'+t.persisting+'</div><div class="l muted">Still open</div></div></div>'
-      +'<p class="sub" style="text-align:center;margin-top:1rem">Total '+t.wasTotal+' \u2192 '+t.nowTotal+' \u00B7 '
-      +(net<0?'<span class="ok">down '+Math.abs(net)+'</span>':net>0?'<span class="crit">up '+net+'</span>':'<span class="muted">no change</span>')+'</p></div>';
+      +'<p class="sub" style="text-align:center;margin-top:1rem">Since '+esc(new Date(t.date).toLocaleDateString())+': '+t.wasTotal+' \u2192 '+t.nowTotal+' \u00B7 '
+      +(net<0?'<span class="ok">down '+Math.abs(net)+'</span>':net>0?'<span class="crit">up '+net+'</span>':'<span class="muted">no change</span>')+'</p>';
   } else {
-    trendHtml='<div class="card"><p class="label">Trend</p><p class="empty">No baseline loaded. Save a snapshot after a run, then load it as the baseline before the next run to see resolved / new / still-open counts here.</p></div>';
+    trendInner='<p class="empty">No baseline loaded. Save a snapshot after a run, then load it as the baseline before the next run to see resolved / new / still-open counts here.</p>';
   }
+
+  var sc=D.summary.critical||0, sw=D.summary.warning||0, si=D.summary.info||0, stot=sc+sw+si;
+  var sevInner='<div class="sevmix">'
+    + donut([{n:sc,color:'var(--crit)'},{n:sw,color:'var(--warn)'},{n:si,color:'var(--muted2)'}], stot)
+    + '<div class="legend">'
+      + legRow('var(--crit)','Critical',sc,stot)
+      + legRow('var(--warn)','Warning',sw,stot)
+      + legRow('var(--muted2)','Info',si,stot)
+    + '</div></div>';
+
   var cov=D.coverage;
   var covMissing=cov.missing.length
-    ? cov.missing.map(function(m){ return '<div class="barrow" style="display:flex;gap:.6rem;margin:.3rem 0;font-size:.85rem"><span style="min-width:150px">'+esc(m.lang)+'</span><span class="crit">'+m.count+' page(s) missing / errored</span></div>'; }).join('')
+    ? cov.missing.map(function(m){ return '<div class="barrow"><span style="min-width:150px">'+esc(m.lang)+'</span><span class="crit">'+m.count+' page(s) missing / errored</span></div>'; }).join('')
     : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
+  var covInner='<div class="covrow"><span class="big">'+cov.audited+'</span><span class="muted">of '+cov.discovered+' discovered page(s) audited</span></div>'+covMissing;
 
   var lv=document.getElementById('view-leaders');
   lv.innerHTML=
-    trendHtml
-    + '<div class="card"><p class="label">This audit \u00B7 click to drill in</p><div class="grid stats">'
-      + statCard(D.summary.pages,'Pages','accent','')
-      + statCard(D.summary.critical,'Critical','crit','critical')
-      + statCard(D.summary.warning,'Warnings','warn','warning')
-      + statCard(D.summary.broken,'Broken links',D.summary.broken?'crit':'','')
-      + statCard(D.findings.length,'Total findings','','')
-      + '</div></div>'
-    + '<div class="card"><p class="label">Stale content</p>'
+    '<div class="kpis">'
+      + kpi(D.summary.pages,'Pages','accent','')
+      + kpi(D.summary.critical,'Critical','crit','critical')
+      + kpi(D.summary.warning,'Warnings','warn','warning')
+      + kpi(D.summary.broken,'Broken links',D.summary.broken?'crit':'','')
+      + kpi(D.findings.length,'Total findings','','')
+      + '</div>'
+    + '<div class="dash-grid">'
+      + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
+      + panel('Change since last audit', trendInner)
+      + panel('Findings by category \u00B7 click to expand', drill('category'))
+      + panel('Findings by section / directory \u00B7 click to expand', drill('dir'))
+      + panel('Findings by language \u00B7 click to expand', drill('lang'))
+      + panel('Translation coverage', covInner)
+      + '</div>'
+    + '<section class="card"><p class="label">Stale content</p>'
       + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
       + '<select id="stale-threshold"><option value="3">3 months</option><option value="6">6 months</option>'
       + '<option value="12" selected>12 months</option><option value="18">18 months</option><option value="24">24 months</option></select></div>'
-      + '<div id="stale-body"></div></div>'
-    + '<div class="card"><p class="label">Findings by language \u00B7 click to see them</p>' + drill('lang') + '</div>'
-    + '<div class="card"><p class="label">Findings by category \u00B7 click to see them</p>' + drill('category') + '</div>'
-    + '<div class="card"><p class="label">Findings by section / directory \u00B7 click to see them</p>' + drill('dir') + '</div>'
-    + '<div class="card"><p class="label">Translation coverage</p>'
-      + '<p class="sub">'+cov.audited+' page(s) audited of '+cov.discovered+' discovered in the sitemap.</p>'+covMissing+'</div>';
+      + '<div id="stale-body"></div></section>';
 
   function parseDate(s){
     if(!s) return null;
