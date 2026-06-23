@@ -133,6 +133,29 @@
     border:1px dashed var(--border);border-radius:var(--radius);
   }
 
+  /* Closing justification box */
+  .closing{
+    background:var(--card-alt);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.9rem 2rem;margin-top:3rem;
+  }
+  .closing .eyebrow{
+    font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:1.2px;
+    color:var(--accent);margin-bottom:0.7rem;
+  }
+  .closing h2{font-size:1.6rem;margin-bottom:1rem;}
+  .closing p{margin:0 0 1rem;color:var(--text);font-size:0.98rem;}
+  .closing p:last-child{margin-bottom:0;}
+  .closing .highlight{
+    background:rgba(255,190,95,0.08);border:1px solid rgba(255,190,95,0.28);
+    border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:1.1rem 1.3rem;margin:1.4rem 0;
+  }
+  .closing .highlight .tag{
+    font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;
+    color:var(--accent);display:block;margin-bottom:0.5rem;
+  }
+  .closing .highlight p{font-size:0.95rem;margin:0;}
+
   /* Modal */
   .overlay{
     position:fixed;inset:0;background:rgba(8,8,8,0.74);
@@ -224,6 +247,12 @@
 </head>
 <body>
 
+<button id="print-btn" onclick="printSinglePage()" aria-label="Save as PDF" title="Save as PDF">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17l.621 2.485A2 2 0 0 0 6.561 21h10.878a2 2 0 0 0 1.94-1.515L20 17"/>
+  </svg>
+</button>
+
 <div class="wrap">
   <header class="page">
     <div class="eyebrow">Marketing Engineering · Internal</div>
@@ -246,6 +275,21 @@
 
   <div id="sections"></div>
   <div id="empty" class="empty" style="display:none;">No tools match your filters. Try clearing the search or selecting “All”.</div>
+
+  <section class="closing">
+    <div class="eyebrow">Marketing Engineering · Internal</div>
+    <h2>The case for Enterprise access</h2>
+    <p>The catalog above is the proof of concept. One motivated person, using Claude as a force multiplier, shipped working tools across member experience, compliance, marketing, and internal operations — output that would normally require contract developers, agency spend, or additional headcount. The cost of the AI assistance behind it has been a rounding error next to what it produced.</p>
+
+    <div class="highlight">
+      <span class="tag">Case in point — PCP Provider Search Tool</span>
+      <p>This answered a short-notice, high-impact need for our Medicare Advantage segment. As our value-based provider base contracted, affected members were at risk of being auto-assigned a new primary care provider — so they needed a fast, accurate way to search the remaining value-based providers and choose one themselves rather than have that choice made for them. Work of that scope would normally take the better part of a week and the better part of a development team collaborating across roles. Instead, one person stood it up in essentially three hours — less than half a day. Needless to say, the impact on that member segment was tremendous.</p>
+    </div>
+
+    <p>The constraint now is access. Consumer-tier accounts weren't built for the way we're using them — sustained, work-related, and increasingly touching real business data. An Enterprise subscription gives the small group doing this work the headroom, security controls, and data protections appropriate for an organization in our industry, rather than stretching personal-grade tools past what they were meant for.</p>
+
+    <p>The ask is straightforward: provide an Enterprise seat for the team member already delivering this work. The track record above — and the PCP turnaround in particular — is the evidence that the spend pays for itself, and that giving the team the right tier lets it produce more of the same, faster and on firmer footing.</p>
+  </section>
 </div>
 
 <!-- Detail / demo modal -->
