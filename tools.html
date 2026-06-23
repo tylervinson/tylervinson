@@ -279,16 +279,16 @@
   <section class="closing">
     <div class="eyebrow">Marketing Engineering · Internal</div>
     <h2>The case for Enterprise access</h2>
-    <p>The catalog above is the proof of concept. One motivated person, using Claude as a force multiplier, shipped working tools across member experience, compliance, marketing, and internal operations — output that would normally require contract developers, agency spend, or additional headcount. The cost of the AI assistance behind it has been a rounding error next to what it produced.</p>
+    <p>The catalog above is the proof of concept. One motivated person, using Claude as a force multiplier, shipped working tools across member experience, compliance, marketing, and internal operations: output that would normally require contract developers, agency spend, or additional headcount. The cost of the AI assistance behind it has been a rounding error next to what it produced.</p>
 
     <div class="highlight">
-      <span class="tag">Case in point — PCP Provider Search Tool</span>
-      <p>This answered a short-notice, high-impact need for our Medicare Advantage segment. As our value-based provider base contracted, affected members were at risk of being auto-assigned a new primary care provider — so they needed a fast, accurate way to search the remaining value-based providers and choose one themselves rather than have that choice made for them. Work of that scope would normally take the better part of a week and the better part of a development team collaborating across roles. Instead, one person stood it up in essentially three hours — less than half a day. Needless to say, the impact on that member segment was tremendous.</p>
+      <span class="tag">Case in point: PCP Provider Search Tool</span>
+      <p>This answered a short-notice, high-impact need for our Medicare Advantage segment. As our value-based provider base contracted, affected members were at risk of being auto-assigned a new primary care provider, so they needed a fast, accurate way to search the remaining value-based providers and choose one themselves rather than have that choice made for them. Work of that scope would normally take the better part of a week and the better part of a development team collaborating across roles. Instead, one person stood it up in essentially three hours, less than half a day. Needless to say, the impact on that member segment was tremendous.</p>
     </div>
 
-    <p>The constraint now is access. Consumer-tier accounts weren't built for the way we're using them — sustained, work-related, and increasingly touching real business data. An Enterprise subscription gives the small group doing this work the headroom, security controls, and data protections appropriate for an organization in our industry, rather than stretching personal-grade tools past what they were meant for.</p>
+    <p>The constraint now is access. Consumer-tier accounts weren't built for the way we're using them: sustained, work-related, and increasingly touching real business data. An Enterprise subscription gives the small group doing this work the headroom, security controls, and data protections appropriate for an organization in our industry, rather than stretching personal-grade tools past what they were meant for.</p>
 
-    <p>The ask is straightforward: provide an Enterprise seat for the team member already delivering this work. The track record above — and the PCP turnaround in particular — is the evidence that the spend pays for itself, and that giving the team the right tier lets it produce more of the same, faster and on firmer footing.</p>
+    <p>The ask is straightforward: provide an Enterprise seat for the team member already delivering this work. The track record above, and the PCP turnaround in particular, is the evidence that the spend pays for itself, and that giving the team the right tier lets it produce more of the same, faster and on firmer footing.</p>
   </section>
 </div>
 
@@ -313,7 +313,7 @@
    To enable a live demo for any tool, drop a standalone HTML file into a
    "demos/" folder next to this file, named with the tool's id below
    (e.g. demos/stacked-objects.html), then set  demo:true  on that tool.
-   No demo files are bundled — paste in your own real backups.
+   No demo files are bundled. Paste in your own real backups.
    ======================================================================= */
 var TOOLS=[
  // Chrome extensions
@@ -333,7 +333,7 @@ var TOOLS=[
  {id:'pcp-converter',name:'PCP Data Converter',cat:'web',type:'Web Tool',status:'history',demo:false,
   desc:"Browser tool that converts the Excel provider list into the JSON the search widget expects, with field mapping and derived fields (e.g. building PRVNAME from first + last name). Outputs the hosted data file."},
  {id:'pcp-search',name:'PCP Provider Search Tool',cat:'web',type:'Embedded Widget',status:'history',demo:false,
-  desc:"Member-facing provider directory embedded on the AZ Blue site via Webflow. Loads provider data from a hosted file and renders a filterable, sortable, paginated table \u2014 free-text search by city or ZIP plus Provider Type, Language, and Gender dropdowns. Switches between staging and production data by domain."},
+  desc:"Member-facing provider directory embedded on the AZ Blue site via Webflow. Loads provider data from a hosted file and renders a filterable, sortable, paginated table: free-text search by city or ZIP plus Provider Type, Language, and Gender dropdowns. Switches between staging and production data by domain."},
  {id:'hub-resources-search',name:'Hub Resources Search Tool',cat:'web',type:'Embedded Widget',status:'history',demo:false,
   desc:"A configurable data-directory search adapted from the PCP search tool, presented in a Hub Resources modal. Generic searchable, sortable, paginated table with a settable title and description so it can be pointed at any dataset."},
  {id:'stacked-objects',name:'Interactive Stacked-Objects Tool',cat:'web',type:'Web Tool',status:'history',demo:false,
@@ -344,7 +344,7 @@ var TOOLS=[
  {id:'qualtrics-intercept',name:'Qualtrics Intercept',cat:'gtm',type:'GTM Script',status:'history',demo:false,
   desc:"Force-popup snippet to skip the 90-second delay during testing, plus a countdown-interval tweak. Environment-specific."},
  {id:'flip-cards',name:'Reusable Flip-Card Script',cat:'gtm',type:'GTM Widget',status:'history',demo:false,
-  desc:"Turns a card grid into flip cards \u2014 title on the front, details on the back. Targeted by data-component and SPA-safe via a MutationObserver."},
+  desc:"Turns a card grid into flip cards: title on the front, details on the back. Targeted by data-component and SPA-safe via a MutationObserver."},
  {id:'zoom-calendar',name:'Zoom Calendar Widget',cat:'gtm',type:'GTM Widget',status:'history',demo:false,
   desc:"A meetings list with calendar and list views, event chips, and past-event handling. Built as both a Sitecore component and a GTM-only version."},
  {id:'card-carousel',name:'AZBlue Card Carousel',cat:'gtm',type:'GTM Widget',status:'history',demo:false,
@@ -454,9 +454,9 @@ function openModal(idx){
     html+='<div class="demo-bar"><span class="tag">Live demo</span><a class="ghost-btn" href="'+src+'" target="_blank" rel="noopener">Open in new tab <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>';
     html+='<iframe class="demo-frame" src="'+src+'" title="'+t.name+' demo"></iframe>';
   } else if(t.type.indexOf('Extension')>=0){
-    html+='<div class="note"><strong>Chrome extension.</strong> This one installs rather than runs in a page \u2014 the packaged build lives in our chat history. Load it via <code>chrome://extensions</code> &rarr; Developer mode &rarr; Load unpacked.</div>';
+    html+='<div class="note"><strong>Chrome extension.</strong> This one installs rather than runs in a page; the packaged build lives in our chat history. Load it via <code>chrome://extensions</code> &rarr; Developer mode &rarr; Load unpacked.</div>';
   } else {
-    html+='<div class="note"><strong>No live demo loaded yet.</strong> The original build is in our chat history. To wire up a working demo, save the real standalone file as <code>demos/'+t.id+'.html</code> next to this page, then set <code>demo:true</code> for this tool in the data block. The actual tool renders here \u2014 no rebuilds, no stripped-down versions.</div>';
+    html+='<div class="note"><strong>No live demo loaded yet.</strong> The original build is in our chat history. To wire up a working demo, save the real standalone file as <code>demos/'+t.id+'.html</code> next to this page, then set <code>demo:true</code> for this tool in the data block. The actual tool renders here: no rebuilds, no stripped-down versions.</div>';
   }
   body.innerHTML=html;
   document.getElementById('overlay').classList.add('open');
