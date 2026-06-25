@@ -80,6 +80,31 @@
       font-weight: 750;
       user-select: none;
       border-bottom: 1px solid transparent;
+      list-style-position: inside;
+    }
+
+    summary .summary-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: calc(100% - 20px);
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .section-lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    .section-lock input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
     }
 
     details[open] summary { border-bottom-color: var(--line); }
@@ -254,7 +279,7 @@
 
     <form id="controls">
       <details open>
-        <summary>Canvas</summary>
+        <summary><span class="summary-row"><span>Canvas</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockCanvasSize" type="checkbox" checked></label></span></summary>
         <div class="section">
           <div class="grid">
             <label>
@@ -313,7 +338,7 @@
       </details>
 
       <details open>
-        <summary>Color</summary>
+        <summary><span class="summary-row"><span>Color</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockColor" type="checkbox"></label></span></summary>
         <div class="section">
           <label class="wide">
             Theme
@@ -364,7 +389,7 @@
       </details>
 
       <details open>
-        <summary>Visibility</summary>
+        <summary><span class="summary-row"><span>Visibility</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockVisibility" type="checkbox"></label></span></summary>
         <div class="section">
           <label class="toggle">
             Randomly hide faces
@@ -391,7 +416,7 @@
       </details>
 
       <details>
-        <summary>Composition</summary>
+        <summary><span class="summary-row"><span>Composition</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockComposition" type="checkbox"></label></span></summary>
         <div class="section">
           <label class="toggle">
             Use blank-space border
@@ -425,13 +450,8 @@
       </details>
 
       <details>
-        <summary>Cube Geometry</summary>
+        <summary><span class="summary-row"><span>Cube Geometry</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockGeometry" type="checkbox" checked></label></span></summary>
         <div class="section">
-          <label class="toggle">
-            Lock geometry constraints
-            <input id="lockGeometry" type="checkbox" checked>
-          </label>
-
           <p class="hint">When locked, changing one geometry value scales the other two proportionally.</p>
 
           <div class="grid">
@@ -454,7 +474,7 @@
       </details>
 
       <details>
-        <summary>Export</summary>
+        <summary><span class="summary-row"><span>Export</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockExport" type="checkbox" checked></label></span></summary>
         <div class="section">
           <div class="grid">
             <label>
@@ -501,6 +521,10 @@
       customAspectWidth: document.getElementById("customAspectWidth"),
       customAspectHeight: document.getElementById("customAspectHeight"),
       useCustomSize: document.getElementById("useCustomSize"),
+      lockCanvasSize: document.getElementById("lockCanvasSize"),
+      lockColor: document.getElementById("lockColor"),
+      lockVisibility: document.getElementById("lockVisibility"),
+      lockComposition: document.getElementById("lockComposition"),
       customWidth: document.getElementById("customWidth"),
       customHeight: document.getElementById("customHeight"),
       backgroundColor: document.getElementById("backgroundColor"),
@@ -538,6 +562,7 @@
       cubeHeight: document.getElementById("cubeHeight"),
       cubeDepth: document.getElementById("cubeDepth"),
       lockGeometry: document.getElementById("lockGeometry"),
+      lockExport: document.getElementById("lockExport"),
 
       pngScale: document.getElementById("pngScale"),
       downloadSvg: document.getElementById("downloadSvg"),
@@ -1102,32 +1127,44 @@
     }
 
     function rollDiceConfiguration() {
-      inputs.themeSelect.value = "custom";
+      if (!inputs.lockColor.checked) {
+        inputs.themeSelect.value = "custom";
 
-      setColorValue(inputs.backgroundColor, inputs.backgroundColorPicker, randomHexColor());
-      setColorValue(inputs.topColor, inputs.topColorPicker, randomHexColor());
-      setColorValue(inputs.leftColor, inputs.leftColorPicker, randomHexColor());
-      setColorValue(inputs.rightColor, inputs.rightColorPicker, randomHexColor());
-
-      inputs.aspectRatio.value = randomChoice(["1:1", "4:3", "3:4", "16:9", "9:16", "custom"]);
-      if (inputs.aspectRatio.value === "custom") {
-        inputs.customAspectWidth.value = randomInt(2, 21);
-        inputs.customAspectHeight.value = randomInt(2, 21);
+        setColorValue(inputs.backgroundColor, inputs.backgroundColorPicker, randomHexColor());
+        setColorValue(inputs.topColor, inputs.topColorPicker, randomHexColor());
+        setColorValue(inputs.leftColor, inputs.leftColorPicker, randomHexColor());
+        setColorValue(inputs.rightColor, inputs.rightColorPicker, randomHexColor());
       }
-      inputs.useCustomSize.checked = false;
 
-      inputs.independentVisibility.checked = Math.random() < 0.9;
-      inputs.useBlankMargin.checked = Math.random() < 0.85;
+      // Only randomize canvas size/aspect when canvas size is unlocked.
+      if (!inputs.lockCanvasSize.checked) {
+        inputs.aspectRatio.value = randomChoice(["1:1", "4:3", "3:4", "16:9", "9:16", "custom"]);
 
-      if (inputs.randomMode) inputs.randomMode.checked = false;
+        if (inputs.aspectRatio.value === "custom") {
+          inputs.customAspectWidth.value = randomInt(2, 21);
+          inputs.customAspectHeight.value = randomInt(2, 21);
+        }
 
-      inputs.topVisibility.value = randomInt(15, 100);
-      inputs.leftVisibility.value = randomInt(15, 100);
-      inputs.rightVisibility.value = randomInt(15, 100);
+        inputs.useCustomSize.checked = false;
+      }
 
-      inputs.blankMargin.value = randomInt(0, 24);
-      inputs.edgeFalloff.value = randomInt(0, 28);
-      inputs.innerPadding.value = randomInt(0, 22);
+      if (!inputs.lockVisibility.checked) {
+        inputs.independentVisibility.checked = Math.random() < 0.9;
+
+        if (inputs.randomMode) inputs.randomMode.checked = false;
+
+        inputs.topVisibility.value = randomInt(15, 100);
+        inputs.leftVisibility.value = randomInt(15, 100);
+        inputs.rightVisibility.value = randomInt(15, 100);
+      }
+
+      if (!inputs.lockComposition.checked) {
+        inputs.useBlankMargin.checked = Math.random() < 0.85;
+
+        inputs.blankMargin.value = randomInt(0, 24);
+        inputs.edgeFalloff.value = randomInt(0, 28);
+        inputs.innerPadding.value = randomInt(0, 22);
+      }
 
       // Only randomize cube geometry when constraints are unlocked.
       // If locked, Dice preserves the current cube proportions and dimensions.
@@ -1187,7 +1224,8 @@
       inputs.aspectRatio,
       inputs.customAspectWidth,
       inputs.customAspectHeight,
-      inputs.useCustomSize
+      inputs.useCustomSize,
+      inputs.lockCanvasSize
     ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: true })));
 
     [
@@ -1208,6 +1246,14 @@
       slider.addEventListener("change", () => applySettings({ reroll: true, resize: false }));
     });
 
+
+    [
+      inputs.lockCanvasSize,
+      inputs.lockColor,
+      inputs.lockVisibility,
+      inputs.lockComposition,
+      inputs.lockExport
+    ].forEach(lock => lock.addEventListener("change", event => event.stopPropagation()));
 
     inputs.lockGeometry.addEventListener("change", captureGeometryRatio);
 
