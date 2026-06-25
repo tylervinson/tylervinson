@@ -1129,11 +1129,14 @@
       inputs.edgeFalloff.value = randomInt(0, 28);
       inputs.innerPadding.value = randomInt(0, 22);
 
-      inputs.lockGeometry.checked = Math.random() < 0.65;
-      inputs.cubeWidth.value = randomInt(42, 130);
-      inputs.cubeHeight.value = randomInt(24, 76);
-      inputs.cubeDepth.value = randomInt(42, 150);
-      captureGeometryRatio();
+      // Only randomize cube geometry when constraints are unlocked.
+      // If locked, Dice preserves the current cube proportions and dimensions.
+      if (!inputs.lockGeometry.checked) {
+        inputs.cubeWidth.value = randomInt(42, 130);
+        inputs.cubeHeight.value = randomInt(24, 76);
+        inputs.cubeDepth.value = randomInt(42, 150);
+        captureGeometryRatio();
+      }
 
       applySettings({ reroll: true, resize: true, animate: true });
     }
