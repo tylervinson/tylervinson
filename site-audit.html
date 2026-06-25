@@ -1344,6 +1344,13 @@ function dashboardCss(){
     '.pc-path{color:var(--muted2);font-size:.72rem;font-family:"SF Mono",Monaco,Consolas,monospace;flex-basis:100%;margin-left:1.1rem}',
     '.pill{font-size:.7rem;padding:.12rem .5rem;border-radius:20px;border:1px solid var(--border)}.pill.c{color:var(--crit);border-color:var(--crit)}.pill.w{color:var(--warn);border-color:var(--warn)}.pill.i{color:var(--muted);border-color:var(--muted2)}.pill.date{color:var(--muted)}',
     '.pc-body{padding:0 1rem .8rem}',
+    '.picker{border:1px solid var(--border);border-radius:8px;background:var(--card-alt);margin-bottom:1rem}',
+    '.picker-head{cursor:pointer;padding:.85rem 1rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;user-select:none}',
+    '.picker-head .chev{color:var(--accent);font-size:.7rem;display:inline-block;transition:transform .2s}.picker.open .picker-head .chev{transform:rotate(90deg)}',
+    '.picker-head .pk-name{font-weight:400;font-size:1rem}.picker-head .pk-hint{color:var(--muted);font-size:.78rem;white-space:nowrap}',
+    '.picker-list{display:none;border-top:1px solid var(--border);max-height:340px;overflow:auto}.picker.open .picker-list{display:block}',
+    '.picker-opt{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s}.picker-opt:last-child{border-bottom:none}.picker-opt:hover{background:#2a2a2a}.picker-opt.sel{background:#2a2a2a}',
+    '.picker-opt .po-name{flex:1;min-width:150px}.picker-opt .pc-path{flex-basis:100%;margin-left:0}',
     'details.stale{border:1px solid var(--border);border-radius:8px;margin-bottom:.5rem;background:var(--card-alt)}details.stale.is-stale{border-left:3px solid var(--crit)}details.stale>summary{list-style:none;cursor:pointer;padding:.65rem 1rem;display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;align-items:center;font-size:.85rem}details.stale>summary::-webkit-details-marker{display:none}',
     '.st-path{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.78rem;overflow:hidden;text-overflow:ellipsis}.st-age{color:var(--muted);font-variant-numeric:tabular-nums;min-width:48px;text-align:right}.st-date{color:var(--muted);min-width:84px;text-align:right}',
     '.st-body{padding:.2rem 1rem .8rem;font-size:.82rem;color:var(--muted);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem 1.5rem}.st-body .k{color:var(--muted2);text-transform:uppercase;font-size:.66rem;letter-spacing:.05em}.st-body .v{color:var(--text)}',
@@ -1485,6 +1492,17 @@ function dashboardApp(){
     + '<span class="muted" id="f-count" style="font-size:.8rem"></span>'
     + '</div><div id="author-list"></div></div>';
 
+  var authorSel = null;
+  function pageMeta(key, items, now){
+    var head=key.split('||'), name=head[0], path=head[1];
+    var cc=items.filter(function(f){return f.severity==='critical';}).length;
+    var wc=items.filter(function(f){return f.severity==='warning';}).length;
+    var ic=items.filter(function(f){return f.severity==='info';}).length;
+    var cd=pageDate(path), datePill='';
+    if(cd && cd.updated){ var a=ageDays(cd.updated, now); datePill='<span class="pill date">updated '+esc(cd.updated.slice(0,10))+(a!=null?' \u00B7 '+fmtAge(a):'')+(cd.updatedBy?' \u00B7 '+esc(cd.updatedBy):'')+'</span>'; }
+    var pills=(cc?'<span class="pill c">'+cc+' critical</span>':'')+(wc?'<span class="pill w">'+wc+' warning</span>':'')+(ic?'<span class="pill i">'+ic+' info</span>':'')+datePill;
+    return { name:name, path:path, pills:pills };
+  }
   function renderAuthors(){
     var l=document.getElementById('f-lang').value, s=document.getElementById('f-sev').value,
         c=document.getElementById('f-cat').value, q=document.getElementById('f-q').value.toLowerCase();
@@ -1495,26 +1513,35 @@ function dashboardApp(){
     document.getElementById('f-count').textContent = rows.length + ' finding(s) across ' + (new Set(rows.map(function(f){return f.path;}))).size + ' page(s)';
     var groups={}; rows.forEach(function(f){ var k=f.page+'||'+f.path; (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
-    if(!keys.length){ document.getElementById('author-list').innerHTML='<p class="empty">No findings match these filters.</p>'; return; }
+    var host=document.getElementById('author-list');
+    if(!keys.length){ host.innerHTML='<p class="empty">No findings match these filters.</p>'; authorSel=null; return; }
+    if(keys.indexOf(authorSel)===-1) authorSel=keys[0];
     var now=D.now||Date.now();
-    var html=keys.map(function(k){
-      var items=groups[k].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity])||a.lang.localeCompare(b.lang); });
-      var head=k.split('||'); var path=head[1];
-      var cc=items.filter(function(f){return f.severity==='critical';}).length;
-      var wc=items.filter(function(f){return f.severity==='warning';}).length;
-      var ic=items.filter(function(f){return f.severity==='info';}).length;
-      var cd=pageDate(path); var datePill='';
-      if(cd && cd.updated){ var a=ageDays(cd.updated, now); datePill='<span class="pill date">updated '+esc(cd.updated.slice(0,10))+(a!=null?' \u00B7 '+fmtAge(a):'')+(cd.updatedBy?' \u00B7 '+esc(cd.updatedBy):'')+'</span>'; }
-      return '<details class="pagecard"><summary>'
-        + '<span class="pc-name">'+chev+esc(head[0])+'</span>'
-        + (cc?'<span class="pill c">'+cc+' critical</span>':'')
-        + (wc?'<span class="pill w">'+wc+' warning</span>':'')
-        + (ic?'<span class="pill i">'+ic+' info</span>':'')
-        + datePill
-        + '<span class="pc-path">/'+esc(path)+'</span>'
-        + '</summary><div class="pc-body">'+findingsTable(items, ['sev','lang','cat','issue'])+'</div></details>';
+    var selItems=groups[authorSel].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity])||a.lang.localeCompare(b.lang); });
+    var selMeta=pageMeta(authorSel, groups[authorSel], now);
+    var opts=keys.map(function(k){
+      var m=pageMeta(k, groups[k], now);
+      return '<div class="picker-opt'+(k===authorSel?' sel':'')+'" data-key="'+encodeURIComponent(k)+'">'
+        + '<span class="po-name">'+esc(m.name)+'</span>'+m.pills
+        + '<span class="pc-path">/'+esc(m.path)+'</span></div>';
     }).join('');
-    document.getElementById('author-list').innerHTML=html;
+    host.innerHTML =
+      '<div class="picker" id="pk">'
+        + '<div class="picker-head" id="pk-head">'+chev
+          + '<span class="pk-name">'+esc(selMeta.name)+'</span>'+selMeta.pills
+          + '<span class="pc-path">/'+esc(selMeta.path)+'</span>'
+          + '<span class="spacer" style="flex:1"></span>'
+          + '<span class="pk-hint">'+keys.length+' page(s) \u00B7 click to change</span>'
+        + '</div>'
+        + '<div class="picker-list" id="pk-list">'+opts+'</div>'
+      + '</div>'
+      + '<div class="picker-detail">'+findingsTable(selItems, ['sev','lang','cat','issue'])+'</div>';
+    document.getElementById('pk-head').onclick=function(){ document.getElementById('pk').classList.toggle('open'); };
+    document.getElementById('pk-list').onclick=function(e){
+      var opt=e.target.closest ? e.target.closest('.picker-opt') : null; if(!opt) return;
+      authorSel=decodeURIComponent(opt.getAttribute('data-key'));
+      renderAuthors();
+    };
   }
   ['f-lang','f-sev','f-cat'].forEach(function(id){ document.getElementById(id).onchange=renderAuthors; });
   document.getElementById('f-q').oninput=renderAuthors;
