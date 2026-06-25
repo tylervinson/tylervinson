@@ -142,6 +142,23 @@
   .vtab:hover { color: var(--text); }
   .vtab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .dashframe { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); min-height: 600px; }
+  .pagetabs { display: flex; gap: .4rem; margin: 0 0 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .ptab { background: none; border: none; color: var(--muted); padding: .85rem 1.3rem; cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 400; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; transition: color .2s, border-color .2s; }
+  .ptab:hover { color: var(--text); }
+  .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .dash-toolbar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: 1.25rem; padding: .85rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+  .dash-empty { padding: 3.5rem 1.5rem; text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--border); border-radius: 12px; font-size: 1rem; line-height: 1.7; }
+  .dash-empty strong { color: var(--accent); font-weight: 500; }
+  .gen-done { margin-top: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--ok); border-left: 3px solid var(--ok); border-radius: 10px; background: rgba(125,191,130,.08); color: var(--text); }
+  .gen-done a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .run-modal { position: fixed; inset: 0; background: rgba(8,8,8,.74); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1.5rem; }
+  .run-modal-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 2.2rem; max-width: 480px; width: 100%; box-shadow: 0 24px 70px rgba(0,0,0,.55); }
+  .run-modal-card .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; font-size: .7rem; font-weight: 500; margin: 0 0 .5rem; }
+  .run-modal-card h2 { font-weight: 300; font-size: 1.5rem; margin: 0 0 1.25rem; letter-spacing: -.5px; }
+  .run-modal-progress { color: var(--muted); font-size: .9rem; margin-top: .9rem; min-height: 1.2em; }
+  .run-modal-hint { color: var(--muted-2); font-size: .78rem; margin: 1.25rem 0 0; }
+  .run-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: run-spin .8s linear infinite; vertical-align: -2px; margin-right: .5rem; }
+  @keyframes run-spin { to { transform: rotate(360deg); } }
 
   .lang-tags { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
   .lang-tag { display: flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 20px; padding: .25rem .4rem .25rem .8rem; }
@@ -276,6 +293,14 @@
     <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
   </header>
 
+  <nav id="pageTabs" class="pagetabs">
+    <button class="ptab active" data-page="generate" onclick="showPage('generate')">Generate data</button>
+    <button class="ptab" data-page="authors" onclick="showPage('authors')">Authors dashboard</button>
+    <button class="ptab" data-page="leaders" onclick="showPage('leaders')">Leaders dashboard</button>
+  </nav>
+
+  <div id="page-generate" class="page">
+
   <!-- SETTINGS -->
   <section class="card no-print">
     <h2>Settings</h2>
@@ -315,6 +340,22 @@
           <button class="ghost" onclick="testConnection()">Test</button>
         </div>
         <div id="testResult"></div>
+      </div>
+    </details>
+    <details class="accordion">
+      <summary><span class="chev">▶</span> Trend &amp; content dates (optional)</summary>
+      <div class="accordion-body">
+        <p class="hint" style="margin-bottom:.8rem;">Load a prior snapshot as a <strong>baseline</strong> to see what changed since your last run, and load your Sitecore <strong>“Items last updated”</strong> export to power the Leaders dashboard's stale-content view with real publish dates.</p>
+        <div class="toolbar" style="margin-top:0; flex-wrap:wrap;">
+          <button class="btn-secondary" onclick="document.getElementById('baselineFile').click()">Load baseline</button>
+          <button class="btn-secondary" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
+          <button class="btn-secondary" onclick="exportSnapshot()">Save snapshot of last run</button>
+          <button class="btn-secondary" onclick="approveBaseline()">Approve current as baseline</button>
+          <input type="file" id="baselineFile" accept="application/json,.json" style="display:none" onchange="loadBaseline(this.files && this.files[0]); this.value='';">
+          <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
+        </div>
+        <p class="hint" style="margin:.7rem 0 0;"><strong>Source-change detection:</strong> after a translation is signed off, click <em>Approve current as baseline</em> to record the English + translation fingerprints. Load that file before the next run and the tool flags any page whose English changed while the translation stayed put.</p>
+        <div class="score" id="inputStatus" style="margin-top:.7rem;"></div>
       </div>
     </details>
   </section>
@@ -368,36 +409,34 @@
     <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
   </section>
 
-  <!-- SUMMARY -->
-  <section class="card" id="summaryCard" style="display:none;">
-    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
-      <h2 style="margin:0;">Summary</h2>
-      <span class="spacer" style="flex:1;"></span>
-      <button class="ghost" onclick="exportDashboard()">Save dashboard (HTML)</button>
-      <button class="ghost" onclick="exportCsv()">Export issues (CSV)</button>
-      <button class="ghost" onclick="exportSnapshot()">Save snapshot</button>
-      <button class="ghost" onclick="document.getElementById('baselineFile').click()">Load baseline</button>
-      <button class="ghost" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
-      <input type="file" id="baselineFile" accept="application/json,.json" style="display:none" onchange="loadBaseline(this.files && this.files[0]); this.value='';">
-      <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
-    </div>
-    <div class="score" id="reportStatus" style="margin:-.75rem 0 1.25rem;"></div>
-    <div class="summary-grid" id="summaryGrid"></div>
-  </section>
-
-  <!-- VIEW TABS: Author · Leadership -->
-  <div id="viewTabs" class="viewtabs" style="display:none;">
-    <button class="vtab active" data-view="authors" onclick="showView('authors')">Author view</button>
-    <button class="vtab" data-view="leaders" onclick="showView('leaders')">Leadership view</button>
-    <span class="spacer" style="flex:1;"></span>
-    <span class="score" style="align-self:center;">Both views also export via “Save dashboard”.</span>
-  </div>
-
-  <!-- detailed per-page render still runs into here (hidden; feeds nothing visible) -->
+  <!-- hidden sink for the detailed per-page render -->
   <div id="panel-results" style="display:none;"><div id="results"></div></div>
 
-  <!-- AUTHORS / LEADERS (embedded dashboard, isolated) -->
-  <iframe id="dashFrame" class="dashframe" title="Dashboard view" style="display:none;"></iframe>
+  <div id="genDone" class="gen-done" style="display:none;"></div>
+
+  </div><!-- /page-generate -->
+
+  <!-- DASHBOARDS (Authors / Leaders) — retain the last generated data -->
+  <div id="page-dash" class="page" style="display:none;">
+    <div id="dashToolbar" class="dash-toolbar" style="display:none;">
+      <span class="score" id="reportStatus"></span>
+      <span class="spacer" style="flex:1;"></span>
+      <button class="primary" id="pdfBtn" style="padding:.55rem 1.1rem;" onclick="exportReportPDF()">Save as report PDF</button>
+    </div>
+    <div id="dashEmpty" class="dash-empty">No audit data yet. Open <strong>Generate data</strong>, run an audit, and your Authors and Leaders dashboards will appear here — they keep the last run's results.</div>
+    <iframe id="dashFrame" class="dashframe" title="Dashboard view" style="display:none;"></iframe>
+  </div>
+</div>
+
+<!-- RUN AUDIT PROGRESS MODAL -->
+<div id="runModal" class="run-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="runModalTitle">
+  <div class="run-modal-card">
+    <p class="eyebrow">Running audit</p>
+    <h2 id="runModalTitle">Auditing your pages…</h2>
+    <div class="bar" id="modalBarWrap"><span id="modalBar"></span></div>
+    <div id="modalProgress" class="run-modal-progress"><span class="run-spinner"></span>Starting…</div>
+    <p class="run-modal-hint">This window closes automatically and opens your Leaders dashboard when the audit finishes.</p>
+  </div>
 </div>
 
 <script>
@@ -717,7 +756,7 @@ function onTransToggle(){
 
 /* ----------------------------- save / load to JSON ----------------------------- */
 function setSaveStatus(msg, err){ const el = document.getElementById('saveStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
-function setReportStatus(msg, err){ const el = document.getElementById('reportStatus'); if(!el) return; el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
+function setReportStatus(msg, err){ ['reportStatus','inputStatus'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; } }); }
 
 function exportState(){
   const data = {
@@ -789,6 +828,41 @@ function findingSubject(f){
 function keyFor(f){
   return [f.path||'', f.lang||'', f.section||'', f.category||'', findingSubject(f)].join('||').toLowerCase();
 }
+/* ---- content fingerprints (source-sync model) ----
+   A stable, normalized hash of a page's visible content. Comparing the current
+   English hash against the hash captured when a translation was approved lets us
+   tell "English changed after the translation was approved" from ordinary QA drift. */
+function cyrb53(str, seed){
+  seed = seed || 0;
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for(let i = 0, ch; i < str.length; i++){
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+function contentFingerprint(data){
+  if(!data) return null;
+  // Title + meta + ordered content segments. Numbers/dates are intentionally KEPT
+  // (a changed % or year is a meaningful English change we want to catch).
+  const parts = [data.title || '', data.metaDesc || ''].concat(data.segments || []);
+  let s = parts.join('\u0001');
+  try { s = s.normalize('NFC'); } catch(e){}
+  s = s.replace(/\s+/g, ' ').trim();
+  return cyrb53(s);
+}
+function currentFingerprints(){
+  const en = {}, tr = {};
+  (auditState.results || []).forEach(r => {
+    const pk = r.page.path || '';
+    if(r.enFp != null) en[pk] = r.enFp;
+    (r.languages || []).forEach(b => { if(b.trFp != null) tr[pk + '||' + b.lang.label] = b.trFp; });
+  });
+  return { en, tr };
+}
 function flattenFindings(){
   const out = [];
   (auditState.results||[]).forEach(r => {
@@ -823,6 +897,25 @@ function flattenFindings(){
         b.tech.code.forEach(c => base(lang,'Code','code', c.sev, c.text, '', c.snippet, c.items, c.evidenceLabel));
         b.tech.links.forEach(l => base(lang,'Links','broken link','critical', l.url, '', l.snippet));
       }
+      // Source sync: did English change after this translation was approved?
+      if(baseline && baseline.fp && baseline.fp.en){
+        const baseEn = baseline.fp.en[path];
+        const curEn = r.enFp;
+        if(baseEn != null && curEn != null && curEn !== baseEn){
+          const baseTr = (baseline.fp.tr || {})[path + '||' + lang];
+          const curTr = b.trFp;
+          const approvedOn = baseline.approvedAt ? (' on ' + new Date(baseline.approvedAt).toLocaleDateString()) : '';
+          if(baseTr != null && curTr != null && curTr === baseTr){
+            base(lang,'Source sync','source changed, translation stale','warning',
+              'English changed after this translation was approved' + approvedOn + ', but the ' + lang + ' page has not been updated since.',
+              'Re-translate this page to match the updated English source.');
+          } else if(baseTr != null && curTr != null && curTr !== baseTr){
+            base(lang,'Source sync','source & translation both changed','info',
+              'Both the English source and the ' + lang + ' translation changed since the approved baseline' + approvedOn + '. Confirm the translation reflects the new English.',
+              'Review to confirm the translation is in sync with the new English.');
+          }
+        }
+      }
     });
   });
   out.forEach(f => f.key = keyFor(f));
@@ -841,13 +934,23 @@ function buildSnapshotObj(){
     total: f.length,
     keys: f.map(x => x.key),
     byCategory: countBy(f, 'category'),
-    byLang: countBy(f, 'lang')
+    byLang: countBy(f, 'lang'),
+    fp: currentFingerprints()
   };
 }
 function exportSnapshot(){
   if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
   downloadBlob(JSON.stringify(buildSnapshotObj()), 'application/json', `audit-snapshot-${reportHost()}-${new Date().toISOString().slice(0,10)}.json`);
   setReportStatus('Snapshot saved. Load it as the baseline before your next audit to track what changed.');
+}
+function approveBaseline(){
+  if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
+  const obj = buildSnapshotObj();
+  obj.approved = true;
+  obj.approvedAt = obj.date;
+  const fpEn = Object.keys(obj.fp.en || {}).length;
+  downloadBlob(JSON.stringify(obj), 'application/json', `audit-baseline-${reportHost()}-${new Date().toISOString().slice(0,10)}.json`);
+  setReportStatus(`Approved baseline saved (${fpEn} page fingerprint(s)). Load it before your next audit to flag pages where English changed after approval.`);
 }
 function loadBaseline(file){
   if(!file) return;
@@ -858,7 +961,10 @@ function loadBaseline(file){
       if(j.type !== 'audit-snapshot') throw new Error('bad type');
       baseline = j;
       markDashStale();
-      setReportStatus(`Baseline loaded from ${new Date(j.date).toLocaleDateString()} (${j.keys.length} prior finding(s)). The dashboard will show changes since then.`);
+      refreshDashIfVisible();
+      const fpN = (j.fp && j.fp.en) ? Object.keys(j.fp.en).length : 0;
+      const appr = j.approved ? `Approved baseline from ${new Date(j.approvedAt || j.date).toLocaleDateString()}` : `Baseline from ${new Date(j.date).toLocaleDateString()}`;
+      setReportStatus(`${appr} loaded — ${j.keys.length} prior finding(s)` + (fpN ? `, ${fpN} page fingerprint(s) for source-change detection` : '') + '. The dashboards will show what changed since then.');
     } catch(err){ setReportStatus('That isn’t a valid audit snapshot file.', true); }
   };
   reader.readAsText(file);
@@ -907,6 +1013,7 @@ function loadContentDates(file){
       });
       const pages = contentDates.filter(r => !r.isComponent).length;
       markDashStale();
+      refreshDashIfVisible();
       setReportStatus(`Loaded ${contentDates.length} Sitecore item(s) — ${pages} page(s) with real publish dates. They’ll drive the stale-content view in the dashboard.`);
     } catch(err){
       setReportStatus('That isn’t a valid "Items last updated" JSON export.', true);
@@ -918,6 +1025,8 @@ function loadContentDates(file){
 /* ---- two-view dashboard (Authors + Leaders) ---- */
 function buildDashboardData(){
   const findings = flattenFindings();
+  let syncWarn = 0, syncInfo = 0;
+  findings.forEach(f => { if(f.section === 'Source sync'){ if(f.severity === 'warning') syncWarn++; else if(f.severity === 'info') syncInfo++; } });
   const missing = {};
   (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
   const pages = (auditState.results||[]).map(r => ({
@@ -932,7 +1041,7 @@ function buildDashboardData(){
         ? ((document.getElementById('engine')||{}).value || 'on') : 'off'
     },
     now: Date.now(),
-    summary: { critical:auditState.crit, warning:auditState.warn, info:auditState.info, broken:auditState.broken, pages:auditState.pages },
+    summary: { critical:auditState.crit, warning:auditState.warn + syncWarn, info:auditState.info + syncInfo, broken:auditState.broken, pages:auditState.pages },
     findings,
     rollups: {
       byLang: countBy(findings, 'lang'),
@@ -947,6 +1056,12 @@ function buildDashboardData(){
     },
     pages,
     contentDates: (contentDates ? contentDates.filter(r => !r.isComponent) : null),
+    sync: {
+      hasBaseline: !!(baseline && baseline.fp && baseline.fp.en),
+      approvedAt: (baseline && baseline.approvedAt) || null,
+      stale: findings.filter(f => f.category === 'source changed, translation stale').length,
+      bothChanged: findings.filter(f => f.category === 'source & translation both changed').length
+    },
     trend: trendVsBaseline(findings.map(f => f.key))
   };
 }
@@ -968,12 +1083,33 @@ function ensureDashFrame(targetTab){
     try { frame.contentWindow.postMessage('tab:' + targetTab, '*'); } catch(e){}
   }
 }
-function showView(v){
-  if(v === 'results') v = 'authors';
-  document.querySelectorAll('#viewTabs .vtab').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  document.getElementById('dashFrame').style.display = 'block';
-  ensureDashFrame(v);
+let currentDashTab = 'authors';
+function dashHasData(){ return !!(auditState && auditState.results && auditState.results.length); }
+function showPage(p){
+  document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
+  var gen = (p === 'generate');
+  document.getElementById('page-generate').style.display = gen ? 'block' : 'none';
+  document.getElementById('page-dash').style.display = gen ? 'none' : 'block';
+  if(!gen){
+    currentDashTab = (p === 'leaders') ? 'leaders' : 'authors';
+    var has = dashHasData();
+    document.getElementById('dashEmpty').style.display = has ? 'none' : 'block';
+    document.getElementById('dashToolbar').style.display = has ? 'flex' : 'none';
+    document.getElementById('dashFrame').style.display = has ? 'block' : 'none';
+    if(has) ensureDashFrame(currentDashTab);
+  }
+  try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e){ window.scrollTo(0,0); }
 }
+function refreshDashIfVisible(){
+  if(document.getElementById('page-dash').style.display !== 'none' && dashHasData()){
+    document.getElementById('dashEmpty').style.display = 'none';
+    document.getElementById('dashToolbar').style.display = 'flex';
+    document.getElementById('dashFrame').style.display = 'block';
+    ensureDashFrame(currentDashTab);
+  }
+}
+/* back-compat shim */
+function showView(v){ showPage(v === 'leaders' ? 'leaders' : 'authors'); }
 function buildDashboardHtml(){
   const data = buildDashboardData();
   let json = JSON.stringify(data).replace(/<\/script>/gi, '<\\/script>');
@@ -991,6 +1127,168 @@ function exportDashboard(){
   if(!auditState || !auditState.results || !auditState.results.length){ setReportStatus('Run an audit first.', true); return; }
   downloadBlob(buildDashboardHtml(), 'text/html', 'audit-dashboard-' + reportHost() + '-' + new Date().toISOString().slice(0,10) + '.html');
   setReportStatus('Dashboard saved' + (baseline ? ' (with trend vs the loaded baseline).' : '. Tip: load a baseline snapshot to add trend tracking.'));
+}
+
+/* ---- PDF report (light, print-friendly; differs by current dashboard) ---- */
+function exportReportPDF(){
+  if(!dashHasData()){ setReportStatus('Run an audit first.', true); return; }
+  var view = (currentDashTab === 'leaders') ? 'leaders' : 'authors';
+  var html = buildReportHtml(view);
+  var old = document.getElementById('reportPrintFrame'); if(old) old.remove();
+  var f = document.createElement('iframe');
+  f.id = 'reportPrintFrame';
+  f.setAttribute('aria-hidden', 'true');
+  f.style.cssText = 'position:fixed;left:-10000px;top:0;width:960px;height:1200px;border:0;';
+  document.body.appendChild(f);
+  f.srcdoc = html;
+  setReportStatus((view === 'leaders' ? 'Leadership' : 'Author') + ' report sent to the print dialog — choose “Save as PDF” as the destination.');
+  setTimeout(function(){ var fr = document.getElementById('reportPrintFrame'); if(fr) fr.remove(); }, 60000);
+}
+function reportCss(){
+  return [
+    "*{box-sizing:border-box}",
+    "body{margin:0;background:#fafafa;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:400;line-height:1.55;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
+    ".rep{max-width:960px;margin:0 auto;padding:2.5rem 2.2rem}",
+    ".eyebrow{color:#b9770e;text-transform:uppercase;letter-spacing:.13em;font-size:.66rem;font-weight:600;margin:0 0 .4rem}",
+    "h1{font-weight:300;font-size:2rem;margin:0 0 .3rem;letter-spacing:-.5px}",
+    ".meta{color:#666;font-size:.82rem;margin:0}",
+    ".repkind{color:#1a1a1a;font-weight:500;font-size:1rem;margin:.45rem 0 0}",
+    "section.block{margin-top:1.9rem;break-inside:avoid;page-break-inside:avoid}",
+    "h2.sect{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#b9770e;font-weight:600;margin:0 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid #e0e0e0}",
+    ".kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem}",
+    ".kpi{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:.9rem 1rem}",
+    ".kpi .n{font-size:1.8rem;font-weight:300;line-height:1}",
+    ".kpi .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#666;margin-top:.35rem}",
+    ".kpi.c .n{color:#c0392b}.kpi.w .n{color:#b9770e}",
+    "table{width:100%;border-collapse:collapse;font-size:.8rem;background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden}",
+    "th{text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600;padding:.5rem .7rem;border-bottom:1px solid #e0e0e0;background:#f4f4f4}",
+    "td{padding:.5rem .7rem;border-bottom:1px solid #eee;vertical-align:top}tr:last-child td{border-bottom:none}",
+    "td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}",
+    ".sevb{display:inline-flex;align-items:center;gap:.35rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;font-weight:600;white-space:nowrap}.sevb .dot{width:7px;height:7px;border-radius:50%}",
+    ".sevb.c{color:#c0392b}.sevb.c .dot{background:#c0392b}.sevb.w{color:#b9770e}.sevb.w .dot{background:#b9770e}.sevb.i{color:#777}.sevb.i .dot{background:#aaa}",
+    ".pgblock{margin-top:1.1rem;break-inside:avoid;page-break-inside:avoid}",
+    ".pghead{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;margin-bottom:.45rem}",
+    ".pgname{font-size:1rem;font-weight:500}.pgpath{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.72rem;color:#888}",
+    ".pill{font-size:.62rem;padding:.1rem .45rem;border-radius:20px;border:1px solid #ddd;color:#666}",
+    ".pill.c{color:#c0392b;border-color:#e2b3ae}.pill.w{color:#b9770e;border-color:#e3cd9c}.pill.i{color:#777}",
+    ".sugg{color:#2e7d4f}.muted{color:#888}",
+    ".trend{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:1.1rem}",
+    ".trend .d{font-size:1.7rem;font-weight:300}.trend .dl{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:#666;margin-top:.2rem}",
+    ".foot{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #e0e0e0;color:#999;font-size:.7rem}",
+    "@media print{body{background:#fff}.rep{padding:1.2rem}}"
+  ].join('');
+}
+function buildReportHtml(view){
+  var D = buildDashboardData();
+  var E = escapeHtml;
+  var sevRank = { critical:0, warning:1, info:2 };
+  function sevc(s){ return s==='critical'?'c':s==='warning'?'w':'i'; }
+  function sevb(s){ return '<span class="sevb '+sevc(s)+'"><span class="dot"></span>'+E(s)+'</span>'; }
+  function sect(title, inner){ return '<section class="block"><h2 class="sect">'+E(title)+'</h2>'+inner+'</section>'; }
+  function fmtAge(days){ if(days==null) return ''; if(days<60) return days+'d'; var mo=Math.floor(days/30.44); if(mo<24) return mo+'mo'; return (days/365).toFixed(1)+'y'; }
+  function pd(s){ if(!s) return null; var d=new Date(s); return isNaN(d)?null:d; }
+  var cdByKey={};
+  function normKey(p){ return (p||'').toLowerCase().replace(/^\/+|\/+$/g,'').replace(/\s+/g,'-'); }
+  (D.contentDates||[]).forEach(function(r){ cdByKey[normKey(r.path)]=r; });
+  function pageDate(path){ return cdByKey[normKey((path||'').replace(/^(es|zh)\//,''))]||null; }
+  function rollTable(obj, label){
+    var keys=Object.keys(obj||{}).sort(function(a,b){ return obj[b]-obj[a]; });
+    if(!keys.length) return '<p class="muted">No findings.</p>';
+    var rows=keys.map(function(k){ return '<tr><td>'+E(k)+'</td><td class="num">'+obj[k]+'</td></tr>'; }).join('');
+    return '<table><thead><tr><th>'+E(label)+'</th><th class="num">Findings</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  var body='';
+  if(view === 'leaders'){
+    function kpi(n,l,cls){ return '<div class="kpi '+(cls||'')+'"><div class="n">'+n+'</div><div class="l">'+E(l)+'</div></div>'; }
+    var kpis='<div class="kpis">'+kpi(D.summary.pages,'Pages')+kpi(D.summary.critical,'Critical','c')
+      +kpi(D.summary.warning,'Warnings','w')+kpi(D.summary.broken,'Broken links',D.summary.broken?'c':'')
+      +kpi(D.findings.length,'Total findings')+'</div>';
+    var bs=D.rollups.bySeverity||{}, stot=(bs.critical||0)+(bs.warning||0)+(bs.info||0);
+    var sevRows=['critical','warning','info'].map(function(k){ var n=bs[k]||0, p=stot?Math.round(n/stot*100):0;
+      return '<tr><td>'+sevb(k)+'</td><td class="num">'+n+'</td><td class="num">'+p+'%</td></tr>'; }).join('');
+    var sevTable='<table><thead><tr><th>Severity</th><th class="num">Count</th><th class="num">Share</th></tr></thead><tbody>'+sevRows+'</tbody></table>';
+    var trendBlock='';
+    var t=D.trend;
+    if(t && t.hasBaseline){
+      trendBlock=sect('Change since last audit',
+        '<div class="trend"><div><div class="d" style="color:#2e7d4f">'+t.resolved+'</div><div class="dl">Resolved</div></div>'
+        +'<div><div class="d" style="color:#c0392b">'+t.added+'</div><div class="dl">New</div></div>'
+        +'<div><div class="d" style="color:#b9770e">'+t.persisting+'</div><div class="dl">Still open</div></div></div>'
+        +'<p class="meta" style="text-align:center;margin-top:.8rem">Since '+E(new Date(t.date).toLocaleDateString())+': '+t.wasTotal+' \u2192 '+t.nowTotal+'</p>');
+    }
+    var cov=D.coverage;
+    var covMissing=cov.missing.length
+      ? '<table><thead><tr><th>Language</th><th class="num">Missing / errored</th></tr></thead><tbody>'+cov.missing.map(function(m){ return '<tr><td>'+E(m.lang)+'</td><td class="num">'+m.count+'</td></tr>'; }).join('')+'</tbody></table>'
+      : '<p class="muted">Every audited page returned a version in all languages.</p>';
+    var coverageBlock=sect('Translation coverage', '<p class="meta" style="margin-bottom:.7rem">'+cov.audited+' of '+cov.discovered+' discovered page(s) audited.</p>'+covMissing);
+    var staleBlock='';
+    if(D.contentDates && D.contentDates.length){
+      var now=D.now||Date.now(), cutoff=now-12*30.44*86400000;
+      var rows=D.contentDates.map(function(r){ return { path:r.path, by:r.updatedBy, d:pd(r.updated) }; }).filter(function(r){ return r.d; }).sort(function(a,b){ return a.d-b.d; });
+      var staleN=rows.filter(function(r){ return r.d.getTime()<cutoff; }).length;
+      var tb=rows.map(function(r){ var age=Math.floor((now-r.d.getTime())/86400000), stale=r.d.getTime()<cutoff;
+        return '<tr><td>/'+E(r.path)+'</td><td>'+E(r.by||'\u2014')+'</td><td>'+E(r.d.toISOString().slice(0,10))+'</td><td class="num">'+fmtAge(age)+'</td><td>'+(stale?'<span class="sevb c"><span class="dot"></span>stale</span>':'<span class="muted">current</span>')+'</td></tr>'; }).join('');
+      staleBlock=sect('Stale content', '<p class="meta" style="margin-bottom:.7rem">'+staleN+' of '+rows.length+' page(s) not updated in over 12 months.</p>'
+        +'<table><thead><tr><th>Page</th><th>Updated by</th><th>Last updated</th><th class="num">Age</th><th>Status</th></tr></thead><tbody>'+tb+'</tbody></table>');
+    }
+    var syncBlock='';
+    if(D.sync && D.sync.hasBaseline){
+      var staleF=D.findings.filter(function(f){ return f.category==='source changed, translation stale'; });
+      var apprOn=D.sync.approvedAt ? ' (approved '+E(new Date(D.sync.approvedAt).toLocaleDateString())+')' : '';
+      if(staleF.length){
+        var srows=staleF.slice().sort(function(a,b){ return a.page.localeCompare(b.page); }).map(function(f){
+          return '<tr><td>'+E(f.page)+'<br><span class="pgpath" style="font-size:.68rem">/'+E(f.path)+'</span></td><td>'+E(f.lang)+'</td><td>'+E(f.detail)+'</td></tr>'; }).join('');
+        syncBlock=sect('Stale because English changed'+apprOn,
+          '<p class="meta" style="margin-bottom:.7rem">'+staleF.length+' translated page(s) where the English source changed after approval and the translation has not been updated.</p>'
+          +'<table><thead><tr><th>Page</th><th>Locale</th><th>What changed</th></tr></thead><tbody>'+srows+'</tbody></table>');
+      } else {
+        syncBlock=sect('Source sync'+apprOn, '<p class="muted">No stale translations \u2014 every approved translation still matches its English source.</p>');
+      }
+    }
+    body=sect('At a glance', kpis)
+      + syncBlock
+      + sect('Severity breakdown', sevTable)
+      + trendBlock
+      + sect('Findings by category', rollTable(D.rollups.byCategory,'Category'))
+      + sect('Findings by language', rollTable(D.rollups.byLang,'Language'))
+      + sect('Findings by section / directory', rollTable(D.rollups.byDir,'Section'))
+      + coverageBlock
+      + staleBlock;
+  } else {
+    if(!D.findings.length){
+      body='<section class="block"><p class="muted">No findings — every audited page passed.</p></section>';
+    } else {
+      var groups={}; D.findings.forEach(function(f){ var k=f.page+'||'+f.path; (groups[k]=groups[k]||[]).push(f); });
+      var keys=Object.keys(groups);
+      function weight(list){ var w=0; list.forEach(function(f){ w += f.severity==='critical'?100:f.severity==='warning'?10:1; }); return w; }
+      keys.sort(function(a,b){ return weight(groups[b])-weight(groups[a]); });
+      var now=D.now||Date.now();
+      var pagesHtml=keys.map(function(k){
+        var items=groups[k].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity])||a.lang.localeCompare(b.lang); });
+        var head=k.split('||'), name=head[0], path=head[1];
+        var cc=items.filter(function(f){return f.severity==='critical';}).length;
+        var wc=items.filter(function(f){return f.severity==='warning';}).length;
+        var ic=items.filter(function(f){return f.severity==='info';}).length;
+        var cd=pageDate(path), dateStr='';
+        if(cd && cd.updated){ var d=pd(cd.updated); if(d){ var age=Math.floor((now-d.getTime())/86400000); dateStr='<span class="pill">updated '+E(d.toISOString().slice(0,10))+' \u00B7 '+fmtAge(age)+(cd.updatedBy?' \u00B7 '+E(cd.updatedBy):'')+'</span>'; } }
+        var rows=items.map(function(f){ return '<tr><td>'+sevb(f.severity)+'</td><td>'+E(f.lang)+'</td><td>'+E(f.category)+'</td><td>'+E(f.detail)+(f.suggestion?'<br><span class="sugg">\u2192 '+E(f.suggestion)+'</span>':'')+'</td></tr>'; }).join('');
+        return '<div class="pgblock"><div class="pghead"><span class="pgname">'+E(name)+'</span><span class="pgpath">/'+E(path)+'</span>'
+          +(cc?'<span class="pill c">'+cc+' critical</span>':'')+(wc?'<span class="pill w">'+wc+' warning</span>':'')+(ic?'<span class="pill i">'+ic+' info</span>':'')+dateStr+'</div>'
+          +'<table><thead><tr><th>Severity</th><th>Language</th><th>Category</th><th>Issue &amp; suggestion</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+      }).join('');
+      body='<section class="block"><p class="meta">'+D.findings.length+' finding(s) across '+keys.length+' page(s), ordered by severity.</p></section>'+pagesHtml;
+    }
+  }
+
+  var header='<p class="eyebrow">Localization QA Report</p><h1>'+E(D.meta.host)+'</h1>'
+    + '<p class="meta">Generated '+E(D.meta.generated)+' \u00B7 '+E((D.meta.langs||[]).join(', '))+' \u00B7 translation check: '+E(D.meta.translationCheck)+'</p>'
+    + '<p class="repkind">'+(view==='leaders'?'Leadership summary':'Author work list')+'</p>';
+  var foot='<div class="foot">Multilingual Site Audit \u00B7 '+E(D.meta.host)+' \u00B7 '+(view==='leaders'?'Leadership':'Author')+' report</div>';
+  var printScript='<scr'+'ipt>(function(){function go(){try{var w=document.documentElement.scrollWidth,h=document.documentElement.scrollHeight;var st=document.createElement("style");st.textContent="@page{size:"+w+"px "+h+"px;margin:0}";document.head.appendChild(st);}catch(e){}try{window.focus();window.print();}catch(e){}}if(document.readyState==="complete")setTimeout(go,350);else window.addEventListener("load",function(){setTimeout(go,350);});})();</scr'+'ipt>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>'
+    + E(D.meta.host)+' \u2014 '+(view==='leaders'?'Leadership':'Author')+' report</title><style>'+reportCss()+'</style></head><body><div class="rep">'
+    + header+body+foot+'</div>'+printScript+'</body></html>';
 }
 function dashboardCss(){
   return [
@@ -1020,6 +1318,19 @@ function dashboardCss(){
     'pre.src{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.72rem;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.6rem;margin:.4rem 0 0}',
     '.trend{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center}.delta{font-size:1.9rem;font-weight:300}',
     '.empty{color:var(--muted);font-size:.88rem}',
+    '.ftable-wrap{overflow-x:auto;margin-top:.2rem}',
+    'table.ft{width:100%;border-collapse:collapse;font-size:.83rem}',
+    'table.ft th{text-align:left;color:var(--muted2);font-weight:500;text-transform:uppercase;font-size:.62rem;letter-spacing:.06em;padding:.35rem .55rem;border-bottom:1px solid var(--border);white-space:nowrap}',
+    'table.ft td{padding:.5rem .55rem;border-bottom:1px solid var(--border);vertical-align:top}table.ft tbody tr.frow:last-of-type td{border-bottom:none}',
+    'tr.frow{cursor:pointer;transition:background .12s}tr.frow:hover{background:#2a2a2a}tr.frow.open{background:#2a2a2a}',
+    '.sevb{display:inline-flex;align-items:center;gap:.4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;font-weight:500;white-space:nowrap}.sevb .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}',
+    '.sevb.c{color:var(--crit)}.sevb.c .dot{background:var(--crit)}.sevb.w{color:var(--warn)}.sevb.w .dot{background:var(--warn)}.sevb.i{color:var(--muted)}.sevb.i .dot{background:var(--muted2)}',
+    '.ft .fc-pg{color:var(--text)}.ft .fc-path{display:block;color:var(--muted2);font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.68rem;margin-top:.1rem}',
+    '.ft .fc-lang,.ft .fc-cat{color:var(--muted);white-space:nowrap}.ft .fc-issue{color:var(--text);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62ch}.drill-body .fc-issue{max-width:30ch}',
+    '.ft .fc-exp{width:1.4rem;text-align:right;color:var(--muted2)}.fchev{display:inline-block;transition:transform .2s}tr.frow.open .fchev{transform:rotate(90deg)}',
+    'tr.fdetail{display:none}tr.fdetail.show{display:table-row}tr.fdetail>td{padding:.1rem .55rem .7rem;background:#1b1b1b;border-bottom:1px solid var(--border)}',
+    '.fd-inner{padding:.6rem .8rem;border-left:2px solid var(--accent);background:var(--card-alt);border-radius:0 6px 6px 0}',
+    '.fd-sugg{color:var(--ok);font-size:.82rem;margin:0 0 .4rem}.fd-meta{color:var(--muted);font-size:.73rem;margin:0 0 .4rem;font-family:"SF Mono",Monaco,Consolas,monospace}',
     'details.drill{border-bottom:1px solid var(--border)}details.drill>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.7rem;padding:.55rem 0;font-size:.88rem}details.drill>summary::-webkit-details-marker{display:none}',
     '.finding details.evidence{margin:.1rem .85rem .7rem}.finding details.evidence>summary{cursor:pointer;color:var(--accent);font-size:.72rem;list-style:none}.finding details.evidence>summary::-webkit-details-marker{display:none}',
     'ul.evlist{list-style:none;margin:.4rem 0 0;padding:0;border:1px solid var(--border);border-radius:6px;background:var(--bg);max-height:320px;overflow:auto}',
@@ -1048,7 +1359,9 @@ function dashboardCss(){
     '.sevmix{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.donut{width:148px;height:148px;flex:0 0 auto}.donut-n{fill:var(--text);font-size:30px;font-weight:300}.donut-l{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}',
     '.legend{display:flex;flex-direction:column;gap:.65rem;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:.6rem;font-size:.88rem}.swatch{width:11px;height:11px;border-radius:3px;flex:0 0 auto}.legend-row .ln{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text)}.legend-row .lt{color:var(--muted)}',
     '.covrow{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.7rem}.covrow .big{font-size:1.8rem;font-weight:300;color:var(--accent);line-height:1}.barrow{display:flex;gap:.6rem;margin:.3rem 0;font-size:.85rem}',
-    '@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}}'
+    '@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}}',
+    '.queue-stale{border-left:3px solid var(--warn);margin-bottom:1.25rem}.queue-stale .label{color:var(--warn)}.queue-stale .label::before{background:var(--warn)}',
+    '.queue-ok{margin-bottom:1.25rem}'
   ].join('');
 }
 function dashboardApp(){
@@ -1084,6 +1397,32 @@ function dashboardApp(){
       + evidenceBlock(f)
       + '</div>';
   }
+  /* ---- compact, scannable findings table (replaces stacked cards) ---- */
+  function sevAbbr(s){ return s==='critical'?'c':s==='warning'?'w':'i'; }
+  function sevBadge(s){ return '<span class="sevb '+sevAbbr(s)+'"><span class="dot"></span>'+esc(s)+'</span>'; }
+  var FCELL = {
+    sev:  function(f){ return sevBadge(f.severity); },
+    page: function(f){ return '<span class="fc-pg">'+esc(f.page)+'</span><span class="fc-path">/'+esc(f.path)+'</span>'; },
+    lang: function(f){ return '<span class="fc-lang">'+esc(f.lang)+'</span>'; },
+    cat:  function(f){ return '<span class="fc-cat">'+esc(f.category)+'</span>'; },
+    issue:function(f){ return '<span class="fc-issue">'+esc(f.detail)+'</span>'; }
+  };
+  var FHEAD = { sev:'Severity', page:'Page', lang:'Language', cat:'Category', issue:'Issue' };
+  function findingsTable(rows, cols){
+    if(!rows || !rows.length) return '<p class="empty">No findings.</p>';
+    var span = cols.length + 1;
+    var thead = '<thead><tr>' + cols.map(function(k){ return '<th>'+FHEAD[k]+'</th>'; }).join('') + '<th></th></tr></thead>';
+    var body = rows.map(function(f){
+      var tds = cols.map(function(k){ return '<td>'+FCELL[k](f)+'</td>'; }).join('')
+        + '<td class="fc-exp"><span class="fchev">\u25B8</span></td>';
+      var detail = '<div class="fd-inner">'
+        + (f.suggestion ? '<div class="fd-sugg">\u2192 '+esc(f.suggestion)+'</div>' : '')
+        + '<div class="fd-meta">'+esc(f.lang)+' \u00B7 '+esc(f.category)+' \u00B7 /'+esc(f.path)+'</div>'
+        + evidenceBlock(f) + '</div>';
+      return '<tr class="frow">'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
+    }).join('');
+    return '<div class="ftable-wrap"><table class="ft">'+thead+'<tbody>'+body+'</tbody></table></div>';
+  }
 
   app.innerHTML =
     '<p class="eyebrow">Localization QA dashboard</p>'
@@ -1111,6 +1450,19 @@ function dashboardApp(){
   });
   if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
   setTimeout(postHeight, 200);
+
+  /* expand/collapse a findings-table row to show its detail */
+  document.addEventListener('click', function(e){
+    var row = e.target.closest ? e.target.closest('tr.frow') : null;
+    if(!row) return;
+    var det = row.nextElementSibling;
+    if(det && det.className.indexOf('fdetail') !== -1){
+      var willOpen = !det.classList.contains('show');
+      det.classList.toggle('show', willOpen);
+      row.classList.toggle('open', willOpen);
+      postHeight();
+    }
+  });
 
   /* content-date lookup (best-effort match of audited page -> Sitecore date) */
   var cdByKey = {};
@@ -1160,7 +1512,7 @@ function dashboardApp(){
         + (ic?'<span class="pill i">'+ic+' info</span>':'')
         + datePill
         + '<span class="pc-path">/'+esc(path)+'</span>'
-        + '</summary><div class="pc-body">'+items.map(findingCard).join('')+'</div></details>';
+        + '</summary><div class="pc-body">'+findingsTable(items, ['sev','lang','cat','issue'])+'</div></details>';
     }).join('');
     document.getElementById('author-list').innerHTML=html;
   }
@@ -1202,6 +1554,7 @@ function dashboardApp(){
     document.getElementById('view-authors').scrollIntoView({behavior:'smooth', block:'start'});
   };
   function drill(dim){
+    var cols = ['sev','page','issue'];
     var groups={}; D.findings.forEach(function(f){ var k=f[dim]||'\u2014'; (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
     if(!keys.length) return '<p class="empty">No findings.</p>';
@@ -1212,7 +1565,7 @@ function dashboardApp(){
       return '<details class="drill"><summary><span class="drill-label">'+chev+esc(k)+'</span>'
         +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
         +'<span class="drill-count">'+list.length+'</span></summary>'
-        +'<div class="drill-body">'+list.map(findingCard).join('')+'</div></details>';
+        +'<div class="drill-body">'+findingsTable(list, cols)+'</div></details>';
     }).join('');
   }
 
@@ -1229,7 +1582,8 @@ function dashboardApp(){
     trendInner='<p class="empty">No baseline loaded. Save a snapshot after a run, then load it as the baseline before the next run to see resolved / new / still-open counts here.</p>';
   }
 
-  var sc=D.summary.critical||0, sw=D.summary.warning||0, si=D.summary.info||0, stot=sc+sw+si;
+  var bs = D.rollups.bySeverity || {};
+  var sc=bs.critical||0, sw=bs.warning||0, si=bs.info||0, stot=sc+sw+si;
   var sevInner='<div class="sevmix">'
     + donut([{n:sc,color:'var(--crit)'},{n:sw,color:'var(--warn)'},{n:si,color:'var(--muted2)'}], stot)
     + '<div class="legend">'
@@ -1244,6 +1598,20 @@ function dashboardApp(){
     : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
   var covInner='<div class="covrow"><span class="big">'+cov.audited+'</span><span class="muted">of '+cov.discovered+' discovered page(s) audited</span></div>'+covMissing;
 
+  var sync = D.sync || {};
+  var staleFindings = D.findings.filter(function(f){ return f.category === 'source changed, translation stale'; });
+  var queueHtml = '';
+  if(sync.hasBaseline){
+    var apprTxt = sync.approvedAt ? ' \u00B7 approved ' + esc(new Date(sync.approvedAt).toLocaleDateString()) : '';
+    if(staleFindings.length){
+      queueHtml = '<section class="card queue-stale"><p class="label">\u26A0 Stale because English changed \u00B7 retranslate these (' + staleFindings.length + ')' + apprTxt + '</p>'
+        + findingsTable(staleFindings, ['sev','page','lang','issue']) + '</section>';
+    } else {
+      queueHtml = '<section class="card queue-ok"><p class="label">Source sync' + apprTxt + '</p>'
+        + '<p class="ok" style="font-size:.88rem">No stale translations — every approved translation still matches its English source.</p></section>';
+    }
+  }
+
   var lv=document.getElementById('view-leaders');
   lv.innerHTML=
     '<div class="kpis">'
@@ -1253,6 +1621,7 @@ function dashboardApp(){
       + kpi(D.summary.broken,'Broken links',D.summary.broken?'crit':'','')
       + kpi(D.findings.length,'Total findings','','')
       + '</div>'
+    + queueHtml
     + '<div class="dash-grid">'
       + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
       + panel('Change since last audit', trendInner)
@@ -1933,15 +2302,19 @@ async function runAudit(){
 
   document.getElementById('runBtn').disabled = true;
   document.getElementById('results').innerHTML = '';
-  document.getElementById('summaryCard').style.display = 'none';
+  var _gd = document.getElementById('genDone'); if(_gd) _gd.style.display = 'none';
   document.getElementById('barWrap').style.display = 'block';
+  scrollTopSmooth();
+  openRunModal();
 
   auditState = { results: [], crit:0, warn:0, info:0, broken:0, pages:0 };
   linkCache.clear();
 
   const totalUnits = activePages.length;
   let done = 0;
+  let auditOk = true;
 
+  try {
   for(const pg of activePages){
     setProgress(`Auditing “${pg.name}”…`);
     const result = { page: pg, languages: [], refData: null, refError: null };
@@ -1954,6 +2327,7 @@ async function runAudit(){
       if(r.ok){ refData = extract(r.text, refUrl); }
       else { result.refError = r.error ? r.error : ('HTTP ' + r.status); }
       result.refData = refData;
+      result.enFp = refData ? contentFingerprint(refData) : null;
       result.refStatus = r.status;
       result.refUrl = refUrl;
     }
@@ -1973,6 +2347,7 @@ async function runAudit(){
       block.status = tr.status;
       const tData = extract(tr.text, url);
       block.data = tData;
+      block.trFp = contentFingerprint(tData);
 
       // technical pass for this language
       block.tech = await technicalPass(tData, tl.label, conc, auditState);
@@ -2021,10 +2396,16 @@ async function runAudit(){
     setBar(done/totalUnits*100);
   }
 
-  document.getElementById('runBtn').disabled = false;
   setProgress('Audit complete — ' + auditState.pages + ' page(s) reviewed.');
   setBar(100);
-  renderSummary();
+  } catch(err){
+    auditOk = false;
+    setProgress('Audit stopped: ' + (err && err.message ? err.message : String(err)), true);
+  } finally {
+    document.getElementById('runBtn').disabled = false;
+    closeRunModal();
+  }
+  if(auditOk) renderSummary();
 }
 
 function bump(s, sev){ if(sev==='critical') s.crit++; else if(sev==='warning') s.warn++; else s.info++; }
@@ -2271,25 +2652,45 @@ function renderIssue(is){
 
 function renderSummary(){
   const s = auditState;
-  document.getElementById('summaryCard').style.display = 'block';
-  document.getElementById('viewTabs').style.display = 'flex';
   markDashStale();
-  showView('authors');
-  const grid = document.getElementById('summaryGrid');
-  grid.innerHTML = `
-    <div class="stat"><div class="num">${s.pages}</div><div class="lbl">Pages reviewed</div></div>
-    <div class="stat crit"><div class="num">${s.crit}</div><div class="lbl">Critical issues</div></div>
-    <div class="stat warn"><div class="num">${s.warn}</div><div class="lbl">Warnings</div></div>
-    <div class="stat crit"><div class="num">${s.broken}</div><div class="lbl">Broken links</div></div>
-    <div class="stat"><div class="num">${s.info}</div><div class="lbl">Notes</div></div>`;
+  const done = document.getElementById('genDone');
+  if(done){
+    done.style.display = 'block';
+    done.innerHTML = 'Audit complete — <strong>' + s.pages + '</strong> page(s) reviewed · '
+      + s.crit + ' critical · ' + s.warn + ' warning · ' + s.broken + ' broken link(s). '
+      + 'Open your <a onclick="showPage(\'leaders\')">Leaders dashboard</a> &middot; '
+      + '<a onclick="showPage(\'authors\')">Authors dashboard</a>.';
+  }
+  showPage('leaders');
 }
 
 /* ----------------------------- helpers ----------------------------- */
 function clean(s){ return (s||'').replace(/\s+/g,' ').trim(); }
 function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 function escapeAttr(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-function setProgress(msg, warn){ const el=document.getElementById('progress'); el.textContent = msg; el.style.color = warn?'var(--critical)':'var(--muted)'; }
-function setBar(pct){ document.getElementById('bar').style.width = pct + '%'; }
+function setProgress(msg, warn){
+  ['progress','modalProgress'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(id === 'modalProgress' && !warn && msg){ el.innerHTML = '<span class="run-spinner"></span>' + msg; }
+    else { el.textContent = msg; }
+    el.style.color = warn ? 'var(--critical)' : 'var(--muted)';
+  });
+}
+function setBar(pct){
+  ['bar','modalBar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.width = pct + '%'; });
+}
+function scrollTopSmooth(){ try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e){ window.scrollTo(0,0); } }
+function openRunModal(){
+  var m = document.getElementById('runModal');
+  if(m){ m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+  setBar(0);
+}
+function closeRunModal(){
+  var m = document.getElementById('runModal');
+  if(m){ m.style.display = 'none'; }
+  document.body.style.overflow = '';
+}
 
 /* ----------------------------- init ----------------------------- */
 (function initConfigDisplay(){
