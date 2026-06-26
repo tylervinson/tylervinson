@@ -290,7 +290,7 @@
 <div class="wrap">
   <header class="page-head">
     <p class="eyebrow">Localization QA</p>
-    <h1>Multilingual Site Audit<span class="version">v2.6</span></h1>
+    <h1>Multilingual Site Audit<span class="version">v2.7</span></h1>
     <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
   </header>
 
@@ -420,8 +420,10 @@
   <!-- DASHBOARDS (Authors / Leaders) — retain the last generated data -->
   <div id="page-dash" class="page" style="display:none;">
     <div id="dashToolbar" class="dash-toolbar" style="display:none;">
-      <span class="score" id="reportStatus"></span>
+      <span class="score" id="storeStatus" style="font-size:.78rem;"></span>
       <span class="spacer" style="flex:1;"></span>
+      <span class="score" id="reportStatus" style="font-size:.78rem;"></span>
+      <button class="btn-secondary" id="publishBtn" onclick="publishRun()">Publish run to team</button>
       <button class="primary" id="pdfBtn" style="padding:.55rem 1.1rem;" onclick="exportReportPDF()">Save as report PDF</button>
     </div>
     <div id="dashEmpty" class="dash-empty">No audit data yet. Open <strong>Generate data</strong>, run an audit, and your Authors and Leaders dashboards will appear here — they keep the last run's results.</div>
@@ -456,6 +458,11 @@ const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (
 // Sitecore content root for the "Items last updated" export — used to turn item
 // paths into clean relative paths in the stale-content view.
 const SITECORE_ROOT = '/sitecore/content/bcbs az/azblue/home';
+// OPTIONAL shared store: set STATE_URL to your KV-backed state endpoint so triage
+// marks (done / ignored) and the latest run are consistent for EVERY user. Leave it
+// empty for local-only (this browser). A ready-to-deploy Cloudflare Worker is shipped
+// alongside this file (audit-state-worker.js). Auth reuses the audit passphrase.
+const STATE_URL = 'https://audit-state.bcbs-of-az.workers.dev/';
 /* ===================================================================== */
 
 /* ----------------------------- languages ----------------------------- */
@@ -820,6 +827,91 @@ function downloadBlob(content, mime, filename){
 }
 function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
 
+/* ============================ shared state ============================
+   Persistent, cross-user store for triage marks (done / ignored) and the
+   latest run. With STATE_URL set, it reads/writes your KV-backed endpoint so
+   the whole team sees the same thing; otherwise it falls back to this browser's
+   localStorage. Auth reuses the audit passphrase (X-Audit-Key). */
+let triageState = {};      // { findingKey: { status:'done'|'ignored', at } }
+let sharedDash  = null;    // a published dashboard-data object (for viewers who didn't run locally)
+let storeMode   = (STATE_URL && STATE_URL.trim()) ? 'remote' : 'local';
+let _lastTriageSaveAt = 0;
+function stateNs(){ return 'mlaudit:' + reportHost(); }
+function stateEndpoint(key){
+  const base = (STATE_URL || '').trim();
+  try { const u = new URL(base); u.searchParams.set('key', stateNs() + ':' + key); return u.href; }
+  catch(e){ return base + (base.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(stateNs() + ':' + key); }
+}
+async function stateGet(key){
+  if(storeMode === 'local'){
+    try { const v = localStorage.getItem(stateNs() + ':' + key); return v ? JSON.parse(v) : null; } catch(e){ return null; }
+  }
+  const res = await fetch(stateEndpoint(key), fetchOpts());
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+async function statePut(key, value){
+  if(storeMode === 'local'){
+    try { localStorage.setItem(stateNs() + ':' + key, JSON.stringify(value)); return true; } catch(e){ return false; }
+  }
+  const res = await fetch(stateEndpoint(key), fetchOpts({ method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(value) }));
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return true;
+}
+let _triageSaveTimer = null;
+function saveTriageSoon(){
+  clearTimeout(_triageSaveTimer);
+  _triageSaveTimer = setTimeout(function(){
+    _lastTriageSaveAt = Date.now();
+    statePut('triage', triageState).then(function(){ setStoreStatus(); }).catch(function(err){ setStoreStatus('save failed'); });
+  }, 600);
+}
+function setTriage(key, status){
+  if(!key) return;
+  if(status === 'open'){ delete triageState[key]; }
+  else { triageState[key] = { status: status, at: new Date().toISOString() }; }
+  saveTriageSoon();
+  setStoreStatus();
+}
+async function loadSharedState(force){
+  // skip a remote re-pull right after we just saved (avoid clobbering our own change)
+  if(!force && storeMode === 'remote' && Date.now() - _lastTriageSaveAt < 2000) return;
+  try { const t = await stateGet('triage'); if(t && typeof t === 'object') triageState = t; } catch(e){}
+  if(!(auditState && auditState.results && auditState.results.length)){
+    try { const r = await stateGet('run'); if(r && r.data) sharedDash = r.data; } catch(e){}
+  }
+  markDashStale();
+  setStoreStatus();
+  refreshDashIfVisible();
+}
+async function publishRun(){
+  if(!(auditState && auditState.results && auditState.results.length)){ setReportStatus('Run an audit first.', true); return; }
+  const payload = { type:'mlaudit-run', at:new Date().toISOString(), host:reportHost(), data: buildDashboardData() };
+  try {
+    await statePut('run', payload);
+    setReportStatus(storeMode === 'remote'
+      ? 'Run published to the shared store — everyone now sees this audit.'
+      : 'Run saved to this browser. Set STATE_URL (see audit-state-worker.js) to share it across users.');
+  } catch(e){ setReportStatus('Could not publish the run: ' + e.message, true); }
+}
+function setStoreStatus(extra){
+  const el = document.getElementById('storeStatus'); if(!el) return;
+  const vals = Object.keys(triageState).map(function(k){ return triageState[k]; });
+  const done = vals.filter(function(t){ return t && t.status === 'done'; }).length;
+  const ign  = vals.filter(function(t){ return t && t.status === 'ignored'; }).length;
+  const mode = storeMode === 'remote' ? 'Shared store · team-wide' : 'Local only · this browser';
+  el.textContent = mode + ' · ' + done + ' done · ' + ign + ' ignored' + (extra ? (' · ' + extra) : '');
+}
+function currentDashData(){
+  let d = null;
+  if(auditState && auditState.results && auditState.results.length){ d = buildDashboardData(); }
+  else if(sharedDash){ d = Object.assign({}, sharedDash); }
+  if(d) d.triage = triageState;
+  return d;
+}
+
 /* ---- unified findings model (one normalized row per issue, with a stable key) ---- */
 function findingSubject(f){
   if(f.section === 'Links') return f.detail;          // the URL identifies the link
@@ -1085,7 +1177,7 @@ function ensureDashFrame(targetTab){
   }
 }
 let currentDashTab = 'authors';
-function dashHasData(){ return !!(auditState && auditState.results && auditState.results.length); }
+function dashHasData(){ return !!((auditState && auditState.results && auditState.results.length) || sharedDash); }
 function showPage(p){
   document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
   var gen = (p === 'generate');
@@ -1098,6 +1190,8 @@ function showPage(p){
     document.getElementById('dashToolbar').style.display = has ? 'flex' : 'none';
     document.getElementById('dashFrame').style.display = has ? 'block' : 'none';
     if(has) ensureDashFrame(currentDashTab);
+    if(has) setStoreStatus();
+    if(storeMode === 'remote') loadSharedState();
   }
   try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e){ window.scrollTo(0,0); }
 }
@@ -1112,7 +1206,7 @@ function refreshDashIfVisible(){
 /* back-compat shim */
 function showView(v){ showPage(v === 'leaders' ? 'leaders' : 'authors'); }
 function buildDashboardHtml(){
-  const data = buildDashboardData();
+  const data = currentDashData() || buildDashboardData();
   let json = JSON.stringify(data).replace(/<\/script>/gi, '<\\/script>');
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
@@ -1180,7 +1274,23 @@ function reportCss(){
   ].join('');
 }
 function buildReportHtml(view){
-  var D = buildDashboardData();
+  var D = currentDashData() || buildDashboardData();
+  var TRI = D.triage || {};
+  var allFindings = D.findings || [];
+  var openF = allFindings.filter(function(f){ return !(TRI[f.key] && TRI[f.key].status); });
+  var resolvedN = allFindings.length - openF.length;
+  function _cb(arr, p){ var o={}; arr.forEach(function(x){ var k=x[p]||'\u2014'; o[k]=(o[k]||0)+1; }); return o; }
+  D = Object.assign({}, D, {
+    findings: openF,
+    rollups: { byLang:_cb(openF,'lang'), byCategory:_cb(openF,'category'), byDir:_cb(openF,'dir'), bySeverity:_cb(openF,'severity') },
+    summary: {
+      pages: D.summary.pages,
+      critical: openF.filter(function(f){ return f.severity==='critical' && f.category!=='broken link'; }).length,
+      warning: openF.filter(function(f){ return f.severity==='warning'; }).length,
+      info: openF.filter(function(f){ return f.severity==='info'; }).length,
+      broken: openF.filter(function(f){ return f.category==='broken link'; }).length
+    }
+  });
   var E = escapeHtml;
   var sevRank = { critical:0, warning:1, info:2 };
   function sevc(s){ return s==='critical'?'c':s==='warning'?'w':'i'; }
@@ -1284,7 +1394,7 @@ function buildReportHtml(view){
 
   var header='<p class="eyebrow">Localization QA Report</p><h1>'+E(D.meta.host)+'</h1>'
     + '<p class="meta">Generated '+E(D.meta.generated)+' \u00B7 '+E((D.meta.langs||[]).join(', '))+' \u00B7 translation check: '+E(D.meta.translationCheck)+'</p>'
-    + '<p class="repkind">'+(view==='leaders'?'Leadership summary':'Author work list')+'</p>';
+    + '<p class="repkind">'+(view==='leaders'?'Leadership summary':'Author work list')+(resolvedN?' \u00B7 <span style="font-weight:400;color:#888">open items only ('+resolvedN+' resolved hidden)</span>':'')+'</p>';
   var foot='<div class="foot">Multilingual Site Audit \u00B7 '+E(D.meta.host)+' \u00B7 '+(view==='leaders'?'Leadership':'Author')+' report</div>';
   var printScript='<scr'+'ipt>(function(){function go(){try{var w=document.documentElement.scrollWidth,h=document.documentElement.scrollHeight;var st=document.createElement("style");st.textContent="@page{size:"+w+"px "+h+"px;margin:0}";document.head.appendChild(st);}catch(e){}try{window.focus();window.print();}catch(e){}}if(document.readyState==="complete")setTimeout(go,350);else window.addEventListener("load",function(){setTimeout(go,350);});})();</scr'+'ipt>';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>'
@@ -1369,7 +1479,12 @@ function dashboardCss(){
     '.covrow{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.7rem}.covrow .big{font-size:1.8rem;font-weight:300;color:var(--accent);line-height:1}.barrow{display:flex;gap:.6rem;margin:.3rem 0;font-size:.85rem}',
     '@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}}',
     '.queue-stale{border-left:3px solid var(--warn);margin-bottom:1.25rem}.queue-stale .label{color:var(--warn)}.queue-stale .label::before{background:var(--warn)}',
-    '.queue-ok{margin-bottom:1.25rem}'
+    '.queue-ok{margin-bottom:1.25rem}',
+    'tr.frow.resolved td{opacity:.45}tr.frow.resolved .fc-issue{text-decoration:line-through}.ftag{display:inline-block;font-size:.85rem;margin-right:.35rem;vertical-align:middle}.ftag.done{color:var(--ok)}.ftag.ignored{color:var(--muted2)}',
+    '.tri-row{display:flex;gap:.5rem;align-items:center;margin-top:.7rem;flex-wrap:wrap}.tri-meta{color:var(--muted);font-size:.76rem;margin-right:.3rem}',
+    '.tri-btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:inherit;font-size:.74rem;padding:.32rem .7rem;border-radius:6px;cursor:pointer;transition:color .15s,border-color .15s}.tri-btn:hover{color:var(--text);border-color:var(--muted2)}.tri-btn.done:hover{color:var(--ok);border-color:var(--ok)}.tri-btn.ignore:hover{color:var(--warn);border-color:var(--warn)}',
+    '.f-toggle{display:inline-flex;align-items:center;gap:.35rem;color:var(--muted);font-size:.8rem;cursor:pointer;white-space:nowrap}.f-toggle input{accent-color:var(--accent)}',
+    '.tprog{height:8px;background:#33322f;border-radius:5px;overflow:hidden;margin-top:.2rem}.tprog-bar{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#5fae6a)}'
   ].join('');
 }
 function dashboardApp(){
@@ -1378,6 +1493,26 @@ function dashboardApp(){
   var sevRank = { critical:0, warning:1, info:2 };
   var chev = '<span class="chev">\u25B6</span>';
   var app = document.getElementById('app');
+
+  var TRIAGE = D.triage || {};
+  function statusOf(f){ var t = TRIAGE[f.key]; return (t && t.status) ? t.status : 'open'; }
+  function isOpen(f){ return statusOf(f) === 'open'; }
+  function activeFindings(){ return (D.findings||[]).filter(isOpen); }
+  function countByApp(arr, prop){ var o={}; arr.forEach(function(x){ var k=x[prop]||'\u2014'; o[k]=(o[k]||0)+1; }); return o; }
+  window.__triage = function(ek, status){
+    var key = decodeURIComponent(ek);
+    if(status === 'open'){ delete TRIAGE[key]; } else { TRIAGE[key] = { status:status, at:new Date().toISOString() }; }
+    try { parent.postMessage({ __mlaudit:'triage', key:key, status:status }, '*'); } catch(e){}
+    renderAuthors(); renderLeaders(); postHeight();
+  };
+  function triageActions(f){
+    var k = encodeURIComponent(f.key||'');
+    var st = statusOf(f);
+    var btn = function(label, status, cls){ return '<button class="tri-btn '+(cls||'')+'" onclick="__triage(\''+k+'\',\''+status+'\')">'+label+'</button>'; };
+    if(st === 'open') return '<div class="tri-row">'+btn('\u2713 Mark done','done','done')+btn('\u2298 Ignore','ignored','ignore')+'</div>';
+    var when = (TRIAGE[f.key] && TRIAGE[f.key].at) ? esc(new Date(TRIAGE[f.key].at).toLocaleDateString()) : '';
+    return '<div class="tri-row"><span class="tri-meta">'+(st==='done'?'Completed':'Ignored')+(when?' \u00B7 '+when:'')+'</span>'+btn('Reopen','open','')+'</div>';
+  }
 
   function evidenceBlock(f){
     var out = '';
@@ -1421,13 +1556,17 @@ function dashboardApp(){
     var span = cols.length + 1;
     var thead = '<thead><tr>' + cols.map(function(k){ return '<th>'+FHEAD[k]+'</th>'; }).join('') + '<th></th></tr></thead>';
     var body = rows.map(function(f){
+      var st = statusOf(f);
+      var rowCls = st === 'done' ? ' resolved done' : st === 'ignored' ? ' resolved ignored' : '';
+      var tag = st === 'done' ? '<span class="ftag done" title="Completed">\u2713</span>'
+              : st === 'ignored' ? '<span class="ftag ignored" title="Ignored">\u2298</span>' : '';
       var tds = cols.map(function(k){ return '<td>'+FCELL[k](f)+'</td>'; }).join('')
-        + '<td class="fc-exp"><span class="fchev">\u25B8</span></td>';
+        + '<td class="fc-exp">'+tag+'<span class="fchev">\u25B8</span></td>';
       var detail = '<div class="fd-inner">'
         + (f.suggestion ? '<div class="fd-sugg">\u2192 '+esc(f.suggestion)+'</div>' : '')
         + '<div class="fd-meta">'+esc(f.lang)+' \u00B7 '+esc(f.category)+' \u00B7 /'+esc(f.path)+'</div>'
-        + evidenceBlock(f) + '</div>';
-      return '<tr class="frow">'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
+        + evidenceBlock(f) + triageActions(f) + '</div>';
+      return '<tr class="frow'+rowCls+'">'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
     }).join('');
     return '<div class="ftable-wrap"><table class="ft">'+thead+'<tbody>'+body+'</tbody></table></div>';
   }
@@ -1490,6 +1629,7 @@ function dashboardApp(){
     + '<select id="f-sev"><option value="">All severities</option><option>critical</option><option>warning</option><option>info</option></select>'
     + '<select id="f-cat"><option value="">All categories</option>' + catOpts.map(function(c){return '<option>'+esc(c)+'</option>';}).join('') + '</select>'
     + '<input id="f-q" placeholder="Search text or page\u2026" style="flex:1;min-width:160px">'
+    + '<label class="f-toggle"><input type="checkbox" id="f-resolved"> show resolved</label>'
     + '<span class="muted" id="f-count" style="font-size:.8rem"></span>'
     + '</div><div id="author-list"></div></div>';
 
@@ -1507,11 +1647,14 @@ function dashboardApp(){
   function renderAuthors(){
     var l=document.getElementById('f-lang').value, s=document.getElementById('f-sev').value,
         c=document.getElementById('f-cat').value, q=document.getElementById('f-q').value.toLowerCase();
-    var rows = D.findings.filter(function(f){
+    var showRes = document.getElementById('f-resolved').checked;
+    var matched = D.findings.filter(function(f){
       return (!l||f.lang===l) && (!s||f.severity===s) && (!c||f.category===c)
         && (!q || (f.detail+' '+f.page+' '+f.path).toLowerCase().indexOf(q)!==-1);
     });
-    document.getElementById('f-count').textContent = rows.length + ' finding(s) across ' + (new Set(rows.map(function(f){return f.path;}))).size + ' page(s)';
+    var rows = matched.filter(function(f){ return showRes || isOpen(f); });
+    var resolvedHidden = matched.length - rows.length;
+    document.getElementById('f-count').textContent = rows.length + ' ' + (showRes?'finding(s)':'open') + ' across ' + (new Set(rows.map(function(f){return f.path;}))).size + ' page(s)' + (!showRes && resolvedHidden ? ' \u00B7 ' + resolvedHidden + ' resolved hidden' : '');
     var groups={}; rows.forEach(function(f){ var k=f.page+'||'+f.path; (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
     var host=document.getElementById('author-list');
@@ -1544,7 +1687,7 @@ function dashboardApp(){
       renderAuthors();
     };
   }
-  ['f-lang','f-sev','f-cat'].forEach(function(id){ document.getElementById(id).onchange=renderAuthors; });
+  ['f-lang','f-sev','f-cat','f-resolved'].forEach(function(id){ document.getElementById(id).onchange=renderAuthors; });
   document.getElementById('f-q').oninput=renderAuthors;
   renderAuthors();
 
@@ -1581,88 +1724,109 @@ function dashboardApp(){
     renderAuthors();
     document.getElementById('view-authors').scrollIntoView({behavior:'smooth', block:'start'});
   };
-  function drill(dim){
+  function drill(dim, list){
     var cols = ['sev','page','issue'];
-    var groups={}; D.findings.forEach(function(f){ var k=f[dim]||'\u2014'; (groups[k]=groups[k]||[]).push(f); });
+    var src = list || D.findings;
+    var groups={}; src.forEach(function(f){ var k=f[dim]||'\u2014'; (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
-    if(!keys.length) return '<p class="empty">No findings.</p>';
+    if(!keys.length) return '<p class="empty">No open findings.</p>';
     var max=groups[keys[0]].length;
     return keys.map(function(k){
-      var list=groups[k].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity]); });
-      var pct=Math.round(list.length/max*100);
+      var list2=groups[k].slice().sort(function(a,b){ return (sevRank[a.severity]-sevRank[b.severity]); });
+      var pct=Math.round(list2.length/max*100);
       return '<details class="drill"><summary><span class="drill-label">'+chev+esc(k)+'</span>'
         +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
-        +'<span class="drill-count">'+list.length+'</span></summary>'
-        +'<div class="drill-body">'+findingsTable(list, cols)+'</div></details>';
+        +'<span class="drill-count">'+list2.length+'</span></summary>'
+        +'<div class="drill-body">'+findingsTable(list2, cols)+'</div></details>';
     }).join('');
   }
-
-  var t=D.trend, trendInner;
-  if(t.hasBaseline){
-    var net=t.nowTotal-t.wasTotal;
-    trendInner='<div class="trend">'
-      +'<div><div class="delta ok">'+t.resolved+'</div><div class="l muted">Resolved</div></div>'
-      +'<div><div class="delta crit">'+t.added+'</div><div class="l muted">New</div></div>'
-      +'<div><div class="delta warn">'+t.persisting+'</div><div class="l muted">Still open</div></div></div>'
-      +'<p class="sub" style="text-align:center;margin-top:1rem">Since '+esc(new Date(t.date).toLocaleDateString())+': '+t.wasTotal+' \u2192 '+t.nowTotal+' \u00B7 '
-      +(net<0?'<span class="ok">down '+Math.abs(net)+'</span>':net>0?'<span class="crit">up '+net+'</span>':'<span class="muted">no change</span>')+'</p>';
-  } else {
-    trendInner='<p class="empty">No baseline loaded. Save a snapshot after a run, then load it as the baseline before the next run to see resolved / new / still-open counts here.</p>';
-  }
-
-  var bs = D.rollups.bySeverity || {};
-  var sc=bs.critical||0, sw=bs.warning||0, si=bs.info||0, stot=sc+sw+si;
-  var sevInner='<div class="sevmix">'
-    + donut([{n:sc,color:'var(--crit)'},{n:sw,color:'var(--warn)'},{n:si,color:'var(--muted2)'}], stot)
-    + '<div class="legend">'
-      + legRow('var(--crit)','Critical',sc,stot)
-      + legRow('var(--warn)','Warning',sw,stot)
-      + legRow('var(--muted2)','Info',si,stot)
-    + '</div></div>';
-
-  var cov=D.coverage;
-  var covMissing=cov.missing.length
-    ? cov.missing.map(function(m){ return '<div class="barrow"><span style="min-width:150px">'+esc(m.lang)+'</span><span class="crit">'+m.count+' page(s) missing / errored</span></div>'; }).join('')
-    : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
-  var covInner='<div class="covrow"><span class="big">'+cov.audited+'</span><span class="muted">of '+cov.discovered+' discovered page(s) audited</span></div>'+covMissing;
-
-  var sync = D.sync || {};
-  var staleFindings = D.findings.filter(function(f){ return f.category === 'source changed, translation stale'; });
-  var queueHtml = '';
-  if(sync.hasBaseline){
-    var apprTxt = sync.approvedAt ? ' \u00B7 approved ' + esc(new Date(sync.approvedAt).toLocaleDateString()) : '';
-    if(staleFindings.length){
-      queueHtml = '<section class="card queue-stale"><p class="label">\u26A0 Stale because English changed \u00B7 retranslate these (' + staleFindings.length + ')' + apprTxt + '</p>'
-        + findingsTable(staleFindings, ['sev','page','lang','issue']) + '</section>';
-    } else {
-      queueHtml = '<section class="card queue-ok"><p class="label">Source sync' + apprTxt + '</p>'
-        + '<p class="ok" style="font-size:.88rem">No stale translations — every approved translation still matches its English source.</p></section>';
-    }
-  }
+  var staleMonths = '12';
 
   var lv=document.getElementById('view-leaders');
-  lv.innerHTML=
-    '<div class="kpis">'
-      + kpi(D.summary.pages,'Pages','accent','')
-      + kpi(D.summary.critical,'Critical','crit','critical')
-      + kpi(D.summary.warning,'Warnings','warn','warning')
-      + kpi(D.summary.broken,'Broken links',D.summary.broken?'crit':'','')
-      + kpi(D.findings.length,'Total findings','','')
-      + '</div>'
-    + queueHtml
-    + '<div class="dash-grid">'
-      + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
-      + panel('Change since last audit', trendInner)
-      + panel('Findings by category \u00B7 click to expand', drill('category'))
-      + panel('Findings by section / directory \u00B7 click to expand', drill('dir'))
-      + panel('Findings by language \u00B7 click to expand', drill('lang'))
-      + panel('Translation coverage', covInner)
-      + '</div>'
-    + '<section class="card"><p class="label">Stale content</p>'
-      + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
-      + '<select id="stale-threshold"><option value="3">3 months</option><option value="6">6 months</option>'
-      + '<option value="12" selected>12 months</option><option value="18">18 months</option><option value="24">24 months</option></select></div>'
-      + '<div id="stale-body"></div></section>';
+  function renderLeaders(){
+    var ACT = activeFindings();
+    var t=D.trend, trendInner;
+    if(t.hasBaseline){
+      var net=t.nowTotal-t.wasTotal;
+      trendInner='<div class="trend">'
+        +'<div><div class="delta ok">'+t.resolved+'</div><div class="l muted">Resolved</div></div>'
+        +'<div><div class="delta crit">'+t.added+'</div><div class="l muted">New</div></div>'
+        +'<div><div class="delta warn">'+t.persisting+'</div><div class="l muted">Still open</div></div></div>'
+        +'<p class="sub" style="text-align:center;margin-top:1rem">Since '+esc(new Date(t.date).toLocaleDateString())+': '+t.wasTotal+' \u2192 '+t.nowTotal+' \u00B7 '
+        +(net<0?'<span class="ok">down '+Math.abs(net)+'</span>':net>0?'<span class="crit">up '+net+'</span>':'<span class="muted">no change</span>')+'</p>';
+    } else {
+      trendInner='<p class="empty">No baseline loaded. Save a snapshot after a run, then load it as the baseline before the next run to see resolved / new / still-open counts here.</p>';
+    }
+
+    var bs = countByApp(ACT, 'severity');
+    var sc=bs.critical||0, sw=bs.warning||0, si=bs.info||0, stot=sc+sw+si;
+    var sevInner='<div class="sevmix">'
+      + donut([{n:sc,color:'var(--crit)'},{n:sw,color:'var(--warn)'},{n:si,color:'var(--muted2)'}], stot)
+      + '<div class="legend">'
+        + legRow('var(--crit)','Critical',sc,stot)
+        + legRow('var(--warn)','Warning',sw,stot)
+        + legRow('var(--muted2)','Info',si,stot)
+      + '</div></div>';
+
+    var cov=D.coverage;
+    var covMissing=cov.missing.length
+      ? cov.missing.map(function(m){ return '<div class="barrow"><span style="min-width:150px">'+esc(m.lang)+'</span><span class="crit">'+m.count+' page(s) missing / errored</span></div>'; }).join('')
+      : '<p class="ok" style="font-size:.85rem">Every audited page returned a version in all languages.</p>';
+    var covInner='<div class="covrow"><span class="big">'+cov.audited+'</span><span class="muted">of '+cov.discovered+' discovered page(s) audited</span></div>'+covMissing;
+
+    var sync = D.sync || {};
+    var staleFindings = ACT.filter(function(f){ return f.category === 'source changed, translation stale'; });
+    var queueHtml = '';
+    if(sync.hasBaseline){
+      var apprTxt = sync.approvedAt ? ' \u00B7 approved ' + esc(new Date(sync.approvedAt).toLocaleDateString()) : '';
+      if(staleFindings.length){
+        queueHtml = '<section class="card queue-stale"><p class="label">\u26A0 Stale because English changed \u00B7 retranslate these (' + staleFindings.length + ')' + apprTxt + '</p>'
+          + findingsTable(staleFindings, ['sev','page','lang','issue']) + '</section>';
+      } else {
+        queueHtml = '<section class="card queue-ok"><p class="label">Source sync' + apprTxt + '</p>'
+          + '<p class="ok" style="font-size:.88rem">No open stale translations — every approved translation still matches its English source.</p></section>';
+      }
+    }
+
+    // triage progress
+    var doneN=0, ignN=0;
+    (D.findings||[]).forEach(function(f){ var st=statusOf(f); if(st==='done')doneN++; else if(st==='ignored')ignN++; });
+    var totalN=(D.findings||[]).length, openN=ACT.length;
+    var pctDone = totalN ? Math.round((doneN+ignN)/totalN*100) : 0;
+    var triageInner = '<div class="covrow"><span class="big">'+openN+'</span><span class="muted">open of '+totalN+' finding(s)</span></div>'
+      + '<div class="tprog"><span class="tprog-bar" style="width:'+pctDone+'%"></span></div>'
+      + '<div class="barrow" style="margin-top:.6rem"><span class="ok">'+doneN+' completed</span><span class="muted">'+ignN+' ignored</span></div>';
+
+    var critK = ACT.filter(function(f){return f.severity==='critical' && f.category!=='broken link';}).length;
+    var brokenK = ACT.filter(function(f){return f.category==='broken link';}).length;
+    lv.innerHTML=
+      '<div class="kpis">'
+        + kpi(D.summary.pages,'Pages','accent','')
+        + kpi(critK,'Critical','crit','critical')
+        + kpi(sw,'Warnings','warn','warning')
+        + kpi(brokenK,'Broken links',brokenK?'crit':'','')
+        + kpi(openN,'Open findings','','')
+        + '</div>'
+      + queueHtml
+      + '<div class="dash-grid">'
+        + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
+        + panel('Triage progress', triageInner)
+        + panel('Change since last audit', trendInner)
+        + panel('Findings by category \u00B7 click to expand', drill('category', ACT))
+        + panel('Findings by section / directory \u00B7 click to expand', drill('dir', ACT))
+        + panel('Findings by language \u00B7 click to expand', drill('lang', ACT))
+        + panel('Translation coverage', covInner)
+        + '</div>'
+      + '<section class="card"><p class="label">Stale content</p>'
+        + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
+        + '<select id="stale-threshold">'
+        + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
+        + '</select></div>'
+        + '<div id="stale-body"></div></section>';
+    var sel=document.getElementById('stale-threshold');
+    if(sel){ sel.onchange=function(){ staleMonths=sel.value; renderStale(); }; }
+    renderStale();
+  }
 
   function parseDate(s){
     if(!s) return null;
@@ -1706,8 +1870,7 @@ function dashboardApp(){
     }).join('');
     document.getElementById('stale-body').innerHTML=html;
   }
-  document.getElementById('stale-threshold').onchange=renderStale;
-  renderStale();
+  renderLeaders();
 }
 
 function collectRows(){
@@ -2734,7 +2897,11 @@ window.addEventListener('message', function(e){
     const f = document.getElementById('dashFrame');
     if(f) f.style.height = (e.data.dashHeight + 24) + 'px';
   }
+  else if(e.data && e.data.__mlaudit === 'triage'){
+    setTriage(e.data.key, e.data.status);
+  }
 });
+loadSharedState(true);
 </script>
 </body>
 </html>
