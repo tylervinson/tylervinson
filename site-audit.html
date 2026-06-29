@@ -176,6 +176,7 @@
   #appShell { position: relative; }
   .gear-btn { position: absolute; top: 0; right: 0; z-index: 5; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
   .gear-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
+  .gear-btn svg { flex: 0 0 auto; display: block; width: 16px; height: 16px; }
   /* generic app modal */
   .app-modal { position: fixed; inset: 0; background: rgba(8,8,8,.74); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 9998; padding: 1.5rem; }
   .app-modal-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem 1.8rem 1.8rem; max-width: 540px; width: 100%; box-shadow: 0 24px 70px rgba(0,0,0,.55); }
@@ -334,6 +335,9 @@
   </div>
 
   <div id="appShell" style="display:none;">
+  <button id="gearBtn" class="gear-btn" onclick="openSettingsModal()" title="Settings" aria-label="Settings">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </button>
   <header class="page-head">
     <p class="eyebrow">Localization QA</p>
     <h1>Multilingual Site Audit<span class="version">v2.8</span></h1>
@@ -347,10 +351,6 @@
   </nav>
 
   <div id="page-generate" class="page">
-
-  <button id="gearBtn" class="gear-btn" onclick="openSettingsModal()" title="Settings" aria-label="Settings">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-  </button>
 
   <!-- PAGES -->
   <section class="card no-print">
@@ -445,6 +445,7 @@
       <p class="hint" style="margin:.4rem 0 0;">These are protected before the tool regenerates the Google translation, so terms your pipeline keeps in English aren't flagged as drift. Saved with your audit file.</p>
     </div>
 
+    <!-- DISABLED 2026-06: Trend / baseline / content-dates controls. Engine code is left intact below; uncomment this block (and the "Stale content" panel in renderLeaders) to re-enable.
     <details class="accordion">
       <summary><span class="chev">▶</span> Trend &amp; content dates (optional)</summary>
       <div class="accordion-body">
@@ -458,6 +459,17 @@
           <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
         </div>
         <p class="hint" style="margin:.7rem 0 0;"><strong>Source-change detection:</strong> after a translation is signed off, click <em>Approve current as baseline</em> to record the English + translation fingerprints. Load that file before the next run and the tool flags any page whose English changed while the translation stayed put.</p>
+        <div class="score" id="inputStatus" style="margin-top:.7rem;"></div>
+      </div>
+    </details>
+    -->
+
+    <details class="accordion">
+      <summary><span class="chev">▶</span> Content dates (for the Stale content box)</summary>
+      <div class="accordion-body">
+        <p class="hint" style="margin-bottom:.7rem;">Load your Sitecore <strong>“Items last updated”</strong> export to give the Admin dashboard's <strong>Stale content</strong> box real publish dates.</p>
+        <button class="btn-secondary" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
+        <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
         <div class="score" id="inputStatus" style="margin-top:.7rem;"></div>
       </div>
     </details>
@@ -934,13 +946,17 @@ function setTriage(key, status){
 async function loadSharedState(force){
   // skip a remote re-pull right after we just saved (avoid clobbering our own change)
   if(!force && storeMode === 'remote' && Date.now() - _lastTriageSaveAt < 2000) return;
+  function sig(){ return JSON.stringify(triageState) + '|' + (sharedDash && sharedDash.meta ? sharedDash.meta.generated : ''); }
+  var before = sig();
   try { const t = await stateGet('triage'); if(t && typeof t === 'object') triageState = t; } catch(e){}
   if(!(auditState && auditState.results && auditState.results.length)){
     try { const r = await stateGet('run'); if(r && r.data) sharedDash = r.data; } catch(e){}
   }
-  markDashStale();
   setStoreStatus();
-  refreshDashIfVisible();
+  if(sig() !== before){            // only rebuild the iframe when something actually changed
+    markDashStale();
+    refreshDashIfVisible();
+  }
 }
 async function publishRun(){
   if(!(auditState && auditState.results && auditState.results.length)){ setReportStatus('Run an audit first.', true); return false; }
@@ -1583,6 +1599,7 @@ function dashboardCss(){
     '.kpi.accent{border-left-color:var(--accent)}.kpi.accent:hover{border-color:var(--accent)}',
     '.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-grid .card{margin:0}',
     '.dash-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-split>.dash-col{display:flex;flex-direction:column;gap:1.25rem;min-width:0}.dash-split .card{margin:0}',
+    '.dash-grid-eq{align-items:stretch}.dash-grid-eq>.card{display:flex;flex-direction:column}',
     '.label{display:flex;align-items:center;gap:.5rem}.label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex:0 0 auto}',
     '.sevmix{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.donut{width:148px;height:148px;flex:0 0 auto}.donut-n{fill:var(--text);font-size:30px;font-weight:300}.donut-l{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}',
     '.legend{display:flex;flex-direction:column;gap:.65rem;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:.6rem;font-size:.88rem}.swatch{width:11px;height:11px;border-radius:3px;flex:0 0 auto}.legend-row .ln{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text)}.legend-row .lt{color:var(--muted)}',
@@ -1877,6 +1894,7 @@ function dashboardApp(){
     }).join('');
   }
   var staleMonths = '12';
+  var findingsDim = 'category';
 
   var lv=document.getElementById('view-leaders');
   function renderLeaders(){
@@ -1941,31 +1959,36 @@ function dashboardApp(){
         + kpi(openN,'Open findings','','')
         + '</div>'
       + queueHtml
-      + '<div class="dash-grid">'
+      + '<div class="dash-grid dash-grid-eq">'
         + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
         + panel('Publish &amp; generate', publishInner)
         + '</div>'
       + '<div class="dash-split">'
         + '<div class="dash-col">'
           + panel('Triage progress', triageInner)
-          + panel('Findings by language \u00B7 click to expand', drill('lang', ACT))
           + panel('Translation coverage', covInner)
+          + panel('Stale content',
+              '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
+              + '<select id="stale-threshold">'
+              + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
+              + '</select></div>'
+              + '<div id="stale-body"></div>')
         + '</div>'
         + '<div class="dash-col">'
-          + panel('Findings by category \u00B7 click to expand', drill('category', ACT))
+          + panel('Findings',
+              '<div class="filters"><span class="muted">Group</span>'
+              + '<select id="findings-dim">'
+              + '<option value="category"'+(findingsDim==='category'?' selected':'')+'>by category</option>'
+              + '<option value="lang"'+(findingsDim==='lang'?' selected':'')+'>by language</option>'
+              + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
+              + '</select><span class="muted" style="font-size:.78rem">\u00B7 click a row to expand</span></div>'
+              + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>')
         + '</div>'
-      + '</div>'
-      + '<div class="dash-grid">'
-        + panel('Findings by section / directory \u00B7 click to expand', drill('dir', ACT))
-        + panel('Stale content',
-            '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
-            + '<select id="stale-threshold">'
-            + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
-            + '</select></div>'
-            + '<div id="stale-body"></div>')
-        + '</div>';
+      + '</div>';
     var sel=document.getElementById('stale-threshold');
     if(sel){ sel.onchange=function(){ staleMonths=sel.value; renderStale(); }; }
+    var fdim=document.getElementById('findings-dim');
+    if(fdim){ fdim.onchange=function(){ findingsDim=fdim.value; var fd=document.getElementById('findings-drill'); if(fd){ fd.innerHTML=drill(findingsDim, activeFindings()); } postHeight(); }; }
     renderStale();
   }
 
@@ -1976,6 +1999,7 @@ function dashboardApp(){
     var t2=Date.parse(s); return isNaN(t2)?null:new Date(t2);
   }
   function renderStale(){
+    var staleBody=document.getElementById('stale-body'); if(!staleBody) return; // panel disabled
     var months=+document.getElementById('stale-threshold').value;
     var now=D.now||Date.now();
     var cutoff=now-months*30.44*86400000;
