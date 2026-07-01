@@ -2138,13 +2138,18 @@ function dashboardApp(){
       + '</div>'
       + '<div id="publishStatus" class="pub-status">'+(canPublish?'':'Run a new audit to publish it to the team.')+'</div>';
 
+    // Missing/broken foreign-language pages. Prefer the explicit list (has clickable URLs);
+    // fall back to reconstructing from the findings already in the data, so this ALWAYS
+    // matches the Findings box even for runs generated before the explicit list existed.
+    var mtList = Array.isArray(D.missingTranslations) ? D.missingTranslations.slice()
+      : (D.findings || []).filter(function(f){ return f.category === 'load error' && f.lang !== 'English (reference)'; })
+          .map(function(f){ return { page:f.page, lang:f.lang, url:'', error:f.detail || 'failed to load' }; });
+
     var s404Inner = (function(){
       var out = '';
 
       // Group 1 — missing/broken foreign-language pages found by the last audit
-      var mt = (D.missingTranslations || []).slice().sort(function(a,b){
-        return (a.page+a.lang).localeCompare(b.page+b.lang);
-      });
+      var mt = mtList.slice().sort(function(a,b){ return (a.page+a.lang).localeCompare(b.page+b.lang); });
       out += '<div class="s404-group"><div class="s404-grouphead">Missing translations \u00B7 expected foreign-language pages that failed to load'
         + (mt.length? ' ('+mt.length+')':'') + '</div>';
       if(!D.summary || !D.summary.pages){
@@ -2152,13 +2157,18 @@ function dashboardApp(){
       } else if(!mt.length){
         out += '<p style="color:var(--ok);font-size:.85rem;margin:.1rem 0 .5rem">Every audited page returned a version in all languages.</p>';
       } else {
-        out += '<div class="s404-list">' + mt.map(function(m){
+        var capN = 60, cap = mt.slice(0, capN);
+        out += '<div class="s404-list">' + cap.map(function(m){
           var label = m.url ? m.url : (m.page + ' \u2014 ' + m.lang);
           var right = m.lang + ' \u00B7 ' + m.error;
           var inner = '<span class="s404-url">' + esc(label) + '</span>';
           if(m.url) inner = '<a class="s404-url" href="'+esc(m.url)+'" target="_blank" rel="noopener">'+esc(label)+'</a>';
           return '<div class="s404-row">' + inner + '<span class="s404-seen">'+esc(right)+'</span></div>';
         }).join('') + '</div>';
+        if(mt.length > cap.length){
+          out += '<p class="muted" style="font-size:.78rem;margin:.5rem 0 0">+' + (mt.length - cap.length)
+            + ' more \u2014 see every one under <strong>Findings \u25B8 by language</strong>.</p>';
+        }
       }
       out += '</div>';
 
@@ -2208,7 +2218,7 @@ function dashboardApp(){
         + '</div>'
       + (function(){
           var dead = ((D.sitemap404 && D.sitemap404.urls) ? Object.keys(D.sitemap404.urls).length : 0)
-                   + ((D.missingTranslations || []).length);
+                   + mtList.length;
           var pill = dead ? ' <span class="count-pill">'+dead+'</span>' : '';
           return '<section class="card card-404'+(dead?' has-dead':'')+'">'
             + '<p class="label">404 errors'+pill+'</p>'
