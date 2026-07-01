@@ -122,6 +122,9 @@
 
   /* secondary buttons: primary's size/shape, dark grey, default border on hover */
   .btn-5050 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .settings-cols { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .settings-cols > .card { margin: 0; }
+  @media (max-width: 900px) { .settings-cols { grid-template-columns: 1fr; } }
   .btn-secondary {
     width: 100%;
     background: var(--card-alt);
@@ -340,7 +343,7 @@
   </button>
   <header class="page-head">
     <p class="eyebrow">Localization QA</p>
-    <h1>Multilingual Site Audit<span class="version">v2.9</span></h1>
+    <h1>Multilingual Site Audit<span class="version">v2.8</span></h1>
     <p>Compare your translated pages against the English reference. Each page is fetched through your proxy, checked for technical problems, and analysed by Claude for translation accuracy and content parity.</p>
   </header>
 
@@ -352,6 +355,7 @@
 
   <div id="page-generate" class="page">
 
+  <div class="settings-cols">
   <!-- PAGES -->
   <section class="card no-print">
     <h2>Pages to audit</h2>
@@ -400,6 +404,17 @@
     <div id="progress"></div>
     <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
   </section>
+
+  <!-- STALE CONTENT SETTINGS -->
+  <section class="card no-print">
+    <h2>Stale content</h2>
+    <p class="hint">Load your Sitecore <strong>“Items last updated”</strong> export to give the Admin dashboard's <strong>Stale content</strong> box real publish dates. Re-load whenever you have a fresh export.</p>
+    <div class="section-label" style="margin-top:1.5rem;">Content dates</div>
+    <button class="btn-secondary" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
+    <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
+    <div class="score" id="inputStatus" style="margin-top:.7rem;"></div>
+  </section>
+  </div><!-- /settings-cols -->
 
   <!-- hidden sink for the detailed per-page render -->
   <div id="panel-results" style="display:none;"><div id="results"></div></div>
@@ -463,16 +478,6 @@
       </div>
     </details>
     -->
-
-    <details class="accordion">
-      <summary><span class="chev">▶</span> Content dates (for the Stale content box)</summary>
-      <div class="accordion-body">
-        <p class="hint" style="margin-bottom:.7rem;">Load your Sitecore <strong>“Items last updated”</strong> export to give the Admin dashboard's <strong>Stale content</strong> box real publish dates.</p>
-        <button class="btn-secondary" onclick="document.getElementById('contentDatesFile').click()">Load content dates</button>
-        <input type="file" id="contentDatesFile" accept="application/json,.json" style="display:none" onchange="loadContentDates(this.files && this.files[0]); this.value='';">
-        <div class="score" id="inputStatus" style="margin-top:.7rem;"></div>
-      </div>
-    </details>
 
     <details class="accordion">
       <summary><span class="chev">▶</span> Test connection</summary>
@@ -684,6 +689,7 @@ async function discoverPages(){
   // normalize → unique paths on our host, minus assets
   const paths = new Set();
   const pathLastmod = {};
+  const keptUrls = [];
   const truncated = foundUrls.size >= MAX_URLS;
   foundUrls.forEach(u => {
     try {
@@ -693,6 +699,7 @@ async function discoverPages(){
       const path = urlToPath(u);
       if(path !== null){
         paths.add(path);
+        keptUrls.push(u);
         const lm = lastmodMap[u];
         if(lm && (!pathLastmod[path] || lm > pathLastmod[path])) pathLastmod[path] = lm;
       }
@@ -704,6 +711,14 @@ async function discoverPages(){
 
   // keep full list in memory; surface directory facets, not raw rows
   discovered = list.map(path => ({ path, lastmod: pathLastmod[path] || '' }));
+
+  // persist the sitemap URL list for the 404 monitor — written ONLY on manual discovery,
+  // so the dashboard box and the Cron worker both scan a fixed list until you discover again.
+  try {
+    var smUrls = Array.from(new Set(keptUrls));
+    statePut('sitemap', { urls: smUrls, count: smUrls.length, updated: new Date().toISOString() })
+      .catch(function(){});
+  } catch(e){}
   const dirCounts = {};
   discovered.forEach(d => { const dir = dirOf(d.path); dirCounts[dir] = (dirCounts[dir]||0)+1; });
   dirInclude = {};
@@ -902,6 +917,7 @@ function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ retu
    localStorage. Auth reuses the audit passphrase (X-Audit-Key). */
 let triageState = {};      // { findingKey: { status:'done'|'ignored', at } }
 let sharedDash  = null;    // a published dashboard-data object (for viewers who didn't run locally)
+let sitemap404  = null;    // { urls:{url:{firstSeen}}, checked, total, dead, newCount } — saved 404 list
 let storeMode   = (STATE_URL && STATE_URL.trim()) ? 'remote' : 'local';
 let _lastTriageSaveAt = 0;
 function stateNs(){ return 'mlaudit:' + reportHost(); }
@@ -946,9 +962,10 @@ function setTriage(key, status){
 async function loadSharedState(force){
   // skip a remote re-pull right after we just saved (avoid clobbering our own change)
   if(!force && storeMode === 'remote' && Date.now() - _lastTriageSaveAt < 2000) return;
-  function sig(){ return JSON.stringify(triageState) + '|' + (sharedDash && sharedDash.meta ? sharedDash.meta.generated : ''); }
+  function sig(){ return JSON.stringify(triageState) + '|' + (sharedDash && sharedDash.meta ? sharedDash.meta.generated : '') + '|' + (sitemap404 ? sitemap404.checked : ''); }
   var before = sig();
   try { const t = await stateGet('triage'); if(t && typeof t === 'object') triageState = t; } catch(e){}
+  try { const s = await stateGet('sitemap404'); if(s && s.urls) sitemap404 = s; } catch(e){}
   if(!(auditState && auditState.results && auditState.results.length)){
     try { const r = await stateGet('run'); if(r && r.data) sharedDash = r.data; } catch(e){}
   }
@@ -969,9 +986,42 @@ async function publishRun(){
     return true;
   } catch(e){ setReportStatus('Could not publish the run: ' + e.message, true); return false; }
 }
+// ---- sitemap 404 monitor (uses the saved sitemap list; does NOT re-fetch the sitemap) ----
+async function check404(url){
+  try {
+    const res = await fetch(proxifyCheck(url), fetchOpts());
+    const ct = res.headers.get('content-type') || '';
+    if(ct.includes('application/json')){ const d = await res.json(); return { url, status: d.status || 0 }; }
+    return { url, status: res.status };
+  } catch(e){ return { url, status: 0 }; }
+}
+async function scanSitemap404s(onProgress){
+  // load the saved sitemap URL list (written only on manual discovery)
+  let urls = [];
+  try { const sm = await stateGet('sitemap'); if(sm && Array.isArray(sm.urls)) urls = sm.urls; } catch(e){}
+  if(!urls.length && discovered && discovered.length){
+    var baseU = SITE_URL.replace(/\/+$/,'');
+    urls = discovered.map(function(d){ return d.path ? (baseU + '/' + d.path.replace(/^\/+/,'')) : baseU; });
+  }
+  if(!urls.length) return { error:'no-sitemap' };
+  let done = 0;
+  const results = await pool(urls, async function(u){ const r = await check404(u); done++; if(onProgress) onProgress(done, urls.length); return r; }, 6);
+  const dead = results.filter(function(r){ return r.status === 404; }).map(function(r){ return r.url; });
+  // merge with the saved list, preserving firstSeen for ones we already knew
+  let prev = {};
+  try { const k = await stateGet('sitemap404'); if(k && k.urls) prev = k.urls; } catch(e){}
+  const now = new Date().toISOString();
+  const merged = {}; const newOnes = [];
+  dead.forEach(function(u){ if(prev[u]){ merged[u] = prev[u]; } else { merged[u] = { firstSeen: now }; newOnes.push(u); } });
+  const rec = { urls: merged, checked: now, total: urls.length, dead: dead.length, newCount: newOnes.length, newUrls: newOnes };
+  sitemap404 = rec;
+  try { await statePut('sitemap404', rec); } catch(e){}
+  markDashStale(); refreshDashIfVisible();
+  return rec;
+}
+
 function setStoreStatus(extra){
   const el = document.getElementById('storeStatus'); if(!el) return;
-  const vals = Object.keys(triageState).map(function(k){ return triageState[k]; });
   const done = vals.filter(function(t){ return t && t.status === 'done'; }).length;
   const ign  = vals.filter(function(t){ return t && t.status === 'ignored'; }).length;
   const mode = storeMode === 'remote' ? 'Shared store · team-wide' : 'Local only · this browser';
@@ -981,7 +1031,7 @@ function currentDashData(){
   let d = null;
   if(auditState && auditState.results && auditState.results.length){ d = buildDashboardData(); }
   else if(sharedDash){ d = Object.assign({}, sharedDash); }
-  if(d){ d.triage = triageState; d.storeMode = storeMode; d.canRun = (userRole === 'admin'); d.hasLocalRun = !!(auditState && auditState.results && auditState.results.length); }
+  if(d){ d.triage = triageState; d.storeMode = storeMode; d.canRun = (userRole === 'admin'); d.hasLocalRun = !!(auditState && auditState.results && auditState.results.length); d.sitemap404 = sitemap404; }
   return d;
 }
 
@@ -1600,6 +1650,11 @@ function dashboardCss(){
     '.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-grid .card{margin:0}',
     '.dash-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-split>.dash-col{display:flex;flex-direction:column;gap:1.25rem;min-width:0}.dash-split .card{margin:0}',
     '.dash-grid-eq{align-items:stretch}.dash-grid-eq>.card{display:flex;flex-direction:column}',
+    '.s404-list{display:flex;flex-direction:column;gap:.5rem;max-height:320px;overflow:auto}',
+    '.s404-row{display:flex;align-items:center;gap:.5rem;font-size:.82rem;border-bottom:1px solid var(--border);padding-bottom:.45rem}',
+    '.s404-url{color:var(--text);text-decoration:none;word-break:break-all;flex:1 1 auto;min-width:0}.s404-url:hover{color:var(--accent);text-decoration:underline}',
+    '.s404-seen{color:var(--muted2);font-size:.72rem;flex:0 0 auto;white-space:nowrap}',
+    '.s404-new{flex:0 0 auto;background:var(--crit);color:#1a1a1a;font-weight:600;font-size:.62rem;letter-spacing:.04em;padding:.1rem .35rem;border-radius:4px}',
     '.label{display:flex;align-items:center;gap:.5rem}.label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex:0 0 auto}',
     '.sevmix{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.donut{width:148px;height:148px;flex:0 0 auto}.donut-n{fill:var(--text);font-size:30px;font-weight:300}.donut-l{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}',
     '.legend{display:flex;flex-direction:column;gap:.65rem;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:.6rem;font-size:.88rem}.swatch{width:11px;height:11px;border-radius:3px;flex:0 0 auto}.legend-row .ln{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text)}.legend-row .lt{color:var(--muted)}',
@@ -1738,6 +1793,11 @@ function dashboardApp(){
     try { parent.postMessage({ __mlaudit:'publish' }, '*'); } catch(e){}
   };
   window.__genAudit = function(){ try { parent.postMessage({ __mlaudit:'runAudit' }, '*'); } catch(e){} };
+  window.__scan404 = function(){
+    var s=document.getElementById('s404-status'); if(s){ s.textContent='Scanning sitemap…'; }
+    var btn=document.getElementById('s404-btn'); if(btn){ btn.disabled=true; }
+    try { parent.postMessage({ __mlaudit:'scan404' }, '*'); } catch(e){}
+  };
   window.addEventListener('message', function(e){
     var m = e.data;
     if(m === 'hidetabs'){ var tb = document.querySelector('.tabs'); if(tb) tb.style.display = 'none'; }
@@ -1746,6 +1806,14 @@ function dashboardApp(){
     else if(m && m.__mlaudit_ack === 'publish'){
       var s=document.getElementById('publishStatus');
       if(s){ s.textContent = m.ok ? ('Published \u2713 ' + new Date(m.at).toLocaleTimeString()) : 'Publish failed — check the connection.'; s.className = 'pub-status' + (m.ok?' ok':' err'); }
+    }
+    else if(m && m.__mlaudit_scan){
+      var st=document.getElementById('s404-status'); var p=m.__mlaudit_scan;
+      if(st){
+        if(p.phase==='start') st.textContent='Scanning sitemap…';
+        else if(p.phase==='progress') st.textContent='Checking '+p.done+' of '+p.total+'…';
+        else if(p.phase==='done'){ st.textContent = p.rec && p.rec.error==='no-sitemap' ? 'No saved sitemap — run “Discover pages from sitemap” first.' : ''; }
+      }
     }
   });
   if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
@@ -1948,6 +2016,34 @@ function dashboardApp(){
       + '</div>'
       + '<div id="publishStatus" class="pub-status">'+(canPublish?'':'Run a new audit to publish it to the team.')+'</div>';
 
+    var s404Inner = (function(){
+      var s = D.sitemap404, out = '';
+      if(!s || !s.checked){
+        out = '<p class="muted" style="margin:.2rem 0 .6rem;font-size:.85rem">Checks the saved sitemap for internal pages that return 404. The scheduled job also updates this list and emails new ones.</p>';
+      } else {
+        var deadUrls = Object.keys(s.urls || {});
+        out = '<p class="muted" style="margin:.2rem 0 .7rem;font-size:.82rem">Last checked '+new Date(s.checked).toLocaleString()+' \u00B7 '+s.dead+' dead of '+s.total+' checked'+(s.newCount? ' \u00B7 '+s.newCount+' new':'')+'</p>';
+        if(!deadUrls.length){
+          out += '<p style="color:var(--ok);font-size:.9rem">No 404s — every page in the saved sitemap resolved.</p>';
+        } else {
+          var rows = deadUrls.sort(function(a,b){ return (s.urls[b].firstSeen||'').localeCompare(s.urls[a].firstSeen||''); }).map(function(u){
+            var isNew = s.newUrls && s.newUrls.indexOf(u) !== -1;
+            var seen = s.urls[u].firstSeen ? 'since '+new Date(s.urls[u].firstSeen).toLocaleDateString() : '';
+            return '<div class="s404-row">'+(isNew?'<span class="s404-new">NEW</span>':'')
+              + '<a class="s404-url" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>'
+              + '<span class="s404-seen">'+seen+'</span></div>';
+          }).join('');
+          out += '<div class="s404-list">'+rows+'</div>';
+        }
+      }
+      if(D.canRun){
+        out += '<div style="margin-top:.85rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
+          + '<button id="s404-btn" class="pub-btn pub-secondary" style="flex:0 0 auto;width:auto;padding:.5rem .9rem" onclick="__scan404()">Check sitemap now</button>'
+          + '<span id="s404-status" class="muted" style="font-size:.8rem"></span></div>';
+      }
+      return out;
+    })();
+
     var critK = ACT.filter(function(f){return f.severity==='critical' && f.category!=='broken link';}).length;
     var brokenK = ACT.filter(function(f){return f.category==='broken link';}).length;
     lv.innerHTML=
@@ -1983,6 +2079,7 @@ function dashboardApp(){
               + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
               + '</select><span class="muted" style="font-size:.78rem">\u00B7 click a row to expand</span></div>'
               + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>')
+          + panel('404 errors \u00B7 internal pages from the sitemap', s404Inner)
         + '</div>'
       + '</div>';
     var sel=document.getElementById('stale-threshold');
@@ -3088,6 +3185,15 @@ window.addEventListener('message', function(e){
   }
   else if(e.data && e.data.__mlaudit === 'publish'){
     publishRun().then(function(ok){ ackToFrame('publish', !!ok); });
+  }
+  else if(e.data && e.data.__mlaudit === 'scan404'){
+    if(userRole === 'admin'){
+      var fr = document.getElementById('dashFrame');
+      function post(p){ try { fr && fr.contentWindow.postMessage({ __mlaudit_scan: p }, '*'); } catch(e){} }
+      post({ phase:'start' });
+      scanSitemap404s(function(done, total){ post({ phase:'progress', done:done, total:total }); })
+        .then(function(rec){ post({ phase:'done', rec:rec }); });
+    }
   }
 });
 function ackToFrame(action, ok){
