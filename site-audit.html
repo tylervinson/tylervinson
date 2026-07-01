@@ -1294,6 +1294,16 @@ function buildDashboardData(){
   findings.forEach(f => { if(f.section === 'Source sync'){ if(f.severity === 'warning') syncWarn++; else if(f.severity === 'info') syncInfo++; } });
   const missing = {};
   (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
+  // Foreign-language pages that failed to load during the audit (e.g. no Chinese/Spanish
+  // version exists → HTTP 404). These are derived by the audit, not the sitemap, so they
+  // won't appear in the sitemap monitor — surface them in the 404 box directly.
+  const missingTranslations = [];
+  (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => {
+    if(b.error) missingTranslations.push({
+      page: r.page.name, path: r.page.path || '', lang: b.lang.label,
+      url: b.url || '', error: b.error
+    });
+  }));
   const pages = (auditState.results||[]).map(r => ({
     path: r.page.path || '(home)', name: r.page.name, lastmod: r.page.lastmod || ''
   }));
@@ -1320,6 +1330,7 @@ function buildDashboardData(){
       missing: Object.keys(missing).map(k => ({ lang:k, count:missing[k] }))
     },
     pages,
+    missingTranslations,
     contentDates: (contentDates ? contentDates.filter(r => !r.isComponent) : null),
     sync: {
       hasBaseline: !!(baseline && baseline.fp && baseline.fp.en),
@@ -1760,6 +1771,8 @@ function dashboardCss(){
     '.s404-seen{color:var(--muted2);font-size:.72rem;flex:0 0 auto;white-space:nowrap}',
     '.s404-new{flex:0 0 auto;background:var(--crit);color:#1a1a1a;font-weight:600;font-size:.62rem;letter-spacing:.04em;padding:.1rem .35rem;border-radius:4px}',
     '.card-404.has-dead{border-left:3px solid var(--crit)}',
+    '.s404-group + .s404-group{margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border)}',
+    '.s404-grouphead{font-size:.75rem;font-weight:600;color:var(--text);margin:0 0 .5rem;letter-spacing:.01em}',
     '.card-404 .label{display:flex;align-items:center;gap:.5rem}',
     '.count-pill{display:inline-block;background:var(--crit);color:#1a1a1a;font-weight:700;font-size:.7rem;line-height:1;padding:.22rem .5rem;border-radius:10px}',
     '.card-404 .s404-list{max-height:300px}',
@@ -2126,30 +2139,55 @@ function dashboardApp(){
       + '<div id="publishStatus" class="pub-status">'+(canPublish?'':'Run a new audit to publish it to the team.')+'</div>';
 
     var s404Inner = (function(){
-      var s = D.sitemap404, out = '';
+      var out = '';
+
+      // Group 1 — missing/broken foreign-language pages found by the last audit
+      var mt = (D.missingTranslations || []).slice().sort(function(a,b){
+        return (a.page+a.lang).localeCompare(b.page+b.lang);
+      });
+      out += '<div class="s404-group"><div class="s404-grouphead">Missing translations \u00B7 expected foreign-language pages that failed to load'
+        + (mt.length? ' ('+mt.length+')':'') + '</div>';
+      if(!D.summary || !D.summary.pages){
+        out += '<p class="muted" style="font-size:.82rem;margin:.1rem 0 .5rem">Run an audit to check whether each page\u2019s translated versions exist.</p>';
+      } else if(!mt.length){
+        out += '<p style="color:var(--ok);font-size:.85rem;margin:.1rem 0 .5rem">Every audited page returned a version in all languages.</p>';
+      } else {
+        out += '<div class="s404-list">' + mt.map(function(m){
+          var label = m.url ? m.url : (m.page + ' \u2014 ' + m.lang);
+          var right = m.lang + ' \u00B7 ' + m.error;
+          var inner = '<span class="s404-url">' + esc(label) + '</span>';
+          if(m.url) inner = '<a class="s404-url" href="'+esc(m.url)+'" target="_blank" rel="noopener">'+esc(label)+'</a>';
+          return '<div class="s404-row">' + inner + '<span class="s404-seen">'+esc(right)+'</span></div>';
+        }).join('') + '</div>';
+      }
+      out += '</div>';
+
+      // Group 2 — sitemap monitor (internal pages the sitemap lists that 404)
+      var s = D.sitemap404;
+      out += '<div class="s404-group"><div class="s404-grouphead">Sitemap monitor \u00B7 internal pages the sitemap lists that return 404</div>';
       if(!s || !s.checked){
-        out = '<p class="muted" style="margin:.2rem 0 .6rem;font-size:.85rem">Checks the saved sitemap for internal pages that return 404. The scheduled job also updates this list and emails new ones.</p>';
+        out += '<p class="muted" style="margin:.1rem 0 .5rem;font-size:.82rem">Checks the saved sitemap for internal pages that return 404. The scheduled job also updates this list.</p>';
       } else {
         var deadUrls = Object.keys(s.urls || {});
-        out = '<p class="muted" style="margin:.2rem 0 .7rem;font-size:.82rem">Last checked '+new Date(s.checked).toLocaleString()+' \u00B7 '+s.dead+' dead of '+s.total+' checked'+(s.newCount? ' \u00B7 '+s.newCount+' new':'')+'</p>';
+        out += '<p class="muted" style="margin:.1rem 0 .5rem;font-size:.82rem">Last checked '+new Date(s.checked).toLocaleString()+' \u00B7 '+s.dead+' dead of '+s.total+' checked'+(s.newCount? ' \u00B7 '+s.newCount+' new':'')+'</p>';
         if(!deadUrls.length){
-          out += '<p style="color:var(--ok);font-size:.9rem">No 404s — every page in the saved sitemap resolved.</p>';
+          out += '<p style="color:var(--ok);font-size:.85rem">No 404s — every page in the saved sitemap resolved.</p>';
         } else {
-          var rows = deadUrls.sort(function(a,b){ return (s.urls[b].firstSeen||'').localeCompare(s.urls[a].firstSeen||''); }).map(function(u){
+          out += '<div class="s404-list">' + deadUrls.sort(function(a,b){ return (s.urls[b].firstSeen||'').localeCompare(s.urls[a].firstSeen||''); }).map(function(u){
             var isNew = s.newUrls && s.newUrls.indexOf(u) !== -1;
             var seen = s.urls[u].firstSeen ? 'since '+new Date(s.urls[u].firstSeen).toLocaleDateString() : '';
             return '<div class="s404-row">'+(isNew?'<span class="s404-new">NEW</span>':'')
               + '<a class="s404-url" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>'
               + '<span class="s404-seen">'+seen+'</span></div>';
-          }).join('');
-          out += '<div class="s404-list">'+rows+'</div>';
+          }).join('') + '</div>';
         }
       }
       if(D.canRun){
-        out += '<div style="margin-top:.85rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
+        out += '<div style="margin-top:.7rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
           + '<button id="s404-btn" class="pub-btn pub-secondary" style="flex:0 0 auto;width:auto;padding:.5rem .9rem" onclick="__scan404()">Check sitemap now</button>'
           + '<span id="s404-status" class="muted" style="font-size:.8rem"></span></div>';
       }
+      out += '</div>';
       return out;
     })();
 
@@ -2169,10 +2207,11 @@ function dashboardApp(){
         + panel('Publish &amp; generate', publishInner)
         + '</div>'
       + (function(){
-          var dead = (D.sitemap404 && D.sitemap404.urls) ? Object.keys(D.sitemap404.urls).length : 0;
+          var dead = ((D.sitemap404 && D.sitemap404.urls) ? Object.keys(D.sitemap404.urls).length : 0)
+                   + ((D.missingTranslations || []).length);
           var pill = dead ? ' <span class="count-pill">'+dead+'</span>' : '';
           return '<section class="card card-404'+(dead?' has-dead':'')+'">'
-            + '<p class="label">404 errors \u00B7 internal pages from the sitemap'+pill+'</p>'
+            + '<p class="label">404 errors'+pill+'</p>'
             + s404Inner + '</section>';
         })()
       + '<div class="dash-split">'
