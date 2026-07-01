@@ -424,7 +424,12 @@
       <input type="checkbox" id="reverify">
       Re-verify every link this run (ignore saved link results)
     </label>
-    <p class="hint" style="margin-top:1rem;">Choose your pages above, then start the audit from <strong>Generate new audit</strong> on the Admin dashboard.</p>
+
+    <div class="section-label" style="margin-top:1.5rem;">English-only sections</div>
+    <p class="hint" style="margin-bottom:.6rem;">Sections that only exist in English (e.g. a newsroom of marketing articles). One path prefix per line — matching pages are audited for English/technical problems only, and are skipped by translation checks and the 404 monitor, so they won't be flagged for missing foreign-language versions.</p>
+    <textarea id="excludeDirs" rows="3" placeholder="newsroom&#10;news/press-releases&#10;blog" style="width:100%;box-sizing:border-box;"></textarea>
+
+    <p class="hint" style="margin-top:1.5rem;">Choose your pages above, then start the audit from <strong>Generate new audit</strong> on the Admin dashboard.</p>
     <div class="score" id="runHint" style="margin-top:.5rem;"></div>
     <div id="progress"></div>
     <div class="bar" id="barWrap" style="display:none;"><span id="bar"></span></div>
@@ -613,6 +618,17 @@ function buildUrl(site, dir, path){
   if(dir) out += '/' + dir;
   if(path) out += '/' + path;
   return out;
+}
+
+// ---- English-only section exclusions (skip translation checks + 404 monitor) ----
+function getExcludeDirs(){
+  var raw = (document.getElementById('excludeDirs') && document.getElementById('excludeDirs').value) || '';
+  return raw.split(/[\n,]+/).map(function(s){ return s.trim().replace(/^\/+|\/+$/g,'').toLowerCase(); }).filter(Boolean);
+}
+function pathIsExcluded(path, dirs){
+  var p = String(path == null ? '' : path).trim().replace(/^\/+|\/+$/g,'').toLowerCase();
+  if(!p) return false;
+  return (dirs||[]).some(function(d){ return d && (p === d || p.indexOf(d + '/') === 0); });
 }
 
 /* ----------------------------- sitemap discovery ----------------------------- */
@@ -885,6 +901,7 @@ function exportState(){
     pageExclude: pageExclude,
     manualPages: pages.map(pg => ({ name:pg.name, path:pg.path })),
     noTranslate: (document.getElementById('noTranslate') && document.getElementById('noTranslate').value) || '',
+    excludeDirs: (document.getElementById('excludeDirs') && document.getElementById('excludeDirs').value) || '',
     linkResults: [...linkResults.entries()]
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -909,6 +926,7 @@ function importState(file){
       pageExclude = data.pageExclude && typeof data.pageExclude === 'object' ? data.pageExclude : {};
       if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'' }));
       if(typeof data.noTranslate === 'string' && document.getElementById('noTranslate')) document.getElementById('noTranslate').value = data.noTranslate;
+      if(typeof data.excludeDirs === 'string' && document.getElementById('excludeDirs')) document.getElementById('excludeDirs').value = data.excludeDirs;
       linkResults = new Map(Array.isArray(data.linkResults) ? data.linkResults : []);
       if(discovered.length){ document.getElementById('discoveredPanel').style.display = 'block'; renderDiscovered(); }
       renderPages();
@@ -1029,6 +1047,11 @@ async function scanSitemap404s(onProgress){
     var baseU = SITE_URL.replace(/\/+$/,'');
     urls = discovered.map(function(d){ return d.path ? (baseU + '/' + d.path.replace(/^\/+/,'')) : baseU; });
   }
+  if(!urls.length) return { error:'no-sitemap' };
+  // drop English-only sections (e.g. newsroom) so they aren't 404-checked
+  var exclDirs = getExcludeDirs();
+  try { statePut('excludeDirs', { dirs: exclDirs, updated: new Date().toISOString() }).catch(function(){}); } catch(e){}
+  if(exclDirs.length){ urls = urls.filter(function(u){ return !pathIsExcluded(urlToPath(u), exclDirs); }); }
   if(!urls.length) return { error:'no-sitemap' };
   let done = 0;
   const results = await pool(urls, async function(u){ const r = await check404(u); done++; if(onProgress) onProgress(done, urls.length); return r; }, 6);
@@ -1736,6 +1759,11 @@ function dashboardCss(){
     '.s404-url{color:var(--text);text-decoration:none;word-break:break-all;flex:1 1 auto;min-width:0}.s404-url:hover{color:var(--accent);text-decoration:underline}',
     '.s404-seen{color:var(--muted2);font-size:.72rem;flex:0 0 auto;white-space:nowrap}',
     '.s404-new{flex:0 0 auto;background:var(--crit);color:#1a1a1a;font-weight:600;font-size:.62rem;letter-spacing:.04em;padding:.1rem .35rem;border-radius:4px}',
+    '.card-404.has-dead{border-left:3px solid var(--crit)}',
+    '.card-404 .label{display:flex;align-items:center;gap:.5rem}',
+    '.count-pill{display:inline-block;background:var(--crit);color:#1a1a1a;font-weight:700;font-size:.7rem;line-height:1;padding:.22rem .5rem;border-radius:10px}',
+    '.card-404 .s404-list{max-height:300px}',
+    '@media(min-width:760px){.card-404 .s404-list{display:grid;grid-template-columns:1fr 1fr;gap:.15rem 1.8rem}}',
     '.label{display:flex;align-items:center;gap:.5rem}.label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex:0 0 auto}',
     '.sevmix{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.donut{width:148px;height:148px;flex:0 0 auto}.donut-n{fill:var(--text);font-size:30px;font-weight:300}.donut-l{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}',
     '.legend{display:flex;flex-direction:column;gap:.65rem;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:.6rem;font-size:.88rem}.swatch{width:11px;height:11px;border-radius:3px;flex:0 0 auto}.legend-row .ln{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text)}.legend-row .lt{color:var(--muted)}',
@@ -2140,6 +2168,13 @@ function dashboardApp(){
         + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
         + panel('Publish &amp; generate', publishInner)
         + '</div>'
+      + (function(){
+          var dead = (D.sitemap404 && D.sitemap404.urls) ? Object.keys(D.sitemap404.urls).length : 0;
+          var pill = dead ? ' <span class="count-pill">'+dead+'</span>' : '';
+          return '<section class="card card-404'+(dead?' has-dead':'')+'">'
+            + '<p class="label">404 errors \u00B7 internal pages from the sitemap'+pill+'</p>'
+            + s404Inner + '</section>';
+        })()
       + '<div class="dash-split">'
         + '<div class="dash-col">'
           + panel('Triage progress', triageInner)
@@ -2160,7 +2195,6 @@ function dashboardApp(){
               + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
               + '</select><span class="muted" style="font-size:.78rem">\u00B7 click a row to expand</span></div>'
               + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>')
-          + panel('404 errors \u00B7 internal pages from the sitemap', s404Inner)
         + '</div>'
       + '</div>';
     var sel=document.getElementById('stale-threshold');
@@ -2850,6 +2884,8 @@ async function executeAudit(){
   const refLang = langs.find(l=>l.ref);
   const transLangs = langs.filter(l=>!l.ref);
   const conc = 2;
+  const exclDirs = getExcludeDirs();
+  try { statePut('excludeDirs', { dirs: exclDirs, updated: new Date().toISOString() }).catch(function(){}); } catch(e){}
 
   var _rb = document.getElementById('runBtn'); if(_rb) _rb.disabled = true;
   document.getElementById('results').innerHTML = '';
@@ -2886,7 +2922,11 @@ async function executeAudit(){
       result.refTech = await technicalPass(refData, refLang.label, conc, auditState);
     }
 
+    // English-only sections (e.g. newsroom): audit English/technical only, skip translations
+    result.englishOnly = pathIsExcluded(pg.path, exclDirs);
+
     // each translation
+    if(!result.englishOnly)
     for(const tl of transLangs){
       const url = buildUrl(site, tl.dir, pg.path);
       setProgress(`Auditing “${pg.name}” — ${tl.label}…`);
