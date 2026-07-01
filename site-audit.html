@@ -180,6 +180,22 @@
   .gear-btn { position: absolute; top: 0; right: 0; z-index: 5; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
   .gear-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
   .gear-btn svg { flex: 0 0 auto; display: block; width: 16px; height: 16px; }
+  .notif-btn { position: absolute; top: 0; right: 38px; z-index: 5; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+  .notif-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
+  .notif-btn svg { flex: 0 0 auto; display: block; width: 16px; height: 16px; }
+  .notif-dot { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--crit); color: #1a1a1a; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; box-sizing: border-box; }
+  .notif-panel { position: absolute; top: 38px; right: 0; z-index: 20; width: 330px; max-width: 82vw; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.4); overflow: hidden; }
+  .notif-head { display: flex; align-items: center; justify-content: space-between; padding: .7rem .85rem; border-bottom: 1px solid var(--border); font-size: .85rem; color: var(--text); font-weight: 600; }
+  .notif-readall { background: none; border: none; color: var(--accent); font-size: .75rem; cursor: pointer; padding: 0; }
+  .notif-list { max-height: 320px; overflow: auto; }
+  .notif-item { padding: .6rem .85rem; border-bottom: 1px solid var(--border); }
+  .notif-item .nt { color: var(--crit); font-weight: 700; font-size: .66rem; letter-spacing: .04em; }
+  .notif-item .nu { color: var(--text); word-break: break-all; display: block; margin: .18rem 0; font-size: .78rem; }
+  .notif-item .nd { color: var(--muted2); font-size: .7rem; }
+  .notif-empty { padding: 1.1rem .85rem; color: var(--muted); font-size: .8rem; text-align: center; }
+  .notif-foot { padding: .6rem .85rem; border-top: 1px solid var(--border); }
+  .notif-view { width: 100%; background: var(--card-alt); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: .5rem; font-size: .78rem; cursor: pointer; transition: color .2s, border-color .2s; }
+  .notif-view:hover { border-color: var(--accent); color: var(--accent); }
   /* generic app modal */
   .app-modal { position: fixed; inset: 0; background: rgba(8,8,8,.74); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 9998; padding: 1.5rem; }
   .app-modal-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem 1.8rem 1.8rem; max-width: 540px; width: 100%; box-shadow: 0 24px 70px rgba(0,0,0,.55); }
@@ -341,6 +357,15 @@
   <button id="gearBtn" class="gear-btn" onclick="openSettingsModal()" title="Settings" aria-label="Settings">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
   </button>
+  <button id="notifBtn" class="notif-btn" onclick="toggleNotifPanel(event)" title="Notifications" aria-label="Notifications" style="display:none;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+    <span id="notifDot" class="notif-dot" style="display:none;">0</span>
+  </button>
+  <div id="notifPanel" class="notif-panel" style="display:none;">
+    <div class="notif-head"><span>Notifications</span><button class="notif-readall" onclick="markNotifsRead()">Mark all read</button></div>
+    <div id="notifList" class="notif-list"></div>
+    <div class="notif-foot"><button class="notif-view" onclick="viewNotifsInDash()">View 404s in dashboard</button></div>
+  </div>
   <header class="page-head">
     <p class="eyebrow">Localization QA</p>
     <h1>Multilingual Site Audit<span class="version">v2.8</span></h1>
@@ -970,6 +995,7 @@ async function loadSharedState(force){
     try { const r = await stateGet('run'); if(r && r.data) sharedDash = r.data; } catch(e){}
   }
   setStoreStatus();
+  renderNotifBell();
   if(sig() !== before){            // only rebuild the iframe when something actually changed
     markDashStale();
     refreshDashIfVisible();
@@ -1016,7 +1042,7 @@ async function scanSitemap404s(onProgress){
   const rec = { urls: merged, checked: now, total: urls.length, dead: dead.length, newCount: newOnes.length, newUrls: newOnes };
   sitemap404 = rec;
   try { await statePut('sitemap404', rec); } catch(e){}
-  markDashStale(); refreshDashIfVisible();
+  markDashStale(); refreshDashIfVisible(); renderNotifBell();
   return rec;
 }
 
@@ -1354,6 +1380,61 @@ function enterApp(role){
 }
 function openSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='flex'; }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
+
+// ---- in-app notifications (new 404s) — read state is per browser ----
+function notifSeenKey(){ return 'mlaudit-notif-seen:' + reportHost(); }
+function getNotifSeenAt(){ try { return localStorage.getItem(notifSeenKey()) || ''; } catch(e){ return ''; } }
+function setNotifSeenAt(v){ try { localStorage.setItem(notifSeenKey(), v); } catch(e){} }
+function unreadNotifs(){
+  if(!sitemap404 || !sitemap404.urls) return [];
+  var seen = getNotifSeenAt(), out = [];
+  Object.keys(sitemap404.urls).forEach(function(u){
+    var fs = sitemap404.urls[u].firstSeen || '';
+    if(!seen || fs > seen) out.push({ url:u, firstSeen:fs });
+  });
+  out.sort(function(a,b){ return (b.firstSeen||'').localeCompare(a.firstSeen||''); });
+  return out;
+}
+function renderNotifBell(){
+  var btn = document.getElementById('notifBtn'); if(!btn) return;
+  if(userRole !== 'admin'){ btn.style.display='none'; var p=document.getElementById('notifPanel'); if(p) p.style.display='none'; return; }
+  btn.style.display='inline-flex';
+  var n = unreadNotifs().length, dot = document.getElementById('notifDot');
+  if(dot){ if(n>0){ dot.style.display='block'; dot.textContent = n>99 ? '99+' : String(n); } else { dot.style.display='none'; } }
+  var pan = document.getElementById('notifPanel');
+  if(pan && pan.style.display === 'block') renderNotifPanel();
+}
+function renderNotifPanel(){
+  var list = document.getElementById('notifList'); if(!list) return;
+  var items = unreadNotifs();
+  if(!items.length){ list.innerHTML = '<div class="notif-empty">No new 404s. You\u2019re all caught up.</div>'; return; }
+  var cap = items.slice(0, 12);
+  var html = cap.map(function(it){
+    var when = it.firstSeen ? new Date(it.firstSeen).toLocaleString() : 'recently';
+    return '<div class="notif-item"><span class="nt">NEW 404</span>'
+      + '<span class="nu">' + escapeHtml(it.url) + '</span>'
+      + '<span class="nd">detected ' + escapeHtml(when) + '</span></div>';
+  }).join('');
+  if(items.length > cap.length) html += '<div class="notif-empty">+' + (items.length - cap.length) + ' more</div>';
+  list.innerHTML = html;
+}
+function toggleNotifPanel(e){
+  if(e && e.stopPropagation) e.stopPropagation();
+  var p = document.getElementById('notifPanel'); if(!p) return;
+  if(p.style.display !== 'block'){ renderNotifPanel(); p.style.display='block'; }
+  else { p.style.display='none'; }
+}
+function markNotifsRead(){ setNotifSeenAt(new Date().toISOString()); renderNotifBell(); renderNotifPanel(); }
+function viewNotifsInDash(){
+  var p=document.getElementById('notifPanel'); if(p) p.style.display='none';
+  markNotifsRead();
+  showPage('leaders');
+}
+document.addEventListener('click', function(e){
+  var p=document.getElementById('notifPanel'); if(!p || p.style.display!=='block') return;
+  var btn=document.getElementById('notifBtn');
+  if(!p.contains(e.target) && !(btn && btn.contains(e.target))) p.style.display='none';
+});
 
 function showPage(p){
   document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
