@@ -124,6 +124,7 @@
   .btn-5050 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   .settings-cols { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   .settings-cols > .card { margin: 0; }
+  .masked-input { -webkit-text-security: disc; text-security: disc; }
   @media (max-width: 900px) { .settings-cols { grid-template-columns: 1fr; } }
   .btn-secondary {
     width: 100%;
@@ -346,7 +347,7 @@
         <button type="button" class="role-opt" data-role="admin" onclick="pickRole('admin')">Admin</button>
       </div>
       <label class="field-label" for="pass" style="margin-top:1.3rem;">Access passphrase</label>
-      <input type="password" id="pass" placeholder="Enter passphrase" autocomplete="off" onkeydown="if(event.key==='Enter'){submitLogin();}">
+      <input type="text" id="pass" class="masked-input" placeholder="Enter passphrase" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" onkeydown="if(event.key==='Enter'){submitLogin();}">
       <div id="loginError" class="err-note" style="display:none; margin-top:.6rem;"></div>
       <button class="primary" id="loginBtn" onclick="submitLogin()" style="width:100%; margin-top:1.3rem;">Sign in</button>
       <p class="hint" style="margin:1rem 0 0; text-align:center;">The passphrase is held in memory for this session only.</p>
@@ -2285,8 +2286,13 @@ function dashboardApp(){
       document.getElementById('stale-body').innerHTML=html+'<p class="empty">No dates loaded. In the audit tool, click \u201cLoad content dates\u201d and pick your \u201cItems last updated\u201d export, then save the dashboard again.</p>';
       return;
     }
+    var staleRows=dated.filter(function(r){return r.date.getTime()<cutoff;});
+    if(!staleRows.length){
+      document.getElementById('stale-body').innerHTML=html+'<p class="empty" style="color:var(--ok)">No pages are stale at this threshold.</p>';
+      return;
+    }
     html+='<div class="headrow"><span>Page</span><span>Updated</span><span>Age</span><span>Status</span></div>';
-    html+=dated.map(function(r){
+    html+=staleRows.map(function(r){
       var dAge=Math.floor((now-r.date.getTime())/86400000);
       var stale=r.date.getTime()<cutoff;
       var body='<div class="st-body">'
