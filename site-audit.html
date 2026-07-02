@@ -1774,6 +1774,11 @@ function dashboardCss(){
     '.s404-group + .s404-group{margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border)}',
     '.s404-grouphead{font-size:.75rem;font-weight:600;color:var(--text);margin:0 0 .5rem;letter-spacing:.01em}',
     '.card-404 .label{display:flex;align-items:center;gap:.5rem}',
+    '.stale-summary{cursor:pointer;margin:0;list-style:none;user-select:none}',
+    '.stale-summary::-webkit-details-marker{display:none}',
+    '.stale-summary .chev{margin-left:auto;color:var(--muted);font-size:.75rem;transition:transform .2s ease}',
+    '.stale-collapse[open] > .stale-summary{margin-bottom:1rem}',
+    '.stale-collapse[open] .stale-summary .chev{transform:rotate(90deg)}',
     '.count-pill{display:inline-block;background:var(--crit);color:#1a1a1a;font-weight:700;font-size:.7rem;line-height:1;padding:.22rem .5rem;border-radius:10px}',
     '.card-404 .s404-list{max-height:300px}',
     '@media(min-width:760px){.card-404 .s404-list{display:grid;grid-template-columns:1fr 1fr;gap:.15rem 1.8rem}}',
@@ -2228,12 +2233,16 @@ function dashboardApp(){
         + '<div class="dash-col">'
           + panel('Triage progress', triageInner)
           + panel('Translation coverage', covInner)
-          + panel('Stale content',
-              '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
+          + '<section class="card">'
+            + '<details class="stale-collapse">'
+              + '<summary class="label stale-summary">Stale content<span class="chev">\u25B8</span></summary>'
+              + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
               + '<select id="stale-threshold">'
               + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
               + '</select></div>'
-              + '<div id="stale-body"></div>')
+              + '<div id="stale-body"></div>'
+            + '</details>'
+          + '</section>'
         + '</div>'
         + '<div class="dash-col">'
           + panel('Findings',
