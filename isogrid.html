@@ -681,8 +681,8 @@
       stage.style.cursor = isEditor ? "pointer" : "default";
 
       inputs.modeHint.textContent = isEditor
-        ? "Editor mode: click individual cube faces on the canvas to toggle them on or off."
-        : "Random mode: use the side panel values to generate compositions and reroll variations.";
+        ? "Editor mode: start from a blank grid and click individual cube faces to toggle them on or off."
+        : "Random mode: generate a composition, then click any cube face to toggle it on or off.";
     }
 
     function readConfig() {
@@ -1111,6 +1111,28 @@
       ctx.fillStyle = config.backgroundColor;
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
       drawPolygonsForCubes(ctx, cubes, 1, 0);
+
+      // Random mode is editable too: hover shows the face that will toggle.
+      if (hoveredFace) {
+        const cube = cubes[hoveredFace.cubeIndex];
+
+        if (cube) {
+          const poly = getCubePolygons(cube).find(item => item.side === hoveredFace.side);
+
+          if (poly) {
+            if (!poly.visible) {
+              polygon(poly.points, hexToRgba(poly.color, 0.16), ctx);
+            }
+
+            strokePolygon(
+              poly.points,
+              poly.visible ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.38)",
+              1.6,
+              ctx
+            );
+          }
+        }
+      }
     }
 
     function easeOutCubic(t) {
@@ -1542,8 +1564,6 @@
     inputs.downloadPng.addEventListener("click", downloadPng);
 
     canvas.addEventListener("mousemove", event => {
-      if (!inputs.modeEditor.checked) return;
-
       const hit = hitTestFace(getCanvasPoint(event));
       const changed = (
         (!hoveredFace && hit) ||
@@ -1564,8 +1584,6 @@
     });
 
     canvas.addEventListener("click", event => {
-      if (!inputs.modeEditor.checked) return;
-
       const hit = hitTestFace(getCanvasPoint(event));
       if (!hit) return;
 
