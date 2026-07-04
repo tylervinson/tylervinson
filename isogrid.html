@@ -58,6 +58,42 @@
       line-height: 1.35;
     }
 
+    .mode-toggle {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .mode-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mode-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fafafa;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-pill input {
+      margin: 0;
+    }
+
+    .mode-note {
+      margin-top: 0;
+      min-height: 32px;
+    }
+
     form {
       display: grid;
       gap: 10px;
@@ -80,6 +116,31 @@
       font-weight: 750;
       user-select: none;
       border-bottom: 1px solid transparent;
+      list-style-position: inside;
+    }
+
+    summary .summary-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: calc(100% - 20px);
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .section-lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    .section-lock input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
     }
 
     details[open] summary { border-bottom-color: var(--line); }
@@ -171,7 +232,7 @@
       position: sticky;
       bottom: 0;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       padding: 12px;
       background: var(--panel-bg);
@@ -191,6 +252,11 @@
     }
 
     button.secondary { background: #595959; }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
     main {
       min-width: 0;
@@ -250,11 +316,27 @@
     <header>
       <h1>Isometric Cube Generator</h1>
       <p class="sub">Abstract cube composition tool with face color, density, margin, aspect-ratio, and export controls.</p>
+
+      <div class="mode-toggle">
+        <div class="mode-row">
+          <label class="mode-pill">
+            <input id="modeRandom" type="radio" name="mode" value="random" checked>
+            Random
+          </label>
+
+          <label class="mode-pill">
+            <input id="modeEditor" type="radio" name="mode" value="editor">
+            Editor
+          </label>
+        </div>
+
+        <p id="modeHint" class="sub mode-note"></p>
+      </div>
     </header>
 
     <form id="controls">
       <details open>
-        <summary>Canvas</summary>
+        <summary><span class="summary-row"><span>Canvas</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockCanvasSize" type="checkbox" checked></label></span></summary>
         <div class="section">
           <div class="grid">
             <label>
@@ -262,12 +344,27 @@
               <select id="aspectRatio">
                 <option value="free">Free / fill available space</option>
                 <option value="1:1">1:1 square</option>
-                <option value="4:3" selected>4:3 landscape</option>
+                <option value="4:3">4:3 landscape</option>
                 <option value="3:4">3:4 portrait</option>
                 <option value="16:9">16:9 landscape</option>
                 <option value="9:16">9:16 portrait</option>
+                <option value="custom" selected>Custom ratio</option>
               </select>
             </label>
+
+            <div id="customAspectPanel" class="hidden-panel">
+              <div class="grid">
+                <label>
+                  Ratio width
+                  <input id="customAspectWidth" type="number" min="1" max="100" value="2">
+                </label>
+
+                <label>
+                  Ratio height
+                  <input id="customAspectHeight" type="number" min="1" max="100" value="1">
+                </label>
+              </div>
+            </div>
 
             <label class="toggle">
               Use custom size
@@ -298,8 +395,22 @@
       </details>
 
       <details open>
-        <summary>Color</summary>
+        <summary><span class="summary-row"><span>Color</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockColor" type="checkbox"></label></span></summary>
         <div class="section">
+          <label class="wide">
+            Theme
+            <select id="themeSelect">
+              <option value="custom">Custom / manual</option>
+              <option value="desert" selected>Desert Adobe</option>
+              <option value="bauhaus">Bauhaus Primary</option>
+              <option value="nocturne">Nocturne</option>
+              <option value="stone">Stone Neutral</option>
+              <option value="forest">Forest Floor</option>
+              <option value="pastel">Soft Pastel</option>
+              <option value="highcontrast">High Contrast</option>
+            </select>
+          </label>
+
           <div class="grid">
             <label>
               Top color hex
@@ -335,7 +446,7 @@
       </details>
 
       <details open>
-        <summary>Visibility</summary>
+        <summary><span class="summary-row"><span>Visibility</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockVisibility" type="checkbox"></label></span></summary>
         <div class="section">
           <label class="toggle">
             Randomly hide faces
@@ -362,7 +473,7 @@
       </details>
 
       <details>
-        <summary>Composition</summary>
+        <summary><span class="summary-row"><span>Composition</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockComposition" type="checkbox"></label></span></summary>
         <div class="section">
           <label class="toggle">
             Use blank-space border
@@ -396,8 +507,10 @@
       </details>
 
       <details>
-        <summary>Cube Geometry</summary>
+        <summary><span class="summary-row"><span>Cube Geometry</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockGeometry" type="checkbox" checked></label></span></summary>
         <div class="section">
+          <p class="hint">When locked, changing one geometry value scales the other two proportionally.</p>
+
           <div class="grid">
             <label>
               Cube width
@@ -418,7 +531,7 @@
       </details>
 
       <details>
-        <summary>Export</summary>
+        <summary><span class="summary-row"><span>Export</span><label class="section-lock" onclick="event.stopPropagation();">Lock <input id="lockExport" type="checkbox" checked></label></span></summary>
         <div class="section">
           <div class="grid">
             <label>
@@ -443,6 +556,7 @@
     <div class="actions">
       <button id="apply" type="button">Apply</button>
       <button id="reroll" class="secondary" type="button">Reroll</button>
+      <button id="rollDice" class="secondary" type="button">Dice</button>
     </div>
   </aside>
 
@@ -459,12 +573,25 @@
     const main = document.querySelector("main");
 
     const inputs = {
+      modeRandom: document.getElementById("modeRandom"),
+      modeEditor: document.getElementById("modeEditor"),
+      modeHint: document.getElementById("modeHint"),
+
       aspectRatio: document.getElementById("aspectRatio"),
+      customAspectPanel: document.getElementById("customAspectPanel"),
+      customAspectWidth: document.getElementById("customAspectWidth"),
+      customAspectHeight: document.getElementById("customAspectHeight"),
       useCustomSize: document.getElementById("useCustomSize"),
+      lockCanvasSize: document.getElementById("lockCanvasSize"),
+      lockColor: document.getElementById("lockColor"),
+      lockVisibility: document.getElementById("lockVisibility"),
+      lockComposition: document.getElementById("lockComposition"),
       customWidth: document.getElementById("customWidth"),
       customHeight: document.getElementById("customHeight"),
       backgroundColor: document.getElementById("backgroundColor"),
       backgroundColorPicker: document.getElementById("backgroundColorPicker"),
+
+      themeSelect: document.getElementById("themeSelect"),
 
       topColor: document.getElementById("topColor"),
       topColorPicker: document.getElementById("topColorPicker"),
@@ -495,13 +622,16 @@
       cubeWidth: document.getElementById("cubeWidth"),
       cubeHeight: document.getElementById("cubeHeight"),
       cubeDepth: document.getElementById("cubeDepth"),
+      lockGeometry: document.getElementById("lockGeometry"),
+      lockExport: document.getElementById("lockExport"),
 
       pngScale: document.getElementById("pngScale"),
       downloadSvg: document.getElementById("downloadSvg"),
       downloadPng: document.getElementById("downloadPng"),
 
       apply: document.getElementById("apply"),
-      reroll: document.getElementById("reroll")
+      reroll: document.getElementById("reroll"),
+      rollDice: document.getElementById("rollDice")
     };
 
     let config = {};
@@ -509,9 +639,19 @@
     let logicalWidth = 1000;
     let logicalHeight = 1000;
     let animationFrame = null;
+    let hoveredFace = null;
+
+    let geometryRatio = { width: 90, height: 52, depth: 104 };
 
     function parseAspectRatio(value) {
       if (value === "free") return null;
+
+      if (value === "custom") {
+        const w = Math.max(1, Number(inputs.customAspectWidth.value) || 1);
+        const h = Math.max(1, Number(inputs.customAspectHeight.value) || 1);
+        return w / h;
+      }
+
       const [w, h] = value.split(":").map(Number);
       return w / h;
     }
@@ -523,8 +663,11 @@
     }
 
     function syncUI() {
+      const isEditor = inputs.modeEditor.checked;
+
       inputs.visibilityPanel.classList.toggle("active", inputs.independentVisibility.checked);
       inputs.marginPanel.classList.toggle("active", inputs.useBlankMargin.checked);
+      inputs.customAspectPanel.classList.toggle("active", inputs.aspectRatio.value === "custom");
 
       inputs.topVisibilityValue.textContent = inputs.topVisibility.value + "%";
       inputs.leftVisibilityValue.textContent = inputs.leftVisibility.value + "%";
@@ -532,10 +675,19 @@
       inputs.blankMarginValue.textContent = inputs.blankMargin.value + "%";
       inputs.edgeFalloffValue.textContent = inputs.edgeFalloff.value + "%";
       inputs.innerPaddingValue.textContent = inputs.innerPadding.value + "%";
+
+      inputs.rollDice.disabled = isEditor;
+      inputs.reroll.textContent = isEditor ? "Reset Grid" : "Reroll";
+      stage.style.cursor = isEditor ? "pointer" : "default";
+
+      inputs.modeHint.textContent = isEditor
+        ? "Editor mode: click individual cube faces on the canvas to toggle them on or off."
+        : "Random mode: use the side panel values to generate compositions and reroll variations.";
     }
 
     function readConfig() {
       config = {
+        mode: inputs.modeEditor.checked ? "editor" : "random",
         aspectRatio: inputs.aspectRatio.value,
         useCustomSize: inputs.useCustomSize.checked,
         customWidth: Math.max(200, Number(inputs.customWidth.value) || 1000),
@@ -676,7 +828,7 @@
       };
     }
 
-    function buildGridData() {
+    function buildRandomGridData() {
       const generated = [];
 
       const w = config.cubeWidth;
@@ -702,6 +854,8 @@
           if (edgeProbability <= 0) continue;
 
           generated.push({
+            row,
+            col,
             x,
             y,
             offsetX: (Math.random() - 0.5) * config.cubeWidth * 0.45,
@@ -712,6 +866,78 @@
       }
 
       return generated;
+    }
+
+    function buildEditorGridData() {
+      const generated = [];
+
+      const w = config.cubeWidth;
+      const h = config.cubeHeight;
+      const d = config.cubeDepth;
+
+      const stepX = w * 2;
+      const stepY = h + d;
+
+      const rows = Math.ceil(logicalHeight / stepY) + 8;
+      const cols = Math.ceil(logicalWidth / stepX) + 8;
+      const bounds = getArtBounds();
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = -stepX * 3 + col * stepX + (row % 2 ? w : 0);
+          const y = -stepY * 3 + row * stepY;
+
+          const centerX = x;
+          const centerY = y + h + d / 2;
+          const edgeProbability = getEdgeProbability(centerX, centerY, bounds);
+
+          if (edgeProbability <= 0) continue;
+
+          generated.push({
+            row,
+            col,
+            x,
+            y,
+            offsetX: 0,
+            offsetY: 0,
+            faces: {
+              top: { visible: false, color: colorFor("top") },
+              left: { visible: false, color: colorFor("left") },
+              right: { visible: false, color: colorFor("right") }
+            }
+          });
+        }
+      }
+
+      return generated;
+    }
+
+    function buildGridData() {
+      return config.mode === "editor" ? buildEditorGridData() : buildRandomGridData();
+    }
+
+    function preserveEditorState(previousCubes, nextCubes) {
+      const byKey = new Map();
+
+      for (const cube of previousCubes) {
+        byKey.set(`${cube.row}:${cube.col}`, {
+          top: !!cube.faces.top.visible,
+          left: !!cube.faces.left.visible,
+          right: !!cube.faces.right.visible
+        });
+      }
+
+      for (const cube of nextCubes) {
+        const key = `${cube.row}:${cube.col}`;
+        const previous = byKey.get(key);
+        if (!previous) continue;
+
+        cube.faces.top.visible = previous.top;
+        cube.faces.left.visible = previous.left;
+        cube.faces.right.visible = previous.right;
+      }
+
+      return nextCubes;
     }
 
     function makeGrid() {
@@ -786,7 +1012,102 @@
       context.restore();
     }
 
+    function strokePolygon(points, stroke, width = 1, context = ctx) {
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) context.lineTo(points[i].x, points[i].y);
+      context.closePath();
+      context.strokeStyle = stroke;
+      context.lineWidth = width;
+      context.stroke();
+    }
+
+    function hexToRgba(hex, alpha) {
+      const normalized = String(hex || "#000000").trim();
+      const match = /^#?([0-9a-fA-F]{6})$/.exec(normalized);
+      if (!match) return `rgba(0,0,0,${alpha})`;
+
+      const value = match[1];
+      const r = parseInt(value.slice(0, 2), 16);
+      const g = parseInt(value.slice(2, 4), 16);
+      const b = parseInt(value.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function pointInPolygon(point, polygonPoints) {
+      let inside = false;
+
+      for (let i = 0, j = polygonPoints.length - 1; i < polygonPoints.length; j = i++) {
+        const xi = polygonPoints[i].x;
+        const yi = polygonPoints[i].y;
+        const xj = polygonPoints[j].x;
+        const yj = polygonPoints[j].y;
+
+        const intersect = ((yi > point.y) !== (yj > point.y)) &&
+          (point.x < (xj - xi) * (point.y - yi) / ((yj - yi) || 1e-9) + xi);
+
+        if (intersect) inside = !inside;
+      }
+
+      return inside;
+    }
+
+    function getCanvasPoint(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * (logicalWidth / rect.width),
+        y: (event.clientY - rect.top) * (logicalHeight / rect.height)
+      };
+    }
+
+    function hitTestFace(point) {
+      for (let cubeIndex = cubes.length - 1; cubeIndex >= 0; cubeIndex--) {
+        const polygons = getCubePolygons(cubes[cubeIndex]);
+        const hitOrder = [2, 1, 0]; // top, right, left
+
+        for (const polygonIndex of hitOrder) {
+          const poly = polygons[polygonIndex];
+          if (pointInPolygon(point, poly.points)) {
+            return { cubeIndex, side: poly.side };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function drawEditorGrid() {
+      ctx.fillStyle = config.backgroundColor;
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+      for (let cubeIndex = 0; cubeIndex < cubes.length; cubeIndex++) {
+        const cube = cubes[cubeIndex];
+
+        for (const poly of getCubePolygons(cube)) {
+          const hovered = hoveredFace &&
+            hoveredFace.cubeIndex === cubeIndex &&
+            hoveredFace.side === poly.side;
+
+          if (poly.visible) {
+            polygon(poly.points, poly.color, ctx);
+
+            if (hovered) {
+              strokePolygon(poly.points, "rgba(0, 0, 0, 0.55)", 1.5, ctx);
+            }
+          } else {
+            polygon(poly.points, hexToRgba(poly.color, hovered ? 0.18 : 0.06), ctx);
+            strokePolygon(poly.points, hovered ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.14)", hovered ? 1.5 : 1, ctx);
+          }
+        }
+      }
+    }
+
     function draw() {
+      if (config.mode === "editor") {
+        drawEditorGrid();
+        return;
+      }
+
       ctx.fillStyle = config.backgroundColor;
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
       drawPolygonsForCubes(ctx, cubes, 1, 0);
@@ -799,22 +1120,15 @@
     function animateToNewCubes(previousCubes, nextCubes) {
       if (animationFrame) cancelAnimationFrame(animationFrame);
 
-      // Single-layer animation avoids the brief strobe/flicker caused by
-      // crossfading two dense polygon sets on top of each other.
       const duration = 520;
       const start = performance.now();
 
       function render(t) {
         ctx.fillStyle = config.backgroundColor;
         ctx.fillRect(0, 0, logicalWidth, logicalHeight);
-
-        // New pattern slides gently into place at full opacity.
-        // This keeps the transition smooth without flashing.
         drawPolygonsForCubes(ctx, nextCubes, 1, 1 - t);
       }
 
-      // Draw the first frame immediately so there is no blank/strobe frame
-      // before requestAnimationFrame starts.
       render(0);
 
       function frame(now) {
@@ -835,17 +1149,29 @@
       animationFrame = requestAnimationFrame(frame);
     }
 
-    function applySettings({ reroll = true, resize = true, animate = false } = {}) {
+    function applySettings({ reroll = true, resize = true, animate = false, resetEditor = false } = {}) {
+      const previousMode = config.mode || "random";
+      const previousCubes = cubes;
+
       syncUI();
       readConfig();
 
       if (resize) resizeCanvas();
 
       if (reroll) {
-        const previousCubes = cubes;
-        const nextCubes = buildGridData();
+        let nextCubes = buildGridData();
 
-        if (animate && config.animateReroll && previousCubes.length) {
+        if (config.mode === "editor" && previousMode === "editor" && !resetEditor) {
+          nextCubes = preserveEditorState(previousCubes, nextCubes);
+        }
+
+        if (
+          config.mode === "random" &&
+          previousMode === "random" &&
+          animate &&
+          config.animateReroll &&
+          previousCubes.length
+        ) {
           animateToNewCubes(previousCubes, nextCubes);
           return;
         }
@@ -853,6 +1179,7 @@
         cubes = nextCubes;
       }
 
+      hoveredFace = null;
       draw();
     }
 
@@ -917,6 +1244,70 @@
     }
 
 
+
+    const THEMES = {
+      custom: null,
+      desert: {
+        background: "#D35A3F",
+        top: "#F7F3ED",
+        left: "#B05039",
+        right: "#EECA79"
+      },
+      bauhaus: {
+        background: "#F2E8CF",
+        top: "#F7F3ED",
+        left: "#D62828",
+        right: "#F4C430"
+      },
+      nocturne: {
+        background: "#111820",
+        top: "#E8E2D6",
+        left: "#334155",
+        right: "#7C5C48"
+      },
+      stone: {
+        background: "#D8D3CA",
+        top: "#F5F1EA",
+        left: "#8B857B",
+        right: "#4E5452"
+      },
+      forest: {
+        background: "#2F3A2F",
+        top: "#D9C8A9",
+        left: "#667A52",
+        right: "#A45C40"
+      },
+      pastel: {
+        background: "#F0DED7",
+        top: "#FFF8EE",
+        left: "#A7C7C5",
+        right: "#E9B7A9"
+      },
+      highcontrast: {
+        background: "#FFFFFF",
+        top: "#F2F2F2",
+        left: "#111111",
+        right: "#D9A441"
+      }
+    };
+
+    function setColorValue(textInput, pickerInput, value) {
+      textInput.value = value;
+      pickerInput.value = value;
+    }
+
+    function applyTheme(themeKey, redraw = true) {
+      const theme = THEMES[themeKey];
+      if (!theme) return;
+
+      setColorValue(inputs.backgroundColor, inputs.backgroundColorPicker, theme.background);
+      setColorValue(inputs.topColor, inputs.topColorPicker, theme.top);
+      setColorValue(inputs.leftColor, inputs.leftColorPicker, theme.left);
+      setColorValue(inputs.rightColor, inputs.rightColorPicker, theme.right);
+
+      if (redraw) applySettings({ reroll: true, resize: false, animate: true, resetEditor: false });
+    }
+
     function normalizeHex(value, fallback) {
       const trimmed = String(value || "").trim();
       return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : fallback;
@@ -927,12 +1318,14 @@
         const hex = normalizeHex(textInput.value, fallback);
         textInput.value = hex;
         pickerInput.value = hex;
-        applySettings({ reroll: true, resize: false });
+        inputs.themeSelect.value = "custom";
+        applySettings({ reroll: true, resize: false, resetEditor: false });
       });
 
       pickerInput.addEventListener("input", () => {
         textInput.value = pickerInput.value;
-        applySettings({ reroll: true, resize: false });
+        inputs.themeSelect.value = "custom";
+        applySettings({ reroll: true, resize: false, resetEditor: false });
       });
     }
 
@@ -941,21 +1334,161 @@
     bindColorPair(inputs.leftColor, inputs.leftColorPicker, "#d3d0cb");
     bindColorPair(inputs.rightColor, inputs.rightColorPicker, "#26333b");
 
-    inputs.apply.addEventListener("click", () => applySettings({ reroll: true, resize: true }));
 
-    // Reroll now regenerates the art without resizing the canvas, fixing the gradual-growth bug.
-    inputs.reroll.addEventListener("click", () => applySettings({ reroll: true, resize: false, animate: true }));
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomChoice(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function hslToHex(h, s, l) {
+      s /= 100;
+      l /= 100;
+
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+
+      let r = 0, g = 0, b = 0;
+
+      if (h < 60) [r, g, b] = [c, x, 0];
+      else if (h < 120) [r, g, b] = [x, c, 0];
+      else if (h < 180) [r, g, b] = [0, c, x];
+      else if (h < 240) [r, g, b] = [0, x, c];
+      else if (h < 300) [r, g, b] = [x, 0, c];
+      else [r, g, b] = [c, 0, x];
+
+      const toHex = value => {
+        return Math.round((value + m) * 255)
+          .toString(16)
+          .padStart(2, "0")
+          .toUpperCase();
+      };
+
+      return "#" + toHex(r) + toHex(g) + toHex(b);
+    }
+
+    function randomHexColor() {
+      return hslToHex(randomInt(0, 359), randomInt(45, 88), randomInt(38, 82));
+    }
+
+    function rollDiceConfiguration() {
+      if (!inputs.lockColor.checked) {
+        inputs.themeSelect.value = "custom";
+
+        setColorValue(inputs.backgroundColor, inputs.backgroundColorPicker, randomHexColor());
+        setColorValue(inputs.topColor, inputs.topColorPicker, randomHexColor());
+        setColorValue(inputs.leftColor, inputs.leftColorPicker, randomHexColor());
+        setColorValue(inputs.rightColor, inputs.rightColorPicker, randomHexColor());
+      }
+
+      // Only randomize canvas size/aspect when canvas size is unlocked.
+      if (!inputs.lockCanvasSize.checked) {
+        inputs.aspectRatio.value = randomChoice(["1:1", "4:3", "3:4", "16:9", "9:16", "custom"]);
+
+        if (inputs.aspectRatio.value === "custom") {
+          inputs.customAspectWidth.value = randomInt(2, 21);
+          inputs.customAspectHeight.value = randomInt(2, 21);
+        }
+
+        inputs.useCustomSize.checked = false;
+      }
+
+      if (!inputs.lockVisibility.checked) {
+        inputs.independentVisibility.checked = Math.random() < 0.9;
+
+        inputs.topVisibility.value = randomInt(15, 100);
+        inputs.leftVisibility.value = randomInt(15, 100);
+        inputs.rightVisibility.value = randomInt(15, 100);
+      }
+
+      if (!inputs.lockComposition.checked) {
+        inputs.useBlankMargin.checked = Math.random() < 0.85;
+
+        inputs.blankMargin.value = randomInt(0, 24);
+        inputs.edgeFalloff.value = randomInt(0, 28);
+        inputs.innerPadding.value = randomInt(0, 22);
+      }
+
+      // Only randomize cube geometry when constraints are unlocked.
+      // If locked, Dice preserves the current cube proportions and dimensions.
+      if (!inputs.lockGeometry.checked) {
+        inputs.cubeWidth.value = randomInt(42, 130);
+        inputs.cubeHeight.value = randomInt(24, 76);
+        inputs.cubeDepth.value = randomInt(42, 150);
+        captureGeometryRatio();
+      }
+
+      applySettings({ reroll: true, resize: true, animate: true });
+    }
+
+
+    function captureGeometryRatio() {
+      geometryRatio = {
+        width: Math.max(10, Number(inputs.cubeWidth.value) || 90),
+        height: Math.max(10, Number(inputs.cubeHeight.value) || 52),
+        depth: Math.max(10, Number(inputs.cubeDepth.value) || 104)
+      };
+    }
+
+    function applyLockedGeometry(changed) {
+      if (!inputs.lockGeometry.checked) {
+        captureGeometryRatio();
+        return;
+      }
+
+      const inputMap = {
+        width: inputs.cubeWidth,
+        height: inputs.cubeHeight,
+        depth: inputs.cubeDepth
+      };
+
+      const previous = geometryRatio[changed];
+      const current = Math.max(10, Number(inputMap[changed].value) || previous);
+      const scale = current / previous;
+
+      inputs.cubeWidth.value = Math.round(geometryRatio.width * scale);
+      inputs.cubeHeight.value = Math.round(geometryRatio.height * scale);
+      inputs.cubeDepth.value = Math.round(geometryRatio.depth * scale);
+
+      captureGeometryRatio();
+    }
+
+    inputs.themeSelect.addEventListener("change", () => {
+      applyTheme(inputs.themeSelect.value, true);
+    });
+
+    [inputs.modeRandom, inputs.modeEditor].forEach(input => {
+      input.addEventListener("change", () => applySettings({ reroll: true, resize: true, resetEditor: true }));
+    });
+
+    inputs.apply.addEventListener("click", () => applySettings({ reroll: true, resize: true, resetEditor: false }));
+
+    inputs.reroll.addEventListener("click", () => {
+      const isEditor = inputs.modeEditor.checked;
+      applySettings({ reroll: true, resize: false, animate: !isEditor, resetEditor: isEditor });
+    });
+
+    inputs.rollDice.addEventListener("click", () => {
+      if (inputs.modeEditor.checked) return;
+      rollDiceConfiguration();
+    });
 
     [
       inputs.aspectRatio,
-      inputs.useCustomSize
-    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: true })));
+      inputs.customAspectWidth,
+      inputs.customAspectHeight,
+      inputs.useCustomSize,
+      inputs.lockCanvasSize
+    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: true, resetEditor: false })));
 
     [
       inputs.independentVisibility,
       inputs.useBlankMargin,
       inputs.animateReroll
-    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: false })));
+    ].forEach(input => input.addEventListener("change", () => applySettings({ reroll: true, resize: false, resetEditor: false })));
 
     [
       inputs.topVisibility,
@@ -966,31 +1499,98 @@
       inputs.innerPadding
     ].forEach(slider => {
       slider.addEventListener("input", syncUI);
-      slider.addEventListener("change", () => applySettings({ reroll: true, resize: false }));
+      slider.addEventListener("change", () => applySettings({ reroll: true, resize: false, resetEditor: false }));
+    });
+
+
+    [
+      inputs.lockCanvasSize,
+      inputs.lockColor,
+      inputs.lockVisibility,
+      inputs.lockComposition,
+      inputs.lockExport
+    ].forEach(lock => lock.addEventListener("change", event => event.stopPropagation()));
+
+    inputs.lockGeometry.addEventListener("change", captureGeometryRatio);
+
+    inputs.cubeWidth.addEventListener("change", () => {
+      applyLockedGeometry("width");
+      captureGeometryRatio();
+      applySettings({ reroll: true, resize: true, resetEditor: false });
+    });
+
+    inputs.cubeHeight.addEventListener("change", () => {
+      applyLockedGeometry("height");
+      captureGeometryRatio();
+      applySettings({ reroll: true, resize: true, resetEditor: false });
+    });
+
+    inputs.cubeDepth.addEventListener("change", () => {
+      applyLockedGeometry("depth");
+      captureGeometryRatio();
+      applySettings({ reroll: true, resize: true, resetEditor: false });
     });
 
     [
-      inputs.cubeWidth,
-      inputs.cubeHeight,
-      inputs.cubeDepth,
       inputs.customWidth,
       inputs.customHeight
     ].forEach(input => {
-      input.addEventListener("change", () => applySettings({ reroll: true, resize: true }));
+      input.addEventListener("change", () => applySettings({ reroll: true, resize: true, resetEditor: false }));
     });
 
     inputs.downloadSvg.addEventListener("click", downloadSvg);
     inputs.downloadPng.addEventListener("click", downloadPng);
 
+    canvas.addEventListener("mousemove", event => {
+      if (!inputs.modeEditor.checked) return;
+
+      const hit = hitTestFace(getCanvasPoint(event));
+      const changed = (
+        (!hoveredFace && hit) ||
+        (hoveredFace && !hit) ||
+        (hoveredFace && hit && (hoveredFace.cubeIndex !== hit.cubeIndex || hoveredFace.side !== hit.side))
+      );
+
+      if (changed) {
+        hoveredFace = hit;
+        draw();
+      }
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      if (!hoveredFace) return;
+      hoveredFace = null;
+      draw();
+    });
+
+    canvas.addEventListener("click", event => {
+      if (!inputs.modeEditor.checked) return;
+
+      const hit = hitTestFace(getCanvasPoint(event));
+      if (!hit) return;
+
+      const cube = cubes[hit.cubeIndex];
+      cube.faces[hit.side].visible = !cube.faces[hit.side].visible;
+      draw();
+    });
+
     window.addEventListener("resize", () => {
       syncUI();
       readConfig();
       resizeCanvas();
-      makeGrid();
+
+      let nextCubes = buildGridData();
+      if (config.mode === "editor") {
+        nextCubes = preserveEditorState(cubes, nextCubes);
+      }
+
+      cubes = nextCubes;
+      hoveredFace = null;
       draw();
     });
 
-    applySettings({ reroll: true, resize: true });
+    captureGeometryRatio();
+    applySettings({ reroll: true, resize: true, resetEditor: true });
   </script>
 </body>
 </html>
