@@ -1758,11 +1758,11 @@ function dashboardCss(){
     '.st-body{padding:.2rem 1rem .8rem;font-size:.82rem;color:var(--muted);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem 1.5rem}.st-body .k{color:var(--muted2);text-transform:uppercase;font-size:.66rem;letter-spacing:.05em}.st-body .v{color:var(--text)}',
     '.headrow{display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;padding:0 1rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2)}',
     '.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.25rem}',
-    '.kpi{appearance:none;text-align:left;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:1.1rem 1.2rem;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:.4rem;transition:border-color .2s,transform .2s,background .2s}',
-    '.kpi:hover{transform:translateY(-2px);background:#2a2a2a}.kpi .kpi-n{font-size:2.3rem;font-weight:300;line-height:1;color:var(--text)}.kpi .kpi-l{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}',
-    '.kpi.crit{border-left-color:var(--crit)}.kpi.crit:hover{border-color:var(--crit)}.kpi.crit .kpi-n{color:var(--crit)}',
-    '.kpi.warn{border-left-color:var(--warn)}.kpi.warn:hover{border-color:var(--warn)}.kpi.warn .kpi-n{color:var(--warn)}',
-    '.kpi.accent{border-left-color:var(--accent)}.kpi.accent:hover{border-color:var(--accent)}',
+    '.kpi{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.4rem}',
+    '.kpi .kpi-n{font-size:2.3rem;font-weight:300;line-height:1;color:var(--text)}.kpi .kpi-l{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}',
+    '.kpi.crit{border-left-color:var(--crit)}.kpi.crit .kpi-n{color:var(--crit)}',
+    '.kpi.warn{border-left-color:var(--warn)}.kpi.warn .kpi-n{color:var(--warn)}',
+    '.kpi.accent{border-left-color:var(--accent)}',
     '.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-grid .card{margin:0}',
     '.dash-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-split>.dash-col{display:flex;flex-direction:column;gap:1.25rem;min-width:0}.dash-split .card{margin:0}',
     '.dash-grid-eq{align-items:stretch}.dash-grid-eq>.card{display:flex;flex-direction:column}',
@@ -2042,8 +2042,8 @@ function dashboardApp(){
 
   /* ===== Leaders ===== */
   function kpi(n, label, cls, sev){
-    return '<button class="kpi ' + (cls||'') + '" onclick="__drillSev(\'' + (sev||'') + '\')">'
-      + '<span class="kpi-n">' + n + '</span><span class="kpi-l">' + label + '</span></button>';
+    return '<div class="kpi ' + (cls||'') + '">'
+      + '<span class="kpi-n">' + n + '</span><span class="kpi-l">' + label + '</span></div>';
   }
   function donut(parts, total){
     var r=58, c=2*Math.PI*r, cx=74, cy=74, off=0;
@@ -2219,7 +2219,7 @@ function dashboardApp(){
         + '</div>'
       + queueHtml
       + '<div class="dash-grid dash-grid-eq">'
-        + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
+        + panel('Severity mix', sevInner)
         + panel('Publish &amp; generate', publishInner)
         + '</div>'
       + (function(){
