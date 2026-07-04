@@ -1,0 +1,4 @@
+filename=pennies-new.zip
+parts=5
+size=91340783
+assembled_with=cat pennies-new.zip.part* > pennies-new.zip
