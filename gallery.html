@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hard-Edge — Gallery</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+  :root{--bg:#fafafa;--card:#ffffff;--line:#e0e0e0;--ink:#1a1a1a;--muted:#666;--accent:#5fdaff;--shadow:0 1px 3px rgba(0,0,0,0.1)}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:400;line-height:1.5;padding:3rem 1.5rem 4rem}
+  .wrap{max-width:1200px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+  h1{font-weight:300;font-size:2rem;letter-spacing:-0.01em;margin:0 0 .35rem}
+  .sub{color:var(--muted);font-weight:300;margin:0}
+  .actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  a.btnlink,button.btn{font-family:inherit;font-weight:400;font-size:.9rem;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:.55rem .9rem;transition:all .3s ease;text-decoration:none;display:inline-flex;align-items:center}
+  a.btnlink:hover,button.btn:hover{border-color:var(--accent)}
+  input[type=password]{font-family:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:8px;padding:.55rem .7rem;background:#fff;color:var(--ink);width:170px}
+  input[type=password]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(95,218,255,.15)}
+  .status{color:var(--muted);font-weight:300;font-size:.95rem;padding:2rem 0}
+  .status.err{color:#b3261e}
+  .grid{column-width:260px;column-gap:1.1rem}
+  .tile{break-inside:avoid;margin:0 0 1.1rem;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);transition:border-color .3s ease,transform .3s ease}
+  .tile:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .tile .art{cursor:zoom-in;display:block;line-height:0}
+  .tile .art svg{width:100%;height:auto;display:block}
+  .meta{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.6rem .8rem;border-top:1px solid var(--line)}
+  .meta .label{font-size:.78rem;color:var(--muted);font-weight:300;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meta .label b{color:var(--ink);font-weight:500}
+  .rowbtns{display:flex;gap:.35rem;flex-shrink:0}
+  .rowbtns button{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:6px;padding:.28rem .5rem;font-size:.72rem;cursor:pointer;font-family:inherit;transition:all .2s ease}
+  .rowbtns button:hover{border-color:var(--accent);color:var(--ink)}
+  .rowbtns button.del:hover{border-color:#b3261e;color:#b3261e}
+  .modal{position:fixed;inset:0;background:rgba(20,20,20,.82);display:none;align-items:center;justify-content:center;z-index:1000;padding:2rem;cursor:zoom-out}
+  .modal.open{display:flex}
+  .modal .inner{max-width:95vw;max-height:92vh;cursor:default;line-height:0}
+  .modal .inner svg{max-width:95vw;max-height:92vh;width:auto;height:auto;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.4);background:#fff}
+  .modal .close{position:absolute;top:18px;right:22px;width:40px;height:40px;border:none;border-radius:8px;background:#1a1a1a;opacity:.7;color:#fff;font-size:1.3rem;line-height:1;cursor:pointer;transition:opacity .3s ease}
+  .modal .close:hover{opacity:1}
+  #print-btn{position:fixed;top:20px;right:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#1a1a1a;opacity:.7;border:none;border-radius:8px;cursor:pointer;z-index:9999;transition:opacity .3s ease;padding:0}
+  #print-btn:hover{opacity:1}
+  #print-btn svg{width:20px;height:20px;stroke:#fff;fill:none}
+  @media print{#print-btn,.actions,.rowbtns{display:none}body{padding:1rem}.tile{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<button id="print-btn" title="Save as PDF" onclick="printSinglePage()" aria-label="Save as PDF">
+  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+</button>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Gallery</h1>
+      <p class="sub">Saved hard-edge compositions.</p>
+    </div>
+    <div class="actions">
+      <input type="password" id="pass" placeholder="Password (to delete)" autocomplete="off">
+      <button class="btn" id="unlock">Unlock</button>
+      <button class="btn" id="refresh">Refresh</button>
+      <a class="btnlink" href="hard-edge-generator.html">← Generator</a>
+    </div>
+  </header>
+  <div class="status" id="status">Loading…</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <button class="close" id="modalClose" aria-label="Close">×</button>
+  <div class="inner" id="modalInner"></div>
+</div>
+
+<script>
+/* same encrypted-token config as the generator */
+const GITHUB_CONFIG={
+  owner:'tylervinson',
+  repo:'tylervinson',
+  encryptedToken:'U2FsdGVkX1+qorc2cswO0lvBlQ80+YorCGNcUMwoaXqqzArA0wxLPgmIeLgn/O+iQ97vpU6QEw9Jc13uXl0Bvg==',
+  path:'hardedge-gallery.json',
+  branch:'main',
+  token:''
+};
+
+const b64_to_utf8=s=>decodeURIComponent(escape(atob(s)));
+const utf8_to_b64=s=>btoa(unescape(encodeURIComponent(s)));
+const grid=document.getElementById('grid');
+const statusEl=document.getElementById('status');
+let ITEMS=[], SHA=null, uidc=0;
+
+try{const t=sessionStorage.getItem('gh_token');if(t)GITHUB_CONFIG.token=t;}catch(e){}
+
+function setStatus(msg,isErr){statusEl.textContent=msg;statusEl.className='status'+(isErr?' err':'');statusEl.style.display=msg?'block':'none';}
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+function uniqueGrain(svg){const u='g'+(++uidc);return svg.replace(/heGrain/g,'heGrain'+u);}
+
+async function load(){
+  setStatus('Loading…');grid.innerHTML='';
+  const headers={Accept:'application/vnd.github.v3+json'};
+  if(GITHUB_CONFIG.token)headers.Authorization='token '+GITHUB_CONFIG.token;
+  const url='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+GITHUB_CONFIG.path+'?ref='+GITHUB_CONFIG.branch+'&t='+Date.now();
+  try{
+    const res=await fetch(url,{headers,cache:'no-store'});
+    if(res.status===404){ITEMS=[];SHA=null;render();return;}
+    if(res.status===403||res.status===401){setStatus('This gallery needs unlocking — enter your password and press Unlock.',true);return;}
+    if(!res.ok)throw new Error('GitHub '+res.status);
+    const data=await res.json();
+    SHA=data.sha;
+    ITEMS=JSON.parse(b64_to_utf8(data.content.replace(/\s/g,'')))||[];
+    render();
+  }catch(err){setStatus('Could not load the gallery: '+err.message,true);}
+}
+
+function render(){
+  if(!ITEMS.length){setStatus('No pieces yet. Generate one and use “Save to gallery.”');grid.innerHTML='';return;}
+  setStatus('');
+  grid.innerHTML='';
+  ITEMS.forEach(it=>{
+    const tile=document.createElement('div');tile.className='tile';
+    const art=document.createElement('div');art.className='art';art.innerHTML=uniqueGrain(it.svg||'');
+    art.addEventListener('click',()=>openModal(it));
+    const meta=document.createElement('div');meta.className='meta';
+    const when=it.date?new Date(it.date).toLocaleDateString():'';
+    meta.innerHTML='<span class="label"><b>'+esc(it.style||'')+'</b> · '+esc(it.palette||'')+'</span>';
+    const btns=document.createElement('div');btns.className='rowbtns';
+    const png=document.createElement('button');png.textContent='PNG';png.title='Download PNG';png.onclick=e=>{e.stopPropagation();downloadPNG(it);};
+    const svgb=document.createElement('button');svgb.textContent='SVG';svgb.title='Download SVG';svgb.onclick=e=>{e.stopPropagation();downloadSVG(it);};
+    const del=document.createElement('button');del.className='del';del.textContent='✕';del.title='Delete';del.onclick=e=>{e.stopPropagation();removeItem(it);};
+    btns.appendChild(png);btns.appendChild(svgb);btns.appendChild(del);
+    meta.appendChild(btns);
+    tile.appendChild(art);tile.appendChild(meta);
+    grid.appendChild(tile);
+  });
+}
+
+/* modal */
+const modal=document.getElementById('modal'),modalInner=document.getElementById('modalInner');
+function openModal(it){modalInner.innerHTML=uniqueGrain(it.svg||'');modal.classList.add('open');}
+function closeModal(){modal.classList.remove('open');modalInner.innerHTML='';}
+modal.addEventListener('click',e=>{if(!modalInner.contains(e.target))closeModal();});
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* downloads */
+function downloadSVG(it){const b=new Blob([it.svg||''],{type:'image/svg+xml'});const a=document.createElement('a');a.download='hard-edge-'+it.id+'.svg';a.href=URL.createObjectURL(b);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function downloadPNG(it){
+  const img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');c.width=it.w||img.width;c.height=it.h||img.height;c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(b=>{const a=document.createElement('a');a.download='hard-edge-'+it.id+'.png';a.href=URL.createObjectURL(b);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);},'image/png');};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(it.svg||'');
+}
+
+/* unlock + delete (write needs the token) */
+function unlock(){
+  const pw=document.getElementById('pass').value;
+  if(!pw){setStatus('Enter your password.',true);return;}
+  try{
+    const dec=CryptoJS.AES.decrypt(GITHUB_CONFIG.encryptedToken,pw).toString(CryptoJS.enc.Utf8);
+    if(!dec){setStatus('Incorrect password.',true);return;}
+    GITHUB_CONFIG.token=dec;try{sessionStorage.setItem('gh_token',dec);}catch(e){}
+    document.getElementById('pass').value='';
+    load();
+  }catch(e){setStatus('Incorrect password.',true);}
+}
+document.getElementById('unlock').addEventListener('click',unlock);
+document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+
+async function removeItem(it){
+  if(!GITHUB_CONFIG.token){setStatus('Unlock with your password first to delete.',true);return;}
+  if(!confirm('Delete this piece?'))return;
+  const next=ITEMS.filter(x=>x.id!==it.id);
+  const url='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+GITHUB_CONFIG.path;
+  try{
+    const res=await fetch(url,{method:'PUT',headers:{Authorization:'token '+GITHUB_CONFIG.token,Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Remove piece '+it.id,content:utf8_to_b64(JSON.stringify(next)),sha:SHA,branch:GITHUB_CONFIG.branch})});
+    if(!res.ok){let m=res.status;try{const e=await res.json();m=e.message||m;}catch(_){}throw new Error(m);}
+    const d=await res.json();SHA=d.content?d.content.sha:null;ITEMS=next;render();
+  }catch(err){setStatus('Delete failed: '+err.message,true);}
+}
+
+document.getElementById('refresh').addEventListener('click',load);
+load();
+
+function printSinglePage(){
+  const w=document.documentElement.scrollWidth,h=document.documentElement.scrollHeight;
+  const style=document.createElement('style');style.id='print-page-style';
+  style.textContent='@page{size:'+w+'px '+h+'px;margin:0}@media print{html,body{width:'+w+'px}}';
+  document.head.appendChild(style);window.print();
+  setTimeout(()=>{const s=document.getElementById('print-page-style');if(s)s.remove();},600);
+}
+</script>
+</body>
+</html>
