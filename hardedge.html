@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hard-Edge — geometric composition generator</title>
+<style>
+  :root{--bg:#fafafa;--card:#ffffff;--line:#e0e0e0;--ink:#1a1a1a;--muted:#666;--accent:#5fdaff;--shadow:0 1px 3px rgba(0,0,0,0.1)}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:400;line-height:1.5;padding:3rem 1.5rem 4rem}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:2rem}
+  h1{font-weight:300;font-size:2rem;letter-spacing:-0.01em;margin:0 0 .35rem}
+  .sub{color:var(--muted);font-weight:300;max-width:64ch;margin:0}
+  .layout{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start}
+  @media (max-width:820px){.layout{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.5rem;box-shadow:var(--shadow)}
+  .panel h2{font-weight:400;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 1rem}
+  .field{margin-bottom:1.25rem}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;font-weight:400}
+  select,input[type=text]{width:100%;padding:.6rem .7rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:inherit;font-size:.9rem;font-weight:400;transition:border-color .3s ease,box-shadow .3s ease}
+  select:focus,input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(95,218,255,.25)}
+  input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+  .rangewrap{display:flex;align-items:center;gap:.75rem}
+  .rangeval{font-size:.85rem;color:var(--ink);min-width:1.5rem;text-align:right;font-variant-numeric:tabular-nums}
+  .toggle{display:flex;align-items:center;justify-content:space-between}
+  .switch{position:relative;width:42px;height:24px;flex:0 0 auto}
+  .switch input{opacity:0;width:0;height:0;position:absolute}
+  .slider{position:absolute;inset:0;background:#d8d8d8;border-radius:24px;transition:background .3s ease;cursor:pointer}
+  .slider::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .3s ease;box-shadow:var(--shadow)}
+  .switch input:checked + .slider{background:var(--accent)}
+  .switch input:checked + .slider::before{transform:translateX(18px)}
+  button{font-family:inherit;font-weight:400;font-size:.9rem;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:.65rem 1rem;transition:all .3s ease}
+  button:hover{border-color:var(--accent)}
+  button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(95,218,255,.25)}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  button.primary:hover{opacity:.85}
+  .btnrow{display:flex;gap:.5rem;flex-wrap:wrap}
+  .btnrow button{flex:1;min-width:110px}
+  .uploader{border:1px dashed var(--line);border-radius:8px;padding:.85rem;text-align:center;transition:border-color .3s ease,background .3s ease;cursor:pointer}
+  .uploader:hover{border-color:var(--accent)}
+  .uploader.dragover{border-color:var(--accent);background:rgba(95,218,255,.06)}
+  .uploader p{margin:0;font-size:.8rem;color:var(--muted);font-weight:300}
+  .uploader .hint{font-size:.72rem;margin-top:.25rem}
+  .swatches{display:flex;gap:4px;margin-top:.7rem;height:0;overflow:hidden;transition:height .3s ease}
+  .swatches.show{height:22px}
+  .swatches span{flex:1;border-radius:3px;border:1px solid rgba(0,0,0,.06)}
+  .clearlink{display:none;font-size:.74rem;color:var(--accent);background:none;border:none;padding:.4rem 0 0;cursor:pointer}
+  .clearlink.show{display:inline-block}
+  .palrow{display:flex;flex-wrap:wrap;gap:.4rem}
+  .swatchbox{position:relative}
+  .swatchbox input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-radius:6px;padding:0;background:var(--card);cursor:pointer}
+  .swatchbox button{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:11px;line-height:1;padding:0;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .swatchbox button:hover{color:var(--ink);border-color:var(--accent)}
+  .palbtns{display:flex;gap:.5rem;margin-top:.6rem}
+  .palbtns button{flex:1}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+  .canvaswrap{width:100%;max-width:640px;display:flex;justify-content:center;align-items:flex-start}
+  canvas{display:block;max-width:100%;border:1px solid var(--line);border-radius:6px}
+  .customsize{display:none;gap:.5rem;margin-top:.55rem;align-items:center}
+  .customsize input{flex:1;text-align:center}
+  .customsize span{color:var(--muted);font-size:.85rem}
+  .caption{font-size:.78rem;color:var(--muted);font-weight:300;text-align:center;display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;align-items:center}
+  .caption b{font-weight:400;color:var(--ink)}
+  .dot{width:3px;height:3px;border-radius:50%;background:var(--line)}
+  .rules{margin-top:2rem}
+  .rules ul{margin:.5rem 0 0;padding-left:1.2rem;list-style:none}
+  .rules li{margin-bottom:.7rem;color:var(--muted);font-weight:300;position:relative}
+  .rules li b{color:var(--ink);font-weight:400}
+  #print-btn{position:fixed;top:20px;right:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#1a1a1a;opacity:.7;border:none;border-radius:8px;cursor:pointer;z-index:9999;transition:opacity .3s ease;padding:0}
+  #print-btn:hover{opacity:1}
+  #print-btn svg{width:20px;height:20px;stroke:#fff;fill:none}
+  @media print{#print-btn{display:none}body{padding:1rem}.panel,.stage,.rules{box-shadow:none}}
+</style>
+</head>
+<body>
+<button id="print-btn" title="Save as PDF" onclick="printSinglePage()" aria-label="Save as PDF">
+  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+</button>
+
+<div class="wrap">
+  <header>
+    <h1>Hard-Edge</h1>
+    <p class="sub">Flat, mid-century geometric compositions built from color, proportion, and angle alone — bold folded ribbons that imply depth through value, or quiet rectilinear fields balanced by interval and weight.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>Controls</h2>
+
+      <div class="field">
+        <label for="style">Style</label>
+        <select id="style">
+          <option value="fields">Rectilinear fields — McLaughlin</option>
+          <option value="ribbons">Folded ribbons — Hammersley</option>
+          <option value="iso">Isometric — filled block form</option>
+          <option value="kremer">Faceted fields — Kremer</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="aspect">Canvas</label>
+        <select id="aspect">
+          <option value="1:1">Square · 1:1</option>
+          <option value="4:5">Portrait · 4:5</option>
+          <option value="3:4">Portrait · 3:4</option>
+          <option value="2:3">Portrait · 2:3</option>
+          <option value="5:4">Landscape · 5:4</option>
+          <option value="4:3">Landscape · 4:3</option>
+          <option value="3:2">Landscape · 3:2</option>
+          <option value="custom">Custom size…</option>
+        </select>
+        <div class="customsize" id="customSize">
+          <input type="text" id="cw" inputmode="numeric" value="1000" aria-label="width in pixels">
+          <span>×</span>
+          <input type="text" id="ch" inputmode="numeric" value="1400" aria-label="height in pixels">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Inspiration image</label>
+        <div class="uploader" id="uploader">
+          <p>Drop an image or click to upload</p>
+          <p class="hint">Its colors become the palette</p>
+        </div>
+        <div class="swatches" id="swatches"></div>
+        <button class="clearlink" id="clearImg">Remove image</button>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </div>
+
+      <div class="field">
+        <label for="palette">Palette</label>
+        <select id="palette"></select>
+      </div>
+
+      <div class="field">
+        <label>Custom palette</label>
+        <div class="palrow" id="palColors"></div>
+        <div class="palbtns">
+          <button type="button" id="addColor">+ Add color</button>
+          <button type="button" id="useCustom">Use these</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="density">Density</label>
+        <div class="rangewrap">
+          <input type="range" id="density" min="1" max="10" value="4">
+          <span class="rangeval" id="densityVal">4</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="light">Light direction</label>
+        <select id="light">
+          <option value="random">Random</option>
+          <option value="tl">Upper left</option>
+          <option value="tr">Upper right</option>
+          <option value="bl">Lower left</option>
+          <option value="br">Lower right</option>
+        </select>
+      </div>
+
+      <div class="field toggle">
+        <label style="margin:0">Paper grain</label>
+        <span class="switch"><input type="checkbox" id="grain" checked><span class="slider"></span></span>
+      </div>
+
+      <div class="field">
+        <div class="btnrow">
+          <button class="primary" id="regen">Generate</button>
+          <button id="download">Save PNG</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <div class="canvaswrap"><canvas id="art"></canvas></div>
+      <div class="caption" id="caption"></div>
+    </section>
+  </div>
+
+  <div class="panel rules">
+    <h2>The two families</h2>
+    <ul>
+      <li><b>Rectilinear fields.</b> Upright and horizontal planes of deliberately uneven width sit on open ground. There's no implied depth — the work is asymmetry held in balance, tuned by interval, weight, and a few quiet colors, after John McLaughlin.</li>
+      <li><b>Folded ribbons.</b> A strip of one width bends through a 45°/90° angle family; each panel is shaded by how it faces a single implied light, so every crease reads as a fold in space, after Frederick Hammersley.</li>
+      <li><b>Isometric.</b> A field of stacked cubes shaded top-light, side-mid, side-dark under one light, filling the frame edge to edge — a close-up detail of a much larger stepped form. Depth is pure face value; nothing recedes but the color.</li>
+      <li><b>Faceted fields.</b> A large flat block of color and open ground meet a single folded form, split into a lit facet and a shadow facet of one hue so the crease reads as an angled plane catching light, after Paul Kremer.</li>
+      <li><b>Shared discipline.</b> Both keep to flat fills, a limited palette, and large shapes. Nothing is a gradient or a shadow — only color and angle.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* ---------- randomness ---------- */
+const rnd=()=>Math.random();
+const rint=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const chance=p=>Math.random()<p;
+
+/* ---------- palettes ---------- */
+const PALETTES=[
+  {name:"McLaughlin Bone", bg:"#eeeae0", colors:["#efe9db","#9a938a","#b7a892","#2b2b2b"]},
+  {name:"Brick Triptych",  bg:"#efe9e1", colors:["#f0ece2","#c98d78","#b0492f","#1c1a17"]},
+  {name:"Pale Signal",     bg:"#ecebe6", colors:["#efeee9","#8ec5df","#e9d02a","#1d1d1d"]},
+  {name:"Grey Field",      bg:"#eeece7", colors:["#efece5","#b9b2a4","#c24a2e","#111111"]},
+  {name:"Kremer Indigo",   bg:"#efe9e0", colors:["#efe6d9","#f0531f","#3b2fa0","#1a1550"]},
+  {name:"Kremer Glacier",  bg:"#f2f4f3", colors:["#f4f6f5","#8fe0ea","#2aa6c4","#14607e"]},
+  {name:"Hammersley Rust", bg:"#e9e7e1", colors:["#f2efe9","#b0492b","#141210"]},
+  {name:"Vermillion",      bg:"#e6ded8", colors:["#f2e7e0","#e8341c","#161512"]},
+  {name:"Cube",            bg:"#ece9e2", colors:["#f4f1ea","#e0231f","#141414","#79c9ad","#f2b400"]},
+  {name:"Retro Fold",      bg:"#efe4cf", colors:["#bfe3d8","#6cbfa3","#efd6a0","#d7ab68","#ef5a22"]},
+  {name:"Ochre",           bg:"#efe9dd", colors:["#f0e9d8","#caa24a","#7a5a2e","#2b241c"]},
+  {name:"Ink & Coral",     bg:"#efe9e3", colors:["#f3ece5","#ff6f52","#123b4a","#1c1a19"]},
+  {name:"Forest Bauhaus",  bg:"#e8e5db", colors:["#f1eee6","#2f7d5b","#d8b53f","#20201d"]},
+  {name:"Slate + Cyan",    bg:"#ececeb", colors:["#f4f4f2","#8a8f96","#26292e","#5fdaff"]},
+];
+let uploadedPalette=null;
+let customPalette=null;
+let customColors=['#efe9db','#b0492b','#1c1a17'];
+
+function lum(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;const f=c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);return .2126*f(r)+.7152*f(g)+.0722*f(b);}
+function roles(p){const uniq=[...new Set(p.colors)];const values=[...uniq].sort((a,b)=>lum(a)-lum(b));return {values,bg:p.bg,dark:values[0],light:values[values.length-1],mid:values[Math.floor((values.length-1)/2)]};}
+
+/* ---------- canvas ---------- */
+const canvas=document.getElementById('art');
+const ctx=canvas.getContext('2d');
+let W=0,H=0,DPR=1;
+function currentDims(){
+  const v=(els&&els.aspect)?els.aspect.value:'1:1';
+  if(v==='custom'){
+    let cw=parseInt(els.cw.value,10),ch=parseInt(els.ch.value,10);
+    if(!Number.isFinite(cw))cw=1000;if(!Number.isFinite(ch))ch=1400;
+    cw=Math.max(120,Math.min(4000,cw));ch=Math.max(120,Math.min(4000,ch));
+    return [cw,ch];
+  }
+  const [aw,ah]=v.split(':').map(Number),LONG=1600;
+  return aw>=ah?[LONG,Math.round(LONG*ah/aw)]:[Math.round(LONG*aw/ah),LONG];
+}
+function setBuffer(){const [w,h]=currentDims();W=w;H=h;canvas.width=W;canvas.height=H;ctx.setTransform(1,0,0,1,0,0);}
+function fitDisplay(){
+  const wrap=canvas.parentElement;const availW=Math.min(640,wrap.clientWidth||640);
+  const maxH=Math.min(760,(window.innerHeight||900)*0.82);const ar=W/H;
+  let dW=availW,dH=dW/ar;if(dH>maxH){dH=maxH;dW=dH*ar;}
+  canvas.style.width=Math.round(dW)+'px';canvas.style.height=Math.round(dH)+'px';
+}
+function poly(pts,color){if(pts.length<3)return;ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=color;ctx.fill();}
+function fillRect(R){ctx.fillStyle=R.color;ctx.fillRect(R.x,R.y,R.w,R.h);}
+function fillRoundPoly(pts,r,color){
+  const n=pts.length;
+  if(n<3){poly(pts,color);return;}
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const prev=pts[(i-1+n)%n],cur=pts[i],next=pts[(i+1)%n];
+    const v1x=cur[0]-prev[0],v1y=cur[1]-prev[1],v2x=next[0]-cur[0],v2y=next[1]-cur[1];
+    const l1=Math.hypot(v1x,v1y)||1,l2=Math.hypot(v2x,v2y)||1;
+    const rr=Math.min(r,l1/2,l2/2);
+    const p1=[cur[0]-v1x/l1*rr,cur[1]-v1y/l1*rr];
+    const p2=[cur[0]+v2x/l2*rr,cur[1]+v2y/l2*rr];
+    if(i===0)ctx.moveTo(p1[0],p1[1]);else ctx.lineTo(p1[0],p1[1]);
+    ctx.quadraticCurveTo(cur[0],cur[1],p2[0],p2[1]);
+  }
+  ctx.closePath();ctx.fillStyle=color;ctx.fill();
+}
+function clipHalfPlane(pl,a,b,c){const out=[];for(let i=0;i<pl.length;i++){const cur=pl[i],nxt=pl[(i+1)%pl.length];const dc=a*cur[0]+b*cur[1]+c,dn=a*nxt[0]+b*nxt[1]+c;if(dc>=0)out.push(cur);if((dc>=0)!==(dn>=0)){const t=dc/(dc-dn);out.push([cur[0]+t*(nxt[0]-cur[0]),cur[1]+t*(nxt[1]-cur[1])]);}}return out;}
+
+/* ==========================================================
+   STYLE 1 — RECTILINEAR FIELDS (McLaughlin)
+   ========================================================== */
+function intervals(n,total,minFrac){
+  let cuts=[];for(let i=0;i<n-1;i++)cuts.push(rnd());cuts.sort((a,b)=>a-b);
+  let pos=[0,...cuts,1],sizes=[];for(let i=1;i<pos.length;i++)sizes.push(pos[i]-pos[i-1]);
+  sizes=sizes.map(s=>Math.max(minFrac,s));const sum=sizes.reduce((a,b)=>a+b,0);
+  return sizes.map(s=>s/sum*total);
+}
+function addThinBar(rects,X0,Y0,X1,Y1,color){
+  const BW=X1-X0,BH=Y1-Y0;
+  if(chance(0.6)){const w=BW*(0.014+rnd()*0.018),bx=X0+BW*(0.15+rnd()*0.7),h=BH*(0.3+rnd()*0.5),by=Y0+(BH-h)*rnd();rects.push({x:bx,y:by,w,h,color});}
+  else{const h=BH*(0.014+rnd()*0.018),by=Y0+BH*(0.15+rnd()*0.7),w=BW*(0.3+rnd()*0.5),bx=X0+(BW-w)*rnd();rects.push({x:bx,y:by,w,h,color});}
+}
+function drawFields(r,density){
+  const V=r.values, ground=r.light, darkest=r.dark;
+  const ink=V.filter(c=>c!==ground);
+  ctx.fillStyle=ground;ctx.fillRect(0,0,W,H);
+
+  let X0=0,Y0=0,X1=W,Y1=H;
+  if(chance(0.45)){const m=Math.min(W,H)*(0.06+rnd()*0.06);X0=m;Y0=m;X1=W-m;Y1=H-m;}
+  const BW=X1-X0,BH=Y1-Y0;
+  const rects=[];
+  const d=Math.max(1,Math.min(10,density));
+
+  // low density -> sparse quiet fields; high density -> more subdivided compositions
+  let scheme;
+  if(rnd()<(10-d)/12)scheme='quiet';
+  else scheme=pick(['columns','columns','bands','stack']);
+
+  const pickInk=(count)=>(count===0&&chance(0.6))?darkest:pick(ink);
+
+  if(scheme==='columns'||scheme==='bands'){
+    const vertical=scheme==='columns';
+    const along=vertical?BW:BH;
+    const k=2+Math.round(d*0.6);                       // d1->3 ... d10->8 divisions
+    const sizes=intervals(k,along,Math.max(0.05,0.14-d*0.008));
+    const colorProb=0.30+d*0.05;                       // d1->0.35 ... d10->0.80 filled
+    let cur=vertical?X0:Y0, colored=0;
+    for(const s of sizes){
+      if(chance(colorProb)){
+        const col=pickInk(colored);
+        const full=chance(0.72);
+        if(vertical){
+          if(full)rects.push({x:cur,y:Y0,w:s,h:BH,color:col});
+          else{const h=BH*(0.4+rnd()*0.4),y=Y0+(BH-h)*rnd();rects.push({x:cur,y,w:s,h,color:col});}
+        }else{
+          if(full)rects.push({x:X0,y:cur,w:BW,h:s,color:col});
+          else{const w=BW*(0.4+rnd()*0.4),x=X0+(BW-w)*rnd();rects.push({x,y:cur,w,h:s,color:col});}
+        }
+        colored++;
+      }
+      cur+=s;
+    }
+    if(colored===0){
+      if(vertical)rects.push({x:X0+BW*0.32,y:Y0,w:along*0.18,h:BH,color:darkest});
+      else rects.push({x:X0,y:Y0+BH*0.32,w:BW,h:along*0.18,color:darkest});
+    }
+    const bars=(d>=5?rint(0,2):rint(0,1));
+    for(let b=0;b<bars;b++)addThinBar(rects,X0,Y0,X1,Y1,darkest);
+  }
+  else if(scheme==='stack'){
+    const vertical=chance(0.7);
+    let rx0=X0,ry0=Y0,rx1=X1,ry1=Y1;
+    if(chance(0.5)){
+      if(vertical){const w=BW*(0.45+rnd()*0.4);rx0=X0+(BW-w)*rnd();rx1=rx0+w;}
+      else{const h=BH*(0.45+rnd()*0.4);ry0=Y0+(BH-h)*rnd();ry1=ry0+h;}
+    }
+    const n=2+Math.round(d*0.5);                        // d1->3 ... d10->7 bands
+    const along=vertical?(ry1-ry0):(rx1-rx0);
+    const sizes=intervals(n,along,Math.max(0.04,0.1-d*0.005));
+    let cur=vertical?ry0:rx0, prev=null;
+    for(const s of sizes){
+      let col=pick(ink.filter(c=>c!==prev));if(!col)col=pick(ink);
+      if(vertical)rects.push({x:rx0,y:cur,w:rx1-rx0,h:s,color:col});
+      else rects.push({x:cur,y:ry0,w:s,h:ry1-ry0,color:col});
+      cur+=s;prev=col;
+    }
+  }
+  else{ // quiet field: open ground + a tall panel + floating blocks that scale with density
+    const pw=BW*(0.2+rnd()*0.22);
+    let px=X0+(chance(0.5)?BW*(0.08+rnd()*0.22):BW*(0.5+rnd()*0.3));
+    px=Math.min(px,X1-pw);
+    const ph=BH*(0.5+rnd()*0.45),py=Y0+(BH-ph)*rnd();
+    if(chance(0.85))rects.push({x:px,y:py,w:pw,h:ph,color:pick(ink)});
+    const blocks=rint(0,Math.round(d*0.35));            // d1->0 ... d10->3-4 blocks
+    for(let b=0;b<blocks;b++){
+      const bw2=BW*(0.14+rnd()*0.22),bh2=BH*(0.08+rnd()*0.16);
+      rects.push({x:X0+(BW-bw2)*rnd(),y:Y0+(BH-bh2)*rnd(),w:bw2,h:bh2,color:pick(ink)});
+    }
+    if(chance(0.4+d*0.04))addThinBar(rects,X0,Y0,X1,Y1,darkest);
+  }
+
+  for(const R of rects)fillRect(R);
+}
+
+/* ==========================================================
+   STYLE 2 — FOLDED RIBBONS (Hammersley): angle -> value under one light
+   ========================================================== */
+const FAMILY_ANGLES=[0,Math.PI/4,Math.PI/2,3*Math.PI/4];
+function resolveLightDir(){let v=(els&&els.light)?els.light.value:'random';if(v==='random')v=pick(['tl','tr','bl','br']);return v;}
+function makeLightIndex(n,lightAngle){
+  const bright=a=>0.5+0.5*Math.cos(2*(a-lightAngle));
+  const bs=FAMILY_ANGLES.map(bright),mn=Math.min(...bs),mx=Math.max(...bs),rg=(mx-mn)||1;
+  return a=>{const t=(bright(a)-mn)/rg;return Math.max(0,Math.min(n-1,Math.round(t*(n-1))));};
+}
+// pick a value index near the light preference but never equal to the previous panel,
+// and (softly) not equal to the background it sits on -> every fold stays visible
+function chooseIndex(pref,prev,fieldSet,n){
+  const all=[...Array(n).keys()];
+  let cand=all.filter(i=>i!==prev&&!fieldSet.has(i));
+  if(cand.length===0)cand=all.filter(i=>i!==prev);
+  if(cand.length===0)cand=all;
+  cand.sort((a,b)=>{const da=Math.abs(a-pref),db=Math.abs(b-pref);if(da!==db)return da-db;return Math.abs(b-prev)-Math.abs(a-prev);});
+  return cand[0];
+}
+function railOffset(pts,half){
+  const n=pts.length,seg=[];
+  for(let i=0;i<n-1;i++){const dx=pts[i+1][0]-pts[i][0],dy=pts[i+1][1]-pts[i][1];const L=Math.hypot(dx,dy)||1;seg.push([dx/L,dy/L]);}
+  const left=[],right=[];
+  for(let i=0;i<n;i++){
+    if(i===0){const nx=-seg[0][1],ny=seg[0][0];left.push([pts[i][0]+nx*half,pts[i][1]+ny*half]);right.push([pts[i][0]-nx*half,pts[i][1]-ny*half]);}
+    else if(i===n-1){const nx=-seg[n-2][1],ny=seg[n-2][0];left.push([pts[i][0]+nx*half,pts[i][1]+ny*half]);right.push([pts[i][0]-nx*half,pts[i][1]-ny*half]);}
+    else{const na=[-seg[i-1][1],seg[i-1][0]],nb=[-seg[i][1],seg[i][0]];let mx=na[0]+nb[0],my=na[1]+nb[1];const ml=Math.hypot(mx,my)||1;mx/=ml;my/=ml;let d=mx*na[0]+my*na[1];if(Math.abs(d)<0.35)d=d<0?-0.35:0.35;const mlen=half/d;left.push([pts[i][0]+mx*mlen,pts[i][1]+my*mlen]);right.push([pts[i][0]-mx*mlen,pts[i][1]-my*mlen]);}
+  }
+  return {left,right,seg};
+}
+function segAngle(u){let a=Math.atan2(u[1],u[0]);if(a<0)a+=Math.PI;return a;}
+function buildRibbon(){
+  const edge=rint(0,3);let x,y,ang;
+  if(edge===0){x=-0.14*W;y=rnd()*H;ang=pick([Math.PI/4,-Math.PI/4,0]);}
+  else if(edge===1){x=1.14*W;y=rnd()*H;ang=pick([3*Math.PI/4,-3*Math.PI/4,Math.PI]);}
+  else if(edge===2){x=rnd()*W;y=-0.14*H;ang=pick([Math.PI/4,3*Math.PI/4,Math.PI/2]);}
+  else{x=rnd()*W;y=1.14*H;ang=pick([-Math.PI/4,-3*Math.PI/4,-Math.PI/2]);}
+  const pts=[[x-Math.cos(ang)*W*1.4,y-Math.sin(ang)*W*1.4],[x,y]];
+  let cx=x,cy=y,a=ang;
+  const turns=pick([0,0,1,1,1,2]);              // usually 0 or 1 angle change, max 2
+  for(let s=0;s<turns;s++){
+    const len=W*(0.3+rnd()*0.45);
+    cx+=Math.cos(a)*len;cy+=Math.sin(a)*len;pts.push([cx,cy]);
+    a+=pick([Math.PI/4,-Math.PI/4,Math.PI/2,-Math.PI/2]);
+  }
+  cx+=Math.cos(a)*W*1.8;cy+=Math.sin(a)*W*1.8;pts.push([cx,cy]);
+  return pts;
+}
+function drawRibbons(r,density){
+  const V=r.values, n=V.length;
+  const dir=resolveLightDir();
+  const lightAngle=(dir==='tr'||dir==='br')?Math.PI/4:3*Math.PI/4;
+  const lightIdx=makeLightIndex(n,lightAngle);
+  const fieldSet=new Set();
+  // background base
+  const baseIdx=lightIdx(pick(FAMILY_ANGLES));
+  ctx.fillStyle=V[baseIdx];ctx.fillRect(0,0,W,H);fieldSet.add(baseIdx);
+  // optional second facet, forced to differ from the base
+  if(chance(0.75)){
+    const cutAng=pick(FAMILY_ANGLES);
+    let ci=lightIdx(cutAng);
+    if(ci===baseIdx)ci=(baseIdx+(baseIdx<n-1?1:-1)+n)%n;
+    const nx=Math.cos(cutAng+Math.PI/2),ny=Math.sin(cutAng+Math.PI/2);
+    const px=W*(0.3+rnd()*0.4),py=H*(0.3+rnd()*0.4);
+    poly(clipHalfPlane([[0,0],[W,0],[W,H],[0,H]],nx,ny,-(nx*px+ny*py)),V[ci]);
+    fieldSet.add(ci);
+  }
+  const ribbonN=1+Math.round(density*0.45);
+  const t=(Math.max(1,Math.min(10,density))-1)/9;
+  const baseHalf=0.20-0.15*t;                     // low density -> wide, high density -> narrow
+  const minHalf=0.10*Math.max(W,H);              // full width >= 20% of the larger canvas side
+  for(let i=0;i<ribbonN;i++){
+    const c=buildRibbon();
+    const half=Math.max(minHalf, W*baseHalf*(0.82+rnd()*0.36));
+    const {left,right,seg}=railOffset(c,half);
+    let prev=-1,prevAng=null;
+    for(let s=0;s<seg.length;s++){
+      const ang=segAngle(seg[s]);
+      const idx=(prevAng!==null&&Math.abs(ang-prevAng)<1e-6)?prev:chooseIndex(lightIdx(ang),prev,fieldSet,n);
+      poly([left[s],left[s+1],right[s+1],right[s]],V[idx]);
+      prev=idx;prevAng=ang;
+    }
+  }
+}
+
+/* ==========================================================
+   STYLE 3 — ISOMETRIC (filled): a cropped detail of a large stepped block form
+   ========================================================== */
+function drawIso(r,density){
+  const V=r.values;
+  const n=V.length;
+  const light=V[n-1], dark=V[0], mid=V[Math.floor((n-1)/2)];
+  const dir=resolveLightDir();
+  const litLeft=(dir==='tl'||dir==='bl'), fromTop=(dir==='tl'||dir==='tr');
+  const leftCol=litLeft?mid:dark, rightCol=litLeft?dark:mid;   // lit side lighter, shadow side darker
+
+  const d=Math.max(1,Math.min(10,density));
+  const tile=Math.min(W,H)/(2.5+d*1.0);          // thicker cubes; low density -> closer crop
+  const a=tile, b=tile*0.5, c=tile*2.0;          // tall columns -> tall walls
+  const ox=W*0.5, oy=H*0.5;
+  const P=(gx,gy,gz)=>[ox+(gx-gy)*a, oy+(gx+gy)*b-gz*c];
+
+  ctx.fillStyle=dark;ctx.fillRect(0,0,W,H);       // backstop so no canvas ever shows through
+
+  const maxH=4;                                   // number of height levels
+  const R=Math.ceil(W/(2*a)+H/(2*b))+maxH*2+6;   // grid generously overfills all four sides
+  const size=2*R+1, idx=(gx,gy)=>(gx+R)*size+(gy+R);
+
+  // terraced value-noise height field: chunky blocks of varying height with tall walls between
+  let f=new Float32Array(size*size);
+  for(let i=0;i<f.length;i++)f[i]=Math.random();
+  const passes=Math.max(2,Math.round(8-d*0.5));   // low density -> more blur -> larger blocks
+  const tmp=new Float32Array(size*size);
+  for(let p=0;p<passes;p++){
+    for(let x=0;x<size;x++)for(let y=0;y<size;y++){
+      let s=0,cnt=0;
+      for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=size||yy>=size)continue;s+=f[xx*size+yy];cnt++;}
+      tmp[x*size+y]=s/cnt;
+    }
+    f.set(tmp);
+  }
+  let mn=Infinity,mx=-Infinity;for(let i=0;i<f.length;i++){if(f[i]<mn)mn=f[i];if(f[i]>mx)mx=f[i];}
+  const rng=(mx-mn)||1;
+  const hf=new Int16Array(size*size);
+  for(let i=0;i<f.length;i++)hf[i]=1+Math.round((f[i]-mn)/rng*(maxH-1));
+
+  // top faces colored by height level; lit from top -> higher is lighter, lit from below -> inverted
+  const topFor=(h)=>{let t=(h-1)/(maxH-1); if(!fromTop)t=1-t; return V[Math.max(0,Math.min(n-1,Math.round(t*(n-1))))];};
+
+  const cells=[];
+  for(let gx=-R;gx<=R;gx++)for(let gy=-R;gy<=R;gy++)cells.push([gx,gy]);
+  cells.sort((A,B)=>(A[0]+A[1])-(B[0]+B[1]));     // painter's order, back to front
+
+  for(const [gx,gy] of cells){
+    const h=hf[idx(gx,gy)];
+    poly([P(gx+1,gy,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx+1,gy,h)], rightCol);   // right face
+    poly([P(gx,gy+1,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx,gy+1,h)], leftCol);    // left face
+    poly([P(gx,gy,h),P(gx+1,gy,h),P(gx+1,gy+1,h),P(gx,gy+1,h)], topFor(h)); // top by elevation
+  }
+}
+
+/* ==========================================================
+   STYLE 4 — KREMER: a big flat field + a faceted folded form on open ground
+   ========================================================== */
+function drawKremer(r,density){
+  const V=r.values;
+  const ground=V[V.length-1];
+  const inkSorted=V.filter(c=>c!==ground).sort((a,b)=>lum(a)-lum(b)); // dark -> light
+  if(inkSorted.length===0)inkSorted.push(V[0]);
+  const fieldColor=inkSorted[inkSorted.length-1];                 // brightest ink = the flat field
+  const facetDark=inkSorted[0];
+  const facetLight=inkSorted.length>=2?inkSorted[1]:inkSorted[0];
+  const dir=resolveLightDir();
+  const litLeftSide=(dir==='tl'||dir==='bl');
+  const d=Math.max(1,Math.min(10,density));
+
+  ctx.fillStyle=ground;ctx.fillRect(0,0,W,H);
+
+  // big flat field, anchored to an edge or corner
+  const mode=pick(['top','top','topPartial','side','square']);
+  ctx.fillStyle=fieldColor;
+  if(mode==='top'){ctx.fillRect(0,0,W,H*(0.4+rnd()*0.22));}
+  else if(mode==='topPartial'){const w=W*(0.55+rnd()*0.4),x=chance(0.5)?0:W-w;ctx.fillRect(x,0,w,H*(0.4+rnd()*0.25));}
+  else if(mode==='side'){const w=W*(0.18+rnd()*0.16),x=chance(0.5)?0:W-w;ctx.fillRect(x,0,w,H);}
+  else{const s=Math.min(W,H)*(0.5+rnd()*0.28),x=chance(0.5)?0:W-s;ctx.fillRect(x,0,s,s);}
+
+  // faceted folded form rising from the bottom, split into a lit and a shadow facet
+  const spanFull=chance(0.45);
+  const fx0=spanFull?0:W*(rnd()*0.35);
+  const fx1=spanFull?W:Math.min(W,fx0+W*(0.45+rnd()*0.5));
+  const nRidge=2+Math.round(d*0.5)+rint(0,1);       // more peaks with density
+  const ridge=[];
+  for(let i=0;i<nRidge;i++){
+    const rx=fx0+(fx1-fx0)*(i/(nRidge-1));
+    const ry=H*(0.26+rnd()*0.56);
+    ridge.push([rx,ry]);
+  }
+  let ai=0;for(let i=1;i<ridge.length;i++)if(ridge[i][1]<ridge[ai][1])ai=i;
+  const apex=ridge[ai];
+  const foldX=Math.max(fx0+1,Math.min(fx1-1,apex[0]+(rnd()*2-1)*(fx1-fx0)*0.14));
+  const round=Math.min(W,H)*(0.035+rnd()*0.03);     // soften corners for an organic feel
+  const BASE=H+Math.min(W,H)*0.06;                  // push base off-canvas so only peaks round
+  fillRoundPoly([[fx0,BASE],...ridge,[fx1,BASE]],round,facetDark);
+  if(litLeftSide)fillRoundPoly([[fx0,BASE],...ridge.slice(0,ai+1),[foldX,BASE]],round,facetLight);
+  else fillRoundPoly([[foldX,BASE],...ridge.slice(ai),[fx1,BASE]],round,facetLight);
+}
+
+/* ---------- grain ---------- */
+let grainPattern=null;
+function makeGrain(){const s=160,oc=document.createElement('canvas');oc.width=s;oc.height=s;const octx=oc.getContext('2d');const id=octx.createImageData(s,s);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255|0;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255;}octx.putImageData(id,0,0);grainPattern=ctx.createPattern(oc,'repeat');}
+function applyGrain(){if(!grainPattern)makeGrain();ctx.save();ctx.globalAlpha=0.05;ctx.globalCompositeOperation='multiply';ctx.fillStyle=grainPattern;ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='screen';ctx.globalAlpha=0.04;ctx.fillStyle=grainPattern;ctx.fillRect(0,0,W,H);ctx.restore();}
+
+/* ---------- palette extraction ---------- */
+function toHex(c){const h=v=>('0'+Math.round(v).toString(16)).slice(-2);return '#'+h(c[0])+h(c[1])+h(c[2]);}
+function extractPalette(srcCanvas){
+  const w=srcCanvas.width,h=srcCanvas.height;
+  const data=srcCanvas.getContext('2d').getImageData(0,0,w,h).data;
+  const pts=[];const step=Math.max(1,Math.floor((w*h)/2500));
+  for(let i=0;i<w*h;i+=step){const o=i*4;if(data[o+3]<128)continue;pts.push([data[o],data[o+1],data[o+2]]);}
+  if(pts.length<8)return null;
+  const k=5;let cents=[];for(let i=0;i<k;i++)cents.push(pts[Math.floor(Math.random()*pts.length)].slice());
+  for(let it=0;it<7;it++){const sums=Array.from({length:k},()=>[0,0,0,0]);for(const p of pts){let bi=0,bd=1e15;for(let c=0;c<k;c++){const dx=p[0]-cents[c][0],dy=p[1]-cents[c][1],dz=p[2]-cents[c][2];const d=dx*dx+dy*dy+dz*dz;if(d<bd){bd=d;bi=c}}sums[bi][0]+=p[0];sums[bi][1]+=p[1];sums[bi][2]+=p[2];sums[bi][3]++;}for(let c=0;c<k;c++)if(sums[c][3])cents[c]=[sums[c][0]/sums[c][3],sums[c][1]/sums[c][3],sums[c][2]/sums[c][3]];}
+  let cols=cents.map(toHex);
+  let dk=pts[0],lt=pts[0],dl=1e9,ll=-1;for(const p of pts){const L=0.299*p[0]+0.587*p[1]+0.114*p[2];if(L<dl){dl=L;dk=p}if(L>ll){ll=L;lt=p}}
+  cols.push(toHex(dk),toHex(lt));
+  const out=[];for(const c of cols){if(!out.some(o=>Math.abs(parseInt(o.slice(1),16)-parseInt(c.slice(1),16))<0x080808))out.push(c);}
+  const sorted=out.sort((a,b)=>lum(a)-lum(b));
+  return {name:"From your image",bg:mixToward(sorted[sorted.length-1],"#ffffff",0.55),colors:sorted};
+}
+function mixToward(hex,to,t){const A=parseInt(hex.slice(1),16),B=parseInt(to.slice(1),16);const ar=A>>16&255,ag=A>>8&255,ab=A&255,br=B>>16&255,bg=B>>8&255,bb=B&255;return toHex([ar+(br-ar)*t,ag+(bg-ag)*t,ab+(bb-ab)*t]);}
+
+/* ---------- orchestration ---------- */
+const els={style:document.getElementById('style'),palette:document.getElementById('palette'),density:document.getElementById('density'),densityVal:document.getElementById('densityVal'),grain:document.getElementById('grain'),caption:document.getElementById('caption'),swatches:document.getElementById('swatches'),clearImg:document.getElementById('clearImg')};
+els.aspect=document.getElementById('aspect');els.cw=document.getElementById('cw');els.ch=document.getElementById('ch');els.light=document.getElementById('light');
+function rebuildPaletteOptions(select){const opts=[];if(uploadedPalette)opts.push(`<option value="upload">From your image</option>`);if(customPalette)opts.push(`<option value="custom">Custom colors</option>`);opts.push(`<option value="random">Random</option>`);opts.push(...PALETTES.map((p,i)=>`<option value="${i}">${p.name}</option>`));els.palette.innerHTML=opts.join('');if(select)els.palette.value=select;}
+rebuildPaletteOptions();
+function resolvePalette(){let v=els.palette.value;if(v==='upload'&&uploadedPalette)return uploadedPalette;if(v==='custom'&&customPalette)return customPalette;if(v==='random')return PALETTES[rint(0,PALETTES.length-1)];return PALETTES[+v]||PALETTES[0];}
+function syncCustomPalette(regen){
+  const cols=[...new Set(customColors.map(c=>String(c).toLowerCase()))];
+  customPalette = cols.length>=2 ? {name:'Custom colors',bg:mixToward([...cols].sort((a,b)=>lum(a)-lum(b)).slice(-1)[0],'#ffffff',0.55),colors:cols} : null;
+  let sel=els.palette.value; if(sel==='custom'&&!customPalette)sel='random';
+  rebuildPaletteOptions(sel);
+  if(regen&&els.palette.value==='custom')generate();
+}
+function renderCustomSwatches(){
+  const box=document.getElementById('palColors'); box.innerHTML='';
+  customColors.forEach((c,i)=>{
+    const wrap=document.createElement('div'); wrap.className='swatchbox';
+    const inp=document.createElement('input'); inp.type='color'; inp.value=/^#[0-9a-f]{6}$/i.test(c)?c:'#888888';
+    inp.setAttribute('aria-label','palette color '+(i+1));
+    inp.addEventListener('input',()=>{customColors[i]=inp.value;syncCustomPalette(true);});
+    wrap.appendChild(inp);
+    if(customColors.length>2){const rm=document.createElement('button');rm.type='button';rm.textContent='\u00d7';rm.title='Remove color';rm.addEventListener('click',()=>{customColors.splice(i,1);renderCustomSwatches();syncCustomPalette(true);});wrap.appendChild(rm);}
+    box.appendChild(wrap);
+  });
+}
+function generate(){
+  setBuffer();
+  const palette=resolvePalette(),r=roles(palette),density=parseInt(els.density.value,10);
+  const st=els.style.value;
+  if(st==='fields')drawFields(r,density);
+  else if(st==='ribbons')drawRibbons(r,density);
+  else if(st==='iso')drawIso(r,density);
+  else drawKremer(r,density);
+  if(els.grain.checked)applyGrain();
+  fitDisplay();
+  const styleName=st==='fields'?'Rectilinear fields':st==='ribbons'?'Folded ribbons':st==='iso'?'Isometric':'Kremer';
+  els.caption.innerHTML=`<b>${styleName}</b><span class="dot"></span>${palette.name}<span class="dot"></span>${W}×${H}`;
+}
+
+/* ---------- upload ---------- */
+const fileInput=document.getElementById('fileInput'),uploader=document.getElementById('uploader');
+uploader.addEventListener('click',()=>fileInput.click());
+['dragover','dragenter'].forEach(e=>uploader.addEventListener(e,ev=>{ev.preventDefault();uploader.classList.add('dragover');}));
+['dragleave','drop'].forEach(e=>uploader.addEventListener(e,ev=>{ev.preventDefault();uploader.classList.remove('dragover');}));
+uploader.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f)handleFile(f);});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
+function handleFile(file){if(!file.type.startsWith('image/'))return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const oc=document.createElement('canvas');const scale=120/Math.max(img.width,img.height);oc.width=Math.max(1,Math.round(img.width*scale));oc.height=Math.max(1,Math.round(img.height*scale));oc.getContext('2d').drawImage(img,0,0,oc.width,oc.height);const pal=extractPalette(oc);if(!pal)return;uploadedPalette=pal;els.swatches.innerHTML=pal.colors.map(c=>`<span style="background:${c}"></span>`).join('');els.swatches.classList.add('show');els.clearImg.classList.add('show');uploader.querySelector('p').textContent='Palette pulled from image';rebuildPaletteOptions('upload');generate();};img.src=e.target.result;};reader.readAsDataURL(file);}
+els.clearImg.addEventListener('click',()=>{uploadedPalette=null;fileInput.value='';els.swatches.classList.remove('show');els.swatches.innerHTML='';els.clearImg.classList.remove('show');uploader.querySelector('p').textContent='Drop an image or click to upload';rebuildPaletteOptions('0');generate();});
+
+/* ---------- events ---------- */
+els.style.addEventListener('change',generate);
+els.aspect.addEventListener('change',()=>{document.getElementById('customSize').style.display=els.aspect.value==='custom'?'flex':'none';generate();});
+els.cw.addEventListener('change',generate);
+els.ch.addEventListener('change',generate);
+els.density.addEventListener('input',()=>{els.densityVal.textContent=els.density.value;generate();});
+els.light.addEventListener('change',generate);
+els.palette.addEventListener('change',generate);
+els.grain.addEventListener('change',generate);
+document.getElementById('regen').addEventListener('click',generate);
+document.getElementById('download').addEventListener('click',()=>{const a=document.createElement('a');a.download='hard-edge.png';a.href=canvas.toDataURL('image/png');a.click();});
+document.getElementById('addColor').addEventListener('click',()=>{if(customColors.length<8){customColors.push('#888888');renderCustomSwatches();syncCustomPalette(false);}});
+document.getElementById('useCustom').addEventListener('click',()=>{syncCustomPalette(false);if(customPalette){els.palette.value='custom';generate();}});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fitDisplay,150);});
+renderCustomSwatches();
+syncCustomPalette(false);
+generate();
+
+/* ---------- print ---------- */
+function printSinglePage(){const w=document.documentElement.scrollWidth,h=document.documentElement.scrollHeight;const style=document.createElement('style');style.id='print-page-style';style.textContent=`@page{size:${w}px ${h}px;margin:0}@media print{html,body{width:${w}px;height:${h}px}}`;document.head.appendChild(style);window.print();setTimeout(()=>{const s=document.getElementById('print-page-style');if(s)s.remove();},600);}
+</script>
+</body>
+</html>
