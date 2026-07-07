@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hard-Edge — geometric composition generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
   :root{--bg:#fafafa;--card:#ffffff;--line:#e0e0e0;--ink:#1a1a1a;--muted:#666;--accent:#5fdaff;--shadow:0 1px 3px rgba(0,0,0,0.1)}
   *{box-sizing:border-box}
@@ -56,9 +57,19 @@
   .swatchbox button:hover{color:var(--ink);border-color:var(--accent)}
   .palbtns{display:flex;gap:.5rem;margin-top:.6rem}
   .palbtns button{flex:1}
+  .tinychk{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--muted);margin:.5rem 0 0;font-weight:300;cursor:pointer}
+  .tinychk input{accent-color:var(--accent)}
+  .btnlink{flex:1;min-width:110px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:.9rem;border:1px solid var(--line);border-radius:8px;padding:.65rem 1rem;color:var(--ink);transition:all .3s ease}
+  .btnlink:hover{border-color:var(--accent)}
+  .ghstatus{font-size:.74rem;color:var(--muted);margin:.5rem 0 0;font-weight:300;min-height:1em;word-break:break-word}
+  .ghrow{display:flex;gap:.5rem;align-items:center}
+  .ghrow input{flex:1}
+  .locked #saveGallery{opacity:.5}
+  .ghstatus.ok{color:#1a7f37}.ghstatus.err{color:#b3261e}
   .stage{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
   .canvaswrap{width:100%;max-width:640px;display:flex;justify-content:center;align-items:flex-start}
-  canvas{display:block;max-width:100%;border:1px solid var(--line);border-radius:6px}
+  #art{display:block;width:100%;height:auto}
+  #art svg{display:block;width:100%;height:auto;max-height:min(76vh,780px);border:1px solid var(--line);border-radius:6px}
   .customsize{display:none;gap:.5rem;margin-top:.55rem;align-items:center}
   .customsize input{flex:1;text-align:center}
   .customsize span{color:var(--muted);font-size:.85rem}
@@ -172,12 +183,26 @@
         <div class="btnrow">
           <button class="primary" id="regen">Generate</button>
           <button id="download">Save PNG</button>
+          <button id="downloadSvg">Save SVG</button>
         </div>
+      </div>
+
+      <div class="field" id="galleryBox">
+        <label>Gallery</label>
+        <div class="ghrow">
+          <input type="password" id="ghPass" placeholder="Password to unlock" autocomplete="off">
+          <button id="ghUnlock" type="button">Unlock</button>
+        </div>
+        <div class="btnrow" style="margin-top:.55rem">
+          <button id="saveGallery">Save to gallery</button>
+          <a class="btnlink" href="hardedge-gallery.html">Open gallery</a>
+        </div>
+        <p class="ghstatus" id="ghStatus"></p>
       </div>
     </aside>
 
     <section class="stage">
-      <div class="canvaswrap"><canvas id="art"></canvas></div>
+      <div class="canvaswrap"><div id="art"></div></div>
       <div class="caption" id="caption"></div>
     </section>
   </div>
@@ -195,6 +220,21 @@
 </div>
 
 <script>
+/* ===== EDIT THIS: your GitHub repo for the gallery (used by Save to gallery + gallery.html) ===== */
+/* ===== GitHub gallery — same encrypted-token pattern as your scripts page =====
+   The token stays AES-encrypted here; you unlock it with your password once per
+   session. Reusing the encrypted token from your scripts page, so the same
+   password works. Regenerate below if you ever want a different one.          */
+const GITHUB_CONFIG={
+  owner:'tylervinson',
+  repo:'tylervinson',
+  encryptedToken:'U2FsdGVkX1+qorc2cswO0lvBlQ80+YorCGNcUMwoaXqqzArA0wxLPgmIeLgn/O+iQ97vpU6QEw9Jc13uXl0Bvg==',
+  path:'hardedge-gallery.json',   // the gallery lives in this one JSON file
+  branch:'main',
+  token:''                        // decrypted at runtime, kept only in sessionStorage
+};
+/* ============================================================================================== */
+
 /* ---------- randomness ---------- */
 const rnd=()=>Math.random();
 const rint=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -225,10 +265,14 @@ let customColors=['#efe9db','#b0492b','#1c1a17'];
 function lum(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;const f=c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);return .2126*f(r)+.7152*f(g)+.0722*f(b);}
 function roles(p){const uniq=[...new Set(p.colors)];const values=[...uniq].sort((a,b)=>lum(a)-lum(b));return {values,bg:p.bg,dark:values[0],light:values[values.length-1],mid:values[Math.floor((values.length-1)/2)]};}
 
-/* ---------- canvas ---------- */
-const canvas=document.getElementById('art');
-const ctx=canvas.getContext('2d');
-let W=0,H=0,DPR=1;
+/* ---------- SVG stage ---------- */
+const stage=document.getElementById('art');
+const ecanvas=document.createElement('canvas');   // offscreen, only for PNG export
+let W=0,H=0;
+let SVGEL=[];                                       // elements collected for the current piece
+let currentSVG='';                                 // full <svg> markup of the current piece
+let currentMeta={};
+function fmt(n){return Math.round(n*100)/100;}
 function currentDims(){
   const v=(els&&els.aspect)?els.aspect.value:'1:1';
   if(v==='custom'){
@@ -240,19 +284,15 @@ function currentDims(){
   const [aw,ah]=v.split(':').map(Number),LONG=1600;
   return aw>=ah?[LONG,Math.round(LONG*ah/aw)]:[Math.round(LONG*aw/ah),LONG];
 }
-function setBuffer(){const [w,h]=currentDims();W=w;H=h;canvas.width=W;canvas.height=H;ctx.setTransform(1,0,0,1,0,0);}
-function fitDisplay(){
-  const wrap=canvas.parentElement;const availW=Math.min(640,wrap.clientWidth||640);
-  const maxH=Math.min(760,(window.innerHeight||900)*0.82);const ar=W/H;
-  let dW=availW,dH=dW/ar;if(dH>maxH){dH=maxH;dW=dH*ar;}
-  canvas.style.width=Math.round(dW)+'px';canvas.style.height=Math.round(dH)+'px';
-}
-function poly(pts,color){if(pts.length<3)return;ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=color;ctx.fill();}
-function fillRect(R){ctx.fillStyle=R.color;ctx.fillRect(R.x,R.y,R.w,R.h);}
+function setBuffer(){const [w,h]=currentDims();W=w;H=h;}
+function fitDisplay(){}                             // SVG scales via viewBox + CSS
+function bg(color){SVGEL.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="'+color+'"/>');}
+function poly(pts,color){if(pts.length<3)return;SVGEL.push('<polygon points="'+pts.map(p=>fmt(p[0])+','+fmt(p[1])).join(' ')+'" fill="'+color+'"/>');}
+function fillRect(R){SVGEL.push('<rect x="'+fmt(R.x)+'" y="'+fmt(R.y)+'" width="'+fmt(R.w)+'" height="'+fmt(R.h)+'" fill="'+R.color+'"/>');}
 function fillRoundPoly(pts,r,color){
   const n=pts.length;
   if(n<3){poly(pts,color);return;}
-  ctx.beginPath();
+  let d='';
   for(let i=0;i<n;i++){
     const prev=pts[(i-1+n)%n],cur=pts[i],next=pts[(i+1)%n];
     const v1x=cur[0]-prev[0],v1y=cur[1]-prev[1],v2x=next[0]-cur[0],v2y=next[1]-cur[1];
@@ -260,10 +300,10 @@ function fillRoundPoly(pts,r,color){
     const rr=Math.min(r,l1/2,l2/2);
     const p1=[cur[0]-v1x/l1*rr,cur[1]-v1y/l1*rr];
     const p2=[cur[0]+v2x/l2*rr,cur[1]+v2y/l2*rr];
-    if(i===0)ctx.moveTo(p1[0],p1[1]);else ctx.lineTo(p1[0],p1[1]);
-    ctx.quadraticCurveTo(cur[0],cur[1],p2[0],p2[1]);
+    d+=(i===0?'M':'L')+fmt(p1[0])+' '+fmt(p1[1])+' Q'+fmt(cur[0])+' '+fmt(cur[1])+' '+fmt(p2[0])+' '+fmt(p2[1])+' ';
   }
-  ctx.closePath();ctx.fillStyle=color;ctx.fill();
+  d+='Z';
+  SVGEL.push('<path d="'+d+'" fill="'+color+'"/>');
 }
 function clipHalfPlane(pl,a,b,c){const out=[];for(let i=0;i<pl.length;i++){const cur=pl[i],nxt=pl[(i+1)%pl.length];const dc=a*cur[0]+b*cur[1]+c,dn=a*nxt[0]+b*nxt[1]+c;if(dc>=0)out.push(cur);if((dc>=0)!==(dn>=0)){const t=dc/(dc-dn);out.push([cur[0]+t*(nxt[0]-cur[0]),cur[1]+t*(nxt[1]-cur[1])]);}}return out;}
 
@@ -284,7 +324,7 @@ function addThinBar(rects,X0,Y0,X1,Y1,color){
 function drawFields(r,density){
   const V=r.values, ground=r.light, darkest=r.dark;
   const ink=V.filter(c=>c!==ground);
-  ctx.fillStyle=ground;ctx.fillRect(0,0,W,H);
+  bg(ground);
 
   let X0=0,Y0=0,X1=W,Y1=H;
   if(chance(0.45)){const m=Math.min(W,H)*(0.06+rnd()*0.06);X0=m;Y0=m;X1=W-m;Y1=H-m;}
@@ -420,7 +460,7 @@ function drawRibbons(r,density){
   const fieldSet=new Set();
   // background base
   const baseIdx=lightIdx(pick(FAMILY_ANGLES));
-  ctx.fillStyle=V[baseIdx];ctx.fillRect(0,0,W,H);fieldSet.add(baseIdx);
+  bg(V[baseIdx]);fieldSet.add(baseIdx);
   // optional second facet, forced to differ from the base
   if(chance(0.75)){
     const cutAng=pick(FAMILY_ANGLES);
@@ -455,10 +495,12 @@ function drawRibbons(r,density){
 function drawIso(r,density){
   const V=r.values;
   const n=V.length;
-  const light=V[n-1], dark=V[0], mid=V[Math.floor((n-1)/2)];
+  const dark=V[0];                                 // used only as the backstop behind the form
   const dir=resolveLightDir();
-  const litLeft=(dir==='tl'||dir==='bl'), fromTop=(dir==='tl'||dir==='tr');
-  const leftCol=litLeft?mid:dark, rightCol=litLeft?dark:mid;   // lit side lighter, shadow side darker
+  const fromTop=(dir==='tl'||dir==='tr');
+  // random side-face colors — no forced dark "shadow" side; keep the two sides distinct so the form still reads
+  let leftCol=pick(V), rightCol=pick(V), guard=0;
+  while(rightCol===leftCol&&V.length>1&&guard++<8)rightCol=pick(V);
 
   const d=Math.max(1,Math.min(10,density));
   const tile=Math.min(W,H)/(2.5+d*1.0);          // thicker cubes; low density -> closer crop
@@ -466,7 +508,7 @@ function drawIso(r,density){
   const ox=W*0.5, oy=H*0.5;
   const P=(gx,gy,gz)=>[ox+(gx-gy)*a, oy+(gx+gy)*b-gz*c];
 
-  ctx.fillStyle=dark;ctx.fillRect(0,0,W,H);       // backstop so no canvas ever shows through
+  bg(dark);       // backstop so no ground ever shows through
 
   const maxH=4;                                   // number of height levels
   const R=Math.ceil(W/(2*a)+H/(2*b))+maxH*2+6;   // grid generously overfills all four sides
@@ -497,11 +539,13 @@ function drawIso(r,density){
   for(let gx=-R;gx<=R;gx++)for(let gy=-R;gy<=R;gy++)cells.push([gx,gy]);
   cells.sort((A,B)=>(A[0]+A[1])-(B[0]+B[1]));     // painter's order, back to front
 
+  // faces carry a same-color stroke so adjacent tiles meet with no hairline seams (grid lines)
+  const face=(pts,color)=>SVGEL.push('<polygon points="'+pts.map(p=>fmt(p[0])+','+fmt(p[1])).join(' ')+'" fill="'+color+'" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round"/>');
   for(const [gx,gy] of cells){
     const h=hf[idx(gx,gy)];
-    poly([P(gx+1,gy,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx+1,gy,h)], rightCol);   // right face
-    poly([P(gx,gy+1,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx,gy+1,h)], leftCol);    // left face
-    poly([P(gx,gy,h),P(gx+1,gy,h),P(gx+1,gy+1,h),P(gx,gy+1,h)], topFor(h)); // top by elevation
+    face([P(gx+1,gy,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx+1,gy,h)], rightCol);   // right face
+    face([P(gx,gy+1,0),P(gx+1,gy+1,0),P(gx+1,gy+1,h),P(gx,gy+1,h)], leftCol);    // left face
+    face([P(gx,gy,h),P(gx+1,gy,h),P(gx+1,gy+1,h),P(gx,gy+1,h)], topFor(h)); // top by elevation
   }
 }
 
@@ -510,51 +554,61 @@ function drawIso(r,density){
    ========================================================== */
 function drawKremer(r,density){
   const V=r.values;
-  const ground=V[V.length-1];
+  const ground=V[V.length-1];                          // lightest color = open ground
   const inkSorted=V.filter(c=>c!==ground).sort((a,b)=>lum(a)-lum(b)); // dark -> light
   if(inkSorted.length===0)inkSorted.push(V[0]);
-  const fieldColor=inkSorted[inkSorted.length-1];                 // brightest ink = the flat field
-  const facetDark=inkSorted[0];
-  const facetLight=inkSorted.length>=2?inkSorted[1]:inkSorted[0];
+  const fieldColor=inkSorted[inkSorted.length-1];       // brightest remaining = the flat field
+  const facetDark=inkSorted[0];                         // darkest = shadow facet
+  const facetLight=inkSorted.length>=2?inkSorted[1]:inkSorted[0];   // next = lit facet
   const dir=resolveLightDir();
   const litLeftSide=(dir==='tl'||dir==='bl');
   const d=Math.max(1,Math.min(10,density));
 
-  ctx.fillStyle=ground;ctx.fillRect(0,0,W,H);
-
-  // big flat field, anchored to an edge or corner
-  const mode=pick(['top','top','topPartial','side','square']);
-  ctx.fillStyle=fieldColor;
-  if(mode==='top'){ctx.fillRect(0,0,W,H*(0.4+rnd()*0.22));}
-  else if(mode==='topPartial'){const w=W*(0.55+rnd()*0.4),x=chance(0.5)?0:W-w;ctx.fillRect(x,0,w,H*(0.4+rnd()*0.25));}
-  else if(mode==='side'){const w=W*(0.18+rnd()*0.16),x=chance(0.5)?0:W-w;ctx.fillRect(x,0,w,H);}
-  else{const s=Math.min(W,H)*(0.5+rnd()*0.28),x=chance(0.5)?0:W-s;ctx.fillRect(x,0,s,s);}
+  // background = two colors sharing an organic, rounded-angle boundary (not straight stripes)
+  bg(ground);            // lower background color
+  const yBase=H*(0.42+rnd()*0.14);
+  const yL=yBase+(rnd()*2-1)*H*0.05;
+  const yR=yBase+(rnd()*2-1)*H*0.05;
+  const xc=W*(0.3+rnd()*0.4);
+  const yc=yBase+(chance(0.5)?-1:1)*H*(0.1+rnd()*0.12);  // one pronounced bend, up or down
+  const M=Math.min(W,H)*0.15;
+  const bRound=Math.min(W,H)*(0.05+rnd()*0.05);
+  fillRoundPoly([[-M,-M],[W+M,-M],[W+M,yR],[xc,yc],[-M,yL]],bRound,fieldColor);  // upper color, organic edge
+  const reachY=Math.min(yL,yR,yc)-H*0.02;                // form rises to meet the color region
 
   // faceted folded form rising from the bottom, split into a lit and a shadow facet
-  const spanFull=chance(0.45);
-  const fx0=spanFull?0:W*(rnd()*0.35);
-  const fx1=spanFull?W:Math.min(W,fx0+W*(0.45+rnd()*0.5));
-  const nRidge=2+Math.round(d*0.5)+rint(0,1);       // more peaks with density
+  const spanFull=chance(0.55);
+  const fx0=spanFull?0:W*(rnd()*0.28);
+  const fx1=spanFull?W:Math.min(W,fx0+W*(0.55+rnd()*0.4));
+  const nRidge=2+Math.round(d*0.5)+rint(0,1);           // more peaks with density
   const ridge=[];
   for(let i=0;i<nRidge;i++){
     const rx=fx0+(fx1-fx0)*(i/(nRidge-1));
-    const ry=H*(0.26+rnd()*0.56);
+    const ry=reachY+rnd()*(H-reachY)*0.5;               // peaks near the field, valleys lower
     ridge.push([rx,ry]);
   }
-  let ai=0;for(let i=1;i<ridge.length;i++)if(ridge[i][1]<ridge[ai][1])ai=i;
-  const apex=ridge[ai];
-  const foldX=Math.max(fx0+1,Math.min(fx1-1,apex[0]+(rnd()*2-1)*(fx1-fx0)*0.14));
-  const round=Math.min(W,H)*(0.035+rnd()*0.03);     // soften corners for an organic feel
-  const BASE=H+Math.min(W,H)*0.06;                  // push base off-canvas so only peaks round
-  fillRoundPoly([[fx0,BASE],...ridge,[fx1,BASE]],round,facetDark);
-  if(litLeftSide)fillRoundPoly([[fx0,BASE],...ridge.slice(0,ai+1),[foldX,BASE]],round,facetLight);
-  else fillRoundPoly([[foldX,BASE],...ridge.slice(ai),[fx1,BASE]],round,facetLight);
+  // near-vertical fold at a balanced position -> two substantial facets, not a thin sliver
+  const foldX=fx0+(fx1-fx0)*(0.35+rnd()*0.3);
+  const yAt=x=>{for(let i=0;i<ridge.length-1;i++){const[ax,ay]=ridge[i],[bx,by]=ridge[i+1];if(x>=ax&&x<=bx){const t=(x-ax)/((bx-ax)||1);return ay+t*(by-ay);}}return ridge[ridge.length-1][1];};
+  const yf=yAt(foldX);
+  const round=Math.min(W,H)*(0.03+rnd()*0.025);         // soften corners for an organic feel
+  const BASE=H+Math.min(W,H)*0.06;                      // push base off-canvas so only peaks round
+  fillRoundPoly([[fx0,BASE],...ridge,[fx1,BASE]],round,facetDark);   // whole form = shadow facet
+  if(litLeftSide){
+    const lit=ridge.filter(p=>p[0]<=foldX);
+    fillRoundPoly([[fx0,BASE],...lit,[foldX,yf],[foldX,BASE]],round,facetLight);
+  }else{
+    const lit=ridge.filter(p=>p[0]>=foldX);
+    fillRoundPoly([[foldX,BASE],[foldX,yf],...lit,[fx1,BASE]],round,facetLight);
+  }
 }
 
-/* ---------- grain ---------- */
-let grainPattern=null;
-function makeGrain(){const s=160,oc=document.createElement('canvas');oc.width=s;oc.height=s;const octx=oc.getContext('2d');const id=octx.createImageData(s,s);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255|0;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255;}octx.putImageData(id,0,0);grainPattern=ctx.createPattern(oc,'repeat');}
-function applyGrain(){if(!grainPattern)makeGrain();ctx.save();ctx.globalAlpha=0.05;ctx.globalCompositeOperation='multiply';ctx.fillStyle=grainPattern;ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='screen';ctx.globalAlpha=0.04;ctx.fillStyle=grainPattern;ctx.fillRect(0,0,W,H);ctx.restore();}
+/* ---------- grain (SVG feTurbulence) ---------- */
+const GRAIN_DEFS='<filter id="heGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n"/><feColorMatrix in="n" type="saturate" values="0"/></filter>';
+function grainOverlay(){
+  return '<rect x="0" y="0" width="'+W+'" height="'+H+'" filter="url(#heGrain)" opacity="0.09" style="mix-blend-mode:multiply"/>'
+       + '<rect x="0" y="0" width="'+W+'" height="'+H+'" filter="url(#heGrain)" opacity="0.05" style="mix-blend-mode:screen"/>';
+}
 
 /* ---------- palette extraction ---------- */
 function toHex(c){const h=v=>('0'+Math.round(v).toString(16)).slice(-2);return '#'+h(c[0])+h(c[1])+h(c[2]);}
@@ -602,15 +656,22 @@ function renderCustomSwatches(){
 }
 function generate(){
   setBuffer();
+  SVGEL=[];
   const palette=resolvePalette(),r=roles(palette),density=parseInt(els.density.value,10);
   const st=els.style.value;
   if(st==='fields')drawFields(r,density);
   else if(st==='ribbons')drawRibbons(r,density);
   else if(st==='iso')drawIso(r,density);
   else drawKremer(r,density);
-  if(els.grain.checked)applyGrain();
-  fitDisplay();
+  const useGrain=els.grain.checked;
+  currentSVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid meet">'
+    +(useGrain?'<defs>'+GRAIN_DEFS+'</defs>':'')
+    +SVGEL.join('')
+    +(useGrain?grainOverlay():'')
+    +'</svg>';
+  stage.innerHTML=currentSVG;
   const styleName=st==='fields'?'Rectilinear fields':st==='ribbons'?'Folded ribbons':st==='iso'?'Isometric':'Kremer';
+  currentMeta={style:styleName, styleKey:st, palette:palette.name, w:W, h:H};
   els.caption.innerHTML=`<b>${styleName}</b><span class="dot"></span>${palette.name}<span class="dot"></span>${W}×${H}`;
 }
 
@@ -634,7 +695,72 @@ els.light.addEventListener('change',generate);
 els.palette.addEventListener('change',generate);
 els.grain.addEventListener('change',generate);
 document.getElementById('regen').addEventListener('click',generate);
-document.getElementById('download').addEventListener('click',()=>{const a=document.createElement('a');a.download='hard-edge.png';a.href=canvas.toDataURL('image/png');a.click();});
+/* ---------- export ---------- */
+function rasterize(){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{ecanvas.width=W;ecanvas.height=H;const c=ecanvas.getContext('2d');c.clearRect(0,0,W,H);c.drawImage(img,0,0,W,H);resolve(ecanvas);};
+    img.onerror=reject;
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(currentSVG);
+  });
+}
+document.getElementById('download').addEventListener('click',async()=>{
+  try{const c=await rasterize();c.toBlob(b=>{const a=document.createElement('a');a.download='hard-edge.png';a.href=URL.createObjectURL(b);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);},'image/png');}catch(e){}
+});
+document.getElementById('downloadSvg').addEventListener('click',()=>{
+  const blob=new Blob([currentSVG],{type:'image/svg+xml'});const a=document.createElement('a');a.download='hard-edge.svg';a.href=URL.createObjectURL(blob);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+
+/* ---------- gallery: encrypted-token auth + JSON on GitHub ---------- */
+const utf8_to_b64=s=>btoa(unescape(encodeURIComponent(s)));
+const b64_to_utf8=s=>decodeURIComponent(escape(atob(s)));
+const ghPass=document.getElementById('ghPass'),ghUnlock=document.getElementById('ghUnlock'),ghStatus=document.getElementById('ghStatus'),galleryBox=document.getElementById('galleryBox');
+function ghMsg(m,cls){ghStatus.textContent=m;ghStatus.className='ghstatus'+(cls?' '+cls:'');}
+function haveToken(){return !!GITHUB_CONFIG.token;}
+function setLocked(v){galleryBox.classList.toggle('locked',v);}
+(function(){try{const t=localStorage.getItem('gh_token')||sessionStorage.getItem('gh_token');if(t)GITHUB_CONFIG.token=t;}catch(e){}setLocked(!haveToken());if(haveToken())ghMsg('Unlocked \u2713 ready to save.','ok');})();
+function unlock(){
+  const pw=ghPass.value;if(!pw){ghMsg('Enter your password.','err');return;}
+  try{
+    const dec=CryptoJS.AES.decrypt(GITHUB_CONFIG.encryptedToken,pw).toString(CryptoJS.enc.Utf8);
+    if(!dec){ghMsg('Incorrect password.','err');return;}
+    GITHUB_CONFIG.token=dec;try{localStorage.setItem('gh_token',dec);}catch(e){}
+    ghPass.value='';setLocked(false);ghMsg('Unlocked \u2713 ready to save.','ok');
+  }catch(e){ghMsg('Incorrect password.','err');}
+}
+ghUnlock.addEventListener('click',unlock);
+ghPass.addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+async function galleryGet(){
+  const url='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+GITHUB_CONFIG.path+'?ref='+GITHUB_CONFIG.branch;
+  const res=await fetch(url,{headers:{Authorization:'token '+GITHUB_CONFIG.token,Accept:'application/vnd.github.v3+json'}});
+  if(res.status===404)return {sha:null,items:[]};
+  if(!res.ok)throw new Error('GitHub '+res.status);
+  const data=await res.json();
+  let items=[];try{items=JSON.parse(b64_to_utf8(data.content.replace(/\s/g,'')))||[];}catch(e){items=[];}
+  return {sha:data.sha,items};
+}
+async function galleryPut(items,sha,msg){
+  const url='https://api.github.com/repos/'+GITHUB_CONFIG.owner+'/'+GITHUB_CONFIG.repo+'/contents/'+GITHUB_CONFIG.path;
+  const body={message:msg,content:utf8_to_b64(JSON.stringify(items)),branch:GITHUB_CONFIG.branch};
+  if(sha)body.sha=sha;
+  const res=await fetch(url,{method:'PUT',headers:{Authorization:'token '+GITHUB_CONFIG.token,Accept:'application/vnd.github.v3+json'},body:JSON.stringify(body)});
+  if(!res.ok){let m=res.status;try{const e=await res.json();m=e.message||m;}catch(_){}throw new Error(m);}
+}
+document.getElementById('saveGallery').addEventListener('click',async()=>{
+  if(!haveToken()){ghMsg('Unlock with your password first.','err');return;}
+  ghMsg('Saving\u2026');
+  const entry={id:Date.now().toString(),style:currentMeta.style,styleKey:currentMeta.styleKey,palette:currentMeta.palette,w:currentMeta.w,h:currentMeta.h,date:new Date().toISOString(),svg:currentSVG};
+  try{
+    const {sha,items}=await galleryGet();
+    items.unshift(entry);
+    await galleryPut(items,sha,'Add hard-edge piece '+entry.id);
+    ghMsg('Saved \u2713 — it\u2019s in your gallery now.','ok');
+  }catch(err){
+    if(/\b401\b|bad credentials/i.test(String(err.message))){try{localStorage.removeItem('gh_token');sessionStorage.removeItem('gh_token');}catch(e){}GITHUB_CONFIG.token='';setLocked(true);ghMsg('Sign-in expired — unlock again.','err');}
+    else if(/\b403\b|rate limit/i.test(String(err.message))){ghMsg('GitHub is rate-limiting — wait a minute and try again (still unlocked).','err');}
+    else ghMsg('Error: '+err.message,'err');
+  }
+});
 document.getElementById('addColor').addEventListener('click',()=>{if(customColors.length<8){customColors.push('#888888');renderCustomSwatches();syncCustomPalette(false);}});
 document.getElementById('useCustom').addEventListener('click',()=>{syncCustomPalette(false);if(customPalette){els.palette.value='custom';generate();}});
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fitDisplay,150);});
