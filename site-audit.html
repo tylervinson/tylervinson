@@ -2073,10 +2073,38 @@ function dashboardApp(){
     renderAuthors();
     document.getElementById('view-authors').scrollIntoView({behavior:'smooth', block:'start'});
   };
+  var ISSUE_LABELS = {
+    'broken link':'Broken links',
+    'load error':'Page failed to load',
+    'headings':'Heading structure',
+    'metadata':'Metadata not translated',
+    'missing':'Missing section',
+    'lang attribute':'Language attribute wrong',
+    'hreflang':'hreflang tags',
+    'canonical':'Canonical URL',
+    'indexing':'Set to noindex',
+    'untranslated':'Untranslated body text',
+    'structured data':'Structured data',
+    'content volume':'Content volume low',
+    'placeholder text':'Placeholder text',
+    'code':'Code / markup',
+    'unavailable':'Check unavailable',
+    'source changed, translation stale':'Translation stale (source changed)',
+    'source & translation both changed':'Source & translation both changed'
+  };
+  function titleCase(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : '\u2014'; }
+  function issueKey(f){
+    if(f.category === 'count'){
+      var m = /has\s+\d+\s+([\w ]+?)\s+vs\s+\d+/i.exec(f.detail||'');
+      var name = m ? m[1].trim() : 'element';
+      return titleCase(name) + ' count doesn\u2019t match';
+    }
+    return ISSUE_LABELS[f.category] || titleCase(f.category);
+  }
   function drill(dim, list){
-    var cols = ['sev','page','issue'];
+    var cols = (dim === 'issue') ? ['sev','page','lang'] : ['sev','page','issue'];
     var src = list || D.findings;
-    var groups={}; src.forEach(function(f){ var k=f[dim]||'\u2014'; (groups[k]=groups[k]||[]).push(f); });
+    var groups={}; src.forEach(function(f){ var k = (dim==='issue') ? issueKey(f) : (f[dim]||'\u2014'); (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
     if(!keys.length) return '<p class="empty">No open findings.</p>';
     var max=groups[keys[0]].length;
@@ -2090,7 +2118,7 @@ function dashboardApp(){
     }).join('');
   }
   var staleMonths = '12';
-  var findingsDim = 'category';
+  var findingsDim = 'issue';
 
   var lv=document.getElementById('view-leaders');
   function renderLeaders(){
@@ -2249,6 +2277,7 @@ function dashboardApp(){
           + panel('Findings',
               '<div class="filters"><span class="muted">Group</span>'
               + '<select id="findings-dim">'
+              + '<option value="issue"'+(findingsDim==='issue'?' selected':'')+'>by issue</option>'
               + '<option value="category"'+(findingsDim==='category'?' selected':'')+'>by category</option>'
               + '<option value="lang"'+(findingsDim==='lang'?' selected':'')+'>by language</option>'
               + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
