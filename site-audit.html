@@ -36,7 +36,7 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   header.page-head { margin-bottom: 2.5rem; }
   header.page-head .eyebrow { font-size: .7rem; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin: 0 0 .8rem; }
   header.page-head h1 { font-weight: 300; font-size: 2.6rem; margin: 0 0 .5rem; letter-spacing: -1px; line-height: 1.1; }
@@ -591,7 +591,7 @@ let langs = [
 
 /* ----------------------------- state ----------------------------- */
 let pages = [
-  { id: p(), name: 'Home', path: '' }
+  { id: p(), name: 'Home', path: '', excluded: false }
 ];
 let discovered = [];   // full sitemap list, kept in memory (not all rendered)
 let dirInclude = {};   // directory -> included?
@@ -603,23 +603,27 @@ function renderPages(){
   const tbl = document.getElementById('pagesTable');
   tbl.innerHTML = '';
   const head = document.createElement('tr');
-  head.innerHTML = '<th style="min-width:140px;">Page name</th><th style="min-width:160px;">Path</th><th>Resolves to</th><th></th>';
+  head.innerHTML = '<th style="min-width:140px;">Page name</th><th style="min-width:160px;">Path</th><th>Resolves to</th><th style="text-align:center;" title="Skip this page in the next audit run">Skip</th><th></th>';
   tbl.appendChild(head);
   pages.forEach(pg => {
     const tr = document.createElement('tr');
-    const preview = langs.map(l => escapeHtml(buildUrl(SITE_URL, l.dir, pg.path))).join('<br>');
+    if(pg.excluded) tr.style.opacity = '.45';
+    const preview = langs.map(l => escapeHtml(buildUrl(SITE_URL, l.dir, pg.path))).join('<br>')
+      + (pg.excluded ? '<br><span style="color:var(--critical);">Excluded from audit</span>' : '');
     tr.innerHTML =
       `<td class="name-cell"><input type="text" value="${escapeAttr(pg.name)}" oninput="updatePageName('${pg.id}', this.value)" placeholder="Page name"></td>` +
       `<td><input type="text" value="${escapeAttr(pg.path)}" placeholder="(home)" oninput="updatePagePath('${pg.id}', this.value)"></td>` +
       `<td style="font-size:.72rem;color:var(--muted);line-height:1.5;word-break:break-all;">${preview}</td>` +
+      `<td style="text-align:center;"><input type="checkbox" ${pg.excluded?'checked':''} title="Skip this page in the next audit run" onchange="togglePageExcluded('${pg.id}', this.checked)"></td>` +
       `<td><button class="tiny ghost" onclick="removePage('${pg.id}')">✕</button></td>`;
     tbl.appendChild(tr);
   });
 }
 function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.name=v; updateRunHint(); } }
 function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); updateRunHint(); } }
-function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'' }); renderPages(); updateRunHint(); }
+function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'', excluded:false }); renderPages(); updateRunHint(); }
 function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); updateRunHint(); }
+function togglePageExcluded(id, checked){ const pg = pages.find(x=>x.id===id); if(pg){ pg.excluded = checked; renderPages(); updateRunHint(); } }
 
 function buildUrl(site, dir, path){
   let base = (site||'').replace(/\/+$/,'');
@@ -882,7 +886,11 @@ function renderDiscSearch(){
 function getAuditPages(){
   const map = new Map();
   effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
-  pages.forEach(pg => { if(pg && pg.name) map.set(pg.path, { name: pg.name, path: pg.path, lastmod: (map.get(pg.path)||{}).lastmod || '' }); });
+  pages.forEach(pg => {
+    if(!pg) return;
+    if(pg.excluded){ map.delete(pg.path); return; }
+    if(pg.name) map.set(pg.path, { name: pg.name, path: pg.path, lastmod: (map.get(pg.path)||{}).lastmod || '' });
+  });
   return [...map.values()];
 }
 function updateRunHint(){
@@ -910,7 +918,7 @@ function exportState(){
     discovered: discovered,
     dirInclude: dirInclude,
     pageExclude: pageExclude,
-    manualPages: pages.map(pg => ({ name:pg.name, path:pg.path })),
+    manualPages: pages.map(pg => ({ name:pg.name, path:pg.path, excluded:!!pg.excluded })),
     noTranslate: (document.getElementById('noTranslate') && document.getElementById('noTranslate').value) || '',
     excludeDirs: (document.getElementById('excludeDirs') && document.getElementById('excludeDirs').value) || '',
     linkResults: [...linkResults.entries()]
@@ -935,7 +943,7 @@ function importState(file){
       discovered = Array.isArray(data.discovered) ? data.discovered : [];
       dirInclude = data.dirInclude && typeof data.dirInclude === 'object' ? data.dirInclude : {};
       pageExclude = data.pageExclude && typeof data.pageExclude === 'object' ? data.pageExclude : {};
-      if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'' }));
+      if(Array.isArray(data.manualPages)) pages = data.manualPages.map(pg => ({ id:p(), name:pg.name||'', path:pg.path||'', excluded:!!pg.excluded }));
       if(typeof data.noTranslate === 'string' && document.getElementById('noTranslate')) document.getElementById('noTranslate').value = data.noTranslate;
       if(typeof data.excludeDirs === 'string' && document.getElementById('excludeDirs')) document.getElementById('excludeDirs').value = data.excludeDirs;
       linkResults = new Map(Array.isArray(data.linkResults) ? data.linkResults : []);
@@ -1735,7 +1743,7 @@ function dashboardCss(){
   return [
     ':root{--bg:#1a1a1a;--card:#242424;--card-alt:#1e1e1e;--border:#2e2e2e;--text:#f0f0f0;--muted:#888;--muted2:#666;--accent:#FFBE5F;--crit:#d98a84;--warn:#d8a24a;--ok:#7dbf82}',
     '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-weight:300;line-height:1.6}',
-    '.wrap{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem}',
+    '.wrap{max-width:1440px;margin:0 auto;padding:2.5rem 1.5rem}',
     '.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.13em;font-size:.7rem;font-weight:500;margin:0}',
     'h1{font-weight:300;font-size:2rem;margin:.2rem 0}.sub{color:var(--muted);font-size:.88rem;margin:.3rem 0 0}',
     '.tabs{display:flex;gap:.4rem;margin:2rem 0 1.5rem;border-bottom:1px solid var(--border)}',
