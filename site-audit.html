@@ -471,6 +471,16 @@
     </div>
     <p class="hint">Auditing <strong id="cfgSite"></strong> through your configured proxy. To change the site, proxy, or languages, edit the config block at the top of this file.</p>
 
+    <div class="section-label">Account</div>
+    <div style="display:flex; align-items:center; gap:.7rem; flex-wrap:wrap;">
+      <span class="score">Signed in as <strong id="cfgRole"></strong></span>
+    </div>
+    <div class="role-toggle" id="settingsRoleToggle" style="margin-top:.6rem; max-width:280px;">
+      <button type="button" class="role-opt" data-role="author" onclick="switchRole('author')">Author</button>
+      <button type="button" class="role-opt" data-role="admin" onclick="switchRole('admin')">Admin</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:1rem;" onclick="logout()">Sign out</button>
+
     <div class="section-label">Translation check</div>
     <div style="display:flex; align-items:center; gap:.7rem;">
       <label class="switch">
@@ -1413,8 +1423,37 @@ function enterApp(role){
   loadSharedState(true);
   showPage(role === 'admin' ? 'leaders' : 'authors');
 }
-function openSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='flex'; }
+function openSettingsModal(){
+  var m=document.getElementById('settingsModal'); if(m) m.style.display='flex';
+  var cr = document.getElementById('cfgRole'); if(cr) cr.textContent = userRole === 'admin' ? 'Admin' : 'Author';
+  document.querySelectorAll('#settingsRoleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === userRole); });
+}
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
+function switchRole(role){
+  if(role === userRole) return;
+  userRole = role;
+  buildTabsForRole(role);
+  try {
+    var s = JSON.parse(sessionStorage.getItem('mlaudit-session') || 'null') || {};
+    s.role = role;
+    sessionStorage.setItem('mlaudit-session', JSON.stringify(s));
+  } catch(e){}
+  closeSettingsModal();
+  showPage(role === 'admin' ? 'leaders' : 'authors');
+  renderNotifBell();
+}
+function logout(){
+  try { sessionStorage.removeItem('mlaudit-session'); } catch(e){}
+  userRole = null;
+  closeSettingsModal();
+  var np = document.getElementById('notifPanel'); if(np) np.style.display = 'none';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  var passEl = document.getElementById('pass');
+  if(passEl){ passEl.value = ''; passEl.classList.remove('input-error'); }
+  showLoginError('');
+  pickRole('author');
+}
 
 // ---- in-app notifications (new 404s) — read state is per browser ----
 function notifSeenKey(){ return 'mlaudit-notif-seen:' + reportHost(); }
