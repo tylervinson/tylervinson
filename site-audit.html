@@ -619,11 +619,28 @@ function renderPages(){
     tbl.appendChild(tr);
   });
 }
-function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.name=v; updateRunHint(); } }
-function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); updateRunHint(); } }
-function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'', excluded:false }); renderPages(); updateRunHint(); }
-function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); updateRunHint(); }
-function togglePageExcluded(id, checked){ const pg = pages.find(x=>x.id===id); if(pg){ pg.excluded = checked; renderPages(); updateRunHint(); } }
+function updatePageName(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.name=v; updateRunHint(); saveManualPagesSoon(); } }
+function updatePagePath(id,v){ const pg = pages.find(x=>x.id===id); if(pg){ pg.path=v.trim(); renderPages(); updateRunHint(); saveManualPagesSoon(); } }
+function addPage(){ pages.push({ id:p(), name:'Page ' + (pages.length+1), path:'', excluded:false }); renderPages(); updateRunHint(); saveManualPagesSoon(); }
+function removePage(id){ pages = pages.filter(x=>x.id!==id); renderPages(); updateRunHint(); saveManualPagesSoon(); }
+function togglePageExcluded(id, checked){ const pg = pages.find(x=>x.id===id); if(pg){ pg.excluded = checked; renderPages(); updateRunHint(); saveManualPagesSoon(); } }
+let _manualPagesSaveTimer = null;
+function saveManualPagesSoon(){
+  clearTimeout(_manualPagesSaveTimer);
+  _manualPagesSaveTimer = setTimeout(function(){
+    statePut('manualPages', pages.map(function(pg){ return { name:pg.name, path:pg.path, excluded:!!pg.excluded }; })).catch(function(){});
+  }, 600);
+}
+async function loadManualPages(){
+  try {
+    const mp = await stateGet('manualPages');
+    if(Array.isArray(mp)){
+      pages = mp.map(function(pg){ return { id:p(), name:pg.name||'', path:pg.path||'', excluded:!!pg.excluded }; });
+      renderPages();
+      updateRunHint();
+    }
+  } catch(e){}
+}
 
 function buildUrl(site, dir, path){
   let base = (site||'').replace(/\/+$/,'');
@@ -1429,6 +1446,7 @@ function enterApp(role){
   buildTabsForRole(role);
   try { sessionStorage.setItem('mlaudit-session', JSON.stringify({ role: role, pass: (document.getElementById('pass').value || '') })); } catch(e){}
   loadSharedState(true);
+  loadManualPages();
   showPage(role === 'admin' ? 'leaders' : 'authors');
 }
 function openSettingsModal(){
@@ -2352,7 +2370,7 @@ function dashboardApp(){
         })()
       + '<div class="dash-grid dash-grid-eq">'
         + '<section class="card">'
-          + '<details class="acc-collapse">'
+          + '<details class="acc-collapse" open>'
             + '<summary class="label acc-summary">Findings<span class="chev">\u25B8</span></summary>'
             + '<div class="filters"><span class="muted">Group</span>'
             + '<select id="findings-dim">'
@@ -2370,7 +2388,7 @@ function dashboardApp(){
         + panel('Translation coverage', covInner)
         + '</div>'
       + '<section class="card">'
-        + '<details class="stale-collapse">'
+        + '<details class="stale-collapse" open>'
           + '<summary class="label stale-summary">Stale content<span class="chev">\u25B8</span></summary>'
           + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
           + '<select id="stale-threshold">'
