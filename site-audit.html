@@ -1739,7 +1739,7 @@ function dashboardCss(){
     'ul.evlist li{font-size:.78rem;padding:.35rem .6rem;border-bottom:1px solid var(--border);word-break:break-word;font-family:"SF Mono",Monaco,Consolas,monospace}ul.evlist li:last-child{border-bottom:none}',
     'ul.evlist li.evhead{font-family:Inter,sans-serif;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:.66rem;background:var(--card-alt)}',
     'details.drill>summary:hover .drill-label{color:var(--accent)}.drill-label{min-width:170px}.drill-label .chev{color:var(--muted2);margin-right:.4rem;font-size:.7rem;display:inline-block;width:.7rem;transition:transform .2s}details.drill[open]>summary .chev{transform:rotate(90deg)}',
-    '.bartrack{flex:1;height:9px;background:#33322f;border-radius:5px;overflow:hidden;max-width:none}.barfill{height:100%;background:linear-gradient(90deg,#ffce85,#f0a63a);border-radius:5px;min-width:3px}.drill-count{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-weight:400}',
+    '.bartrack{flex:1;height:9px;background:#33322f;border-radius:5px;overflow:hidden;max-width:none}.barfill{display:block;height:100%;background:linear-gradient(90deg,#ffce85,#f0a63a);border-radius:5px;min-width:3px}.drill-count{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-weight:400}',
     '.drill-body{padding:.3rem 0 .9rem}',
     'details.pagecard{border:1px solid var(--border);border-radius:8px;margin-bottom:.7rem;background:var(--card-alt)}details.pagecard>summary{list-style:none;cursor:pointer;padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}details.pagecard>summary::-webkit-details-marker{display:none}',
     '.pc-name{font-weight:400;font-size:1rem;flex:1;min-width:160px}.pc-name .chev{color:var(--muted2);margin-right:.5rem;font-size:.7rem;display:inline-block;transition:transform .2s}details.pagecard[open]>summary .pc-name .chev{transform:rotate(90deg)}',
@@ -1803,14 +1803,13 @@ function dashboardCss(){
     '.pub-btn.pub-secondary{background:transparent;border-color:var(--accent);color:var(--accent);font-weight:500}.pub-btn.pub-secondary:hover{background:rgba(255,190,95,.08);border-color:var(--accent)}',
     '.pub-btn:disabled{opacity:.4;cursor:not-allowed;background:transparent;border-color:var(--border);color:var(--muted)}.pub-btn:disabled:hover{background:transparent;border-color:var(--border)}',
     '.pub-status{font-size:.78rem;color:var(--muted);margin-top:.7rem;min-height:1em}.pub-status.ok{color:var(--ok)}.pub-status.err{color:var(--crit)}',
-    '.rank-row{display:flex;align-items:center;gap:.6rem;padding:.3rem 0}',
-    '.rank-name{flex:0 0 190px;min-width:0;display:flex;flex-direction:column;gap:1px}',
-    '.rank-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;font-size:.82rem;color:var(--text)}',
+    '.rank-label{display:flex;align-items:center;gap:.5rem;min-width:210px}',
+    '.rank-name{display:flex;flex-direction:column;gap:1px;min-width:0}',
+    '.rank-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;font-size:.88rem;color:var(--text)}',
     '.rank-path{display:block;color:var(--muted2);font-size:.68rem;font-family:"SF Mono",Monaco,Consolas,monospace}',
-    '.slang-row{display:flex;align-items:center;gap:.6rem;padding:.3rem 0;font-size:.82rem}',
-    '.slang-name{flex:0 0 130px;color:var(--text)}',
+    '.slang-name{font-size:.88rem;color:var(--text)}',
     '.slang-track{flex:1;height:12px;border-radius:4px;overflow:hidden;display:flex;background:#33322f}',
-    '.slang-track span{height:100%}'
+    '.slang-track span{display:block;height:100%}'
   ].join('');
 }
 function dashboardApp(){
@@ -2097,24 +2096,12 @@ function dashboardApp(){
         +'<div class="drill-body">'+findingsTable(list2, cols)+'</div></details>';
     }).join('');
   }
-  function countByLocal(arr, prop){ var o={}; arr.forEach(function(x){ var k=x[prop]||'\u2014'; o[k]=(o[k]||0)+1; }); return o; }
-  function rankBars(counts){
-    var keys=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
-    if(!keys.length) return '<p class="empty">No open findings.</p>';
-    var mx=counts[keys[0]];
-    return keys.map(function(k){
-      var n=counts[k], pct=Math.round(n/mx*100);
-      return '<div class="rank-row"><span class="rank-name"><span class="rank-title">'+esc(k)+'</span></span>'
-        +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
-        +'<span class="drill-count">'+n+'</span></div>';
-    }).join('');
-  }
   function topProblemPages(list, n){
     var groups={}; list.forEach(function(f){ var k=f.page+'||'+f.path; (groups[k]=groups[k]||[]).push(f); });
     var scored=Object.keys(groups).map(function(k){
       var items=groups[k], w=0; items.forEach(function(f){ w += f.severity==='critical'?100:f.severity==='warning'?10:1; });
       var head=k.split('||');
-      return { name:head[0], path:head[1], score:w };
+      return { name:head[0], path:head[1], score:w, items:items.slice().sort(function(a,b){ return sevRank[a.severity]-sevRank[b.severity]; }) };
     });
     scored.sort(function(a,b){ return b.score-a.score; });
     var top=scored.slice(0, n||5);
@@ -2122,14 +2109,15 @@ function dashboardApp(){
     var mx=top[0].score||1;
     return top.map(function(r){
       var pct=Math.round(r.score/mx*100);
-      return '<div class="rank-row"><span class="rank-name"><span class="rank-title">'+esc(r.name)+'</span><span class="rank-path">/'+esc(r.path)+'</span></span>'
+      return '<details class="drill"><summary><span class="rank-label">'+chev+'<span class="rank-name"><span class="rank-title">'+esc(r.name)+'</span><span class="rank-path">/'+esc(r.path)+'</span></span></span>'
         +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
-        +'<span class="drill-count">'+r.score+'</span></div>';
+        +'<span class="drill-count">'+r.score+'</span></summary>'
+        +'<div class="drill-body">'+findingsTable(r.items, ['sev','lang','cat','issue'])+'</div></details>';
     }).join('');
   }
   function sevByLangBars(list){
     var byLang={};
-    list.forEach(function(f){ var l=f.lang||'\u2014'; byLang[l]=byLang[l]||{critical:0,warning:0,info:0}; byLang[l][f.severity]=(byLang[l][f.severity]||0)+1; });
+    list.forEach(function(f){ var l=f.lang||'\u2014'; byLang[l]=byLang[l]||{critical:0,warning:0,info:0,items:[]}; byLang[l][f.severity]=(byLang[l][f.severity]||0)+1; byLang[l].items.push(f); });
     var langs=Object.keys(byLang).sort(function(a,b){
       var ta=byLang[a].critical+byLang[a].warning+byLang[a].info, tb=byLang[b].critical+byLang[b].warning+byLang[b].info;
       return tb-ta;
@@ -2138,9 +2126,11 @@ function dashboardApp(){
     return langs.map(function(l){
       var d=byLang[l], t=(d.critical+d.warning+d.info)||1;
       var pc=Math.round(d.critical/t*100), pw=Math.round(d.warning/t*100), pi=100-pc-pw;
-      return '<div class="slang-row"><span class="slang-name">'+esc(l)+'</span>'
+      var items=d.items.slice().sort(function(a,b){ return sevRank[a.severity]-sevRank[b.severity]; });
+      return '<details class="drill"><summary><span class="rank-label">'+chev+'<span class="slang-name">'+esc(l)+'</span></span>'
         +'<span class="slang-track"><span style="flex:'+pc+' 0 0;background:var(--crit)"></span><span style="flex:'+pw+' 0 0;background:var(--warn)"></span><span style="flex:'+pi+' 0 0;background:var(--muted2)"></span></span>'
-        +'<span class="drill-count">'+(d.critical+d.warning+d.info)+'</span></div>';
+        +'<span class="drill-count">'+(d.critical+d.warning+d.info)+'</span></summary>'
+        +'<div class="drill-body">'+findingsTable(items, ['sev','page','cat','issue'])+'</div></details>';
     }).join('');
   }
   var staleMonths = '12';
@@ -2274,7 +2264,14 @@ function dashboardApp(){
       + queueHtml
       + panel('Top problem pages', topProblemPages(ACT, 5))
       + '<div class="dash-grid dash-grid-eq">'
-        + panel('Findings by section', rankBars(countByLocal(ACT,'dir')))
+        + panel('Findings',
+            '<div class="filters"><span class="muted">Group</span>'
+            + '<select id="findings-dim">'
+            + '<option value="category"'+(findingsDim==='category'?' selected':'')+'>by category</option>'
+            + '<option value="lang"'+(findingsDim==='lang'?' selected':'')+'>by language</option>'
+            + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
+            + '</select><span class="muted" style="font-size:.78rem">\u00B7 click a row to expand</span></div>'
+            + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>')
         + panel('Severity by language', sevByLangBars(ACT))
         + '</div>'
       + '<div class="dash-grid dash-grid-eq">'
@@ -2289,32 +2286,18 @@ function dashboardApp(){
             + '<p class="label">404 errors'+pill+'</p>'
             + s404Inner + '</section>';
         })()
-      + '<div class="dash-split">'
-        + '<div class="dash-col">'
-          + panel('Triage progress', triageInner)
-          + panel('Translation coverage', covInner)
-          + '<section class="card">'
-            + '<details class="stale-collapse">'
-              + '<summary class="label stale-summary">Stale content<span class="chev">\u25B8</span></summary>'
-              + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
-              + '<select id="stale-threshold">'
-              + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
-              + '</select></div>'
-              + '<div id="stale-body"></div>'
-            + '</details>'
-          + '</section>'
-        + '</div>'
-        + '<div class="dash-col">'
-          + panel('Findings',
-              '<div class="filters"><span class="muted">Group</span>'
-              + '<select id="findings-dim">'
-              + '<option value="category"'+(findingsDim==='category'?' selected':'')+'>by category</option>'
-              + '<option value="lang"'+(findingsDim==='lang'?' selected':'')+'>by language</option>'
-              + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
-              + '</select><span class="muted" style="font-size:.78rem">\u00B7 click a row to expand</span></div>'
-              + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>')
-        + '</div>'
-      + '</div>';
+      + panel('Triage progress', triageInner)
+      + panel('Translation coverage', covInner)
+      + '<section class="card">'
+        + '<details class="stale-collapse">'
+          + '<summary class="label stale-summary">Stale content<span class="chev">\u25B8</span></summary>'
+          + '<div class="filters"><span class="muted">Flag pages not updated in over</span>'
+          + '<select id="stale-threshold">'
+          + ['3','6','12','18','24'].map(function(v){ return '<option value="'+v+'"'+(v===staleMonths?' selected':'')+'>'+v+' months</option>'; }).join('')
+          + '</select></div>'
+          + '<div id="stale-body"></div>'
+        + '</details>'
+      + '</section>';
     var sel=document.getElementById('stale-threshold');
     if(sel){ sel.onchange=function(){ staleMonths=sel.value; renderStale(); }; }
     var fdim=document.getElementById('findings-dim');
