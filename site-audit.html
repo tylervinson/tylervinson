@@ -1758,11 +1758,11 @@ function dashboardCss(){
     '.st-body{padding:.2rem 1rem .8rem;font-size:.82rem;color:var(--muted);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem 1.5rem}.st-body .k{color:var(--muted2);text-transform:uppercase;font-size:.66rem;letter-spacing:.05em}.st-body .v{color:var(--text)}',
     '.headrow{display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;padding:0 1rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2)}',
     '.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.25rem}',
-    '.kpi{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.4rem}',
-    '.kpi .kpi-n{font-size:2.3rem;font-weight:300;line-height:1;color:var(--text)}.kpi .kpi-l{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}',
-    '.kpi.crit{border-left-color:var(--crit)}.kpi.crit .kpi-n{color:var(--crit)}',
-    '.kpi.warn{border-left-color:var(--warn)}.kpi.warn .kpi-n{color:var(--warn)}',
-    '.kpi.accent{border-left-color:var(--accent)}',
+    '.kpi{appearance:none;text-align:left;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:1.1rem 1.2rem;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:.4rem;transition:border-color .2s,transform .2s,background .2s}',
+    '.kpi:hover{transform:translateY(-2px);background:#2a2a2a}.kpi .kpi-n{font-size:2.3rem;font-weight:300;line-height:1;color:var(--text)}.kpi .kpi-l{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}',
+    '.kpi.crit{border-left-color:var(--crit)}.kpi.crit:hover{border-color:var(--crit)}.kpi.crit .kpi-n{color:var(--crit)}',
+    '.kpi.warn{border-left-color:var(--warn)}.kpi.warn:hover{border-color:var(--warn)}.kpi.warn .kpi-n{color:var(--warn)}',
+    '.kpi.accent{border-left-color:var(--accent)}.kpi.accent:hover{border-color:var(--accent)}',
     '.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-grid .card{margin:0}',
     '.dash-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin-bottom:1.25rem;align-items:start}.dash-split>.dash-col{display:flex;flex-direction:column;gap:1.25rem;min-width:0}.dash-split .card{margin:0}',
     '.dash-grid-eq{align-items:stretch}.dash-grid-eq>.card{display:flex;flex-direction:column}',
@@ -1802,7 +1802,15 @@ function dashboardCss(){
     '.pub-btn.pub-primary{background:var(--accent);color:#1a1a1a;border-color:var(--accent);font-weight:500}.pub-btn.pub-primary:hover{filter:brightness(1.05)}',
     '.pub-btn.pub-secondary{background:transparent;border-color:var(--accent);color:var(--accent);font-weight:500}.pub-btn.pub-secondary:hover{background:rgba(255,190,95,.08);border-color:var(--accent)}',
     '.pub-btn:disabled{opacity:.4;cursor:not-allowed;background:transparent;border-color:var(--border);color:var(--muted)}.pub-btn:disabled:hover{background:transparent;border-color:var(--border)}',
-    '.pub-status{font-size:.78rem;color:var(--muted);margin-top:.7rem;min-height:1em}.pub-status.ok{color:var(--ok)}.pub-status.err{color:var(--crit)}'
+    '.pub-status{font-size:.78rem;color:var(--muted);margin-top:.7rem;min-height:1em}.pub-status.ok{color:var(--ok)}.pub-status.err{color:var(--crit)}',
+    '.rank-row{display:flex;align-items:center;gap:.6rem;padding:.3rem 0}',
+    '.rank-name{flex:0 0 190px;min-width:0;display:flex;flex-direction:column;gap:1px}',
+    '.rank-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;font-size:.82rem;color:var(--text)}',
+    '.rank-path{display:block;color:var(--muted2);font-size:.68rem;font-family:"SF Mono",Monaco,Consolas,monospace}',
+    '.slang-row{display:flex;align-items:center;gap:.6rem;padding:.3rem 0;font-size:.82rem}',
+    '.slang-name{flex:0 0 130px;color:var(--text)}',
+    '.slang-track{flex:1;height:12px;border-radius:4px;overflow:hidden;display:flex;background:#33322f}',
+    '.slang-track span{height:100%}'
   ].join('');
 }
 function dashboardApp(){
@@ -2042,8 +2050,8 @@ function dashboardApp(){
 
   /* ===== Leaders ===== */
   function kpi(n, label, cls, sev){
-    return '<div class="kpi ' + (cls||'') + '">'
-      + '<span class="kpi-n">' + n + '</span><span class="kpi-l">' + label + '</span></div>';
+    return '<button class="kpi ' + (cls||'') + '" onclick="__drillSev(\'' + (sev||'') + '\')">'
+      + '<span class="kpi-n">' + n + '</span><span class="kpi-l">' + label + '</span></button>';
   }
   function donut(parts, total){
     var r=58, c=2*Math.PI*r, cx=74, cy=74, off=0;
@@ -2073,38 +2081,10 @@ function dashboardApp(){
     renderAuthors();
     document.getElementById('view-authors').scrollIntoView({behavior:'smooth', block:'start'});
   };
-  var ISSUE_LABELS = {
-    'broken link':'Broken links',
-    'load error':'Page failed to load',
-    'headings':'Heading structure',
-    'metadata':'Metadata not translated',
-    'missing':'Missing section',
-    'lang attribute':'Language attribute wrong',
-    'hreflang':'hreflang tags',
-    'canonical':'Canonical URL',
-    'indexing':'Set to noindex',
-    'untranslated':'Untranslated body text',
-    'structured data':'Structured data',
-    'content volume':'Content volume low',
-    'placeholder text':'Placeholder text',
-    'code':'Code / markup',
-    'unavailable':'Check unavailable',
-    'source changed, translation stale':'Translation stale (source changed)',
-    'source & translation both changed':'Source & translation both changed'
-  };
-  function titleCase(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : '\u2014'; }
-  function issueKey(f){
-    if(f.category === 'count'){
-      var m = /has\s+\d+\s+([\w ]+?)\s+vs\s+\d+/i.exec(f.detail||'');
-      var name = m ? m[1].trim() : 'element';
-      return titleCase(name) + ' count doesn\u2019t match';
-    }
-    return ISSUE_LABELS[f.category] || titleCase(f.category);
-  }
   function drill(dim, list){
-    var cols = (dim === 'issue') ? ['sev','page','lang'] : ['sev','page','issue'];
+    var cols = ['sev','page','issue'];
     var src = list || D.findings;
-    var groups={}; src.forEach(function(f){ var k = (dim==='issue') ? issueKey(f) : (f[dim]||'\u2014'); (groups[k]=groups[k]||[]).push(f); });
+    var groups={}; src.forEach(function(f){ var k=f[dim]||'\u2014'; (groups[k]=groups[k]||[]).push(f); });
     var keys=Object.keys(groups).sort(function(a,b){ return groups[b].length-groups[a].length; });
     if(!keys.length) return '<p class="empty">No open findings.</p>';
     var max=groups[keys[0]].length;
@@ -2117,8 +2097,54 @@ function dashboardApp(){
         +'<div class="drill-body">'+findingsTable(list2, cols)+'</div></details>';
     }).join('');
   }
+  function countByLocal(arr, prop){ var o={}; arr.forEach(function(x){ var k=x[prop]||'\u2014'; o[k]=(o[k]||0)+1; }); return o; }
+  function rankBars(counts){
+    var keys=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
+    if(!keys.length) return '<p class="empty">No open findings.</p>';
+    var mx=counts[keys[0]];
+    return keys.map(function(k){
+      var n=counts[k], pct=Math.round(n/mx*100);
+      return '<div class="rank-row"><span class="rank-name"><span class="rank-title">'+esc(k)+'</span></span>'
+        +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
+        +'<span class="drill-count">'+n+'</span></div>';
+    }).join('');
+  }
+  function topProblemPages(list, n){
+    var groups={}; list.forEach(function(f){ var k=f.page+'||'+f.path; (groups[k]=groups[k]||[]).push(f); });
+    var scored=Object.keys(groups).map(function(k){
+      var items=groups[k], w=0; items.forEach(function(f){ w += f.severity==='critical'?100:f.severity==='warning'?10:1; });
+      var head=k.split('||');
+      return { name:head[0], path:head[1], score:w };
+    });
+    scored.sort(function(a,b){ return b.score-a.score; });
+    var top=scored.slice(0, n||5);
+    if(!top.length) return '<p class="empty">No open findings.</p>';
+    var mx=top[0].score||1;
+    return top.map(function(r){
+      var pct=Math.round(r.score/mx*100);
+      return '<div class="rank-row"><span class="rank-name"><span class="rank-title">'+esc(r.name)+'</span><span class="rank-path">/'+esc(r.path)+'</span></span>'
+        +'<span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span>'
+        +'<span class="drill-count">'+r.score+'</span></div>';
+    }).join('');
+  }
+  function sevByLangBars(list){
+    var byLang={};
+    list.forEach(function(f){ var l=f.lang||'\u2014'; byLang[l]=byLang[l]||{critical:0,warning:0,info:0}; byLang[l][f.severity]=(byLang[l][f.severity]||0)+1; });
+    var langs=Object.keys(byLang).sort(function(a,b){
+      var ta=byLang[a].critical+byLang[a].warning+byLang[a].info, tb=byLang[b].critical+byLang[b].warning+byLang[b].info;
+      return tb-ta;
+    });
+    if(!langs.length) return '<p class="empty">No open findings.</p>';
+    return langs.map(function(l){
+      var d=byLang[l], t=(d.critical+d.warning+d.info)||1;
+      var pc=Math.round(d.critical/t*100), pw=Math.round(d.warning/t*100), pi=100-pc-pw;
+      return '<div class="slang-row"><span class="slang-name">'+esc(l)+'</span>'
+        +'<span class="slang-track"><span style="flex:'+pc+' 0 0;background:var(--crit)"></span><span style="flex:'+pw+' 0 0;background:var(--warn)"></span><span style="flex:'+pi+' 0 0;background:var(--muted2)"></span></span>'
+        +'<span class="drill-count">'+(d.critical+d.warning+d.info)+'</span></div>';
+    }).join('');
+  }
   var staleMonths = '12';
-  var findingsDim = 'issue';
+  var findingsDim = 'category';
 
   var lv=document.getElementById('view-leaders');
   function renderLeaders(){
@@ -2246,8 +2272,13 @@ function dashboardApp(){
         + kpi(openN,'Open findings','','')
         + '</div>'
       + queueHtml
+      + panel('Top problem pages', topProblemPages(ACT, 5))
       + '<div class="dash-grid dash-grid-eq">'
-        + panel('Severity mix', sevInner)
+        + panel('Findings by section', rankBars(countByLocal(ACT,'dir')))
+        + panel('Severity by language', sevByLangBars(ACT))
+        + '</div>'
+      + '<div class="dash-grid dash-grid-eq">'
+        + panel('Severity mix \u00B7 click a metric above to drill in', sevInner)
         + panel('Publish &amp; generate', publishInner)
         + '</div>'
       + (function(){
@@ -2277,7 +2308,6 @@ function dashboardApp(){
           + panel('Findings',
               '<div class="filters"><span class="muted">Group</span>'
               + '<select id="findings-dim">'
-              + '<option value="issue"'+(findingsDim==='issue'?' selected':'')+'>by issue</option>'
               + '<option value="category"'+(findingsDim==='category'?' selected':'')+'>by category</option>'
               + '<option value="lang"'+(findingsDim==='lang'?' selected':'')+'>by language</option>'
               + '<option value="dir"'+(findingsDim==='dir'?' selected':'')+'>by section / directory</option>'
