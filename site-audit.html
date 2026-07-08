@@ -1859,18 +1859,9 @@ function dashboardCss(){
     '.rank-name{display:flex;flex-direction:column;gap:1px;min-width:0}',
     '.rank-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;font-size:.88rem;color:var(--text)}',
     '.rank-path{display:block;color:var(--muted2);font-size:.68rem;font-family:"SF Mono",Monaco,Consolas,monospace}',
-    '.slang-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem}',
-    '.slang-card{border:1px solid var(--border);border-radius:8px;background:var(--card-alt);overflow:hidden}',
-    '.slang-card>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:1rem .5rem;text-align:center;position:relative}',
-    '.slang-card>summary::-webkit-details-marker{display:none}',
-    '.slang-card:hover{border-color:var(--muted2)}',
-    '.mini-donut{width:88px;height:88px}',
-    '.mini-donut-n{fill:var(--text);font-size:22px;font-weight:300}',
-    '.slang-card-name{font-size:.86rem;color:var(--text);margin-top:.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}',
-    '.slang-card-sub{font-size:.72rem;color:var(--muted)}',
-    '.slang-card-chev{position:absolute;top:.6rem;right:.6rem;color:var(--muted2);font-size:.7rem;transition:transform .2s ease}',
-    '.slang-card[open] .slang-card-chev{transform:rotate(90deg)}',
-    '.slang-card[open]{grid-column:1 / -1}'
+    '.lchart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:.9rem;font-size:12px;color:var(--muted)}',
+    '.lchart-legend .item{display:flex;align-items:center;gap:5px}',
+    '.lchart-legend .item .n{color:var(--muted2)}'
   ].join('');
 }
 function dashboardApp(){
@@ -2176,45 +2167,46 @@ function dashboardApp(){
         +'<div class="drill-body">'+findingsTable(r.items, ['sev','lang','cat','issue'])+'</div></details>';
     }).join('');
   }
-  function miniDonut(parts, total){
-    var r=40, c=2*Math.PI*r, cx=50, cy=50, off=0;
-    var segs = parts.filter(function(p){return p.n>0;}).map(function(p){
-      var len = total ? c*(p.n/total) : 0;
-      var s = '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+p.color+'" stroke-width="11" '
-        + 'stroke-dasharray="'+len+' '+(c-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
-      off += len; return s;
-    }).join('');
-    return '<svg viewBox="0 0 100 100" class="mini-donut">'
-      + '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="11"/>'
-      + (total ? segs : '')
-      + '<text x="50" y="57" text-anchor="middle" class="mini-donut-n">'+total+'</text></svg>';
-  }
-  function sevByLangDonuts(list){
+  function sevByLangLine(list){
     var byLang={};
-    list.forEach(function(f){ var l=f.lang||'\u2014'; byLang[l]=byLang[l]||{critical:0,warning:0,info:0,items:[]}; byLang[l][f.severity]=(byLang[l][f.severity]||0)+1; byLang[l].items.push(f); });
+    list.forEach(function(f){ var l=f.lang||'\u2014'; byLang[l]=byLang[l]||{critical:0,warning:0,info:0}; byLang[l][f.severity]=(byLang[l][f.severity]||0)+1; });
     var langs=Object.keys(byLang).sort(function(a,b){
       var ta=byLang[a].critical+byLang[a].warning+byLang[a].info, tb=byLang[b].critical+byLang[b].warning+byLang[b].info;
       return tb-ta;
     });
     if(!langs.length) return '<p class="empty">No open findings.</p>';
-    var legend = '<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:1rem;font-size:12px;color:var(--muted)">'
-      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:var(--crit)"></span>Critical</span>'
-      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:var(--warn)"></span>Warning</span>'
-      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:var(--muted2)"></span>Info</span>'
-      + '</div>';
-    var cards = langs.map(function(l){
-      var d=byLang[l], t=d.critical+d.warning+d.info;
-      var items=d.items.slice().sort(function(a,b){ return sevRank[a.severity]-sevRank[b.severity]; });
-      var svg=miniDonut([{n:d.critical,color:'var(--crit)'},{n:d.warning,color:'var(--warn)'},{n:d.info,color:'var(--muted2)'}], t);
-      return '<details class="slang-card"><summary>'
-        + svg
-        + '<span class="slang-card-name">'+esc(l)+'</span>'
-        + '<span class="slang-card-sub">'+t+' finding'+(t===1?'':'s')+'</span>'
-        + '<span class="chev slang-card-chev">\u25B8</span>'
-        + '</summary>'
-        + '<div class="drill-body">'+findingsTable(items, ['sev','page','cat','issue'])+'</div></details>';
+    var palette = ['var(--accent)','var(--ok)','#8aa9d9','#b48ae0','#e08ac0','#7fd0c9'];
+    var cats = ['critical','warning','info'], catLabels = ['Critical','Warning','Info'];
+    var maxV = 1;
+    langs.forEach(function(l){ cats.forEach(function(c){ if(byLang[l][c] > maxV) maxV = byLang[l][c]; }); });
+    var W=440, H=200, padL=30, padR=14, padT=14, padB=28;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    function xFor(i){ return padL + plotW*i/(cats.length-1); }
+    function yFor(v){ return padT + plotH - (plotH*v/maxV); }
+    var yTicks=[0, Math.round(maxV/2), maxV];
+    var gridSvg = yTicks.map(function(t){
+      var y=yFor(t);
+      return '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'
+        + '<text x="'+(padL-8)+'" y="'+(y+3)+'" text-anchor="end" font-size="10" fill="var(--muted2)">'+t+'</text>';
     }).join('');
-    return legend + '<div class="slang-grid">'+cards+'</div>';
+    var xLabels = cats.map(function(c,i){
+      return '<text x="'+xFor(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+catLabels[i]+'</text>';
+    }).join('');
+    var lines = langs.map(function(l, li){
+      var color = palette[li % palette.length];
+      var pts = cats.map(function(c,i){ return xFor(i)+','+yFor(byLang[l][c]); }).join(' ');
+      var dots = cats.map(function(c,i){
+        return '<circle cx="'+xFor(i)+'" cy="'+yFor(byLang[l][c])+'" r="3.5" fill="'+color+'"><title>'+esc(l)+' \u00B7 '+catLabels[i]+': '+byLang[l][c]+'</title></circle>';
+      }).join('');
+      return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+dots;
+    }).join('');
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'+gridSvg+xLabels+lines+'</svg>';
+    var legend = '<div class="lchart-legend">'+langs.map(function(l, li){
+      var color = palette[li % palette.length];
+      var t = byLang[l].critical+byLang[l].warning+byLang[l].info;
+      return '<span class="item"><span class="swatch" style="background:'+color+'"></span>'+esc(l)+' <span class="n">('+t+')</span></span>';
+    }).join('')+'</div>';
+    return svg + legend;
   }
   var staleMonths = '12';
   var findingsDim = 'category';
@@ -2371,7 +2363,7 @@ function dashboardApp(){
             + '<div id="findings-drill">' + drill(findingsDim, ACT) + '</div>'
           + '</details>'
         + '</section>'
-        + panel('Severity by language', sevByLangDonuts(ACT))
+        + panel('Severity by language', sevByLangLine(ACT))
         + '</div>'
       + '<div class="dash-grid dash-grid-eq">'
         + panel('Triage progress', triageInner)
