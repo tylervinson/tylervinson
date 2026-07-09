@@ -1164,10 +1164,18 @@ function currentFingerprints(){
   });
   return { en, tr };
 }
+function excludedManualPathSet(){
+  const s = new Set();
+  pages.forEach(pg => { if(pg && pg.excluded) s.add(pg.path || ''); });
+  return s;
+}
 function flattenFindings(){
   const out = [];
+  const EXCL = excludedManualPathSet();
   (auditState.results||[]).forEach(r => {
-    const page = r.page.name, path = r.page.path || '';
+    const path = r.page.path || '';
+    if(EXCL.has(path)) return; // skipped in Audit Settings — treat as removed from current data
+    const page = r.page.name;
     const dir = (dirOf(path) || '(top level)');
     const base = (lang, section, cat, sev, detail, suggestion, snippet, items, evidenceLabel) =>
       out.push({ page, path, dir, lang, section, category: cat, severity: sev, detail: detail||'', suggestion: suggestion||'', snippet: snippet||'', items: items||null, evidenceLabel: evidenceLabel||'' });
@@ -1326,23 +1334,31 @@ function loadContentDates(file){
 /* ---- two-view dashboard (Authors + Leaders) ---- */
 function buildDashboardData(){
   const findings = flattenFindings();
-  let syncWarn = 0, syncInfo = 0;
-  findings.forEach(f => { if(f.section === 'Source sync'){ if(f.severity === 'warning') syncWarn++; else if(f.severity === 'info') syncInfo++; } });
+  const EXCL = excludedManualPathSet();
+  const activeResults = (auditState.results||[]).filter(r => !EXCL.has(r.page.path || ''));
   const missing = {};
-  (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
+  activeResults.forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
   // Foreign-language pages that failed to load during the audit (e.g. no Chinese/Spanish
   // version exists → HTTP 404). These are derived by the audit, not the sitemap, so they
   // won't appear in the sitemap monitor — surface them in the 404 box directly.
   const missingTranslations = [];
-  (auditState.results||[]).forEach(r => (r.languages||[]).forEach(b => {
+  activeResults.forEach(r => (r.languages||[]).forEach(b => {
     if(b.error) missingTranslations.push({
       page: r.page.name, path: r.page.path || '', lang: b.lang.label,
       url: b.url || '', error: b.error
     });
   }));
-  const pages = (auditState.results||[]).map(r => ({
+  const pages = activeResults.map(r => ({
     path: r.page.path || '(home)', name: r.page.name, lastmod: r.page.lastmod || ''
   }));
+  // Severity/broken totals are recomputed fresh from the (already-filtered) findings rather
+  // than the live-run counters (auditState.crit/warn/info/broken), so a page marked "Skip" in
+  // Audit Settings disappears from these counts immediately, without re-running the audit.
+  let sCrit=0, sWarn=0, sInfo=0, sBroken=0;
+  findings.forEach(f => {
+    if(f.category === 'broken link'){ sBroken++; return; }
+    if(f.severity === 'critical') sCrit++; else if(f.severity === 'warning') sWarn++; else sInfo++;
+  });
   return {
     meta: {
       host: reportHost(),
@@ -1352,7 +1368,7 @@ function buildDashboardData(){
         ? ((document.getElementById('engine')||{}).value || 'on') : 'off'
     },
     now: Date.now(),
-    summary: { critical:auditState.crit, warning:auditState.warn + syncWarn, info:auditState.info + syncInfo, broken:auditState.broken, pages:auditState.pages },
+    summary: { critical:sCrit, warning:sWarn, info:sInfo, broken:sBroken, pages:activeResults.length },
     findings,
     rollups: {
       byLang: countBy(findings, 'lang'),
@@ -1362,7 +1378,7 @@ function buildDashboardData(){
     },
     coverage: {
       discovered: (discovered && discovered.length) || 0,
-      audited: auditState.pages,
+      audited: activeResults.length,
       missing: Object.keys(missing).map(k => ({ lang:k, count:missing[k] }))
     },
     pages,
@@ -2293,8 +2309,8 @@ function dashboardApp(){
 
       // Group 1 — missing/broken foreign-language pages found by the last audit
       var mt = mtList.slice().sort(function(a,b){ return (a.page+a.lang).localeCompare(b.page+b.lang); });
-      out += '<div class="s404-group"><div class="s404-grouphead">Missing translations \u00B7 expected foreign-language pages that failed to load'
-        + (mt.length? ' ('+mt.length+')':'') + '</div>';
+      out += '<details class="acc-collapse s404-group" open><summary class="s404-grouphead acc-summary">Missing translations \u00B7 expected foreign-language pages that failed to load'
+        + (mt.length? ' ('+mt.length+')':'') + '<span class="chev">\u25B8</span></summary>';
       if(!D.summary || !D.summary.pages){
         out += '<p class="muted" style="font-size:.82rem;margin:.1rem 0 .5rem">Run an audit to check whether each page\u2019s translated versions exist.</p>';
       } else if(!mt.length){
@@ -2313,11 +2329,11 @@ function dashboardApp(){
             + ' more \u2014 see every one under <strong>Findings \u25B8 by language</strong>.</p>';
         }
       }
-      out += '</div>';
+      out += '</details>';
 
       // Group 2 — sitemap monitor (internal pages the sitemap lists that 404)
       var s = D.sitemap404;
-      out += '<div class="s404-group"><div class="s404-grouphead">Sitemap monitor \u00B7 internal pages the sitemap lists that return 404</div>';
+      out += '<details class="acc-collapse s404-group" open><summary class="s404-grouphead acc-summary">Sitemap monitor \u00B7 internal pages the sitemap lists that return 404<span class="chev">\u25B8</span></summary>';
       if(!s || !s.checked){
         out += '<p class="muted" style="margin:.1rem 0 .5rem;font-size:.82rem">Checks the saved sitemap for internal pages that return 404. The scheduled job also updates this list.</p>';
       } else {
@@ -2340,7 +2356,7 @@ function dashboardApp(){
           + '<button id="s404-btn" class="pub-btn pub-secondary" style="flex:0 0 auto;width:auto;padding:.5rem .9rem" onclick="__scan404()">Check sitemap now</button>'
           + '<span id="s404-status" class="muted" style="font-size:.8rem"></span></div>';
       }
-      out += '</div>';
+      out += '</details>';
       return out;
     })();
 
