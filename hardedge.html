@@ -94,7 +94,7 @@
 <div class="wrap">
   <header>
     <h1>Hard-Edge</h1>
-    <p class="sub">Flat, mid-century geometric compositions built from color, proportion, and angle alone — bold folded ribbons that imply depth through value, or quiet rectilinear fields balanced by interval and weight.</p>
+    <p class="sub">Flat, mid-century geometric compositions built from color, proportion, and angle alone — bold flat planes cut by clean diagonals, or quiet rectilinear fields balanced by interval and weight.</p>
   </header>
 
   <div class="layout">
@@ -105,7 +105,7 @@
         <label for="style">Style</label>
         <select id="style">
           <option value="fields">Rectilinear fields — McLaughlin</option>
-          <option value="ribbons">Folded ribbons — Hammersley</option>
+          <option value="planes">Flat planes</option>
           <option value="iso">Isometric — filled block form</option>
           <option value="kremer">Faceted fields — Kremer</option>
         </select>
@@ -211,7 +211,7 @@
     <h2>The two families</h2>
     <ul>
       <li><b>Rectilinear fields.</b> Upright and horizontal planes of deliberately uneven width sit on open ground. There's no implied depth — the work is asymmetry held in balance, tuned by interval, weight, and a few quiet colors, after John McLaughlin.</li>
-      <li><b>Folded ribbons.</b> A strip of one width bends through a 45°/90° angle family; each panel is shaded by how it faces a single implied light, so every crease reads as a fold in space, after Frederick Hammersley.</li>
+      <li><b>Flat planes.</b> A few large flat color planes divided by bold straight cuts — mostly steep diagonals, sometimes a clean divider — with strong value contrast and the occasional pair of same-hue values meeting at an edge to imply a folded plane.</li>
       <li><b>Isometric.</b> A field of stacked cubes shaded top-light, side-mid, side-dark under one light, filling the frame edge to edge — a close-up detail of a much larger stepped form. Depth is pure face value; nothing recedes but the color.</li>
       <li><b>Faceted fields.</b> A large flat block of color and open ground meet a single folded form, split into a lit facet and a shadow facet of one hue so the crease reads as an angled plane catching light, after Paul Kremer.</li>
       <li><b>Shared discipline.</b> Both keep to flat fills, a limited palette, and large shapes. Nothing is a gradient or a shadow — only color and angle.</li>
@@ -404,89 +404,92 @@ function drawFields(r,density){
 }
 
 /* ==========================================================
-   STYLE 2 — FOLDED RIBBONS (Hammersley): angle -> value under one light
+   STYLE 2 — FLAT PLANES: a few large flat color planes divided by
+   bold straight cuts (steep diagonals, the occasional divider)
    ========================================================== */
-const FAMILY_ANGLES=[0,Math.PI/4,Math.PI/2,3*Math.PI/4];
 function resolveLightDir(){let v=(els&&els.light)?els.light.value:'random';if(v==='random')v=pick(['tl','tr','bl','br']);return v;}
-function makeLightIndex(n,lightAngle){
-  const bright=a=>0.5+0.5*Math.cos(2*(a-lightAngle));
-  const bs=FAMILY_ANGLES.map(bright),mn=Math.min(...bs),mx=Math.max(...bs),rg=(mx-mn)||1;
-  return a=>{const t=(bright(a)-mn)/rg;return Math.max(0,Math.min(n-1,Math.round(t*(n-1))));};
+function hx2rgb(h){const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];}
+function rgb2hx(r,g,b){const c=v=>('0'+Math.max(0,Math.min(255,Math.round(v))).toString(16)).slice(-2);return '#'+c(r)+c(g)+c(b);}
+function darken(h,f){const [r,g,b]=hx2rgb(h);return rgb2hx(r*f,g*f,b*f);}
+function sat(h){let [r,g,b]=hx2rgb(h).map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx===mn)return 0;const l=(mx+mn)/2,d=mx-mn;return l>0.5?d/(2-mx-mn):d/(mx+mn);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=rint(0,i),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function bboxOf(pl){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const p of pl){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1];}return {x0,y0,x1,y1};}
+function centN(pl,nx,ny){let s=0;for(const p of pl)s+=nx*p[0]+ny*p[1];return s/pl.length;}
+function splitPoly(pl,px,py,nx,ny){const c=-(nx*px+ny*py);return [clipHalfPlane(pl,nx,ny,c),clipHalfPlane(pl,-nx,-ny,-c)];}
+function colorKit(r){
+  const V=r.values,n=V.length;
+  let hero=V[0],hs=-1;for(const c of V){const s=sat(c);if(s>hs){hs=s;hero=c;}}
+  return {V,n,darkC:V[0],lightC:V[n-1],hero,neutrals:V.filter(c=>sat(c)<0.18),paper:r.bg||V[n-1]};
 }
-// pick a value index near the light preference but never equal to the previous panel,
-// and (softly) not equal to the background it sits on -> every fold stays visible
-function chooseIndex(pref,prev,fieldSet,n){
-  const all=[...Array(n).keys()];
-  let cand=all.filter(i=>i!==prev&&!fieldSet.has(i));
-  if(cand.length===0)cand=all.filter(i=>i!==prev);
-  if(cand.length===0)cand=all;
-  cand.sort((a,b)=>{const da=Math.abs(a-pref),db=Math.abs(b-pref);if(da!==db)return da-db;return Math.abs(b-prev)-Math.abs(a-prev);});
-  return cand[0];
+function wedgeColors(m,kit){
+  const uniq=shuffle(kit.V.slice());
+  if(uniq.length===1)return Array(m).fill(uniq[0]);
+  const seq=[];for(let i=0;i<m;i++)seq.push(uniq[i%uniq.length]);   // palette colors only; adjacent bands always differ
+  return seq;
 }
-function railOffset(pts,half){
-  const n=pts.length,seg=[];
-  for(let i=0;i<n-1;i++){const dx=pts[i+1][0]-pts[i][0],dy=pts[i+1][1]-pts[i][1];const L=Math.hypot(dx,dy)||1;seg.push([dx/L,dy/L]);}
-  const left=[],right=[];
-  for(let i=0;i<n;i++){
-    if(i===0){const nx=-seg[0][1],ny=seg[0][0];left.push([pts[i][0]+nx*half,pts[i][1]+ny*half]);right.push([pts[i][0]-nx*half,pts[i][1]-ny*half]);}
-    else if(i===n-1){const nx=-seg[n-2][1],ny=seg[n-2][0];left.push([pts[i][0]+nx*half,pts[i][1]+ny*half]);right.push([pts[i][0]-nx*half,pts[i][1]-ny*half]);}
-    else{const na=[-seg[i-1][1],seg[i-1][0]],nb=[-seg[i][1],seg[i][0]];let mx=na[0]+nb[0],my=na[1]+nb[1];const ml=Math.hypot(mx,my)||1;mx/=ml;my/=ml;let d=mx*na[0]+my*na[1];if(Math.abs(d)<0.35)d=d<0?-0.35:0.35;const mlen=half/d;left.push([pts[i][0]+mx*mlen,pts[i][1]+my*mlen]);right.push([pts[i][0]-mx*mlen,pts[i][1]-my*mlen]);}
-  }
-  return {left,right,seg};
+function panelPair(kit,prevDom){
+  const V=kit.V;
+  const dom=V.find(c=>c!==prevDom)||V[0];
+  const others=V.filter(c=>c!==dom);
+  const sec=others.length?pick(others):dom;                        // palette colors only, never invented
+  return chance(0.5)?{a:dom,b:sec,dom}:{a:sec,b:dom,dom};
 }
-function segAngle(u){let a=Math.atan2(u[1],u[0]);if(a<0)a+=Math.PI;return a;}
-function buildRibbon(){
-  const edge=rint(0,3);let x,y,ang;
-  if(edge===0){x=-0.14*W;y=rnd()*H;ang=pick([Math.PI/4,-Math.PI/4,0]);}
-  else if(edge===1){x=1.14*W;y=rnd()*H;ang=pick([3*Math.PI/4,-3*Math.PI/4,Math.PI]);}
-  else if(edge===2){x=rnd()*W;y=-0.14*H;ang=pick([Math.PI/4,3*Math.PI/4,Math.PI/2]);}
-  else{x=rnd()*W;y=1.14*H;ang=pick([-Math.PI/4,-3*Math.PI/4,-Math.PI/2]);}
-  const pts=[[x-Math.cos(ang)*W*1.4,y-Math.sin(ang)*W*1.4],[x,y]];
-  let cx=x,cy=y,a=ang;
-  const turns=pick([0,0,1,1,1,2]);              // usually 0 or 1 angle change, max 2
-  for(let s=0;s<turns;s++){
-    const len=W*(0.3+rnd()*0.45);
-    cx+=Math.cos(a)*len;cy+=Math.sin(a)*len;pts.push([cx,cy]);
-    a+=pick([Math.PI/4,-Math.PI/4,Math.PI/2,-Math.PI/2]);
+function planesPanels(comp,kit,t){
+  const b=bboxOf(comp);
+  const vertical=chance(0.68);
+  let nP=2;if(chance(0.3+t*0.6))nP++;if(t>0.6&&chance(0.4))nP++;             // 2..4, grows with density
+  let cuts=[];for(let i=1;i<nP;i++)cuts.push(i/nP+(rnd()-0.5)*0.16);cuts.sort((a,b)=>a-b);
+  let panels=[comp];
+  for(const f of cuts){
+    const px=vertical?b.x0+(b.x1-b.x0)*f:(b.x0+b.x1)/2, py=vertical?(b.y0+b.y1)/2:b.y0+(b.y1-b.y0)*f;
+    const nx=vertical?1:0,ny=vertical?0:1,next=[];
+    for(const R of panels){const [A,B]=splitPoly(R,px,py,nx,ny);if(A.length>=3)next.push(A);if(B.length>=3)next.push(B);}
+    panels=next;
   }
-  cx+=Math.cos(a)*W*1.8;cy+=Math.sin(a)*W*1.8;pts.push([cx,cy]);
-  return pts;
+  panels.forEach(P=>{const bb=bboxOf(P);P._o=vertical?bb.x0:bb.y0;});
+  panels.sort((a,b)=>a._o-b._o);
+  let prevDom=null;
+  panels.forEach(P=>{
+    const pair=panelPair(kit,prevDom);prevDom=pair.dom;
+    if(chance(0.28)){poly(P,pair.dom);return;}                              // some panels stay solid planes
+    const bb=bboxOf(P);
+    const cx=bb.x0+(bb.x1-bb.x0)*(0.34+rnd()*0.32), cy=bb.y0+(bb.y1-bb.y0)*(0.3+rnd()*0.4);
+    let edgeAng=(22+rnd()*42)*Math.PI/180;if(chance(0.5))edgeAng=-edgeAng;
+    const nx=Math.cos(edgeAng+Math.PI/2),ny=Math.sin(edgeAng+Math.PI/2);
+    const [A,B]=splitPoly(P,cx,cy,nx,ny);
+    if(A.length>=3)poly(A,pair.a);
+    if(B.length>=3)poly(B,pair.b);
+    if(A.length<3&&B.length<3)poly(P,pair.a);
+  });
 }
-function drawRibbons(r,density){
-  const V=r.values, n=V.length;
-  const dir=resolveLightDir();
-  const lightAngle=(dir==='tr'||dir==='br')?Math.PI/4:3*Math.PI/4;
-  const lightIdx=makeLightIndex(n,lightAngle);
-  const fieldSet=new Set();
-  // background base
-  const baseIdx=lightIdx(pick(FAMILY_ANGLES));
-  bg(V[baseIdx]);fieldSet.add(baseIdx);
-  // optional second facet, forced to differ from the base
-  if(chance(0.75)){
-    const cutAng=pick(FAMILY_ANGLES);
-    let ci=lightIdx(cutAng);
-    if(ci===baseIdx)ci=(baseIdx+(baseIdx<n-1?1:-1)+n)%n;
-    const nx=Math.cos(cutAng+Math.PI/2),ny=Math.sin(cutAng+Math.PI/2);
-    const px=W*(0.3+rnd()*0.4),py=H*(0.3+rnd()*0.4);
-    poly(clipHalfPlane([[0,0],[W,0],[W,H],[0,H]],nx,ny,-(nx*px+ny*py)),V[ci]);
-    fieldSet.add(ci);
+function planesWedges(comp,kit,t){
+  const b=bboxOf(comp);
+  let edgeAng=(20+rnd()*46)*Math.PI/180;if(chance(0.5))edgeAng=-edgeAng;
+  const nx=Math.cos(edgeAng+Math.PI/2),ny=Math.sin(edgeAng+Math.PI/2);
+  const cxc=(b.x0+b.x1)/2,cyc=(b.y0+b.y1)/2, span=Math.abs(nx*(b.x1-b.x0))+Math.abs(ny*(b.y1-b.y0));
+  let k=2;if(chance(0.3+t*0.6))k++;if(t>0.65&&chance(0.4))k++;               // 2..4
+  let fr=[];for(let i=0;i<k;i++)fr.push(0.18+rnd()*0.64);fr.sort((a,b)=>a-b);
+  let regions=[comp];
+  for(const f of fr){
+    const px=cxc+nx*(f-0.5)*span, py=cyc+ny*(f-0.5)*span,next=[];
+    for(const R of regions){const [A,B]=splitPoly(R,px,py,nx,ny);if(A.length>=3)next.push(A);if(B.length>=3)next.push(B);}
+    regions=next;
   }
-  const ribbonN=1+Math.round(density*0.45);
-  const t=(Math.max(1,Math.min(10,density))-1)/9;
-  const baseHalf=0.20-0.15*t;                     // low density -> wide, high density -> narrow
-  const minHalf=0.10*Math.max(W,H);              // full width >= 20% of the larger canvas side
-  for(let i=0;i<ribbonN;i++){
-    const c=buildRibbon();
-    const half=Math.max(minHalf, W*baseHalf*(0.82+rnd()*0.36));
-    const {left,right,seg}=railOffset(c,half);
-    let prev=-1,prevAng=null;
-    for(let s=0;s<seg.length;s++){
-      const ang=segAngle(seg[s]);
-      const idx=(prevAng!==null&&Math.abs(ang-prevAng)<1e-6)?prev:chooseIndex(lightIdx(ang),prev,fieldSet,n);
-      poly([left[s],left[s+1],right[s+1],right[s]],V[idx]);
-      prev=idx;prevAng=ang;
-    }
-  }
+  regions.forEach(R=>{R._t=centN(R,nx,ny);});
+  regions.sort((a,b)=>a._t-b._t);
+  const seq=wedgeColors(regions.length,kit);
+  regions.forEach((R,i)=>poly(R,seq[i%seq.length]));
+}
+function drawPlanes(r,density){
+  const kit=colorKit(r), t=(Math.max(1,Math.min(10,density))-1)/9;
+  let comp=[[0,0],[W,0],[W,H],[0,H]];
+  if(chance(0.5)){                                                          // paper margin, like the bordered reference
+    bg(kit.lightC);
+    const m=Math.round(Math.min(W,H)*(0.03+rnd()*0.03));
+    comp=[[m,m],[W-m,m],[W-m,H-m],[m,H-m]];
+  }else bg(kit.darkC);
+  if(chance(0.5))planesPanels(comp,kit,t);
+  else planesWedges(comp,kit,t);
 }
 
 /* ==========================================================
@@ -660,7 +663,7 @@ function generate(){
   const palette=resolvePalette(),r=roles(palette),density=parseInt(els.density.value,10);
   const st=els.style.value;
   if(st==='fields')drawFields(r,density);
-  else if(st==='ribbons')drawRibbons(r,density);
+  else if(st==='planes')drawPlanes(r,density);
   else if(st==='iso')drawIso(r,density);
   else drawKremer(r,density);
   const useGrain=els.grain.checked;
@@ -670,7 +673,7 @@ function generate(){
     +(useGrain?grainOverlay():'')
     +'</svg>';
   stage.innerHTML=currentSVG;
-  const styleName=st==='fields'?'Rectilinear fields':st==='ribbons'?'Folded ribbons':st==='iso'?'Isometric':'Kremer';
+  const styleName=st==='fields'?'Rectilinear fields':st==='planes'?'Flat planes':st==='iso'?'Isometric':'Kremer';
   currentMeta={style:styleName, styleKey:st, palette:palette.name, w:W, h:H};
   els.caption.innerHTML=`<b>${styleName}</b><span class="dot"></span>${palette.name}<span class="dot"></span>${W}×${H}`;
 }
