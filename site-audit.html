@@ -1112,10 +1112,30 @@ function setStoreStatus(extra){
   const mode = storeMode === 'remote' ? 'Shared store · team-wide' : 'Local only · this browser';
   el.textContent = mode + ' · ' + done + ' done · ' + ign + ' ignored' + (extra ? (' · ' + extra) : '');
 }
+function filterSharedDash(src){
+  // A published run is pre-computed dashboard data. When someone later marks pages
+  // "Skip" in Audit Settings, those exclusions must still apply to the shared view —
+  // so drop excluded pages here and recompute the derived fields from what's left.
+  const EXCL = excludedManualPathSet();
+  if(!EXCL.size) return Object.assign({}, src);
+  const d = JSON.parse(JSON.stringify(src));
+  const keep = f => !EXCL.has((f.path === '(home)' ? '' : f.path) || '');
+  d.findings = (d.findings || []).filter(keep);
+  if(Array.isArray(d.pages)) d.pages = d.pages.filter(p => !EXCL.has((p.path === '(home)' ? '' : p.path) || ''));
+  if(Array.isArray(d.missingTranslations)) d.missingTranslations = d.missingTranslations.filter(m => !EXCL.has(m.path || ''));
+  // recompute summary + rollups from the filtered findings
+  let c=0,w=0,i=0,b=0;
+  d.findings.forEach(f => { if(f.category === 'broken link'){ b++; return; } if(f.severity==='critical')c++; else if(f.severity==='warning')w++; else i++; });
+  d.summary = { critical:c, warning:w, info:i, broken:b, pages:(d.pages? d.pages.length : d.summary.pages) };
+  const cb = (arr, prop) => { const o={}; arr.forEach(x=>{ const k=x[prop]||'\u2014'; o[k]=(o[k]||0)+1; }); return o; };
+  d.rollups = { byLang:cb(d.findings,'lang'), byCategory:cb(d.findings,'category'), byDir:cb(d.findings,'dir'), bySeverity:cb(d.findings,'severity') };
+  if(d.coverage) d.coverage.audited = d.pages ? d.pages.length : d.coverage.audited;
+  return d;
+}
 function currentDashData(){
   let d = null;
   if(auditState && auditState.results && auditState.results.length){ d = buildDashboardData(); }
-  else if(sharedDash){ d = Object.assign({}, sharedDash); }
+  else if(sharedDash){ d = filterSharedDash(sharedDash); }
   if(d){ d.triage = triageState; d.storeMode = storeMode; d.canRun = (userRole === 'admin'); d.hasLocalRun = !!(auditState && auditState.results && auditState.results.length); d.sitemap404 = sitemap404; }
   return d;
 }
