@@ -2940,8 +2940,10 @@ function contentChecks(refData, tData, lang, pg){
     if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.', '', codes.map(c=>c||'(empty)'), 'hreflang codes present');
   }
 
-  // noindex
-  if(tData.noindex) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
+  // noindex — Chinese pages are intentionally noindex, so don't flag them
+  var _lc = (lang.gcode || lang.dir || '').toLowerCase();
+  var _isChinese = _lc.indexOf('zh') === 0 || /chinese/i.test(lang.label || '');
+  if(tData.noindex && !_isChinese) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
 
   // canonical
   if(tData.canonical && refData && refData.canonical && tData.canonical === refData.canonical && lang.dir){
