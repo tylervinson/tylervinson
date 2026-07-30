@@ -557,14 +557,8 @@
 </div>
 
 <script>
-/* =======================================================================
-   CONFIG — edit these once. WORKER_URL is just an endpoint, not a secret,
-   but keep the file local anyway. The access passphrase is typed into the
-   tool at runtime (Settings card) and never stored here. WORKER_KEY below
-   is an optional fallback if you'd rather hardcode it; leave it empty to
-   always type the passphrase instead.
-   Languages are defined just below — edit the `langs` list to change them.
-   ======================================================================= */
+/* CONFIG — edit once. Passphrase is typed in the UI at runtime, not stored here.
+   Languages are the `langs` list below. */
 const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
@@ -572,10 +566,8 @@ const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (
 // Sitecore content root for the "Items last updated" export — used to turn item
 // paths into clean relative paths in the stale-content view.
 const SITECORE_ROOT = '/sitecore/content/bcbs az/azblue/home';
-// OPTIONAL shared store: set STATE_URL to your KV-backed state endpoint so triage
-// marks (done / ignored) and the latest run are consistent for EVERY user. Leave it
-// empty for local-only (this browser). A ready-to-deploy Cloudflare Worker is shipped
-// alongside this file (audit-state-worker.js). Auth reuses the audit passphrase.
+// Shared store: STATE_URL points at the KV Worker (audit-state-worker.js) so triage +
+// runs are consistent for all users. Empty = local-only. Auth reuses the passphrase.
 const STATE_URL = 'https://audit-state.bcbs-of-az.workers.dev/';
 /* ===================================================================== */
 
@@ -989,11 +981,94 @@ function downloadBlob(content, mime, filename){
 }
 function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
 
-/* ============================ shared state ============================
-   Persistent, cross-user store for triage marks (done / ignored) and the
-   latest run. With STATE_URL set, it reads/writes your KV-backed endpoint so
-   the whole team sees the same thing; otherwise it falls back to this browser's
-   localStorage. Auth reuses the audit passphrase (X-Audit-Key). */
+/* Power BI export: flattens the current audit into one-row-per-record CSV tables.
+   Same shape the Worker endpoint serves. */
+function csvCell(v){
+  if(v === null || v === undefined) return '';
+  var str = String(v);
+  if(/[",\r\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+  return str;
+}
+function toCSV(columns, rows){
+  var head = columns.map(function(c){ return csvCell(c.header); }).join(',');
+  var body = rows.map(function(r){
+    return columns.map(function(c){ return csvCell(c.get(r)); }).join(',');
+  });
+  return '\ufeff' + [head].concat(body).join('\r\n');   // BOM so Excel/Power BI read UTF-8
+}
+function powerBITables(){
+  var D = currentDashData() || {};
+  var host = (D.meta && D.meta.host) || reportHost();
+  var triage = triageState || {};
+
+  var findings = (D.findings || []).map(function(f){
+    var t = triage[f.key]; var status = (t && t.status) ? t.status : 'open';
+    return { host:host, page:f.page, path:f.path, section:f.dir, area:f.section,
+             language:f.lang, issue:f.category, severity:f.severity, status:status,
+             detail:f.detail || '' };
+  });
+
+  var s404 = [];
+  var sm = sitemap404;
+  if(sm && sm.urls){
+    var newSet = {}; (sm.newUrls || []).forEach(function(u){ newSet[u] = 1; });
+    Object.keys(sm.urls).forEach(function(u){
+      s404.push({ host:host, url:u, first_seen:(sm.urls[u].firstSeen || ''),
+                  is_new:(newSet[u] ? 'yes' : 'no'), last_checked:(sm.checked || '') });
+    });
+  }
+
+  var cov = ((D.coverage && D.coverage.missing) || []).map(function(m){
+    var disc = (D.coverage && D.coverage.discovered) || 0;
+    return { host:host, language:m.lang, discovered:disc, missing:m.count, live:Math.max(0, disc - m.count) };
+  });
+
+  var stale = (D.contentDates || []).map(function(r){
+    return { host:host, path:r.path, last_updated:(r.updated || ''), updated_by:(r.updatedBy || ''),
+             created:(r.created || ''), created_by:(r.createdBy || '') };
+  });
+
+  return { findings:findings, sitemap_404:s404, coverage:cov, stale:stale };
+}
+function exportPowerBICsv(){
+  var t = powerBITables();
+  var host = reportHost();
+  var specs = [
+    { name:'findings', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'page',get:function(r){return r.page;}},
+      {header:'path',get:function(r){return r.path;}}, {header:'section',get:function(r){return r.section;}},
+      {header:'area',get:function(r){return r.area;}}, {header:'language',get:function(r){return r.language;}},
+      {header:'issue',get:function(r){return r.issue;}}, {header:'severity',get:function(r){return r.severity;}},
+      {header:'status',get:function(r){return r.status;}}, {header:'detail',get:function(r){return r.detail;}}
+    ], rows:t.findings },
+    { name:'sitemap_404', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'url',get:function(r){return r.url;}},
+      {header:'first_seen',get:function(r){return r.first_seen;}}, {header:'is_new',get:function(r){return r.is_new;}},
+      {header:'last_checked',get:function(r){return r.last_checked;}}
+    ], rows:t.sitemap_404 },
+    { name:'coverage', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'language',get:function(r){return r.language;}},
+      {header:'discovered',get:function(r){return r.discovered;}}, {header:'missing',get:function(r){return r.missing;}},
+      {header:'live',get:function(r){return r.live;}}
+    ], rows:t.coverage },
+    { name:'stale', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'path',get:function(r){return r.path;}},
+      {header:'last_updated',get:function(r){return r.last_updated;}}, {header:'updated_by',get:function(r){return r.updated_by;}},
+      {header:'created',get:function(r){return r.created;}}, {header:'created_by',get:function(r){return r.created_by;}}
+    ], rows:t.stale }
+  ];
+  var stamp = new Date().toISOString().slice(0,10);
+  var i = 0;
+  (function next(){
+    if(i >= specs.length){ setReportStatus('Exported ' + specs.length + ' CSV tables for Power BI.'); return; }
+    var sp = specs[i++];
+    downloadBlob(toCSV(sp.cols, sp.rows), 'text/csv;charset=utf-8', 'audit-' + sp.name + '-' + host + '-' + stamp + '.csv');
+    setTimeout(next, 350);   // stagger so browsers don't block the batch
+  })();
+}
+
+/* Cross-user store for triage marks and the latest run: KV endpoint when STATE_URL
+   is set, else this browser's localStorage. */
 let triageState = {};      // { findingKey: { status:'done'|'ignored', at } }
 let sharedDash  = null;    // a published dashboard-data object (for viewers who didn't run locally)
 let sitemap404  = null;    // { urls:{url:{firstSeen}}, checked, total, dead, newCount } — saved 404 list
@@ -1113,9 +1188,8 @@ function setStoreStatus(extra){
   el.textContent = mode + ' · ' + done + ' done · ' + ign + ' ignored' + (extra ? (' · ' + extra) : '');
 }
 function filterSharedDash(src){
-  // A published run is pre-computed dashboard data. When someone later marks pages
-  // "Skip" in Audit Settings, those exclusions must still apply to the shared view —
-  // so drop excluded pages here and recompute the derived fields from what's left.
+  // Published runs are pre-computed; still drop pages later marked "Skip" and
+  // recompute derived fields from what's left.
   const EXCL = excludedManualPathSet();
   if(!EXCL.size) return Object.assign({}, src);
   const d = JSON.parse(JSON.stringify(src));
@@ -1149,10 +1223,8 @@ function findingSubject(f){
 function keyFor(f){
   return [f.path||'', f.lang||'', f.section||'', f.category||'', findingSubject(f)].join('||').toLowerCase();
 }
-/* ---- content fingerprints (source-sync model) ----
-   A stable, normalized hash of a page's visible content. Comparing the current
-   English hash against the hash captured when a translation was approved lets us
-   tell "English changed after the translation was approved" from ordinary QA drift. */
+/* Content fingerprints: a normalized hash of a page's visible text, so we can tell
+   "English changed since the translation was approved" from ordinary QA drift. */
 function cyrb53(str, seed){
   seed = seed || 0;
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -1358,9 +1430,8 @@ function buildDashboardData(){
   const activeResults = (auditState.results||[]).filter(r => !EXCL.has(r.page.path || ''));
   const missing = {};
   activeResults.forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
-  // Foreign-language pages that failed to load during the audit (e.g. no Chinese/Spanish
-  // version exists → HTTP 404). These are derived by the audit, not the sitemap, so they
-  // won't appear in the sitemap monitor — surface them in the 404 box directly.
+  // Foreign-language pages that 404'd during the audit (missing translations). Derived
+  // here, not by the sitemap monitor, so the 404 box can show them.
   const missingTranslations = [];
   activeResults.forEach(r => (r.languages||[]).forEach(b => {
     if(b.error) missingTranslations.push({
@@ -1371,9 +1442,8 @@ function buildDashboardData(){
   const pages = activeResults.map(r => ({
     path: r.page.path || '(home)', name: r.page.name, lastmod: r.page.lastmod || ''
   }));
-  // Severity/broken totals are recomputed fresh from the (already-filtered) findings rather
-  // than the live-run counters (auditState.crit/warn/info/broken), so a page marked "Skip" in
-  // Audit Settings disappears from these counts immediately, without re-running the audit.
+  // Recount from the filtered findings (not the live-run counters) so "Skip" takes
+  // effect immediately without re-running.
   let sCrit=0, sWarn=0, sInfo=0, sBroken=0;
   findings.forEach(f => {
     if(f.category === 'broken link'){ sBroken++; return; }
@@ -2010,12 +2080,16 @@ function dashboardApp(){
       + '<a class="pdf-link" id="pdfLink" onclick="__pdf()" title="Save as PDF">'
         + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>'
         + '<span>Save as report PDF</span></a>'
+      + '<a class="pdf-link" id="csvLink" onclick="__exportcsv()" title="Export tables as CSV for Power BI" style="margin-left:.5rem">'
+        + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M14 4v6h6"></path><path d="M8 13h8M8 17h5"></path></svg>'
+        + '<span>Export data (CSV)</span></a>'
     + '</div>'
     + '<div class="tabs"><button class="tab active" id="tab-authors">Authors</button><button class="tab" id="tab-leaders">Admin</button></div>'
     + '<div id="view-authors"></div><div id="view-leaders" style="display:none"></div>';
 
   var curView = 'authors';
   window.__pdf = function(){ try { parent.postMessage({ __mlaudit:'pdf', view: curView }, '*'); } catch(e){} };
+  window.__exportcsv = function(){ try { parent.postMessage({ __mlaudit:'exportcsv' }, '*'); } catch(e){} };
 
   function show(t){
     curView = t;
@@ -2317,9 +2391,8 @@ function dashboardApp(){
       + '</div>'
       + '<div id="publishStatus" class="pub-status">'+(canPublish?'':'Run a new audit to publish it to the team.')+'</div>';
 
-    // Missing/broken foreign-language pages. Prefer the explicit list (has clickable URLs);
-    // fall back to reconstructing from the findings already in the data, so this ALWAYS
-    // matches the Findings box even for runs generated before the explicit list existed.
+    // Prefer the explicit missing-translations list; fall back to reconstructing from
+    // findings so older runs still match the Findings box.
     var mtList = Array.isArray(D.missingTranslations) ? D.missingTranslations.slice()
       : (D.findings || []).filter(function(f){ return f.category === 'load error' && f.lang !== 'English (reference)'; })
           .map(function(f){ return { page:f.page, lang:f.lang, url:'', error:f.detail || 'failed to load' }; });
@@ -3541,6 +3614,9 @@ window.addEventListener('message', function(e){
   }
   else if(e.data && e.data.__mlaudit === 'pdf'){
     exportReportPDF(e.data.view);
+  }
+  else if(e.data && e.data.__mlaudit === 'exportcsv'){
+    exportPowerBICsv();
   }
   else if(e.data && e.data.__mlaudit === 'runAudit'){
     if(userRole === 'admin') runAudit();
