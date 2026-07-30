@@ -894,11 +894,12 @@ function renderDiscSearch(){
 /* combined audit set: selected discovered pages + manual rows, deduped by path */
 function getAuditPages(){
   const map = new Map();
-  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
+  effectiveDiscovered().forEach(d => map.set(normPath(d.path), { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
   pages.forEach(pg => {
     if(!pg) return;
-    if(pg.excluded){ map.delete(pg.path); return; }
-    if(pg.name) map.set(pg.path, { name: pg.name, path: pg.path, lastmod: (map.get(pg.path)||{}).lastmod || '' });
+    const k = normPath(pg.path);
+    if(pg.excluded){ map.delete(k); return; }
+    if(pg.name) map.set(k, { name: pg.name, path: pg.path, lastmod: (map.get(k)||{}).lastmod || '' });
   });
   return [...map.values()];
 }
@@ -1193,10 +1194,10 @@ function filterSharedDash(src){
   const EXCL = excludedManualPathSet();
   if(!EXCL.size) return Object.assign({}, src);
   const d = JSON.parse(JSON.stringify(src));
-  const keep = f => !EXCL.has((f.path === '(home)' ? '' : f.path) || '');
+  const keep = f => !EXCL.has(normPath(f.path));
   d.findings = (d.findings || []).filter(keep);
-  if(Array.isArray(d.pages)) d.pages = d.pages.filter(p => !EXCL.has((p.path === '(home)' ? '' : p.path) || ''));
-  if(Array.isArray(d.missingTranslations)) d.missingTranslations = d.missingTranslations.filter(m => !EXCL.has(m.path || ''));
+  if(Array.isArray(d.pages)) d.pages = d.pages.filter(p => !EXCL.has(normPath(p.path)));
+  if(Array.isArray(d.missingTranslations)) d.missingTranslations = d.missingTranslations.filter(m => !EXCL.has(normPath(m.path)));
   // recompute summary + rollups from the filtered findings
   let c=0,w=0,i=0,b=0;
   d.findings.forEach(f => { if(f.category === 'broken link'){ b++; return; } if(f.severity==='critical')c++; else if(f.severity==='warning')w++; else i++; });
@@ -1256,9 +1257,14 @@ function currentFingerprints(){
   });
   return { en, tr };
 }
+function normPath(p){
+  var s = String(p == null ? '' : p).trim();
+  if(s === '(home)') return '';
+  return s.replace(/^\/+|\/+$/g, '');
+}
 function excludedManualPathSet(){
   const s = new Set();
-  pages.forEach(pg => { if(pg && pg.excluded) s.add(pg.path || ''); });
+  pages.forEach(pg => { if(pg && pg.excluded) s.add(normPath(pg.path)); });
   return s;
 }
 function flattenFindings(){
@@ -1266,7 +1272,7 @@ function flattenFindings(){
   const EXCL = excludedManualPathSet();
   (auditState.results||[]).forEach(r => {
     const path = r.page.path || '';
-    if(EXCL.has(path)) return; // skipped in Audit Settings — treat as removed from current data
+    if(EXCL.has(normPath(path))) return; // skipped in Audit Settings — treat as removed from current data
     const page = r.page.name;
     const dir = (dirOf(path) || '(top level)');
     const base = (lang, section, cat, sev, detail, suggestion, snippet, items, evidenceLabel) =>
@@ -1427,7 +1433,7 @@ function loadContentDates(file){
 function buildDashboardData(){
   const findings = flattenFindings();
   const EXCL = excludedManualPathSet();
-  const activeResults = (auditState.results||[]).filter(r => !EXCL.has(r.page.path || ''));
+  const activeResults = (auditState.results||[]).filter(r => !EXCL.has(normPath(r.page.path)));
   const missing = {};
   activeResults.forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
   // Foreign-language pages that 404'd during the audit (missing translations). Derived
