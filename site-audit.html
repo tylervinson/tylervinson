@@ -343,14 +343,14 @@
       <p class="login-sub">Choose your role and enter the access passphrase.</p>
       <div class="section-label" style="margin-top:1.4rem;">I am signing in as</div>
       <div class="role-toggle" id="roleToggle">
-        <button type="button" class="role-opt active" data-role="author" onclick="pickRole('author')">Author</button>
-        <button type="button" class="role-opt" data-role="admin" onclick="pickRole('admin')">Admin</button>
+        <button type="button" class="role-opt" data-role="author" onclick="pickRole('author')">Author</button>
+        <button type="button" class="role-opt active" data-role="admin" onclick="pickRole('admin')">Admin</button>
       </div>
       <label class="field-label" for="pass" style="margin-top:1.3rem;">Access passphrase</label>
       <input type="text" id="pass" class="masked-input" placeholder="Enter passphrase" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" onkeydown="if(event.key==='Enter'){submitLogin();}">
       <div id="loginError" class="err-note" style="display:none; margin-top:.6rem;"></div>
       <button class="primary" id="loginBtn" onclick="submitLogin()" style="width:100%; margin-top:1.3rem;">Sign in</button>
-      <p class="hint" style="margin:1rem 0 0; text-align:center;">The passphrase is held in memory for this session only.</p>
+      <p class="hint" style="margin:.8rem 0 0; text-align:center; font-size:.72rem; line-height:1.4;">The passphrase is held in memory for this session only.</p>
     </div>
   </div>
 
@@ -1509,7 +1509,7 @@ function ensureDashFrame(targetTab){
 }
 let currentDashTab = 'authors';
 function dashHasData(){ return !!((auditState && auditState.results && auditState.results.length) || sharedDash); }
-let userRole = null, loginRole = 'author';
+let userRole = null, loginRole = 'admin';
 function pickRole(r){
   loginRole = r;
   document.querySelectorAll('#roleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === r); });
@@ -1590,7 +1590,7 @@ function logout(){
   var passEl = document.getElementById('pass');
   if(passEl){ passEl.value = ''; passEl.classList.remove('input-error'); }
   showLoginError('');
-  pickRole('author');
+  pickRole('admin');
 }
 
 // ---- in-app notifications (new 404s) — read state is per browser ----
