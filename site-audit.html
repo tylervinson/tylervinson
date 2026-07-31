@@ -151,7 +151,7 @@
   .pbi-btn { margin-left: auto; align-self: center; display: inline-flex; align-items: center; gap: .45rem; padding: .4rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); font-family: inherit; font-size: .82rem; font-weight: 400; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap; }
   .pbi-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
   .pbi-btn svg { flex: 0 0 auto; display: block; }
-  .pbi-card { max-width: 760px; }
+  .pbi-page-card { max-width: 820px; }
   .pbi-body h3 { font-weight: 500; font-size: 1rem; margin: 1.6rem 0 .3rem; color: var(--text); }
   .pbi-body h3:first-child { margin-top: 0; }
   .pbi-sub { color: var(--muted); font-size: .84rem; margin: 0 0 .8rem; }
@@ -489,12 +489,9 @@
 </div>
 
 <!-- SETTINGS MODAL (all audit options + connection diagnostics) -->
-<div id="pbiModal" class="app-modal" style="display:none;" role="dialog" aria-modal="true">
-  <div class="app-modal-card app-modal-scroll pbi-card">
-    <div class="app-modal-head">
-      <h2>Power BI import instructions</h2>
-      <button class="app-modal-x" onclick="closePowerBIModal()" aria-label="Close">&times;</button>
-    </div>
+<div id="page-pbi" class="page" style="display:none;">
+  <section class="card pbi-page-card">
+    <h2>Power BI import instructions</h2>
     <p class="hint">Bring the four audit tables into Power BI and keep them refreshed. Do <strong>Option A</strong> or <strong>Option B</strong> to get the data in, then follow <strong>Configure Tables</strong>.</p>
 
     <div class="pbi-body">
@@ -558,7 +555,7 @@ https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">stale</span
       </table>
 
     </div>
-  </div>
+  </section>
 </div>
 
 <div id="settingsModal" class="app-modal" style="display:none;" role="dialog" aria-modal="true">
@@ -1654,7 +1651,7 @@ function buildTabsForRole(role){
         '<button class="ptab" data-page="leaders" onclick="showPage(\'leaders\')">Admin</button>'
       + '<button class="ptab" data-page="authors" onclick="showPage(\'authors\')">Authors</button>'
       + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>'
-      + '<button class="pbi-btn" onclick="openPowerBIModal()" title="Power BI import instructions" aria-label="Power BI import instructions">'
+      + '<button class="pbi-btn" onclick="showPage(\'pbi\')" title="Power BI import instructions" aria-label="Power BI import instructions">'
       +   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M14 4v6h6"></path><path d="M8 13h8M8 17h5"></path></svg>'
       +   '<span>Power BI Import Instructions</span></button>';
   } else {
@@ -1677,8 +1674,8 @@ function openSettingsModal(){
   document.querySelectorAll('#settingsRoleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === userRole); });
 }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
-function openPowerBIModal(){ var m=document.getElementById('pbiModal'); if(m) m.style.display='flex'; }
-function closePowerBIModal(){ var m=document.getElementById('pbiModal'); if(m) m.style.display='none'; }
+function openPowerBIModal(){ showPage('pbi'); }
+function closePowerBIModal(){ showPage('leaders'); }
 function switchRole(role){
   if(role === userRole) return;
   userRole = role;
@@ -1763,9 +1760,11 @@ document.addEventListener('click', function(e){
 function showPage(p){
   document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
   var gen = (p === 'generate');
+  var pbi = (p === 'pbi');
   document.getElementById('page-generate').style.display = gen ? 'block' : 'none';
-  document.getElementById('page-dash').style.display = gen ? 'none' : 'block';
-  if(!gen){
+  var pbiEl = document.getElementById('page-pbi'); if(pbiEl) pbiEl.style.display = pbi ? 'block' : 'none';
+  document.getElementById('page-dash').style.display = (gen || pbi) ? 'none' : 'block';
+  if(!gen && !pbi){
     currentDashTab = (p === 'leaders') ? 'leaders' : 'authors';
     var has = dashHasData();
     document.getElementById('dashEmpty').style.display = has ? 'none' : 'block';
