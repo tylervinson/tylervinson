@@ -148,6 +148,32 @@
   .vtab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .dashframe { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); min-height: 600px; }
   .pagetabs { display: flex; gap: .4rem; margin: 0 0 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .pbi-btn { margin-left: auto; align-self: center; display: inline-flex; align-items: center; gap: .45rem; padding: .4rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); font-family: inherit; font-size: .82rem; font-weight: 400; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap; }
+  .pbi-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
+  .pbi-btn svg { flex: 0 0 auto; display: block; }
+  .pbi-card { max-width: 760px; }
+  .pbi-body h3 { font-weight: 500; font-size: 1rem; margin: 1.6rem 0 .3rem; color: var(--text); }
+  .pbi-body h3:first-child { margin-top: 0; }
+  .pbi-sub { color: var(--muted); font-size: .84rem; margin: 0 0 .8rem; }
+  .pbi-next { color: var(--accent); font-size: .84rem; font-weight: 500; margin: .7rem 0 0; }
+  .pbi-pre { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: .8rem .9rem; overflow-x: auto; margin: .6rem 0; }
+  .pbi-pre code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .76rem; line-height: 1.7; color: var(--text); white-space: pre; }
+  .pbi-pre .tok { color: var(--accent); }
+  .pbi-body code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .82em; background: var(--card-alt); border: 1px solid var(--border); border-radius: 4px; padding: .05em .35em; }
+  .pbi-body .kbd { background: var(--card-alt); border: 1px solid var(--border); border-radius: 5px; padding: .05em .4em; font-size: .8em; white-space: nowrap; }
+  ol.pbi-steps { list-style: none; padding-left: 0; counter-reset: pstep; margin: .6rem 0 1rem; }
+  ol.pbi-steps > li { counter-increment: pstep; position: relative; padding-left: 2.2rem; margin: .7rem 0; font-size: .88rem; }
+  ol.pbi-steps > li::before { content: counter(pstep); position: absolute; left: 0; top: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #1a1a1a; font-size: .74rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  ol.pbi-steps ul { margin: .35rem 0; padding-left: 1.1rem; font-size: .85rem; }
+  .pbi-dl { border: 1px solid var(--border); border-radius: 10px; background: var(--card-alt); padding: .9rem 1rem; margin: 1.4rem 0; }
+  .pbi-dl-label { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+  .pbi-dl-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .pbi-dl-links button { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-size: .8rem; padding: .4rem .7rem; cursor: pointer; transition: border-color .2s, color .2s; }
+  .pbi-dl-links button:hover { border-color: var(--accent); color: var(--accent); }
+  .pbi-dl-links button svg { flex: 0 0 auto; }
+  .pbi-issues { width: 100%; border-collapse: collapse; margin: .6rem 0; font-size: .84rem; }
+  .pbi-issues th, .pbi-issues td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .pbi-issues th { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .ptab { background: none; border: none; color: var(--muted); padding: .85rem 1.3rem; cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 400; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; transition: color .2s, border-color .2s; }
   .ptab:hover { color: var(--text); }
   .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -463,6 +489,78 @@
 </div>
 
 <!-- SETTINGS MODAL (all audit options + connection diagnostics) -->
+<div id="pbiModal" class="app-modal" style="display:none;" role="dialog" aria-modal="true">
+  <div class="app-modal-card app-modal-scroll pbi-card">
+    <div class="app-modal-head">
+      <h2>Power BI import instructions</h2>
+      <button class="app-modal-x" onclick="closePowerBIModal()" aria-label="Close">&times;</button>
+    </div>
+    <p class="hint">Bring the four audit tables into Power BI and keep them refreshed. Do <strong>Option A</strong> or <strong>Option B</strong> to get the data in, then follow <strong>Configure Tables</strong>.</p>
+
+    <div class="pbi-body">
+
+      <h3>Table URLs</h3>
+      <p class="pbi-sub">The four sources for Option A — one per table.</p>
+      <pre class="pbi-pre"><code>https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">findings</span>&amp;format=csv&amp;token=powerbitoken
+https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">sitemap404</span>&amp;format=csv&amp;token=powerbitoken
+https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">coverage</span>&amp;format=csv&amp;token=powerbitoken
+https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">stale</span>&amp;format=csv&amp;token=powerbitoken</code></pre>
+
+      <h3>Option A — Connect to the live URLs</h3>
+      <p class="pbi-sub">Recommended. Set up once and it can refresh on a schedule.</p>
+      <ol class="pbi-steps">
+        <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Web</span>. Paste the <strong>findings</strong> URL, click <span class="kbd">OK</span>.</li>
+        <li>If asked, choose <strong>Anonymous</strong> &rarr; <span class="kbd">Connect</span>.</li>
+        <li>Click <span class="kbd">Transform Data</span>, rename the query to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+        <li>Repeat for the <strong>sitemap404</strong>, <strong>coverage</strong>, and <strong>stale</strong> URLs.</li>
+      </ol>
+      <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
+
+      <div class="pbi-dl">
+        <div class="pbi-dl-label">Download the four files (for Option B)</div>
+        <div class="pbi-dl-links">
+          <button onclick="downloadPBITable('findings')">findings.csv</button>
+          <button onclick="downloadPBITable('sitemap_404')">sitemap_404.csv</button>
+          <button onclick="downloadPBITable('coverage')">coverage.csv</button>
+          <button onclick="downloadPBITable('stale')">stale.csv</button>
+        </div>
+      </div>
+
+      <h3>Option B — Import the CSV files</h3>
+      <p class="pbi-sub">Manual updates. Re-import when the files change.</p>
+      <ol class="pbi-steps">
+        <li>Save the four files somewhere stable (a fixed folder, or OneDrive/SharePoint to schedule refresh later).</li>
+        <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Text/CSV</span>.</li>
+        <li>Select the <strong>findings</strong> file &rarr; <span class="kbd">Open</span> &rarr; confirm the header row.</li>
+        <li>Click <span class="kbd">Transform Data</span>, rename to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+        <li>Repeat for the <strong>sitemap_404</strong>, <strong>coverage</strong>, and <strong>stale</strong> files.</li>
+      </ol>
+      <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
+
+      <h3>Configure Tables</h3>
+      <p class="pbi-sub">Shared setup, after the data is in.</p>
+      <ol class="pbi-steps">
+        <li><strong>Set column types</strong> — text for names/labels, whole number for <code>discovered</code>/<code>missing</code>/<code>live</code>, date/time for the <code>*_seen</code>/<code>*_updated</code>/<code>created</code> fields.</li>
+        <li><strong>Relate the tables</strong> in <strong>Model view</strong>: <code>findings[path]</code> &rarr; <code>stale[path]</code>, and <code>findings[language]</code> &rarr; <code>coverage[language]</code>. Keep cross-filter <strong>Single</strong>.</li>
+        <li><strong>Build visuals</strong> — findings by <code>severity</code> and <code>issue</code>, <code>status</code> as a donut, <code>missing</code> by <code>language</code>, tables of <code>sitemap_404</code> and <code>stale</code>.</li>
+        <li><strong>Publish &amp; refresh</strong> — <span class="kbd">Publish</span> to a workspace. In the Service: model &rarr; <span class="kbd">Settings</span> &rarr; <strong>Data source credentials</strong> &rarr; <strong>Anonymous</strong>, then <strong>Scheduled refresh</strong> &rarr; <strong>On</strong>. Option A refreshes automatically; for Option B, replace the files and <span class="kbd">Refresh</span>.</li>
+      </ol>
+
+      <h3>Issues</h3>
+      <table class="pbi-issues">
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>403</code> / forbidden on refresh</td><td>Token is wrong or rotated. Get a current set of URLs; update via <em>Transform data &rarr; Data source settings</em>.</td></tr>
+          <tr><td><code>findings</code>/<code>coverage</code>/<code>stale</code> empty</td><td>No run has been published yet. Publish a run, then refresh.</td></tr>
+          <tr><td>Numbers didn't change after an audit</td><td>The feed updates when a new run is published. Refresh after that.</td></tr>
+          <tr><td>Can't pick <strong>Anonymous</strong></td><td>Tenant may block anonymous web sources — use <strong>Web API</strong> or <strong>Basic</strong>; the token still authenticates.</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
 <div id="settingsModal" class="app-modal" style="display:none;" role="dialog" aria-modal="true">
   <div class="app-modal-card app-modal-scroll">
     <div class="app-modal-head">
@@ -1031,10 +1129,9 @@ function powerBITables(){
 
   return { findings:findings, sitemap_404:s404, coverage:cov, stale:stale };
 }
-function exportPowerBICsv(){
+function pbiSpecs(){
   var t = powerBITables();
-  var host = reportHost();
-  var specs = [
+  return [
     { name:'findings', cols:[
       {header:'host',get:function(r){return r.host;}}, {header:'page',get:function(r){return r.page;}},
       {header:'path',get:function(r){return r.path;}}, {header:'section',get:function(r){return r.section;}},
@@ -1058,6 +1155,16 @@ function exportPowerBICsv(){
       {header:'created',get:function(r){return r.created;}}, {header:'created_by',get:function(r){return r.created_by;}}
     ], rows:t.stale }
   ];
+}
+function downloadPBITable(name){
+  var sp = pbiSpecs().filter(function(s){ return s.name === name; })[0];
+  if(!sp) return;
+  var stamp = new Date().toISOString().slice(0,10);
+  downloadBlob(toCSV(sp.cols, sp.rows), 'text/csv;charset=utf-8', 'audit-' + sp.name + '-' + reportHost() + '-' + stamp + '.csv');
+}
+function exportPowerBICsv(){
+  var specs = pbiSpecs();
+  var host = reportHost();
   var stamp = new Date().toISOString().slice(0,10);
   var i = 0;
   (function next(){
@@ -1546,7 +1653,10 @@ function buildTabsForRole(role){
     nav.innerHTML =
         '<button class="ptab" data-page="leaders" onclick="showPage(\'leaders\')">Admin</button>'
       + '<button class="ptab" data-page="authors" onclick="showPage(\'authors\')">Authors</button>'
-      + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>';
+      + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>'
+      + '<button class="pbi-btn" onclick="openPowerBIModal()" title="Power BI import instructions" aria-label="Power BI import instructions">'
+      +   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M14 4v6h6"></path><path d="M8 13h8M8 17h5"></path></svg>'
+      +   '<span>Power BI Import Instructions</span></button>';
   } else {
     nav.style.display = 'none';
   }
@@ -1567,6 +1677,8 @@ function openSettingsModal(){
   document.querySelectorAll('#settingsRoleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === userRole); });
 }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
+function openPowerBIModal(){ var m=document.getElementById('pbiModal'); if(m) m.style.display='flex'; }
+function closePowerBIModal(){ var m=document.getElementById('pbiModal'); if(m) m.style.display='none'; }
 function switchRole(role){
   if(role === userRole) return;
   userRole = role;
