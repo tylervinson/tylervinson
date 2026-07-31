@@ -1902,6 +1902,10 @@ function dashboardCss(){
     'table.ft th{text-align:left;color:var(--muted2);font-weight:500;text-transform:uppercase;font-size:.62rem;letter-spacing:.06em;padding:.35rem .55rem;border-bottom:1px solid var(--border);white-space:nowrap}',
     'table.ft td{padding:.5rem .55rem;border-bottom:1px solid var(--border);vertical-align:top}table.ft tbody tr.frow:last-of-type td{border-bottom:none}',
     'tr.frow{cursor:pointer;transition:background .12s}tr.frow:hover{background:#2a2a2a}tr.frow.open{background:#2a2a2a}',
+    'table.ft th.sortable{cursor:pointer;user-select:none;white-space:nowrap}table.ft th.sortable:hover{color:var(--text)}',
+    'table.ft th.sortable .sort-ind{margin-left:.3rem;font-size:.75em;opacity:.3}table.ft th.sortable .sort-ind::after{content:"\\2195"}',
+    'table.ft th.sortable[data-dir] .sort-ind{opacity:1;color:var(--accent)}',
+    'table.ft th.sortable[data-dir="asc"] .sort-ind::after{content:"\\2191"}table.ft th.sortable[data-dir="desc"] .sort-ind::after{content:"\\2193"}',
     '.sevb{display:inline-flex;align-items:center;gap:.4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;font-weight:500;white-space:nowrap}.sevb .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}',
     '.sevb.c{color:var(--crit)}.sevb.c .dot{background:var(--crit)}.sevb.w{color:var(--warn)}.sevb.w .dot{background:var(--warn)}.sevb.i{color:var(--muted)}.sevb.i .dot{background:var(--muted2)}',
     '.ft .fc-pg{color:var(--text)}.ft .fc-path{display:block;color:var(--muted2);font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.68rem;margin-top:.1rem}',
@@ -2061,7 +2065,7 @@ function dashboardApp(){
   function findingsTable(rows, cols){
     if(!rows || !rows.length) return '<p class="empty">No findings.</p>';
     var span = cols.length + 1;
-    var thead = '<thead><tr>' + cols.map(function(k){ return '<th>'+FHEAD[k]+'</th>'; }).join('') + '<th></th></tr></thead>';
+    var thead = '<thead><tr>' + cols.map(function(k){ return '<th class="sortable" data-k="'+k+'">'+FHEAD[k]+'<span class="sort-ind"></span></th>'; }).join('') + '<th></th></tr></thead>';
     var body = rows.map(function(f){
       var st = statusOf(f);
       var rowCls = st === 'done' ? ' resolved done' : st === 'ignored' ? ' resolved ignored' : '';
@@ -2069,11 +2073,16 @@ function dashboardApp(){
               : st === 'ignored' ? '<span class="ftag ignored" title="Ignored">\u2298</span>' : '';
       var tds = cols.map(function(k){ return '<td>'+FCELL[k](f)+'</td>'; }).join('')
         + '<td class="fc-exp">'+tag+'<span class="fchev">\u25B8</span></td>';
+      var sortAttrs = ' data-sev="'+(sevRank[f.severity]!=null?sevRank[f.severity]:9)+'"'
+        + ' data-page="'+esc(((f.page||'')+' '+(f.path||'')).toLowerCase())+'"'
+        + ' data-lang="'+esc((f.lang||'').toLowerCase())+'"'
+        + ' data-cat="'+esc((f.category||'').toLowerCase())+'"'
+        + ' data-issue="'+esc((f.detail||'').toLowerCase())+'"';
       var detail = '<div class="fd-inner">'
         + (f.suggestion ? '<div class="fd-sugg">\u2192 '+esc(f.suggestion)+'</div>' : '')
         + '<div class="fd-meta">'+esc(f.lang)+' \u00B7 '+esc(f.category)+' \u00B7 /'+esc(f.path)+'</div>'
         + evidenceBlock(f) + triageActions(f) + '</div>';
-      return '<tr class="frow'+rowCls+'">'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
+      return '<tr class="frow'+rowCls+'"'+sortAttrs+'>'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
     }).join('');
     return '<div class="ftable-wrap"><table class="ft">'+thead+'<tbody>'+body+'</tbody></table></div>';
   }
@@ -2151,6 +2160,30 @@ function dashboardApp(){
       row.classList.toggle('open', willOpen);
       postHeight();
     }
+  });
+
+  // Click a column header to sort that findings table (keeps each row's detail with it).
+  document.addEventListener('click', function(e){
+    var th = e.target.closest ? e.target.closest('th.sortable') : null;
+    if(!th) return;
+    var table = th.closest('table.ft'); if(!table) return;
+    var tbody = table.querySelector('tbody'); if(!tbody) return;
+    var k = th.getAttribute('data-k');
+    var dir = (table.getAttribute('data-sk') === k && table.getAttribute('data-sd') === 'asc') ? 'desc' : 'asc';
+    table.setAttribute('data-sk', k); table.setAttribute('data-sd', dir);
+    var kids = Array.prototype.slice.call(tbody.children), pairs = [];
+    for(var i=0;i<kids.length;i+=2){ pairs.push([kids[i], kids[i+1]]); }
+    var numeric = (k === 'sev');
+    pairs.sort(function(a,b){
+      var va = a[0].getAttribute('data-'+k) || '', vb = b[0].getAttribute('data-'+k) || '', c;
+      if(numeric){ c = (parseFloat(va)||0) - (parseFloat(vb)||0); }
+      else { c = va < vb ? -1 : va > vb ? 1 : 0; }
+      return dir === 'asc' ? c : -c;
+    });
+    pairs.forEach(function(p){ tbody.appendChild(p[0]); if(p[1]) tbody.appendChild(p[1]); });
+    table.querySelectorAll('th.sortable').forEach(function(h){ h.removeAttribute('data-dir'); });
+    th.setAttribute('data-dir', dir);
+    postHeight();
   });
 
   /* content-date lookup (best-effort match of audited page -> Sitecore date) */
