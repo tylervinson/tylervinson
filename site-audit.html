@@ -151,7 +151,8 @@
   .pbi-btn { margin-left: auto; align-self: center; display: inline-flex; align-items: center; gap: .45rem; padding: .4rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); font-family: inherit; font-size: .82rem; font-weight: 400; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap; }
   .pbi-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
   .pbi-btn svg { flex: 0 0 auto; display: block; }
-  .pbi-page-card { max-width: 820px; }
+  .pbi-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  @media (max-width: 900px) { .pbi-cols { grid-template-columns: 1fr; } }
   .pbi-body h3 { font-weight: 500; font-size: 1rem; margin: 1.6rem 0 .3rem; color: var(--text); }
   .pbi-body h3:first-child { margin-top: 0; }
   .pbi-sub { color: var(--muted); font-size: .84rem; margin: 0 0 .8rem; }
@@ -490,72 +491,79 @@
 
 <!-- SETTINGS MODAL (all audit options + connection diagnostics) -->
 <div id="page-pbi" class="page" style="display:none;">
-  <section class="card pbi-page-card">
+  <section class="card">
     <h2>Power BI import instructions</h2>
     <p class="hint">Bring the four audit tables into Power BI and keep them refreshed. Do <strong>Option A</strong> or <strong>Option B</strong> to get the data in, then follow <strong>Configure Tables</strong>.</p>
-
     <div class="pbi-body">
-
       <h3>Table URLs</h3>
       <p class="pbi-sub">The four sources for Option A — one per table.</p>
       <pre class="pbi-pre"><code>https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">findings</span>&amp;format=csv&amp;token=powerbitoken
 https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">sitemap404</span>&amp;format=csv&amp;token=powerbitoken
 https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">coverage</span>&amp;format=csv&amp;token=powerbitoken
 https://audit-state.bcbs-of-az.workers.dev/?export=<span class="tok">stale</span>&amp;format=csv&amp;token=powerbitoken</code></pre>
-
-      <h3>Option A — Connect to the live URLs</h3>
-      <p class="pbi-sub">Recommended. Set up once and it can refresh on a schedule.</p>
-      <ol class="pbi-steps">
-        <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Web</span>. Paste the <strong>findings</strong> URL, click <span class="kbd">OK</span>.</li>
-        <li>If asked, choose <strong>Anonymous</strong> &rarr; <span class="kbd">Connect</span>.</li>
-        <li>Click <span class="kbd">Transform Data</span>, rename the query to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
-        <li>Repeat for the <strong>sitemap404</strong>, <strong>coverage</strong>, and <strong>stale</strong> URLs.</li>
-      </ol>
-      <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
-
-      <div class="pbi-dl">
-        <div class="pbi-dl-label">Download the four files (for Option B)</div>
-        <div class="pbi-dl-links">
-          <button onclick="downloadPBITable('findings')">findings.csv</button>
-          <button onclick="downloadPBITable('sitemap_404')">sitemap_404.csv</button>
-          <button onclick="downloadPBITable('coverage')">coverage.csv</button>
-          <button onclick="downloadPBITable('stale')">stale.csv</button>
-        </div>
-      </div>
-
-      <h3>Option B — Import the CSV files</h3>
-      <p class="pbi-sub">Manual updates. Re-import when the files change.</p>
-      <ol class="pbi-steps">
-        <li>Save the four files somewhere stable (a fixed folder, or OneDrive/SharePoint to schedule refresh later).</li>
-        <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Text/CSV</span>.</li>
-        <li>Select the <strong>findings</strong> file &rarr; <span class="kbd">Open</span> &rarr; confirm the header row.</li>
-        <li>Click <span class="kbd">Transform Data</span>, rename to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
-        <li>Repeat for the <strong>sitemap_404</strong>, <strong>coverage</strong>, and <strong>stale</strong> files.</li>
-      </ol>
-      <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
-
-      <h3>Configure Tables</h3>
-      <p class="pbi-sub">Shared setup, after the data is in.</p>
-      <ol class="pbi-steps">
-        <li><strong>Set column types</strong> — text for names/labels, whole number for <code>discovered</code>/<code>missing</code>/<code>live</code>, date/time for the <code>*_seen</code>/<code>*_updated</code>/<code>created</code> fields.</li>
-        <li><strong>Relate the tables</strong> in <strong>Model view</strong>: <code>findings[path]</code> &rarr; <code>stale[path]</code>, and <code>findings[language]</code> &rarr; <code>coverage[language]</code>. Keep cross-filter <strong>Single</strong>.</li>
-        <li><strong>Build visuals</strong> — findings by <code>severity</code> and <code>issue</code>, <code>status</code> as a donut, <code>missing</code> by <code>language</code>, tables of <code>sitemap_404</code> and <code>stale</code>.</li>
-        <li><strong>Publish &amp; refresh</strong> — <span class="kbd">Publish</span> to a workspace. In the Service: model &rarr; <span class="kbd">Settings</span> &rarr; <strong>Data source credentials</strong> &rarr; <strong>Anonymous</strong>, then <strong>Scheduled refresh</strong> &rarr; <strong>On</strong>. Option A refreshes automatically; for Option B, replace the files and <span class="kbd">Refresh</span>.</li>
-      </ol>
-
-      <h3>Issues</h3>
-      <table class="pbi-issues">
-        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
-        <tbody>
-          <tr><td><code>403</code> / forbidden on refresh</td><td>Token is wrong or rotated. Get a current set of URLs; update via <em>Transform data &rarr; Data source settings</em>.</td></tr>
-          <tr><td><code>findings</code>/<code>coverage</code>/<code>stale</code> empty</td><td>No run has been published yet. Publish a run, then refresh.</td></tr>
-          <tr><td>Numbers didn't change after an audit</td><td>The feed updates when a new run is published. Refresh after that.</td></tr>
-          <tr><td>Can't pick <strong>Anonymous</strong></td><td>Tenant may block anonymous web sources — use <strong>Web API</strong> or <strong>Basic</strong>; the token still authenticates.</td></tr>
-        </tbody>
-      </table>
-
     </div>
   </section>
+
+  <div class="pbi-cols">
+    <section class="card">
+      <div class="pbi-body">
+        <h3>Option A — Connect to the live URLs</h3>
+        <p class="pbi-sub">Recommended. Set up once and it can refresh on a schedule.</p>
+        <ol class="pbi-steps">
+          <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Web</span>. Paste the <strong>findings</strong> URL, click <span class="kbd">OK</span>.</li>
+          <li>If asked, choose <strong>Anonymous</strong> &rarr; <span class="kbd">Connect</span>.</li>
+          <li>Click <span class="kbd">Transform Data</span>, rename the query to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+          <li>Repeat for the <strong>sitemap404</strong>, <strong>coverage</strong>, and <strong>stale</strong> URLs.</li>
+        </ol>
+        <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
+
+        <div class="pbi-dl">
+          <div class="pbi-dl-label">Download the four files (for Option B)</div>
+          <div class="pbi-dl-links">
+            <button onclick="downloadPBITable('findings')">findings.csv</button>
+            <button onclick="downloadPBITable('sitemap_404')">sitemap_404.csv</button>
+            <button onclick="downloadPBITable('coverage')">coverage.csv</button>
+            <button onclick="downloadPBITable('stale')">stale.csv</button>
+          </div>
+        </div>
+
+        <h3>Option B — Import the CSV files</h3>
+        <p class="pbi-sub">Manual updates. Re-import when the files change.</p>
+        <ol class="pbi-steps">
+          <li>Save the four files somewhere stable (a fixed folder, or OneDrive/SharePoint to schedule refresh later).</li>
+          <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Text/CSV</span>.</li>
+          <li>Select the <strong>findings</strong> file &rarr; <span class="kbd">Open</span> &rarr; confirm the header row.</li>
+          <li>Click <span class="kbd">Transform Data</span>, rename to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+          <li>Repeat for the <strong>sitemap_404</strong>, <strong>coverage</strong>, and <strong>stale</strong> files.</li>
+        </ol>
+        <p class="pbi-next">&rarr; Continue to Configure Tables.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="pbi-body">
+        <h3>Configure Tables</h3>
+        <p class="pbi-sub">Shared setup, after the data is in.</p>
+        <ol class="pbi-steps">
+          <li><strong>Set column types</strong> — text for names/labels, whole number for <code>discovered</code>/<code>missing</code>/<code>live</code>, date/time for the <code>*_seen</code>/<code>*_updated</code>/<code>created</code> fields.</li>
+          <li><strong>Relate the tables</strong> in <strong>Model view</strong>: <code>findings[path]</code> &rarr; <code>stale[path]</code>, and <code>findings[language]</code> &rarr; <code>coverage[language]</code>. Keep cross-filter <strong>Single</strong>.</li>
+          <li><strong>Build visuals</strong> — findings by <code>severity</code> and <code>issue</code>, <code>status</code> as a donut, <code>missing</code> by <code>language</code>, tables of <code>sitemap_404</code> and <code>stale</code>.</li>
+          <li><strong>Publish &amp; refresh</strong> — <span class="kbd">Publish</span> to a workspace. In the Service: model &rarr; <span class="kbd">Settings</span> &rarr; <strong>Data source credentials</strong> &rarr; <strong>Anonymous</strong>, then <strong>Scheduled refresh</strong> &rarr; <strong>On</strong>. Option A refreshes automatically; for Option B, replace the files and <span class="kbd">Refresh</span>.</li>
+        </ol>
+
+        <h3>Issues</h3>
+        <table class="pbi-issues">
+          <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+          <tbody>
+            <tr><td><code>403</code> / forbidden on refresh</td><td>Token is wrong or rotated. Get a current set of URLs; update via <em>Transform data &rarr; Data source settings</em>.</td></tr>
+            <tr><td><code>findings</code>/<code>coverage</code>/<code>stale</code> empty</td><td>No run has been published yet. Publish a run, then refresh.</td></tr>
+            <tr><td>Numbers didn't change after an audit</td><td>The feed updates when a new run is published. Refresh after that.</td></tr>
+            <tr><td>Can't pick <strong>Anonymous</strong></td><td>Tenant may block anonymous web sources — use <strong>Web API</strong> or <strong>Basic</strong>; the token still authenticates.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div id="settingsModal" class="app-modal" style="display:none;" role="dialog" aria-modal="true">
