@@ -148,6 +148,42 @@
   .vtab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .dashframe { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); min-height: 600px; }
   .pagetabs { display: flex; gap: .4rem; margin: 0 0 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .pbi-btn { margin-left: auto; align-self: center; display: inline-flex; align-items: center; gap: .45rem; padding: .4rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); font-family: inherit; font-size: .82rem; font-weight: 400; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap; }
+  .pbi-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--card-alt); }
+  .pbi-btn svg { flex: 0 0 auto; display: block; }
+  .pbi-flow { position: relative; display: grid; grid-template-columns: 1fr 130px 1fr; align-items: center; gap: 0; margin-bottom: 1rem; }
+  .pbi-flow-left { grid-column: 1; display: flex; flex-direction: column; gap: 2.5rem; }
+  .pbi-flow-right { grid-column: 3; }
+  .pbi-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 1; }
+  @media (max-width: 900px) {
+    .pbi-flow { grid-template-columns: 1fr; }
+    .pbi-flow-left, .pbi-flow-right { grid-column: 1; }
+    .pbi-flow-left { gap: 1rem; margin-bottom: 1rem; }
+    .pbi-connectors { display: none; }
+  }
+  .pbi-body h3 { font-weight: 500; font-size: 1rem; margin: 1.6rem 0 .3rem; color: var(--text); }
+  .pbi-body h3:first-child { margin-top: 0; }
+  .pbi-sub { color: var(--muted); font-size: .84rem; margin: 0 0 .8rem; }
+  .pbi-next { color: var(--accent); font-size: .84rem; font-weight: 500; margin: .7rem 0 0; }
+  .pbi-pre { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: .8rem .9rem; overflow-x: auto; margin: .6rem 0; }
+  .pbi-pre code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .76rem; line-height: 1.7; color: var(--text); white-space: pre; }
+  .pbi-pre .tok { color: var(--accent); }
+  .pbi-body code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: .82em; background: var(--card-alt); border: 1px solid var(--border); border-radius: 4px; padding: .05em .35em; }
+  .pbi-body .kbd { background: var(--card-alt); border: 1px solid var(--border); border-radius: 5px; padding: .05em .4em; font-size: .8em; white-space: nowrap; }
+  ol.pbi-steps { list-style: none; padding-left: 0; counter-reset: pstep; margin: .6rem 0 1rem; }
+  ol.pbi-steps > li { counter-increment: pstep; position: relative; padding-left: 2.2rem; margin: .7rem 0; font-size: .88rem; }
+  ol.pbi-steps > li::before { content: counter(pstep); position: absolute; left: 0; top: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #1a1a1a; font-size: .74rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  ol.pbi-steps ul { margin: .35rem 0; padding-left: 1.1rem; font-size: .85rem; }
+  .pbi-dl { border: 1px solid var(--border); border-radius: 10px; background: var(--card-alt); padding: .9rem 1rem; margin: 1.4rem 0; }
+  .pbi-dl-label { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+  .pbi-dl-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .pbi-dl-links button { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-size: .8rem; padding: .4rem .7rem; cursor: pointer; transition: border-color .2s, color .2s; }
+  .pbi-dl-links button:hover { border-color: var(--accent); color: var(--accent); }
+  .pbi-dl-links button.copied { border-color: var(--ok); color: var(--ok); }
+  .pbi-dl-links button svg { flex: 0 0 auto; }
+  .pbi-issues { width: 100%; border-collapse: collapse; margin: .6rem 0; font-size: .84rem; }
+  .pbi-issues th, .pbi-issues td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .pbi-issues th { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .ptab { background: none; border: none; color: var(--muted); padding: .85rem 1.3rem; cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 400; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; transition: color .2s, border-color .2s; }
   .ptab:hover { color: var(--text); }
   .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -343,14 +379,14 @@
       <p class="login-sub">Choose your role and enter the access passphrase.</p>
       <div class="section-label" style="margin-top:1.4rem;">I am signing in as</div>
       <div class="role-toggle" id="roleToggle">
-        <button type="button" class="role-opt active" data-role="author" onclick="pickRole('author')">Author</button>
-        <button type="button" class="role-opt" data-role="admin" onclick="pickRole('admin')">Admin</button>
+        <button type="button" class="role-opt" data-role="author" onclick="pickRole('author')">Author</button>
+        <button type="button" class="role-opt active" data-role="admin" onclick="pickRole('admin')">Admin</button>
       </div>
       <label class="field-label" for="pass" style="margin-top:1.3rem;">Access passphrase</label>
       <input type="text" id="pass" class="masked-input" placeholder="Enter passphrase" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" onkeydown="if(event.key==='Enter'){submitLogin();}">
       <div id="loginError" class="err-note" style="display:none; margin-top:.6rem;"></div>
       <button class="primary" id="loginBtn" onclick="submitLogin()" style="width:100%; margin-top:1.3rem;">Sign in</button>
-      <p class="hint" style="margin:1rem 0 0; text-align:center;">The passphrase is held in memory for this session only.</p>
+      <p class="hint" style="margin:.8rem 0 0; text-align:center; font-size:.72rem; line-height:1.4;">The passphrase is held in memory for this session only.</p>
     </div>
   </div>
 
@@ -459,6 +495,93 @@
     <div id="dashEmpty" class="dash-empty">No audit data yet. Open the <strong>Audit</strong> tab, run an audit, and the dashboards will appear here — they keep the last run's results.</div>
     <iframe id="dashFrame" class="dashframe" title="Dashboard view" style="display:none;"></iframe>
   </div>
+  <div id="page-pbi" class="page" style="display:none;">
+  <section class="card">
+    <h2>Power BI import instructions</h2>
+    <p class="hint">Bring the four audit tables into Power BI and keep them refreshed. Do <strong>Option A</strong> or <strong>Option B</strong> to get the data in, then follow <strong>Configure Tables</strong>.</p>
+  </section>
+
+  <div class="pbi-flow" id="pbiFlow">
+    <div class="pbi-flow-left">
+      <section class="card pbi-node" id="pbiOptA">
+        <div class="pbi-body">
+          <h3>Option A — Connect to the live URLs</h3>
+          <p class="pbi-sub">Recommended. Set up once and it can refresh on a schedule.</p>
+          <ol class="pbi-steps">
+            <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Web</span>. Paste the <strong>findings</strong> URL, click <span class="kbd">OK</span>.</li>
+            <li>If asked, choose <strong>Anonymous</strong> &rarr; <span class="kbd">Connect</span>.</li>
+            <li>Click <span class="kbd">Transform Data</span>, rename the query to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+            <li>Repeat for the <strong>sitemap404</strong>, <strong>coverage</strong>, and <strong>stale</strong> URLs.</li>
+          </ol>
+          <div class="pbi-dl">
+            <div class="pbi-dl-label">Copy a table URL</div>
+            <div class="pbi-dl-links">
+              <button onclick="copyPBIUrl('findings', this)">findings</button>
+              <button onclick="copyPBIUrl('sitemap404', this)">sitemap404</button>
+              <button onclick="copyPBIUrl('coverage', this)">coverage</button>
+              <button onclick="copyPBIUrl('stale', this)">stale</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="card pbi-node" id="pbiOptB">
+        <div class="pbi-body">
+          <h3>Option B — Import the CSV files</h3>
+          <p class="pbi-sub">Manual updates. Re-import when the files change.</p>
+          <ol class="pbi-steps">
+            <li>Save the four files somewhere stable (a fixed folder, or OneDrive/SharePoint to schedule refresh later).</li>
+            <li>In <strong>Power BI Desktop</strong>: <span class="kbd">Get data</span> &rarr; <span class="kbd">Text/CSV</span>.</li>
+            <li>Select the <strong>findings</strong> file &rarr; <span class="kbd">Open</span> &rarr; confirm the header row.</li>
+            <li>Click <span class="kbd">Transform Data</span>, rename to <code>Findings</code>, then <span class="kbd">Close &amp; Apply</span>.</li>
+            <li>Repeat for the <strong>sitemap_404</strong>, <strong>coverage</strong>, and <strong>stale</strong> files.</li>
+          </ol>
+          <div class="pbi-dl">
+            <div class="pbi-dl-label">Download the four files</div>
+            <div class="pbi-dl-links">
+              <button onclick="downloadPBITable('findings')">findings.csv</button>
+              <button onclick="downloadPBITable('sitemap_404')">sitemap_404.csv</button>
+              <button onclick="downloadPBITable('coverage')">coverage.csv</button>
+              <button onclick="downloadPBITable('stale')">stale.csv</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <svg class="pbi-connectors" id="pbiConnectors" aria-hidden="true"></svg>
+
+    <div class="pbi-flow-right">
+      <section class="card pbi-node" id="pbiConfig">
+        <div class="pbi-body">
+          <h3>Configure Tables</h3>
+          <p class="pbi-sub">Both options lead here.</p>
+          <ol class="pbi-steps">
+            <li><strong>Set column types</strong> — text for names/labels, whole number for <code>discovered</code>/<code>missing</code>/<code>live</code>, date/time for the <code>*_seen</code>/<code>*_updated</code>/<code>created</code> fields.</li>
+            <li><strong>Relate the tables</strong> in <strong>Model view</strong>: <code>findings[path]</code> &rarr; <code>stale[path]</code>, and <code>findings[language]</code> &rarr; <code>coverage[language]</code>. Keep cross-filter <strong>Single</strong>.</li>
+            <li><strong>Build visuals</strong> — findings by <code>severity</code> and <code>issue</code>, <code>status</code> as a donut, <code>missing</code> by <code>language</code>, tables of <code>sitemap_404</code> and <code>stale</code>.</li>
+            <li><strong>Publish &amp; refresh</strong> — <span class="kbd">Publish</span> to a workspace. In the Service: model &rarr; <span class="kbd">Settings</span> &rarr; <strong>Data source credentials</strong> &rarr; <strong>Anonymous</strong>, then <strong>Scheduled refresh</strong> &rarr; <strong>On</strong>. Option A refreshes automatically; for Option B, replace the files and <span class="kbd">Refresh</span>.</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="pbi-body">
+      <h3>Issues</h3>
+      <table class="pbi-issues">
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>403</code> / forbidden on refresh</td><td>Token is wrong or rotated. Get a current set of URLs; update via <em>Transform data &rarr; Data source settings</em>.</td></tr>
+          <tr><td><code>findings</code>/<code>coverage</code>/<code>stale</code> empty</td><td>No run has been published yet. Publish a run, then refresh.</td></tr>
+          <tr><td>Numbers didn't change after an audit</td><td>The feed updates when a new run is published. Refresh after that.</td></tr>
+          <tr><td>Can't pick <strong>Anonymous</strong></td><td>Tenant may block anonymous web sources — use <strong>Web API</strong> or <strong>Basic</strong>; the token still authenticates.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  </div>
+
   </div><!-- /appShell -->
 </div>
 
@@ -557,14 +680,8 @@
 </div>
 
 <script>
-/* =======================================================================
-   CONFIG — edit these once. WORKER_URL is just an endpoint, not a secret,
-   but keep the file local anyway. The access passphrase is typed into the
-   tool at runtime (Settings card) and never stored here. WORKER_KEY below
-   is an optional fallback if you'd rather hardcode it; leave it empty to
-   always type the passphrase instead.
-   Languages are defined just below — edit the `langs` list to change them.
-   ======================================================================= */
+/* CONFIG — edit once. Passphrase is typed in the UI at runtime, not stored here.
+   Languages are the `langs` list below. */
 const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
@@ -572,10 +689,8 @@ const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (
 // Sitecore content root for the "Items last updated" export — used to turn item
 // paths into clean relative paths in the stale-content view.
 const SITECORE_ROOT = '/sitecore/content/bcbs az/azblue/home';
-// OPTIONAL shared store: set STATE_URL to your KV-backed state endpoint so triage
-// marks (done / ignored) and the latest run are consistent for EVERY user. Leave it
-// empty for local-only (this browser). A ready-to-deploy Cloudflare Worker is shipped
-// alongside this file (audit-state-worker.js). Auth reuses the audit passphrase.
+// Shared store: STATE_URL points at the KV Worker (audit-state-worker.js) so triage +
+// runs are consistent for all users. Empty = local-only. Auth reuses the passphrase.
 const STATE_URL = 'https://audit-state.bcbs-of-az.workers.dev/';
 /* ===================================================================== */
 
@@ -902,11 +1017,12 @@ function renderDiscSearch(){
 /* combined audit set: selected discovered pages + manual rows, deduped by path */
 function getAuditPages(){
   const map = new Map();
-  effectiveDiscovered().forEach(d => map.set(d.path, { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
+  effectiveDiscovered().forEach(d => map.set(normPath(d.path), { name: prettyName(d.path), path: d.path, lastmod: d.lastmod || '' }));
   pages.forEach(pg => {
     if(!pg) return;
-    if(pg.excluded){ map.delete(pg.path); return; }
-    if(pg.name) map.set(pg.path, { name: pg.name, path: pg.path, lastmod: (map.get(pg.path)||{}).lastmod || '' });
+    const k = normPath(pg.path);
+    if(pg.excluded){ map.delete(k); return; }
+    if(pg.name) map.set(k, { name: pg.name, path: pg.path, lastmod: (map.get(k)||{}).lastmod || '' });
   });
   return [...map.values()];
 }
@@ -989,11 +1105,103 @@ function downloadBlob(content, mime, filename){
 }
 function reportHost(){ try { return new URL(SITE_URL).hostname; } catch(e){ return 'site'; } }
 
-/* ============================ shared state ============================
-   Persistent, cross-user store for triage marks (done / ignored) and the
-   latest run. With STATE_URL set, it reads/writes your KV-backed endpoint so
-   the whole team sees the same thing; otherwise it falls back to this browser's
-   localStorage. Auth reuses the audit passphrase (X-Audit-Key). */
+/* Power BI export: flattens the current audit into one-row-per-record CSV tables.
+   Same shape the Worker endpoint serves. */
+function csvCell(v){
+  if(v === null || v === undefined) return '';
+  var str = String(v);
+  if(/[",\r\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+  return str;
+}
+function toCSV(columns, rows){
+  var head = columns.map(function(c){ return csvCell(c.header); }).join(',');
+  var body = rows.map(function(r){
+    return columns.map(function(c){ return csvCell(c.get(r)); }).join(',');
+  });
+  return '\ufeff' + [head].concat(body).join('\r\n');   // BOM so Excel/Power BI read UTF-8
+}
+function powerBITables(){
+  var D = currentDashData() || {};
+  var host = (D.meta && D.meta.host) || reportHost();
+  var triage = triageState || {};
+
+  var findings = (D.findings || []).map(function(f){
+    var t = triage[f.key]; var status = (t && t.status) ? t.status : 'open';
+    return { host:host, page:f.page, path:f.path, section:f.dir, area:f.section,
+             language:f.lang, issue:f.category, severity:f.severity, status:status,
+             detail:f.detail || '' };
+  });
+
+  var s404 = [];
+  var sm = sitemap404;
+  if(sm && sm.urls){
+    var newSet = {}; (sm.newUrls || []).forEach(function(u){ newSet[u] = 1; });
+    Object.keys(sm.urls).forEach(function(u){
+      s404.push({ host:host, url:u, first_seen:(sm.urls[u].firstSeen || ''),
+                  is_new:(newSet[u] ? 'yes' : 'no'), last_checked:(sm.checked || '') });
+    });
+  }
+
+  var cov = ((D.coverage && D.coverage.missing) || []).map(function(m){
+    var disc = (D.coverage && D.coverage.discovered) || 0;
+    return { host:host, language:m.lang, discovered:disc, missing:m.count, live:Math.max(0, disc - m.count) };
+  });
+
+  var stale = (D.contentDates || []).map(function(r){
+    return { host:host, path:r.path, last_updated:(r.updated || ''), updated_by:(r.updatedBy || ''),
+             created:(r.created || ''), created_by:(r.createdBy || '') };
+  });
+
+  return { findings:findings, sitemap_404:s404, coverage:cov, stale:stale };
+}
+function pbiSpecs(){
+  var t = powerBITables();
+  return [
+    { name:'findings', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'page',get:function(r){return r.page;}},
+      {header:'path',get:function(r){return r.path;}}, {header:'section',get:function(r){return r.section;}},
+      {header:'area',get:function(r){return r.area;}}, {header:'language',get:function(r){return r.language;}},
+      {header:'issue',get:function(r){return r.issue;}}, {header:'severity',get:function(r){return r.severity;}},
+      {header:'status',get:function(r){return r.status;}}, {header:'detail',get:function(r){return r.detail;}}
+    ], rows:t.findings },
+    { name:'sitemap_404', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'url',get:function(r){return r.url;}},
+      {header:'first_seen',get:function(r){return r.first_seen;}}, {header:'is_new',get:function(r){return r.is_new;}},
+      {header:'last_checked',get:function(r){return r.last_checked;}}
+    ], rows:t.sitemap_404 },
+    { name:'coverage', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'language',get:function(r){return r.language;}},
+      {header:'discovered',get:function(r){return r.discovered;}}, {header:'missing',get:function(r){return r.missing;}},
+      {header:'live',get:function(r){return r.live;}}
+    ], rows:t.coverage },
+    { name:'stale', cols:[
+      {header:'host',get:function(r){return r.host;}}, {header:'path',get:function(r){return r.path;}},
+      {header:'last_updated',get:function(r){return r.last_updated;}}, {header:'updated_by',get:function(r){return r.updated_by;}},
+      {header:'created',get:function(r){return r.created;}}, {header:'created_by',get:function(r){return r.created_by;}}
+    ], rows:t.stale }
+  ];
+}
+function downloadPBITable(name){
+  var sp = pbiSpecs().filter(function(s){ return s.name === name; })[0];
+  if(!sp) return;
+  var stamp = new Date().toISOString().slice(0,10);
+  downloadBlob(toCSV(sp.cols, sp.rows), 'text/csv;charset=utf-8', 'audit-' + sp.name + '-' + reportHost() + '-' + stamp + '.csv');
+}
+function exportPowerBICsv(){
+  var specs = pbiSpecs();
+  var host = reportHost();
+  var stamp = new Date().toISOString().slice(0,10);
+  var i = 0;
+  (function next(){
+    if(i >= specs.length){ setReportStatus('Exported ' + specs.length + ' CSV tables for Power BI.'); return; }
+    var sp = specs[i++];
+    downloadBlob(toCSV(sp.cols, sp.rows), 'text/csv;charset=utf-8', 'audit-' + sp.name + '-' + host + '-' + stamp + '.csv');
+    setTimeout(next, 350);   // stagger so browsers don't block the batch
+  })();
+}
+
+/* Cross-user store for triage marks and the latest run: KV endpoint when STATE_URL
+   is set, else this browser's localStorage. */
 let triageState = {};      // { findingKey: { status:'done'|'ignored', at } }
 let sharedDash  = null;    // a published dashboard-data object (for viewers who didn't run locally)
 let sitemap404  = null;    // { urls:{url:{firstSeen}}, checked, total, dead, newCount } — saved 404 list
@@ -1113,16 +1321,15 @@ function setStoreStatus(extra){
   el.textContent = mode + ' · ' + done + ' done · ' + ign + ' ignored' + (extra ? (' · ' + extra) : '');
 }
 function filterSharedDash(src){
-  // A published run is pre-computed dashboard data. When someone later marks pages
-  // "Skip" in Audit Settings, those exclusions must still apply to the shared view —
-  // so drop excluded pages here and recompute the derived fields from what's left.
+  // Published runs are pre-computed; still drop pages later marked "Skip" and
+  // recompute derived fields from what's left.
   const EXCL = excludedManualPathSet();
   if(!EXCL.size) return Object.assign({}, src);
   const d = JSON.parse(JSON.stringify(src));
-  const keep = f => !EXCL.has((f.path === '(home)' ? '' : f.path) || '');
+  const keep = f => !EXCL.has(normPath(f.path));
   d.findings = (d.findings || []).filter(keep);
-  if(Array.isArray(d.pages)) d.pages = d.pages.filter(p => !EXCL.has((p.path === '(home)' ? '' : p.path) || ''));
-  if(Array.isArray(d.missingTranslations)) d.missingTranslations = d.missingTranslations.filter(m => !EXCL.has(m.path || ''));
+  if(Array.isArray(d.pages)) d.pages = d.pages.filter(p => !EXCL.has(normPath(p.path)));
+  if(Array.isArray(d.missingTranslations)) d.missingTranslations = d.missingTranslations.filter(m => !EXCL.has(normPath(m.path)));
   // recompute summary + rollups from the filtered findings
   let c=0,w=0,i=0,b=0;
   d.findings.forEach(f => { if(f.category === 'broken link'){ b++; return; } if(f.severity==='critical')c++; else if(f.severity==='warning')w++; else i++; });
@@ -1149,10 +1356,8 @@ function findingSubject(f){
 function keyFor(f){
   return [f.path||'', f.lang||'', f.section||'', f.category||'', findingSubject(f)].join('||').toLowerCase();
 }
-/* ---- content fingerprints (source-sync model) ----
-   A stable, normalized hash of a page's visible content. Comparing the current
-   English hash against the hash captured when a translation was approved lets us
-   tell "English changed after the translation was approved" from ordinary QA drift. */
+/* Content fingerprints: a normalized hash of a page's visible text, so we can tell
+   "English changed since the translation was approved" from ordinary QA drift. */
 function cyrb53(str, seed){
   seed = seed || 0;
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -1184,9 +1389,14 @@ function currentFingerprints(){
   });
   return { en, tr };
 }
+function normPath(p){
+  var s = String(p == null ? '' : p).trim();
+  if(s === '(home)') return '';
+  return s.replace(/^\/+|\/+$/g, '');
+}
 function excludedManualPathSet(){
   const s = new Set();
-  pages.forEach(pg => { if(pg && pg.excluded) s.add(pg.path || ''); });
+  pages.forEach(pg => { if(pg && pg.excluded) s.add(normPath(pg.path)); });
   return s;
 }
 function flattenFindings(){
@@ -1194,7 +1404,7 @@ function flattenFindings(){
   const EXCL = excludedManualPathSet();
   (auditState.results||[]).forEach(r => {
     const path = r.page.path || '';
-    if(EXCL.has(path)) return; // skipped in Audit Settings — treat as removed from current data
+    if(EXCL.has(normPath(path))) return; // skipped in Audit Settings — treat as removed from current data
     const page = r.page.name;
     const dir = (dirOf(path) || '(top level)');
     const base = (lang, section, cat, sev, detail, suggestion, snippet, items, evidenceLabel) =>
@@ -1355,12 +1565,11 @@ function loadContentDates(file){
 function buildDashboardData(){
   const findings = flattenFindings();
   const EXCL = excludedManualPathSet();
-  const activeResults = (auditState.results||[]).filter(r => !EXCL.has(r.page.path || ''));
+  const activeResults = (auditState.results||[]).filter(r => !EXCL.has(normPath(r.page.path)));
   const missing = {};
   activeResults.forEach(r => (r.languages||[]).forEach(b => { if(b.error) missing[b.lang.label] = (missing[b.lang.label]||0)+1; }));
-  // Foreign-language pages that failed to load during the audit (e.g. no Chinese/Spanish
-  // version exists → HTTP 404). These are derived by the audit, not the sitemap, so they
-  // won't appear in the sitemap monitor — surface them in the 404 box directly.
+  // Foreign-language pages that 404'd during the audit (missing translations). Derived
+  // here, not by the sitemap monitor, so the 404 box can show them.
   const missingTranslations = [];
   activeResults.forEach(r => (r.languages||[]).forEach(b => {
     if(b.error) missingTranslations.push({
@@ -1371,9 +1580,8 @@ function buildDashboardData(){
   const pages = activeResults.map(r => ({
     path: r.page.path || '(home)', name: r.page.name, lastmod: r.page.lastmod || ''
   }));
-  // Severity/broken totals are recomputed fresh from the (already-filtered) findings rather
-  // than the live-run counters (auditState.crit/warn/info/broken), so a page marked "Skip" in
-  // Audit Settings disappears from these counts immediately, without re-running the audit.
+  // Recount from the filtered findings (not the live-run counters) so "Skip" takes
+  // effect immediately without re-running.
   let sCrit=0, sWarn=0, sInfo=0, sBroken=0;
   findings.forEach(f => {
     if(f.category === 'broken link'){ sBroken++; return; }
@@ -1433,7 +1641,7 @@ function ensureDashFrame(targetTab){
 }
 let currentDashTab = 'authors';
 function dashHasData(){ return !!((auditState && auditState.results && auditState.results.length) || sharedDash); }
-let userRole = null, loginRole = 'author';
+let userRole = null, loginRole = 'admin';
 function pickRole(r){
   loginRole = r;
   document.querySelectorAll('#roleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === r); });
@@ -1470,7 +1678,10 @@ function buildTabsForRole(role){
     nav.innerHTML =
         '<button class="ptab" data-page="leaders" onclick="showPage(\'leaders\')">Admin</button>'
       + '<button class="ptab" data-page="authors" onclick="showPage(\'authors\')">Authors</button>'
-      + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>';
+      + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>'
+      + '<button class="pbi-btn" onclick="showPage(\'pbi\')" title="Power BI import instructions" aria-label="Power BI import instructions">'
+      +   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M14 4v6h6"></path><path d="M8 13h8M8 17h5"></path></svg>'
+      +   '<span>Power BI Import Instructions</span></button>';
   } else {
     nav.style.display = 'none';
   }
@@ -1491,6 +1702,58 @@ function openSettingsModal(){
   document.querySelectorAll('#settingsRoleToggle .role-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.role === userRole); });
 }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
+function openPowerBIModal(){ showPage('pbi'); }
+function copyPBIUrl(table, btn){
+  var url = 'https://audit-state.bcbs-of-az.workers.dev/?export=' + table + '&format=csv&token=powerbitoken';
+  function flash(){
+    var prev = btn.getAttribute('data-label') || btn.textContent;
+    btn.setAttribute('data-label', prev);
+    btn.textContent = 'Copied \u2713'; btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = prev; btn.classList.remove('copied'); }, 1200);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(flash, function(){ pbiFallbackCopy(url); flash(); });
+  } else { pbiFallbackCopy(url); flash(); }
+}
+function pbiFallbackCopy(text){
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  } catch(e){}
+}
+function drawPbiConnectors(){
+  var flow = document.getElementById('pbiFlow'), svg = document.getElementById('pbiConnectors');
+  if(!flow || !svg) return;
+  var a = document.getElementById('pbiOptA'), bnode = document.getElementById('pbiOptB'), c = document.getElementById('pbiConfig');
+  if(!a || !bnode || !c) return;
+  if(window.innerWidth <= 900){ svg.innerHTML = ''; return; }
+  var fr = flow.getBoundingClientRect();
+  if(!fr.width) return;
+  svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
+  svg.setAttribute('viewBox', '0 0 ' + fr.width + ' ' + fr.height);
+  var ra = a.getBoundingClientRect(), rb = bnode.getBoundingClientRect(), rc = c.getBoundingClientRect();
+  var ax = ra.right - fr.left, ay = ra.top + ra.height/2 - fr.top;
+  var bx = rb.right - fr.left, by = rb.top + rb.height/2 - fr.top;
+  var tx = rc.left - fr.left, tcy = rc.top + rc.height/2 - fr.top;
+  function seg(sx, sy, ex, ey){ var dx = Math.max(48, (ex - sx) * 0.55); return 'M ' + sx + ' ' + sy + ' C ' + (sx+dx) + ' ' + sy + ' ' + (ex-dx) + ' ' + ey + ' ' + ex + ' ' + ey; }
+  var S = '#8a8a8a';
+  svg.innerHTML =
+    '<defs><marker id="pbiArrow" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse">'
+    + '<path d="M1,1 L6.5,4 L1,7" fill="none" stroke="' + S + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>'
+    + '<path d="' + seg(ax, ay, tx, tcy - 14) + '" fill="none" stroke="' + S + '" stroke-width="1.6" marker-end="url(#pbiArrow)"/>'
+    + '<path d="' + seg(bx, by, tx, tcy + 14) + '" fill="none" stroke="' + S + '" stroke-width="1.6" marker-end="url(#pbiArrow)"/>';
+}
+var _pbiResizeT;
+window.addEventListener('resize', function(){
+  clearTimeout(_pbiResizeT);
+  _pbiResizeT = setTimeout(function(){
+    var el = document.getElementById('page-pbi');
+    if(el && el.style.display !== 'none') drawPbiConnectors();
+  }, 120);
+});
+function closePowerBIModal(){ showPage('leaders'); }
 function switchRole(role){
   if(role === userRole) return;
   userRole = role;
@@ -1514,7 +1777,7 @@ function logout(){
   var passEl = document.getElementById('pass');
   if(passEl){ passEl.value = ''; passEl.classList.remove('input-error'); }
   showLoginError('');
-  pickRole('author');
+  pickRole('admin');
 }
 
 // ---- in-app notifications (new 404s) — read state is per browser ----
@@ -1575,9 +1838,12 @@ document.addEventListener('click', function(e){
 function showPage(p){
   document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
   var gen = (p === 'generate');
+  var pbi = (p === 'pbi');
   document.getElementById('page-generate').style.display = gen ? 'block' : 'none';
-  document.getElementById('page-dash').style.display = gen ? 'none' : 'block';
-  if(!gen){
+  var pbiEl = document.getElementById('page-pbi'); if(pbiEl) pbiEl.style.display = pbi ? 'block' : 'none';
+  document.getElementById('page-dash').style.display = (gen || pbi) ? 'none' : 'block';
+  if(pbi){ requestAnimationFrame(drawPbiConnectors); setTimeout(drawPbiConnectors, 130); }
+  if(!gen && !pbi){
     currentDashTab = (p === 'leaders') ? 'leaders' : 'authors';
     var has = dashHasData();
     document.getElementById('dashEmpty').style.display = has ? 'none' : 'block';
@@ -1826,6 +2092,10 @@ function dashboardCss(){
     'table.ft th{text-align:left;color:var(--muted2);font-weight:500;text-transform:uppercase;font-size:.62rem;letter-spacing:.06em;padding:.35rem .55rem;border-bottom:1px solid var(--border);white-space:nowrap}',
     'table.ft td{padding:.5rem .55rem;border-bottom:1px solid var(--border);vertical-align:top}table.ft tbody tr.frow:last-of-type td{border-bottom:none}',
     'tr.frow{cursor:pointer;transition:background .12s}tr.frow:hover{background:#2a2a2a}tr.frow.open{background:#2a2a2a}',
+    'table.ft th.sortable{cursor:pointer;user-select:none;white-space:nowrap}table.ft th.sortable:hover{color:var(--text)}',
+    'table.ft th.sortable .sort-ind{margin-left:.3rem;font-size:.75em;opacity:.3}table.ft th.sortable .sort-ind::after{content:"\\2195"}',
+    'table.ft th.sortable[data-dir] .sort-ind{opacity:1;color:var(--accent)}',
+    'table.ft th.sortable[data-dir="asc"] .sort-ind::after{content:"\\2191"}table.ft th.sortable[data-dir="desc"] .sort-ind::after{content:"\\2193"}',
     '.sevb{display:inline-flex;align-items:center;gap:.4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;font-weight:500;white-space:nowrap}.sevb .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}',
     '.sevb.c{color:var(--crit)}.sevb.c .dot{background:var(--crit)}.sevb.w{color:var(--warn)}.sevb.w .dot{background:var(--warn)}.sevb.i{color:var(--muted)}.sevb.i .dot{background:var(--muted2)}',
     '.ft .fc-pg{color:var(--text)}.ft .fc-path{display:block;color:var(--muted2);font-family:"SF Mono",Monaco,Consolas,monospace;font-size:.68rem;margin-top:.1rem}',
@@ -1985,7 +2255,7 @@ function dashboardApp(){
   function findingsTable(rows, cols){
     if(!rows || !rows.length) return '<p class="empty">No findings.</p>';
     var span = cols.length + 1;
-    var thead = '<thead><tr>' + cols.map(function(k){ return '<th>'+FHEAD[k]+'</th>'; }).join('') + '<th></th></tr></thead>';
+    var thead = '<thead><tr>' + cols.map(function(k){ return '<th class="sortable" data-k="'+k+'">'+FHEAD[k]+'<span class="sort-ind"></span></th>'; }).join('') + '<th></th></tr></thead>';
     var body = rows.map(function(f){
       var st = statusOf(f);
       var rowCls = st === 'done' ? ' resolved done' : st === 'ignored' ? ' resolved ignored' : '';
@@ -1993,11 +2263,16 @@ function dashboardApp(){
               : st === 'ignored' ? '<span class="ftag ignored" title="Ignored">\u2298</span>' : '';
       var tds = cols.map(function(k){ return '<td>'+FCELL[k](f)+'</td>'; }).join('')
         + '<td class="fc-exp">'+tag+'<span class="fchev">\u25B8</span></td>';
+      var sortAttrs = ' data-sev="'+(sevRank[f.severity]!=null?sevRank[f.severity]:9)+'"'
+        + ' data-page="'+esc(((f.page||'')+' '+(f.path||'')).toLowerCase())+'"'
+        + ' data-lang="'+esc((f.lang||'').toLowerCase())+'"'
+        + ' data-cat="'+esc((f.category||'').toLowerCase())+'"'
+        + ' data-issue="'+esc((f.detail||'').toLowerCase())+'"';
       var detail = '<div class="fd-inner">'
         + (f.suggestion ? '<div class="fd-sugg">\u2192 '+esc(f.suggestion)+'</div>' : '')
         + '<div class="fd-meta">'+esc(f.lang)+' \u00B7 '+esc(f.category)+' \u00B7 /'+esc(f.path)+'</div>'
         + evidenceBlock(f) + triageActions(f) + '</div>';
-      return '<tr class="frow'+rowCls+'">'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
+      return '<tr class="frow'+rowCls+'"'+sortAttrs+'>'+tds+'</tr><tr class="fdetail"><td colspan="'+span+'">'+detail+'</td></tr>';
     }).join('');
     return '<div class="ftable-wrap"><table class="ft">'+thead+'<tbody>'+body+'</tbody></table></div>';
   }
@@ -2016,6 +2291,7 @@ function dashboardApp(){
 
   var curView = 'authors';
   window.__pdf = function(){ try { parent.postMessage({ __mlaudit:'pdf', view: curView }, '*'); } catch(e){} };
+  window.__exportcsv = function(){ try { parent.postMessage({ __mlaudit:'exportcsv' }, '*'); } catch(e){} };
 
   function show(t){
     curView = t;
@@ -2071,6 +2347,30 @@ function dashboardApp(){
       row.classList.toggle('open', willOpen);
       postHeight();
     }
+  });
+
+  // Click a column header to sort that findings table (keeps each row's detail with it).
+  document.addEventListener('click', function(e){
+    var th = e.target.closest ? e.target.closest('th.sortable') : null;
+    if(!th) return;
+    var table = th.closest('table.ft'); if(!table) return;
+    var tbody = table.querySelector('tbody'); if(!tbody) return;
+    var k = th.getAttribute('data-k');
+    var dir = (table.getAttribute('data-sk') === k && table.getAttribute('data-sd') === 'asc') ? 'desc' : 'asc';
+    table.setAttribute('data-sk', k); table.setAttribute('data-sd', dir);
+    var kids = Array.prototype.slice.call(tbody.children), pairs = [];
+    for(var i=0;i<kids.length;i+=2){ pairs.push([kids[i], kids[i+1]]); }
+    var numeric = (k === 'sev');
+    pairs.sort(function(a,b){
+      var va = a[0].getAttribute('data-'+k) || '', vb = b[0].getAttribute('data-'+k) || '', c;
+      if(numeric){ c = (parseFloat(va)||0) - (parseFloat(vb)||0); }
+      else { c = va < vb ? -1 : va > vb ? 1 : 0; }
+      return dir === 'asc' ? c : -c;
+    });
+    pairs.forEach(function(p){ tbody.appendChild(p[0]); if(p[1]) tbody.appendChild(p[1]); });
+    table.querySelectorAll('th.sortable').forEach(function(h){ h.removeAttribute('data-dir'); });
+    th.setAttribute('data-dir', dir);
+    postHeight();
   });
 
   /* content-date lookup (best-effort match of audited page -> Sitecore date) */
@@ -2317,9 +2617,8 @@ function dashboardApp(){
       + '</div>'
       + '<div id="publishStatus" class="pub-status">'+(canPublish?'':'Run a new audit to publish it to the team.')+'</div>';
 
-    // Missing/broken foreign-language pages. Prefer the explicit list (has clickable URLs);
-    // fall back to reconstructing from the findings already in the data, so this ALWAYS
-    // matches the Findings box even for runs generated before the explicit list existed.
+    // Prefer the explicit missing-translations list; fall back to reconstructing from
+    // findings so older runs still match the Findings box.
     var mtList = Array.isArray(D.missingTranslations) ? D.missingTranslations.slice()
       : (D.findings || []).filter(function(f){ return f.category === 'load error' && f.lang !== 'English (reference)'; })
           .map(function(f){ return { page:f.page, lang:f.lang, url:'', error:f.detail || 'failed to load' }; });
@@ -2867,8 +3166,10 @@ function contentChecks(refData, tData, lang, pg){
     if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.', '', codes.map(c=>c||'(empty)'), 'hreflang codes present');
   }
 
-  // noindex
-  if(tData.noindex) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
+  // noindex — Chinese pages are intentionally noindex, so don't flag them
+  var _lc = (lang.gcode || lang.dir || '').toLowerCase();
+  var _isChinese = _lc.indexOf('zh') === 0 || /chinese/i.test(lang.label || '');
+  if(tData.noindex && !_isChinese) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
 
   // canonical
   if(tData.canonical && refData && refData.canonical && tData.canonical === refData.canonical && lang.dir){
@@ -3541,6 +3842,9 @@ window.addEventListener('message', function(e){
   }
   else if(e.data && e.data.__mlaudit === 'pdf'){
     exportReportPDF(e.data.view);
+  }
+  else if(e.data && e.data.__mlaudit === 'exportcsv'){
+    exportPowerBICsv();
   }
   else if(e.data && e.data.__mlaudit === 'runAudit'){
     if(userRole === 'admin') runAudit();
