@@ -107,7 +107,6 @@
           <option value="fields">Rectilinear fields — McLaughlin</option>
           <option value="planes">Flat planes</option>
           <option value="iso">Isometric — filled block form</option>
-          <option value="kremer">Faceted fields — Kremer</option>
           <option value="emblem">Emblem — minimal mark</option>
         </select>
       </div>
@@ -214,8 +213,7 @@
       <li><b>Rectilinear fields.</b> Upright and horizontal planes of deliberately uneven width sit on open ground. There's no implied depth — the work is asymmetry held in balance, tuned by interval, weight, and a few quiet colors, after John McLaughlin.</li>
       <li><b>Flat planes.</b> A few large flat color planes divided by bold straight cuts — mostly steep diagonals, sometimes a clean divider — with strong value contrast and the occasional pair of same-hue values meeting at an edge to imply a folded plane.</li>
       <li><b>Isometric.</b> A field of stacked cubes shaded top-light, side-mid, side-dark under one light, filling the frame edge to edge — a close-up detail of a much larger stepped form. Depth is pure face value; nothing recedes but the color.</li>
-      <li><b>Faceted fields.</b> A large flat block of color and open ground meet a single folded form, split into a lit facet and a shadow facet of one hue so the crease reads as an angled plane catching light, after Paul Kremer.</li>
-      <li><b>Emblem.</b> A single geometric mark centered on an open field — a silhouette cut into a facet grid or shards, nested into concentric bands, drawn as line-art, or built as a flat-3D solid: an isometric cube (wireframe, shaded, or line-delineated), an octahedron or tetrahedron in outline, or a cluster of overlapping cubes, in the minimalist mark tradition.</li>
+      <li><b>Emblem.</b> A single mark on an open field, grown from rules rather than drawn from stored shapes: a field carved by random cuts repeated around a rotation group, a volume grown cell-by-cell on an isometric lattice, a self-avoiding walk drawn as one rounded stroke, or a generated polygon nested under shrink and rotation.</li>
       <li><b>Shared discipline.</b> Both keep to flat fills, a limited palette, and large shapes. Nothing is a gradient or a shadow — only color and angle.</li>
     </ul>
   </div>
@@ -555,57 +553,219 @@ function drawIso(r,density){
 }
 
 /* ==========================================================
-   STYLE 4 — KREMER: a big flat field + a faceted folded form on open ground
+   STYLE 4 — EMBLEM: generative geometric marks. Nothing here is a stored
+   shape; each mark is grown from rules — a symmetry group, a set of cuts,
+   a lattice, or a walk — so the geometry is new every time.
    ========================================================== */
-function drawKremer(r,density){
-  const V=r.values;
-  const ground=V[V.length-1];                          // lightest color = open ground
-  const inkSorted=V.filter(c=>c!==ground).sort((a,b)=>lum(a)-lum(b)); // dark -> light
-  if(inkSorted.length===0)inkSorted.push(V[0]);
-  const fieldColor=inkSorted[inkSorted.length-1];       // brightest remaining = the flat field
-  const facetDark=inkSorted[0];                         // darkest = shadow facet
-  const facetLight=inkSorted.length>=2?inkSorted[1]:inkSorted[0];   // next = lit facet
-  const dir=resolveLightDir();
-  const litLeftSide=(dir==='tl'||dir==='bl');
-  const d=Math.max(1,Math.min(10,density));
-
-  // background = two colors sharing an organic, rounded-angle boundary (not straight stripes)
-  bg(ground);            // lower background color
-  const yBase=H*(0.42+rnd()*0.14);
-  const yL=yBase+(rnd()*2-1)*H*0.05;
-  const yR=yBase+(rnd()*2-1)*H*0.05;
-  const xc=W*(0.3+rnd()*0.4);
-  const yc=yBase+(chance(0.5)?-1:1)*H*(0.1+rnd()*0.12);  // one pronounced bend, up or down
-  const M=Math.min(W,H)*0.15;
-  const bRound=Math.min(W,H)*(0.05+rnd()*0.05);
-  fillRoundPoly([[-M,-M],[W+M,-M],[W+M,yR],[xc,yc],[-M,yL]],bRound,fieldColor);  // upper color, organic edge
-  const reachY=Math.min(yL,yR,yc)-H*0.02;                // form rises to meet the color region
-
-  // faceted folded form rising from the bottom, split into a lit and a shadow facet
-  const spanFull=chance(0.55);
-  const fx0=spanFull?0:W*(rnd()*0.28);
-  const fx1=spanFull?W:Math.min(W,fx0+W*(0.55+rnd()*0.4));
-  const nRidge=2+Math.round(d*0.5)+rint(0,1);           // more peaks with density
-  const ridge=[];
-  for(let i=0;i<nRidge;i++){
-    const rx=fx0+(fx1-fx0)*(i/(nRidge-1));
-    const ry=reachY+rnd()*(H-reachY)*0.5;               // peaks near the field, valleys lower
-    ridge.push([rx,ry]);
+const ISOX=Math.cos(Math.PI/6), ISOY=Math.sin(Math.PI/6);
+function ptsAttr(p){return p.map(q=>fmt(q[0])+','+fmt(q[1])).join(' ');}
+function polyPts(cx,cy,sides,rotDeg,R){const o=[],a0=rotDeg*Math.PI/180;for(let i=0;i<sides;i++){const a=a0+i*2*Math.PI/sides;o.push([cx+Math.cos(a)*R,cy+Math.sin(a)*R]);}return o;}
+function polyArea(p){let a=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];a+=p[i][0]*q[1]-q[0]*p[i][1];}return Math.abs(a)/2;}
+function polyCentroid(p){let a=0,cx=0,cy=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];const f=p[i][0]*q[1]-q[0]*p[i][1];a+=f;cx+=(p[i][0]+q[0])*f;cy+=(p[i][1]+q[1])*f;}a/=2;if(Math.abs(a)<1e-9){let sx=0,sy=0;for(const q of p){sx+=q[0];sy+=q[1];}return [sx/p.length,sy/p.length];}return [cx/(6*a),cy/(6*a)];}
+function insetPoly(p,d){                      // regions are convex, so edge-wise clipping is exact
+  const c=polyCentroid(p);let out=p;
+  for(let i=0;i<p.length;i++){
+    const A=p[i],B=p[(i+1)%p.length];
+    let nx=-(B[1]-A[1]),ny=(B[0]-A[0]);const L=Math.hypot(nx,ny)||1;nx/=L;ny/=L;
+    if(nx*c[0]+ny*c[1]-(nx*A[0]+ny*A[1])<0){nx=-nx;ny=-ny;}
+    out=clipHalfPlane(out,nx,ny,-(nx*A[0]+ny*A[1])-d);
+    if(out.length<3)return [];
   }
-  // near-vertical fold at a balanced position -> two substantial facets, not a thin sliver
-  const foldX=fx0+(fx1-fx0)*(0.35+rnd()*0.3);
-  const yAt=x=>{for(let i=0;i<ridge.length-1;i++){const[ax,ay]=ridge[i],[bx,by]=ridge[i+1];if(x>=ax&&x<=bx){const t=(x-ax)/((bx-ax)||1);return ay+t*(by-ay);}}return ridge[ridge.length-1][1];};
-  const yf=yAt(foldX);
-  const round=Math.min(W,H)*(0.03+rnd()*0.025);         // soften corners for an organic feel
-  const BASE=H+Math.min(W,H)*0.06;                      // push base off-canvas so only peaks round
-  fillRoundPoly([[fx0,BASE],...ridge,[fx1,BASE]],round,facetDark);   // whole form = shadow facet
-  if(litLeftSide){
-    const lit=ridge.filter(p=>p[0]<=foldX);
-    fillRoundPoly([[fx0,BASE],...lit,[foldX,yf],[foldX,BASE]],round,facetLight);
-  }else{
-    const lit=ridge.filter(p=>p[0]>=foldX);
-    fillRoundPoly([[foldX,BASE],[foldX,yf],...lit,[fx1,BASE]],round,facetLight);
+  return out;
+}
+function strokePolyE(p,color,sw){SVGEL.push('<polygon points="'+ptsAttr(p)+'" fill="none" stroke="'+color+'" stroke-width="'+fmt(sw)+'" stroke-linejoin="round"/>');}
+function strokePathE(pts,color,sw,closed){
+  if(pts.length<2)return;
+  let d='M'+fmt(pts[0][0])+' '+fmt(pts[0][1]);
+  for(let i=1;i<pts.length;i++)d+=' L'+fmt(pts[i][0])+' '+fmt(pts[i][1]);
+  if(closed)d+=' Z';
+  SVGEL.push('<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+fmt(sw)+'" stroke-linecap="round" stroke-linejoin="round"/>');
+}
+function circleE(c,rr,color){SVGEL.push('<circle cx="'+fmt(c[0])+'" cy="'+fmt(c[1])+'" r="'+fmt(rr)+'" fill="'+color+'"/>');}
+
+/* --- ENGINE 1: symmetric cut mosaic -------------------------------------
+   A base field is carved by a handful of random lines; every line is then
+   repeated around a rotation group (and optionally mirrored), so a random
+   cut becomes a coherent symmetric structure. Regions are then kept or
+   dropped by a rule applied per symmetry-orbit, so the mark stays balanced
+   while the geometry itself is new.                                        */
+function emblemMosaic(cx,cy,R,t,ink,ground,inks){
+  const k=pick([2,3,4,5,6,8]);
+  const mirror=chance(0.5);
+  const baseSides=pick([k===5?5:k, k===2?4:k, 4, 6, 24]);
+  let regions=[polyPts(cx,cy,Math.max(3,baseSides),rnd()*360,R*(baseSides===24?1:1.05))];
+  const cuts=[];
+  const m=1+Math.round(rnd()*2+t*2);                      // 1..5 generating cuts
+  for(let i=0;i<m;i++){
+    const ang=rnd()*Math.PI, off=(rnd()*0.85)*R;
+    cuts.push([ang,off]);
   }
+  for(const [ang,off] of cuts){
+    for(let j=0;j<k;j++){
+      const rot=j*2*Math.PI/k;
+      const a=ang+rot, nx=Math.cos(a+Math.PI/2), ny=Math.sin(a+Math.PI/2);
+      const px=cx+nx*off, py=cy+ny*off;
+      const next=[];
+      for(const Rg of regions){const [A,B]=splitPoly(Rg,px,py,nx,ny);if(A.length>=3)next.push(A);if(B.length>=3)next.push(B);}
+      regions=next;
+      if(mirror){
+        const a2=-ang+rot, nx2=Math.cos(a2+Math.PI/2), ny2=Math.sin(a2+Math.PI/2);
+        const px2=cx+nx2*off, py2=cy+ny2*off, nx3=[];
+        for(const Rg of regions){const [A,B]=splitPoly(Rg,px2,py2,nx2,ny2);if(A.length>=3)nx3.push(A);if(B.length>=3)nx3.push(B);}
+        regions=nx3;
+      }
+      if(regions.length>260)break;
+    }
+  }
+  const minA=(R*R)*0.012;
+  regions=regions.filter(p=>polyArea(p)>minA);
+  // per-orbit decision: same distance band + same folded angle -> same choice
+  const memo={}, rStep=R/(2+Math.round(t*3)), aStep=(2*Math.PI/k)/(2+Math.round(t*2));
+  const keepP=0.42+rnd()*0.26;
+  const rule=pick(['random','parity','parity','radial']);
+  const bandOn={}, phase=rint(0,1);
+  const keep=p=>{
+    const c=polyCentroid(p), dx=c[0]-cx, dy=c[1]-cy;
+    const rr=Math.hypot(dx,dy);let th=Math.atan2(dy,dx);
+    let fold=((th%(2*Math.PI/k))+2*Math.PI/k)%(2*Math.PI/k);
+    if(mirror)fold=Math.min(fold,2*Math.PI/k-fold);
+    const bi=Math.round(rr/rStep), ai=Math.round(fold/aStep);
+    if(rule==='parity')return ((bi+ai+phase)%2)===0;                  // alternating checker -> woven look
+    if(rule==='radial'){if(!(bi in bandOn))bandOn[bi]=chance(0.55);return bandOn[bi];}
+    const key=bi+':'+ai;
+    if(!(key in memo))memo[key]=chance(keepP);
+    return memo[key];
+  };
+  const render=pick(['solid','gapped','outline','duotone']);
+  const gap=render==='gapped'?Math.max(1.5,R*(0.008+rnd()*0.012)):0;
+  const ink2=inks.length>1?inks[Math.min(1,inks.length-1)]:ink;
+  let drew=0;
+  for(const p of regions){
+    const on=keep(p);
+    if(render==='outline'){
+      strokePolyE(p,ink,Math.max(1.2,R*0.012));
+      if(on){const q=insetPoly(p,R*0.03);if(q.length>=3){poly(q,ink);drew++;}}
+      continue;
+    }
+    if(!on)continue;
+    const q=gap?insetPoly(p,gap):p;
+    if(q.length>=3){poly(q,render==='duotone'&&chance(0.5)?ink2:ink);drew++;}
+  }
+  if(drew===0)for(const p of regions)poly(p,ink);        // never emit an empty field
+}
+
+/* --- ENGINE 2: grown isometric form -------------------------------------
+   A compact volume is grown cell by cell on an isometric lattice (random
+   walk + symmetry), then rendered as stacked cubes. The silhouette is a
+   consequence of the growth, not a preset solid.                           */
+function emblemIsoForm(cx,cy,R,t,ink,ground,inks){
+  const rad=2+Math.round(t*2), cells={};
+  const key=(x,y)=>x+','+y;
+  const sym=pick(['none','mirror','rot4']);
+  let px=0,py=0;
+  const steps=6+Math.round(rnd()*6+t*8);
+  const bump=(x,y)=>{
+    const pts=[[x,y]];
+    if(sym==='mirror')pts.push([-x,y]);
+    if(sym==='rot4'){pts.push([-x,-y],[y,-x],[-y,x]);}
+    for(const [a,b] of pts){
+      if(Math.abs(a)>rad||Math.abs(b)>rad)continue;
+      const kk=key(a,b);cells[kk]=Math.min(4,(cells[kk]||0)+1);
+    }
+  };
+  bump(0,0);
+  for(let i=0;i<steps;i++){
+    const d=pick([[1,0],[-1,0],[0,1],[0,-1]]);
+    px=Math.max(-rad,Math.min(rad,px+d[0]));py=Math.max(-rad,Math.min(rad,py+d[1]));
+    bump(px,py);
+  }
+  const u=R/(rad+1.6);
+  const list=Object.keys(cells).map(kk=>{const [x,y]=kk.split(',').map(Number);return {x,y,h:cells[kk]};});
+  list.sort((a,b)=>(a.x+a.y)-(b.x+b.y));
+  const tones=inks.slice().sort((a,b)=>lum(b)-lum(a));
+  const topC=tones[0], leftC=tones[Math.min(1,tones.length-1)], rightC=tones[tones.length-1];
+  const wire=(inks.length<3)||chance(0.35);
+  const lw=Math.max(1.4,R*0.012);
+  const P=(x,y,z)=>iso(x,y,z,cx,cy,u);
+  for(const c of list){
+    const h=c.h*0.55;
+    const top=[P(c.x-.5,c.y-.5,h),P(c.x+.5,c.y-.5,h),P(c.x+.5,c.y+.5,h),P(c.x-.5,c.y+.5,h)];
+    const left=[P(c.x-.5,c.y+.5,h),P(c.x+.5,c.y+.5,h),P(c.x+.5,c.y+.5,0),P(c.x-.5,c.y+.5,0)];
+    const right=[P(c.x+.5,c.y-.5,h),P(c.x+.5,c.y+.5,h),P(c.x+.5,c.y+.5,0),P(c.x+.5,c.y-.5,0)];
+    if(wire){
+      poly(top,ground);poly(left,ground);poly(right,ground);
+      strokePolyE(top,ink,lw);strokePolyE(left,ink,lw);strokePolyE(right,ink,lw);
+    }else{poly(left,leftC);poly(right,rightC);poly(top,topC);}
+  }
+}
+function iso(x,y,z,cx,cy,u){return [cx+(x-y)*ISOX*u, cy+((x+y)*ISOY-z)*u];}
+
+/* --- ENGINE 3: routed path ----------------------------------------------
+   A self-avoiding walk over a small lattice, drawn as one thick rounded
+   stroke. The letterform-like tangle is produced by the walk.              */
+function emblemRoute(cx,cy,R,t,ink,ground,inks){
+  const n=3+Math.round(rnd()*1+t*2);
+  const s=(R*1.7)/n, ox=cx-(n-1)*s/2, oy=cy-(n-1)*s/2;
+  const seen={}, pts=[];
+  let x=rint(0,n-1), y=rint(0,n-1);
+  seen[x+','+y]=1;pts.push([ox+x*s,oy+y*s]);
+  const target=Math.round(n*n*(0.45+rnd()*0.35));
+  let guard=0;
+  while(pts.length<target&&guard++<400){
+    const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>[x+d[0],y+d[1]])
+      .filter(([a,b])=>a>=0&&b>=0&&a<n&&b<n&&!seen[a+','+b]);
+    if(!opts.length)break;
+    const [a,b]=pick(opts);x=a;y=b;seen[a+','+b]=1;pts.push([ox+a*s,oy+b*s]);
+  }
+  const sw=s*(0.52+rnd()*0.26);
+  strokePathE(pts,ink,sw,false);
+  if(chance(0.5)){                                        // stray cells become dots
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+      if(seen[i+','+j])continue;
+      if(chance(0.28))circleE([ox+i*s,oy+j*s],sw*0.42,ink);
+    }
+  }
+}
+
+/* --- ENGINE 4: nested rotation ------------------------------------------
+   One generated polygon (random vertex radii, then symmetrised) repeated
+   under shrink + rotation.                                                 */
+function emblemNested(cx,cy,R,t,ink,ground,inks){
+  const k=pick([3,4,5,6,8]);
+  const jag=chance(0.5);
+  const base=[];
+  const radii=[];
+  for(let i=0;i<k;i++)radii.push(jag?(0.55+rnd()*0.45):1);
+  for(let i=0;i<k;i++){
+    const a=-Math.PI/2+i*2*Math.PI/k;
+    base.push([cx+Math.cos(a)*R*radii[i],cy+Math.sin(a)*R*radii[i]]);
+    if(jag){const a2=a+Math.PI/k;const rr=0.3+rnd()*0.4;base.push([cx+Math.cos(a2)*R*rr,cy+Math.sin(a2)*R*rr]);}
+  }
+  const copies=3+Math.round(rnd()*2+t*4);
+  const step=(6+rnd()*30)*(chance(0.5)?1:-1);
+  const filled=chance(0.35);
+  const lw=Math.max(1.3,R*0.012);
+  for(let i=0;i<copies;i++){
+    const f=1-i*(0.62/copies);
+    const a=i*step*Math.PI/180, co=Math.cos(a), si=Math.sin(a);
+    const p=base.map(q=>{const dx=(q[0]-cx)*f,dy=(q[1]-cy)*f;return [cx+dx*co-dy*si,cy+dx*si+dy*co];});
+    if(filled&&i%2===0)poly(p,ink);else strokePolyE(p,ink,lw);
+  }
+}
+
+function drawEmblem(r,density){
+  const V=r.values,n=V.length;
+  let ground=V[n-1],ink=V[0];
+  if(chance(0.4)){ground=V[0];ink=V[n-1];}
+  bg(ground);
+  const inks=V.filter(c=>c!==ground);
+  const useInk=inks.length?inks[0]:ink;
+  const cx=W/2,cy=H/2,R=Math.min(W,H)*0.32,t=(Math.max(1,Math.min(10,density))-1)/9;
+  const engine=pick(['mosaic','mosaic','mosaic','iso','iso','route','nested']);
+  if(engine==='mosaic')emblemMosaic(cx,cy,R,t,useInk,ground,inks);
+  else if(engine==='iso')emblemIsoForm(cx,cy,R,t,useInk,ground,inks);
+  else if(engine==='route')emblemRoute(cx,cy,R,t,useInk,ground,inks);
+  else emblemNested(cx,cy,R,t,useInk,ground,inks);
 }
 
 /* ---------- grain (SVG feTurbulence) ---------- */
@@ -615,8 +775,9 @@ function grainOverlay(){
        + '<rect x="0" y="0" width="'+W+'" height="'+H+'" filter="url(#heGrain)" opacity="0.05" style="mix-blend-mode:screen"/>';
 }
 
-/* ---------- palette extraction ---------- */
+/* ---------- palette extraction (k-means) ---------- */
 function toHex(c){const h=v=>('0'+Math.round(v).toString(16)).slice(-2);return '#'+h(c[0])+h(c[1])+h(c[2]);}
+function mixToward(hex,to,t){const A=parseInt(hex.slice(1),16),B=parseInt(to.slice(1),16);const ar=A>>16&255,ag=A>>8&255,ab=A&255,br=B>>16&255,bgc=B>>8&255,bb=B&255;return toHex([ar+(br-ar)*t,ag+(bgc-ag)*t,ab+(bb-ab)*t]);}
 function extractPalette(srcCanvas){
   const w=srcCanvas.width,h=srcCanvas.height;
   const data=srcCanvas.getContext('2d').getImageData(0,0,w,h).data;
@@ -624,147 +785,60 @@ function extractPalette(srcCanvas){
   for(let i=0;i<w*h;i+=step){const o=i*4;if(data[o+3]<128)continue;pts.push([data[o],data[o+1],data[o+2]]);}
   if(pts.length<8)return null;
   const k=5;let cents=[];for(let i=0;i<k;i++)cents.push(pts[Math.floor(Math.random()*pts.length)].slice());
-  for(let it=0;it<7;it++){const sums=Array.from({length:k},()=>[0,0,0,0]);for(const p of pts){let bi=0,bd=1e15;for(let c=0;c<k;c++){const dx=p[0]-cents[c][0],dy=p[1]-cents[c][1],dz=p[2]-cents[c][2];const d=dx*dx+dy*dy+dz*dz;if(d<bd){bd=d;bi=c}}sums[bi][0]+=p[0];sums[bi][1]+=p[1];sums[bi][2]+=p[2];sums[bi][3]++;}for(let c=0;c<k;c++)if(sums[c][3])cents[c]=[sums[c][0]/sums[c][3],sums[c][1]/sums[c][3],sums[c][2]/sums[c][3]];}
+  for(let it=0;it<7;it++){
+    const sums=Array.from({length:k},()=>[0,0,0,0]);
+    for(const p of pts){let bi=0,bd=1e15;for(let c=0;c<k;c++){const dx=p[0]-cents[c][0],dy=p[1]-cents[c][1],dz=p[2]-cents[c][2];const d=dx*dx+dy*dy+dz*dz;if(d<bd){bd=d;bi=c;}}sums[bi][0]+=p[0];sums[bi][1]+=p[1];sums[bi][2]+=p[2];sums[bi][3]++;}
+    for(let c=0;c<k;c++)if(sums[c][3])cents[c]=[sums[c][0]/sums[c][3],sums[c][1]/sums[c][3],sums[c][2]/sums[c][3]];
+  }
   let cols=cents.map(toHex);
-  let dk=pts[0],lt=pts[0],dl=1e9,ll=-1;for(const p of pts){const L=0.299*p[0]+0.587*p[1]+0.114*p[2];if(L<dl){dl=L;dk=p}if(L>ll){ll=L;lt=p}}
+  let dk=pts[0],lt=pts[0],dl=1e9,ll=-1;
+  for(const p of pts){const L=0.299*p[0]+0.587*p[1]+0.114*p[2];if(L<dl){dl=L;dk=p;}if(L>ll){ll=L;lt=p;}}
   cols.push(toHex(dk),toHex(lt));
   const out=[];for(const c of cols){if(!out.some(o=>Math.abs(parseInt(o.slice(1),16)-parseInt(c.slice(1),16))<0x080808))out.push(c);}
   const sorted=out.sort((a,b)=>lum(a)-lum(b));
   return {name:"From your image",bg:mixToward(sorted[sorted.length-1],"#ffffff",0.55),colors:sorted};
 }
-function mixToward(hex,to,t){const A=parseInt(hex.slice(1),16),B=parseInt(to.slice(1),16);const ar=A>>16&255,ag=A>>8&255,ab=A&255,br=B>>16&255,bg=B>>8&255,bb=B&255;return toHex([ar+(br-ar)*t,ag+(bg-ag)*t,ab+(bb-ab)*t]);}
 
 /* ---------- orchestration ---------- */
 const els={style:document.getElementById('style'),palette:document.getElementById('palette'),density:document.getElementById('density'),densityVal:document.getElementById('densityVal'),grain:document.getElementById('grain'),caption:document.getElementById('caption'),swatches:document.getElementById('swatches'),clearImg:document.getElementById('clearImg')};
 els.aspect=document.getElementById('aspect');els.cw=document.getElementById('cw');els.ch=document.getElementById('ch');els.light=document.getElementById('light');
-function rebuildPaletteOptions(select){const opts=[];if(uploadedPalette)opts.push(`<option value="upload">From your image</option>`);if(customPalette)opts.push(`<option value="custom">Custom colors</option>`);opts.push(`<option value="random">Random</option>`);opts.push(...PALETTES.map((p,i)=>`<option value="${i}">${p.name}</option>`));els.palette.innerHTML=opts.join('');if(select)els.palette.value=select;}
+function rebuildPaletteOptions(select){
+  const opts=[];
+  if(customPalette)opts.push('<option value="custom">Custom colors</option>');
+  if(uploadedPalette)opts.push('<option value="upload">From your image</option>');
+  opts.push('<option value="random">Random</option>');
+  opts.push(...PALETTES.map((p,i)=>`<option value="${i}">${p.name}</option>`));
+  els.palette.innerHTML=opts.join('');
+  if(select)els.palette.value=select;
+}
 rebuildPaletteOptions();
-function resolvePalette(){let v=els.palette.value;if(v==='upload'&&uploadedPalette)return uploadedPalette;if(v==='custom'&&customPalette)return customPalette;if(v==='random')return PALETTES[rint(0,PALETTES.length-1)];return PALETTES[+v]||PALETTES[0];}
-function syncCustomPalette(regen){
-  const cols=[...new Set(customColors.map(c=>String(c).toLowerCase()))];
-  customPalette = cols.length>=2 ? {name:'Custom colors',bg:mixToward([...cols].sort((a,b)=>lum(a)-lum(b)).slice(-1)[0],'#ffffff',0.55),colors:cols} : null;
-  let sel=els.palette.value; if(sel==='custom'&&!customPalette)sel='random';
-  rebuildPaletteOptions(sel);
-  if(regen&&els.palette.value==='custom')generate();
+function resolvePalette(){
+  const v=els.palette.value;
+  if(v==='custom'&&customPalette)return customPalette;
+  if(v==='upload'&&uploadedPalette)return uploadedPalette;
+  if(v==='random')return PALETTES[rint(0,PALETTES.length-1)];
+  return PALETTES[+v]||PALETTES[0];
+}
+function syncCustomPalette(live){
+  const cols=[...new Set(customColors)];
+  if(cols.length<2){customPalette=null;return;}
+  const sorted=cols.slice().sort((a,b)=>lum(a)-lum(b));
+  customPalette={name:"Custom colors",bg:sorted[sorted.length-1],colors:cols.slice()};
+  const cur=els.palette.value;
+  rebuildPaletteOptions(cur==='custom'?'custom':cur);
+  if(live&&els.palette.value==='custom')generate();
 }
 function renderCustomSwatches(){
-  const box=document.getElementById('palColors'); box.innerHTML='';
+  const box=document.getElementById('palColors');
+  box.innerHTML='';
   customColors.forEach((c,i)=>{
-    const wrap=document.createElement('div'); wrap.className='swatchbox';
-    const inp=document.createElement('input'); inp.type='color'; inp.value=/^#[0-9a-f]{6}$/i.test(c)?c:'#888888';
-    inp.setAttribute('aria-label','palette color '+(i+1));
+    const wrap=document.createElement('div');wrap.className='swatchbox';
+    const inp=document.createElement('input');inp.type='color';inp.value=c;
     inp.addEventListener('input',()=>{customColors[i]=inp.value;syncCustomPalette(true);});
     wrap.appendChild(inp);
     if(customColors.length>2){const rm=document.createElement('button');rm.type='button';rm.textContent='\u00d7';rm.title='Remove color';rm.addEventListener('click',()=>{customColors.splice(i,1);renderCustomSwatches();syncCustomPalette(true);});wrap.appendChild(rm);}
     box.appendChild(wrap);
   });
-}
-/* ==========================================================
-   STYLE 5 — EMBLEM: a centered geometric mark — solid facet grids, nested
-   bands, line-art silhouettes, and flat-3D solids (DailyMinimal vein)
-   ========================================================== */
-const ISOX=Math.cos(Math.PI/6), ISOY=Math.sin(Math.PI/6);
-function polyPts(cx,cy,sides,rotDeg,R){const pts=[],a0=rotDeg*Math.PI/180;for(let i=0;i<sides;i++){const a=a0+i*2*Math.PI/sides;pts.push([cx+Math.cos(a)*R,cy+Math.sin(a)*R]);}return pts;}
-function scalePoly(pts,cx,cy,f){return pts.map(p=>[cx+(p[0]-cx)*f,cy+(p[1]-cy)*f]);}
-function rotPoly(pts,cx,cy,deg){const a=deg*Math.PI/180,co=Math.cos(a),si=Math.sin(a);return pts.map(p=>{const dx=p[0]-cx,dy=p[1]-cy;return [cx+dx*co-dy*si,cy+dx*si+dy*co];});}
-function ptsAttr(pts){return pts.map(p=>fmt(p[0])+','+fmt(p[1])).join(' ');}
-function iso(x,y,z,cx,cy,u){return [cx+(x-y)*ISOX*u, cy+((x+y)*ISOY-z)*u];}
-function strokePoly(pts,color,sw){SVGEL.push('<polygon points="'+ptsAttr(pts)+'" fill="none" stroke="'+color+'" stroke-width="'+fmt(sw)+'" stroke-linejoin="round"/>');}
-function strokeSeg(a,b,color,sw){SVGEL.push('<line x1="'+fmt(a[0])+'" y1="'+fmt(a[1])+'" x2="'+fmt(b[0])+'" y2="'+fmt(b[1])+'" stroke="'+color+'" stroke-width="'+fmt(sw)+'" stroke-linecap="round"/>');}
-function silhouette(kind,cx,cy,R){
-  if(kind==='triangle')return [polyPts(cx,cy,3,-90,R)];
-  if(kind==='square')return [polyPts(cx,cy,4,45,R)];
-  if(kind==='diamond')return [polyPts(cx,cy,4,0,R)];
-  if(kind==='pentagon')return [polyPts(cx,cy,5,-90,R)];
-  if(kind==='hexagon')return [polyPts(cx,cy,6,chance(0.5)?0:30,R)];
-  if(kind==='octagon')return [polyPts(cx,cy,8,22.5,R)];
-  return [polyPts(cx,cy,4,45,R),polyPts(cx,cy,4,0,R)];      // star = square + diamond
-}
-function isoCube(cx,cy,u){
-  const P=(x,y,z)=>iso(x,y,z,cx,cy,u);
-  const v5=P(-.5,-.5,.5),v6=P(.5,-.5,.5),v7=P(-.5,.5,.5),v8=P(.5,.5,.5),v2=P(.5,-.5,-.5),v3=P(-.5,.5,-.5),v4=P(.5,.5,-.5);
-  return {hex:[v5,v6,v2,v4,v3,v7],center:v8,top:[v5,v6,v8,v7],right:[v6,v2,v4,v8],left:[v7,v8,v4,v3],spokes:[v4,v6,v7]};
-}
-function clipLines(sil,lines,color,sw){
-  const cid='emb'+Math.floor(rnd()*1e6);
-  let clip='<clipPath id="'+cid+'">';for(const pg of sil)clip+='<polygon points="'+ptsAttr(pg)+'"/>';clip+='</clipPath>';
-  SVGEL.push('<defs>'+clip+'</defs>');
-  let g='<g clip-path="url(#'+cid+')" stroke="'+color+'" stroke-width="'+fmt(sw)+'" fill="none" stroke-linecap="square">';
-  for(const L of lines)g+='<line x1="'+fmt(L[0])+'" y1="'+fmt(L[1])+'" x2="'+fmt(L[2])+'" y2="'+fmt(L[3])+'"/>';
-  g+='</g>';SVGEL.push(g);
-}
-function buildLines(mode,cx,cy,R,t){
-  const lines=[],bound=R*1.7,add=(px,py,ang)=>{const dx=Math.cos(ang),dy=Math.sin(ang);lines.push([px-dx*bound,py-dy*bound,px+dx*bound,py+dy*bound]);};
-  if(mode==='grid'){const gN=3+Math.round(t*5),s=2*R/gN,fams=chance(0.6)?[0,90,45,135]:[0,90];for(const deg of fams){const ang=deg*Math.PI/180,nx=Math.cos(ang+Math.PI/2),ny=Math.sin(ang+Math.PI/2);for(let k=-gN;k<=gN;k++){const off=k*s;add(cx+nx*off,cy+ny*off,ang);}}}
-  else{const K=3+Math.round(t*5);for(let i=0;i<K;i++)add(cx+(rnd()-0.5)*R*1.1,cy+(rnd()-0.5)*R*1.1,rnd()*Math.PI);}
-  return lines;
-}
-function drawEmblem(r,density){
-  const V=r.values,n=V.length;
-  let ground=V[n-1],ink=V[0];
-  if(chance(0.4)){ground=V[0];ink=V[n-1];}                  // invert -> light mark on dark field
-  bg(ground);
-  const cx=W/2,cy=H/2,R=Math.min(W,H)*0.32,t=(Math.max(1,Math.min(10,density))-1)/9;
-  const sw=Math.max(2,R*0.022), lw=Math.max(1.5,R*0.014);
-  const inks=V.filter(c=>c!==ground);
-  const shadeTones=()=>{const s=inks.slice().sort((a,b)=>lum(b)-lum(a));return [s[0],s[Math.min(1,s.length-1)],s[s.length-1]];};
-
-  const mode=pick(['subdivide','subdivide','concentric','wire','wire','overlap','cube','cube','octa','tetra','cluster','cluster']);
-
-  if(mode==='concentric'){
-    const sil=silhouette(pick(['triangle','square','diamond','hexagon','octagon','star']),cx,cy,R);
-    const rings=3+Math.round(t*4);
-    for(let i=0;i<rings;i++){const f=1-i/rings;for(const pg of sil)poly(scalePoly(pg,cx,cy,f),(i%2===0)?ink:ground);}
-    return;
-  }
-  if(mode==='wire'){
-    const sil=silhouette(pick(['triangle','square','diamond','pentagon','hexagon','octagon','star']),cx,cy,R);
-    for(const pg of sil)strokePoly(pg,ink,lw);
-    clipLines(sil,buildLines(chance(0.5)?'grid':'facets',cx,cy,R,t),ink,lw);
-    return;
-  }
-  if(mode==='overlap'){
-    const base=silhouette(pick(['triangle','square','pentagon','hexagon']),cx,cy,R)[0];
-    const copies=3+Math.round(t*4), step=pick([10,15,22,30]);
-    for(let i=0;i<copies;i++){const f=1-i*(0.5/copies);strokePoly(rotPoly(scalePoly(base,cx,cy,f),cx,cy,i*step),ink,lw);}
-    return;
-  }
-  if(mode==='cube'){
-    const C=isoCube(cx,cy,R*0.9), style=pick(['wire','shaded','line']);
-    if(style==='shaded'&&inks.length>=2){const[tp,md,dk]=shadeTones();poly(C.top,tp);poly(C.right,dk);poly(C.left,md);strokeSeg(C.center,C.spokes[0],ground,lw*0.8);strokeSeg(C.center,C.spokes[1],ground,lw*0.8);strokeSeg(C.center,C.spokes[2],ground,lw*0.8);}
-    else if(style==='line'){poly(C.hex,ink);strokeSeg(C.center,C.spokes[0],ground,sw);strokeSeg(C.center,C.spokes[1],ground,sw);strokeSeg(C.center,C.spokes[2],ground,sw);}
-    else{strokePoly(C.hex,ink,lw);strokeSeg(C.center,C.spokes[0],ink,lw);strokeSeg(C.center,C.spokes[1],ink,lw);strokeSeg(C.center,C.spokes[2],ink,lw);}
-    return;
-  }
-  if(mode==='octa'){
-    const a=R*0.95,P=(x,y,z)=>iso(x,y,z,cx,cy,a);
-    const T=P(0,0,.6),B=P(0,0,-.6),Xp=P(.6,0,0),Xm=P(-.6,0,0),Yp=P(0,.6,0),Ym=P(0,-.6,0);
-    strokePoly([T,Ym,Xp,B,Yp,Xm],ink,lw);
-    strokePoly([Xp,Yp,Xm,Ym],ink,lw);
-    for(const e of [Xp,Xm,Yp,Ym]){strokeSeg(T,e,ink,lw);strokeSeg(B,e,ink,lw);}
-    return;
-  }
-  if(mode==='tetra'){
-    const Tp=polyPts(cx,cy,3,-90,R);
-    strokePoly(Tp,ink,lw);
-    const cen=[cx,cy+R*0.18];
-    for(const v of Tp)strokeSeg(cen,v,ink,lw);
-    return;
-  }
-  if(mode==='cluster'){
-    const K=3+Math.round(t*3);
-    for(let i=0;i<K;i++){
-      const C=isoCube(cx+(rnd()-0.5)*R*0.8, cy+(rnd()-0.5)*R*0.8, R*(0.5+rnd()*0.5));
-      strokePoly(C.hex,ink,lw);
-      if(chance(0.7)){strokeSeg(C.center,C.spokes[0],ink,lw);strokeSeg(C.center,C.spokes[1],ink,lw);strokeSeg(C.center,C.spokes[2],ink,lw);}
-    }
-    return;
-  }
-  // subdivide (solid facet grid / shards)
-  const sil=silhouette(pick(['triangle','square','diamond','pentagon','hexagon','octagon','star']),cx,cy,R);
-  for(const pg of sil)poly(pg,ink);
-  clipLines(sil,buildLines(chance(0.5)?'grid':'facets',cx,cy,R,t),ground,sw);
-  if(chance(0.3)){const hs=R*(0.14+rnd()*0.12);poly(polyPts(cx,cy,4,chance(0.5)?45:0,hs),ground);}
 }
 
 function generate(){
@@ -775,8 +849,7 @@ function generate(){
   if(st==='fields')drawFields(r,density);
   else if(st==='planes')drawPlanes(r,density);
   else if(st==='iso')drawIso(r,density);
-  else if(st==='emblem')drawEmblem(r,density);
-  else drawKremer(r,density);
+  else drawEmblem(r,density);
   const useGrain=els.grain.checked;
   currentSVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid meet">'
     +(useGrain?'<defs>'+GRAIN_DEFS+'</defs>':'')
@@ -784,7 +857,7 @@ function generate(){
     +(useGrain?grainOverlay():'')
     +'</svg>';
   stage.innerHTML=currentSVG;
-  const styleName=st==='fields'?'Rectilinear fields':st==='planes'?'Flat planes':st==='iso'?'Isometric':st==='emblem'?'Emblem':'Kremer';
+  const styleName=st==='fields'?'Rectilinear fields':st==='planes'?'Flat planes':st==='iso'?'Isometric':'Emblem';
   currentMeta={style:styleName, styleKey:st, palette:palette.name, w:W, h:H};
   els.caption.innerHTML=`<b>${styleName}</b><span class="dot"></span>${palette.name}<span class="dot"></span>${W}×${H}`;
 }
