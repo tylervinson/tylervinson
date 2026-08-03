@@ -206,13 +206,24 @@
   .pbi-dl-links { display: flex; flex-wrap: wrap; gap: .5rem; }
   .pbi-dl-links button { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-size: .8rem; padding: .4rem .7rem; cursor: pointer; transition: border-color .2s, color .2s; }
   .pbi-dl-links button:hover { border-color: var(--accent); color: var(--accent); }
-  /* transient success state — visual only, never disables the button */
+  /* transient success flash — visual only, never disables the button */
   button.btn-flash-ok, .pbi-dl-links button.btn-flash-ok {
     border-color: var(--ok) !important;
     color: var(--ok) !important;
     background: rgba(125,191,130,.10) !important;
   }
   button.btn-flash-ok .fchk { font-weight: 600; margin-right: .3rem; }
+  /* persistent "already done this session" indicator — outlives the flash and
+     survives hover, so the button keeps signalling completion afterward */
+  button.btn-done, .pbi-dl-links button.btn-done {
+    border-color: var(--ok) !important;
+    color: var(--ok) !important;
+  }
+  button.btn-done:hover, .pbi-dl-links button.btn-done:hover {
+    border-color: var(--ok) !important;
+    color: var(--ok) !important;
+    background: rgba(125,191,130,.12) !important;
+  }
   .pbi-dl-links button svg { flex: 0 0 auto; }
   .pbi-issues { width: 100%; border-collapse: collapse; margin: .6rem 0; font-size: .84rem; }
   .pbi-issues th, .pbi-issues td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -1891,8 +1902,9 @@ function openSettingsModal(){
 }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
 function openPowerBIModal(){ showPage('pbi'); }
-/* Transient green check on a button. Purely visual — the button stays enabled and
-   clickable throughout, and repeated clicks just restart the timer. */
+/* Transient green check on a button, followed by a persistent green "done"
+   indicator for the rest of the session. Purely visual — the button stays
+   enabled and clickable throughout, and clicking again just re-flashes it. */
 function flashBtnOk(btn, msg){
   if(!btn) return;
   if(btn._flashT) clearTimeout(btn._flashT);
@@ -1901,12 +1913,14 @@ function flashBtnOk(btn, msg){
   }
   btn.innerHTML = '<span class="fchk" aria-hidden="true">\u2713</span>' + escapeHtml(msg || 'Done');
   btn.classList.add('btn-flash-ok');
+  btn.classList.add('btn-done'); // persists for the rest of the session
   btn._flashT = setTimeout(function(){
     var prev = btn.getAttribute('data-flash-label');
     if(prev !== null) btn.innerHTML = prev;
-    btn.classList.remove('btn-flash-ok');
+    btn.classList.remove('btn-flash-ok'); // checkmark/text-swap ends
     btn.removeAttribute('data-flash-label');
     btn._flashT = null;
+    // .btn-done is intentionally left on — that's the persistent indicator
   }, 1800);
 }
 function copyPBIUrl(table, btn){
