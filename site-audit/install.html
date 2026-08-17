@@ -186,20 +186,6 @@ footer a:hover { color: #888; }
             </div>
             <div class="step">
                 <div class="step-num">4</div>
-                <div class="step-body"><h3>Set the access key</h3><p>Open <code>config.js</code> in the extracted folder and set <code>ACCESS_KEY</code> to the value of the Worker's <code>AUDIT_KEY</code> secret. Save, then hit the reload icon on the extension card in <code>chrome://extensions</code>.</p><p>Without this the extension loads but can't reach shared state &mdash; the panel will say it isn't configured.</p></div>
-                <div class="ui-mock">
-<div style="padding:14px">
-    <div style="font-size:10px;color:#555;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">config.js</div>
-    <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:1.9;color:#666">
-        <div>window.AUDIT_CONFIG = {</div>
-        <div style="padding-left:14px">ACCESS_KEY: <span style="color:#98c379">'&hellip;your key&hellip;'</span>,</div>
-        <div style="padding-left:14px;color:#4a5a4a">STATE_URL: &hellip;</div>
-        <div>};</div>
-    </div>
-</div></div>
-            </div>
-            <div class="step">
-                <div class="step-num">5</div>
                 <div class="step-body"><h3>Pin it and pick a role</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon and choose <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong> &mdash; no passphrase. See <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px;text-align:center">
@@ -211,10 +197,10 @@ footer a:hover { color: #888; }
 </div></div>
             </div>
     </div>
-
+<!--<p><br></p>
     <div class="callout warn">&#9888; Don’t move the folder after loading it. Chrome stores the path and will disable the extension if the folder is relocated or deleted &mdash; re-load it from the new path if you ever move it.</div>
     <div class="callout tip">Developer mode must stay enabled for the extension to keep working. Chrome will occasionally show a banner about developer extensions being active &mdash; that’s expected for load-unpacked installs.</div>
-</div>
+--></div>
 
     <footer>
         <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
