@@ -161,6 +161,33 @@
     .pbi-flow-left { gap: 1rem; margin-bottom: 1rem; }
     .pbi-connectors { display: none; }
   }
+  /* AEP two-track workflow */
+  .aep-tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.25rem; }
+  .aep-track-btn { display: flex; flex-direction: column; gap: .35rem; text-align: left; padding: 1.1rem 1.2rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card-alt); cursor: pointer; font-family: inherit; transition: border-color .2s, background .2s; }
+  .aep-track-btn:hover { border-color: var(--muted-2); color: var(--text); }
+  .aep-track-btn .tt { font-size: 1.02rem; font-weight: 500; color: var(--text); }
+  .aep-track-btn .td { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+  .aep-track-btn .td em { color: var(--muted); font-style: italic; }
+  .aep-track-btn.active { border-color: var(--accent); background: rgba(255,190,95,.06); }
+  .aep-track-btn.active .tt { color: var(--accent); }
+  @media (max-width: 760px){ .aep-tracks { grid-template-columns: 1fr; } }
+
+  .aep-flow { position: relative; display: grid; gap: 2.6rem; margin-bottom: 1.5rem; align-items: stretch; }
+  .aep-flow.steps-3 { grid-template-columns: repeat(3, 1fr); }
+  .aep-flow.steps-4 { grid-template-columns: repeat(4, 1fr); }
+  .aep-step { position: relative; z-index: 2; margin: 0; padding: 1.3rem 1.3rem 1.4rem; display: flex; flex-direction: column; }
+  .aep-step .n { position: absolute; top: -11px; left: 1.2rem; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #1a1a1a; font-size: .78rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .aep-step h3 { font-weight: 500; font-size: 1rem; margin: .4rem 0 .45rem; color: var(--text); }
+  .aep-step p { font-size: .84rem; color: var(--muted); line-height: 1.6; margin: 0 0 1.1rem; flex: 1; }
+  .aep-step .btn-secondary { padding: .6rem 1rem; font-size: .86rem; }
+  .aep-step.passive { border-style: dashed; background: transparent; }
+  .aep-step.passive .n { background: var(--border); color: var(--muted); }
+  .aep-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 1; }
+  @media (max-width: 1000px){
+    .aep-flow.steps-3, .aep-flow.steps-4 { grid-template-columns: 1fr; gap: 1rem; }
+    .aep-connectors { display: none; }
+  }
+
   .pbi-body h3 { font-weight: 500; font-size: 1rem; margin: 1.6rem 0 .3rem; color: var(--text); }
   .pbi-body h3:first-child { margin-top: 0; }
   .pbi-sub { color: var(--muted); font-size: .84rem; margin: 0 0 .8rem; }
@@ -179,7 +206,24 @@
   .pbi-dl-links { display: flex; flex-wrap: wrap; gap: .5rem; }
   .pbi-dl-links button { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-family: inherit; font-size: .8rem; padding: .4rem .7rem; cursor: pointer; transition: border-color .2s, color .2s; }
   .pbi-dl-links button:hover { border-color: var(--accent); color: var(--accent); }
-  .pbi-dl-links button.copied { border-color: var(--ok); color: var(--ok); }
+  /* transient success flash — visual only, never disables the button */
+  button.btn-flash-ok, .pbi-dl-links button.btn-flash-ok {
+    border-color: var(--ok) !important;
+    color: var(--ok) !important;
+    background: rgba(125,191,130,.10) !important;
+  }
+  button.btn-flash-ok .fchk { font-weight: 600; margin-right: .3rem; }
+  /* persistent "already done this session" indicator — outlives the flash and
+     survives hover, so the button keeps signalling completion afterward */
+  button.btn-done, .pbi-dl-links button.btn-done {
+    border-color: var(--ok) !important;
+    color: var(--ok) !important;
+  }
+  button.btn-done:hover, .pbi-dl-links button.btn-done:hover {
+    border-color: var(--ok) !important;
+    color: var(--ok) !important;
+    background: rgba(125,191,130,.12) !important;
+  }
   .pbi-dl-links button svg { flex: 0 0 auto; }
   .pbi-issues { width: 100%; border-collapse: collapse; margin: .6rem 0; font-size: .84rem; }
   .pbi-issues th, .pbi-issues td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -538,10 +582,10 @@
           <div class="pbi-dl">
             <div class="pbi-dl-label">Download the four files</div>
             <div class="pbi-dl-links">
-              <button onclick="downloadPBITable('findings')">findings.csv</button>
-              <button onclick="downloadPBITable('sitemap_404')">sitemap_404.csv</button>
-              <button onclick="downloadPBITable('coverage')">coverage.csv</button>
-              <button onclick="downloadPBITable('stale')">stale.csv</button>
+              <button onclick="downloadPBITable('findings', this)">findings.csv</button>
+              <button onclick="downloadPBITable('sitemap_404', this)">sitemap_404.csv</button>
+              <button onclick="downloadPBITable('coverage', this)">coverage.csv</button>
+              <button onclick="downloadPBITable('stale', this)">stale.csv</button>
             </div>
           </div>
         </div>
@@ -582,6 +626,156 @@
   </section>
   </div>
 
+  <div id="page-aep" class="page" style="display:none;">
+
+    <section class="card">
+      <h2>AEP launch</h2>
+      <p class="hint">Two separate workflows. Pick the one that matches where you are in the release.</p>
+      <div class="aep-tracks">
+        <button type="button" class="aep-track-btn active" data-track="pre" onclick="aepPickTrack('pre')">
+          <span class="tt">Pre-launch validation</span>
+          <span class="td">Check staging before you deploy. Answers: <em>is the new content correct and complete?</em></span>
+        </button>
+        <button type="button" class="aep-track-btn" data-track="post" onclick="aepPickTrack('post')">
+          <span class="tt">Post-launch verification</span>
+          <span class="td">Compare production before and after. Answers: <em>did every update actually land?</em></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section scope</h2>
+      <p class="hint">Applies to both workflows. Enter the prefix <strong>without</strong> a language code — <code>medicare</code> already covers <code>/medicare</code>, <code>/es/medicare</code> and <code>/zh/medicare</code>, since each page is audited once across all three languages.</p>
+      <div class="row" style="margin-top:1.25rem;">
+        <div>
+          <label class="field-label" for="aepScope">Path prefix (one per line)</label>
+          <textarea id="aepScope" rows="2" placeholder="medicare" oninput="aepScopeChanged()"></textarea>
+        </div>
+        <div style="flex:0 0 260px;">
+          <label class="field-label">Currently matching</label>
+          <div class="score" id="aepScopeCount" style="padding-top:.55rem;">&mdash;</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRE-LAUNCH TRACK ============ -->
+    <div id="aepTrackPre">
+      <div class="aep-flow steps-3" id="aepFlowPre">
+        <section class="card aep-step" id="aepPreStep1">
+          <span class="n">1</span>
+          <h3>Baseline production</h3>
+          <p>Capture what is live right now, so the release diff has something to compare against.</p>
+          <button class="btn-secondary" onclick="aepRunAndCapture('production','Production baseline', this)">Run &amp; capture production</button>
+        </section>
+        <section class="card aep-step" id="aepPreStep2">
+          <span class="n">2</span>
+          <h3>Audit staging</h3>
+          <p>Same checks against <strong id="aepStgHost">staging</strong>. Indexing, canonical and hreflang are skipped &mdash; they legitimately differ off production.</p>
+          <button class="btn-secondary" onclick="aepRunAndCapture('staging','Staging candidate', this)">Run &amp; capture staging</button>
+        </section>
+        <section class="card aep-step" id="aepPreStep3">
+          <span class="n">3</span>
+          <h3>Review the release</h3>
+          <p>See everything that will change when you deploy, and anything incomplete on staging that would launch broken.</p>
+          <button class="btn-secondary" onclick="aepScrollTo('aepPreCompare')">Go to review</button>
+        </section>
+        <svg class="aep-connectors" id="aepConnPre" aria-hidden="true"></svg>
+      </div>
+
+      <section class="card" id="aepPreRun">
+        <div class="score" id="aepPreProgress" style="min-height:1.2em;">No scoped audit run yet in this session.</div>
+        <div class="bar" id="aepPreBarWrap" style="display:none; margin-top:.6rem;"><span id="aepPreBar"></span></div>
+        <div id="aepPreSummary" style="margin-top:1rem;"></div>
+      </section>
+
+      <section class="card" id="aepPreCompare">
+        <h2>What will change on deploy</h2>
+        <p class="hint">Compares a production snapshot against a staging snapshot. Only production snapshots appear on the left; only staging snapshots on the right.</p>
+        <div class="row" style="margin-top:1.25rem;">
+          <div>
+            <label class="field-label" for="aepPreA">Production (live today)</label>
+            <select id="aepPreA"></select>
+          </div>
+          <div>
+            <label class="field-label" for="aepPreB">Staging (candidate)</label>
+            <select id="aepPreB"></select>
+          </div>
+          <div style="flex:0 0 160px; display:flex; align-items:flex-end;">
+            <button class="primary" style="width:100%;" onclick="aepCompare('pre')">Compare</button>
+          </div>
+        </div>
+        <div id="aepPreOut" style="margin-top:1.5rem;"></div>
+      </section>
+    </div>
+
+    <!-- ============ POST-LAUNCH TRACK ============ -->
+    <div id="aepTrackPost" style="display:none;">
+      <div class="aep-flow steps-4" id="aepFlowPost">
+        <section class="card aep-step" id="aepPostStep1">
+          <span class="n">1</span>
+          <h3>Before deploy</h3>
+          <p>Capture production immediately before the release goes out. This is your reference point.</p>
+          <button class="btn-secondary" onclick="aepRunAndCapture('production','Production before', this)">Run &amp; capture</button>
+        </section>
+        <section class="card aep-step passive" id="aepPostStep2">
+          <span class="n">2</span>
+          <h3>Deploy</h3>
+          <p>Push the release live. Nothing to do in this tool &mdash; come back when it is out.</p>
+        </section>
+        <section class="card aep-step" id="aepPostStep3">
+          <span class="n">3</span>
+          <h3>After deploy</h3>
+          <p>Capture production again once the release is live and caches have cleared.</p>
+          <button class="btn-secondary" onclick="aepRunAndCapture('production','Production after', this)">Run &amp; capture</button>
+        </section>
+        <section class="card aep-step" id="aepPostStep4">
+          <span class="n">4</span>
+          <h3>Verify</h3>
+          <p>Compare the two. The <strong>Unchanged</strong> list is your miss list &mdash; pages that should have been updated but were not.</p>
+          <button class="btn-secondary" onclick="aepScrollTo('aepPostCompare')">Go to verify</button>
+        </section>
+        <svg class="aep-connectors" id="aepConnPost" aria-hidden="true"></svg>
+      </div>
+
+      <section class="card" id="aepPostRun">
+        <div class="score" id="aepPostProgress" style="min-height:1.2em;">No scoped audit run yet in this session.</div>
+        <div class="bar" id="aepPostBarWrap" style="display:none; margin-top:.6rem;"><span id="aepPostBar"></span></div>
+        <div id="aepPostSummary" style="margin-top:1rem;"></div>
+      </section>
+
+      <section class="card" id="aepPostCompare">
+        <h2>Did the release land</h2>
+        <p class="hint">Compares two production snapshots. Staging snapshots are deliberately excluded &mdash; they are not relevant to verifying a live release.</p>
+        <div class="row" style="margin-top:1.25rem;">
+          <div>
+            <label class="field-label" for="aepPostA">Before deploy</label>
+            <select id="aepPostA"></select>
+          </div>
+          <div>
+            <label class="field-label" for="aepPostB">After deploy</label>
+            <select id="aepPostB"></select>
+          </div>
+          <div style="flex:0 0 160px; display:flex; align-items:flex-end;">
+            <button class="primary" style="width:100%;" onclick="aepCompare('post')">Compare</button>
+          </div>
+        </div>
+        <div id="aepPostOut" style="margin-top:1.5rem;"></div>
+      </section>
+    </div>
+
+    <!-- ============ SHARED SNAPSHOT LIBRARY ============ -->
+    <section class="card">
+      <details class="accordion" open style="margin-top:0;">
+        <summary><span class="chev">&#9654;</span> Snapshot library</summary>
+        <div class="accordion-body">
+          <p class="hint" style="margin-top:0;">Every snapshot, both environments. Rename by editing the label. Stored in the shared store, so the whole team sees the same list.</p>
+          <div class="score" id="aepSaveStatus" style="margin:.6rem 0;"></div>
+          <div id="aepSnapList"></div>
+        </div>
+      </details>
+    </section>
+
+  </div>
   </div><!-- /appShell -->
 </div>
 
@@ -684,6 +878,9 @@
    Languages are the `langs` list below. */
 const WORKER_URL = 'https://schema-cors-proxy.bcbs-of-az.workers.dev/';
 const SITE_URL   = 'https://www.azblue.com';
+// Staging origin for the AEP tab's pre-launch audits. Must also be added to
+// ALLOWED_HOSTS in the CORS proxy worker, or every request returns 403.
+const STAGING_URL = 'https://staging.azblue.com';
 const WORKER_KEY = ''; // optional fallback; prefer typing the passphrase in the UI
 const AI_MODEL   = 'claude-sonnet-4-6'; // model used for translation analysis (via your worker)
 // Sitecore content root for the "Items last updated" export — used to turn item
@@ -1181,11 +1378,12 @@ function pbiSpecs(){
     ], rows:t.stale }
   ];
 }
-function downloadPBITable(name){
+function downloadPBITable(name, btn){
   var sp = pbiSpecs().filter(function(s){ return s.name === name; })[0];
   if(!sp) return;
   var stamp = new Date().toISOString().slice(0,10);
   downloadBlob(toCSV(sp.cols, sp.rows), 'text/csv;charset=utf-8', 'audit-' + sp.name + '-' + reportHost() + '-' + stamp + '.csv');
+  flashBtnOk(btn, 'Downloaded');
 }
 function exportPowerBICsv(){
   var specs = pbiSpecs();
@@ -1678,6 +1876,7 @@ function buildTabsForRole(role){
     nav.innerHTML =
         '<button class="ptab" data-page="leaders" onclick="showPage(\'leaders\')">Admin</button>'
       + '<button class="ptab" data-page="authors" onclick="showPage(\'authors\')">Authors</button>'
+      + '<button class="ptab" data-page="aep" onclick="showPage(\'aep\')">AEP Launch</button>'
       + '<button class="ptab" data-page="generate" onclick="showPage(\'generate\')">Audit Settings</button>'
       + '<button class="pbi-btn" onclick="showPage(\'pbi\')" title="Power BI import instructions" aria-label="Power BI import instructions">'
       +   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path><path d="M14 4v6h6"></path><path d="M8 13h8M8 17h5"></path></svg>'
@@ -1703,14 +1902,30 @@ function openSettingsModal(){
 }
 function closeSettingsModal(){ var m=document.getElementById('settingsModal'); if(m) m.style.display='none'; }
 function openPowerBIModal(){ showPage('pbi'); }
+/* Transient green check on a button, followed by a persistent green "done"
+   indicator for the rest of the session. Purely visual — the button stays
+   enabled and clickable throughout, and clicking again just re-flashes it. */
+function flashBtnOk(btn, msg){
+  if(!btn) return;
+  if(btn._flashT) clearTimeout(btn._flashT);
+  if(btn.getAttribute('data-flash-label') === null){
+    btn.setAttribute('data-flash-label', btn.innerHTML);
+  }
+  btn.innerHTML = '<span class="fchk" aria-hidden="true">\u2713</span>' + escapeHtml(msg || 'Done');
+  btn.classList.add('btn-flash-ok');
+  btn.classList.add('btn-done'); // persists for the rest of the session
+  btn._flashT = setTimeout(function(){
+    var prev = btn.getAttribute('data-flash-label');
+    if(prev !== null) btn.innerHTML = prev;
+    btn.classList.remove('btn-flash-ok'); // checkmark/text-swap ends
+    btn.removeAttribute('data-flash-label');
+    btn._flashT = null;
+    // .btn-done is intentionally left on — that's the persistent indicator
+  }, 1800);
+}
 function copyPBIUrl(table, btn){
   var url = 'https://audit-state.bcbs-of-az.workers.dev/?export=' + table + '&format=csv&token=powerbitoken';
-  function flash(){
-    var prev = btn.getAttribute('data-label') || btn.textContent;
-    btn.setAttribute('data-label', prev);
-    btn.textContent = 'Copied \u2713'; btn.classList.add('copied');
-    setTimeout(function(){ btn.textContent = prev; btn.classList.remove('copied'); }, 1200);
-  }
+  function flash(){ flashBtnOk(btn, 'Copied'); }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).then(flash, function(){ pbiFallbackCopy(url); flash(); });
   } else { pbiFallbackCopy(url); flash(); }
@@ -1839,11 +2054,14 @@ function showPage(p){
   document.querySelectorAll('#pageTabs .ptab').forEach(function(b){ b.classList.toggle('active', b.dataset.page === p); });
   var gen = (p === 'generate');
   var pbi = (p === 'pbi');
+  var aep = (p === 'aep');
   document.getElementById('page-generate').style.display = gen ? 'block' : 'none';
   var pbiEl = document.getElementById('page-pbi'); if(pbiEl) pbiEl.style.display = pbi ? 'block' : 'none';
-  document.getElementById('page-dash').style.display = (gen || pbi) ? 'none' : 'block';
+  var aepEl = document.getElementById('page-aep'); if(aepEl) aepEl.style.display = aep ? 'block' : 'none';
+  document.getElementById('page-dash').style.display = (gen || pbi || aep) ? 'none' : 'block';
   if(pbi){ requestAnimationFrame(drawPbiConnectors); setTimeout(drawPbiConnectors, 130); }
-  if(!gen && !pbi){
+  if(aep){ aepRenderAll(); }
+  if(!gen && !pbi && !aep){
     currentDashTab = (p === 'leaders') ? 'leaders' : 'authors';
     var has = dashHasData();
     document.getElementById('dashEmpty').style.display = has ? 'none' : 'block';
@@ -3146,7 +3364,10 @@ function isLikelyEnglish(text){
   let hits = 0; words.forEach(w => { if(stop.has(w.replace(/[^a-z]/g,''))) hits++; });
   return hits / words.length > 0.2;
 }
-function contentChecks(refData, tData, lang, pg){
+function contentChecks(refData, tData, lang, pg, opts){
+  // opts.staging suppresses checks that are meaningless outside production —
+  // staging is intentionally noindex, and its canonical/hreflang point elsewhere.
+  const stagingMode = !!(opts && opts.staging);
   const issues = [];
   const add = (severity, category, explanation, suggestion, snippet, items, evidenceLabel) =>
     issues.push({ severity, category, explanation, suggestion: suggestion||'', snippet: snippet||'', items: items||null, evidenceLabel: evidenceLabel||'' });
@@ -3157,7 +3378,9 @@ function contentChecks(refData, tData, lang, pg){
   if(!tData.htmlLang) add('warning','lang attribute',`<html> has no lang attribute. It should declare ${lang.label} (e.g. lang="${lang.gcode||lang.dir}").`,'Set the lang attribute so browsers and search engines know the page language.');
   else if(want && got && got !== want) add('warning','lang attribute',`<html lang="${tData.htmlLang}"> doesn't match the expected ${lang.label} ("${lang.gcode||lang.dir}").`,'Correct the lang attribute to the page\'s actual language.', '', ['Found: lang="'+tData.htmlLang+'"', 'Expected: lang="'+(lang.gcode||lang.dir)+'"'], 'Language attribute');
 
-  // hreflang presence + self reference
+  // hreflang presence + self reference — skipped on staging, where alternates
+  // legitimately point at production or are absent entirely
+  if(!stagingMode){
   if(!tData.hreflang.length) add('warning','hreflang',`No hreflang alternate tags. Search engines won't know this is the ${lang.label} version of an English page.`,'Add reciprocal hreflang link tags across all language versions.');
   else {
     const codes = tData.hreflang.map(h=>h.lang);
@@ -3165,17 +3388,20 @@ function contentChecks(refData, tData, lang, pg){
     const hasSelf = codes.some(c => c === wantCode || c.split('-')[0] === want);
     if(!hasSelf) add('info','hreflang',`hreflang tags are present but none point to this page's own language (${lang.gcode||lang.dir}).`,'Include a self-referential hreflang entry.', '', codes.map(c=>c||'(empty)'), 'hreflang codes present');
   }
+  }
 
   // noindex — Chinese pages are intentionally noindex, so don't flag them
   var _lc = (lang.gcode || lang.dir || '').toLowerCase();
   var _isChinese = _lc.indexOf('zh') === 0 || /chinese/i.test(lang.label || '');
-  if(tData.noindex && !_isChinese) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
+  if(!stagingMode && tData.noindex && !_isChinese) add('critical','indexing','This page is set to noindex — it will be excluded from search results.','Remove the noindex directive unless this exclusion is intentional.');
 
-  // canonical
+  // canonical — on staging these usually point at the production URL by design
+  if(!stagingMode){
   if(tData.canonical && refData && refData.canonical && tData.canonical === refData.canonical && lang.dir){
     add('critical','canonical',`Canonical URL points to the English page. This tells search engines to ignore the ${lang.label} version.`,'Set the canonical to this page\'s own URL.', '', [tData.canonical], 'Canonical URL');
   } else if(tData.canonical && lang.dir && !tData.canonical.includes('/'+lang.dir)){
     add('warning','canonical',`Canonical URL doesn't include the ${lang.dir} path — verify it points to this translation, not English.`,'Point the canonical at the translated URL.', '', [tData.canonical], 'Canonical URL');
+  }
   }
 
   // untranslated metadata
@@ -3793,6 +4019,594 @@ function renderSummary(){
       + '<a onclick="showPage(\'authors\')">Authors dashboard</a>.';
   }
   showPage('leaders');
+}
+
+/* ===================== AEP LAUNCH =====================
+   Two independent workflows over one shared engine:
+     pre  — production vs staging: what will change when we deploy?
+     post — production vs production: did the deploy actually land?
+   The diff buckets mean opposite things in each, so each track renders them
+   with its own labels, ordering and emphasis.
+   NOTE: worker keys must match /^mlaudit:<host>:[\w.\-]+$/ — no colons. */
+let aepTrack = 'pre';
+let aepAuditState = null;
+let aepRunning = false, aepCancel = false;
+let aepEnv = 'production';
+let aepSnapIndex = [];
+
+function aepKeyIndex(){ return 'aep-index'; }
+function aepKeySnap(id){ return 'aep-snap-' + id; }
+function aepBaseUrl(){ return aepEnv === 'staging' ? STAGING_URL : SITE_URL; }
+function aepHostOf(u){ try { return new URL(u).hostname; } catch(e){ return u; } }
+function aepUi(name){ return document.getElementById('aep' + (aepTrack === 'pre' ? 'Pre' : 'Post') + name); }
+function aepStatus(msg, err){
+  const el = document.getElementById('aepSaveStatus'); if(!el) return;
+  el.textContent = msg; el.style.color = err ? 'var(--critical)' : 'var(--muted)';
+}
+function aepScrollTo(id){
+  const el = document.getElementById(id); if(!el) return;
+  try { el.scrollIntoView({ behavior:'smooth', block:'start' }); } catch(e){ el.scrollIntoView(); }
+}
+function aepPickTrack(t){
+  if(aepRunning) return;
+  aepTrack = t;
+  document.querySelectorAll('.aep-track-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.track === t); });
+  const pre = document.getElementById('aepTrackPre'), post = document.getElementById('aepTrackPost');
+  if(pre) pre.style.display = (t === 'pre') ? 'block' : 'none';
+  if(post) post.style.display = (t === 'post') ? 'block' : 'none';
+  aepRenderRunSummary();
+  aepRenderPickers();
+  requestAnimationFrame(drawAepConnectors);
+  setTimeout(drawAepConnectors, 140);
+}
+
+/* ---- flow connectors, same technique as the Power BI page ---- */
+function drawAepConnectors(){
+  const id = (aepTrack === 'pre') ? 'Pre' : 'Post';
+  const flow = document.getElementById('aepFlow' + id), svg = document.getElementById('aepConn' + id);
+  if(!flow || !svg) return;
+  if(window.innerWidth <= 1000){ svg.innerHTML = ''; return; }
+  const fr = flow.getBoundingClientRect();
+  if(!fr.width) return;
+  const steps = Array.prototype.slice.call(flow.querySelectorAll('.aep-step'));
+  if(steps.length < 2){ svg.innerHTML = ''; return; }
+  svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
+  svg.setAttribute('viewBox', '0 0 ' + fr.width + ' ' + fr.height);
+  const S = '#8a8a8a';
+  let paths = '';
+  for(let i = 0; i < steps.length - 1; i++){
+    const a = steps[i].getBoundingClientRect(), b = steps[i+1].getBoundingClientRect();
+    const sx = a.right - fr.left, ex = b.left - fr.left;
+    const y = a.top + a.height/2 - fr.top;
+    paths += '<path d="M ' + (sx + 6) + ' ' + y + ' L ' + (ex - 10) + ' ' + y
+      + '" fill="none" stroke="' + S + '" stroke-width="1.6" marker-end="url(#aepArrow)"/>';
+  }
+  svg.innerHTML =
+    '<defs><marker id="aepArrow" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse">'
+    + '<path d="M1,1 L6.5,4 L1,7" fill="none" stroke="' + S + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>'
+    + paths;
+}
+var _aepResizeT;
+window.addEventListener('resize', function(){
+  clearTimeout(_aepResizeT);
+  _aepResizeT = setTimeout(function(){
+    var el = document.getElementById('page-aep');
+    if(el && el.style.display !== 'none') drawAepConnectors();
+  }, 120);
+});
+
+/* ---- scope ---- */
+function aepGetScope(){
+  const raw = (document.getElementById('aepScope') && document.getElementById('aepScope').value) || '';
+  return raw.split(/[\n,]+/).map(s => s.trim().replace(/^\/+|\/+$/g,'').toLowerCase()).filter(Boolean);
+}
+function aepInScope(path, dirs){
+  if(!dirs || !dirs.length) return true;
+  const pth = normPath(path).toLowerCase();
+  return dirs.some(d => pth === d || pth.indexOf(d + '/') === 0);
+}
+let _aepScopeTimer = null;
+function aepScopeChanged(){
+  aepUpdateScopeCount();
+  clearTimeout(_aepScopeTimer);
+  _aepScopeTimer = setTimeout(function(){ statePut('aep-scope', { dirs: aepGetScope() }).catch(function(){}); }, 600);
+}
+async function aepLoadScope(){
+  const el = document.getElementById('aepScope');
+  if(!el) return;
+  try {
+    const s = await stateGet('aep-scope');
+    if(s && Array.isArray(s.dirs)){ el.value = s.dirs.join('\n'); return; }
+  } catch(e){}
+  if(!el.value) el.value = 'medicare';
+}
+function aepPageList(){
+  const dirs = aepGetScope();
+  return getAuditPages().filter(pg => aepInScope(pg.path, dirs));
+}
+function aepSource(){
+  if(aepAuditState && aepAuditState.results && aepAuditState.results.length) return { st: aepAuditState, kind:'scoped' };
+  if(auditState && auditState.results && auditState.results.length) return { st: auditState, kind:'site' };
+  return null;
+}
+function aepUpdateScopeCount(){
+  const el = document.getElementById('aepScopeCount'); if(!el) return;
+  const queued = aepPageList().length;
+  el.textContent = queued ? (queued + ' page(s) \u00D7 ' + langs.length + ' language(s)') : 'No pages in scope';
+  const sh = document.getElementById('aepStgHost');
+  if(sh) sh.textContent = aepHostOf(STAGING_URL);
+}
+
+/* ---- run + capture (one guided step) ---- */
+function aepSetRunProgress(msg, err){
+  const el = aepUi('Progress');
+  if(el){ el.textContent = msg || ''; el.style.color = err ? 'var(--critical)' : 'var(--muted)'; }
+}
+function aepSetBar(pct){ const el = aepUi('Bar'); if(el) el.style.width = pct + '%'; }
+function aepCancelRun(){ if(aepRunning){ aepCancel = true; aepSetRunProgress('Stopping after the current page\u2026'); } }
+
+async function aepRunAndCapture(env, labelPrefix, btn){
+  const ok = await aepRunAudit(env);
+  if(!ok) return;
+  const stamp = new Date().toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+  const saved = await aepSaveSnapshot(labelPrefix + ' \u00B7 ' + stamp);
+  if(saved) flashBtnOk(btn, 'Captured');
+}
+
+async function aepRunAudit(env){
+  if(aepRunning) return false;
+  aepEnv = env || 'production';
+  if(!WORKER_URL || WORKER_URL.includes('your-worker')){ aepSetRunProgress('WORKER_URL is not configured.', true); return false; }
+  const list = aepPageList();
+  if(!list.length){
+    aepSetRunProgress('No pages in scope. Run \u201cDiscover pages from sitemap\u201d in Audit Settings first, or widen the scope prefix.', true);
+    return false;
+  }
+  const key = (((document.getElementById('pass')||{}).value) || WORKER_KEY || '').trim();
+  if(!key){ aepSetRunProgress('Enter your access passphrase before running.', true); return false; }
+
+  const site = aepBaseUrl();
+  const staging = (aepEnv === 'staging');
+
+  aepSetRunProgress('Checking access to ' + aepHostOf(site) + '\u2026');
+  const pre = await fetchPage(site);
+  if(pre.status === 403 && /Target host not allowed/i.test(pre.text || '')){
+    aepSetRunProgress('The proxy worker is refusing ' + aepHostOf(site)
+      + ' \u2014 add it to ALLOWED_HOSTS in the worker and redeploy.', true);
+    return false;
+  }
+  if(pre.status === 403 && /passphrase|forbidden/i.test(pre.text || '')){
+    aepSetRunProgress('The worker rejected this passphrase.', true); return false;
+  }
+
+  aepRunning = true; aepCancel = false;
+  const bw = aepUi('BarWrap'); if(bw) bw.style.display = 'block';
+  const sm = aepUi('Summary'); if(sm) sm.innerHTML = '';
+  aepSetBar(0);
+
+  const refLang = langs.find(l => l.ref);
+  const transLangs = langs.filter(l => !l.ref);
+  const exclDirs = getExcludeDirs();
+  const conc = 2;
+  const st = { results: [], crit:0, warn:0, info:0, broken:0, pages:0,
+               scope: aepGetScope().join(','), env: aepEnv, host: aepHostOf(site), at: null };
+  let done = 0, completed = false;
+  linkCache.clear();
+
+  try {
+    for(const pg of list){
+      if(aepCancel) break;
+      aepSetRunProgress('Auditing \u201c' + pg.name + '\u201d on ' + aepHostOf(site) + '\u2026 (' + (done+1) + ' of ' + list.length + ')');
+      const tally = { critical:0, warning:0, info:0, broken:0 };
+      const mark = () => ({ c:st.crit, w:st.warn, i:st.info, b:st.broken });
+      const absorb = (b) => {
+        tally.critical += st.crit - b.c; tally.warning += st.warn - b.w;
+        tally.info += st.info - b.i;     tally.broken  += st.broken - b.b;
+      };
+      const result = { page: pg, languages: [], refData: null, refError: null };
+      const refUrl = buildUrl(site, refLang.dir, pg.path);
+      const r = await fetchPage(refUrl);
+      let refData = null;
+      if(r.ok){ refData = extract(r.text, refUrl); }
+      else { result.refError = r.error ? r.error : ('HTTP ' + r.status); st.crit++; tally.critical++; }
+      result.refData = refData;
+      result.enFp = refData ? contentFingerprint(refData) : null;
+      result.refUrl = refUrl; result.refStatus = r.status;
+
+      if(refData){ const b0 = mark(); result.refTech = await technicalPass(refData, refLang.label, conc, st); absorb(b0); }
+
+      result.englishOnly = pathIsExcluded(pg.path, exclDirs);
+      if(!result.englishOnly){
+        for(const tl of transLangs){
+          if(aepCancel) break;
+          const url = buildUrl(site, tl.dir, pg.path);
+          aepSetRunProgress('Auditing \u201c' + pg.name + '\u201d \u2014 ' + tl.label + '\u2026');
+          const block = { lang: tl, url };
+          const tr = await fetchPage(url);
+          if(!tr.ok){
+            block.error = tr.error ? tr.error : ('HTTP ' + tr.status);
+            result.languages.push(block); st.crit++; tally.critical++; continue;
+          }
+          block.status = tr.status;
+          const tData = extract(tr.text, url);
+          block.data = tData;
+          block.trFp = contentFingerprint(tData);
+          const b1 = mark();
+          block.tech = await technicalPass(tData, tl.label, conc, st);
+          if(refData){
+            const regionIssues = regionDiff(refData.regions, tData.regions, parseDoc(tData.rawHtml), tData.rawHtml);
+            const missingMajor = regionIssues.some(i => i.severity === 'critical');
+            block.parity = [].concat(regionIssues, structuralDiff(refData, tData, missingMajor));
+            block.parity.forEach(i => bump(st, i.severity));
+          }
+          block.content = contentChecks(refData, tData, tl, pg, { staging: staging });
+          block.content.forEach(i => bump(st, i.severity));
+          absorb(b1);
+          result.languages.push(block);
+        }
+      }
+      result.sevTally = tally;
+      st.results.push(result);
+      st.pages++; done++;
+      aepSetBar(done / list.length * 100);
+    }
+    st.at = new Date().toISOString();
+    aepAuditState = st;
+    completed = st.pages > 0;
+    aepSetRunProgress(aepCancel
+      ? 'Stopped \u2014 ' + st.pages + ' of ' + list.length + ' page(s) audited on ' + st.host + '.'
+      : 'Audited ' + st.pages + ' page(s) on ' + st.host + '.');
+  } catch(e){
+    aepSetRunProgress('Audit stopped: ' + (e && e.message ? e.message : String(e)), true);
+  } finally {
+    aepRunning = false;
+  }
+  aepRenderRunSummary();
+  aepUpdateScopeCount();
+  return completed;
+}
+function aepRenderRunSummary(){
+  const host = aepUi('Summary'); if(!host) return;
+  const st = aepAuditState;
+  if(!st || !st.results.length){ host.innerHTML = ''; return; }
+  let miss = 0;
+  st.results.forEach(r => (r.languages||[]).forEach(b => { if(b.error) miss++; }));
+  const rows = st.results.slice().sort((a,b) => {
+    const t = x => x.sevTally.critical*100 + x.sevTally.warning*10 + x.sevTally.info;
+    return t(b) - t(a);
+  }).slice(0, 12).map(r => {
+    const t = r.sevTally;
+    const pills = (t.critical ? '<span class="pill crit">' + t.critical + ' critical</span> ' : '')
+                + (t.warning ? '<span class="pill warn">' + t.warning + ' warning</span> ' : '')
+                + (t.broken ? '<span class="pill crit">' + t.broken + ' broken</span> ' : '')
+                + (!t.critical && !t.warning && !t.broken ? '<span class="pill ok">clean</span>' : '');
+    return '<tr><td>' + escapeHtml(r.page.name) + '</td>'
+      + '<td style="font-size:.76rem;color:var(--muted-2);word-break:break-all;">/' + escapeHtml(r.page.path || '') + '</td>'
+      + '<td>' + pills + '</td></tr>';
+  }).join('');
+  const more = st.results.length > 12 ? '<p class="hint" style="margin:.6rem 0 0;">Showing the 12 worst of ' + st.results.length + ' page(s).</p>' : '';
+  host.innerHTML =
+    '<div class="summary-grid">'
+      + '<div class="stat"><div class="num">' + st.pages + '</div><div class="lbl">Pages</div></div>'
+      + '<div class="stat crit"><div class="num">' + st.crit + '</div><div class="lbl">Critical</div></div>'
+      + '<div class="stat warn"><div class="num">' + st.warn + '</div><div class="lbl">Warnings</div></div>'
+      + '<div class="stat crit"><div class="num">' + st.broken + '</div><div class="lbl">Broken links</div></div>'
+      + '<div class="stat ' + (miss ? 'crit' : 'ok') + '"><div class="num">' + miss + '</div><div class="lbl">Missing translations</div></div>'
+    + '</div>'
+    + '<div class="section-label" style="margin-top:1.25rem;">Pages by severity \u00B7 ' + escapeHtml(st.host) + '</div>'
+    + '<div style="overflow-x:auto;"><table class="pages"><tr><th>Page</th><th>Path</th><th>Findings</th></tr>' + rows + '</table></div>'
+    + more;
+}
+
+/* ---- snapshots ---- */
+function aepBuildSnapshot(label){
+  const dirs = aepGetScope();
+  const EXCL = excludedManualPathSet();
+  const src = aepSource();
+  if(!src) return null;
+  let bySev = null;
+  if(src.kind === 'site'){
+    bySev = {};
+    flattenFindings().forEach(f => {
+      const k = normPath(f.path);
+      const t = bySev[k] || (bySev[k] = { critical:0, warning:0, info:0, broken:0 });
+      if(f.category === 'broken link') t.broken++;
+      else if(f.severity === 'critical') t.critical++;
+      else if(f.severity === 'warning') t.warning++;
+      else t.info++;
+    });
+  }
+  const pagesOut = {};
+  let n = 0;
+  (src.st.results||[]).forEach(r => {
+    const pth = normPath(r.page.path || '');
+    if(EXCL.has(pth)) return;
+    if(!aepInScope(pth, dirs)) return;
+    const d = r.refData || null;
+    const langsOut = {};
+    (r.languages||[]).forEach(b => {
+      langsOut[b.lang.label] = {
+        fp: (b.trFp != null ? b.trFp : null),
+        missing: !!b.error, error: b.error || '',
+        title: (b.data && b.data.title) || '', words: (b.data && b.data.words) || 0
+      };
+    });
+    pagesOut[pth] = {
+      name: r.page.name || prettyName(pth),
+      enFp: (r.enFp != null ? r.enFp : null),
+      enError: r.refError || '',
+      title: d ? (d.title || '') : '', metaDesc: d ? (d.metaDesc || '') : '',
+      words: d ? (d.words || 0) : 0, counts: d ? d.counts : null,
+      sev: r.sevTally || (bySev && bySev[pth]) || { critical:0, warning:0, info:0, broken:0 },
+      langs: langsOut
+    };
+    n++;
+  });
+  // env/host come from the run itself, never a user choice
+  const env = src.st.env || 'production';
+  const host = src.st.host || reportHost();
+  return {
+    type:'aep-snapshot', version:1,
+    id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    label: label, env: env, host: host, scope: dirs.join(','), source: src.kind,
+    at: new Date().toISOString(), pageCount: n, pages: pagesOut
+  };
+}
+async function aepSaveSnapshot(label){
+  if(!aepSource()){ aepStatus('No audit to snapshot yet.', true); return false; }
+  const snap = aepBuildSnapshot(label);
+  if(!snap){ aepStatus('No audit to snapshot yet.', true); return false; }
+  if(!snap.pageCount){ aepStatus('No audited pages match that scope prefix.', true); return false; }
+  try {
+    await statePut(aepKeySnap(snap.id), snap);
+    aepSnapIndex.push({ id:snap.id, label:snap.label, env:snap.env, host:snap.host,
+                        scope:snap.scope, at:snap.at, pageCount:snap.pageCount, source:snap.source });
+    await statePut(aepKeyIndex(), aepSnapIndex);
+    aepRenderList(); aepRenderPickers();
+    aepStatus('Captured \u201c' + snap.label + '\u201d \u00B7 ' + snap.pageCount + ' page(s) from ' + snap.host + '.');
+    return true;
+  } catch(e){ aepStatus('Could not save the snapshot: ' + e.message, true); return false; }
+}
+async function aepDeleteSnapshot(id){
+  aepSnapIndex = aepSnapIndex.filter(s => s.id !== id);
+  try { await statePut(aepKeyIndex(), aepSnapIndex); } catch(e){}
+  try { await statePut(aepKeySnap(id), null); } catch(e){}
+  aepRenderList(); aepRenderPickers();
+  aepStatus('Snapshot removed.');
+}
+async function aepRenameSnapshot(id, label){
+  const s = aepSnapIndex.find(x => x.id === id); if(!s) return;
+  s.label = label;
+  try {
+    await statePut(aepKeyIndex(), aepSnapIndex);
+    const full = await stateGet(aepKeySnap(id));
+    if(full){ full.label = label; await statePut(aepKeySnap(id), full); }
+    aepRenderPickers();
+  } catch(e){}
+}
+async function aepLoadIndex(){
+  try { const idx = await stateGet(aepKeyIndex()); aepSnapIndex = Array.isArray(idx) ? idx : []; }
+  catch(e){ aepSnapIndex = []; }
+}
+function aepEnvBadge(env){
+  const isStg = env === 'staging';
+  return '<span class="pill" style="' + (isStg ? 'color:var(--warning);border-color:rgba(216,162,74,.4);' : 'color:var(--ok);border-color:rgba(125,191,130,.4);') + '">'
+    + escapeHtml(isStg ? 'staging' : 'production') + '</span>';
+}
+function aepRenderList(){
+  const host = document.getElementById('aepSnapList'); if(!host) return;
+  if(!aepSnapIndex.length){
+    host.innerHTML = '<p class="empty-msg">No snapshots yet. Use the numbered steps above to capture one.</p>';
+    return;
+  }
+  const rows = aepSnapIndex.slice().sort((a,b)=> (b.at||'').localeCompare(a.at||'')).map(s =>
+    '<tr><td><input type="text" value="' + escapeAttr(s.label || '') + '" style="font-size:.85rem;" '
+      + 'onchange="aepRenameSnapshot(\'' + s.id + '\', this.value)"></td>'
+    + '<td>' + aepEnvBadge(s.env) + '</td>'
+    + '<td style="font-size:.78rem;color:var(--muted-2);">' + escapeHtml(s.host || '') + '</td>'
+    + '<td style="font-size:.8rem;color:var(--muted);white-space:nowrap;">' + escapeHtml(new Date(s.at).toLocaleString()) + '</td>'
+    + '<td style="font-size:.8rem;color:var(--muted);">' + (s.pageCount||0) + '</td>'
+    + '<td><button class="tiny ghost" onclick="aepDeleteSnapshot(\'' + s.id + '\')">\u2715</button></td></tr>'
+  ).join('');
+  host.innerHTML = '<div style="overflow-x:auto;"><table class="pages">'
+    + '<tr><th style="min-width:220px;">Label</th><th>Environment</th><th>Host</th><th>Captured</th><th>Pages</th><th></th></tr>'
+    + rows + '</table></div>';
+}
+function aepOptsFor(envFilter){
+  const list = aepSnapIndex.filter(s => !envFilter || s.env === envFilter)
+    .sort((a,b) => (a.at||'').localeCompare(b.at||''));
+  if(!list.length) return '<option value="">(no ' + (envFilter || '') + ' snapshots yet)</option>';
+  return list.map(s => '<option value="' + s.id + '">' + escapeAttr(s.label || '(untitled)')
+    + ' \u00B7 ' + escapeAttr(new Date(s.at).toLocaleDateString()) + '</option>').join('');
+}
+function aepRenderPickers(){
+  const set = (id, html, pickLast) => {
+    const el = document.getElementById(id); if(!el) return;
+    const prev = el.value;
+    el.innerHTML = html;
+    if(prev && el.querySelector('option[value="' + prev + '"]')) el.value = prev;
+    else if(pickLast && el.options.length) el.selectedIndex = el.options.length - 1;
+  };
+  set('aepPreA', aepOptsFor('production'), false);
+  set('aepPreB', aepOptsFor('staging'), true);
+  set('aepPostA', aepOptsFor('production'), false);
+  set('aepPostB', aepOptsFor('production'), true);
+}
+async function aepRenderAll(){
+  await aepLoadScope();
+  await aepLoadIndex();
+  aepUpdateScopeCount();
+  aepRenderRunSummary();
+  aepRenderList();
+  aepRenderPickers();
+  requestAnimationFrame(drawAepConnectors);
+  setTimeout(drawAepConnectors, 140);
+}
+
+/* ---- diff ---- */
+function aepDiff(A, B){
+  const paths = Array.from(new Set(Object.keys(A.pages||{}).concat(Object.keys(B.pages||{})))).sort();
+  const out = { changed:[], unchanged:[], added:[], removed:[], broke:[], lag:[], lostTrans:[], bMissing:[], unknown:[] };
+  // Every translation missing on the B side, irrespective of what A had. For a
+  // pre-launch check this is the question that matters: is the candidate complete?
+  Object.keys(B.pages||{}).forEach(pth => {
+    const b = B.pages[pth];
+    Object.keys(b.langs || {}).forEach(L => {
+      if(b.langs[L] && b.langs[L].missing) out.bMissing.push({ path:pth, name:b.name, lang:L, error:b.langs[L].error });
+    });
+  });
+  paths.forEach(pth => {
+    const a = (A.pages||{})[pth], b = (B.pages||{})[pth];
+    // A page recorded but failing to load counts as absent, not as incomparable —
+    // otherwise a 404 on one side hides in a bucket nobody reads.
+    const aOk = !!(a && a.enFp != null), bOk = !!(b && b.enFp != null);
+    if(aOk && !bOk){
+      // present and healthy before, gone or failing now
+      if(b) out.broke.push({ path:pth, a:a, b:b, error: b.enError || 'failed to load' });
+      else out.removed.push({ path:pth, a:a, b:null });
+      return;
+    }
+    if(!aOk && bOk){ out.added.push({ path:pth, a:(a||null), b:b }); return; }
+    if(!aOk && !bOk){ out.unknown.push({ path:pth, a:(a||null), b:(b||null) }); return; }
+    const changed = (a.enFp !== b.enFp);
+    const row = { path:pth, a:a, b:b, changed:changed };
+    if(changed) out.changed.push(row); else out.unchanged.push(row);
+    Object.keys(b.langs || {}).forEach(L => {
+      const la = (a.langs || {})[L], lb = b.langs[L];
+      if(!lb) return;
+      if(lb.missing && la && !la.missing) out.lostTrans.push({ path:pth, name:b.name, lang:L, error:lb.error });
+      if(changed === true && la && !la.missing && !lb.missing
+         && la.fp != null && lb.fp != null && la.fp === lb.fp){
+        out.lag.push({ path:pth, name:b.name, lang:L });
+      }
+    });
+  });
+  return out;
+}
+function aepPageTable(rows, opts){
+  opts = opts || {};
+  if(!rows.length) return '<p class="empty-msg">None.</p>';
+  const body = rows.map(r => {
+    const src = r.b || r.a;
+    let words = '';
+    if(opts.showWords){
+      const wa = r.a ? r.a.words : null, wb = r.b ? r.b.words : null;
+      words = '<td style="font-size:.8rem;color:var(--muted);">'
+        + (wa == null ? '\u2014' : wa) + ' \u2192 ' + (wb == null ? '\u2014' : wb) + '</td>';
+    }
+    let extra = '';
+    if(opts.showSev){
+      if(r.a && r.b){
+        const d = (r.b.sev.critical + r.b.sev.warning) - (r.a.sev.critical + r.a.sev.warning);
+        const cls = d > 0 ? 'var(--critical)' : d < 0 ? 'var(--ok)' : 'var(--muted-2)';
+        extra = '<td style="color:' + cls + ';font-size:.8rem;">' + (d > 0 ? '+' + d : String(d)) + '</td>';
+      } else extra = '<td style="color:var(--muted-2);font-size:.8rem;">\u2014</td>';
+    }
+    return '<tr><td>' + escapeHtml(src.name || prettyName(r.path)) + '</td>'
+      + '<td style="font-size:.76rem;color:var(--muted-2);word-break:break-all;">/' + escapeHtml(r.path) + '</td>'
+      + words + extra + '</tr>';
+  }).join('');
+  let head = '<tr><th>Page</th><th>Path</th>';
+  if(opts.showWords) head += '<th>Words</th>';
+  if(opts.showSev) head += '<th>Crit+Warn \u0394</th>';
+  head += '</tr>';
+  return '<div style="overflow-x:auto;"><table class="pages">' + head + body + '</table></div>';
+}
+function aepLangTable(rows){
+  if(!rows.length) return '<p class="empty-msg">None.</p>';
+  const anyErr = rows.some(r=>r.error);
+  const body = rows.map(r =>
+    '<tr><td>' + escapeHtml(r.name || prettyName(r.path)) + '</td>'
+    + '<td style="font-size:.76rem;color:var(--muted-2);word-break:break-all;">/' + escapeHtml(r.path) + '</td>'
+    + '<td>' + escapeHtml(r.lang) + '</td>'
+    + (anyErr ? '<td style="font-size:.8rem;color:var(--critical);">' + escapeHtml(r.error || '') + '</td>' : '')
+    + '</tr>').join('');
+  return '<div style="overflow-x:auto;"><table class="pages"><tr><th>Page</th><th>Path</th><th>Language</th>'
+    + (anyErr ? '<th>Error</th>' : '') + '</tr>' + body + '</table></div>';
+}
+function aepAcc(title, count, inner, open, note){
+  return '<details class="accordion"' + (open ? ' open' : '') + '><summary><span class="chev">\u25B6</span> '
+    + title + ' (' + count + ')</summary><div class="accordion-body">'
+    + (note ? '<p class="hint" style="margin-top:0;">' + note + '</p>' : '') + inner + '</div></details>';
+}
+async function aepCompare(track){
+  aepTrack = track;
+  const out = document.getElementById(track === 'pre' ? 'aepPreOut' : 'aepPostOut');
+  const aId = (document.getElementById(track === 'pre' ? 'aepPreA' : 'aepPostA')||{}).value;
+  const bId = (document.getElementById(track === 'pre' ? 'aepPreB' : 'aepPostB')||{}).value;
+  if(!aId || !bId){
+    out.innerHTML = '<div class="err-note">' + (track === 'pre'
+      ? 'You need one production snapshot and one staging snapshot. Use steps 1 and 2 above.'
+      : 'You need two production snapshots. Use steps 1 and 3 above.') + '</div>';
+    return;
+  }
+  if(aId === bId){ out.innerHTML = '<div class="err-note">Pick two different snapshots.</div>'; return; }
+  out.innerHTML = '<div class="score">Loading snapshots\u2026</div>';
+  let A, B;
+  try { A = await stateGet(aepKeySnap(aId)); B = await stateGet(aepKeySnap(bId)); }
+  catch(e){ out.innerHTML = '<div class="err-note">Could not load snapshots: ' + escapeHtml(e.message) + '</div>'; return; }
+  if(!A || !B){ out.innerHTML = '<div class="err-note">One of those snapshots is missing from the store.</div>'; return; }
+
+  const d = aepDiff(A, B);
+  const scopeNote = (A.scope || '') !== (B.scope || '')
+    ? '<div class="err-note" style="margin-bottom:1rem;">These snapshots used different scopes ('
+      + escapeHtml(A.scope || '(whole site)') + ' vs ' + escapeHtml(B.scope || '(whole site)')
+      + '). New and removed counts will be misleading.</div>' : '';
+  const header = '<p class="hint">Comparing <strong>' + escapeHtml(A.label) + '</strong> \u00B7 ' + escapeHtml(A.host)
+    + ' (' + escapeHtml(new Date(A.at).toLocaleString()) + ') against <strong>' + escapeHtml(B.label) + '</strong> \u00B7 '
+    + escapeHtml(B.host) + ' (' + escapeHtml(new Date(B.at).toLocaleString()) + ').</p>';
+
+  if(track === 'pre'){
+    const willBreak = d.bMissing.length + d.broke.length;
+    out.innerHTML = scopeNote
+      + '<div class="summary-grid">'
+        + '<div class="stat ok"><div class="num">' + d.changed.length + '</div><div class="lbl">Will change</div></div>'
+        + '<div class="stat"><div class="num">' + d.added.length + '</div><div class="lbl">New pages</div></div>'
+        + '<div class="stat ' + (willBreak ? 'crit' : 'ok') + '"><div class="num">' + willBreak + '</div><div class="lbl">Would launch broken</div></div>'
+        + '<div class="stat warn"><div class="num">' + d.lag.length + '</div><div class="lbl">Translation not updated</div></div>'
+        + '<div class="stat"><div class="num">' + d.unchanged.length + '</div><div class="lbl">Untouched</div></div>'
+        + '<div class="stat warn"><div class="num">' + d.removed.length + '</div><div class="lbl">Missing from staging</div></div>'
+      + '</div>' + header
+      + aepAcc('Incomplete on staging \u00B7 translations missing', d.bMissing.length, aepLangTable(d.bMissing), d.bMissing.length > 0,
+          'A language version is absent or failing on staging. Whether or not it exists in production today, deploying this leaves it broken.')
+      + aepAcc('Will change on deploy', d.changed.length, aepPageTable(d.changed, { showWords:true }), true,
+          'Your release contents. Review this list against what the release was supposed to touch.')
+      + aepAcc('Translation not updated on staging', d.lag.length, aepLangTable(d.lag), false,
+          'English changed on staging but this language did not \u2014 it will go live showing the old copy.')
+      + aepAcc('New pages going live', d.added.length, aepPageTable(d.added, {}), false)
+      + aepAcc('Failing on staging \u00B7 live in production', d.broke.length, aepPageTable(d.broke, {}), d.broke.length > 0,
+          'These load in production but error on staging. Deploying would take a working page down.')
+      + aepAcc('In production but missing from staging', d.removed.length, aepPageTable(d.removed, {}), false,
+          'Expected if staging only holds part of the site. Worth a look if it does not.')
+      + aepAcc('Untouched by this release', d.unchanged.length, aepPageTable(d.unchanged, {}), false,
+          'Identical on both. Normal \u2014 these pages simply are not part of the release.')
+      + (d.unknown.length ? aepAcc('Not comparable', d.unknown.length, aepPageTable(d.unknown, {}), false,
+          'Failed to load in one of the two snapshots.') : '');
+  } else {
+    out.innerHTML = scopeNote
+      + '<div class="summary-grid">'
+        + '<div class="stat warn"><div class="num">' + d.unchanged.length + '</div><div class="lbl">Unchanged</div></div>'
+        + '<div class="stat ok"><div class="num">' + d.changed.length + '</div><div class="lbl">Updated</div></div>'
+        + '<div class="stat"><div class="num">' + d.added.length + '</div><div class="lbl">New pages</div></div>'
+        + '<div class="stat crit"><div class="num">' + d.broke.length + '</div><div class="lbl">Now failing</div></div>'
+        + '<div class="stat warn"><div class="num">' + d.lag.length + '</div><div class="lbl">Translation lag</div></div>'
+        + '<div class="stat crit"><div class="num">' + d.lostTrans.length + '</div><div class="lbl">Lost translations</div></div>'
+      + '</div>' + header
+      + aepAcc('Unchanged \u00B7 possibly missed updates', d.unchanged.length, aepPageTable(d.unchanged, {}), true,
+          'Byte-for-byte identical before and after. Cross-check against the pages the release was meant to update \u2014 anything on both lists was missed.')
+      + aepAcc('Lost translations \u00B7 live before, failing now', d.lostTrans.length, aepLangTable(d.lostTrans), true,
+          'These broke during the release. Fix first.')
+      + aepAcc('Translation lag \u00B7 English updated, translation did not', d.lag.length, aepLangTable(d.lag), false,
+          'Your retranslation queue.')
+      + aepAcc('Updated', d.changed.length, aepPageTable(d.changed, { showWords:true, showSev:true }), false,
+          'A positive Crit+Warn delta means the page picked up new problems while being updated.')
+      + aepAcc('New pages', d.added.length, aepPageTable(d.added, {}), false)
+      + aepAcc('Now failing \u00B7 loaded before the release, erroring now', d.broke.length, aepPageTable(d.broke, {}), d.broke.length > 0,
+          'These pages worked before the deploy and are erroring now. Highest priority.')
+      + aepAcc('Removed', d.removed.length, aepPageTable(d.removed, {}), false, 'Confirm each retirement was intentional.')
+      + (d.unknown.length ? aepAcc('Not comparable', d.unknown.length, aepPageTable(d.unknown, {}), false,
+          'Failed to load in one of the two snapshots.') : '');
+  }
 }
 
 /* ----------------------------- helpers ----------------------------- */
