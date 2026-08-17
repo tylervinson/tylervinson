@@ -171,6 +171,7 @@ footer a:hover { color: #888; }
 <section class="section">
     <div class="section-label">Opening The Panel</div>
     <h2>One door in, then it stays open</h2>
+<<<<<<< Updated upstream
     <p>The toolbar icon is context-aware: <strong style="color:#e0e0e0">on azblue.com it docks the review panel directly</strong>; anywhere else it opens the dashboard. From inside the dashboard, <strong style="color:#e0e0e0">Review on site</strong> does both at once.</p>
     <div class="steps" style="margin-top:32px">
         <div class="step" style="grid-template-columns:40px 1fr">
@@ -192,9 +193,39 @@ footer a:hover { color: #888; }
             <div class="step-body">
                 <h3>It stays docked from there</h3>
                 <p>The panel is bound to the browser window, not the tab. Navigate anywhere on azblue.com and it updates to that page automatically, until you close it.</p>
+=======
+    <p>The extension's toolbar icon always opens the dashboard &mdash; it never opens the panel directly. There's exactly one built-in way to open the panel, plus one Chrome-native way most people won't stumble onto.</p>
+    <div class="converge-wrap" id="convergeWrap">
+        <svg class="flow-connectors" id="convergeSvg" aria-hidden="true"></svg>
+        <div class="role-split">
+            <div class="role-left">
+                <div class="role-card" id="roleA">
+                    <h4>"Review on site" (the documented way)</h4>
+                    <ul>
+                        <li>Click the toolbar icon &rarr; dashboard opens</li>
+                        <li>Click "Review on site" on any dashboard page</li>
+                        <li>Opens azblue.com and docks the panel in one action</li>
+                    </ul>
+                </div>
+                <div class="role-card" id="roleB">
+                    <h4>Chrome's side panel icon (native, optional)</h4>
+                    <ul>
+                        <li>The panel becomes available the moment you're on azblue.com &mdash; the dashboard doesn't need to be open</li>
+                        <li>Click Chrome's own side panel icon in the toolbar, separate from ours</li>
+                        <li>Pick "AZ Blue Site Audit" from the list Chrome shows you</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="role-right">
+                <div class="role-card target" id="roleTarget">
+                    <h4>Once open, it follows you</h4>
+                    <p>However it got opened, the panel is docked to the browser window &mdash; not one tab. Navigate anywhere on azblue.com and it updates to that page automatically, until you close it.</p>
+                </div>
+>>>>>>> Stashed changes
             </div>
         </div>
     </div>
+    <div class="callout note">Chrome doesn't allow an extension to open its own side panel without a direct click on the extension's own UI &mdash; that's why the toolbar icon can't just open the panel by itself, and why "Review on site" exists.</div>
 </section>
 
     <footer>
