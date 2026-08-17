@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Using the Extension — AZ Blue Site Audit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+.container { max-width: 1080px; margin: 0 auto; padding: 80px 40px 120px; }
+header { position: relative; margin-bottom: 64px; }
+.eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; line-height: 1.5; max-width: 640px; }
+.tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+.tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+.tab-nav-link:hover { color: #aaa; }
+.tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+.download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+.download-btn:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.25); }
+
+.section { margin-bottom: 96px; }
+.section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+.section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+.section > p { font-size: 15px; color: #999; line-height: 1.75; max-width: 760px; }
+.section > p + p { margin-top: 14px; }
+code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+strong { color: #d8d8d8; font-weight: 600; }
+a.inline-link { color: #FFBE5F; text-decoration: none; border-bottom: 1px solid rgba(255,190,95,.35); }
+a.inline-link:hover { border-color: #FFBE5F; }
+
+pre { background: #141414; border: 1px solid #252525; border-radius: 5px; padding: 20px; margin: 16px 0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.key { color: #7aa2d4; } .str { color: #98c379; } .cmt { color: #4a5a4a; font-style: italic; } .num { color: #d19a66; } .bool { color: #c678dd; }
+
+.field-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+.field-table th { text-align: left; padding: 10px 14px; color: #666; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #2a2a2a; }
+.field-table td { padding: 12px 14px; border-bottom: 1px solid #232323; color: #999; vertical-align: top; }
+.field-table td:first-child { color: #e0e0e0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; white-space: nowrap; }
+.field-table tr:last-child td { border-bottom: none; }
+
+.callout { border-radius: 6px; padding: 14px 18px; margin: 16px 0; font-size: 13px; line-height: 1.6; border: 1px solid; }
+.tip { background: #131c17; border-color: #1e3a2a; color: #8fbf9a; }
+.warn { background: #211a12; border-color: #3a2e1a; color: #d4ab6a; }
+.note { background: #14181f; border-color: #1e2a3a; color: #7aa2d4; }
+
+.section-divider { border: none; border-top: 1px solid #242424; margin: 96px 0; }
+footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+footer a { color: #555; text-decoration: none; }
+footer a:hover { color: #888; }
+
+@media (max-width: 768px) {
+    h1 { font-size: 34px; }
+    .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+}
+
+
+.steps { display: flex; flex-direction: column; gap: 40px; margin-top: 32px; }
+.step { display: grid; grid-template-columns: 40px 1fr 320px; gap: 24px; align-items: start; }
+.step-num { width: 32px; height: 32px; border-radius: 50%; background: #242424; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #FFBE5F; }
+.step-body h3 { font-size: 17px; font-weight: 500; color: #e0e0e0; margin-bottom: 8px; }
+.step-body p { font-size: 13.5px; color: #888; line-height: 1.7; }
+.step-body p + p { margin-top: 10px; }
+
+.ui-mock { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; }
+
+.panel-anatomy { font-size: 11.5px; }
+.panel-header-mock { background: #1e1e1e; border-bottom: 1px solid #2a2a2a; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.mock-icon { width: 20px; height: 20px; border-radius: 5px; background: #FFBE5F; flex: 0 0 auto; }
+.mock-title { color: #e0e0e0; font-weight: 500; }
+.panel-section-mock { padding: 12px; border-bottom: 1px solid #232323; }
+.panel-section-mock-label { font-size: 9.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #555; margin-bottom: 6px; }
+.mock-title.big { font-size: 13px; }
+.mock-sub { font-family: 'SF Mono', monospace; font-size: 10px; color: #666; margin-top: 2px; }
+.panel-item-mock { display: flex; align-items: center; gap: 8px; background: #1a1a1a; border: 1px solid #262626; border-radius: 5px; padding: 7px 9px; margin-top: 6px; }
+.panel-item-mock-icon { width: 5px; height: 5px; border-radius: 50%; flex: 0 0 auto; }
+.panel-item-mock-icon.c { background: #d98a84; } .panel-item-mock-icon.w { background: #d8a24a; }
+.panel-item-mock-name { color: #ccc; font-weight: 500; }
+.panel-item-mock-text { color: #777; font-size: 10.5px; margin-top: 1px; }
+.panel-body-mock { padding: 4px 0; }
+
+.ui-callout { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; margin-top: 32px; }
+.ui-callout-header { padding: 14px 18px; border-bottom: 1px solid #262626; font-size: 12px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: .5px; }
+.ui-callout-body { padding: 16px 18px; font-size: 13px; color: #888; line-height: 1.7; }
+
+@media (max-width: 900px) { .step { grid-template-columns: 1fr; } .step-num { display: none; } }
+
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <p class="eyebrow">AZ Blue Site Audit</p>
+        <h1>Using the Extension</h1>
+        <p class="subtitle">What each part does, day to day.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link active">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link">Install</a>
+        </nav>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
+    </header>
+
+
+<section class="section">
+    <div class="section-label">Getting In</div>
+    <h2>Two doors, one sign-in</h2>
+    <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body"><h3>Open the dashboard</h3><p>Click the toolbar icon. If the dashboard is already open in a tab, it’s focused instead of duplicated.</p><p>Sign in once with the shared passphrase. This also hands the credential to the side panel &mdash; you won’t be asked again there.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px;text-align:center">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px">
+        <div style="width:22px;height:22px;border-radius:6px;background:#FFBE5F"></div>
+        <span style="font-size:11px;color:#888">AZ Blue Site Audit</span>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:10px">Click the icon &rarr; dashboard opens in a new tab</div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body"><h3>Jump into review mode</h3><p>From any dashboard page, click <strong style="color:#e0e0e0">Review on site</strong>. It opens azblue.com and docks the side panel in one action.</p><p>This has to be a real click &mdash; Chrome won’t let an extension open the panel on its own.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px">
+    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dashboard tab bar</div>
+    <div style="display:flex;gap:6px;font-size:10.5px">
+        <div style="padding:6px 10px;color:#666">Admin</div>
+        <div style="padding:6px 10px;color:#666">Authors</div>
+        <div style="margin-left:auto;padding:6px 10px;background:#242424;border:1px solid #FFBE5F;border-radius:6px;color:#FFBE5F;font-weight:600">&#9635; Review on site</div>
+    </div>
+</div></div>
+            </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-label">The Side Panel</div>
+    <h2>Anatomy</h2>
+    <p>The panel always reflects whichever tab is active. Navigate to a new azblue.com page and it refreshes automatically.</p>
+    <div class="steps">
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body"><h3>Current page</h3><p>Name, path, and a severity breakdown for the page you’re on right now. The homepage shows as "Home" with an empty path &mdash; that’s expected.</p><p>Not on azblue.com, or no published run yet? The panel says so plainly instead of showing stale data.</p></div>
+                <div class="ui-mock">
+<div class="panel-anatomy">
+    <div class="panel-header-mock"><div class="mock-icon"></div><div class="mock-title">Site Audit</div></div>
+    <div class="panel-section-mock">
+        <div class="panel-section-mock-label">Current page</div>
+        <div class="mock-title big">Annual Exam</div>
+        <div class="mock-sub">/medicare/annual-exam</div>
+    </div>
+    <div class="panel-section-mock panel-body-mock">
+        <div class="panel-section-mock-label">Findings &middot; 2</div>
+        <div class="panel-item-mock"><div class="panel-item-mock-icon c"></div><div><div class="panel-item-mock-name">Missing translated page</div><div class="panel-item-mock-text">Chinese returned HTTP 404</div></div></div>
+        <div class="panel-item-mock"><div class="panel-item-mock-icon w"></div><div><div class="panel-item-mock-name">Heading count mismatch</div><div class="panel-item-mock-text">4 vs 7 in English</div></div></div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body"><h3>Expand to highlight</h3><p>Click a finding to expand it. If the audit captured a locatable element &mdash; a broken link, placeholder text, a heading &mdash; the panel scrolls the page to it and outlines it in gold.</p><p>Some findings (meta description, title, canonical) have no visible element on the page. The panel says so rather than pretending.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px;background:#111">
+    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">On the live page</div>
+    <div style="border:2px solid #FFBE5F;background:rgba(255,190,95,.14);border-radius:4px;padding:8px 10px;font-size:11px;color:#ccc;position:relative">
+        Prescription forms
+        <div style="position:absolute;top:-22px;left:0;background:#1a1a1a;border:1px solid #FFBE5F;color:#FFBE5F;font-size:9px;padding:2px 6px;border-radius:4px">Broken link</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body"><h3>Triage inline</h3><p>Mark a finding <strong style="color:#e0e0e0">Done</strong> right from the panel. It writes to the same shared store the dashboard reads &mdash; no separate list to reconcile.</p><p>Click again to undo.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px">
+    <div style="background:#1a1a1a;border:1px solid #262626;border-radius:6px;padding:10px 12px;opacity:.5">
+        <div style="font-size:11px;color:#ccc;text-decoration:line-through">Placeholder text found</div>
+        <div style="margin-top:8px"><span style="font-size:10px;color:#7dbf82;border:1px solid #2a4a2a;border-radius:5px;padding:3px 8px">Done &#10003;</span></div>
+    </div>
+</div></div>
+            </div>
+    </div>
+</section>
+
+<div class="ui-callout">
+    <div class="ui-callout-header">Coming back to the dashboard</div>
+    <div class="ui-callout-body">The panel's footer has a <strong style="color:#e0e0e0">Full dashboard</strong> button &mdash; it focuses the existing dashboard tab (or opens one) without closing the panel. The panel stays docked as you switch back and forth.</div>
+</div>
+
+    <footer>
+        <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
+    </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specs — AZ Blue Site Audit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+.container { max-width: 1080px; margin: 0 auto; padding: 80px 40px 120px; }
+header { position: relative; margin-bottom: 64px; }
+.eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; line-height: 1.5; max-width: 640px; }
+.tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+.tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+.tab-nav-link:hover { color: #aaa; }
+.tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+.download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+.download-btn:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.25); }
+
+.section { margin-bottom: 96px; }
+.section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+.section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+.section > p { font-size: 15px; color: #999; line-height: 1.75; max-width: 760px; }
+.section > p + p { margin-top: 14px; }
+code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+strong { color: #d8d8d8; font-weight: 600; }
+a.inline-link { color: #FFBE5F; text-decoration: none; border-bottom: 1px solid rgba(255,190,95,.35); }
+a.inline-link:hover { border-color: #FFBE5F; }
+
+pre { background: #141414; border: 1px solid #252525; border-radius: 5px; padding: 20px; margin: 16px 0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.key { color: #7aa2d4; } .str { color: #98c379; } .cmt { color: #4a5a4a; font-style: italic; } .num { color: #d19a66; } .bool { color: #c678dd; }
+
+.field-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+.field-table th { text-align: left; padding: 10px 14px; color: #666; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #2a2a2a; }
+.field-table td { padding: 12px 14px; border-bottom: 1px solid #232323; color: #999; vertical-align: top; }
+.field-table td:first-child { color: #e0e0e0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; white-space: nowrap; }
+.field-table tr:last-child td { border-bottom: none; }
+
+.callout { border-radius: 6px; padding: 14px 18px; margin: 16px 0; font-size: 13px; line-height: 1.6; border: 1px solid; }
+.tip { background: #131c17; border-color: #1e3a2a; color: #8fbf9a; }
+.warn { background: #211a12; border-color: #3a2e1a; color: #d4ab6a; }
+.note { background: #14181f; border-color: #1e2a3a; color: #7aa2d4; }
+
+.section-divider { border: none; border-top: 1px solid #242424; margin: 96px 0; }
+footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+footer a { color: #555; text-decoration: none; }
+footer a:hover { color: #888; }
+
+@media (max-width: 768px) {
+    h1 { font-size: 34px; }
+    .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+}
+
+
+.spec-block { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; margin-top: 16px; overflow: hidden; }
+.spec-block + .spec-block { margin-top: 12px; }
+.spec-block-header { padding: 20px 24px 0; }
+.spec-block-header h3 { font-size: 16px; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; }
+.spec-block-header p { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 14px; }
+.spec-block-body { padding: 0 24px 20px; }
+.spec-block-body p { font-size: 13px; color: #777; line-height: 1.7; margin-top: 10px; }
+
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <p class="eyebrow">AZ Blue Site Audit</p>
+        <h1>Technical Specs</h1>
+        <p class="subtitle">Manifest, message types, and the data this thing reads and writes.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Workflow</a>
+            <a href="specs.html" class="tab-nav-link active">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link">Install</a>
+        </nav>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
+    </header>
+
+
+<section class="section">
+    <div class="section-label">Manifest</div>
+    <h2>Permissions &amp; scope</h2>
+    <p>Manifest V3, no remote code, permissions scoped to azblue.com and the two Cloudflare Workers.</p>
+    <div class="spec-block">
+        <div class="spec-block-header">
+            <h3>manifest.json</h3>
+            <p><code>host_permissions</code> is what lets the extension fetch azblue.com pages directly, bypassing the old CORS-proxy Worker entirely once installed.</p>
+        </div>
+        <div class="spec-block-body"><pre><span class="cmt">// manifest.json (abridged)</span>
+{
+  <span class="key">"manifest_version"</span>: <span class="num">3</span>,
+  <span class="key">"permissions"</span>: [<span class="str">"storage"</span>, <span class="str">"sidePanel"</span>, <span class="str">"tabs"</span>, <span class="str">"scripting"</span>],
+  <span class="key">"host_permissions"</span>: [
+    <span class="str">"https://www.azblue.com/*"</span>,
+    <span class="str">"https://audit-state.bcbs-of-az.workers.dev/*"</span>,
+    <span class="str">"https://schema-cors-proxy.bcbs-of-az.workers.dev/*"</span>
+  ],
+  <span class="key">"background"</span>: { <span class="key">"service_worker"</span>: <span class="str">"background.js"</span> },
+  <span class="key">"side_panel"</span>: { <span class="key">"default_path"</span>: <span class="str">"sidepanel.html"</span> },
+  <span class="key">"content_scripts"</span>: [{
+    <span class="key">"matches"</span>: [<span class="str">"https://www.azblue.com/*"</span>, <span class="str">"https://azblue.com/*"</span>],
+    <span class="key">"js"</span>: [<span class="str">"content.js"</span>]
+  }]
+}</pre></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-label">File Map</div>
+    <h2>What each file is responsible for</h2>
+    <table class="field-table">
+        <tr><th>File</th><th>Role</th></tr>
+        <tr><td>dashboard.html / .js</td><td>The full tool. Scripts externalised and inline handlers replaced with delegated <code>data-*</code> attributes for MV3's CSP.</td></tr>
+        <tr><td>actions.js</td><td>Delegated event dispatcher &mdash; parses <code>data-click="fn('a', this)"</code> style attributes, no <code>eval</code>.</td></tr>
+        <tr><td>dashview.js</td><td>Runs inside the dashboard's iframe. Generated from dashboard.js so the CSS/render logic isn't duplicated by hand.</td></tr>
+        <tr><td>ext-glue.js</td><td>Adds the "Review on site" button to the dashboard's tab bar, only when running as an extension.</td></tr>
+        <tr><td>sidepanel.html / .js</td><td>Reads the active tab's URL, maps it to an audit path, filters the published run's findings.</td></tr>
+        <tr><td>content.js</td><td>Injected into azblue.com. Resolves a finding's evidence to a DOM element and highlights it.</td></tr>
+        <tr><td>background.js</td><td>Toolbar click handling, per-tab side panel enablement, message relay.</td></tr>
+    </table>
+</section>
+
+<section class="section">
+    <div class="section-label">Message Types</div>
+    <h2>How the pieces talk</h2>
+    <p>Three message types cover everything &mdash; two through the background service worker, one directly to the content script.</p>
+    <div class="spec-block">
+        <div class="spec-block-body" style="padding-top:20px"><pre><span class="cmt">// dashboard.html → background.js</span>
+chrome.runtime.sendMessage({ <span class="key">type</span>: <span class="str">'openSite'</span>, <span class="key">url</span>: <span class="str">'https://www.azblue.com/'</span> });
+
+<span class="cmt">// sidepanel.js → background.js</span>
+chrome.runtime.sendMessage({ <span class="key">type</span>: <span class="str">'openDashboard'</span> });
+
+<span class="cmt">// sidepanel.js → content.js (per finding, on expand)</span>
+chrome.tabs.sendMessage(tabId, {
+  <span class="key">type</span>: <span class="str">'sa-highlight'</span>,
+  <span class="key">spec</span>: { <span class="key">category</span>, <span class="key">detail</span>, <span class="key">urls</span>, <span class="key">items</span>, <span class="key">text</span> }
+});</pre></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-label">Shared State</div>
+    <h2>What lives in the Worker's KV store</h2>
+    <p>Both surfaces read the same keys from the <code>audit-state</code> Worker. The dashboard writes <code>run</code> and <code>triage</code>; the side panel writes <code>triage</code> only.</p>
+    <div class="spec-block">
+        <div class="spec-block-body" style="padding-top:20px"><pre><span class="cmt">// KV keys, all namespaced mlaudit:&lt;host&gt;:&lt;name&gt;</span>
+mlaudit:www.azblue.com:run          <span class="cmt">// published dashboard data</span>
+mlaudit:www.azblue.com:triage       <span class="cmt">// { findingKey: { status, at } }</span>
+mlaudit:www.azblue.com:sitemap      <span class="cmt">// discovered page list</span>
+mlaudit:www.azblue.com:sitemap404   <span class="cmt">// 404 monitor history</span>
+mlaudit:www.azblue.com:excludeDirs  <span class="cmt">// English-only sections</span></pre></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-label">Highlight Resolution</div>
+    <h2>How content.js finds an element</h2>
+    <p>Tried in order, first match wins. Some findings &mdash; metadata, title, canonical, noindex &mdash; have no visible element and correctly resolve to nothing.</p>
+    <table class="field-table">
+        <tr><th>Signal</th><th>Resolves to</th></tr>
+        <tr><td>Broken link URL</td><td>The exact <code>&lt;a href&gt;</code> matching that path</td></tr>
+        <tr><td>Empty/placeholder link</td><td>All <code>href="#"</code> or blank-href anchors</td></tr>
+        <tr><td>Evidence text (<code>items</code>)</td><td>Whole-word match in page text &mdash; short tokens require word boundaries</td></tr>
+        <tr><td>Footer-related</td><td><code>&lt;footer&gt;</code> or <code>[role=contentinfo]</code></td></tr>
+        <tr><td>Heading / H1 category</td><td>All heading elements on the page</td></tr>
+        <tr><td>Image / link count</td><td>All images or links in scope</td></tr>
+    </table>
+</section>
+
+    <footer>
+        <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
+    </footer>
+</div>
+</body>
+</html>

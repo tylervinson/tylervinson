@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation — AZ Blue Site Audit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+.container { max-width: 1080px; margin: 0 auto; padding: 80px 40px 120px; }
+header { position: relative; margin-bottom: 64px; }
+.eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; line-height: 1.5; max-width: 640px; }
+.tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
+.tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
+.tab-nav-link:hover { color: #aaa; }
+.tab-nav-link.active { color: #FFBE5F; border-bottom-color: #FFBE5F; }
+.download-btn { display: inline-block; padding: 12px 24px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 5px; transition: all 0.2s ease; position: absolute; top: 0; right: 0; }
+.download-btn:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.25); }
+
+.section { margin-bottom: 96px; }
+.section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+.section h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 16px; line-height: 1.2; }
+.section > p { font-size: 15px; color: #999; line-height: 1.75; max-width: 760px; }
+.section > p + p { margin-top: 14px; }
+code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+strong { color: #d8d8d8; font-weight: 600; }
+a.inline-link { color: #FFBE5F; text-decoration: none; border-bottom: 1px solid rgba(255,190,95,.35); }
+a.inline-link:hover { border-color: #FFBE5F; }
+
+pre { background: #141414; border: 1px solid #252525; border-radius: 5px; padding: 20px; margin: 16px 0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.key { color: #7aa2d4; } .str { color: #98c379; } .cmt { color: #4a5a4a; font-style: italic; } .num { color: #d19a66; } .bool { color: #c678dd; }
+
+.field-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+.field-table th { text-align: left; padding: 10px 14px; color: #666; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #2a2a2a; }
+.field-table td { padding: 12px 14px; border-bottom: 1px solid #232323; color: #999; vertical-align: top; }
+.field-table td:first-child { color: #e0e0e0; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; white-space: nowrap; }
+.field-table tr:last-child td { border-bottom: none; }
+
+.callout { border-radius: 6px; padding: 14px 18px; margin: 16px 0; font-size: 13px; line-height: 1.6; border: 1px solid; }
+.tip { background: #131c17; border-color: #1e3a2a; color: #8fbf9a; }
+.warn { background: #211a12; border-color: #3a2e1a; color: #d4ab6a; }
+.note { background: #14181f; border-color: #1e2a3a; color: #7aa2d4; }
+
+.section-divider { border: none; border-top: 1px solid #242424; margin: 96px 0; }
+footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+footer a { color: #555; text-decoration: none; }
+footer a:hover { color: #888; }
+
+@media (max-width: 768px) {
+    h1 { font-size: 34px; }
+    .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
+}
+
+
+.req-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-bottom: 40px; }
+.req-item { background: #1e1e1e; padding: 22px 24px; }
+.req-item h4 { font-size: 11px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.req-item p { font-size: 13px; color: #888; line-height: 1.6; }
+
+.download-cta { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px; padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 56px; flex-wrap: wrap; }
+.download-cta-text h2 { font-size: 20px; font-weight: 500; color: #f0f0f0; margin-bottom: 8px; }
+.download-cta-text p { font-size: 12.5px; color: #666; line-height: 1.6; }
+.download-cta-text span { color: #555; }
+.dl-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: #FFBE5F; color: #1a1a1a; text-decoration: none; font-size: 13px; font-weight: 600; border-radius: 6px; white-space: nowrap; transition: all .2s; }
+.dl-btn:hover { background: #FFD495; transform: translateY(-1px); }
+
+.steps { display: flex; flex-direction: column; gap: 40px; margin-top: 8px; }
+.step { display: grid; grid-template-columns: 40px 1fr 320px; gap: 24px; align-items: start; }
+.step-num { width: 32px; height: 32px; border-radius: 50%; background: #242424; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #FFBE5F; }
+.step-body h3 { font-size: 17px; font-weight: 500; color: #e0e0e0; margin-bottom: 8px; }
+.step-body p { font-size: 13.5px; color: #888; line-height: 1.7; }
+.step-body p + p { margin-top: 10px; }
+.ui-mock { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; }
+
+.chrome-toolbar { background: #2a2a2a; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+.chrome-dots { display: flex; gap: 5px; }
+.chrome-dot { width: 9px; height: 9px; border-radius: 50%; }
+.chrome-dot.r { background: #e35b4f; } .chrome-dot.y { background: #e3b04f; } .chrome-dot.g { background: #5fbf6e; }
+.chrome-omni { background: #1a1a1a; border-radius: 4px; padding: 4px 10px; font-size: 10.5px; color: #888; flex: 1; }
+.ext-page { padding: 14px; font-size: 11px; }
+
+@media (max-width: 900px) { .step { grid-template-columns: 1fr; } .step-num { display: none; } .req-grid { grid-template-columns: 1fr; } }
+
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <p class="eyebrow">AZ Blue Site Audit</p>
+        <h1>Installation</h1>
+        <p class="subtitle">Download, extract, and load the extension in four steps.</p>
+        <nav class="tab-nav">
+            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
+            <a href="workflow.html" class="tab-nav-link">Workflow</a>
+            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
+            <a href="demo.html" class="tab-nav-link">Demo</a>
+            <a href="install.html" class="tab-nav-link active">Install</a>
+        </nav>
+        <a href="install.html" class="download-btn">Get the Extension →</a>
+    </header>
+
+
+<div class="req-grid">
+    <div class="req-item">
+        <h4>Browser</h4>
+        <p><strong>Google Chrome</strong> &mdash; any recent version. Uses Manifest V3 and the Chrome Side Panel API. Edge works too, since it's the same Chromium base.</p>
+    </div>
+    <div class="req-item">
+        <h4>Environment</h4>
+        <p><strong>azblue.com</strong> &mdash; the extension fetches pages directly and the side panel activates on that domain and its own pages.</p>
+    </div>
+    <div class="req-item">
+        <h4>Distribution</h4>
+        <p><strong>Load unpacked</strong> &mdash; not on the Chrome Web Store. Developer mode must be enabled in Chrome.</p>
+    </div>
+</div>
+
+<div class="download-cta">
+    <div class="download-cta-text">
+        <h2>AZ Blue Site Audit v2.8</h2>
+        <p>Extension ZIP &middot; Chrome MV3<br>
+        <span>Includes: manifest.json, background.js, content.js, dashboard.html/js, sidepanel.html/js, actions.js, dashview.js, ext-glue.js, icons</span></p>
+    </div>
+    <a href="site-audit-extension.zip" class="dl-btn" download>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 13h12" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Download ZIP
+    </a>
+</div>
+
+<div class="section">
+    <div class="section-label">Installation Steps</div>
+    <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body"><h3>Download and extract the ZIP</h3><p>Click the download button above. Save it somewhere stable &mdash; Chrome references the folder by its path on disk after loading, so a location like <code>Documents/extensions/site-audit/</code> works well.</p><p>Extract the ZIP. <code>manifest.json</code> should sit at the root of the extracted folder, alongside the other files.</p></div>
+                <div class="ui-mock">
+<div style="padding:14px">
+    <div style="font-size:10px;color:#555;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Unzipped folder</div>
+    <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:2;color:#666">
+        <div style="color:#FFBE5F">site-audit-extension/</div>
+        <div style="padding-left:16px">&#9500;&#9472; <span style="color:#7aa2d4">manifest.json</span></div>
+        <div style="padding-left:16px">&#9500;&#9472; background.js</div>
+        <div style="padding-left:16px">&#9500;&#9472; content.js</div>
+        <div style="padding-left:16px">&#9500;&#9472; dashboard.html</div>
+        <div style="padding-left:16px">&#9500;&#9472; sidepanel.html</div>
+        <div style="padding-left:16px">&#9500;&#9472; &hellip;</div>
+        <div style="padding-left:16px">&#9492;&#9472; icons/</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body"><h3>Open chrome://extensions and enable Developer mode</h3><p>Type <code>chrome://extensions</code> into the address bar, or Chrome menu &rarr; More tools &rarr; Extensions.</p><p>Toggle <strong style="color:#e0e0e0">Developer mode</strong> in the top right. Three buttons appear: Load unpacked, Pack extension, Update.</p></div>
+                <div class="ui-mock">
+<div class="chrome-toolbar"><div class="chrome-dots"><div class="chrome-dot r"></div><div class="chrome-dot y"></div><div class="chrome-dot g"></div></div><div class="chrome-omni">chrome://extensions</div></div>
+<div class="ext-page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="color:#888">Extensions</span>
+        <div style="display:flex;align-items:center;gap:6px"><span style="color:#888">Developer mode</span><div style="width:28px;height:16px;background:#FFBE5F;border-radius:8px;position:relative"><div style="width:12px;height:12px;background:#1a1a1a;border-radius:50%;position:absolute;top:2px;right:2px"></div></div></div>
+    </div>
+    <div style="display:flex;gap:8px">
+        <div style="background:#242424;border:1px solid #333;border-radius:5px;padding:6px 12px;color:#ccc">Load unpacked</div>
+        <div style="background:#242424;border:1px solid #333;border-radius:5px;padding:6px 12px;color:#666">Pack extension</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body"><h3>Load unpacked</h3><p>Click <strong style="color:#e0e0e0">Load unpacked</strong> and select the extracted folder (the one containing <code>manifest.json</code>, not its parent).</p><p>The extension card appears immediately &mdash; no restart needed.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px;text-align:center">
+    <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:16px">
+        <div style="width:32px;height:32px;border-radius:8px;background:#FFBE5F;margin:0 auto 10px"></div>
+        <div style="font-size:11px;color:#ccc;font-weight:500">AZ Blue Site Audit</div>
+        <div style="font-size:9.5px;color:#555;margin-top:4px">Loaded successfully</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body"><h3>Pin it and sign in</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon, sign in with the shared passphrase, and you're set &mdash; see <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
+                <div class="ui-mock">
+<div style="padding:16px;text-align:center">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px">
+        <div style="width:16px;height:16px;border-radius:4px;background:#FFBE5F"></div>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#FFBE5F"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7z"/></svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:10px">Pinned to the toolbar</div>
+</div></div>
+            </div>
+    </div>
+
+    <div class="callout warn">&#9888; Don’t move the folder after loading it. Chrome stores the path and will disable the extension if the folder is relocated or deleted &mdash; re-load it from the new path if you ever move it.</div>
+    <div class="callout tip">Developer mode must stay enabled for the extension to keep working. Chrome will occasionally show a banner about developer extensions being active &mdash; that’s expected for load-unpacked installs.</div>
+</div>
+
+    <footer>
+        <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
+    </footer>
+</div>
+</body>
+</html>
