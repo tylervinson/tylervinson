@@ -126,7 +126,8 @@ footer a:hover { color: #888; }
         <tr><td>ext-glue.js</td><td>Adds the "Review on site" button to the dashboard's tab bar, only when running as an extension.</td></tr>
         <tr><td>sidepanel.html / .js</td><td>Reads the active tab's URL, maps it to an audit path, filters the published run's findings.</td></tr>
         <tr><td>content.js</td><td>Injected into azblue.com. Resolves a finding's evidence to a DOM element and highlights it.</td></tr>
-        <tr><td>background.js</td><td>Toolbar click handling, per-tab side panel enablement, message relay.</td></tr>
+        <tr><td>background.js</td><td>Context-aware toolbar click (panel on azblue.com, dashboard elsewhere), per-tab side panel enablement, message relay.</td></tr>
+        <tr><td>config.js</td><td>Access key and endpoints, loaded by both the dashboard and the side panel.</td></tr>
     </table>
 </section>
 

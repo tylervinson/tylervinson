@@ -58,8 +58,6 @@ footer a:hover { color: #888; }
 }
 
 
-.flow-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 1; }
-
 .phase-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; margin-top: 32px; }
 .phase-card { background: #1e1e1e; padding: 24px 20px; }
 .phase-num { font-size: 11px; font-weight: 600; color: #FFBE5F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
@@ -116,12 +114,12 @@ footer a:hover { color: #888; }
     <div class="phase-grid">
         <div class="phase-card">
             <div class="phase-num">Phase 1</div>
-            <h3>Sign in</h3>
-            <p>Once per browser, in the dashboard. The passphrase is shared with the side panel automatically &mdash; sign in once, both surfaces work.</p>
+            <h3>Pick a role</h3>
+            <p>No passphrase. Choose Admin or Author on first load &mdash; Admins can run audits and change settings, Authors see findings only.</p>
             <ul class="step-list">
                 <li>Click the toolbar icon</li>
                 <li>Pick Admin or Author</li>
-                <li>Enter the passphrase</li>
+                <li>Continue</li>
             </ul>
         </div>
         <div class="phase-card">
@@ -171,37 +169,29 @@ footer a:hover { color: #888; }
 </section>
 
 <section class="section">
-    <div class="section-label">Two Ways In</div>
-    <h2>Dashboard-first vs. panel-first</h2>
-    <p>Same data, two entry points depending on what you're doing.</p>
-    <div class="converge-wrap" id="convergeWrap">
-        <svg class="flow-connectors" id="convergeSvg" aria-hidden="true"></svg>
-        <div class="role-split">
-            <div class="role-left">
-                <div class="role-card" id="roleA">
-                    <h4>Starting from the dashboard</h4>
-                    <ul>
-                        <li>Click the toolbar icon</li>
-                        <li>Scan Top Problem Pages / Findings tables</li>
-                        <li>Click "Review on site" to jump into a page with the panel</li>
-                        <li>Good for: triage sweeps, running audits, Power BI setup</li>
-                    </ul>
-                </div>
-                <div class="role-card" id="roleB">
-                    <h4>Starting from the site</h4>
-                    <ul>
-                        <li>Browse azblue.com normally, panel stays docked</li>
-                        <li>Panel updates as you navigate between pages</li>
-                        <li>Expand a finding &rarr; it's highlighted right there</li>
-                        <li>Good for: page-by-page content review, spot checks</li>
-                    </ul>
-                </div>
+    <div class="section-label">Opening The Panel</div>
+    <h2>One door in, then it stays open</h2>
+    <p>The toolbar icon is context-aware: <strong style="color:#e0e0e0">on azblue.com it docks the review panel directly</strong>; anywhere else it opens the dashboard. From inside the dashboard, <strong style="color:#e0e0e0">Review on site</strong> does both at once.</p>
+    <div class="steps" style="margin-top:32px">
+        <div class="step" style="grid-template-columns:40px 1fr">
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h3>Already on azblue.com? Just click the icon</h3>
+                <p>The panel docks immediately &mdash; no dashboard tab is opened, and nothing interrupts what you were doing.</p>
             </div>
-            <div class="role-right">
-                <div class="role-card target" id="roleTarget">
-                    <h4>Same shared state</h4>
-                    <p>Both paths read the same published run and write to the same triage store. Nothing you do in one is invisible to the other.</p>
-                </div>
+        </div>
+        <div class="step" style="grid-template-columns:40px 1fr">
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h3>Somewhere else? The icon opens the dashboard</h3>
+                <p>From there, <strong style="color:#e0e0e0">Review on site</strong> opens azblue.com and docks the panel together &mdash; a single click, which is what Chrome requires to allow a panel to open at all.</p>
+            </div>
+        </div>
+        <div class="step" style="grid-template-columns:40px 1fr">
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h3>It stays docked from there</h3>
+                <p>The panel is bound to the browser window, not the tab. Navigate anywhere on azblue.com and it updates to that page automatically, until you close it.</p>
             </div>
         </div>
     </div>
@@ -211,45 +201,5 @@ footer a:hover { color: #888; }
         <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
     </footer>
 </div>
-
-<script>
-function drawConvergeConnectors(){
-  var box = document.getElementById('convergeWrap'), svg = document.getElementById('convergeSvg');
-  if(!box || !svg) return;
-  var fr = box.getBoundingClientRect();
-  if(!fr.width) return;
-  if(window.innerWidth <= 860){ svg.innerHTML=''; return; }
-  svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
-  svg.setAttribute('viewBox', '0 0 ' + fr.width + ' ' + fr.height);
-  var PAIRS = [['roleA','roleTarget','right'],['roleB','roleTarget','right']];
-  var S = '#8a8a8a';
-  function pt(el, edge){
-    var r = el.getBoundingClientRect();
-    if(edge==='right') return {x: r.right - fr.left, y: r.top + r.height/2 - fr.top};
-    if(edge==='left')  return {x: r.left - fr.left,  y: r.top + r.height/2 - fr.top};
-    if(edge==='bottom')return {x: r.left + r.width/2 - fr.left, y: r.bottom - fr.top};
-    return {x: r.left + r.width/2 - fr.left, y: r.top - fr.top};
-  }
-  function seg(sx,sy,ex,ey,horiz){
-    if(horiz){ var dx = Math.max(40, (ex - sx) * 0.55); return 'M '+sx+' '+sy+' C '+(sx+dx)+' '+sy+' '+(ex-dx)+' '+ey+' '+ex+' '+ey; }
-    var dy = Math.max(30, (ey - sy) * 0.55); return 'M '+sx+' '+sy+' C '+sx+' '+(sy+dy)+' '+ex+' '+(ey-dy)+' '+ex+' '+ey;
-  }
-  var defs = '<defs><marker id="convergeSvgArrow" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse">'
-    + '<path d="M1,1 L6.5,4 L1,7" fill="none" stroke="'+S+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
-  var paths = PAIRS.map(function(p){
-    var a = document.getElementById(p[0]), b = document.getElementById(p[1]);
-    if(!a || !b) return '';
-    var edge = p[2] || 'right';
-    var s0 = pt(a, edge);
-    var e0 = pt(b, edge==='bottom'||edge==='top' ? 'top' : 'left');
-    var horiz = (edge==='right' || edge==='left');
-    return '<path d="'+seg(s0.x,s0.y,e0.x,e0.y,horiz)+'" fill="none" stroke="'+S+'" stroke-width="1.6" marker-end="url(#convergeSvgArrow)"/>';
-  }).join('');
-  svg.innerHTML = defs + paths;
-}
-window.addEventListener('resize', function(){ clearTimeout(window.__drawConvergeConnectorsT); window.__drawConvergeConnectorsT = setTimeout(drawConvergeConnectors, 120); });
-window.addEventListener('load', drawConvergeConnectors);
-document.addEventListener('DOMContentLoaded', function(){ setTimeout(drawConvergeConnectors, 60); });
-</script>
 </body>
 </html>

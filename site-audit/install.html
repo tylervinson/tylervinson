@@ -125,9 +125,9 @@ footer a:hover { color: #888; }
 
 <div class="download-cta">
     <div class="download-cta-text">
-        <h2>AZ Blue Site Audit v2.8</h2>
+        <h2>AZ Blue Site Audit v3.0</h2>
         <p>Extension ZIP &middot; Chrome MV3<br>
-        <span>Includes: manifest.json, background.js, content.js, dashboard.html/js, sidepanel.html/js, actions.js, dashview.js, ext-glue.js, icons</span></p>
+        <span>Includes: manifest.json, config.js, background.js, content.js, dashboard.html/js, sidepanel.html/js, actions.js, dashview.js, ext-glue.js, icons</span></p>
     </div>
     <a href="site-audit-extension.zip" class="dl-btn" download>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 13h12" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -186,7 +186,21 @@ footer a:hover { color: #888; }
             </div>
             <div class="step">
                 <div class="step-num">4</div>
-                <div class="step-body"><h3>Pin it and sign in</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon, sign in with the shared passphrase, and you're set &mdash; see <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
+                <div class="step-body"><h3>Set the access key</h3><p>Open <code>config.js</code> in the extracted folder and set <code>ACCESS_KEY</code> to the value of the Worker's <code>AUDIT_KEY</code> secret. Save, then hit the reload icon on the extension card in <code>chrome://extensions</code>.</p><p>Without this the extension loads but can't reach shared state &mdash; the panel will say it isn't configured.</p></div>
+                <div class="ui-mock">
+<div style="padding:14px">
+    <div style="font-size:10px;color:#555;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">config.js</div>
+    <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:1.9;color:#666">
+        <div>window.AUDIT_CONFIG = {</div>
+        <div style="padding-left:14px">ACCESS_KEY: <span style="color:#98c379">'&hellip;your key&hellip;'</span>,</div>
+        <div style="padding-left:14px;color:#4a5a4a">STATE_URL: &hellip;</div>
+        <div>};</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body"><h3>Pin it and pick a role</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon and choose <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong> &mdash; no passphrase. See <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px;text-align:center">
     <div style="display:inline-flex;align-items:center;gap:6px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px">
