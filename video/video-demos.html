@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Integration Demos</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --text-secondary: #666;
+    --accent: #5fdaff;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 4rem 2rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  h1 {
+    font-weight: 300;
+    font-size: 2.25rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  section {
+    max-width: 960px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  section h2 {
+    font-weight: 300;
+    font-size: 1.4rem;
+    margin: 0 0 0.25rem;
+  }
+
+  .label {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  section > p.desc {
+    color: var(--text-secondary);
+    margin: 0 0 1.5rem;
+    max-width: 640px;
+  }
+
+  video {
+    display: block;
+    width: 100%;
+    border-radius: 6px;
+    background: #000;
+  }
+
+  /* ---- 1. Scroll-scrubbed video ---- */
+  .scrub-wrap {
+    position: relative;
+    height: 240vh;
+  }
+  .scrub-sticky {
+    position: sticky;
+    top: 6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .scrub-progress {
+    margin-top: 0.75rem;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .scrub-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.05s linear;
+  }
+
+  /* ---- 2. Hover-to-play grid ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .grid-item {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .grid-item video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 0;
+  }
+  .grid-item .tag {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    font-size: 0.7rem;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ---- 3. Ambient dominant-color theming ---- */
+  .ambient-wrap {
+    position: relative;
+    border-radius: 6px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    transition: background 0.6s ease;
+  }
+  .ambient-inner {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .ambient-inner video {
+    width: 55%;
+    border-radius: 6px;
+  }
+  .ambient-swatch {
+    flex: 1;
+    text-align: center;
+  }
+  .ambient-swatch-box {
+    width: 100%;
+    height: 90px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    transition: background 0.3s ease;
+    margin-bottom: 0.5rem;
+  }
+  .ambient-swatch code {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  /* ---- 4. Text-mask reveal ---- */
+  .mask-wrap {
+    position: relative;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .mask-text {
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    background: #111;
+    position: relative;
+    -webkit-mask-image: linear-gradient(#fff, #fff);
+    mask-image: linear-gradient(#fff, #fff);
+  }
+  .mask-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140%;
+    transform: translate(-50%, -50%);
+    -webkit-mask-image: none;
+  }
+  .mask-text-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: #0a0a0a;
+    mix-blend-mode: normal;
+    -webkit-mask-image: none;
+  }
+  .mask-video-el {
+    width: 100%;
+    display: block;
+  }
+  .mask-text-clip {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+  }
+  .mask-text-clip span {
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    -webkit-mask-image: none;
+  }
+
+  /* ---- 5. Split-screen comparison slider ---- */
+  .compare {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    user-select: none;
+  }
+  .compare video {
+    display: block;
+    width: 100%;
+    border-radius: 0;
+  }
+  .compare-after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: hidden;
+    width: 50%;
+    border-right: 2px solid var(--accent);
+  }
+  .compare-after video {
+    filter: grayscale(1) contrast(1.1);
+    width: var(--compare-video-width, 100%);
+    max-width: none;
+  }
+  .compare-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34px;
+    height: 34px;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: ew-resize;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .compare-handle::before {
+    content: '';
+    display: block;
+    width: 2px;
+    height: 14px;
+    background: #1a1a1a;
+    box-shadow: 6px 0 0 #1a1a1a, -6px 0 0 #1a1a1a;
+  }
+  .compare-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 3rem 2rem 4rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+
+  /* Print / PDF button */
+  #print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: #1a1a1a;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+  }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { width: 18px; height: 18px; }
+
+  #print-tooltip {
+    position: fixed;
+    top: 22px;
+    right: 68px;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+  }
+  #print-btn:hover + #print-tooltip { opacity: 1; }
+
+  @media print {
+    #print-btn, #print-tooltip { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .ambient-inner { flex-direction: column; }
+    .ambient-inner video { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<button id="print-btn" aria-label="Save as PDF">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12"/>
+    <path d="M7 10l5 5 5-5"/>
+    <path d="M5 21h14"/>
+  </svg>
+</button>
+<div id="print-tooltip">Save as PDF</div>
+
+<header>
+  <h1>Video, off the rails</h1>
+  <p>Five unconventional ways to wire a &lt;video&gt; element into a page, all built on your uploaded clip.</p>
+</header>
+
+<section>
+  <span class="label">01 — Scroll-scrubbed</span>
+  <h2>Scroll drives playback</h2>
+  <p class="desc">Instead of autoplaying, the video's <code>currentTime</code> is bound directly to scroll position within this section. Scroll down slowly to "play" the clip.</p>
+  <div class="scrub-wrap" id="scrubWrap">
+    <div class="scrub-sticky">
+      <video id="scrubVideo" src="example.mp4" muted playsinline preload="auto"></video>
+      <div class="scrub-progress"><div class="scrub-progress-bar" id="scrubBar"></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="label">02 — Hover-to-play grid</span>
+  <h2>Only the hovered tile decodes</h2>
+  <p class="desc">Three muted instances of the same video, each starting at a different offset. Playback only starts on hover — cheap on bandwidth and CPU when scaled to a real gallery.</p>
+  <div class="grid">
+    <div class="grid-item" data-offset="0">
+      <video src="example.mp4" muted loop playsinline preload="metadata"></video>
+      <span class="tag">0:00</span>
+    </div>
+    <div class="grid-item" data-offset="5">
+      <video src="example.mp4" muted loop playsinline preload="metadata"></video>
+      <span class="tag">0:05</span>
+    </div>
+    <div class="grid-item" data-offset="10">
+      <video src="example.mp4" muted loop playsinline preload="metadata"></video>
+      <span class="tag">0:10</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="label">03 — Ambient color extraction</span>
+  <h2>The page reads the frame back</h2>
+  <p class="desc">A hidden canvas samples pixels from the current video frame every few hundred milliseconds and averages them into a single color, which then drives the swatch and background tint in real time — press play.</p>
+  <div class="ambient-wrap" id="ambientWrap">
+    <div class="ambient-inner">
+      <video id="ambientVideo" src="example.mp4" muted loop playsinline controls></video>
+      <div class="ambient-swatch">
+        <div class="ambient-swatch-box" id="ambientSwatch"></div>
+        <code id="ambientHex">#000000</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="label">04 — Text as a viewport</span>
+  <h2>Footage plays through the letterforms</h2>
+  <p class="desc">The video is masked so it's only visible where the headline text sits, using <code>-webkit-background-clip: text</code>. Everywhere else in the block, it's just a dark background.</p>
+  <div class="mask-wrap">
+    <video id="maskVideoBg" src="example.mp4" muted loop autoplay playsinline style="position:absolute; width:140%; top:50%; left:50%; transform:translate(-50%,-50%);"></video>
+    <h2 id="maskHeadline" style="margin:0; font-size:clamp(2.5rem,9vw,6rem); font-weight:300; letter-spacing:-0.02em; color:#0a0a0a; position:relative;">MOTION</h2>
+  </div>
+</section>
+
+<section>
+  <span class="label">05 — Split-screen compare</span>
+  <h2>One clip, two treatments</h2>
+  <p class="desc">Two synced instances of the same video — one styled, one not — revealed with a draggable clip line. Useful for before/after grading, color passes, or camera angle A/B.</p>
+  <div class="compare" id="compareWrap">
+    <video id="compareBase" src="example.mp4" muted loop autoplay playsinline></video>
+    <div class="compare-after" id="compareAfter">
+      <video id="compareTop" src="example.mp4" muted loop autoplay playsinline></video>
+    </div>
+    <div class="compare-handle" id="compareHandle"></div>
+  </div>
+  <div class="compare-labels"><span>Graded (grayscale)</span><span>Original</span></div>
+</section>
+
+<footer>Built entirely with native &lt;video&gt;, canvas, and CSS — no video editing involved.</footer>
+
+<script>
+  // ---- 1. Scroll-scrubbed video ----
+  (function () {
+    const wrap = document.getElementById('scrubWrap');
+    const video = document.getElementById('scrubVideo');
+    const bar = document.getElementById('scrubBar');
+    let duration = 0;
+
+    video.addEventListener('loadedmetadata', () => { duration = video.duration; });
+
+    function onScroll() {
+      if (!duration) return;
+      const rect = wrap.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const scrolled = Math.min(Math.max(-rect.top, 0), total);
+      const progress = total > 0 ? scrolled / total : 0;
+      video.currentTime = progress * duration;
+      bar.style.width = (progress * 100) + '%';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // ---- 2. Hover-to-play grid ----
+  (function () {
+    document.querySelectorAll('.grid-item').forEach(item => {
+      const video = item.querySelector('video');
+      const offset = parseFloat(item.dataset.offset) || 0;
+      video.addEventListener('loadedmetadata', () => {
+        video.currentTime = Math.min(offset, video.duration - 0.1);
+      });
+      item.addEventListener('mouseenter', () => {
+        video.currentTime = Math.min(offset, video.duration - 0.1);
+        video.play();
+      });
+      item.addEventListener('mouseleave', () => {
+        video.pause();
+        video.currentTime = Math.min(offset, video.duration - 0.1);
+      });
+    });
+  })();
+
+  // ---- 3. Ambient color extraction ----
+  (function () {
+    const video = document.getElementById('ambientVideo');
+    const wrap = document.getElementById('ambientWrap');
+    const swatch = document.getElementById('ambientSwatch');
+    const hexLabel = document.getElementById('ambientHex');
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 18;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let raf = null;
+
+    function toHex(n) { return n.toString(16).padStart(2, '0'); }
+
+    function sample() {
+      if (video.paused || video.ended) return;
+      try {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+        }
+        r = Math.round(r / count); g = Math.round(g / count); b = Math.round(b / count);
+        const hex = '#' + toHex(r) + toHex(g) + toHex(b);
+        swatch.style.background = hex;
+        hexLabel.textContent = hex.toUpperCase();
+        wrap.style.background = `linear-gradient(135deg, rgba(${r},${g},${b},0.08), var(--card))`;
+      } catch (e) { /* frame not ready yet */ }
+      raf = requestAnimationFrame(() => setTimeout(sample, 200));
+    }
+
+    video.addEventListener('play', sample);
+    video.addEventListener('pause', () => { if (raf) cancelAnimationFrame(raf); });
+  })();
+
+  // ---- 5. Split-screen compare drag ----
+  (function () {
+    const wrap = document.getElementById('compareWrap');
+    const after = document.getElementById('compareAfter');
+    const handle = document.getElementById('compareHandle');
+    const base = document.getElementById('compareBase');
+    const top = document.getElementById('compareTop');
+    let dragging = false;
+
+    function setSplit(pct) {
+      pct = Math.min(Math.max(pct, 0), 100);
+      after.style.width = pct + '%';
+      handle.style.left = pct + '%';
+      top.style.width = (100 / (pct / 100)) + '%';
+    }
+    setSplit(50);
+
+    function onMove(clientX) {
+      const rect = wrap.getBoundingClientRect();
+      const pct = ((clientX - rect.left) / rect.width) * 100;
+      setSplit(pct);
+    }
+
+    handle.addEventListener('mousedown', () => dragging = true);
+    window.addEventListener('mouseup', () => dragging = false);
+    window.addEventListener('mousemove', e => { if (dragging) onMove(e.clientX); });
+
+    handle.addEventListener('touchstart', () => dragging = true, { passive: true });
+    window.addEventListener('touchend', () => dragging = false);
+    window.addEventListener('touchmove', e => {
+      if (dragging && e.touches[0]) onMove(e.touches[0].clientX);
+    }, { passive: true });
+
+    // keep base/top videos loosely in sync
+    base.addEventListener('play', () => top.play());
+    base.addEventListener('pause', () => top.pause());
+  })();
+
+  // ---- Print to PDF ----
+  function printSinglePage() {
+    const width = document.documentElement.scrollWidth;
+    const height = document.documentElement.scrollHeight;
+    const styleEl = document.createElement('style');
+    styleEl.id = 'single-page-print-style';
+    styleEl.textContent = `
+      @page { size: ${width}px ${height}px; margin: 0; }
+      html, body { width: ${width}px; height: ${height}px; }
+    `;
+    document.head.appendChild(styleEl);
+    window.print();
+    setTimeout(() => {
+      const el = document.getElementById('single-page-print-style');
+      if (el) el.remove();
+    }, 1000);
+  }
+  document.getElementById('print-btn').addEventListener('click', printSinglePage);
+</script>
+
+</body>
+</html>
