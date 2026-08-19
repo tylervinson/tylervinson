@@ -52,6 +52,33 @@ footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; f
 footer a { color: #555; text-decoration: none; }
 footer a:hover { color: #888; }
 
+
+/* plain-language helpers */
+.lead { font-size: 17px; color: #aaa; line-height: 1.75; max-width: 780px; }
+.lead + .lead { margin-top: 14px; }
+.plain-card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; }
+.qa { margin-top: 28px; }
+.qa h3 { font-size: 15.5px; font-weight: 500; color: #e0e0e0; margin-bottom: 6px; }
+.qa p { font-size: 14px; color: #999; line-height: 1.75; margin-bottom: 20px; max-width: 780px; }
+.big-steps { display: flex; flex-direction: column; gap: 2px; margin-top: 28px; }
+.big-step { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; display: grid; grid-template-columns: 44px 1fr; gap: 20px; align-items: start; }
+.big-step .bn { width: 34px; height: 34px; border-radius: 50%; background: #FFBE5F; color: #1a1a1a; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.big-step h3 { font-size: 16px; font-weight: 500; color: #e0e0e0; margin-bottom: 7px; }
+.big-step p { font-size: 14px; color: #999; line-height: 1.7; }
+.big-step p + p { margin-top: 10px; }
+.big-step .why { color: #777; font-size: 13px; font-style: italic; margin-top: 9px; }
+.result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; margin-top: 24px; }
+@media (max-width: 980px) { .result-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .result-grid { grid-template-columns: 1fr; } }
+.result-item { background: #1e1e1e; padding: 20px 22px; }
+.result-item .rname { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.result-item .rname.crit { color: #d98a84; }
+.result-item .rname.warn { color: #d8a24a; }
+.result-item .rname.ok { color: #7dbf82; }
+.result-item .rname.neutral { color: #d0d0d0; }
+.result-item p { font-size: 13px; color: #888; line-height: 1.65; }
+.result-item .todo { font-size: 12.5px; color: #FFBE5F; margin-top: 8px; }
+
 @media (max-width: 768px) {
     h1 { font-size: 34px; }
     .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
@@ -73,19 +100,21 @@ footer a:hover { color: #888; }
 
     <header>
         <p class="eyebrow">AZ Blue Site Audit</p>
-        <h1>Technical Specs</h1>
-        <p class="subtitle">Manifest, message types, and the data this thing reads and writes.</p>
+        <h1>Reference</h1>
+        <p class="subtitle">Technical detail for whoever maintains this. Nothing here is needed for day-to-day use.</p>
         <nav class="tab-nav">
-            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-            <a href="workflow.html" class="tab-nav-link">Workflow</a>
-            <a href="specs.html" class="tab-nav-link active">Technical Specs</a>
-            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
-            <a href="demo.html" class="tab-nav-link">Demo</a>
-            <a href="install.html" class="tab-nav-link">Install</a>
+            <a href="overview.html" class="tab-nav-link">What It Does</a>
+            <a href="install.html" class="tab-nav-link">Set It Up</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Everyday Review</a>
+            <a href="aep-launch.html" class="tab-nav-link">AEP Launch</a>
+            <a href="demo.html" class="tab-nav-link">Try It</a>
+            <a href="specs.html" class="tab-nav-link active">Reference</a>
         </nav>
-        <a href="install.html" class="download-btn">Get the Extension →</a>
+        <a href="install.html" class="download-btn">Get Started →</a>
     </header>
 
+
+<div class="callout note" style="margin-bottom:40px">This page is for developers and IT. If you just want to use the tool, <a href="using-the-extension.html" class="inline-link">Everyday Review</a> and <a href="aep-launch.html" class="inline-link">AEP Launch</a> are what you want.</div>
 
 <section class="section">
     <div class="section-label">Manifest</div>
@@ -94,7 +123,7 @@ footer a:hover { color: #888; }
     <div class="spec-block">
         <div class="spec-block-header">
             <h3>manifest.json</h3>
-            <p><code>host_permissions</code> is what lets the extension fetch azblue.com pages directly, bypassing the old CORS-proxy Worker entirely once installed.</p>
+            <p><code>host_permissions</code> is what lets the extension fetch azblue.com pages directly from the browser, with no proxy in between.</p>
         </div>
         <div class="spec-block-body"><pre><span class="cmt">// manifest.json (abridged)</span>
 {
@@ -102,6 +131,7 @@ footer a:hover { color: #888; }
   <span class="key">"permissions"</span>: [<span class="str">"storage"</span>, <span class="str">"sidePanel"</span>, <span class="str">"tabs"</span>, <span class="str">"scripting"</span>],
   <span class="key">"host_permissions"</span>: [
     <span class="str">"https://www.azblue.com/*"</span>,
+    <span class="str">"https://staging.azblue.com/*"</span>,
     <span class="str">"https://audit-state.bcbs-of-az.workers.dev/*"</span>,
     <span class="str">"https://schema-cors-proxy.bcbs-of-az.workers.dev/*"</span>
   ],
@@ -127,7 +157,9 @@ footer a:hover { color: #888; }
         <tr><td>sidepanel.html / .js</td><td>Reads the active tab's URL, maps it to an audit path, filters the published run's findings.</td></tr>
         <tr><td>content.js</td><td>Injected into azblue.com. Resolves a finding's evidence to a DOM element and highlights it.</td></tr>
         <tr><td>background.js</td><td>Context-aware toolbar click (panel on azblue.com, dashboard elsewhere), per-tab side panel enablement, message relay.</td></tr>
-        <tr><td>config.js</td><td>Access key and endpoints, loaded by both the dashboard and the side panel.</td></tr>
+        <tr><td>config.js</td><td>Access key, state endpoint, production and staging URLs. Loaded by both surfaces.</td></tr>
+        <tr><td>pdf-thumb.js</td><td>Renders page 1 of a linked PDF as a thumbnail for AEP comparisons. Polyfills a very new <code>Map</code> method some Chrome builds lack — check here first if PDFs stop rendering.</td></tr>
+        <tr><td>vendor/pdfjs/</td><td>Bundled PDF.js (~2.4MB). Local only, no CDN or network fetch.</td></tr>
     </table>
 </section>
 
@@ -165,9 +197,24 @@ mlaudit:www.azblue.com:excludeDirs  <span class="cmt">// English-only sections</
 </section>
 
 <section class="section">
+    <div class="section-label">AEP Snapshots</div>
+    <h2>How comparisons work</h2>
+    <p>A snapshot records the scoped audit result plus, per page, the ordered text segments, title, meta description, and any linked document URLs. Comparison diffs those segment lists.</p>
+    <table class="field-table">
+        <tr><th>Behaviour</th><th>Detail</th></tr>
+        <tr><td>Environment tagging</td><td>Recorded from the run that produced the snapshot, not chosen by hand — a staging capture can't be mislabelled as production. Pre-launch offers production on the left, staging on the right; post-launch offers production only.</td></tr>
+        <tr><td>Storage</td><td>Shared KV, same store as findings and triage, so the whole team sees one library.</td></tr>
+        <tr><td>Scope mismatch</td><td>Comparing snapshots taken with different scopes shows a warning — added/removed counts are unreliable across differing scopes.</td></tr>
+        <tr><td>Legacy snapshots</td><td>Captures taken before content-diffing existed fall back to a word-count delta with an explanatory note rather than an empty diff.</td></tr>
+        <tr><td>Skipped checks on staging</td><td>Indexing, canonical and hreflang are not evaluated against staging — they legitimately differ off production.</td></tr>
+        <tr><td>Document thumbnails</td><td>PDFs render page 1 locally via bundled PDF.js, once per document per session, lazily on section open. Non-PDF office formats show a file-type icon. Failures resolve to one of three icons: 404, unreachable host, or unparseable.</td></tr>
+    </table>
+</section>
+
+<section class="section">
     <div class="section-label">Highlight Resolution</div>
     <h2>How content.js finds an element</h2>
-    <p>Tried in order, first match wins. Some findings &mdash; metadata, title, canonical, noindex &mdash; have no visible element and correctly resolve to nothing.</p>
+    <p>Tried in order, first match wins. Some findings &mdash; metadata, title, canonical, noindex &mdash; have no visible element and resolve to nothing.</p>
     <table class="field-table">
         <tr><th>Signal</th><th>Resolves to</th></tr>
         <tr><td>Broken link URL</td><td>The exact <code>&lt;a href&gt;</code> matching that path</td></tr>

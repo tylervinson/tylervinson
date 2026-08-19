@@ -52,6 +52,33 @@ footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; f
 footer a { color: #555; text-decoration: none; }
 footer a:hover { color: #888; }
 
+
+/* plain-language helpers */
+.lead { font-size: 17px; color: #aaa; line-height: 1.75; max-width: 780px; }
+.lead + .lead { margin-top: 14px; }
+.plain-card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; }
+.qa { margin-top: 28px; }
+.qa h3 { font-size: 15.5px; font-weight: 500; color: #e0e0e0; margin-bottom: 6px; }
+.qa p { font-size: 14px; color: #999; line-height: 1.75; margin-bottom: 20px; max-width: 780px; }
+.big-steps { display: flex; flex-direction: column; gap: 2px; margin-top: 28px; }
+.big-step { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; display: grid; grid-template-columns: 44px 1fr; gap: 20px; align-items: start; }
+.big-step .bn { width: 34px; height: 34px; border-radius: 50%; background: #FFBE5F; color: #1a1a1a; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.big-step h3 { font-size: 16px; font-weight: 500; color: #e0e0e0; margin-bottom: 7px; }
+.big-step p { font-size: 14px; color: #999; line-height: 1.7; }
+.big-step p + p { margin-top: 10px; }
+.big-step .why { color: #777; font-size: 13px; font-style: italic; margin-top: 9px; }
+.result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; margin-top: 24px; }
+@media (max-width: 980px) { .result-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .result-grid { grid-template-columns: 1fr; } }
+.result-item { background: #1e1e1e; padding: 20px 22px; }
+.result-item .rname { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.result-item .rname.crit { color: #d98a84; }
+.result-item .rname.warn { color: #d8a24a; }
+.result-item .rname.ok { color: #7dbf82; }
+.result-item .rname.neutral { color: #d0d0d0; }
+.result-item p { font-size: 13px; color: #888; line-height: 1.65; }
+.result-item .todo { font-size: 12.5px; color: #FFBE5F; margin-top: 8px; }
+
 @media (max-width: 768px) {
     h1 { font-size: 34px; }
     .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
@@ -101,7 +128,7 @@ footer a:hover { color: #888; }
 
 .panel-anatomy { font-size: 11.5px; }
 .panel-header-mock { background: #1e1e1e; border-bottom: 1px solid #2a2a2a; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
-.mock-icon { width: 20px; height: 20px; border-radius: 5px; background: #FFBE5F; flex: 0 0 auto; }
+.mock-icon { width: 20px; height: 20px; border-radius: 5px; background: #0099D8; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
 .mock-title { color: #e0e0e0; font-weight: 500; }
 .panel-section-mock { padding: 12px; border-bottom: 1px solid #232323; }
 .panel-section-mock-label { font-size: 9.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #555; margin-bottom: 6px; }
@@ -127,17 +154,17 @@ footer a:hover { color: #888; }
 
     <header>
         <p class="eyebrow">AZ Blue Site Audit</p>
-        <h1>Using the Extension</h1>
-        <p class="subtitle">What each part does, day to day.</p>
+        <h1>Everyday Review</h1>
+        <p class="subtitle">Finding problems, seeing them on the page, and marking them fixed.</p>
         <nav class="tab-nav">
-            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-            <a href="workflow.html" class="tab-nav-link">Workflow</a>
-            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
-            <a href="using-the-extension.html" class="tab-nav-link active">Using the Extension</a>
-            <a href="demo.html" class="tab-nav-link">Demo</a>
-            <a href="install.html" class="tab-nav-link">Install</a>
+            <a href="overview.html" class="tab-nav-link">What It Does</a>
+            <a href="install.html" class="tab-nav-link">Set It Up</a>
+            <a href="using-the-extension.html" class="tab-nav-link active">Everyday Review</a>
+            <a href="aep-launch.html" class="tab-nav-link">AEP Launch</a>
+            <a href="demo.html" class="tab-nav-link">Try It</a>
+            <a href="specs.html" class="tab-nav-link">Reference</a>
         </nav>
-        <a href="install.html" class="download-btn">Get the Extension →</a>
+        <a href="install.html" class="download-btn">Get Started →</a>
     </header>
 
 
@@ -185,7 +212,7 @@ footer a:hover { color: #888; }
                         <div class="vstep-num">3</div>
                         <div class="vstep-body">
                             <h3>Open a page on azblue.com</h3>
-                            <p>The panel updates to whatever page is active, including the homepage.</p>
+                            <p>The panel updates to whatever page is active, showing that page's findings.</p>
                             <div class="vstep-time">0:24</div>
                         </div>
                     </div>
@@ -219,24 +246,24 @@ footer a:hover { color: #888; }
 </section>
 
 <section class="section">
-    <div class="section-label">Getting In</div>
-    <h2>Two ways to reach the panel</h2>
+    <div class="section-label">Opening It</div>
+    <h2>Getting to your findings</h2>
     <div class="steps">
             <div class="step">
                 <div class="step-num">1</div>
-                <div class="step-body"><h3>Click the toolbar icon</h3><p>It’s context-aware. On azblue.com it docks the review panel straight away. Anywhere else it opens the dashboard &mdash; or focuses it, if already open.</p><p>Pick <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong> the first time. No passphrase.</p></div>
+                <div class="step-body"><h3>Click the toolbar icon</h3><p>It’s context-aware. On azblue.com it docks the review panel straight away. Anywhere else it opens the dashboard &mdash; or focuses it, if already open.</p><p>Pick <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong> the first time you open it.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px;text-align:center">
     <div style="display:inline-flex;align-items:center;gap:8px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:8px 14px">
-        <div style="width:22px;height:22px;border-radius:6px;background:#FFBE5F"></div>
+        <div style="width:22px;height:22px;border-radius:6px;background:#0099D8;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <span style="font-size:11px;color:#888">AZ Blue Site Audit</span>
     </div>
-    <div style="font-size:10px;color:#555;margin-top:10px">Click the icon &rarr; dashboard opens in a new tab</div>
+    <div style="font-size:10px;color:#555;margin-top:10px">On azblue.com &rarr; panel. Elsewhere &rarr; dashboard.</div>
 </div></div>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
-                <div class="step-body"><h3>Or jump in from the dashboard</h3><p>From any dashboard page, click <strong style="color:#e0e0e0">Review on site</strong>. It opens azblue.com and docks the side panel in one action.</p><p>This has to be a real click &mdash; Chrome won’t let an extension open the panel on its own.</p></div>
+                <div class="step-body"><h3>Or jump in from the dashboard</h3><p>From any dashboard page, click <strong style="color:#e0e0e0">Review on site</strong>. It opens azblue.com and docks the side panel in one action.</p><p>Useful when you’re already in the dashboard and want to start reviewing pages.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px">
     <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dashboard tab bar</div>
@@ -257,10 +284,10 @@ footer a:hover { color: #888; }
     <div class="steps">
             <div class="step">
                 <div class="step-num">3</div>
-                <div class="step-body"><h3>Current page</h3><p>Name, path, and a severity breakdown for the page you’re on right now. The homepage shows as "Home" with an empty path &mdash; that’s expected.</p><p>Not on azblue.com, or no published run yet? The panel says so plainly instead of showing stale data.</p></div>
+                <div class="step-body"><h3>Current page</h3><p>Name, path, and a severity breakdown for the page you’re on right now.</p><p>If you’re not on azblue.com, or no audit has been published yet, the panel tells you which.</p></div>
                 <div class="ui-mock">
 <div class="panel-anatomy">
-    <div class="panel-header-mock"><div class="mock-icon"></div><div class="mock-title">Site Audit</div></div>
+    <div class="panel-header-mock"><div class="mock-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div class="mock-title">Site Audit</div></div>
     <div class="panel-section-mock">
         <div class="panel-section-mock-label">Current page</div>
         <div class="mock-title big">Annual Exam</div>
@@ -275,7 +302,7 @@ footer a:hover { color: #888; }
             </div>
             <div class="step">
                 <div class="step-num">4</div>
-                <div class="step-body"><h3>Expand to highlight</h3><p>Click a finding to expand it. If the audit captured a locatable element &mdash; a broken link, placeholder text, a heading &mdash; the panel scrolls the page to it and outlines it in gold.</p><p>Some findings (meta description, title, canonical) have no visible element on the page. The panel says so rather than pretending.</p></div>
+                <div class="step-body"><h3>Expand to highlight</h3><p>Click a finding to expand it. If the audit captured a locatable element &mdash; a broken link, placeholder text, a heading &mdash; the panel scrolls the page to it and outlines it in gold.</p><p>Some findings &mdash; meta description, title, canonical &mdash; have no visible element on the page. The panel tells you when there’s nothing to point at.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px;background:#111">
     <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">On the live page</div>
@@ -296,6 +323,24 @@ footer a:hover { color: #888; }
     </div>
 </div></div>
             </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-label">Working Through Them</div>
+    <h2>What to do with a finding</h2>
+    <div class="qa">
+        <h3>Not everything needs fixing</h3>
+        <p>Some findings are genuinely wrong for your site &mdash; a page that's intentionally English-only, or a heading count that differs for a good reason. Mark those <strong>Ignore</strong> and they stop cluttering the list for everyone.</p>
+
+        <h3>Marking something done</h3>
+        <p>Once you've made the fix in the CMS, mark it <strong>Done</strong>. It stays marked until the next audit run confirms it, and your teammates see it immediately so nobody duplicates the work.</p>
+
+        <h3>Where to start when there's a lot</h3>
+        <p>The dashboard's <strong>Top problem pages</strong> list ranks pages by how many findings they have. Fixing one page there often clears several findings at once, which is usually faster than working down a flat list.</p>
+
+        <h3>Severity, in plain terms</h3>
+        <p><strong style="color:#d98a84">Critical</strong> means a page or translation is missing or broken &mdash; a customer hits a dead end. <strong style="color:#d8a24a">Warning</strong> means the content doesn't match the English version and probably lost something. <strong style="color:#888">Info</strong> is worth knowing but rarely urgent.</p>
     </div>
 </section>
 

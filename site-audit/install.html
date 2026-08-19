@@ -52,6 +52,33 @@ footer { padding-top: 40px; border-top: 1px solid #242424; text-align: center; f
 footer a { color: #555; text-decoration: none; }
 footer a:hover { color: #888; }
 
+
+/* plain-language helpers */
+.lead { font-size: 17px; color: #aaa; line-height: 1.75; max-width: 780px; }
+.lead + .lead { margin-top: 14px; }
+.plain-card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; }
+.qa { margin-top: 28px; }
+.qa h3 { font-size: 15.5px; font-weight: 500; color: #e0e0e0; margin-bottom: 6px; }
+.qa p { font-size: 14px; color: #999; line-height: 1.75; margin-bottom: 20px; max-width: 780px; }
+.big-steps { display: flex; flex-direction: column; gap: 2px; margin-top: 28px; }
+.big-step { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 26px; display: grid; grid-template-columns: 44px 1fr; gap: 20px; align-items: start; }
+.big-step .bn { width: 34px; height: 34px; border-radius: 50%; background: #FFBE5F; color: #1a1a1a; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.big-step h3 { font-size: 16px; font-weight: 500; color: #e0e0e0; margin-bottom: 7px; }
+.big-step p { font-size: 14px; color: #999; line-height: 1.7; }
+.big-step p + p { margin-top: 10px; }
+.big-step .why { color: #777; font-size: 13px; font-style: italic; margin-top: 9px; }
+.result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #2a2a2a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; margin-top: 24px; }
+@media (max-width: 980px) { .result-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .result-grid { grid-template-columns: 1fr; } }
+.result-item { background: #1e1e1e; padding: 20px 22px; }
+.result-item .rname { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.result-item .rname.crit { color: #d98a84; }
+.result-item .rname.warn { color: #d8a24a; }
+.result-item .rname.ok { color: #7dbf82; }
+.result-item .rname.neutral { color: #d0d0d0; }
+.result-item p { font-size: 13px; color: #888; line-height: 1.65; }
+.result-item .todo { font-size: 12.5px; color: #FFBE5F; margin-top: 8px; }
+
 @media (max-width: 768px) {
     h1 { font-size: 34px; }
     .download-btn { position: static; display: block; text-align: center; margin-top: 24px; }
@@ -94,40 +121,40 @@ footer a:hover { color: #888; }
 
     <header>
         <p class="eyebrow">AZ Blue Site Audit</p>
-        <h1>Installation</h1>
-        <p class="subtitle">Download, extract, and load the extension in four steps.</p>
+        <h1>Set It Up</h1>
+        <p class="subtitle">A one-time setup. About five minutes, and you only do it once.</p>
         <nav class="tab-nav">
-            <a href="overview.html" class="tab-nav-link">Extension Overview</a>
-            <a href="workflow.html" class="tab-nav-link">Workflow</a>
-            <a href="specs.html" class="tab-nav-link">Technical Specs</a>
-            <a href="using-the-extension.html" class="tab-nav-link">Using the Extension</a>
-            <a href="demo.html" class="tab-nav-link">Demo</a>
-            <a href="install.html" class="tab-nav-link active">Install</a>
+            <a href="overview.html" class="tab-nav-link">What It Does</a>
+            <a href="install.html" class="tab-nav-link active">Set It Up</a>
+            <a href="using-the-extension.html" class="tab-nav-link">Everyday Review</a>
+            <a href="aep-launch.html" class="tab-nav-link">AEP Launch</a>
+            <a href="demo.html" class="tab-nav-link">Try It</a>
+            <a href="specs.html" class="tab-nav-link">Reference</a>
         </nav>
-        <a href="install.html" class="download-btn">Get the Extension →</a>
+        <a href="install.html" class="download-btn">Get Started →</a>
     </header>
 
 
 <div class="req-grid">
     <div class="req-item">
         <h4>Browser</h4>
-        <p><strong>Google Chrome</strong> &mdash; any recent version. Uses Manifest V3 and the Chrome Side Panel API. Edge works too, since it's the same Chromium base.</p>
+        <p><strong>Google Chrome</strong>, any recent version. Microsoft Edge works too.</p>
     </div>
     <div class="req-item">
-        <h4>Environment</h4>
-        <p><strong>azblue.com</strong> &mdash; the extension fetches pages directly and the side panel activates on that domain and its own pages.</p>
+        <h4>Access</h4>
+        <p>You'll need the <strong>access key</strong> for the tool. Ask whoever set it up if you don't have one.</p>
     </div>
     <div class="req-item">
         <h4>Distribution</h4>
-        <p><strong>Load unpacked</strong> &mdash; not on the Chrome Web Store. Developer mode must be enabled in Chrome.</p>
+        <p>This isn't in the Chrome Web Store &mdash; you install it from a folder, which means turning on Chrome's <strong>Developer mode</strong> switch.</p>
     </div>
 </div>
 
 <div class="download-cta">
     <div class="download-cta-text">
-        <h2>AZ Blue Site Audit v3.0</h2>
-        <p>Extension ZIP &middot; Chrome MV3<br>
-        <span>Includes: manifest.json, config.js, background.js, content.js, dashboard.html/js, sidepanel.html/js, actions.js, dashview.js, ext-glue.js, icons</span></p>
+        <h2>AZ Blue Site Audit v3.2</h2>
+        <p>Chrome extension &middot; version 3.2<br>
+        <span>Everything needed to run the tool, including the PDF preview library used by AEP Launch.</span></p>
     </div>
     <a href="site-audit-extension.zip" class="dl-btn" download>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 13h12" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -178,7 +205,7 @@ footer a:hover { color: #888; }
                 <div class="ui-mock">
 <div style="padding:16px;text-align:center">
     <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:16px">
-        <div style="width:32px;height:32px;border-radius:8px;background:#FFBE5F;margin:0 auto 10px"></div>
+        <div style="width:32px;height:32px;border-radius:8px;background:#0099D8;margin:0 auto 10px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <div style="font-size:11px;color:#ccc;font-weight:500">AZ Blue Site Audit</div>
         <div style="font-size:9.5px;color:#555;margin-top:4px">Loaded successfully</div>
     </div>
@@ -186,21 +213,35 @@ footer a:hover { color: #888; }
             </div>
             <div class="step">
                 <div class="step-num">4</div>
-                <div class="step-body"><h3>Pin it and pick a role</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon and choose <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong> &mdash; no passphrase. See <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
+                <div class="step-body"><h3>Set the access key</h3><p>Open the file called <code>config.js</code> in the folder you just extracted &mdash; any text editor works. Find the line that says <code>ACCESS_KEY</code> and replace <code>CHANGE_ME</code> with the access key you were given. Save the file, then click the reload icon on the extension card in <code>chrome://extensions</code>.</p><p>Without this the tool installs but can't load any data &mdash; the side panel will tell you it isn't configured. If you don't have the key, ask whoever set up the tool.</p></div>
+                <div class="ui-mock">
+<div style="padding:14px">
+    <div style="font-size:10px;color:#555;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">config.js</div>
+    <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:1.9;color:#666">
+        <div>window.AUDIT_CONFIG = {</div>
+        <div style="padding-left:14px">ACCESS_KEY: <span style="color:#98c379">'&hellip;your key&hellip;'</span>,</div>
+        <div style="padding-left:14px;color:#4a5a4a">STATE_URL: &hellip;</div>
+        <div>};</div>
+    </div>
+</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body"><h3>Pin it and pick a role</h3><p>Click the puzzle-piece icon in Chrome's toolbar and pin <strong style="color:#e0e0e0">AZ Blue Site Audit</strong> so it's always visible.</p><p>Click the icon and choose <strong style="color:#e0e0e0">Admin</strong> or <strong style="color:#e0e0e0">Author</strong>. See <a href="using-the-extension.html" class="inline-link">Using the Extension</a> for what comes next.</p></div>
                 <div class="ui-mock">
 <div style="padding:16px;text-align:center">
     <div style="display:inline-flex;align-items:center;gap:6px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px">
-        <div style="width:16px;height:16px;border-radius:4px;background:#FFBE5F"></div>
+        <div style="width:16px;height:16px;border-radius:4px;background:#0099D8;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="#FFBE5F"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7z"/></svg>
     </div>
     <div style="font-size:10px;color:#555;margin-top:10px">Pinned to the toolbar</div>
 </div></div>
             </div>
     </div>
-<!--<p><br></p>
+
     <div class="callout warn">&#9888; Don’t move the folder after loading it. Chrome stores the path and will disable the extension if the folder is relocated or deleted &mdash; re-load it from the new path if you ever move it.</div>
     <div class="callout tip">Developer mode must stay enabled for the extension to keep working. Chrome will occasionally show a banner about developer extensions being active &mdash; that’s expected for load-unpacked installs.</div>
---></div>
+</div>
 
     <footer>
         <p>AZ Blue Site Audit &middot; internal tool &middot; <a href="overview.html">Docs home</a></p>
