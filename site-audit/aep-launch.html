@@ -107,7 +107,7 @@ footer a:hover { color: #888; }
   padding: 26px 28px 26px 30px; position: relative;
   box-shadow: 0 6px 24px rgba(0,0,0,.25);
 }
-.zcard.passive { border-style: dashed; background: transparent; box-shadow: none; }
+.zcard.wait { border-color: #333; background: #1c1c1c; }
 .zcard .zn {
   position: absolute; top: 22px; left: -22px;
   width: 44px; height: 44px; border-radius: 50%;
@@ -116,7 +116,9 @@ footer a:hover { color: #888; }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 14px rgba(255,190,95,.28);
 }
-.zcard.passive .zn { background: #2a2a2a; color: #777; box-shadow: none; }
+.zcard.wait .zn { background: #3a3a3a; color: #cfcfcf; box-shadow: none; }
+.zcard .zwait { display: inline-block; margin: 14px 0 0 26px; font-size: 12.5px; color: #999;
+  border: 1px solid #333; border-radius: 6px; padding: 6px 12px; }
 .zcard h4 { font-size: 17px; font-weight: 500; color: #f0f0f0; margin: 0 0 9px 26px; letter-spacing: -.2px; }
 .zcard p { font-size: 14px; color: #999; line-height: 1.7; margin: 0 0 0 26px; }
 .zcard .btnhint {
@@ -309,10 +311,11 @@ footer a:hover { color: #888; }
                 </div>
             </div>
             <div class="zrow right">
-                <div class="zcard passive" id="post2">
+                <div class="zcard wait" id="post2">
                     <span class="zn">2</span>
                     <h4>Deploy</h4>
-                    <p>The release goes out. Nothing to do here &mdash; come back when it's live and caches have cleared.</p>
+                    <p>Your normal release process, outside this tool. Come back once it's live and caches have cleared.</p>
+                    <span class="zwait">No action in the extension</span>
                 </div>
             </div>
             <div class="zrow left">
