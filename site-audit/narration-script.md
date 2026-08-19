@@ -1,6 +1,6 @@
 # Walkthrough narration script
 
-For text-to-speech. Timings match the six steps in `docs/using-the-extension.html`.
+For text-to-speech. Timings match the six steps in `docs/everyday-review.html`.
 Target pace is about 150 words per minute; word counts are noted so you can trim
 if your voice runs fast or slow.
 
@@ -78,7 +78,7 @@ Need the bigger picture? The button at the bottom takes you to the full dashboar
 - **Leave about a half second of silence** at the start of each segment if you're
   recording them separately. It gives the screen action a beat to land.
 - **If your timings drift**, update the `data-timestamp` values in
-  `docs/using-the-extension.html` to match the finished audio. They're in seconds:
+  `docs/everyday-review.html` to match the finished audio. They're in seconds:
   currently 0, 12, 24, 38, 55, and 70.
 - **Save the finished video** as `using-the-extension.mp4` next to the docs HTML.
   The placeholder disappears on its own once the file loads.

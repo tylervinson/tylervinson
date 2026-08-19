@@ -15,7 +15,8 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', syst
 header { position: relative; margin-bottom: 64px; }
 .eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
 h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
-.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; line-height: 1.5; max-width: 720px; }
+.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 36px; line-height: 1.5; max-width: 720px;
+    min-height: calc(17px * 1.5 * 2); }  /* two lines reserved so the tabs sit at the same height on every page */
 .tab-nav { display: flex; gap: 0; border-bottom: 1px solid #2e2e2e; flex-wrap: wrap; }
 .tab-nav-link { padding: 12px 18px; text-decoration: none; color: #666; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: color 0.2s; }
 .tab-nav-link:hover { color: #aaa; }
@@ -95,17 +96,42 @@ footer a:hover { color: #888; }
 .track-card .when { font-size: 13px; color: #777; line-height: 1.65; padding-top: 14px; border-top: 1px solid #262626; }
 .track-card .when strong { color: #999; }
 
-.flow-wrap { position: relative; margin-top: 32px; }
-.flow-row { position: relative; z-index: 2; display: grid; gap: 44px; }
-.flow-row.n3 { grid-template-columns: repeat(3, 1fr); }
-.flow-row.n4 { grid-template-columns: repeat(4, 1fr); }
-.fstep { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 22px 20px; position: relative; }
-.fstep.passive { border-style: dashed; background: transparent; }
-.fstep .fn { position: absolute; top: -12px; left: 18px; width: 26px; height: 26px; border-radius: 50%; background: #FFBE5F; color: #1a1a1a; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
-.fstep.passive .fn { background: #2a2a2a; color: #777; }
-.fstep h4 { font-size: 15px; font-weight: 500; color: #e0e0e0; margin: 8px 0 8px; }
-.fstep p { font-size: 13px; color: #888; line-height: 1.65; }
-.fstep .btnhint { display: inline-block; margin-top: 12px; font-size: 11.5px; color: #FFBE5F; border: 1px solid #3a3324; border-radius: 5px; padding: 4px 9px; }
+.flow-wrap { position: relative; margin-top: 40px; padding: 10px 0 20px; }
+.flow-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 1; }
+.zsteps { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 90px; }
+.zrow { display: grid; grid-template-columns: 1fr 1fr; }
+.zrow.right .zcard { grid-column: 2; }
+.zrow.left .zcard { grid-column: 1; }
+.zcard {
+  background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 14px;
+  padding: 26px 28px 26px 30px; position: relative;
+  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+}
+.zcard.passive { border-style: dashed; background: transparent; box-shadow: none; }
+.zcard .zn {
+  position: absolute; top: 22px; left: -22px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #FFBE5F; color: #1a1a1a;
+  font-size: 18px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(255,190,95,.28);
+}
+.zcard.passive .zn { background: #2a2a2a; color: #777; box-shadow: none; }
+.zcard h4 { font-size: 17px; font-weight: 500; color: #f0f0f0; margin: 0 0 9px 26px; letter-spacing: -.2px; }
+.zcard p { font-size: 14px; color: #999; line-height: 1.7; margin: 0 0 0 26px; }
+.zcard .btnhint {
+  display: inline-block; margin: 14px 0 0 26px; font-size: 12.5px; color: #FFBE5F;
+  border: 1px solid #3a3324; background: rgba(255,190,95,.05);
+  border-radius: 6px; padding: 6px 12px;
+}
+@media (max-width: 900px) {
+  .zrow, .zrow.right .zcard, .zrow.left .zcard { grid-template-columns: 1fr; grid-column: 1; }
+  .zsteps { gap: 18px; }
+  .flow-connectors { display: none; }
+  .zcard { padding-left: 26px; }
+  .zcard .zn { position: static; margin-bottom: 12px; }
+  .zcard h4, .zcard p, .zcard .btnhint { margin-left: 0; }
+}
 
 .readout { margin-top: 28px; }
 .readout h3 { font-size: 15px; font-weight: 500; color: #e0e0e0; margin-bottom: 4px; }
@@ -142,10 +168,10 @@ footer a:hover { color: #888; }
         <nav class="tab-nav">
             <a href="overview.html" class="tab-nav-link">What It Does</a>
             <a href="install.html" class="tab-nav-link">Set It Up</a>
-            <a href="using-the-extension.html" class="tab-nav-link">Everyday Review</a>
+            <a href="everyday-review.html" class="tab-nav-link">Everyday Review</a>
             <a href="aep-launch.html" class="tab-nav-link active">AEP Launch</a>
             <a href="demo.html" class="tab-nav-link">Try It</a>
-            <a href="specs.html" class="tab-nav-link">Reference</a>
+            <a href="reference.html" class="tab-nav-link">Reference</a>
         </nav>
         <a href="install.html" class="download-btn">Get Started →</a>
     </header>
@@ -198,24 +224,30 @@ footer a:hover { color: #888; }
 
     <div class="flow-wrap" id="preWrap">
         <svg class="flow-connectors" id="preSvg" aria-hidden="true"></svg>
-        <div class="flow-row n3">
-            <div class="fstep" id="pre1">
-                <span class="fn">1</span>
-                <h4>Baseline production</h4>
-                <p>Take a snapshot of what customers see right now. This is what the new content gets measured against.</p>
-                <span class="btnhint">Run &amp; capture production</span>
+        <div class="zsteps">
+            <div class="zrow left">
+                <div class="zcard" id="pre1">
+                    <span class="zn">1</span>
+                    <h4>Baseline production</h4>
+                    <p>Take a snapshot of what customers see right now. This is what the new content gets measured against.</p>
+                    <span class="btnhint">Run &amp; capture production</span>
+                </div>
             </div>
-            <div class="fstep" id="pre2">
-                <span class="fn">2</span>
-                <h4>Audit staging</h4>
-                <p>Same checks against the staging site, where the new content lives before launch.</p>
-                <span class="btnhint">Run &amp; capture staging</span>
+            <div class="zrow right">
+                <div class="zcard" id="pre2">
+                    <span class="zn">2</span>
+                    <h4>Audit staging</h4>
+                    <p>Run the same checks against the staging site, where the new content lives before launch.</p>
+                    <span class="btnhint">Run &amp; capture staging</span>
+                </div>
             </div>
-            <div class="fstep" id="pre3">
-                <span class="fn">3</span>
-                <h4>Review the release</h4>
-                <p>Pick the two snapshots and compare. You'll see everything the release will change, and anything that would launch broken.</p>
-                <span class="btnhint">Compare</span>
+            <div class="zrow left">
+                <div class="zcard" id="pre3">
+                    <span class="zn">3</span>
+                    <h4>Review the release</h4>
+                    <p>Pick the two snapshots and compare. You'll see everything the release will change, and anything that would launch broken.</p>
+                    <span class="btnhint">Compare</span>
+                </div>
             </div>
         </div>
     </div>
@@ -267,29 +299,37 @@ footer a:hover { color: #888; }
 
     <div class="flow-wrap" id="postWrap">
         <svg class="flow-connectors" id="postSvg" aria-hidden="true"></svg>
-        <div class="flow-row n4">
-            <div class="fstep" id="post1">
-                <span class="fn">1</span>
-                <h4>Before deploy</h4>
-                <p>Capture production right before the release goes out. Don't skip this &mdash; without it there's nothing to compare against afterwards.</p>
-                <span class="btnhint">Run &amp; capture</span>
+        <div class="zsteps">
+            <div class="zrow left">
+                <div class="zcard" id="post1">
+                    <span class="zn">1</span>
+                    <h4>Before deploy</h4>
+                    <p>Capture production right before the release goes out. Don't skip this &mdash; without it there's nothing to compare against afterwards.</p>
+                    <span class="btnhint">Run &amp; capture</span>
+                </div>
             </div>
-            <div class="fstep passive" id="post2">
-                <span class="fn">2</span>
-                <h4>Deploy</h4>
-                <p>The release goes out. Nothing to do here &mdash; come back when it's live and caches have cleared.</p>
+            <div class="zrow right">
+                <div class="zcard passive" id="post2">
+                    <span class="zn">2</span>
+                    <h4>Deploy</h4>
+                    <p>The release goes out. Nothing to do here &mdash; come back when it's live and caches have cleared.</p>
+                </div>
             </div>
-            <div class="fstep" id="post3">
-                <span class="fn">3</span>
-                <h4>After deploy</h4>
-                <p>Capture production again, now that the new content is live.</p>
-                <span class="btnhint">Run &amp; capture</span>
+            <div class="zrow left">
+                <div class="zcard" id="post3">
+                    <span class="zn">3</span>
+                    <h4>After deploy</h4>
+                    <p>Capture production again, now that the new content is live.</p>
+                    <span class="btnhint">Run &amp; capture</span>
+                </div>
             </div>
-            <div class="fstep" id="post4">
-                <span class="fn">4</span>
-                <h4>Verify</h4>
-                <p>Compare the two captures and find anything that should have changed but didn't.</p>
-                <span class="btnhint">Compare</span>
+            <div class="zrow right">
+                <div class="zcard" id="post4">
+                    <span class="zn">4</span>
+                    <h4>Verify</h4>
+                    <p>Compare the two captures and find anything that should have changed but didn't.</p>
+                    <span class="btnhint">Compare</span>
+                </div>
             </div>
         </div>
     </div>
@@ -398,82 +438,50 @@ footer a:hover { color: #888; }
 </div>
 
 <script>
-function drawPreConn(){
-  var box = document.getElementById('preWrap'), svg = document.getElementById('preSvg');
-  if(!box || !svg) return;
-  var fr = box.getBoundingClientRect();
+/* Connectors leave the bottom-centre of a card, drop, swing across to the next
+   column, then come back down into the top-centre of the next card. Vertical
+   tangents at both ends keep the entry and exit square to the cards. */
+function drawSwoops(wrapId, svgId){
+  var wrap = document.getElementById(wrapId), svg = document.getElementById(svgId);
+  if(!wrap || !svg) return;
+  var cards = [].slice.call(wrap.querySelectorAll('.zcard'));
+  if(cards.length < 2) return;
+  var fr = wrap.getBoundingClientRect();
   if(!fr.width) return;
-  if(window.innerWidth <= 860){ svg.innerHTML=''; return; }
-  svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
+  if(window.innerWidth <= 900){ svg.innerHTML = ''; return; }
+
+  svg.setAttribute('width', fr.width);
+  svg.setAttribute('height', fr.height);
   svg.setAttribute('viewBox', '0 0 ' + fr.width + ' ' + fr.height);
-  var PAIRS = [['pre1','pre2','right'],['pre2','pre3','right']];
-  var S = '#8a8a8a';
-  function pt(el, edge){
-    var r = el.getBoundingClientRect();
-    if(edge==='right') return {x: r.right - fr.left, y: r.top + r.height/2 - fr.top};
-    if(edge==='left')  return {x: r.left - fr.left,  y: r.top + r.height/2 - fr.top};
-    if(edge==='bottom')return {x: r.left + r.width/2 - fr.left, y: r.bottom - fr.top};
-    return {x: r.left + r.width/2 - fr.left, y: r.top - fr.top};
+
+  var S = '#5a5a5a', paths = '';
+  for(var i = 0; i < cards.length - 1; i++){
+    var a = cards[i].getBoundingClientRect();
+    var b = cards[i+1].getBoundingClientRect();
+
+    var sx = a.left + a.width / 2 - fr.left;   // bottom centre of A
+    var sy = a.bottom - fr.top;
+    var ex = b.left + b.width / 2 - fr.left;   // top centre of B
+    var ey = b.top - fr.top - 10;              // stop just above, so the head sits clear
+
+    // Vertical control handles: the curve exits straight down and enters straight down.
+    var d = Math.max(70, (ey - sy) * 0.72);
+
+    paths += '<path d="M ' + sx + ' ' + sy
+          + ' C ' + sx + ' ' + (sy + d) + ' ' + ex + ' ' + (ey - d) + ' ' + ex + ' ' + ey + '"'
+          + ' fill="none" stroke="' + S + '" stroke-width="2.4" stroke-linecap="round"'
+          + ' marker-end="url(#' + svgId + 'Head)"/>';
   }
-  function seg(sx,sy,ex,ey,horiz){
-    if(horiz){ var dx = Math.max(40, (ex - sx) * 0.55); return 'M '+sx+' '+sy+' C '+(sx+dx)+' '+sy+' '+(ex-dx)+' '+ey+' '+ex+' '+ey; }
-    var dy = Math.max(30, (ey - sy) * 0.55); return 'M '+sx+' '+sy+' C '+sx+' '+(sy+dy)+' '+ex+' '+(ey-dy)+' '+ex+' '+ey;
-  }
-  var defs = '<defs><marker id="preSvgArrow" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse">'
-    + '<path d="M1,1 L6.5,4 L1,7" fill="none" stroke="'+S+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
-  var paths = PAIRS.map(function(p){
-    var a = document.getElementById(p[0]), b = document.getElementById(p[1]);
-    if(!a || !b) return '';
-    var edge = p[2] || 'right';
-    var s0 = pt(a, edge);
-    var e0 = pt(b, edge==='bottom'||edge==='top' ? 'top' : 'left');
-    var horiz = (edge==='right' || edge==='left');
-    return '<path d="'+seg(s0.x,s0.y,e0.x,e0.y,horiz)+'" fill="none" stroke="'+S+'" stroke-width="1.6" marker-end="url(#preSvgArrow)"/>';
-  }).join('');
-  svg.innerHTML = defs + paths;
+  svg.innerHTML =
+    '<defs><marker id="' + svgId + 'Head" markerWidth="13" markerHeight="13" refX="7" refY="5.5"'
+    + ' orient="auto" markerUnits="userSpaceOnUse">'
+    + '<path d="M1.5,1.5 L8.5,5.5 L1.5,9.5" fill="none" stroke="' + S + '" stroke-width="2"'
+    + ' stroke-linecap="round" stroke-linejoin="round"/></marker></defs>' + paths;
 }
-window.addEventListener('resize', function(){ clearTimeout(window.__drawPreConnT); window.__drawPreConnT = setTimeout(drawPreConn, 120); });
-window.addEventListener('load', drawPreConn);
-document.addEventListener('DOMContentLoaded', function(){ setTimeout(drawPreConn, 60); });
-</script>
-<script>
-function drawPostConn(){
-  var box = document.getElementById('postWrap'), svg = document.getElementById('postSvg');
-  if(!box || !svg) return;
-  var fr = box.getBoundingClientRect();
-  if(!fr.width) return;
-  if(window.innerWidth <= 860){ svg.innerHTML=''; return; }
-  svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
-  svg.setAttribute('viewBox', '0 0 ' + fr.width + ' ' + fr.height);
-  var PAIRS = [['post1','post2','right'],['post2','post3','right'],['post3','post4','right']];
-  var S = '#8a8a8a';
-  function pt(el, edge){
-    var r = el.getBoundingClientRect();
-    if(edge==='right') return {x: r.right - fr.left, y: r.top + r.height/2 - fr.top};
-    if(edge==='left')  return {x: r.left - fr.left,  y: r.top + r.height/2 - fr.top};
-    if(edge==='bottom')return {x: r.left + r.width/2 - fr.left, y: r.bottom - fr.top};
-    return {x: r.left + r.width/2 - fr.left, y: r.top - fr.top};
-  }
-  function seg(sx,sy,ex,ey,horiz){
-    if(horiz){ var dx = Math.max(40, (ex - sx) * 0.55); return 'M '+sx+' '+sy+' C '+(sx+dx)+' '+sy+' '+(ex-dx)+' '+ey+' '+ex+' '+ey; }
-    var dy = Math.max(30, (ey - sy) * 0.55); return 'M '+sx+' '+sy+' C '+sx+' '+(sy+dy)+' '+ex+' '+(ey-dy)+' '+ex+' '+ey;
-  }
-  var defs = '<defs><marker id="postSvgArrow" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse">'
-    + '<path d="M1,1 L6.5,4 L1,7" fill="none" stroke="'+S+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
-  var paths = PAIRS.map(function(p){
-    var a = document.getElementById(p[0]), b = document.getElementById(p[1]);
-    if(!a || !b) return '';
-    var edge = p[2] || 'right';
-    var s0 = pt(a, edge);
-    var e0 = pt(b, edge==='bottom'||edge==='top' ? 'top' : 'left');
-    var horiz = (edge==='right' || edge==='left');
-    return '<path d="'+seg(s0.x,s0.y,e0.x,e0.y,horiz)+'" fill="none" stroke="'+S+'" stroke-width="1.6" marker-end="url(#postSvgArrow)"/>';
-  }).join('');
-  svg.innerHTML = defs + paths;
-}
-window.addEventListener('resize', function(){ clearTimeout(window.__drawPostConnT); window.__drawPostConnT = setTimeout(drawPostConn, 120); });
-window.addEventListener('load', drawPostConn);
-document.addEventListener('DOMContentLoaded', function(){ setTimeout(drawPostConn, 60); });
+function drawAllSwoops(){ drawSwoops('preWrap','preSvg'); drawSwoops('postWrap','postSvg'); }
+window.addEventListener('load', drawAllSwoops);
+window.addEventListener('resize', function(){ clearTimeout(window.__swoopT); window.__swoopT = setTimeout(drawAllSwoops, 120); });
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(drawAllSwoops, 60); });
 </script>
 </body>
 </html>
