@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DES Form — Console Script Kit</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    background: #fafafa;
+    color: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  h1 { font-weight: 300; font-size: 1.9rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+  h2 { font-weight: 300; font-size: 1.15rem; margin: 0; letter-spacing: -.005em; }
+  .lede { color: #666; margin: 0 0 2rem; max-width: 62ch; }
+
+  section {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 2rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .step-head { display: flex; align-items: baseline; gap: .75rem; margin-bottom: .35rem; }
+  .num {
+    font-size: .7rem; font-weight: 400; color: #5fdaff;
+    border: 1px solid #e0e0e0; border-radius: 3px;
+    padding: .1rem .4rem; letter-spacing: .08em; flex: none;
+  }
+  .desc { color: #666; margin: 0 0 1.25rem; max-width: 66ch; }
+  .desc code, p code, li code {
+    background: #fafafa; border: 1px solid #e0e0e0; border-radius: 3px;
+    padding: .05rem .3rem; font-size: .85em;
+  }
+
+  /* setup inputs */
+  .field { margin-bottom: 1.25rem; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: .8rem; color: #666; margin-bottom: .35rem; }
+  input[type=text] {
+    width: 100%; padding: .65rem .8rem;
+    border: 1px solid #e0e0e0; border-radius: 4px; background: #fafafa;
+    font-family: inherit; font-size: .95rem; color: #1a1a1a;
+    transition: border-color .3s ease, background .3s ease, box-shadow .3s ease;
+  }
+  input[type=text]:focus {
+    outline: none; border-color: #5fdaff; background: #fff;
+    box-shadow: 0 0 0 3px rgba(95,218,255,.18);
+  }
+  .hint { font-size: .78rem; color: #666; margin: .35rem 0 0; }
+
+  /* code */
+  .code-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .5rem; }
+  .code-label { font-size: .75rem; color: #666; letter-spacing: .04em; }
+  pre {
+    margin: 0; padding: 1rem;
+    background: #fafafa; border: 1px solid #e0e0e0; border-radius: 4px;
+    overflow-x: auto; font-size: .8rem; line-height: 1.55;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #1a1a1a;
+  }
+  .copy {
+    flex: none; cursor: pointer;
+    border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;
+    color: #1a1a1a; font-family: inherit; font-size: .8rem; font-weight: 400;
+    padding: .45rem .9rem;
+    transition: all .3s ease;
+  }
+  .copy:hover { border-color: #5fdaff; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .copy:focus-visible { outline: 2px solid #5fdaff; outline-offset: 2px; }
+  .copy.done { border-color: #5fdaff; color: #666; }
+
+  ol.plain { padding-left: 1.2rem; margin: 0; color: #666; }
+  ol.plain li { margin-bottom: .5rem; }
+  ol.plain li:last-child { margin-bottom: 0; }
+  ol.plain strong { color: #1a1a1a; font-weight: 400; }
+
+  .callout { border-left: 2px solid #5fdaff; padding-left: 1rem; margin-top: 1.25rem; color: #666; font-size: .9rem; }
+
+  /* print button */
+  #print-btn {
+    position: fixed; top: 20px; right: 20px;
+    width: 40px; height: 40px; z-index: 9999;
+    background: #1a1a1a; opacity: .7; border: none; border-radius: 4px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: opacity .3s ease;
+  }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { width: 18px; height: 18px; stroke: #fff; }
+
+  @media print {
+    #print-btn { display: none; }
+    body { padding: 0; background: #fff; }
+    section { break-inside: avoid; }
+    pre { white-space: pre-wrap; word-break: break-word; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<button id="print-btn" title="Save as PDF" aria-label="Save as PDF" onclick="printSinglePage()">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/>
+  </svg>
+</button>
+
+<div class="wrap">
+
+  <h1>DES form — console script kit</h1>
+  <p class="lede">Copy each block, paste it into the browser console on the DES form page, press Enter. Work through them in order and stop as soon as the comma is gone.</p>
+
+  <section>
+    <div class="step-head"><span class="num">FIRST</span><h2>Open the console</h2></div>
+    <ol class="plain">
+      <li>On the DES form page press <strong>F12</strong> (or Ctrl+Shift+J) and click the <strong>Console</strong> tab.</li>
+      <li>Chrome blocks the first paste for safety. If it refuses, type <strong>allow pasting</strong> into the console, press Enter, then paste normally.</li>
+      <li>If the field sits inside an embedded ID.me frame, use the frame dropdown at the top of the console (it reads <strong>top</strong>) and switch to that frame first.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">SETUP</span><h2>Fill these in and every script below updates</h2></div>
+    <div class="field">
+      <label for="sel">Field selector</label>
+      <input type="text" id="sel" value="#middleName" spellcheck="false">
+      <p class="hint">The id or name of the greyed-out box, e.g. <code>#middleName</code> or <code>[name="middleName"]</code>. Script 1 will tell you what it is. Leave as-is for now.</p>
+    </div>
+    <div class="field">
+      <label for="bad">Her middle name exactly as the form shows it</label>
+      <input type="text" id="bad" value="Michael,Lynne" spellcheck="false">
+      <p class="hint">Type it with the comma, exactly as it appears. Script 4 targets this literal string so it can't disturb any other field.</p>
+    </div>
+    <div class="field">
+      <label for="good">What it should say instead</label>
+      <input type="text" id="good" value="Michael Lynne" spellcheck="false">
+    </div>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">01</span><h2>Find the field</h2></div>
+    <p class="desc">Lists every input on the page whose value contains a comma, along with its id, name, and whether it's disabled. Use the id it prints to fill in the selector above.</p>
+    <div class="code-head"><span class="code-label">console</span><button class="copy" data-for="c1">Copy</button></div>
+    <pre id="c1"></pre>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">02</span><h2>Inspect what's holding the value</h2></div>
+    <p class="desc">Dumps the data attributes, all raw attributes, and any hidden inputs in the same form. This is what tells you whether the comma lives in a data attribute, a hidden twin, or both.</p>
+    <div class="code-head"><span class="code-label">console</span><button class="copy" data-for="c2">Copy</button></div>
+    <pre id="c2"></pre>
+    <div class="callout">Prefer clicking? Right-click the greyed field, choose Inspect, then run script 3 — it falls back to <code>$0</code>, the element you just selected.</div>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">03</span><h2>Rewrite the data attribute and unlock the field</h2></div>
+    <p class="desc">Strips the comma out of every data attribute, removes the disabled state, sets the visible value through the native setter so a framework can't discard it, and cleans any hidden input carrying the same string. Re-run script 2 afterward to confirm nothing snapped back.</p>
+    <div class="code-head"><span class="code-label">console</span><button class="copy" data-for="c3">Copy</button></div>
+    <pre id="c3"></pre>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">04</span><h2>Patch the request on its way out</h2></div>
+    <p class="desc">The reliable one. It edits the outgoing payload after the page has built it, so it works no matter where the value was stored. Run it <strong>before</strong> clicking submit and watch for the confirmation line in the console. Handles plain bodies, JSON, and FormData.</p>
+    <div class="code-head"><span class="code-label">console</span><button class="copy" data-for="c4">Copy</button></div>
+    <pre id="c4"></pre>
+    <div class="callout">Nothing logged when she submitted? The page is doing a native form POST rather than a background request. Script 3 plus script 5 is the path in that case.</div>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">05</span><h2>Turn off the browser's own validation</h2></div>
+    <p class="desc">Only if a pattern or required check still blocks submit after the value looks correct. Clears <code>pattern</code>, <code>maxlength</code>, and form-level validation.</p>
+    <div class="code-head"><span class="code-label">console</span><button class="copy" data-for="c5">Copy</button></div>
+    <pre id="c5"></pre>
+  </section>
+
+  <section>
+    <div class="step-head"><span class="num">CHECK</span><h2>Confirm what actually got sent</h2></div>
+    <p class="desc">After submitting, open the <strong>Network</strong> tab, click the submit request, and look at <strong>Payload</strong>. If the middle name reads correctly there and the form still errors, the comma isn't the problem and the rejection is coming from somewhere else.</p>
+  </section>
+
+</div>
+
+<script>
+const T = {
+  c1: () => `document.querySelectorAll('input, textarea, select').forEach(el => {
+  const v = el.value || el.dataset.value || '';
+  if (v.includes(',')) console.log({
+    id: el.id, name: el.name, value: v,
+    disabled: el.disabled, readOnly: el.readOnly,
+    data: { ...el.dataset }
+  });
+});`,
+
+  c2: (s) => `(() => {
+  const el = document.querySelector('${s}') || (typeof $0 !== 'undefined' ? $0 : null);
+  if (!el) return console.warn('Not found. Right-click the field, Inspect, then re-run.');
+  console.log('value      :', el.value);
+  console.log('dataset    :', { ...el.dataset });
+  console.log('attributes :', [...el.attributes].map(a => a.name + '="' + a.value + '"'));
+  console.log('disabled   :', el.disabled, '| readOnly:', el.readOnly, '| maxLength:', el.maxLength);
+  console.log('hidden     :', [...(el.form ? el.form.querySelectorAll('input[type=hidden]') : [])]
+    .map(h => ({ name: h.name, value: h.value })));
+})();`,
+
+  c3: (s) => `(() => {
+  const el = document.querySelector('${s}') || (typeof $0 !== 'undefined' ? $0 : null);
+  if (!el) return console.warn('Not found. Check the selector.');
+  const clean = v => v.replace(/\\s*,\\s*/g, ' ').trim();
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+  const fire = n => ['input','change','blur'].forEach(e => n.dispatchEvent(new Event(e, { bubbles: true })));
+
+  for (const [k, v] of Object.entries(el.dataset)) {
+    if (typeof v === 'string' && v.includes(',')) {
+      el.dataset[k] = clean(v);
+      console.log('data-' + k + ' ->', el.dataset[k]);
+    }
+  }
+
+  el.disabled = false; el.readOnly = false;
+  el.removeAttribute('disabled'); el.removeAttribute('readonly');
+  el.style.pointerEvents = 'auto'; el.style.opacity = '1';
+  setter.call(el, clean(el.value || el.dataset.value || ''));
+  fire(el);
+  console.log('field ->', el.value);
+
+  if (el.form) el.form.querySelectorAll('input[type=hidden]').forEach(h => {
+    if (h.value.includes(',')) {
+      setter.call(h, clean(h.value));
+      fire(h);
+      console.log('hidden ' + h.name + ' ->', h.value);
+    }
+  });
+})();`,
+
+  c4: (s, bad, good) => `(() => {
+  const BAD = ${JSON.stringify(bad || 'Michael,Lynne')};
+  const GOOD = ${JSON.stringify(good || 'Michael Lynne')};
+  const fix = v => typeof v === 'string' ? v.split(BAD).join(GOOD) : v;
+
+  const patchBody = b => {
+    if (typeof b === 'string') return fix(b);
+    if (b instanceof FormData) {
+      for (const [k, v] of [...b.entries()]) if (typeof v === 'string' && v.includes(BAD)) b.set(k, fix(v));
+      return b;
+    }
+    if (b instanceof URLSearchParams) {
+      for (const [k, v] of [...b.entries()]) if (v.includes(BAD)) b.set(k, fix(v));
+      return b;
+    }
+    return b;
+  };
+
+  const of = window.fetch;
+  window.fetch = function (u, o) {
+    if (o && o.body) { o.body = patchBody(o.body); console.log('%cpatched fetch', 'color:#0a7'); }
+    return of.apply(this, arguments);
+  };
+
+  const os = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function (b) {
+    console.log('%cpatched xhr', 'color:#0a7');
+    return os.call(this, patchBody(b));
+  };
+
+  console.log('Interceptor armed. Now click submit.');
+})();`,
+
+  c5: () => `document.querySelectorAll('form').forEach(f => { f.noValidate = true; f.setAttribute('novalidate',''); });
+document.querySelectorAll('input, textarea').forEach(el => {
+  el.removeAttribute('pattern');
+  el.removeAttribute('maxlength');
+  el.setCustomValidity('');
+});
+console.log('Native validation cleared on', document.forms.length, 'form(s).');`
+};
+
+const $ = id => document.getElementById(id);
+function render() {
+  const s = $('sel').value.trim() || '#middleName';
+  const bad = $('bad').value;
+  const good = $('good').value;
+  $('c1').textContent = T.c1();
+  $('c2').textContent = T.c2(s);
+  $('c3').textContent = T.c3(s);
+  $('c4').textContent = T.c4(s, bad, good);
+  $('c5').textContent = T.c5();
+}
+['sel','bad','good'].forEach(id => $(id).addEventListener('input', render));
+render();
+
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const text = $(btn.dataset.for).textContent;
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+      document.body.removeChild(ta);
+    }
+    btn.textContent = ok ? 'Copied' : 'Select it manually';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1800);
+  });
+});
+
+function printSinglePage() {
+  const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+  const style = document.createElement('style');
+  style.id = 'single-page-print';
+  style.textContent = '@page { size: ' + w + 'px ' + h + 'px; margin: 0; }' +
+    '@media print { html, body { width: ' + w + 'px; height: ' + h + 'px; }' +
+    '* { break-inside: avoid !important; page-break-inside: avoid !important; } }';
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => style.remove(), 1000);
+}
+</script>
+</body>
+</html>
