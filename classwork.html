@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Four Papers — Start Simple</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --line: #e0e0e0;
+    --ink: #1a1a1a;
+    --ink2: #666;
+    --accent: #5fdaff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+    min-height: 100vh;
+  }
+
+  .stage {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- top bar ---------- */
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 44px;
+    margin-bottom: 2.5rem;
+  }
+  .back {
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ink2);
+    background: none;
+    border: none;
+    padding: 0.4rem 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: color 0.3s ease;
+  }
+  .back:hover { color: var(--ink); }
+  .back:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .back svg { width: 14px; height: 14px; stroke: currentColor; }
+  .back[hidden] { display: none; }
+  .crumb {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #b0b0b0;
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.5;
+  }
+  .crumb b { color: var(--ink2); font-weight: 400; }
+
+  /* ---------- depth dots ---------- */
+  .depth { display: flex; gap: 0.35rem; margin-bottom: 1.75rem; }
+  .depth i {
+    width: 22px; height: 2px;
+    background: var(--line);
+    display: block;
+    transition: background 0.3s ease;
+  }
+  .depth i.on { background: var(--accent); }
+
+  /* ---------- screen content ---------- */
+  .screen { animation: enter 0.3s cubic-bezier(0.4,0,0.2,1); flex: 1; }
+  @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink2);
+    margin: 0 0 0.85rem;
+  }
+  h1 {
+    font-weight: 300;
+    font-size: 1.9rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.25rem;
+  }
+  h1.small { font-size: 1.4rem; }
+  .body { color: var(--ink); margin-bottom: 2rem; }
+  .body p { margin: 0 0 1.1rem; }
+  .body p:last-child { margin-bottom: 0; }
+  .body .muted { color: var(--ink2); font-size: 0.95rem; }
+
+  /* labeled blocks (setup / problem / fix) */
+  .block {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1.25rem;
+    margin-bottom: 0.85rem;
+  }
+  .block .lbl {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink2);
+    margin-bottom: 0.45rem;
+  }
+  .block p { margin: 0; font-size: 0.97rem; }
+  .block.accent { border-left: 2px solid var(--accent); }
+
+  /* term list */
+  .terms { list-style: none; padding: 0; margin: 0; }
+  .terms li {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1rem 1.15rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .terms b { font-weight: 400; border-bottom: 1px solid var(--accent); padding-bottom: 1px; }
+  .terms span { color: var(--ink2); }
+
+  .note {
+    background: #f5fdff;
+    border: 1px solid #d6f3fd;
+    border-radius: 2px;
+    padding: 1rem 1.15rem;
+    font-size: 0.94rem;
+    margin-top: 1.25rem;
+  }
+
+  .quotebox {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    border-radius: 2px;
+    padding: 1.25rem;
+    font-size: 0.97rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ---------- option buttons ---------- */
+  .options { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.5rem; }
+  .opt {
+    font-family: inherit;
+    text-align: left;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .opt:hover { border-color: #b8b8b8; transform: translateX(2px); }
+  .opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .opt .txt { flex: 1; }
+  .opt .lead { display: block; font-size: 1rem; color: var(--ink); line-height: 1.4; }
+  .opt .sub { display: block; font-size: 0.85rem; color: var(--ink2); margin-top: 0.15rem; }
+  .opt .arrow { color: var(--accent); font-size: 1.1rem; line-height: 1; }
+  .opt.quiet { background: none; border-style: dashed; }
+
+  .copy {
+    font-family: inherit;
+    font-size: 0.82rem;
+    color: var(--ink2);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .copy:hover { color: var(--ink); border-color: #b8b8b8; }
+  .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- print ---------- */
+  #print-btn {
+    position: fixed; top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    background: #1a1a1a; opacity: 0.7;
+    border: none; border-radius: 2px; cursor: pointer;
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.3s ease;
+  }
+  #print-btn:hover { opacity: 1; }
+  #print-btn svg { width: 18px; height: 18px; stroke: #fff; }
+
+  #print-all { display: none; }
+  #print-all .pscreen { padding: 0 0 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  #print-all .pscreen h1 { font-size: 1.35rem; }
+
+  @media print {
+    #print-btn, .bar, .depth, .options, .copy { display: none !important; }
+    .stage { display: none; }
+    #print-all { display: block !important; max-width: none; padding: 1.5rem; }
+    body { background: #fff; }
+  }
+  body.printing .stage { display: none; }
+  body.printing #print-all { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<button id="print-btn" onclick="printSinglePage()" title="Save as PDF" aria-label="Save as PDF">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/>
+  </svg>
+</button>
+
+<div class="stage">
+  <div class="bar">
+    <button class="back" id="back" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <div class="crumb" id="crumb"></div>
+  </div>
+  <div class="depth" id="depth" aria-hidden="true"></div>
+  <div id="screen" class="screen" role="main" aria-live="polite"></div>
+</div>
+
+<div id="print-all"></div>
+
+<script>
+/* ============================================================
+   SCREEN DATA
+   Each screen: { crumb, depth, eyebrow, title, body, options }
+   ============================================================ */
+const S = {
+
+/* ---------- LEVEL 0 ---------- */
+home: {
+  crumb: 'Start', depth: 1,
+  eyebrow: 'Four papers &middot; Start here',
+  title: 'The environment is never a neutral container.',
+  body: `<p>That one sentence is what all four papers share. The room, the website, the building, the clay in your hands &mdash; each one acts on the people inside it, and each one was designed around an assumption about whose body counts as normal.</p>
+         <p class="muted">If you only remember one thing, remember that. Everything below is elaboration.</p>`,
+  options: [
+    { lead: 'Break it into two pairs', sub: 'The quickest way to keep four papers straight', to: 'pairs' },
+    { lead: 'Where the papers disagree', sub: 'Four tensions &mdash; the good discussion material', to: 'tensions' },
+    { lead: 'Just give me something to post', sub: 'Three ready-made responses', to: 'post' }
+  ]
+},
+
+/* ---------- LEVEL 1 ---------- */
+pairs: {
+  crumb: 'Two pairs', depth: 2, parent: 'home',
+  eyebrow: 'Level 2',
+  title: 'They split into two pairs.',
+  body: `<p>Each pair asks a different version of the same question. Pick one and go in.</p>`,
+  options: [
+    { lead: 'Pair A &mdash; Who was this space built for?', sub: 'Hwang &middot; Mills', to: 'pairA' },
+    { lead: 'Pair B &mdash; What does the material do to the learner?', sub: 'Hickey-Moody, Palmer &amp; Sayers &middot; Garber', to: 'pairB' },
+    { lead: 'How the two pairs connect', sub: 'One short screen', to: 'bridge', quiet: true }
+  ]
+},
+
+bridge: {
+  crumb: 'The bridge', depth: 3, parent: 'pairs',
+  eyebrow: 'Connecting the pairs',
+  title: 'Two halves of one argument.',
+  body: `<div class="block"><span class="lbl">Pair A says</span><p>A space carries politics about whose body it expects. Compliance lets institutions call that problem solved when it isn't.</p></div>
+         <div class="block"><span class="lbl">Pair B says</span><p>A space and its materials actively shape what learning is even possible. Matter pushes back.</p></div>
+         <div class="block accent"><span class="lbl">Put together</span><p>The physical conditions of a class are not a logistics problem. They are the curriculum.</p></div>
+         <div class="note">Worth saying out loud in discussion: the two pairs barely cite each other. Pair A runs on disability studies, Pair B runs on Karen Barad. Naming that gap is a contribution.</div>`,
+  options: [{ lead: 'Back to the two pairs', to: 'pairs', quiet: true }]
+},
+
+pairA: {
+  crumb: 'Pair A', depth: 3, parent: 'pairs',
+  eyebrow: 'Pair A',
+  title: 'Who was this space built for?',
+  body: `<p>Both papers take a designed environment, find an able-bodied user assumed inside it, and argue that legal compliance made things <em>worse</em> &mdash; because it let institutions declare the problem solved.</p>`,
+  options: [
+    { lead: 'Hwang &mdash; the online classroom', sub: '2023 &middot; Journal of Cultural Research in Art Education', to: 'hwang' },
+    { lead: 'Mills &mdash; the museum building', sub: '2024 &middot; Journal of Cultural Research in Art Education', to: 'mills' }
+  ]
+},
+
+pairB: {
+  crumb: 'Pair B', depth: 3, parent: 'pairs',
+  eyebrow: 'Pair B',
+  title: 'What does the material do to the learner?',
+  body: `<p>Both papers argue that matter is active rather than inert, and that art education keeps rushing past the physical encounter to get to the concept.</p>`,
+  options: [
+    { lead: 'Hickey-Moody, Palmer &amp; Sayers &mdash; the moving body', sub: '2016 &middot; Gender and Education', to: 'hm' },
+    { lead: 'Garber &mdash; the object in your hands', sub: '2019 &middot; Studies in Art Education', to: 'garber' }
+  ]
+},
+
+/* ---------- LEVEL 2: PAPERS ---------- */
+hwang: {
+  crumb: 'Hwang', depth: 4, parent: 'pairA',
+  eyebrow: 'Paper 01 &middot; Eunkyung Hwang, 2023',
+  title: 'Cripping Online Learning Space Designs',
+  titleSmall: true,
+  body: `<div class="block"><span class="lbl">Setup</span><p>An online course site is a building. Hwang calls it a virtually-built environment &mdash; so you can analyze it the way you'd analyze a staircase with no ramp.</p></div>
+         <div class="block"><span class="lbl">Problem</span><p>Universal design got flattened into legal compliance, then into diversity marketing. Accessibility hides in a corner button. Getting accommodations means producing medical proof over and over &mdash; exhausting enough that some students hide their disability instead.</p></div>
+         <div class="block accent"><span class="lbl">Fix</span><p><b>Cripping.</b> Either disrupt the existing design or craft an alternative one, with disabled students leading because they're the ones who actually know. The goal is collective access, not compliance.</p></div>`,
+  options: [
+    { lead: 'Key terms', sub: '6 terms you\u2019ll be expected to use', to: 'hwang-terms' },
+    { lead: 'The two artists', sub: 'What to cite as an example', to: 'hwang-art' },
+    { lead: 'Her four questions', sub: 'Portable to any learning space', to: 'hwang-q' },
+    { lead: 'Details worth citing', sub: 'Three things that show you read it', to: 'hwang-det' }
+  ]
+},
+
+'hwang-terms': {
+  crumb: 'Terms', depth: 5, parent: 'hwang',
+  eyebrow: 'Hwang',
+  title: 'Key terms', titleSmall: true,
+  body: `<ul class="terms">
+    <li><b>Cripping</b> <span>&mdash; turning McRuer's reclaimed word "crip" into a verb. An active refusal of ableist design.</span></li>
+    <li><b>Crip technoscience</b> <span>&mdash; Hamraie &amp; Fritsch, 2019. Design activism. Making access is framed as an <i>attack</i> on the ableist built environment, and disabled people are makers of knowledge, not recipients of technology.</span></li>
+    <li><b>Access fatigue</b> <span>&mdash; Konrad, 2021. The exhaustion of constantly performing your disability to get what you need.</span></li>
+    <li><b>Biocertification</b> <span>&mdash; Samuels, 2014. Proving disability with medical documentation to unlock support.</span></li>
+    <li><b>Compulsory able-bodiedness</b> <span>&mdash; McRuer, 2006. The cultural demand that everyone be able-bodied.</span></li>
+    <li><b>Collective access</b> <span>&mdash; Piepzna-Samarasinha, 2018. Flexible, creative engagement with the built environment that builds disability solidarity. The paper's endpoint.</span></li>
+  </ul>`,
+  options: [{ lead: 'Back to Hwang', to: 'hwang', quiet: true }]
+},
+
+'hwang-art': {
+  crumb: 'The artists', depth: 5, parent: 'hwang',
+  eyebrow: 'Hwang',
+  title: 'The two artists', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Crafting an alternative</span><p><b>Alt Text as Poetry</b> &mdash; Shannon Finnegan &amp; Bojana Coklyat, 2019 to present. Workshops that treat alt text as creative writing instead of a compliance field. Their own site is text-first: box-shaped text and Unicode flower symbols instead of icons, high contrast, voice descriptions. Proof that accessible design can be beautiful rather than a downgrade.</p></div>
+         <div class="block"><span class="lbl">Disruption</span><p><b>Labor of Sleep</b> &mdash; Elisa Giardina Papa, 2017, from the Whitney's <i>Sunrise/Sunset</i> project. Her video takes over and blocks the museum's homepage, critiquing technology that turns even sleep into labor.</p></div>
+         <div class="note">Hwang is upfront that the Giardina Papa piece isn't about disability &mdash; she extends its critique of bodily standardization. If you want a sharp critical note, that's where her argument stretches furthest.</div>`,
+  options: [{ lead: 'Back to Hwang', to: 'hwang', quiet: true }]
+},
+
+'hwang-q': {
+  crumb: 'Four questions', depth: 5, parent: 'hwang',
+  eyebrow: 'Hwang',
+  title: 'Her four questions', titleSmall: true,
+  body: `<p class="muted">She gives these to students to analyze a learning space. They transfer to almost any environment, which makes them very useful in a discussion post.</p>
+         <div class="quotebox">1. Who is the assumed user, and who is marginalized?</div>
+         <div class="quotebox">2. What knowledge is absent, and what ableist logic is embedded?</div>
+         <div class="quotebox">3. How do we prioritize disabled students' experience in what we make?</div>
+         <div class="quotebox">4. How do we attack the design &mdash; and then improve it?</div>`,
+  options: [{ lead: 'Back to Hwang', to: 'hwang', quiet: true }]
+},
+
+'hwang-det': {
+  crumb: 'Details', depth: 5, parent: 'hwang',
+  eyebrow: 'Hwang',
+  title: 'Details worth citing', titleSmall: true,
+  body: `<div class="block"><p>She implicates herself. Her own online museum programs used images without meaningful alt text and links labeled "click here." That makes the paper praxis rather than just critique.</p></div>
+         <div class="block"><p>The pandemic shift <i>increased</i> her own access &mdash; she could manage pain and fatigue at home &mdash; while decreasing it for students who relied on in-person support. Online learning redistributes who gets accommodated; it doesn't simply improve things.</p></div>
+         <div class="block"><p>Her strongest practical caution: no single disabled student can represent all disability or all access needs.</p></div>`,
+  options: [{ lead: 'Back to Hwang', to: 'hwang', quiet: true }]
+},
+
+mills: {
+  crumb: 'Mills', depth: 4, parent: 'pairA',
+  eyebrow: 'Paper 02 &middot; Shara Mills, 2024',
+  title: 'Museums and Disability Policy', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Setup</span><p>Museums are among the most trusted knowledge sources in the country &mdash; the public rates them above books and teachers &mdash; with over 850 million US visits a year. Being shut out of one is being shut out of knowledge.</p></div>
+         <div class="block"><span class="lbl">Problem</span><p>Two laws collide. The ADA wants access; the National Historic Preservation Act wants the building left alone. Neither defines "readily achievable" or "undue burden." And most museums fall under ADA Title III, which &mdash; unlike Title II &mdash; doesn't require them to audit themselves at all.</p></div>
+         <div class="block accent"><span class="lbl">Fix</span><p>Define what actually makes the site significant, <i>then</i> audit access, then get creative about substitutions instead of treating it as all-or-nothing. And put disabled people in real decision-making roles &mdash; not in a feedback survey afterward.</p></div>`,
+  options: [
+    { lead: 'The legal timeline', sub: 'Four laws, concrete and cite-able', to: 'mills-law' },
+    { lead: 'Buildings to name', sub: 'Two models that actually worked', to: 'mills-bldg' },
+    { lead: 'Details worth citing', sub: 'Including the best line in the paper', to: 'mills-det' }
+  ]
+},
+
+'mills-law': {
+  crumb: 'The law', depth: 5, parent: 'mills',
+  eyebrow: 'Mills',
+  title: 'The legal timeline', titleSmall: true,
+  body: `<ul class="terms">
+    <li><b>1966 &mdash; National Historic Preservation Act</b> <span>Section 106 sets a long review process before altering a historic property.</span></li>
+    <li><b>1968 &mdash; Architectural Barriers Act</b> <span>One of the first federal accessibility mandates, limited to federal facilities.</span></li>
+    <li><b>1973 &mdash; Section 504, Rehabilitation Act</b> <span>No exclusion by discrimination from federally funded programs.</span></li>
+    <li><b>1990 &mdash; ADA</b> <span>A legal rather than medical definition of disability, applying regardless of federal funding.</span></li>
+  </ul>
+  <div class="note"><b>The bit that matters most:</b> Title II covers state and local institutions and requires a self-evaluation plus a transition plan. Title III covers private accommodations &mdash; where most museums sit &mdash; and requires neither. Enforcement happens mainly through lawsuits.</div>`,
+  options: [{ lead: 'Back to Mills', to: 'mills', quiet: true }]
+},
+
+'mills-bldg': {
+  crumb: 'Buildings', depth: 5, parent: 'mills',
+  eyebrow: 'Mills',
+  title: 'Buildings to name', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Laurent House &middot; Rockford, IL &middot; 1955</span><p>Frank Lloyd Wright designed it for Kenneth Laurent, a WWII veteran and wheelchair user: open plan, tables lowered so everyone meets at eye level, rehung cabinet hinges, wider doorways. Forty years before the ADA. The same thinking shows up in the Guggenheim's shallow incline. Mills's point: this isn't hard when it's innate rather than retrofitted.</p></div>
+         <div class="block"><span class="lbl">Molly Brown House Museum</span><p>A lift to some levels, plus opening a previously unseen section that <i>could</i> be reached, plus tactile fabric samples standing in for rooms that still can't be. Creative substitution instead of all-or-nothing.</p></div>`,
+  options: [{ lead: 'Back to Mills', to: 'mills', quiet: true }]
+},
+
+'mills-det': {
+  crumb: 'Details', depth: 5, parent: 'mills',
+  eyebrow: 'Mills',
+  title: 'Details worth citing', titleSmall: true,
+  body: `<div class="block"><span class="lbl">The cost objection loses</span><p>Davis (2000) notes the government's own statistics show barrier removal costs are relatively low. Cost is cover, not constraint.</p></div>
+         <div class="block"><span class="lbl">The sharpest moment in the paper</span><p>Pressman &amp; Schulz's thought experiment: describe an artwork to a blind visitor, omit the detail that changes its meaning, and you've controlled not just their access to the room but their access to interpretation.</p></div>
+         <div class="block"><span class="lbl">Access beyond sight and touch</span><p>Disney uses 17 manufactured scents across its parks for immersion. Mills asks why museums stop where they do.</p></div>
+         <div class="block"><span class="lbl">Her closing move</span><p>Disability is the one community every person eventually joins, temporarily or permanently. Rhetorically effective &mdash; though you could argue it concedes something by appealing to self-interest.</p></div>`,
+  options: [{ lead: 'Back to Mills', to: 'mills', quiet: true }]
+},
+
+hm: {
+  crumb: 'Hickey-Moody', depth: 4, parent: 'pairB',
+  eyebrow: 'Paper 03 &middot; Hickey-Moody, Palmer &amp; Sayers, 2016',
+  title: 'Diffractive Pedagogies', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Setup</span><p>Universities imagine real learning as the transfer of abstract ideas between minds. The body gets left out &mdash; and the authors argue the body is coded feminine, so leaving it out is a gendered move, not a neutral one.</p></div>
+         <div class="block"><span class="lbl">Problem</span><p>Students have been trained to find the right answer. Given an open creative brief, they freeze and hover at the edge of the room. Meanwhile the institution won't book a warm room, and a cold concrete floor makes the decision for them.</p></div>
+         <div class="block accent"><span class="lbl">Fix</span><p><b>Diffractive pedagogy.</b> Teach through movement. Students build images of freedom and control, turn them into dances, teach them to partners, film them. The theorizing happens live, in the body, rather than afterward in an essay.</p></div>`,
+  options: [
+    { lead: 'Key terms', sub: 'Including intra-action, the big one', to: 'hm-terms' },
+    { lead: 'The exercise, step by step', sub: 'What actually happens in the class', to: 'hm-ex' },
+    { lead: 'Two hard lines, decoded', sub: 'The sentences that trip people up', to: 'hm-hard' },
+    { lead: 'Details worth citing', sub: 'Gender, religion, and honest failure', to: 'hm-det' }
+  ]
+},
+
+'hm-terms': {
+  crumb: 'Terms', depth: 5, parent: 'hm',
+  eyebrow: 'Hickey-Moody, Palmer &amp; Sayers',
+  title: 'Key terms', titleSmall: true,
+  body: `<ul class="terms">
+    <li><b>Intra-action</b> <span>&mdash; Barad. Not interaction between things that already exist separately; the things themselves emerge <i>through</i> the relation. The single most important term across Papers 03 and 04.</span></li>
+    <li><b>Diffraction</b> <span>&mdash; Haraway, then Barad. Borrowed from optics and turned into a way of reading that disrupts timelines and refuses to rank one kind of meaning above another.</span></li>
+    <li><b>Trans-corporeality</b> <span>&mdash; Alaimo &amp; Hekman. The inseparability of self from environment.</span></li>
+    <li><b>The abject</b> <span>&mdash; via Kristeva. Where the body and the material get filed in academic life: messy, peripheral, not quite legitimate.</span></li>
+    <li><b>Educational imaginary</b> <span>&mdash; the shared picture of what university learning is supposed to look and feel like. The thing the paper wants to shift.</span></li>
+  </ul>`,
+  options: [{ lead: 'Back to the paper', to: 'hm', quiet: true }]
+},
+
+'hm-ex': {
+  crumb: 'The exercise', depth: 5, parent: 'hm',
+  eyebrow: 'Hickey-Moody, Palmer &amp; Sayers',
+  title: 'The exercise, in order', titleSmall: true,
+  body: `<ul class="terms">
+    <li><b>1.</b> <span>Make a freedom image and a control image.</span></li>
+    <li><b>2.</b> <span>Each image becomes a score for a movement.</span></li>
+    <li><b>3.</b> <span>Scale them &mdash; giant and tiny; low, medium and high.</span></li>
+    <li><b>4.</b> <span>Build a solo.</span></li>
+    <li><b>5.</b> <span>Teach it to a partner to make a duet containing a run, a roll, a reach, or a weight share.</span></li>
+    <li><b>6.</b> <span>Combine into groups of four.</span></li>
+    <li><b>7.</b> <span>Film it and set it to student-made soundscapes.</span></li>
+  </ul>
+  <div class="note">Two support devices worth mentioning: floor tape that traces movement into a drawing, and ground rules of no looking, no talking, no laughing to defuse the exposure.</div>`,
+  options: [{ lead: 'Back to the paper', to: 'hm', quiet: true }]
+},
+
+'hm-hard': {
+  crumb: 'Hard lines', depth: 5, parent: 'hm',
+  eyebrow: 'Hickey-Moody, Palmer &amp; Sayers',
+  title: 'Two hard lines, decoded', titleSmall: true,
+  body: `<div class="quotebox">"To dance is to become, intransitively."</div>
+         <p class="muted">Intransitive verbs take no object. You're not dancing <i>in order to become</i> a dancer &mdash; the becoming has no destination. Dancing folds past into present and pushes the body past what it has been, without arriving anywhere.</p>
+         <div class="quotebox" style="margin-top:1.75rem">"The materiality of learning matters and comes to make matter."</div>
+         <p class="muted">The cold floor, the badly booked room, the timetable. When the environment is uncomfortable, the body decides &mdash; to leave, to stop attending, to refuse. The authors won't blame the room or the learner: a pedagogy that fails to adapt to its space is the thing at fault.</p>`,
+  options: [{ lead: 'Back to the paper', to: 'hm', quiet: true }]
+},
+
+'hm-det': {
+  crumb: 'Details', depth: 5, parent: 'hm',
+  eyebrow: 'Hickey-Moody, Palmer &amp; Sayers',
+  title: 'Details worth citing', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Gender and religion are central</span><p>For some British Muslim students, dance reads as inherently sexualized. The authors' answer is deliberately un-stylized, pedestrian movement &mdash; their phrase is that this is not becoming-Madonna.</p></div>
+         <div class="block"><span class="lbl">The McRobbie puzzle</span><p>McRobbie called dance an outlet of escape for working-class girls. So why the reluctance in class? Because institutional context changes what dancing means.</p></div>
+         <div class="block"><span class="lbl">They admit it doesn't always work</span><p>Students stall at the edge of the room until a confident classmate models a response. That honesty is good material to praise or to push on.</p></div>
+         <div class="block"><span class="lbl">A direct link to Paper 04</span><p>This is the same Hickey-Moody whose 2016 book with Tara Page is Garber's main pedagogical source. The two papers are in conversation.</p></div>`,
+  options: [{ lead: 'Back to the paper', to: 'hm', quiet: true }]
+},
+
+garber: {
+  crumb: 'Garber', depth: 4, parent: 'pairB',
+  eyebrow: 'Paper 04 &middot; Elizabeth Garber, 2019',
+  title: 'Objects and New Materialisms', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Setup</span><p>Garber opens in a house full of objects and a failed attempt at minimalism. Objects aren't passive: the high-backed dining chair does not permit sprawling, and living rooms now get arranged around a screen instead of around people.</p></div>
+         <div class="block"><span class="lbl">Problem</span><p>Art education has shifted toward concept and idea, treating the actual making as a vehicle you pass through on the way to meaning. Students, meanwhile, still want to get their hands on things.</p></div>
+         <div class="block accent"><span class="lbl">Fix</span><p>Take material agency seriously. Attend to the <b>intra-actions</b> between maker, material and object &mdash; the clay resisting the hands, the visitors smudging the artwork. That friction produces a kind of knowledge you can't get any other way.</p></div>`,
+  options: [
+    { lead: 'Key terms', sub: '5 terms, including the ones from Paper 03', to: 'garber-terms' },
+    { lead: 'The two artworks', sub: 'Red Dirt Rug and Orange Rabbit', to: 'garber-art' },
+    { lead: 'Details worth citing', sub: 'Including a debate she picks herself', to: 'garber-det' }
+  ]
+},
+
+'garber-terms': {
+  crumb: 'Terms', depth: 5, parent: 'garber',
+  eyebrow: 'Garber',
+  title: 'Key terms', titleSmall: true,
+  body: `<ul class="terms">
+    <li><b>Intra-action</b> <span>&mdash; Barad, same as Paper 03. This shared term is your strongest link between the two.</span></li>
+    <li><b>Agency vs. animacy</b> <span>&mdash; Ingold's distinction. Neither people nor things <i>possess</i> agency; both are possessed by action. He calls what happens between them a "dance of animacy."</span></li>
+    <li><b>Hylomorphic vs. morphogenetic</b> <span>&mdash; Deleuze &amp; Guattari. Hylomorphic imposes a predetermined form on matter assumed to be uniform. Morphogenetic responds to what the material is doing &mdash; the grain of the wood, how oils behave that day.</span></li>
+    <li><b>Things-in-motion</b> <span>&mdash; Appadurai. Watching objects move through the world is what reveals their social context.</span></li>
+    <li><b>Knowing in being</b> <span>&mdash; Hickey-Moody &amp; Page, 2016. Knowledge produced in and as embodied making, rather than represented in language afterward.</span></li>
+  </ul>`,
+  options: [{ lead: 'Back to Garber', to: 'garber', quiet: true }]
+},
+
+'garber-art': {
+  crumb: 'The artworks', depth: 5, parent: 'garber',
+  eyebrow: 'Garber',
+  title: 'The two artworks', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Rena Detrixhe &middot; Red Dirt Rug &middot; 2016&ndash;17</span><p>Hundreds of gallons of Oklahoma soil, hammered, sifted through progressively finer screens, spread, tamped, then pressed with patterns taken from shoe soles &mdash; eight hours a day for three weeks. The soil carries Oklahoma's history: bison herds, "Indian Territory," the Dust Bowl, pipelines, fracking. Shown without borders, so a bug tracks across it, a dime rolls through, a visitor smudges a corner, and eventually it's swept up &mdash; and the sweeping is part of the work.</p></div>
+         <div class="note">This is Garber's clearest single example of the whole theory: artist, soil, gallery and visitors form one entanglement, and nobody is acting on inert material.</div>
+         <div class="block" style="margin-top:1.25rem"><span class="lbl">Elizabeth Garber &middot; Orange Rabbit &middot; 2015</span><p>A premade ceramic rabbit bought on eBay, to her clay-working friends' horror, because a large figurine was exactly right. Visitors photographed themselves with it and pinned prints to clotheslines. They growled at it, kissed it, petted it, meditated beneath it, told it secrets, and used their phones instead of her camera. The work leaked past what she planned.</p></div>`,
+  options: [{ lead: 'Back to Garber', to: 'garber', quiet: true }]
+},
+
+'garber-det': {
+  crumb: 'Details', depth: 5, parent: 'garber',
+  eyebrow: 'Garber',
+  title: 'Details worth citing', titleSmall: true,
+  body: `<div class="block"><span class="lbl">The best illustration of "knowing in being"</span><p>De Waal learning to centre clay &mdash; a ripple of movements through hand, wrist, neck and shoulders &mdash; describes it as a learning he could not articulate. That inarticulability is the whole point.</p></div>
+         <div class="block"><span class="lbl">Objects accumulate meanings their owners didn't choose</span><p>Garber keeps her great-grandmother's diamonds in a safe deposit box because the stones carry connotations of forced labor and environmental damage her grandmothers never named.</p></div>
+         <div class="block"><span class="lbl">A debate she picks herself</span><p>In a footnote she notes O'Donoghue's argument that <i>experience</i>, not making or objects, is the real object of art education. She agrees experience matters but insists making and objects give more than experience alone. Real debate material.</p></div>`,
+  options: [{ lead: 'Back to Garber', to: 'garber', quiet: true }]
+},
+
+/* ---------- TENSIONS ---------- */
+tensions: {
+  crumb: 'Disagreements', depth: 2, parent: 'home',
+  eyebrow: 'The good discussion material',
+  title: 'Where the papers pull against each other.',
+  body: `<p>Agreement makes a summary. Disagreement makes a discussion post. Pick one.</p>`,
+  options: [
+    { lead: 'Is discomfort generative, or an injury?', sub: 'Hickey-Moody vs. Hwang', to: 't1' },
+    { lead: 'Does diffractive pedagogy have an access problem?', sub: 'Paper 03 read through Papers 01 and 02', to: 't2' },
+    { lead: 'Reform or refusal?', sub: 'Mills vs. Hwang', to: 't3' },
+    { lead: 'If everything has agency, what about politics?', sub: 'Pair B read through Pair A', to: 't4' }
+  ]
+},
+
+t1: {
+  crumb: 'Discomfort', depth: 3, parent: 'tensions',
+  eyebrow: 'Tension 1',
+  title: 'Is discomfort generative, or an injury?', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Hickey-Moody et al. say</span><p>Discomfort is productive. Students should sit with the unknown and push through it. That's how the unlearning happens.</p></div>
+         <div class="block"><span class="lbl">Hwang says</span><p>Access fatigue &mdash; the exhaustion of constantly performing your disability &mdash; is a harm the institution inflicts, not a growth opportunity.</p></div>
+         <div class="block accent"><span class="lbl">The question that resolves it</span><p>Who chose the discomfort, and who can walk away from it?</p></div>`,
+  options: [{ lead: 'Back to the tensions', to: 'tensions', quiet: true }]
+},
+
+t2: {
+  crumb: 'Access problem', depth: 3, parent: 'tensions',
+  eyebrow: 'Tension 2',
+  title: 'Does diffractive pedagogy have an access problem?', titleSmall: true,
+  body: `<p>Paper 03 requires everyone to move &mdash; nobody sleeps at the back. Read through Papers 01 and 02, mandatory physical participation starts to look like it assumes a particular kind of body.</p>
+         <div class="note">In fairness: Hickey-Moody has written a book on intellectual disability and dance, and the paper does insist pedagogy adapt to the learner. But it never turns its own framework toward disability. Naming that gap is a strong, defensible contribution &mdash; just present it as your argument, not as something the paper says.</div>`,
+  options: [{ lead: 'Back to the tensions', to: 'tensions', quiet: true }]
+},
+
+t3: {
+  crumb: 'Reform or refusal', depth: 3, parent: 'tensions',
+  eyebrow: 'Tension 3',
+  title: 'Reform or refusal?', titleSmall: true,
+  body: `<div class="block"><span class="lbl">Mills works inside</span><p>Audit the building, define its significance, add community members to administrative roles.</p></div>
+         <div class="block"><span class="lbl">Hwang works against</span><p>Cripping is framed as an attack on the design. Refusal, not negotiation.</p></div>
+         <div class="block accent"><span class="lbl">A good longer argument</span><p>Treat them as sequential rather than opposed &mdash; disruption changes what reform is willing to consider.</p></div>`,
+  options: [{ lead: 'Back to the tensions', to: 'tensions', quiet: true }]
+},
+
+t4: {
+  crumb: 'Agency', depth: 3, parent: 'tensions',
+  eyebrow: 'Tension 4',
+  title: 'If everything has agency, what about politics?', titleSmall: true,
+  body: `<p>New materialism spreads agency across people and things. Disability justice insists on disabled people <i>specifically</i> as knowers and makers with political standing.</p>
+         <p>If agency belongs to clay and soil too, does the political claim get diluted?</p>
+         <div class="note">Hwang would likely say no &mdash; crip technoscience is also about interdependence with tools and environments. But the tension is live, and it's the most sophisticated thing you could raise about these four readings together.</div>`,
+  options: [{ lead: 'Back to the tensions', to: 'tensions', quiet: true }]
+},
+
+/* ---------- POST ---------- */
+post: {
+  crumb: 'What to post', depth: 2, parent: 'home',
+  eyebrow: 'Ready to adapt',
+  title: 'Three response starters.',
+  body: `<p>Each one is a paragraph you can rework in your own voice. Pick the one that matches the prompt.</p>`,
+  options: [
+    { lead: 'Connecting two or more readings', to: 'p1' },
+    { lead: 'What you\u2019d push back on', to: 'p2' },
+    { lead: 'Implications for practice', to: 'p3' }
+  ]
+},
+
+p1: {
+  crumb: 'Connecting', depth: 3, parent: 'post',
+  eyebrow: 'Response starter',
+  title: 'Connecting two or more readings', titleSmall: true,
+  copyable: true,
+  body: `<div class="quotebox" id="copytext">All four articles refuse the idea that space and matter are passive backgrounds to learning. Hwang and Mills make that argument about designed environments &mdash; the course site and the historic museum &mdash; while Hickey-Moody et al. and Garber make it about the studio and the material itself. Read together, the compliance checklist Mills critiques and the concept-first curriculum Garber critiques turn out to be the same mistake: both treat the material conditions of an experience as a solved problem rather than as the experience.</div>`,
+  options: [{ lead: 'Back to the starters', to: 'post', quiet: true }]
+},
+
+p2: {
+  crumb: 'Push back', depth: 3, parent: 'post',
+  eyebrow: 'Response starter',
+  title: 'What you\u2019d push back on', titleSmall: true,
+  copyable: true,
+  body: `<div class="quotebox" id="copytext">Hickey-Moody, Palmer and Sayers argue that bodies and environments are inseparable, and that a pedagogy failing to adapt to its space is the thing at fault &mdash; but the framework never turns toward disability, even though requiring everyone to participate physically assumes a great deal about bodies. Hwang's crip technoscience supplies the missing piece: access as a continuous, frictional, collective effort rather than a one-time accommodation.</div>`,
+  options: [{ lead: 'Back to the starters', to: 'post', quiet: true }]
+},
+
+p3: {
+  crumb: 'Practice', depth: 3, parent: 'post',
+  eyebrow: 'Response starter',
+  title: 'Implications for practice', titleSmall: true,
+  copyable: true,
+  body: `<div class="quotebox" id="copytext">Hwang's four analysis questions transfer to any learning space: who is the assumed user, what knowledge is absent, how do we center disabled students' experience in what we make, and how do we attack and then improve the design. Mills adds the governance version &mdash; put disabled people in the room where decisions get made, not in a survey afterward. Garber and Hickey-Moody supply the counterpart for materials: build in enough time with the medium that students meet its resistance instead of treating it as a delivery system for a concept.</div>`,
+  options: [{ lead: 'Back to the starters', to: 'post', quiet: true }]
+}
+
+};
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+const screenEl = document.getElementById('screen');
+const backEl = document.getElementById('back');
+const crumbEl = document.getElementById('crumb');
+const depthEl = document.getElementById('depth');
+let stack = ['home'];
+
+function trail(id) {
+  const path = [];
+  let cur = id;
+  while (cur) { path.unshift(S[cur].crumb); cur = S[cur].parent; }
+  return path;
+}
+
+function render(id) {
+  const s = S[id];
+
+  // depth dots
+  depthEl.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.createElement('i');
+    if (i <= (s.depth || 1)) dot.className = 'on';
+    depthEl.appendChild(dot);
+  }
+
+  // breadcrumb
+  const path = trail(id);
+  crumbEl.innerHTML = path.length > 1
+    ? path.slice(0, -1).join(' &rsaquo; ') + ' &rsaquo; <b>' + path[path.length - 1] + '</b>'
+    : '<b>' + path[0] + '</b>';
+
+  backEl.hidden = (id === 'home');
+
+  // content
+  let html = '';
+  if (s.eyebrow) html += '<p class="eyebrow">' + s.eyebrow + '</p>';
+  html += '<h1' + (s.titleSmall ? ' class="small"' : '') + '>' + s.title + '</h1>';
+  if (s.body) html += '<div class="body">' + s.body + '</div>';
+  if (s.copyable) html += '<button class="copy" id="copybtn">Copy this paragraph</button>';
+  if (s.options && s.options.length) {
+    html += '<div class="options">';
+    s.options.forEach(function (o, i) {
+      html += '<button class="opt' + (o.quiet ? ' quiet' : '') + '" data-to="' + o.to + '">' +
+              '<span class="txt"><span class="lead">' + o.lead + '</span>' +
+              (o.sub ? '<span class="sub">' + o.sub + '</span>' : '') + '</span>' +
+              '<span class="arrow">&rarr;</span></button>';
+    });
+    html += '</div>';
+  }
+
+  screenEl.innerHTML = '';
+  const inner = document.createElement('div');
+  inner.className = 'screen';
+  inner.innerHTML = html;
+  screenEl.appendChild(inner);
+
+  inner.querySelectorAll('.opt').forEach(function (b) {
+    b.addEventListener('click', function () { go(b.dataset.to); });
+  });
+
+  const cb = inner.querySelector('#copybtn');
+  if (cb) {
+    cb.addEventListener('click', function () {
+      const t = inner.querySelector('#copytext').innerText;
+      navigator.clipboard.writeText(t).then(function () {
+        cb.textContent = 'Copied';
+        setTimeout(function () { cb.textContent = 'Copy this paragraph'; }, 1800);
+      }).catch(function () { cb.textContent = 'Select and copy manually'; });
+    });
+  }
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function go(id) {
+  if (!S[id]) return;
+  // going "back to X" collapses rather than deepens the stack
+  const existing = stack.lastIndexOf(id);
+  if (existing > -1) stack = stack.slice(0, existing + 1);
+  else stack.push(id);
+  render(id);
+}
+
+backEl.addEventListener('click', function () {
+  if (stack.length > 1) { stack.pop(); render(stack[stack.length - 1]); }
+});
+
+render('home');
+
+/* ============================================================
+   PRINT — flattens every screen into one document
+   ============================================================ */
+function buildPrintAll() {
+  const c = document.getElementById('print-all');
+  if (c.dataset.built) return;
+  let html = '<h1 style="font-weight:300;font-size:1.8rem;margin-bottom:2rem">Four Papers &mdash; Full Guide</h1>';
+  Object.keys(S).forEach(function (k) {
+    const s = S[k];
+    html += '<div class="pscreen">';
+    if (s.eyebrow) html += '<p class="eyebrow">' + s.eyebrow + '</p>';
+    html += '<h1>' + s.title + '</h1>';
+    if (s.body) html += '<div class="body">' + s.body + '</div>';
+    html += '</div>';
+  });
+  c.innerHTML = html;
+  c.dataset.built = '1';
+}
+
+function printSinglePage() {
+  buildPrintAll();
+  document.body.classList.add('printing');
+
+  const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+
+  const style = document.createElement('style');
+  style.id = 'single-page-print';
+  style.textContent =
+    '@page { size: ' + w + 'px ' + h + 'px; margin: 0; }' +
+    'html, body { width: ' + w + 'px !important; height: auto !important; }' +
+    '* { page-break-inside: avoid !important; page-break-before: avoid !important; page-break-after: avoid !important; break-inside: avoid !important; }';
+  document.head.appendChild(style);
+
+  window.print();
+
+  setTimeout(function () {
+    const s = document.getElementById('single-page-print');
+    if (s) s.remove();
+    document.body.classList.remove('printing');
+  }, 500);
+}
+</script>
+</body>
+</html>
