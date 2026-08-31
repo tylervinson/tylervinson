@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.6; }
+.container { max-width: 900px; margin: 0 auto; padding: 80px 48px 120px; }
+header { position: relative; margin-bottom: 64px; }
+.eyebrow { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+h1 { font-size: 52px; font-weight: 300; letter-spacing: -1.5px; margin-bottom: 12px; color: #f0f0f0; line-height: 1.1; }
+.subtitle { font-size: 17px; color: #888; font-weight: 400; margin-bottom: 0; line-height: 1.5; max-width: 640px; }
+
+.section { margin-bottom: 72px; }
+.section:last-of-type { margin-bottom: 0; }
+.section-label { font-size: 11px; font-weight: 500; color: #FFBE5F; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
+.section h2 { font-size: 28px; font-weight: 300; letter-spacing: -0.5px; color: #f0f0f0; margin-bottom: 12px; line-height: 1.2; }
+.section > p { font-size: 14px; color: #999; line-height: 1.7; max-width: 700px; margin-bottom: 24px; }
+strong { color: #d8d8d8; font-weight: 600; }
+code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; background: #2a2a2a; padding: 2px 6px; border-radius: 3px; border: 1px solid #333; color: #FFBE5F; }
+
+footer { padding-top: 40px; margin-top: 96px; border-top: 1px solid #242424; text-align: center; font-size: 13px; color: #444; }
+footer a { color: #555; text-decoration: none; }
+footer a:hover { color: #888; }
+
+/* now playing */
+.intro-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 40px; align-items: start; }
+@media (max-width: 720px) { .intro-grid { grid-template-columns: 1fr; } }
+
+.album-art-container {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.album-art-container img { width: 100%; height: 100%; object-fit: cover; }
+.album-art-placeholder { color: #444; font-size: 44px; }
+
+.stat-stack { display: flex; flex-direction: column; gap: 2px; }
+.stat-item { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; padding: 20px 24px; }
+.stat-item + .stat-item { margin-top: 2px; }
+.stat-num { font-size: 36px; font-weight: 300; color: #f0f0f0; letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 11px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+.now-playing-name { font-size: 15px; font-weight: 500; color: #e0e0e0; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.audio-player { margin-top: 14px; }
+audio { width: 100%; height: 32px; accent-color: #FFBE5F; }
+
+/* playlist */
+.widget-list { display: flex; flex-direction: column; gap: 2px; }
+.track-item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.track-item:hover { background: #242424; border-color: #333; }
+.track-item.active { border-color: #FFBE5F; background: #242424; }
+
+.track-play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFBE5F;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  flex-shrink: 0;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.track-play-btn:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(255,190,95,0.2); }
+
+.track-info { min-width: 0; }
+.track-name { font-size: 14px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-duration { font-size: 12.5px; color: #666; margin-top: 4px; }
+
+.tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.tag-a { background: #1e2e1a; color: #7dbf82; border: 1px solid #2a4a2a; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: #555; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px; }
+.empty-state-icon { font-size: 32px; margin-bottom: 12px; color: #3a3a3a; }
+.empty-state p { font-size: 13px; color: #666; }
+
+/* fixed action button */
+.settings-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: #242424;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  z-index: 9999;
+  color: #FFBE5F;
+}
+.settings-btn:hover { opacity: 1; background: #2d2d2d; border-color: #3a3a3a; }
+.settings-btn i { font-size: 18px; }
+
+/* modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center;
+  z-index: 10000; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal-content {
+  background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px;
+  padding: 28px 26px; width: 100%; max-width: 480px; max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #2a2a2a;
+}
+.modal-title { font-size: 18px; font-weight: 500; color: #e0e0e0; }
+.modal-close {
+  width: 32px; height: 32px; background: none; border: none; cursor: pointer;
+  color: #666; transition: color 0.2s ease; display: flex; align-items: center;
+  justify-content: center; font-size: 18px;
+}
+.modal-close:hover { color: #e0e0e0; }
+
+.upload-group { margin-bottom: 20px; }
+.upload-group:last-child { margin-bottom: 0; }
+label {
+  display: block; font-size: 11px; font-weight: 500; color: #666;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.config-display {
+  font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px;
+  background: #242424; border: 1px solid #2a2a2a; border-radius: 6px;
+  padding: 12px 14px; color: #FFBE5F; word-break: break-all;
+}
+.config-hint { font-size: 12px; color: #666; line-height: 1.6; margin-top: 10px; }
+.btn-primary {
+  margin-top: 20px; width: 100%; padding: 12px 16px;
+  background: #FFBE5F; color: #1a1a1a; border: none; border-radius: 6px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:hover { background: #FFD495; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,190,95,0.25); }
+.btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+
+@media print {
+  .settings-btn { display: none; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 60px 24px 80px; }
+  h1 { font-size: 34px; }
+}
+
+</style>
+</head>
+<body>
+
+<button class="settings-btn" id="settings-btn" title="Settings" aria-label="Settings">
+  <i class="fas fa-cog"></i>
+</button>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Settings</h2>
+      <button class="modal-close" id="modalClose" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="upload-group">
+      <label>Source Repository</label>
+      <div class="config-display" id="configDisplay"></div>
+      <p class="config-hint">Edit the <code>CONFIG</code> object near the top of the &lt;script&gt; tag to point at your own repo, branch and folder. Every <code>.wav</code> file in that folder is added to the queue; the first image in the folder is used as album art.</p>
+    </div>
+    <button class="btn-primary" id="reloadBtn"><i class="fas fa-rotate"></i> Reload Tracks</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <header>
+    <p class="eyebrow">Personal Library</p>
+    <h1>Music Player</h1>
+    <p class="subtitle">Streams every <code>.wav</code> file committed to a folder in this GitHub repo, so it's the same playlist for every visitor.</p>
+  </header>
+
+  <section class="section">
+    <div class="section-label">Now Playing</div>
+    <div class="intro-grid">
+      <div class="album-art-container" id="albumArtDisplay">
+        <div class="album-art-placeholder"><i class="fas fa-music"></i></div>
+      </div>
+      <div class="stat-stack">
+        <div class="stat-item">
+          <div class="stat-num" id="trackCountNum">0</div>
+          <div class="stat-label">Tracks in queue</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Currently Playing</div>
+          <div class="now-playing-name" id="playerInfo">No track selected</div>
+          <div class="audio-player">
+            <audio id="audioPlayer" controls></audio>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Playlist</div>
+    <h2>Your Queue</h2>
+    <p>Click any track to play it, or use the play button to jump straight in.</p>
+    <div class="widget-list" id="playlist">
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-spinner fa-spin"></i></div>
+        <p>Loading tracks from GitHub&hellip;</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Music Player &middot; streams from a public GitHub repo &middot; same playlist for every visitor</p>
+  </footer>
+
+</div>
+
+<script>
+  // ---- Configure this to point at your own repo ----
+  const CONFIG = {
+    owner: 'tylervinson',            // GitHub username or org
+    repo: 'tylervinson',             // repository name
+    branch: 'main',                 // branch to read from
+    path: 'songs'                   // folder in the repo containing your .wav files (and optional cover image)
+  };
+  // ----------------------------------------------------
+
+  const albumArtDisplay = document.getElementById('albumArtDisplay');
+  const audioPlayer = document.getElementById('audioPlayer');
+  const playlistEl = document.getElementById('playlist');
+  const playerInfo = document.getElementById('playerInfo');
+  const trackCountNum = document.getElementById('trackCountNum');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('settingsModal');
+  const modalClose = document.getElementById('modalClose');
+  const configDisplay = document.getElementById('configDisplay');
+  const reloadBtn = document.getElementById('reloadBtn');
+
+  let tracks = [];
+  let currentTrackIndex = -1;
+
+  configDisplay.textContent = `${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${CONFIG.path}`;
+
+  settingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
+  modalClose.addEventListener('click', () => settingsModal.classList.remove('open'));
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) settingsModal.classList.remove('open');
+  });
+  reloadBtn.addEventListener('click', () => {
+    settingsModal.classList.remove('open');
+    fetchTracks();
+  });
+
+  async function fetchTracks() {
+    playlistEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-spinner fa-spin"></i></div>
+        <p>Loading tracks from GitHub&hellip;</p>
+      </div>`;
+
+    const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?ref=${CONFIG.branch}`;
+
+    try {
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error(`GitHub API responded ${res.status}`);
+      const items = await res.json();
+      if (!Array.isArray(items)) throw new Error(`"${CONFIG.path}" is not a folder`);
+
+      const wavFiles = items
+        .filter(item => item.type === 'file' && /\.wav$/i.test(item.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      const imageFile = items.find(item => item.type === 'file' && /\.(png|jpe?g|webp|gif)$/i.test(item.name));
+
+      tracks = wavFiles.map(f => ({ name: f.name.replace(/\.wav$/i, ''), url: f.download_url }));
+      trackCountNum.textContent = tracks.length;
+
+      if (imageFile) {
+        albumArtDisplay.innerHTML = `<img src="${imageFile.download_url}" alt="Album Art">`;
+      }
+
+      renderPlaylist();
+      if (tracks.length > 0) {
+        loadTrack(0);
+      } else {
+        playerInfo.textContent = 'No track selected';
+      }
+    } catch (err) {
+      playlistEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div>
+          <p>Couldn't load tracks (${err.message}). Check the CONFIG values in Settings.</p>
+        </div>`;
+    }
+  }
+
+  function renderPlaylist() {
+    if (tracks.length === 0) {
+      playlistEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="fas fa-folder"></i></div>
+          <p>No .wav files found in ${CONFIG.owner}/${CONFIG.repo}/${CONFIG.path}</p>
+        </div>`;
+      return;
+    }
+
+    playlistEl.innerHTML = tracks.map((track, index) => `
+      <div class="track-item ${index === currentTrackIndex ? 'active' : ''}" data-index="${index}">
+        <button class="track-play-btn" data-play-index="${index}"><i class="fas fa-play"></i></button>
+        <div class="track-info">
+          <div class="track-name">${track.name}</div>
+          <div class="track-duration" data-duration-index="${index}">Loading&hellip;</div>
+        </div>
+        ${index === currentTrackIndex ? '<span class="tag tag-a">Playing</span>' : ''}
+      </div>
+    `).join('');
+
+    playlistEl.querySelectorAll('.track-play-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(btn.dataset.playIndex);
+        loadTrack(index);
+        audioPlayer.play();
+      });
+    });
+
+    playlistEl.querySelectorAll('.track-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const index = parseInt(item.dataset.index);
+        loadTrack(index);
+        audioPlayer.play();
+      });
+    });
+  }
+
+  function loadTrack(index) {
+    if (index < 0 || index >= tracks.length) return;
+    currentTrackIndex = index;
+    const track = tracks[index];
+    audioPlayer.src = track.url;
+    playerInfo.textContent = track.name;
+    renderPlaylist();
+    audioPlayer.addEventListener('loadedmetadata', updateDuration, { once: true });
+  }
+
+  function updateDuration() {
+    const index = currentTrackIndex;
+    const durationEl = document.querySelector(`[data-duration-index="${index}"]`);
+    if (durationEl && !isNaN(audioPlayer.duration)) {
+      durationEl.textContent = formatTime(audioPlayer.duration);
+    }
+  }
+
+  function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  audioPlayer.addEventListener('ended', () => {
+    if (currentTrackIndex < tracks.length - 1) {
+      loadTrack(currentTrackIndex + 1);
+      audioPlayer.play();
+    }
+  });
+
+  fetchTracks();
+</script>
+
+</body>
+</html>
