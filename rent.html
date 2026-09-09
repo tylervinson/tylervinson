@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AC Outage Rent Credit Request</title>
+<style>
+  :root{
+    --ink:#1f2933;--muted:#667085;--line:#d9dee7;--soft:#f5f7fa;--accent:#243b53;--paper:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9edf2;color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+  .toolbar{max-width:8.5in;margin:18px auto 10px;padding:0 14px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  button{border:1px solid #b8c2cc;background:#fff;color:#243b53;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:14px}
+  button.primary{background:#243b53;color:#fff;border-color:#243b53}
+  .sheet{width:8.5in;min-height:0;margin:0 auto 28px;background:var(--paper);box-shadow:0 8px 28px rgba(31,41,51,.12);padding:.58in .62in .62in}
+  .doc-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;border-bottom:2px solid var(--accent);padding-bottom:16px}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  h1{font-size:25px;line-height:1.15;margin:0;color:#172b4d;letter-spacing:.01em}
+  .subtitle{font-size:13px;color:var(--muted);margin-top:5px}
+  .requested-box{text-align:right;min-width:185px}
+  .requested-box .label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+  .requested-box .amount{font-size:27px;font-weight:800;color:#172b4d;margin-top:3px;white-space:nowrap}
+  .requested-box .percent{font-size:11px;color:var(--muted);margin-top:1px}
+  .meta{display:grid;grid-template-columns:1.35fr .8fr;gap:22px;margin-top:18px}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+  .field.full{grid-column:1/-1}
+  .field label,.small-label{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+  input[type=text],input[type=date],input[type=number],input[type=month],textarea,select{width:100%;border:0;border-bottom:1px solid #aeb8c4;border-radius:0;background:transparent;color:var(--ink);padding:4px 1px 5px;font:inherit;font-size:13px;outline:none}
+  input:focus,textarea:focus,select:focus{border-bottom-color:#243b53;box-shadow:0 1px 0 #243b53}
+  textarea{border:1px solid var(--line);padding:9px;border-radius:5px;resize:vertical;min-height:86px}
+  .section{margin-top:22px}
+  .section-title{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#334e68;font-weight:800;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px}
+  .facts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .fact{padding:10px 11px;border-right:1px solid var(--line);background:#fff;min-width:0}
+  .fact:last-child{border-right:0}
+  .fact .flabel{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:3px}
+  .fact input{font-size:16px;font-weight:700;color:#172b4d;border:0;padding:0;min-width:0}
+  .fact .suffix{font-size:11px;color:var(--muted);margin-top:1px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;font-weight:800;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 8px}
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td.num,th.num{text-align:right;white-space:nowrap}
+  .desc strong{display:block;font-size:12px;color:#243b53}
+  .desc span{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+  .inline-num{width:58px!important;text-align:right;border:0!important;border-bottom:1px solid #b8c2cc!important;padding:2px!important;font-size:12px!important}
+  .inline-wide{width:86px!important}
+  .range-control{display:flex;align-items:center;gap:6px}
+  input[type=range]{width:95px;accent-color:#334e68}
+  .pct-value{font-weight:700;width:34px;text-align:right;font-size:11px}
+  tr.total-row td{border-top:2px solid #334e68;border-bottom:0;padding-top:10px;font-weight:800;font-size:14px}
+  tr.total-row td.num{font-size:18px;color:#172b4d}
+  .utility-detail{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px;padding:10px 12px;background:var(--soft);border-radius:6px}
+  .utility-detail label{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.05em}
+  .utility-detail input{font-size:12px}
+  .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:11px;color:#344054;margin-bottom:10px}
+  .checks label{display:flex;gap:7px;align-items:center}
+  input[type=checkbox]{width:14px;height:14px;accent-color:#334e68}
+  .statement{font-size:11px;color:#344054;background:var(--soft);border-left:3px solid #7b8794;padding:10px 12px;margin-top:12px}
+  .signature{display:grid;grid-template-columns:1fr 105px 1fr 105px;gap:18px;margin-top:26px}
+  .sigline{border-bottom:1px solid #667085;height:26px}
+  .siglabel{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px;letter-spacing:.05em}
+  .print-note{font-size:10px;color:var(--muted);text-align:center;margin-top:22px}
+  .screen-only{display:block}
+  .print-only{display:none}
+  .validation{display:none;margin-top:9px;padding:8px 10px;border:1px solid #efb8b8;background:#fff7f7;color:#9b1c1c;border-radius:5px;font-size:11px}
+  @media print{
+    @page{size:8.5in 15.10in;margin:0}
+    html,body{width:8.5in;margin:0;background:#fff}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .toolbar{display:none!important}
+    .sheet{width:8.5in;min-height:0;margin:0;box-shadow:none;padding:.58in .62in .62in}
+  }
+</style>
+</head>
+<body>
+<div class="toolbar screen-only">
+  <button id="resetBtn" type="button">Reset</button>
+  <button id="printBtn" type="button" class="primary">Print / Save as PDF</button>
+</div>
+
+<main class="sheet" id="document">
+  <header class="doc-head">
+    <div>
+      <div class="kicker">Tenant Request for Rent Credit</div>
+      <h1>Air Conditioning Outage</h1>
+      <div class="subtitle">Prorated loss-of-use, excess electricity, and documented costs</div>
+    </div>
+    <div class="requested-box">
+      <div class="label">Total credit requested</div>
+      <div class="amount" id="grandTotal">$0.00</div>
+      <div class="percent" id="rentPercent"></div>
+    </div>
+  </header>
+
+  <section class="meta">
+    <div class="field-grid">
+      <div class="field"><label for="tenantName">Tenant name</label><input id="tenantName" type="text" placeholder="Full name"></div>
+      <div class="field"><label for="spouseName">Spouse / co-tenant name</label><input id="spouseName" type="text" placeholder="Full name"></div>
+      <div class="field full"><label for="propertyAddress">Rental property address</label><input id="propertyAddress" type="text" placeholder="Street address, city, state, ZIP"></div>
+      <div class="field full"><label for="management">Landlord / property management</label><input id="management" type="text" placeholder="Company or contact name"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label for="unit">Unit</label><input id="unit" type="text" placeholder="Unit #"></div>
+      <div class="field"><label for="preparedDate">Date prepared</label><input id="preparedDate" type="date"></div>
+      <div class="field"><label for="monthlyRent">Monthly rent</label><input id="monthlyRent" type="number" min="0" step="1" value="2000"></div>
+      <div class="field"><label for="creditMonth">Requested credit applied to</label><input id="creditMonth" type="month"></div>
+      <div class="field"><label for="outageStart">AC outage began</label><input id="outageStart" type="date"></div>
+      <div class="field"><label for="outageEnd">Central AC restored</label><input id="outageEnd" type="date"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">Outage Summary</div>
+    <div class="facts">
+      <div class="fact"><div class="flabel">Days without effective AC</div><input id="noAcDays" type="number" min="0" max="31" step="0.5" value="10.5"><div class="suffix">days</div></div>
+      <div class="fact"><div class="flabel">Days using portable units</div><input id="portableDays" type="number" min="0" max="31" step="0.5" value="3.5"><div class="suffix">days</div></div>
+      <div class="fact"><div class="flabel">Highest indoor temperature</div><input id="highestTemp" type="number" min="0" max="150" step="1" value="115"><div class="suffix">°F, if documented/observed</div></div>
+      <div class="fact"><div class="flabel">Proration basis</div><select id="monthDays"><option value="30" selected>30 days</option><option value="31">31 days</option><option value="29">29 days</option><option value="28">28 days</option></select><div class="suffix">monthly rent divisor</div></div>
+    </div>
+    <div id="validation" class="validation"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">Requested Credit Calculation</div>
+    <table aria-label="Rent credit calculation">
+      <thead>
+        <tr><th>Description</th><th class="num">Basis</th><th class="num">Reduction</th><th class="num">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="desc"><strong>No effective air conditioning</strong><span>Prorated rent for days without effective cooling</span></td>
+          <td class="num"><span id="noAcBasis">—</span></td>
+          <td class="num"><span class="screen-only range-control"><input id="noAcPct" type="range" min="0" max="100" step="5" value="100"><span id="noAcPctLabel" class="pct-value">100%</span></span><span class="print-only" id="noAcPctPrint">100%</span></td>
+          <td class="num" id="noAcResult">$0.00</td>
+        </tr>
+        <tr>
+          <td class="desc"><strong>Portable AC period</strong><span>Reduced use/comfort while temporary units were in place</span></td>
+          <td class="num"><span id="portableBasis">—</span></td>
+          <td class="num"><span class="screen-only range-control"><input id="portablePct" type="range" min="0" max="100" step="5" value="50"><span id="portablePctLabel" class="pct-value">50%</span></span><span class="print-only" id="portablePctPrint">50%</span></td>
+          <td class="num" id="portableResult">$0.00</td>
+        </tr>
+        <tr>
+          <td class="desc"><strong>Estimated excess electricity</strong><span>Current affected-month bill less adjusted prior-year baseline</span></td>
+          <td class="num" id="electricBasis">—</td><td class="num">100%</td><td class="num" id="electricResult">$0.00</td>
+        </tr>
+        <tr>
+          <td class="desc"><strong>Other documented costs</strong><span>Out-of-pocket expenses attributable to the outage</span></td>
+          <td class="num">Actual</td><td class="num">100%</td><td class="num"><input id="otherCosts" class="inline-num inline-wide" type="number" min="0" step="0.01" value="0"></td>
+        </tr>
+        <tr>
+          <td class="desc"><strong>Additional requested adjustment</strong><span>Optional amount for inconvenience / negotiation</span></td>
+          <td class="num">Requested</td><td class="num">—</td><td class="num"><input id="negotiationAmount" class="inline-num inline-wide" type="number" min="0" step="1" value="0"></td>
+        </tr>
+        <tr class="total-row"><td colspan="3">TOTAL CREDIT REQUESTED</td><td class="num" id="tableTotal">$0.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="utility-detail">
+      <label>Affected-month electric bill<input id="currentBill" type="number" min="0" step="0.01" value="0"></label>
+      <label>Same month last year<input id="lastYearBill" type="number" min="0" step="0.01" value="0"></label>
+      <label>Rate adjustment since last year (%)<input id="rateAdjustment" type="number" min="-50" max="100" step="0.1" value="0"></label>
+    </div>
+  </section>
+
+  <section class="section impact-grid">
+    <div>
+      <div class="section-title">Impact During Outage</div>
+      <div class="checks">
+        <label><input id="workImpact" type="checkbox" checked> Work-from-home disruption</label>
+        <label><input id="sleepImpact" type="checkbox"> Sleep disruption</label>
+        <label><input id="roomImpact" type="checkbox" checked> Rooms unusably hot</label>
+        <label><input id="portableImpact" type="checkbox" checked> Portable-unit limitations</label>
+      </div>
+      <label class="small-label" for="impactNotes">Impact notes</label>
+      <textarea id="impactNotes" placeholder="Example: Certain rooms remained dangerously hot; temperatures in the bathrooms reached approximately 115°F. The outage also hindered my ability to work from home.">Certain rooms remained dangerously hot, including bathroom temperatures of approximately 115°F. The outage also hindered my ability to work from home. Portable units were not provided until most of the outage period had already passed.</textarea>
+    </div>
+    <div>
+      <div class="section-title">Supporting Documentation</div>
+      <div class="checks">
+        <label><input type="checkbox"> Utility bill — affected month</label>
+        <label><input type="checkbox"> Utility bill — prior year</label>
+        <label><input type="checkbox"> Maintenance requests</label>
+        <label><input type="checkbox"> Photos / temperature records</label>
+        <label><input type="checkbox"> Receipts for other costs</label>
+        <label><input type="checkbox"> Other correspondence</label>
+      </div>
+      <label class="small-label" for="attachmentNotes">Attachment / reference notes</label>
+      <textarea id="attachmentNotes" placeholder="List attached documents, maintenance ticket numbers, dates, etc."></textarea>
+    </div>
+  </section>
+
+  <div class="statement">
+    I am requesting the credit shown above based on the loss of normal use and comfort of the rental unit during the air-conditioning outage, the delayed availability of temporary cooling, and the additional costs associated with the outage. I am requesting that the approved credit be confirmed in writing and applied to the rent period identified above.
+  </div>
+
+  <section class="signature">
+    <div><div class="sigline"></div><div class="siglabel">Tenant signature</div></div>
+    <div><div class="sigline"></div><div class="siglabel">Date</div></div>
+    <div><div class="sigline"></div><div class="siglabel">Spouse / co-tenant signature</div></div>
+    <div><div class="sigline"></div><div class="siglabel">Date</div></div>
+  </section>
+
+  <div class="print-note screen-only">Complete the fields above, then use <strong>Print / Save as PDF</strong>. The print layout removes the controls and formats this as a formal document.</div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const money = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+  const numberValue = (el,min=0,max=Number.MAX_SAFE_INTEGER) => {
+    const n=Number(el.value); return Number.isFinite(n)?Math.min(max,Math.max(min,n)):min;
+  };
+
+  const ids=['monthlyRent','noAcDays','portableDays','noAcPct','portablePct','monthDays','currentBill','lastYearBill','rateAdjustment','otherCosts','negotiationAmount'];
+
+  function calc(){
+    const rent=numberValue($('monthlyRent'));
+    const noDays=numberValue($('noAcDays'),0,31);
+    const portDays=numberValue($('portableDays'),0,31);
+    const noPct=numberValue($('noAcPct'),0,100);
+    const portPct=numberValue($('portablePct'),0,100);
+    const divisor=numberValue($('monthDays'),1,31);
+    const current=numberValue($('currentBill'));
+    const last=numberValue($('lastYearBill'));
+    const rate=numberValue($('rateAdjustment'),-50,100);
+    const other=numberValue($('otherCosts'));
+    const negotiation=numberValue($('negotiationAmount'));
+    const daily=rent/divisor;
+    const noAmt=daily*noDays*(noPct/100);
+    const portAmt=daily*portDays*(portPct/100);
+    const baseline=last*(1+rate/100);
+    const electric=Math.max(0,current-baseline);
+    const total=noAmt+portAmt+electric+other+negotiation;
+    const pct=rent>0?(total/rent)*100:0;
+
+    $('noAcPctLabel').textContent=noPct.toFixed(0)+'%';
+    $('portablePctLabel').textContent=portPct.toFixed(0)+'%';
+    $('noAcPctPrint').textContent=noPct.toFixed(0)+'%';
+    $('portablePctPrint').textContent=portPct.toFixed(0)+'%';
+    $('noAcBasis').textContent=noDays+' days × '+money.format(daily)+'/day';
+    $('portableBasis').textContent=portDays+' days × '+money.format(daily)+'/day';
+    $('electricBasis').textContent=(current||last)?money.format(current)+' − '+money.format(baseline):'Enter bills below';
+    $('noAcResult').textContent=money.format(noAmt);
+    $('portableResult').textContent=money.format(portAmt);
+    $('electricResult').textContent=money.format(electric);
+    $('grandTotal').textContent=money.format(total);
+    $('tableTotal').textContent=money.format(total);
+    $('rentPercent').textContent=rent>0?pct.toFixed(1)+'% of one month’s rent':'';
+
+    const problems=[];
+    if(noDays+portDays>divisor) problems.push('Outage days exceed the selected monthly proration basis.');
+    if(current>0&&last===0) problems.push('Enter the prior-year electric bill to calculate an excess-electricity amount.');
+    const v=$('validation');
+    if(problems.length){v.textContent=problems.join(' ');v.style.display='block'}else{v.textContent='';v.style.display='none'}
+  }
+
+  ids.forEach(id=>{ $(id).addEventListener('input',calc); $(id).addEventListener('change',calc); });
+
+  $('printBtn').addEventListener('click',()=>window.print());
+  $('resetBtn').addEventListener('click',()=>{
+    $('tenantName').value=''; $('spouseName').value=''; $('unit').value=''; $('propertyAddress').value=''; $('management').value=''; $('creditMonth').value='';
+    $('monthlyRent').value='2000'; $('outageStart').value=''; $('outageEnd').value=''; $('noAcDays').value='10.5'; $('portableDays').value='3.5'; $('highestTemp').value='115';
+    $('noAcPct').value='100'; $('portablePct').value='50'; $('monthDays').value='30'; $('currentBill').value='0'; $('lastYearBill').value='0'; $('rateAdjustment').value='0'; $('otherCosts').value='0'; $('negotiationAmount').value='0';
+    $('impactNotes').value='Certain rooms remained dangerously hot, including bathroom temperatures of approximately 115°F. The outage also hindered my ability to work from home. Portable units were not provided until most of the outage period had already passed.';
+    $('attachmentNotes').value='';
+    calc();
+  });
+
+  if(!$('preparedDate').value){
+    const now=new Date(); const local=new Date(now.getTime()-now.getTimezoneOffset()*60000); $('preparedDate').value=local.toISOString().slice(0,10);
+  }
+  calc();
+})();
+</script>
+</body>
+</html>
