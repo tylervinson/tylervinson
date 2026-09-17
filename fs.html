@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CIRF Forms</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #fff;
+      color: #1f2937;
+    }
+
+    body {
+      padding: 18px;
+    }
+
+    .forms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .form-card {
+      min-width: 0;
+      border: 1px solid #d9dde3;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .form-title {
+      margin: 0;
+      padding: 12px 16px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 700;
+      background: #f5f7fa;
+      border-bottom: 1px solid #d9dde3;
+    }
+
+    .form-embed {
+      padding: 16px;
+      min-height: 500px;
+      overflow: auto;
+    }
+
+    @media (max-width: 950px) {
+      .forms-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="forms-grid">
+
+    <section class="form-card">
+      <h2 class="form-title">CIRF Public</h2>
+      <div class="form-embed" id="cirf-public">
+       <script type="text/javascript" id="jsFastForms" src="https://azblue.my.salesforce-sites.com/services/apexrest/VisualAntidote/FFNEngine/v1/?d=di3Q8j8gLTB92M8rcBxQnw%3D%3D"></script>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <h2 class="form-title">CIRF Portal</h2>
+      <div class="form-embed" id="cirf-portal">
+        <script type="text/javascript" id="jsFastForms" src="https://azblue.my.salesforce-sites.com/services/apexrest/VisualAntidote/FFNEngine/v1/?d=i09wyc2KhBhgto5ZuDni5w%3D%3D"></script>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <h2 class="form-title">CIRF Public UAT</h2>
+      <div class="form-embed" id="cirf-public-uat">
+        <script type="text/javascript" id="jsFastForms" src="https://azblue--uat.sandbox.my.salesforce-sites.com/forms/services/apexrest/VisualAntidote/FFNEngine/v1/?d=zierfXfKCsW9ijMfJ4oPfQ%3D%3D"></script>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <h2 class="form-title">CIRF Portal UAT</h2>
+      <div class="form-embed" id="cirf-portal-uat">
+        <script type="text/javascript" id="jsFastForms" src="https://azblue--uat.sandbox.my.salesforce-sites.com/forms/services/apexrest/VisualAntidote/FFNEngine/v1/?d=HVasP%2BHRF1vO3ve8kZx3EQ%3D%3D"></script>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
