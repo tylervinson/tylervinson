@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CIRF Form Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --border: #d7dce2;
+      --text: #18212f;
+      --muted: #667085;
+      --shadow: 0 8px 24px rgba(16, 24, 40, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body { padding: 16px; }
+
+    .app {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 13px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f8fafc; }
+    button.active { outline: 2px solid #98a2b3; }
+
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 48px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .open-focus {
+      padding: 6px 9px;
+      font-size: 13px;
+    }
+
+    .form-frame {
+      display: block;
+      width: 100%;
+      height: 620px;
+      border: 0;
+      background: #fff;
+    }
+
+    .focus {
+      display: none;
+    }
+
+    .focus.active {
+      display: block;
+    }
+
+    .focus-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .focus-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .focus-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .focus-frame {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 125px);
+      min-height: 650px;
+      border: 0;
+      background: #fff;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1050px) {
+      .overview {
+        grid-template-columns: 1fr;
+      }
+      .form-frame {
+        height: 720px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <div>
+        <div class="brand">CIRF Form Dashboard</div>
+        <div class="hint">Each form runs in its own isolated page.</div>
+      </div>
+
+      <div class="controls">
+        <button id="overviewBtn" class="active" type="button">Overview</button>
+        <button id="prevBtn" type="button">← Previous</button>
+        <button id="nextBtn" type="button">Next →</button>
+      </div>
+    </div>
+
+    <section id="overview" class="overview">
+      <article class="card">
+        <div class="card-head">
+          <h2 class="card-title">CIRF Public</h2>
+          <button class="open-focus" type="button" data-index="0">Focus</button>
+        </div>
+        <iframe class="form-frame" src="cirf-public.html" title="CIRF Public"></iframe>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <h2 class="card-title">CIRF Portal</h2>
+          <button class="open-focus" type="button" data-index="1">Focus</button>
+        </div>
+        <iframe class="form-frame" src="cirf-portal.html" title="CIRF Portal"></iframe>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <h2 class="card-title">CIRF Public UAT</h2>
+          <button class="open-focus" type="button" data-index="2">Focus</button>
+        </div>
+        <iframe class="form-frame" src="cirf-public-uat.html" title="CIRF Public UAT"></iframe>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <h2 class="card-title">CIRF Portal UAT</h2>
+          <button class="open-focus" type="button" data-index="3">Focus</button>
+        </div>
+        <iframe class="form-frame" src="cirf-portal-uat.html" title="CIRF Portal UAT"></iframe>
+      </article>
+    </section>
+
+    <section id="focus" class="focus">
+      <div class="focus-card">
+        <div class="focus-head">
+          <div id="focusTitle" class="focus-title">CIRF Public</div>
+          <button id="backBtn" type="button">Back to Overview</button>
+        </div>
+        <iframe id="focusFrame" class="focus-frame" src="cirf-public.html" title="Focused CIRF form"></iframe>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const forms = [
+      { title: "CIRF Public", src: "cirf-public.html" },
+      { title: "CIRF Portal", src: "cirf-portal.html" },
+      { title: "CIRF Public UAT", src: "cirf-public-uat.html" },
+      { title: "CIRF Portal UAT", src: "cirf-portal-uat.html" }
+    ];
+
+    let current = 0;
+
+    const overview = document.getElementById("overview");
+    const focus = document.getElementById("focus");
+    const focusTitle = document.getElementById("focusTitle");
+    const focusFrame = document.getElementById("focusFrame");
+    const overviewBtn = document.getElementById("overviewBtn");
+
+    function showOverview() {
+      overview.style.display = "";
+      focus.classList.remove("active");
+      overviewBtn.classList.add("active");
+    }
+
+    function showFocus(index) {
+      current = (index + forms.length) % forms.length;
+      const form = forms[current];
+
+      focusTitle.textContent = form.title;
+
+      // Reload only when changing forms.
+      if (!focusFrame.src.endsWith(form.src)) {
+        focusFrame.src = form.src;
+      }
+
+      overview.style.display = "none";
+      focus.classList.add("active");
+      overviewBtn.classList.remove("active");
+    }
+
+    document.querySelectorAll(".open-focus").forEach(btn => {
+      btn.addEventListener("click", () => showFocus(Number(btn.dataset.index)));
+    });
+
+    document.getElementById("prevBtn").addEventListener("click", () => showFocus(current - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => showFocus(current + 1));
+    document.getElementById("backBtn").addEventListener("click", showOverview);
+    overviewBtn.addEventListener("click", showOverview);
+
+    document.addEventListener("keydown", (event) => {
+      if (!focus.classList.contains("active")) return;
+      if (event.key === "ArrowLeft") showFocus(current - 1);
+      if (event.key === "ArrowRight") showFocus(current + 1);
+      if (event.key === "Escape") showOverview();
+    });
+  </script>
+</body>
+</html>
