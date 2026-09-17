@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CIRF Form Dashboard</title>
+  <title>CIRF Form Comparison</title>
   <style>
     :root {
-      --bg: #f4f6f8;
+      --bg: #333333;
       --panel: #ffffff;
       --border: #d7dce2;
       --text: #18212f;
@@ -43,13 +43,7 @@
     .brand {
       font-size: 20px;
       font-weight: 700;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      color: #F7F8FA;
     }
 
     button {
@@ -77,7 +71,7 @@
       min-width: 0;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 3px;
       overflow: hidden;
       box-shadow: var(--shadow);
     }
@@ -123,7 +117,7 @@
     .focus-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 3px;
       overflow: hidden;
       box-shadow: var(--shadow);
     }
@@ -152,11 +146,6 @@
       background: #fff;
     }
 
-    .hint {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
     @media (max-width: 1050px) {
       .overview {
         grid-template-columns: 1fr;
@@ -170,16 +159,7 @@
 <body>
   <div class="app">
     <div class="toolbar">
-      <div>
-        <div class="brand">CIRF Form Dashboard</div>
-        <div class="hint">Each form runs in its own isolated page.</div>
-      </div>
-
-      <div class="controls">
-        <button id="overviewBtn" class="active" type="button">Overview</button>
-        <button id="prevBtn" type="button">← Previous</button>
-        <button id="nextBtn" type="button">Next →</button>
-      </div>
+      <div class="brand">CIRF Form Comparison</div>
     </div>
 
     <section id="overview" class="overview">
@@ -241,12 +221,10 @@
     const focus = document.getElementById("focus");
     const focusTitle = document.getElementById("focusTitle");
     const focusFrame = document.getElementById("focusFrame");
-    const overviewBtn = document.getElementById("overviewBtn");
 
     function showOverview() {
       overview.style.display = "";
       focus.classList.remove("active");
-      overviewBtn.classList.add("active");
     }
 
     function showFocus(index) {
@@ -262,22 +240,16 @@
 
       overview.style.display = "none";
       focus.classList.add("active");
-      overviewBtn.classList.remove("active");
     }
 
     document.querySelectorAll(".open-focus").forEach(btn => {
       btn.addEventListener("click", () => showFocus(Number(btn.dataset.index)));
     });
 
-    document.getElementById("prevBtn").addEventListener("click", () => showFocus(current - 1));
-    document.getElementById("nextBtn").addEventListener("click", () => showFocus(current + 1));
     document.getElementById("backBtn").addEventListener("click", showOverview);
-    overviewBtn.addEventListener("click", showOverview);
 
     document.addEventListener("keydown", (event) => {
       if (!focus.classList.contains("active")) return;
-      if (event.key === "ArrowLeft") showFocus(current - 1);
-      if (event.key === "ArrowRight") showFocus(current + 1);
       if (event.key === "Escape") showOverview();
     });
   </script>
