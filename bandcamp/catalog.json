@@ -1,0 +1,1527 @@
+{
+  "generated": "2026-09-29T09:55:17.996Z",
+  "artist": {
+    "name": "RESINWITCH",
+    "tagline": "Tempe, Arizona",
+    "bandcampUrl": "https://nielsgore.bandcamp.com"
+  },
+  "releases": [
+    {
+      "key": "3426931869",
+      "bcAlbumId": "3426931869",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/the-alignment-problem",
+      "title": "The Alignment Problem",
+      "year": 2026,
+      "type": "Album",
+      "featured": true,
+      "order": 0,
+      "art": "https://f4.bcbits.com/img/a374271449_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Walking Disaster",
+          "duration": 218,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3047832892&ts=1790675699&t=76d5dd2ac5a956c645f13dd02d884664813a0938",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Born To Kill",
+          "duration": 183,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1780100239&ts=1790675699&t=e67617ab8f9c625894c260cccd1d1f73bed7e769",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Who's Side",
+          "duration": 180,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3090416278&ts=1790675699&t=c04e98fdeeeb4baf63a8f4d1040c137f669e2ca2",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "The Collective",
+          "duration": 171,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1733746541&ts=1790675699&t=922466914e88b707d1e82294b0267e101244e77b",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "New Magic",
+          "duration": 256,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1557704446&ts=1790675699&t=9ddeef86ec4f29f8742476278aaee6b99c8f2aa3",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "The Alignment Problem",
+          "duration": 185,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3874416815&ts=1790675699&t=d0c2021ca63201f46428efa76eaeb238f0af58ae",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2928087339",
+      "bcAlbumId": "2928087339",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/morgalodon",
+      "title": "Morgalodon",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 1,
+      "art": "https://f4.bcbits.com/img/a2821495239_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Morgalodon",
+          "duration": 232,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3803181226&ts=1790675700&t=537b05d379929058272de893aa3649ae01fb2e19",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "The Search",
+          "duration": 188,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1441353634&ts=1790675700&t=367637d18f7349372e0e0151a390551ba0dd224d",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "The Waters Edge (My Dad Is Dead)",
+          "duration": 139,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3295236229&ts=1790675700&t=ab0ec5d0d6e627fc3d28069e7e1208f147715bf2",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "The Hunt",
+          "duration": 183,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=418560301&ts=1790675700&t=92514ec55d66b146a953ef24e1b7d6251a7254e1",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "The Chase",
+          "duration": 154,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3229551968&ts=1790675700&t=0314c869649c5a5ac25db77555f573c09d2e9c88",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Fish Woman",
+          "duration": 129,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2149842324&ts=1790675700&t=c9c799d388cb633bddebe84eb80e1c9f1a73c206",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2811625909",
+      "bcAlbumId": "2811625909",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/lord-of-death",
+      "title": "LORD OF DEATH",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 2,
+      "art": "https://f4.bcbits.com/img/a624380208_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Suicide By GOD",
+          "duration": 267,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=620682964&ts=1790675700&t=87ff0a3ca7f2149f1d707d86345deb4f7e6144a0",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "See The Sign",
+          "duration": 173,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=647258956&ts=1790675700&t=4375e4f7f246455657e2c78ef913a09b7424df2e",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Watch You Burn",
+          "duration": 261,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3336269187&ts=1790675700&t=64e11ae7f4e2f0743746a6a22e1a2e3c049d7bb7",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "My Abyss",
+          "duration": 131,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1272066051&ts=1790675700&t=8391600642a41f23616ed2008ddf05093ed8dc3a",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "LORD OF DEATH",
+          "duration": 198,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3573123794&ts=1790675700&t=ce6113d40cea16df24e13d898f7002cced9d03e6",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Ether (Gang Of Four)",
+          "duration": 103,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3082487477&ts=1790675700&t=969635de67b89965aff65c51356936d6f0c596b2",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Outro",
+          "duration": 139,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1367672027&ts=1790675700&t=152f1ad80cb0f2c8636feada0094ac3f4dd42d60",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "3742863995",
+      "bcAlbumId": "3742863995",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/king-of-shit",
+      "title": "KING OF SHIT",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 3,
+      "art": "https://f4.bcbits.com/img/a2543852302_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "King Of Shit",
+          "duration": 191,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=655408759&ts=1790675701&t=e402fcd8f3af23f506d0db9824ad831af06bb2a9",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Human Waste",
+          "duration": 179,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=736065898&ts=1790675701&t=e9c8b74c9e00ff8f5cb6ba677e72e480fba7154e",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Dig It (Skinny Puppy)",
+          "duration": 132,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2082620889&ts=1790675701&t=c8b599a683757361f0c0948a2a3ea1f0a8bf2525",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Stillborn",
+          "duration": 211,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=120470674&ts=1790675701&t=e3966b57da866ff7e1679576549f4cb9e11a3a98",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "To Still Exist",
+          "duration": 157,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3443650180&ts=1790675701&t=854e4e2117013d9b411ac07df857c223070990d0",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Death Hilarious",
+          "duration": 217,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3471399171&ts=1790675701&t=8a37de43b4d7a8b07e22a1fcc3eb34efdc76e08a",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "299967262",
+      "bcAlbumId": "299967262",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/child-of-god-2",
+      "title": "CHILD OF GOD",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 4,
+      "art": "https://f4.bcbits.com/img/a253035843_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Loss + Grief",
+          "duration": 323,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3247896947&ts=1790675702&t=70eb4f7b00e4dc9bcf9387dadaf279acf735532e",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Summon The Witch",
+          "duration": 162,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1479793183&ts=1790675702&t=f4200dbc3f3762ec65a50c733e31b459d4293d90",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "I Wish For Death",
+          "duration": 335,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2306874021&ts=1790675702&t=ee57e593d7c4b440e52f99f1a1b9ec810fde850c",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Mercy Of Slumber (Rudimentary Peni)",
+          "duration": 109,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1352761293&ts=1790675702&t=c00620965e6a24d3f0bc6c1f0c8f9ef0658a5be3",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Fuck People",
+          "duration": 260,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2092886438&ts=1790675702&t=a2c9d107f307fab5dea9bbacda9a103eeddcaaa2",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Child Of GOD",
+          "duration": 441,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2778999581&ts=1790675702&t=7f26d3428574b72f2337f8746e318a77c83ea2e2",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "This Is The Terror (Steve Albini Mix)",
+          "duration": 188,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2556695472&ts=1790675702&t=46aa7aee08797d3344bf0d9bd268322cd69c9e1a",
+          "src": ""
+        },
+        {
+          "n": 8,
+          "title": "The Guy Who Invented Fire (Shellac)",
+          "duration": 115,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=23715788&ts=1790675702&t=fbb3e46ed7ceac440e234357e61686f1ecd906d0",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2298453132",
+      "bcAlbumId": "2298453132",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/black-pariah",
+      "title": "Black Pariah",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 5,
+      "art": "https://f4.bcbits.com/img/a2770848643_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Andras Summoned",
+          "duration": 533,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2971128572&ts=1790675703&t=84e7cf0b090003ff9288fe0d9194b01038825644",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Liber Al",
+          "duration": 371,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3765794223&ts=1790675703&t=31c305fe046d7264122498c470fc94e83b83db15",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Let It Burn",
+          "duration": 236,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2445369496&ts=1790675703&t=945b9436f0db0f8ad9a28fb4ba650ed6bb2db435",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Time To Die",
+          "duration": 228,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=232581193&ts=1790675703&t=320a4ab2eacff0373303820c8cc5c4498447437e",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "You Die Earth Feeds",
+          "duration": 213,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=830211318&ts=1790675703&t=dc9bd9309969085d177a868e5d3cd959dc2485f1",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "I Prefer (Ministry)",
+          "duration": 543,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2318298484&ts=1790675703&t=99c7d4649e58582cc4edd5aaaf7f80c9ffb8c286",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Lesser YHWH",
+          "duration": 230,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3190542515&ts=1790675703&t=08a55dd449fa216d2d260eb3db70c1423f100df5",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2652660663",
+      "bcAlbumId": "2652660663",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/parasite-of-man",
+      "title": "Parasite Of Man",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 6,
+      "art": "https://f4.bcbits.com/img/a2119388389_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "OMEN",
+          "duration": 386,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2859651285&ts=1790675704&t=d9d6dc7679360eb4455474bd538e56a7d937c771",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "People",
+          "duration": 190,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2070570056&ts=1790675704&t=254239b7e7b6f4715b336ed465627ef1f1063f7c",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Ignorant Priority",
+          "duration": 123,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3881097573&ts=1790675704&t=c3ad4140e718839cceb12c41c72ed4ded376a03c",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Parasite Of Man",
+          "duration": 199,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1538021843&ts=1790675704&t=762bb4189bf8d0d27772e085cd08589514072841",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Options",
+          "duration": 186,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1065725036&ts=1790675704&t=69a5ac0991996a5695f2730f78d85ed1d57c915a",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Eat You Alive",
+          "duration": 113,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1443335334&ts=1790675704&t=53fb7888fee7195a3cf5e02785e1dd89049d33aa",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "World Abuser",
+          "duration": 175,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=92437662&ts=1790675704&t=5564a732da6a1f0acfae2ef2a046e09002c6963e",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "1876747546",
+      "bcAlbumId": "1876747546",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/red-procession-ep",
+      "title": "Red Procession EP",
+      "year": 2026,
+      "type": "EP",
+      "featured": false,
+      "order": 7,
+      "art": "https://f4.bcbits.com/img/a4905098_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Beloved or Banished",
+          "duration": 478,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3007421512&ts=1790675704&t=5163ec28bcdda7c98b49841860a34102e99d0202",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Red Procession",
+          "duration": 342,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3907604839&ts=1790675704&t=0d436a07cf79e50870e28695da86392957e633b9",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Blood Red (Slayer)",
+          "duration": 328,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3347893372&ts=1790675704&t=0fe3cf6fe1ab7f1a3a5b2cd5cd2bd3155aa462ce",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Your Savior I Am Not",
+          "duration": 533,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1472835873&ts=1790675704&t=1adddbbfc2f0a62e76ae830b6d68948b1a5bd864",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "In The Arms Of The Demiurge",
+          "duration": 177,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4120973513&ts=1790675704&t=31226a297166a26215bdef1e1646349ed3580a17",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2756461997",
+      "bcAlbumId": "2756461997",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/sacred-is-the-grave",
+      "title": "Sacred Is The Grave",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 8,
+      "art": "https://f4.bcbits.com/img/a3661717980_10.jpg",
+      "about": "",
+      "credits": [],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Through The Flames",
+          "duration": 339,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1188421158&ts=1790675705&t=7bcfc2791c6aa9374d444df10179911cddb61515",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "The Wreckage Of Me And You",
+          "duration": 260,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3908999882&ts=1790675705&t=e5da4ce1d213de44fe58468d46bdbbc18b6562d4",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Sacred Is The Grave",
+          "duration": 300,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2681867195&ts=1790675705&t=1cbee5bb3a68c59b10c158ba43f8976077a2282f",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "I Am Become",
+          "duration": 273,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=603680973&ts=1790675705&t=34084cdf66d065bc89ad7c04e00d2871de8725d2",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Mass Extinction Fetish",
+          "duration": 283,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1516766310&ts=1790675705&t=5f1d86388afc59adbd038ecdf08eee8d14604baf",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Disgusted By You All",
+          "duration": 214,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3857948643&ts=1790675705&t=870aaee978788517646e93766d7f360505802669",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Outro",
+          "duration": 98,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1402892496&ts=1790675705&t=d73d6b7c39e1662887ed6bba3d035c0515d93a7e",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "466534201",
+      "bcAlbumId": "466534201",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/on-the-origin-of-the-world",
+      "title": "On The Origin Of The World",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 9,
+      "art": "https://f4.bcbits.com/img/a3703533369_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Intro/Blind God",
+          "duration": 460,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2416951535&ts=1790675706&t=ba94cd523d65223ea661ecb20f866d7663459e90",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Big Bad Sky Dad",
+          "duration": 316,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=396203589&ts=1790675706&t=4cb1a993991e18654970b5725a24d52728473840",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "The Darkness",
+          "duration": 420,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1589813901&ts=1790675706&t=2548f22f20d2ea8d8f3d63805604616c6e578bb9",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "High Strangeness",
+          "duration": 253,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=490828427&ts=1790675706&t=073cf13e80a1242d43879a41852bde1539f9f121",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Life Among The Lifeless",
+          "duration": 394,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1737288304&ts=1790675706&t=0d3a291c27a1893ed7d74c13bf255bdc0ab225c6",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Earth By Invitation Only (Crucifucks)",
+          "duration": 323,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1139347615&ts=1790675706&t=77f3515a5645b0d5dc908f5a6831c344c72dc2ac",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Homo Aetherensis",
+          "duration": 255,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2626612049&ts=1790675706&t=52a0a4823cd498ba3ff6a2219142d6fb8f14d9dc",
+          "src": ""
+        },
+        {
+          "n": 8,
+          "title": "Only To Die/Outro",
+          "duration": 343,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2544652310&ts=1790675706&t=5163f04bad7b0b75bf387440e50726b9e2398123",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "36592057",
+      "bcAlbumId": "36592057",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/people-are-a-plague",
+      "title": "People Are A Plague",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 10,
+      "art": "https://f4.bcbits.com/img/a4122008078_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "People Are A Plague",
+          "duration": 312,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1262786855&ts=1790675706&t=3056dd16909b827f4d7f5972bab2c7c4a933098c",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "I Am The Problem",
+          "duration": 221,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=224797311&ts=1790675706&t=4cbda7f9f4f552cc42d042360e53c95b295efb90",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Always Room In The Ground",
+          "duration": 263,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2732580276&ts=1790675706&t=8a9d9eaafd9f310b57818963c86d10a2a847e657",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Black Shape",
+          "duration": 406,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=921800770&ts=1790675706&t=635ba32894cec8f6987a8009985b945580935988",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Abomination (Gnostic Creation Myth)",
+          "duration": 397,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3913912467&ts=1790675706&t=4a380dc658178c6b76b57764b224f4393757bddc",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "I Hope You All Die",
+          "duration": 223,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=820810318&ts=1790675706&t=bf4d06192653295490fb16ae678c4185a52ce334",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2727598458",
+      "bcAlbumId": "2727598458",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/all-our-gods",
+      "title": "All Our Gods",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 11,
+      "art": "https://f4.bcbits.com/img/a1597923772_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "This God And All Other Gods",
+          "duration": 369,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3748856691&ts=1790675707&t=d2705e71dd493ad19e8dc0a486fcb2654f9b3b3b",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Transfiguration Of The Christ",
+          "duration": 384,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3101319764&ts=1790675707&t=8fdbc9fde30ef51e815f9e6a94461830422f3003",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Demon Of God",
+          "duration": 239,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1750104812&ts=1790675707&t=007b981b65bf67fea39ff11323a2e4206aeadaf8",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Death Is Near",
+          "duration": 264,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3910941956&ts=1790675707&t=92ca453585cb8bc0e69b3c58e49007175387c6c0",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "We Feed The Ground",
+          "duration": 418,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2745552222&ts=1790675707&t=d68cd412fd575d37585ec0eb1b304b2956f2d86b",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Effective Accelerationism",
+          "duration": 350,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=862465329&ts=1790675707&t=fd105b999fbb3b4ca7abefc906b64b3581b0d76e",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Feeling Nothing",
+          "duration": 220,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3038217666&ts=1790675707&t=c4c8e41834572560262afdfbfd0ebc91f5eaa09d",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "771520453",
+      "bcAlbumId": "771520453",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/ritual",
+      "title": "RITUAL",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 12,
+      "art": "https://f4.bcbits.com/img/a700854654_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Intro",
+          "duration": 116,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1370432148&ts=1790675708&t=e8a5081b7c7a291bb2e3d6f3557a5d8adb79aced",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Our Kind Is A Disease",
+          "duration": 197,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3071739590&ts=1790675708&t=9b195cdc23797c7676a9bf26fa8ddfdf94a6b59c",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Pennies From Heaven (Legendary Pink Dots)",
+          "duration": 233,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=89105661&ts=1790675708&t=0a9aea6446c9ad25468bb98f48203654fa7d5492",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Reminor: The Fear of Being Remembered",
+          "duration": 287,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4184646029&ts=1790675708&t=cba27851dd4e4d7a5103d80d09e82cfb7bfe4d5f",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "The Gilded Age",
+          "duration": 326,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=576282404&ts=1790675708&t=d6e0f9b8a0d794c488bcbd06fa625f5b1966b79e",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Monkeys Nukes Piss",
+          "duration": 285,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2097932631&ts=1790675708&t=5e91e81c3c2877018a0a03bacb4d6cee01a6a0bf",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "More Land More Graves",
+          "duration": 334,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2976706924&ts=1790675708&t=1d559345e9c9a0f96febf768b0b82be2186ba93d",
+          "src": ""
+        },
+        {
+          "n": 8,
+          "title": "The Dying Unbirth",
+          "duration": 322,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2673921024&ts=1790675708&t=32ab7c1da3c1fd12a8b7c498f422a2605c960f0f",
+          "src": ""
+        },
+        {
+          "n": 9,
+          "title": "My Greatest Failure",
+          "duration": 323,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4202212556&ts=1790675708&t=2ab70cafc2f9dbd1b7c75651465aa062700433a6",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "728149236",
+      "bcAlbumId": "728149236",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/d-mon-7",
+      "title": "Dæmon 7\"",
+      "year": 2026,
+      "type": "EP",
+      "featured": false,
+      "order": 13,
+      "art": "https://f4.bcbits.com/img/a3179384148_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Dæmon",
+          "duration": 193,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2660332143&ts=1790675709&t=f071d5d135e2a14384cb16f90aacb6714d05166c",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Dæmon (Early Version)",
+          "duration": 297,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3857461672&ts=1790675709&t=a7371fba28772bf36b00cf0199cd89352724c5ed",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Curse #1",
+          "duration": 480,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3415352166&ts=1790675709&t=0d8db4bc0a2cd353af12fbe5be2ef610163c27a4",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "3731248284",
+      "bcAlbumId": "3731248284",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/the-weak-are-the-meat-the-strong-eat-remastered",
+      "title": "The Weak Are The Meat The Strong Eat (Remastered)",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 14,
+      "art": "https://f4.bcbits.com/img/a1732944372_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied.s"
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "The Light In Your Eyes",
+          "duration": 491,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2475419864&ts=1790675710&t=3fb5bf3986a6c9cffb4fc4d7b92287c949f0074e",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Dead People Don't Exist",
+          "duration": 419,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1207302840&ts=1790675710&t=613e277584a8eb90dc14c0ec739bfd17d7b151ca",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Gatekeepers Of Fucking Lies",
+          "duration": 346,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3635280401&ts=1790675710&t=eebe50974c6b353214df4a987ce9d7590150c668",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Got A Match?",
+          "duration": 331,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4034276616&ts=1790675710&t=bba956c9d923b68fb6c27b20981b51676da2b9a4",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "SSDD",
+          "duration": 384,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=12820151&ts=1790675710&t=7de7c46076d6f90e2a350244d988bd4a60ec478c",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Leave Me Behind",
+          "duration": 345,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3861078617&ts=1790675710&t=ad0e159e5f81168b0452f61686e94a65abf56f54",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Feed Me Blood",
+          "duration": 336,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=152599130&ts=1790675710&t=3a3051ecccc42d8b8b54cb4a1307f8ff4564222f",
+          "src": ""
+        },
+        {
+          "n": 8,
+          "title": "The Weak Are The Meat The Strong Eat",
+          "duration": 372,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2918496310&ts=1790675710&t=9cb0229c0ea87925982f739dc3c35b07b986a117",
+          "src": ""
+        },
+        {
+          "n": 9,
+          "title": "Paradise Is Mine 2",
+          "duration": 413,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2686439559&ts=1790675710&t=c3140407cc9f86578ff75169e176192f8d666dd4",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "1705534791",
+      "bcAlbumId": "1705534791",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/illumine",
+      "title": "Illumine",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 15,
+      "art": "https://f4.bcbits.com/img/a558052221_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Intro/Christ",
+          "duration": 268,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1492637236&ts=1790675710&t=768b63c1c816ad5f2d0bbfcf068480bef9b78108",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Curse #2",
+          "duration": 226,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3596741684&ts=1790675710&t=23e21f915cd18d5b7c4d360d7e6714ac7d693f94",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Welcome The Grave",
+          "duration": 202,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2360699129&ts=1790675710&t=f825f96ba106757f38a85067f0c66c243075d60e",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "My Time Of Violence",
+          "duration": 324,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4254506040&ts=1790675710&t=72529a5993e56279e2194d14073de06602108005",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Mother of Harlots",
+          "duration": 388,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2583488722&ts=1790675710&t=c22582b92b0aef1497c5ec5493f07a7ef84264a7",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Illumine",
+          "duration": 370,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3029777850&ts=1790675710&t=8060af6a68ba925cdd5ce61f3692a45b71b31a5d",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Fish Fry (Big Black)",
+          "duration": 373,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2489193317&ts=1790675710&t=ff487bc42cb1d2badc3c10a53570ec47c784dc75",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2700863238",
+      "bcAlbumId": "2700863238",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/garbage-in-garbage-out",
+      "title": "Garbage In Garbage Out",
+      "year": 2026,
+      "type": "Album",
+      "featured": false,
+      "order": 16,
+      "art": "https://f4.bcbits.com/img/a3389116532_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Born Dead Inside",
+          "duration": 311,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3781337008&ts=1790675711&t=4b43081faa4b127a445a0c439263c44204877ce6",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Dies Irae",
+          "duration": 364,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2087923931&ts=1790675711&t=d6448914502a4a3d80a4b377e196a44ac5ddf7b6",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "World In Hell",
+          "duration": 177,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1195672996&ts=1790675711&t=52495fdfd502f711bf5bfbf1053215e30d94c6af",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Tarpit (Dinosaur)",
+          "duration": 275,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=892542025&ts=1790675711&t=9113fcc027874d2445397fff51616b59bec0421d",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Dæmon",
+          "duration": 193,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=235104229&ts=1790675711&t=6bc39bc79f5640fc6c8237632556edb9317af820",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "Earth Is A Graveyard",
+          "duration": 441,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1827896141&ts=1790675711&t=36a6fca92696680d96c3bb08e7b2d31edc008c8d",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Untitled",
+          "duration": 329,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2755610901&ts=1790675711&t=4f47c091d0b63eb736579a70112163781c49db69",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2527573497",
+      "bcAlbumId": "2527573497",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/we-end",
+      "title": "We End",
+      "year": 2026,
+      "type": "EP",
+      "featured": false,
+      "order": 17,
+      "art": "https://f4.bcbits.com/img/a2829800454_10.jpg",
+      "about": "RIP to my little bro Jarrod Le Blanc, I don't suspect I'll ever see you again.",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Hit The Grave Runnin'",
+          "duration": 426,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=5636500&ts=1790675712&t=4c1b78aa1b42a1a1210431ff520f8dfeb35475df",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "We End (2026)",
+          "duration": 539,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3386019596&ts=1790675712&t=88ab64d666fde103d3ad6e7a59c9a0abddd68151",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2383117001",
+      "bcAlbumId": "2383117001",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/ossuary-monumental",
+      "title": "Ossuary/Monumental",
+      "year": 2025,
+      "type": "Album",
+      "featured": false,
+      "order": 18,
+      "art": "https://f4.bcbits.com/img/a4266300037_10.jpg",
+      "about": "The Earth is a graveyard.",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "The Song She Sings",
+          "duration": 416,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3438803127&ts=1790675713&t=d2d299a77e6dedbc16a5962f600553b4c3cdbfdf",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Wisdom Of A Dying World",
+          "duration": 491,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2669162676&ts=1790675713&t=92366bf334da4f7603c2c33babf29b209affe5b9",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "The Endless Gray",
+          "duration": 306,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2185205147&ts=1790675713&t=c95c55f64357627f3e489a48cadc97c0b54ffcab",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Chartered Trips (Hüsker Dü)",
+          "duration": 510,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1812203728&ts=1790675713&t=f0e34e92d7e8ac50ed4146b221281071c1e002df",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Such A Commotion",
+          "duration": 294,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2516125977&ts=1790675713&t=0d276b6645e5e01a550942d89b900410e8d64cd4",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "There's A Voice",
+          "duration": 380,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1557190557&ts=1790675713&t=0a07043d4b4587c78a699ec40bfe82930c3c1c35",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2869372239",
+      "bcAlbumId": "2869372239",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/jeffrey",
+      "title": "Jeffrey",
+      "year": 2025,
+      "type": "EP",
+      "featured": false,
+      "order": 19,
+      "art": "https://f4.bcbits.com/img/a1938740024_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Eat You Alive",
+          "duration": 113,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=870195995&ts=1790675714&t=57510595b999549b6f595909fc42a053e168ce2e",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Don and Jeff Crash the Junior Prom",
+          "duration": 162,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2865827455&ts=1790675714&t=e9515d5f9459e97585c513a96ce56c7879523e42",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Donald The Trump: World Abuser",
+          "duration": 178,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=931278348&ts=1790675714&t=de4a8fedc5aa3fb78c993d5341529422cd85dea0",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Little Orange Tyrant",
+          "duration": 188,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1711229229&ts=1790675714&t=bdf7da8bd786aaac987c97eb8609a788fab5e8d8",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "643596610",
+      "bcAlbumId": "643596610",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/still-nothing-remastered",
+      "title": "Still Nothing (Remastered)",
+      "year": 2025,
+      "type": "Album",
+      "featured": false,
+      "order": 20,
+      "art": "https://f4.bcbits.com/img/a3662478769_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Still Nothing",
+          "duration": 381,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1743107321&ts=1790675714&t=004cd8314459c42215f397286dc22a7a9d705599",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Sinking Alone",
+          "duration": 412,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3824786532&ts=1790675714&t=731c6a82d3b46f2d84b3312e82a709304573a417",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Roko's Basilisk",
+          "duration": 258,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2667120647&ts=1790675714&t=ea4e6f185a6bcfab62d083db72d99454d2c0e051",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "Failure Autraumata",
+          "duration": 329,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3820221573&ts=1790675714&t=4f5e788cfd66d48e0a81430b4433d3ad672a2d1e",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "Beneath A Dying Sun",
+          "duration": 326,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=99577700&ts=1790675714&t=9245bdc766588dcc2ba02e23e8e2925125352d2e",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "MAGIA NOVA",
+          "duration": 325,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4097662227&ts=1790675714&t=f23f57ea50aa77ecf1a321be21c8ae9b7d6d9d23",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Self Immolation",
+          "duration": 315,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1710661640&ts=1790675714&t=28768b2630ccd4f1f772b34c48c0c3709a645944",
+          "src": ""
+        },
+        {
+          "n": 8,
+          "title": "You Owe Nothing To The Sky",
+          "duration": 293,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=210216762&ts=1790675714&t=6424712e3ca687af9f485ff36ffa146622785d27",
+          "src": ""
+        },
+        {
+          "n": 9,
+          "title": "And Now I Know That I Hate You",
+          "duration": 239,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4039579381&ts=1790675714&t=1eaa81f7a0d1352021c216f8b50d7a8e5b402307",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "553615568",
+      "bcAlbumId": "553615568",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/the-coming-of-the-end-of-time",
+      "title": "The Coming Of The End Of Time",
+      "year": 2025,
+      "type": "EP",
+      "featured": false,
+      "order": 21,
+      "art": "https://f4.bcbits.com/img/a3869423340_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "The Coming Of The End Of Time - Part 1",
+          "duration": 490,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2209464197&ts=1790675715&t=643e3132e4db125712da0c44642826331c7005c8",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "The Coming Of The End Of Time - Part 2",
+          "duration": 386,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=165081518&ts=1790675715&t=8363f0c63f09fc5ae8b1d16b8500f4ac7de99615",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "3828205921",
+      "bcAlbumId": "3828205921",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/attrition",
+      "title": "Attrition",
+      "year": 2025,
+      "type": "EP",
+      "featured": false,
+      "order": 22,
+      "art": "https://f4.bcbits.com/img/a8848145_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "Save Your Tears For The Mourning",
+          "duration": 366,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2215746704&ts=1790675716&t=5c0fba18356749d76f0cb87a90cc6aad62969e99",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "I Feel Death Moving Closer",
+          "duration": 546,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1349886947&ts=1790675716&t=1c7a50a37e72c3d87df6a7b9c23d755a35d5e454",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "I Don't Believe You Anymore",
+          "duration": 485,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1079684197&ts=1790675716&t=3af972f8537775ec08909ba9dbcd79127987bcbd",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "It Comes In Waves",
+          "duration": 333,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1849596805&ts=1790675716&t=4d7a7698a3c714751ab413ad7db32985541c4ecc",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2290267463",
+      "bcAlbumId": "2290267463",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/dumuzi",
+      "title": "DUMUZI",
+      "year": 2025,
+      "type": "Album",
+      "featured": false,
+      "order": 23,
+      "art": "https://f4.bcbits.com/img/a952571067_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "We Walk Through The Tophet",
+          "duration": 361,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4177628028&ts=1790675716&t=3e60056e5fa931b1e2999dd6c5f72201f64de70a",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "We Feed The Ground",
+          "duration": 329,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=124490983&ts=1790675716&t=c7fa00ebb3f7b7561f320becfd814778e9969555",
+          "src": ""
+        },
+        {
+          "n": 3,
+          "title": "Mourners Of Dumuzi",
+          "duration": 158,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4018611208&ts=1790675716&t=0b63789a30e9925fc1829e08dd0fdd95e2611806",
+          "src": ""
+        },
+        {
+          "n": 4,
+          "title": "All The Gods Do Is Lie",
+          "duration": 228,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=4079334894&ts=1790675716&t=bb6a04b271818cacdebbfac272a17a5b5582a7b3",
+          "src": ""
+        },
+        {
+          "n": 5,
+          "title": "We All Die Alone",
+          "duration": 229,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=1583307808&ts=1790675716&t=5655eb7c115fa716d1f98b6d6440cf132b635701",
+          "src": ""
+        },
+        {
+          "n": 6,
+          "title": "He Died For The Land",
+          "duration": 300,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=3394279993&ts=1790675716&t=d9fed3b00a10aa4042afd963906cb89fdce85754",
+          "src": ""
+        },
+        {
+          "n": 7,
+          "title": "Severance (Dead Can Dance)",
+          "duration": 258,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=2790051565&ts=1790675716&t=e264473eddcbef9d52d00af40e16b2ad9cc9cea6",
+          "src": ""
+        }
+      ]
+    },
+    {
+      "key": "2515730493",
+      "bcAlbumId": "2515730493",
+      "bcUrl": "https://nielsgore.bandcamp.com/album/this-is-the-terror-7",
+      "title": "This Is The Terror 7\"",
+      "year": 2025,
+      "type": "EP",
+      "featured": false,
+      "order": 24,
+      "art": "https://f4.bcbits.com/img/a2763127480_10.jpg",
+      "about": "",
+      "credits": [
+        [
+          "This album contains AI",
+          "generated vocals produced using synthetic models. Any resemblance to real artists, living or dead, is purely coincidental and unintended. No endorsement or involvement by any third party is implied."
+        ]
+      ],
+      "tracks": [
+        {
+          "n": 1,
+          "title": "This Is The Terror",
+          "duration": 419,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=374086765&ts=1790675717&t=e04c3e04c17fc8094a9c69512735583b7f10eccf",
+          "src": ""
+        },
+        {
+          "n": 2,
+          "title": "Inside (Rudimentary Peni)",
+          "duration": 271,
+          "bcStream": "https://bandcamp.com/stream_redirect?enc=mp3-128&track_id=939180744&ts=1790675717&t=e66889e0dd90349730d45de1b41adf1b93e34911",
+          "src": ""
+        }
+      ]
+    }
+  ]
+}
