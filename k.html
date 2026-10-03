@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phoenix Behavioral Health Facilities</title>
+<style>
+:root{
+  --bg:#f5f4f1; --card:#ffffff; --inset:#faf9f7;
+  --line:rgba(0,0,0,0.10); --line-soft:rgba(0,0,0,0.06);
+  --text:#1a1917; --dim:rgba(0,0,0,0.58); --faint:rgba(0,0,0,0.42);
+  --accent:#8a5200; --accent-fill:#ffbe5f; --accent-wash:#fdf3e2;
+  --accent-line:rgba(138,82,0,0.22);
+  --shadow:0 1px 2px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.05);
+  --r-card:16px; --r-btn:12px; --r-pill:999px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:9rem}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  font-size:17px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-0.02em}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+.page{max-width:720px;margin:0 auto;padding:0 1.1rem 4rem}
+
+/* ---------- header ---------- */
+header.top{padding:2rem 0 1.25rem}
+header.top h1{font-size:1.65rem;line-height:1.2;padding-right:3.5rem;max-width:18ch}
+header.top p{margin:.6rem 0 0;color:var(--dim);font-size:.95rem;max-width:48ch}
+
+/* ---------- controls ---------- */
+.controls{position:sticky;top:0;z-index:40;background:var(--bg);
+  padding:.75rem 0 .6rem;padding-top:calc(.75rem + env(safe-area-inset-top,0px));
+  border-bottom:1px solid var(--line-soft);margin-bottom:1rem}
+.search{position:relative;display:block;margin-bottom:.6rem}
+.search svg{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--faint)}
+input[type=search]{width:100%;min-height:50px;background:var(--card);color:var(--text);
+  border:1px solid var(--line);border-radius:var(--r-btn);
+  padding:0 3.5rem 0 2.9rem;font-size:1rem;-webkit-appearance:none;appearance:none;
+  transition:border-color .2s ease,box-shadow .2s ease}
+input[type=search]::placeholder{color:var(--faint)}
+input[type=search]:focus{outline:none;border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-wash)}
+.sortbar{display:flex;gap:.5rem;align-items:center}
+.scroller{display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;
+  margin-left:-1.1rem;padding:.15rem 0 .15rem 1.1rem;scroll-padding-left:1.1rem}
+.scroller::-webkit-scrollbar{display:none}
+.scroller{-webkit-mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 1.2rem),transparent 100%);
+  mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 1.2rem),transparent 100%)}
+.chip{flex:0 0 auto;min-height:44px;border:1px solid var(--line);background:var(--card);
+  border-radius:var(--r-pill);padding:0 1rem;font-size:.95rem;color:var(--dim);white-space:nowrap;
+  transition:background .2s ease,border-color .2s ease,color .2s ease}
+.chip[aria-pressed=true]{background:var(--accent-wash);border-color:var(--accent-line);
+  color:var(--accent);font-weight:500}
+.chip .dir{font-size:.8rem;margin-left:.25rem}
+.ftog{flex:0 0 auto;min-height:44px;padding:0 .9rem;background:var(--bg);border:1px solid var(--line);
+  border-radius:var(--r-btn);display:flex;align-items:center;gap:.4rem;font-size:.95rem;color:var(--dim)}
+.ftog[aria-expanded=true],.ftog.on{background:var(--accent-wash);border-color:var(--accent-line);color:var(--accent)}
+.fcount{background:var(--accent);color:#fff;border-radius:var(--r-pill);font-size:.72rem;
+  font-weight:600;padding:0 .4rem;min-width:1.2rem;text-align:center}
+.filters{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}
+.filters.open{grid-template-rows:1fr}
+.filters>div{overflow:hidden}
+.fwrap{padding-top:.7rem;display:flex;flex-wrap:wrap;gap:.45rem}
+.countline{display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  margin-top:.6rem;font-size:.85rem;color:var(--faint)}
+.clear{color:var(--accent);font-weight:500}
+
+/* ---------- scan list (C) ---------- */
+.rows{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-card);
+  box-shadow:var(--shadow);overflow:hidden}
+.row{display:flex;align-items:center;gap:.9rem;width:100%;text-align:left;
+  padding:.95rem 1.1rem;min-height:70px;border-top:1px solid var(--line-soft)}
+.rowgroup:first-child .row{border-top:none}
+.rowgroup:not(.open) .row:active{background:var(--inset)}
+
+/* open row inverts, so the control that closes the panel is unmistakable */
+.rowgroup.open .row{background:#1a1917;color:#ffffff}
+.rowgroup.open .rid .m{color:rgba(255,255,255,0.62)}
+.rowgroup.open .rank{background:rgba(255,255,255,0.16);color:#ffffff}
+.rowgroup.open.lead .rank{background:var(--accent-fill);color:#3a2300}
+.rowgroup.open .rscore{color:var(--accent-fill)}
+.rowgroup.open .rchev{color:rgba(255,255,255,0.75)}
+.rowgroup.open .row:active{background:#2a2825}
+.rank{flex:0 0 auto;width:30px;height:30px;border-radius:var(--r-pill);background:var(--inset);
+  color:var(--faint);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:600}
+.rowgroup.lead .rank{background:var(--accent-fill);color:#3a2300}
+.rid{flex:1 1 auto;min-width:0;overflow:hidden}
+.rid .n{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;line-height:1.25}
+.rid .m{display:block;font-size:.85rem;color:var(--faint);margin-top:.2rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rscore{flex:0 0 auto;margin-left:auto;padding-left:.5rem;font-size:1.15rem;font-weight:600;
+  color:var(--accent);letter-spacing:-0.02em}
+.rchev{flex:0 0 auto;color:var(--faint);transition:transform .25s ease}
+.rowgroup.open .rchev{transform:rotate(90deg)}
+
+/* ---------- expanded scorecard (B) ---------- */
+.panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease;background:var(--inset)}
+.rowgroup.open .panel{grid-template-rows:1fr}
+.panel>div{overflow:hidden}
+.pbody{padding:1.1rem;border-top:1px solid var(--line-soft)}
+
+.btop{display:flex;gap:.9rem;align-items:center;margin-bottom:1.05rem}
+.ring{flex:0 0 auto;position:relative;width:60px;height:60px}
+.ring svg{transform:rotate(-90deg)}
+.ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;font-weight:600;letter-spacing:-0.03em}
+.btop .t{flex:1;min-width:0}
+.btop .t h3{font-size:1.05rem;line-height:1.3}
+.btop .t p{margin:.2rem 0 0;font-size:.88rem;color:var(--faint)}
+
+.stats{display:grid;grid-template-columns:1.3fr .7fr;gap:.6rem;margin-bottom:1.05rem}
+.stat{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;
+  min-height:52px;padding:0 .7rem;display:flex;align-items:center;gap:.35rem;overflow:hidden}
+.stat .v{flex:0 0 auto;font-size:1.05rem;font-weight:600;letter-spacing:-0.025em}
+.stat .k{flex:1 1 auto;min-width:0;font-size:.76rem;color:var(--faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.serves{margin:0 0 .8rem;font-size:.92rem;color:var(--dim)}
+.offers{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1.05rem}
+.offer{border:1px solid var(--line);background:var(--card);border-radius:var(--r-pill);
+  padding:.4rem .8rem;font-size:.85rem;color:var(--dim)}
+.offer.key{background:var(--accent-wash);border-color:var(--accent-line);color:var(--accent);font-weight:500}
+.offer.soft{border-style:dashed;color:var(--faint)}
+
+/* map */
+.mapwrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line-soft);
+  background:var(--card);margin-bottom:.75rem}
+.mapwrap iframe{display:block;width:100%;height:190px;border:0;background:var(--inset)}
+.mapfail{height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.5rem;text-align:center;background:var(--inset);color:var(--dim);font-size:.9rem;padding:1rem}
+.mapfail b{color:var(--accent)}
+.mapskel{height:190px;display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:.9rem;background:var(--inset)}
+.maplabel{display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+  padding:.7rem .9rem;border-top:1px solid var(--line-soft);font-size:.88rem;color:var(--dim)}
+.maplabel a{color:var(--accent);font-weight:500;white-space:nowrap}
+.approx{font-size:.78rem;color:var(--faint);margin:-.35rem 0 .75rem}
+
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.btn{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:52px;
+  border-radius:var(--r-btn);font-size:1rem;font-weight:500;border:1.5px solid var(--line);
+  background:var(--card);transition:background .2s ease}
+.btn:active{background:var(--inset)}
+.btn.call{background:var(--accent-fill);border-color:var(--accent-fill);color:#3a2300}
+.btn.call:active{background:#f5ad44}
+.btn.off{opacity:.45;pointer-events:none}
+
+.more{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:77px;
+  margin-bottom:1.05rem;padding:0 .9rem;border:1px solid var(--accent-line);border-radius:var(--r-btn);
+  background:var(--card);color:var(--text);font-size:1rem;font-weight:600;letter-spacing:-0.01em}
+.more svg{color:var(--accent)}
+.more:active{background:var(--inset)}
+.more svg{transition:transform .25s ease}
+.more[aria-expanded=true] svg{transform:rotate(90deg)}
+
+/* ---------- full breakdown ---------- */
+.deep{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease;margin-top:-.45rem}
+.deep.open{grid-template-rows:1fr}
+.deep>div{overflow:hidden}
+.deep-inner{padding-bottom:1.05rem}
+.sec{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;
+  padding:1rem;margin-bottom:.6rem}
+.sec>h4{margin:0 0 .7rem;font-size:.95rem;font-weight:600}
+.comp{display:grid;gap:.65rem}
+.crow{display:grid;grid-template-columns:1fr auto;gap:.2rem .6rem;align-items:center}
+.crow .cn{font-size:.88rem;color:var(--dim)}
+.crow .cv{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent-fill);border-radius:3px}
+dl.kv{margin:0;display:grid;gap:.55rem}
+.kvr{display:grid;grid-template-columns:7.5rem 1fr;gap:.6rem;font-size:.88rem;align-items:baseline}
+.kvr dt{color:var(--faint)}
+.kvr dd{margin:0}
+.kvr dd a{color:var(--accent);font-weight:500}
+.ins{display:flex;flex-direction:column;align-items:flex-start;gap:.45rem;
+  padding:.8rem 0;border-bottom:1px solid var(--line-soft)}
+.ins:last-child{border-bottom:none;padding-bottom:0}
+.ins:first-child{padding-top:0}
+.ins .nm{font-size:.92rem;font-weight:500}
+.ins .sub{display:block;font-size:.8rem;color:var(--faint);margin-top:.1rem}
+.badge{align-self:flex-start;font-size:.78rem;padding:.3rem .7rem;border-radius:var(--r-pill);
+  border:1px solid var(--line);color:var(--dim);line-height:1.4;max-width:100%}
+.badge.ok{background:var(--accent-wash);border-color:var(--accent-line);color:var(--accent);font-weight:500}
+p.body{margin:0;font-size:.88rem;color:var(--dim);line-height:1.6}
+ul.bul{margin:.5rem 0 0;padding-left:1.1rem;font-size:.88rem;color:var(--dim);line-height:1.6}
+ul.bul li{margin-bottom:.25rem}
+.sub-h{font-size:.85rem;font-weight:600;color:var(--text);margin:.85rem 0 .1rem}
+.sub-h:first-child{margin-top:0}
+.srcs{display:flex;flex-wrap:wrap;gap:.4rem}
+.src{font-size:.8rem;color:var(--dim);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:.35rem .7rem}
+.src[href]{color:var(--accent)}
+
+.empty{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-card);
+  padding:2.5rem 1.25rem;text-align:center;color:var(--faint)}
+footer{margin-top:1.5rem;font-size:.82rem;color:var(--faint);line-height:1.6}
+
+#print-btn{position:fixed;top:20px;right:20px;width:40px;height:40px;z-index:9999;
+  background:#1a1a1a;opacity:.7;border:none;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;color:#fff;transition:opacity .3s ease}
+#print-btn:hover{opacity:1}
+
+@media (min-width:640px){
+  header.top h1{font-size:2.1rem;padding-right:0}
+  .mapwrap iframe{height:240px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+@media print{
+  #print-btn,.controls{display:none}
+  .panel,.deep{grid-template-rows:1fr}
+  .rowgroup{break-inside:avoid;page-break-inside:avoid}
+  .mapwrap{display:none}
+}
+</style>
+</head>
+<body>
+
+<button id="print-btn" title="Save as PDF" aria-label="Save as PDF" onclick="printSinglePage()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 19h16"/></svg>
+</button>
+
+<div class="page">
+  <header class="top">
+    <h1 id="h-title">Phoenix Behavioral Health Facilities</h1>
+    <p id="h-sub"></p>
+  </header>
+
+  <div class="controls">
+    <label class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="q" placeholder="Search name, city or program" aria-label="Search facilities">
+    </label>
+    <div class="sortbar">
+      <div class="scroller" id="sorts" role="group" aria-label="Sort by"></div>
+      <button class="ftog" id="ftog" aria-expanded="false" aria-controls="filters">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+        Filter <span class="fcount" id="fcount" hidden>0</span>
+      </button>
+    </div>
+    <div class="filters" id="filters"><div><div class="fwrap" id="fwrap"></div></div></div>
+    <div class="countline">
+      <span id="count"></span>
+      <button class="clear" id="clear" hidden>Clear</button>
+    </div>
+  </div>
+
+  <main id="list"></main>
+  <footer id="foot"></footer>
+</div>
+
+<script id="data" type="application/json">{
+  "metadata": {
+    "title": "Phoenix Metro Behavioral Health Hospital Comparison",
+    "generated_date": "2026-10-03",
+    "facility_count": 10,
+    "region": "Greater Phoenix Metro, Arizona",
+    "distance_origin": {
+      "name": "Tempe City Hall",
+      "address": "31 E 5th St, Tempe, AZ 85281",
+      "latitude": 33.4249209,
+      "longitude": -111.9384505
+    },
+    "distance_notes": "Distances are straight-line (great-circle) miles from Tempe City Hall, not driving miles. Three facility coordinates are approximate address coordinates and are labeled accordingly.",
+    "score_scale": "0-10, higher is better",
+    "score_methodology": "Custom provisional composite based on regulatory/safety history, clinical breadth/resources, continuity/step-down capability, patient-experience evidence and insurance fit. This is not an official CMS or state quality score.",
+    "insurance_notes": "Insurance networks are plan- and service-line-specific. Status values indicate evidence found during the assessment, not a guarantee of coverage.",
+    "missing_data_policy": "Unknown or unverified values are null or explicitly labeled; missing evidence is not treated as a positive finding."
+  },
+  "facilities": [
+    {
+      "id": "via-linda-behavioral-hospital",
+      "provisional_rank": 1,
+      "name": "Via Linda Behavioral Hospital",
+      "parent_system": "Universal Health Services / HonorHealth joint venture",
+      "facility_type": "Freestanding psychiatric hospital",
+      "location": {
+        "street": "9160 E Horseshoe Rd",
+        "city": "Scottsdale",
+        "state": "AZ",
+        "postal_code": "85258",
+        "country": "US",
+        "latitude": 33.5667,
+        "longitude": -111.884,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 10.3,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-476-7000",
+        "intake_phone": "480-476-7000",
+        "fax": null,
+        "website": null,
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": 120,
+        "bed_count_type": "approximately licensed/operational"
+      },
+      "populations": {
+        "adolescents": true,
+        "adolescent_age_range": "approximately 12-17",
+        "adults": true,
+        "older_adults": "not specifically verified"
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "outpatient_psychiatry": true,
+        "medical_detox": "not clearly verified",
+        "inpatient_substance_use_treatment": "co-occurring support reported; dedicated inpatient SUD not clearly verified",
+        "telehealth": true,
+        "ect": false
+      },
+      "clinical_focus": [
+        "acute psychiatric stabilization",
+        "depression",
+        "suicidal ideation/self-harm risk",
+        "bipolar disorder",
+        "psychosis",
+        "trauma-related disorders",
+        "co-occurring substance use"
+      ],
+      "specialty_programs": [
+        "women-focused inpatient services",
+        "women's reproductive mental health/wellness",
+        "military-connected/Patriot Support programming",
+        "first responder support",
+        "professional-focused programming",
+        "culturally responsive/Native American enrichment programming"
+      ],
+      "care_continuity": {
+        "inpatient_to_php": true,
+        "inpatient_to_iop": true,
+        "structured_step_down_available": true
+      },
+      "quality_assessment": {
+        "composite_score_10": 8.3,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate",
+        "confidence_notes": "Relatively short operating history limits long-term trend confidence.",
+        "component_scores_10": {
+          "recent_regulatory_safety": 8.8,
+          "historical_safety": 8.6,
+          "clinical_breadth_resources": 8.8,
+          "continuity_step_down": 8.7,
+          "patient_experience": 8.7,
+          "insurance_fit": 7.6
+        },
+        "consumer_review_rating_5": 4.2,
+        "consumer_review_count": 548,
+        "accreditation": "not independently normalized in this dataset",
+        "regulatory_summary": "Relatively limited adverse inspection history compared with older peers; fewer years of operating history.",
+        "historical_flags": [
+          "Federal inspection record includes cited deficiencies in 2024, but far fewer historical events than several older facilities."
+        ],
+        "strengths": [
+          "strong recent patient-experience signal",
+          "broad inpatient and outpatient continuum",
+          "specialty tracks",
+          "relatively favorable recent regulatory profile"
+        ],
+        "concerns": [
+          "shorter operating history",
+          "Prosano network participation not conclusively verified"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "evidence_of_acceptance",
+          "scope": "some plans/programs",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "business_listing",
+          "note": "Current address, phone, hours, reviews"
+        },
+        {
+          "type": "regulatory",
+          "url": "https://www.hospitalinspections.org/state/az"
+        },
+        {
+          "type": "provider_directory",
+          "url": "https://www.samhsa.gov/data/sites/default/files/reports/rpt57010/National_Directory_MH_facilities_2025.pdf"
+        }
+      ]
+    },
+    {
+      "id": "banner-behavioral-health-hospital",
+      "provisional_rank": 2,
+      "name": "Banner Behavioral Health Hospital",
+      "parent_system": "Banner Health",
+      "facility_type": "Psychiatric hospital",
+      "location": {
+        "street": "7575 E Earll Dr",
+        "city": "Scottsdale",
+        "state": "AZ",
+        "postal_code": "85251",
+        "country": "US",
+        "latitude": 33.4834087,
+        "longitude": -111.9184093,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 4.2,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-448-7500",
+        "intake_phone": "480-448-7500",
+        "fax": "480-448-7666",
+        "website": "https://www.bannerhealth.com/locations/scottsdale/banner-behavioral-health-hospital/behavioral-health",
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": 156,
+        "bed_count_type": "ADHS licensed beds"
+      },
+      "populations": {
+        "adolescents": true,
+        "adolescent_age_range": "approximately 13-17",
+        "adults": true,
+        "older_adults": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "partial_hospitalization_php": "not verified",
+        "intensive_outpatient_iop": true,
+        "outpatient_psychiatry": true,
+        "medical_detox": true,
+        "inpatient_substance_use_treatment": true,
+        "telehealth": "program dependent",
+        "ect": "not verified"
+      },
+      "clinical_focus": [
+        "anxiety",
+        "depression",
+        "eating disorders",
+        "grief/bereavement",
+        "memory problems",
+        "personality disorders",
+        "bipolar disorder",
+        "self-harm",
+        "PTSD",
+        "psychosis",
+        "chemical dependency/substance use"
+      ],
+      "treatment_modalities": [
+        "DBT",
+        "group therapy",
+        "medication management",
+        "medical detoxification",
+        "somatic therapy",
+        "stress-management counseling"
+      ],
+      "care_continuity": {
+        "inpatient_to_iop": true,
+        "structured_step_down_available": true,
+        "integrated_health_system_transfer_capability": true
+      },
+      "quality_assessment": {
+        "composite_score_10": 8.0,
+        "score_type": "custom provisional assessment",
+        "confidence": "high",
+        "component_scores_10": {
+          "recent_regulatory_safety": 8.8,
+          "historical_safety": 6.5,
+          "clinical_breadth_resources": 9.0,
+          "continuity_step_down": 8.5,
+          "patient_experience": 6.3,
+          "insurance_fit": 9.0
+        },
+        "consumer_review_rating_5": 2.4,
+        "consumer_review_count": 72,
+        "regulatory_summary": "ADHS shows multiple inspections in 2023-2025 with no listed enforcement actions.",
+        "historical_flags": [
+          "Serious older federal findings included observation, staffing, medication documentation and corrective-action deficiencies associated with a patient death."
+        ],
+        "strengths": [
+          "large psychiatric hospital",
+          "broad clinical scope",
+          "integrated Banner system",
+          "strong recent state regulatory profile",
+          "strongest Prosano compatibility evidence in this set"
+        ],
+        "concerns": [
+          "serious but old federal safety history",
+          "mixed patient/family communication reviews"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "evidence_of_acceptance",
+          "scope": "some plans",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "strongly_supported_via_focus_plus_prosano_banner_health_network",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_services",
+          "url": "https://www.bannerhealth.com/locations/scottsdale/banner-behavioral-health-hospital/behavioral-health"
+        },
+        {
+          "type": "state_regulatory",
+          "url": "https://hsapps.azdhs.gov/ls/sod/Facility.aspx?FacId=MED0211"
+        },
+        {
+          "type": "historical_inspection",
+          "url": "https://www.hospitalinspections.org/report-detail/4KRH11"
+        }
+      ]
+    },
+    {
+      "id": "valleywise-behavioral-health-center-mesa",
+      "provisional_rank": 2,
+      "name": "Valleywise Behavioral Health Center - Mesa",
+      "parent_system": "Valleywise Health",
+      "facility_type": "Public/academic psychiatric hospital",
+      "location": {
+        "street": "570 W Brown Rd",
+        "city": "Mesa",
+        "state": "AZ",
+        "postal_code": "85201",
+        "country": "US",
+        "latitude": 33.435888,
+        "longitude": -111.844841,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 5.5,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "602-344-5011",
+        "scheduling_phone": "833-855-9973",
+        "outpatient_psychiatry_phone": "480-344-2100",
+        "act_program_phone": "480-344-2255",
+        "website": "https://valleywisehealth.org/locations/behavioral-health-center-mesa/",
+        "hours": "Behavioral health center 24/7; outpatient clinic hours vary"
+      },
+      "capacity": {
+        "beds": 127,
+        "bed_count_type": "academic-program/publicly reported"
+      },
+      "populations": {
+        "adolescents": true,
+        "adolescent_age_range": "approximately 13-17",
+        "adults": true,
+        "older_adults": true,
+        "medically_complex": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "partial_hospitalization_php": "not verified",
+        "intensive_outpatient_iop": "not verified",
+        "outpatient_psychiatry": true,
+        "assertive_community_treatment_act": true,
+        "court_ordered_involuntary_treatment": true,
+        "medical_detox": false,
+        "ect": "not verified"
+      },
+      "clinical_focus": [
+        "adult severe mental illness",
+        "adolescent psychiatry",
+        "geriatric psychiatry",
+        "medically complex psychiatric patients",
+        "court-ordered/involuntary treatment",
+        "psychosis",
+        "mood disorders"
+      ],
+      "academic_integration": {
+        "teaching_hospital_environment": true,
+        "psychiatry_residency_site": true,
+        "academic_partner": "Creighton University School of Medicine Phoenix"
+      },
+      "care_continuity": {
+        "inpatient_to_outpatient": true,
+        "act_services": true,
+        "multidisciplinary_discharge_planning": true
+      },
+      "quality_assessment": {
+        "composite_score_10": 8.0,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate",
+        "confidence_notes": "Facility-specific regulatory data are less directly comparable with the private freestanding hospitals.",
+        "component_scores_10": null,
+        "consumer_review_rating_5": 1.5,
+        "consumer_review_count": 13,
+        "regulatory_summary": "No clean apples-to-apples facility-level federal comparison was established in the initial assessment.",
+        "strengths": [
+          "substantial inpatient psychiatric depth",
+          "adolescent unit",
+          "geriatric/medically complex care",
+          "court-ordered treatment infrastructure",
+          "academic psychiatry integration"
+        ],
+        "concerns": [
+          "small and poor consumer-review sample",
+          "lower confidence in facility-specific regulatory normalization"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "listed_by_valleywise_for_commercial_and_exchange_products",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        },
+        "outpatient_clinic_note": "The separate Mesa outpatient psychiatry clinic has published self-pay pricing and may not accept insurance; do not conflate that clinic with inpatient hospital coverage."
+      },
+      "sources": [
+        {
+          "type": "official_location",
+          "url": "https://valleywisehealth.org/locations/behavioral-health-center-mesa/"
+        },
+        {
+          "type": "official_service",
+          "url": "https://valleywisehealth.org/services/behavioral-health/mental-health-assessment-and-treatment/"
+        },
+        {
+          "type": "official_inpatient",
+          "url": "https://valleywisehealth.org/services/behavioral-health/inpatient-services/"
+        }
+      ]
+    },
+    {
+      "id": "valleywise-behavioral-health-center-phoenix",
+      "provisional_rank": 4,
+      "name": "Valleywise Behavioral Health Center - Phoenix",
+      "parent_system": "Valleywise Health",
+      "facility_type": "Public/academic psychiatric facility",
+      "location": {
+        "street": "2619 E Pierce St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "postal_code": "85008",
+        "country": "US",
+        "latitude": 33.455,
+        "longitude": -112.025,
+        "coordinate_precision": "approximate_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 5.4,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "602-344-5011",
+        "scheduling_phone": "833-855-9973",
+        "website": "https://valleywisehealth.org/locations/behavioral-health-center-phoenix/",
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": 75,
+        "bed_count_type": "approximately publicly reported"
+      },
+      "populations": {
+        "adolescents": "specialty psychosis services present; inpatient adolescent role less clear than Mesa",
+        "adults": true,
+        "older_adults": true,
+        "medically_complex": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "assertive_community_treatment_act": true,
+        "integrated_behavioral_health": true,
+        "court_ordered_involuntary_treatment": true,
+        "geriatric_medical_psychiatry": true,
+        "medical_detox": false,
+        "php_iop": "not verified"
+      },
+      "clinical_focus": [
+        "acute psychiatric stabilization",
+        "geriatric psychiatry",
+        "medically complex psychiatric care",
+        "psychosis",
+        "court-ordered/involuntary treatment"
+      ],
+      "medical_integration": {
+        "adjacent_to_valleywise_health_medical_center": true,
+        "internal_medicine_support": true,
+        "social_services": true,
+        "interpreter_services": true
+      },
+      "quality_assessment": {
+        "composite_score_10": 7.9,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate",
+        "confidence_notes": "Facility-specific regulatory data are less directly comparable with freestanding psychiatric hospitals.",
+        "component_scores_10": null,
+        "consumer_review_rating_5": 2.8,
+        "consumer_review_count": 16,
+        "regulatory_summary": "No fully normalized facility-specific federal deficiency comparison established.",
+        "strengths": [
+          "strong medical integration",
+          "geriatric/medical psychiatric capability",
+          "public academic system",
+          "court-ordered treatment infrastructure"
+        ],
+        "concerns": [
+          "small consumer-review sample",
+          "regulatory comparison confidence lower than private facilities"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "listed_by_valleywise_for_commercial_and_exchange_products",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_location",
+          "url": "https://valleywisehealth.org/locations/behavioral-health-center-phoenix/"
+        },
+        {
+          "type": "official_inpatient",
+          "url": "https://valleywisehealth.org/services/behavioral-health/inpatient-services/"
+        }
+      ]
+    },
+    {
+      "id": "copper-springs-east",
+      "provisional_rank": 5,
+      "name": "Copper Springs East",
+      "parent_system": "Lifepoint Behavioral Health",
+      "facility_type": "Behavioral health hospital",
+      "location": {
+        "street": "3755 S Rome St",
+        "city": "Gilbert",
+        "state": "AZ",
+        "postal_code": "85297",
+        "country": "US",
+        "latitude": 33.284739,
+        "longitude": -111.751566,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 14.5,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-667-5500",
+        "fax": "602-385-6330",
+        "website": "https://www.coppersprings.com/locations/gilbert-az",
+        "hours": "24/7",
+        "walk_ins": "accepted 24/7"
+      },
+      "capacity": {
+        "beds": 72,
+        "bed_count_type": "ADHS licensed beds"
+      },
+      "populations": {
+        "adolescents": "virtual/outpatient programming reported; current official hospital page emphasizes adults and seniors",
+        "adults": true,
+        "older_adults": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "medical_detox": true,
+        "inpatient_substance_use_treatment": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "outpatient_substance_use": true,
+        "telehealth": true,
+        "ect": true
+      },
+      "specialty_programs": [
+        "ECT",
+        "virtual outpatient programming",
+        "co-occurring mental health and substance-use treatment"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 7.5,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate-high",
+        "component_scores_10": {
+          "recent_regulatory_safety": 6.7,
+          "historical_safety": 7.8,
+          "clinical_breadth_resources": 9.0,
+          "continuity_step_down": 9.1,
+          "patient_experience": 6.1,
+          "insurance_fit": 7.8
+        },
+        "consumer_review_rating_5": 2.5,
+        "consumer_review_count": 231,
+        "accreditation": "Joint Commission accredited within Copper Springs organization",
+        "regulatory_summary": "ADHS inspection history includes a civil penalty dated May 14, 2024.",
+        "historical_flags": [
+          "Recent state civil penalty lowers the regulatory score."
+        ],
+        "strengths": [
+          "very broad continuum",
+          "detox and substance-use treatment",
+          "PHP and IOP",
+          "ECT",
+          "24/7 walk-in access"
+        ],
+        "concerns": [
+          "recent civil penalty",
+          "mixed patient reviews",
+          "Prosano network unverified"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "evidence_of_acceptance",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_location",
+          "url": "https://www.coppersprings.com/locations/gilbert-az"
+        },
+        {
+          "type": "state_regulatory",
+          "url": "https://hsapps.azdhs.gov/ls/sod/Facility.aspx?FacId=MED8685"
+        }
+      ]
+    },
+    {
+      "id": "aurora-behavioral-health-system-west",
+      "provisional_rank": 6,
+      "name": "Aurora Behavioral Health System - West",
+      "parent_system": "Aurora Behavioral Health System",
+      "facility_type": "Freestanding behavioral health hospital",
+      "location": {
+        "street": "6015 W Peoria Ave",
+        "city": "Glendale",
+        "state": "AZ",
+        "postal_code": "85302",
+        "country": "US",
+        "latitude": 33.581039,
+        "longitude": -112.189315,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 18.0,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-345-5420",
+        "system_assessment_phone": "877-870-7012",
+        "website": "https://www.auroraarizona.com/",
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": null,
+        "bed_count_type": "not normalized in initial assessment"
+      },
+      "populations": {
+        "adolescents": true,
+        "adolescent_age_range": "approximately 12-17",
+        "adults": true,
+        "older_adults": "not specifically verified"
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "medical_detox": true,
+        "substance_use_treatment": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "ect": true
+      },
+      "specialty_programs": [
+        "adolescent inpatient",
+        "DBT-skills IOP",
+        "young-adult outpatient tracks",
+        "mental-health IOP",
+        "substance-use IOP",
+        "ECT"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 7.3,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate",
+        "component_scores_10": null,
+        "consumer_review_rating_5": null,
+        "consumer_review_count": null,
+        "consumer_review_note": "Search result returned a physician-level listing rather than a reliable facility aggregate; omitted from normalized rating.",
+        "accreditation": "Joint Commission accredited",
+        "regulatory_summary": "Older federal findings included incomplete psychiatric evaluation documentation; 2022 inspection included visitation-rights deficiency.",
+        "historical_flags": [
+          "assessment/documentation quality findings",
+          "patient visitation-rights finding"
+        ],
+        "strengths": [
+          "adult and adolescent inpatient care",
+          "detox/substance-use treatment",
+          "PHP/IOP",
+          "ECT",
+          "current accreditation"
+        ],
+        "concerns": [
+          "historical patient-rights and assessment-quality deficiencies",
+          "Prosano participation unverified"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "BCBS listed among contracted carriers",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_system",
+          "url": "https://www.auroraarizona.com/"
+        },
+        {
+          "type": "provider_directory",
+          "url": "https://phppd.providence.org/Intel/Search/Facility"
+        },
+        {
+          "type": "historical_inspection",
+          "url": "https://www.hospitalinspections.org/report-detail/LJUG11"
+        }
+      ]
+    },
+    {
+      "id": "aurora-behavioral-health-system-tempe",
+      "provisional_rank": 7,
+      "name": "Aurora Behavioral Health System - Tempe",
+      "parent_system": "Aurora Behavioral Health System",
+      "facility_type": "Freestanding behavioral health hospital",
+      "location": {
+        "street": "6350 S Maple Ave",
+        "city": "Tempe",
+        "state": "AZ",
+        "postal_code": "85283",
+        "country": "US",
+        "latitude": 33.363,
+        "longitude": -111.942,
+        "coordinate_precision": "approximate_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 4.3,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-345-5400",
+        "system_assessment_phone": "877-870-7012",
+        "website": "https://www.auroraarizona.com/",
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": 138,
+        "bed_count_type": "approximately staffed/publicly reported"
+      },
+      "populations": {
+        "adolescents": "system offers adolescent care; Glendale is the clearer dedicated inpatient adolescent site",
+        "adults": true,
+        "older_adults": "not specifically verified"
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "medical_detox": true,
+        "substance_use_treatment": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "ect": true
+      },
+      "specialty_programs": [
+        "trauma-focused IOP",
+        "chemical-dependency treatment",
+        "ECT",
+        "expressive/recreational therapies"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 7.2,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate-high",
+        "component_scores_10": {
+          "accreditation_institutional_quality": 8.3,
+          "historical_safety": 6.1,
+          "clinical_breadth_resources": 8.7,
+          "continuity_step_down": 8.5,
+          "patient_experience": 5.2,
+          "insurance_fit": 7.7
+        },
+        "consumer_review_rating_5": 2.0,
+        "consumer_review_count": 69,
+        "accreditation": "Joint Commission accredited",
+        "regulatory_summary": "Historical EMTALA findings included qualified medical-screening issues, failure to accept a suicidal patient despite capacity/capability, and stabilization concerns.",
+        "historical_flags": [
+          "serious but older EMTALA findings"
+        ],
+        "strengths": [
+          "broad inpatient/outpatient continuum",
+          "detox",
+          "PHP/IOP",
+          "ECT",
+          "current accreditation"
+        ],
+        "concerns": [
+          "older but clinically significant EMTALA history",
+          "weak consumer-review signal"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "listed_as_accepted_by_aurora",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_system",
+          "url": "https://www.auroraarizona.com/"
+        },
+        {
+          "type": "provider_registry",
+          "url": "https://npiprofile.com/npi/1518478676/record"
+        },
+        {
+          "type": "historical_inspection",
+          "url": "https://www.hospitalinspections.org/report-detail/LLIJ11"
+        }
+      ]
+    },
+    {
+      "id": "copper-springs-avondale",
+      "provisional_rank": 8,
+      "name": "Copper Springs - Avondale",
+      "parent_system": "Lifepoint Behavioral Health",
+      "facility_type": "Behavioral health hospital",
+      "location": {
+        "street": "10550 W McDowell Rd",
+        "city": "Avondale",
+        "state": "AZ",
+        "postal_code": "85392",
+        "country": "US",
+        "latitude": 33.465392,
+        "longitude": -112.287768,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 20.3,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "480-565-3035",
+        "fax": "480-485-9499",
+        "email": "3001CopperSpringsInfo@lifepointhealth.net",
+        "website": "https://www.coppersprings.com/locations",
+        "hours": "24/7",
+        "walk_ins": "accepted 24/7"
+      },
+      "capacity": {
+        "beds": null,
+        "bed_count_type": "not normalized in initial assessment"
+      },
+      "populations": {
+        "adolescents": true,
+        "adults": true,
+        "older_adults": "not specifically verified"
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "medical_detox": true,
+        "inpatient_substance_use_treatment": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "telehealth": true,
+        "ect": false
+      },
+      "specialty_programs": [
+        "Help for Heroes",
+        "military/veteran/first-responder programming",
+        "dual-diagnosis treatment"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 7.1,
+        "score_type": "custom provisional assessment",
+        "confidence": "moderate-high",
+        "component_scores_10": null,
+        "consumer_review_rating_5": 2.0,
+        "consumer_review_count": 63,
+        "accreditation": "Joint Commission accredited",
+        "regulatory_summary": "Historical federal EMTALA finding involved failure to log/provide a required medical screening examination to an ambulance-arriving patient.",
+        "historical_flags": [
+          "EMTALA medical-screening failure"
+        ],
+        "strengths": [
+          "inpatient psychiatry",
+          "detox",
+          "inpatient substance-use care",
+          "PHP/IOP",
+          "specialized first-responder/military track"
+        ],
+        "concerns": [
+          "EMTALA history",
+          "weak consumer-review signal"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "marketplace/provider-directory evidence_of_participation",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "official_location",
+          "url": "https://www.coppersprings.com/locations"
+        },
+        {
+          "type": "historical_inspection",
+          "url": "https://www.hospitalinspections.org/report-detail/J81211"
+        }
+      ]
+    },
+    {
+      "id": "haven-behavioral-hospital-phoenix",
+      "provisional_rank": 9,
+      "name": "Haven Behavioral Hospital of Phoenix",
+      "parent_system": "Haven Behavioral Healthcare / Oceans Healthcare",
+      "facility_type": "Acute inpatient psychiatric hospital",
+      "location": {
+        "street": "1201 S 7th Ave, Suite 200",
+        "city": "Phoenix",
+        "state": "AZ",
+        "postal_code": "85007",
+        "country": "US",
+        "latitude": 33.4368223,
+        "longitude": -112.0650189,
+        "coordinate_precision": "verified_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 7.3,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "623-236-2024",
+        "alternate_phone": "623-236-2000",
+        "website": null,
+        "hours": "24/7"
+      },
+      "capacity": {
+        "beds": 57,
+        "bed_count_type": "publicly listed"
+      },
+      "populations": {
+        "adolescents": false,
+        "adults": true,
+        "older_adults": true,
+        "medically_complex": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "partial_hospitalization_php": false,
+        "intensive_outpatient_iop": false,
+        "medical_detox": "not established as a primary service",
+        "substance_use_treatment": "co-occurring conditions treated",
+        "ect": false
+      },
+      "clinical_focus": [
+        "acute psychiatric stabilization",
+        "depression",
+        "bipolar disorder",
+        "anxiety/panic",
+        "schizophrenia/psychosis",
+        "PTSD/trauma",
+        "personality/self-harm concerns",
+        "older-adult behavioral conditions",
+        "co-occurring medical/psychiatric needs"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 6.8,
+        "score_type": "custom provisional assessment",
+        "confidence": "high",
+        "component_scores_10": {
+          "recent_regulatory_safety": 6.5,
+          "historical_patient_care": 5.6,
+          "clinical_breadth_resources": 7.4,
+          "continuity_step_down": 7.0,
+          "patient_experience": 5.3,
+          "insurance_fit": 6.9
+        },
+        "consumer_review_rating_5": 2.2,
+        "consumer_review_count": 89,
+        "regulatory_summary": "Historical federal findings included inadequate hydration/nutrition monitoring, training/competency problems, staffing-documentation concerns and more recent physical-plant/emergency-preparedness deficiencies.",
+        "historical_flags": [
+          "clinically significant hydration/nutrition monitoring case",
+          "staff competency/training findings",
+          "staffing oversight/documentation findings"
+        ],
+        "strengths": [
+          "adult and older-adult acute inpatient stabilization",
+          "medically complex psychiatric capability"
+        ],
+        "concerns": [
+          "documented direct-care deficiencies",
+          "weak patient-experience signal",
+          "limited step-down continuum compared with competitors"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "evidence_of_some_commercial_plan_acceptance",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "uncertain_focus_network_exclusions_noted",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "hospital_association",
+          "url": "https://members.azhha.org/hospital-members/Find"
+        },
+        {
+          "type": "historical_inspection",
+          "url": "https://www.hospitalinspections.org/report-detail/K9I511"
+        }
+      ]
+    },
+    {
+      "id": "quail-run-behavioral-health",
+      "provisional_rank": 10,
+      "name": "Quail Run Behavioral Health",
+      "parent_system": "UHS of Phoenix / Universal Health Services",
+      "facility_type": "Psychiatric hospital",
+      "location": {
+        "street": "2545 W Quail Ave",
+        "city": "Phoenix",
+        "state": "AZ",
+        "postal_code": "85027",
+        "country": "US",
+        "latitude": 33.679,
+        "longitude": -112.113,
+        "coordinate_precision": "approximate_address_coordinate",
+        "distance_from_tempe": {
+          "origin": "Tempe City Hall",
+          "straight_line_miles": 20.2,
+          "method": "haversine",
+          "driving_distance_miles": null
+        }
+      },
+      "contact": {
+        "main_phone": "602-455-5700",
+        "intake_phone": "602-455-5694",
+        "toll_free_phone": "844-772-7771",
+        "fax": "602-283-7747",
+        "website": "https://quailrunbehavioral.com/",
+        "hours": "24/7 assessments/hospital access"
+      },
+      "capacity": {
+        "beds": null,
+        "bed_count_type": "not normalized in initial assessment"
+      },
+      "populations": {
+        "adolescents": true,
+        "adolescent_age_range": "approximately 12-17",
+        "adults": true,
+        "older_adults": true
+      },
+      "levels_of_care": {
+        "acute_inpatient_psychiatry": true,
+        "partial_hospitalization_php": true,
+        "intensive_outpatient_iop": true,
+        "adolescent_iop": true,
+        "virtual_iop": true,
+        "substance_use_treatment": true,
+        "medical_detox": true,
+        "ect": false
+      },
+      "specialty_programs": [
+        "adult serious mental illness inpatient care",
+        "older-adult inpatient care",
+        "adolescent inpatient",
+        "adult PHP/IOP",
+        "adolescent IOP/virtual IOP"
+      ],
+      "quality_assessment": {
+        "composite_score_10": 6.4,
+        "score_type": "custom provisional assessment",
+        "confidence": "high",
+        "component_scores_10": null,
+        "consumer_review_rating_5": 2.1,
+        "consumer_review_count": 77,
+        "accreditation": "Joint Commission accreditation reported by facility",
+        "regulatory_summary": "Federal history reviewed through 2024 included numerous deficiencies; clinically important findings involved ligature risk, staff conduct/patient protection, restraint technique, one-to-one monitoring and restraint evaluation.",
+        "historical_flags": [
+          "ligature-risk finding",
+          "restraint/seclusion monitoring deficiencies",
+          "patient-rights/staff-conduct concerns",
+          "visitation-rights finding"
+        ],
+        "strengths": [
+          "wide age range",
+          "inpatient plus PHP/IOP continuum",
+          "older-adult programming",
+          "adolescent programming"
+        ],
+        "concerns": [
+          "relatively recent clinically significant regulatory findings",
+          "weak consumer-review signal"
+        ]
+      },
+      "insurance": {
+        "bcbs_arizona": {
+          "status": "evidence_of_participation",
+          "verification_required": true
+        },
+        "prosano_health": {
+          "status": "unverified_plan_specific",
+          "verification_required": true
+        }
+      },
+      "sources": [
+        {
+          "type": "provider_registry",
+          "url": "https://npiprofile.com/npi/1740604636"
+        },
+        {
+          "type": "city_resource_directory",
+          "url": "https://www.tempe.gov/Home/Components/FacilityDirectory/FacilityDirectory/576/20824"
+        },
+        {
+          "type": "regulatory",
+          "url": "https://www.hospitalinspections.org/state/az"
+        }
+      ]
+    }
+  ]
+}</script>
+<script>
+/* ======================================================================
+   Phoenix behavioral health facilities
+   Scan list that opens into a scorecard, with an embedded map per facility.
+
+   MAPS
+   ----
+   MAPS_API_KEY is optional.
+     - Empty string: uses the keyless maps.google.com embed. Works in a normal
+       browser with no setup, but it is an undocumented endpoint, so treat it
+       as best effort.
+     - With a Google Maps Embed API key: uses the official, supported endpoint.
+   Either way the map is lazy, it only loads when a facility is opened, and an
+   "Open in Google Maps" link always sits below it as a fallback.
+   ====================================================================== */
+const MAPS_API_KEY = '';
+
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const META = DATA.metadata;
+const FACILITIES = DATA.facilities;
+
+/* ---------- helpers ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sentence = s => String(s).replace(/_/g,' ').replace(/^./, c => c.toUpperCase());
+const nn = v => (v === null || v === undefined || v === '') ? null : v;
+const dash = '\u2014';
+const telHref = p => 'tel:' + String(p).replace(/[^0-9+]/g,'');
+
+const addressOf = f => {
+  const l = f.location;
+  return [l.street, l.city, (l.state||'') + ' ' + (l.postal_code||'')].filter(Boolean).join(', ').trim();
+};
+const coordsOf = f => (f.location.latitude != null && f.location.longitude != null)
+  ? f.location.latitude + ',' + f.location.longitude : null;
+
+/* Google Maps: embedded preview plus link-outs for the real navigation */
+function mapEmbedURL(f){
+  const c = coordsOf(f), q = f.name + ', ' + addressOf(f);
+  if (MAPS_API_KEY){
+    return 'https://www.google.com/maps/embed/v1/place?key=' + encodeURIComponent(MAPS_API_KEY)
+         + '&q=' + encodeURIComponent(q) + '&zoom=15';
+  }
+  return 'https://maps.google.com/maps?q=' + encodeURIComponent(c || q)
+       + '&z=15&hl=en&output=embed';
+}
+function directionsURL(f){
+  return 'https://www.google.com/maps/dir/?api=1&destination='
+       + encodeURIComponent(coordsOf(f) || addressOf(f)) + '&travelmode=driving';
+}
+function placeURL(f){
+  return 'https://www.google.com/maps/search/?api=1&query='
+       + encodeURIComponent(f.name + ', ' + addressOf(f));
+}
+
+/* ---------- plain language ---------- */
+const CARE_WORDS = {
+  acute_inpatient_psychiatry:      ['Inpatient', false],
+  partial_hospitalization_php:     ['Day program', false],
+  intensive_outpatient_iop:        ['Evening program', false],
+  php_iop:                         ['Day and evening programs', false],
+  adolescent_iop:                  ['Teen evening program', false],
+  virtual_iop:                     ['Virtual program', false],
+  outpatient_psychiatry:           ['Outpatient visits', false],
+  outpatient_substance_use:        ['Outpatient substance use', false],
+  medical_detox:                   ['Medical detox', true],
+  inpatient_substance_use_treatment:['Substance use, inpatient', true],
+  substance_use_treatment:         ['Substance use treatment', true],
+  ect:                             ['ECT', true],
+  telehealth:                      ['Telehealth', false],
+  geriatric_medical_psychiatry:    ['Geriatric psychiatry', true],
+  integrated_behavioral_health:    ['Medical and psychiatric together', true],
+  assertive_community_treatment_act:['Community treatment team', false],
+  court_ordered_involuntary_treatment:['Court-ordered treatment', true]
+};
+const INS_WORDS = {bcbs_arizona:'Blue Cross Blue Shield of Arizona', prosano_health:'Prosano Health'};
+const POP_WORDS = {
+  adolescents:['Teens',true], adults:['Adults',false],
+  older_adults:['Older adults',false], medically_complex:['Medically complex',true]
+};
+
+/* who it serves, as a sentence rather than a row of chips */
+function servesLine(f){
+  const p = f.populations || {};
+  const firm = [], hedged = [];
+  Object.entries(POP_WORDS).forEach(([k,[label]]) => {
+    if (p[k] === true) firm.push(label.toLowerCase());
+    else if (typeof p[k] === 'string') hedged.push(label.toLowerCase());
+  });
+  if (!firm.length && !hedged.length) return 'Populations served were not recorded.';
+  const join = a => a.length > 1 ? a.slice(0,-1).join(', ') + ' and ' + a[a.length-1] : a[0];
+  let s = firm.length ? 'Serves ' + join(firm) : '';
+  if (hedged.length) s += (s ? '. ' : '') + join(hedged).replace(/^./,c=>c.toUpperCase()) + ' not confirmed';
+  return s + '.';
+}
+
+/* services only, verified ones first, capped so the card stays readable */
+const CHIP_CAP = 5;
+function offerChips(f){
+  const firm = [], soft = [];
+  Object.entries(f.levels_of_care || {}).forEach(([k,v]) => {
+    const w = CARE_WORDS[k]; if (!w) return;
+    if (v === true) firm.push({label:w[0], key:w[1], soft:false});
+    else if (typeof v === 'string') soft.push({label:w[0], key:false, soft:true});
+  });
+  firm.sort((a,b) => (b.key === true) - (a.key === true));
+  const all = firm.concat(soft);
+  const shown = all.slice(0, CHIP_CAP);
+  return {shown, hidden: all.length - shown.length};
+}
+
+/* ---------- accessors ---------- */
+const val = {
+  rank:f=>f.provisional_rank,
+  score:f=>nn(f.quality_assessment?.composite_score_10),
+  rating:f=>nn(f.quality_assessment?.consumer_review_rating_5),
+  reviews:f=>nn(f.quality_assessment?.consumer_review_count),
+  beds:f=>nn(f.capacity?.beds),
+  miles:f=>nn(f.location?.distance_from_tempe?.straight_line_miles),
+  name:f=>f.name
+};
+
+const SORTS = [
+  {id:'rank',  label:'Ranked',   get:val.rank,   dir:1},
+  {id:'miles', label:'Closest',  get:val.miles,  dir:1},
+  {id:'score', label:'Score',    get:val.score,  dir:-1},
+  {id:'rating',label:'Reviews',  get:val.rating, dir:-1},
+  {id:'beds',  label:'Beds',     get:val.beds,   dir:-1},
+  {id:'name',  label:'A to Z',   get:val.name,   dir:1}
+];
+
+const FILTERS = [
+  {id:'teens',  label:'Teens',          test:f=>f.populations?.adolescents===true},
+  {id:'older',  label:'Older adults',   test:f=>f.populations?.older_adults===true},
+  {id:'detox',  label:'Medical detox',  test:f=>f.levels_of_care?.medical_detox===true},
+  {id:'day',    label:'Day program',    test:f=>f.levels_of_care?.partial_hospitalization_php===true||f.levels_of_care?.php_iop===true},
+  {id:'ect',    label:'ECT',            test:f=>f.levels_of_care?.ect===true},
+  {id:'sud',    label:'Substance use',  test:f=>f.levels_of_care?.inpatient_substance_use_treatment===true||f.levels_of_care?.substance_use_treatment===true},
+  {id:'near',   label:'Within 10 miles',test:f=>(val.miles(f)??999)<=10},
+  {id:'bcbs',   label:'BCBS evidence',  test:f=>/evidence|participation/i.test(f.insurance?.bcbs_arizona?.status||'')}
+];
+
+const state = {sort:'rank', dir:1, q:'', active:new Set(), open:null, deep:new Set()};
+
+/* ======================================================================
+   Scorecard panel
+   ====================================================================== */
+const ICON_CALL = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h3l2 5-2.5 1.5a12 12 0 0 0 6 6L15 13l5 2v3a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3z"/></svg>';
+const ICON_PIN  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+const ICON_CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+
+function phoneOf(f){
+  const c = f.contact || {};
+  return c.intake_phone || c.main_phone || c.scheduling_phone
+      || c.alternate_phone || c.system_assessment_phone || c.toll_free_phone || null;
+}
+
+function ringSVG(score){
+  const C = 2 * Math.PI * 25;
+  const off = score != null ? C * (1 - score/10) : C;
+  return `<svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+    <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="6"/>
+    <circle cx="30" cy="30" r="25" fill="none" stroke="#ffbe5f" stroke-width="6"
+      stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+  </svg>`;
+}
+
+function listBlock(title, arr){
+  if (!arr?.length) return '';
+  return `<div class="sub-h">${esc(title)}</div><ul class="bul">`
+    + arr.map(x => `<li>${esc(sentence(x))}</li>`).join('') + `</ul>`;
+}
+
+function deepBlock(f){
+  const q = f.quality_assessment || {};
+  const c = f.contact || {};
+
+  const contactRows = [];
+  Object.entries(c).forEach(([k,v]) => {
+    if (v == null || v === '') return;
+    const label = sentence(k);
+    if (k === 'website')        contactRows.push([label, `<a href="${esc(v)}" target="_blank" rel="noopener">Open site</a>`]);
+    else if (k === 'email')     contactRows.push([label, `<a href="mailto:${esc(v)}">${esc(v)}</a>`]);
+    else if (/phone/.test(k))   contactRows.push([label, `<a href="${telHref(v)}">${esc(v)}</a>`]);
+    else                        contactRows.push([label, esc(typeof v === 'boolean' ? (v?'Yes':'No') : v)]);
+  });
+  contactRows.push(['Address', esc(addressOf(f))]);
+
+  const comps = q.component_scores_10;
+  const ins = f.insurance || {};
+
+  return `
+  <div class="sec">
+    <h4>Score breakdown</h4>
+    ${comps ? `<div class="comp">${Object.entries(comps).map(([k,v]) => `
+      <div class="crow">
+        <span class="cn">${esc(sentence(k))}</span><span class="cv">${v.toFixed(1)}</span>
+        <span class="bar"><i style="width:${v*10}%"></i></span>
+      </div>`).join('')}</div>`
+      : `<p class="body">A component breakdown was not recorded for this facility.</p>`}
+    <p class="body" style="margin-top:.8rem">Confidence in this score: ${esc(sentence(q.confidence || 'not stated'))}${q.confidence_notes ? '. ' + esc(q.confidence_notes) : '.'}</p>
+  </div>
+
+  <div class="sec">
+    <h4>Contact</h4>
+    <dl class="kv">${contactRows.map(([k,v]) => `<div class="kvr"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>
+  </div>
+
+  ${Object.keys(ins).length ? `
+  <div class="sec">
+    <h4>Insurance</h4>
+    ${Object.entries(ins).map(([k,v]) => {
+      const st = v.status || 'unknown';
+      const ok = /evidence|participation|accept/i.test(st) && !/uncertain|exclusion/i.test(st);
+      return `<div class="ins">
+        <span>
+          <span class="nm">${esc(INS_WORDS[k] || sentence(k))}</span>
+          ${v.scope ? `<span class="sub">${esc(sentence(v.scope))}</span>` : ''}
+          ${v.verification_required ? `<span class="sub">Confirm by phone before admission</span>` : ''}
+        </span>
+        <span class="badge ${ok ? 'ok' : ''}">${esc(sentence(st))}</span>
+      </div>`;
+    }).join('')}
+  </div>` : ''}
+
+  <div class="sec">
+    <h4>Safety and inspection record</h4>
+    <p class="body">${esc(q.regulatory_summary || 'No summary was recorded for this facility.')}</p>
+    ${listBlock('Findings on record', q.historical_flags)}
+    ${q.accreditation ? `<div class="sub-h">Accreditation</div><p class="body">${esc(q.accreditation)}</p>` : ''}
+  </div>
+
+  <div class="sec">
+    <h4>Strengths and concerns</h4>
+    ${listBlock('Strengths', q.strengths)}
+    ${listBlock('Concerns', q.concerns)}
+  </div>
+
+  <div class="sec">
+    <h4>About the operator</h4>
+    <dl class="kv">
+      <div class="kvr"><dt>Parent system</dt><dd>${esc(f.parent_system || dash)}</dd></div>
+      <div class="kvr"><dt>Facility type</dt><dd>${esc(f.facility_type || dash)}</dd></div>
+      ${f.capacity?.bed_count_type ? `<div class="kvr"><dt>Bed count</dt><dd>${esc(sentence(f.capacity.bed_count_type))}</dd></div>` : ''}
+    </dl>
+    ${f.clinical_focus ? listBlock('Treats', f.clinical_focus) : ''}
+    ${f.specialty_programs ? listBlock('Specialty programs', f.specialty_programs) : ''}
+  </div>
+
+  ${f.sources?.length ? `
+  <div class="sec">
+    <h4>Sources</h4>
+    <div class="srcs">${f.sources.map(s => s.url
+      ? `<a class="src" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(sentence(s.type))}</a>`
+      : `<span class="src">${esc(sentence(s.type))}</span>`).join('')}</div>
+  </div>` : ''}`;
+}
+
+function panel(f){
+  const score = val.score(f), rating = val.rating(f), beds = val.beds(f), miles = val.miles(f);
+  const phone = phoneOf(f);
+  const {shown, hidden} = offerChips(f);
+  const approx = f.location.coordinate_precision === 'approximate_address_coordinate';
+  const deepOpen = state.deep.has(f.id);
+
+  return `
+  <div class="pbody">
+    <div class="btop">
+      <div class="ring">${ringSVG(score)}<span>${score != null ? score.toFixed(1) : dash}</span></div>
+      <div class="t">
+        <h3>${esc(f.name)}</h3>
+        <p>${esc(f.location.city)} &middot; ${miles != null ? miles + ' mi' : 'distance unknown'} &middot; ${esc(f.facility_type)}</p>
+      </div>
+    </div>
+
+    <button class="more" data-deep="${esc(f.id)}" aria-expanded="${deepOpen}">
+      <span>Full breakdown</span>${ICON_CHEV}
+    </button>
+    <div class="deep ${deepOpen ? 'open' : ''}" data-deepbox="${esc(f.id)}"><div><div class="deep-inner">
+      ${deepOpen ? deepBlock(f) : ''}
+    </div></div></div>
+
+    <div class="stats">
+      <div class="stat"><span class="v">${rating != null ? rating.toFixed(1) + ' / 5' : dash}</span><span class="k">${val.reviews(f) != null ? val.reviews(f) + ' reviews' : 'no reviews'}</span></div>
+      <div class="stat"><span class="v">${beds != null ? beds : dash}</span><span class="k">${beds != null ? 'beds' : 'not listed'}</span></div>
+    </div>
+
+    <p class="serves">${esc(servesLine(f))}</p>
+
+    ${shown.length ? `<div class="offers">${shown.map(c =>
+      `<span class="offer ${c.key ? 'key' : ''} ${c.soft ? 'soft' : ''}">${esc(c.label)}</span>`).join('')}
+      ${hidden > 0 ? `<span class="offer soft">+${hidden} more</span>` : ''}</div>` : ''}
+
+    <div class="mapwrap" data-map="${esc(f.id)}">
+      <div class="mapskel">Loading map</div>
+      <div class="maplabel">
+        <span>${esc(addressOf(f))}</span>
+        <a href="${placeURL(f)}" target="_blank" rel="noopener">Open in Maps</a>
+      </div>
+    </div>
+    ${approx ? `<p class="approx">Pin is an approximate address location, so confirm the entrance when you arrive.</p>` : ''}
+
+    <div class="btns">
+      <a class="btn call ${phone ? '' : 'off'}" href="${phone ? telHref(phone) : '#'}">${ICON_CALL} ${phone ? 'Call' : 'No number'}</a>
+      <a class="btn" href="${directionsURL(f)}" target="_blank" rel="noopener">${ICON_PIN} Directions</a>
+    </div>
+
+  </div>`;
+}
+
+/* ======================================================================
+   List
+   ====================================================================== */
+function visible(){
+  let out = FACILITIES.filter(f => {
+    for (const id of state.active){
+      const flt = FILTERS.find(x => x.id === id);
+      if (flt && !flt.test(f)) return false;
+    }
+    if (state.q && !JSON.stringify(f).toLowerCase().includes(state.q)) return false;
+    return true;
+  });
+  const s = SORTS.find(x => x.id === state.sort);
+  out.sort((a,b) => {
+    const av = s.get(a), bv = s.get(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return typeof av === 'string' ? av.localeCompare(bv) * state.dir : (av - bv) * state.dir;
+  });
+  return out;
+}
+
+function render(){
+  const rows = visible();
+  const list = document.getElementById('list');
+
+  list.innerHTML = rows.length ? `<div class="rows">` + rows.map((f,i) => {
+    const open = state.open === f.id;
+    const miles = val.miles(f), score = val.score(f);
+    return `
+    <section class="rowgroup ${open ? 'open' : ''} ${i === 0 ? 'lead' : ''}" data-group="${esc(f.id)}">
+      <button class="row" data-row="${esc(f.id)}" aria-expanded="${open}">
+        <span class="rank">${f.provisional_rank}</span>
+        <span class="rid">
+          <span class="n">${esc(f.name)}</span>
+          <span class="m">${esc(f.location.city)} &middot; ${miles != null ? miles + ' mi' : 'distance unknown'}</span>
+        </span>
+        <span class="rscore">${score != null ? score.toFixed(1) : dash}</span>
+        <span class="rchev">${ICON_CHEV}</span>
+      </button>
+      <div class="panel"><div>${open ? panel(f) : ''}</div></div>
+    </section>`;
+  }).join('') + `</div>`
+  : `<div class="empty">No facility matches those filters.</div>`;
+
+  if (state.open) loadMap(state.open);
+
+  const n = state.active.size + (state.q ? 1 : 0);
+  document.getElementById('count').textContent =
+    rows.length + ' of ' + FACILITIES.length + ' facilities' + (n ? ', filtered' : '');
+  const fc = document.getElementById('fcount');
+  fc.hidden = !state.active.size; fc.textContent = state.active.size;
+  document.getElementById('ftog').classList.toggle('on', state.active.size > 0);
+  document.getElementById('clear').hidden = n === 0;
+  renderControls();
+}
+
+/* map is injected only once a facility is open, so closed rows cost nothing */
+function loadMap(id){
+  const f = FACILITIES.find(x => x.id === id);
+  const wrap = document.querySelector(`[data-map="${CSS.escape(id)}"]`);
+  if (!f || !wrap || wrap.dataset.loaded) return;
+  wrap.dataset.loaded = '1';
+  const frame = document.createElement('iframe');
+  frame.src = mapEmbedURL(f);
+  frame.loading = 'lazy';
+  frame.referrerPolicy = 'no-referrer-when-downgrade';
+  frame.title = 'Map showing ' + f.name;
+  frame.allowFullscreen = true;
+
+  /* If the embed is blocked the iframe never fires load, so swap in a
+     fallback instead of leaving an empty grey box. */
+  let settled = false;
+  frame.addEventListener('load', () => { settled = true; }, {once:true});
+  setTimeout(() => {
+    if (settled || !frame.isConnected) return;
+    const alt = document.createElement('a');
+    alt.className = 'mapfail';
+    alt.href = placeURL(f);
+    alt.target = '_blank'; alt.rel = 'noopener';
+    alt.innerHTML = ICON_PIN + '<span>Map preview unavailable here<br><b>Open in Google Maps</b></span>';
+    frame.replaceWith(alt);
+  }, 4000);
+
+  wrap.querySelector('.mapskel').replaceWith(frame);
+}
+
+function renderControls(){
+  document.getElementById('sorts').innerHTML = SORTS.map(s => {
+    const on = state.sort === s.id;
+    return `<button class="chip" data-sort="${s.id}" aria-pressed="${on}">${esc(s.label)}`
+         + (on ? `<span class="dir">${state.dir === 1 ? '\u2191' : '\u2193'}</span>` : '') + `</button>`;
+  }).join('');
+  document.getElementById('fwrap').innerHTML = FILTERS.map(f =>
+    `<button class="chip" data-filter="${f.id}" aria-pressed="${state.active.has(f.id)}">${esc(f.label)}</button>`).join('');
+}
+
+/* ======================================================================
+   Events
+   ====================================================================== */
+document.addEventListener('click', e => {
+  const sortBtn = e.target.closest('[data-sort]');
+  if (sortBtn){
+    const id = sortBtn.dataset.sort;
+    if (state.sort === id) state.dir *= -1;
+    else { state.sort = id; state.dir = SORTS.find(s => s.id === id).dir; }
+    render(); return;
+  }
+
+  const fBtn = e.target.closest('[data-filter]');
+  if (fBtn){
+    const id = fBtn.dataset.filter;
+    state.active.has(id) ? state.active.delete(id) : state.active.add(id);
+    render(); return;
+  }
+
+  const row = e.target.closest('[data-row]');
+  if (row){
+    const id = row.dataset.row;
+    state.open = state.open === id ? null : id;   /* one open at a time */
+    state.deep.delete(id);
+    render();
+    if (state.open){
+      const el = document.querySelector(`[data-group="${CSS.escape(id)}"]`);
+      requestAnimationFrame(() => el.scrollIntoView({block:'nearest', behavior:'smooth'}));
+    }
+    return;
+  }
+
+  const deep = e.target.closest('[data-deep]');
+  if (deep){
+    const id = deep.dataset.deep;
+    const box = document.querySelector(`[data-deepbox="${CSS.escape(id)}"]`);
+    const open = !state.deep.has(id);
+    open ? state.deep.add(id) : state.deep.delete(id);
+    if (open) box.querySelector('.deep-inner').innerHTML = deepBlock(FACILITIES.find(x => x.id === id));
+    box.classList.toggle('open', open);
+    deep.setAttribute('aria-expanded', open);
+    return;
+  }
+
+  if (e.target.closest('#ftog')){
+    const p = document.getElementById('filters');
+    const open = p.classList.toggle('open');
+    document.getElementById('ftog').setAttribute('aria-expanded', open);
+    return;
+  }
+
+  if (e.target.closest('#clear')){
+    state.active.clear(); state.q = '';
+    document.getElementById('q').value = '';
+    render();
+  }
+});
+
+let qt;
+document.getElementById('q').addEventListener('input', e => {
+  clearTimeout(qt);
+  qt = setTimeout(() => { state.q = e.target.value.trim().toLowerCase(); state.open = null; render(); }, 150);
+});
+
+/* ---------- boot ---------- */
+document.getElementById('h-title').textContent = META.title.replace(' Comparison','');
+document.getElementById('h-sub').textContent =
+  'Ten facilities in the ' + META.region + '. Distances are straight-line miles from '
+  + META.distance_origin.name + '. Tap a facility to see its scorecard.';
+document.getElementById('foot').textContent =
+  'Scores are a provisional research composite, not an official CMS or Arizona Department of Health Services rating. '
+  + 'Confirm programs and insurance directly with each facility. Data generated ' + META.generated_date + '.';
+render();
+
+function printSinglePage(){
+  const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+  const style = document.createElement('style');
+  style.id = 'single-page-print';
+  style.textContent =
+    '@page{size:' + w + 'px ' + h + 'px;margin:0}' +
+    'html,body{width:' + w + 'px !important;height:auto !important}' +
+    '*{break-inside:avoid !important;page-break-inside:avoid !important;' +
+    'break-before:avoid !important;page-break-before:avoid !important;' +
+    'break-after:avoid !important;page-break-after:avoid !important}';
+  document.head.appendChild(style);
+  const cleanup = () => { const s = document.getElementById('single-page-print'); if (s) s.remove(); };
+  window.addEventListener('afterprint', cleanup, {once:true});
+  setTimeout(() => { window.print(); setTimeout(cleanup, 1200); }, 60);
+}
+</script>
+</body>
+</html>
