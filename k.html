@@ -31,7 +31,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 /* ---------- header ---------- */
 header.top{padding:2rem 0 1.25rem}
-header.top h1{font-size:1.65rem;line-height:1.2;padding-right:3.5rem;max-width:18ch}
+header.top h1{font-size:1.65rem;line-height:1.2;max-width:18ch}
 header.top p{margin:.6rem 0 0;color:var(--dim);font-size:.95rem;max-width:48ch}
 
 /* ---------- controls ---------- */
@@ -202,18 +202,14 @@ ul.bul li{margin-bottom:.25rem}
   padding:2.5rem 1.25rem;text-align:center;color:var(--faint)}
 footer{margin-top:1.5rem;font-size:.82rem;color:var(--faint);line-height:1.6}
 
-#print-btn{position:fixed;top:20px;right:20px;width:40px;height:40px;z-index:9999;
-  background:#1a1a1a;opacity:.7;border:none;border-radius:8px;display:flex;align-items:center;
-  justify-content:center;color:#fff;transition:opacity .3s ease}
-#print-btn:hover{opacity:1}
 
 @media (min-width:640px){
-  header.top h1{font-size:2.1rem;padding-right:0}
+  header.top h1{font-size:2.1rem}
   .mapwrap iframe{height:240px}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
 @media print{
-  #print-btn,.controls{display:none}
+  .controls{display:none}
   .panel,.deep{grid-template-rows:1fr}
   .rowgroup{break-inside:avoid;page-break-inside:avoid}
   .mapwrap{display:none}
@@ -222,9 +218,6 @@ footer{margin-top:1.5rem;font-size:.82rem;color:var(--faint);line-height:1.6}
 </head>
 <body>
 
-<button id="print-btn" title="Save as PDF" aria-label="Save as PDF" onclick="printSinglePage()">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 19h16"/></svg>
-</button>
 
 <div class="page">
   <header class="top">
@@ -1857,7 +1850,8 @@ document.getElementById('q').addEventListener('input', e => {
 });
 
 /* ---------- boot ---------- */
-document.getElementById('h-title').textContent = META.title.replace(' Comparison','');
+document.getElementById('h-title').textContent =
+  META.title.replace(/ Comparison$/, '').replace(/Hospital$/, 'Hospitals');
 document.getElementById('h-sub').textContent =
   'Ten facilities in the ' + META.region + '. Distances are straight-line miles from '
   + META.distance_origin.name + '. Tap a facility to see its scorecard.';
@@ -1866,22 +1860,6 @@ document.getElementById('foot').textContent =
   + 'Confirm programs and insurance directly with each facility. Data generated ' + META.generated_date + '.';
 render();
 
-function printSinglePage(){
-  const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-  const w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
-  const style = document.createElement('style');
-  style.id = 'single-page-print';
-  style.textContent =
-    '@page{size:' + w + 'px ' + h + 'px;margin:0}' +
-    'html,body{width:' + w + 'px !important;height:auto !important}' +
-    '*{break-inside:avoid !important;page-break-inside:avoid !important;' +
-    'break-before:avoid !important;page-break-before:avoid !important;' +
-    'break-after:avoid !important;page-break-after:avoid !important}';
-  document.head.appendChild(style);
-  const cleanup = () => { const s = document.getElementById('single-page-print'); if (s) s.remove(); };
-  window.addEventListener('afterprint', cleanup, {once:true});
-  setTimeout(() => { window.print(); setTimeout(cleanup, 1200); }, 60);
-}
 </script>
 </body>
 </html>
