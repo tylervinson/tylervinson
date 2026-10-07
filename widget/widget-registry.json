@@ -1,6 +1,6 @@
 {
-  "version": "2.3.5",
-  "updatedAt": "2026-06-04T00:00:00.000Z",
+  "version": "2.4.0",
+  "updatedAt": "2026-10-07T17:32:07.536Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
@@ -164,7 +164,15 @@
           "type": "richtext"
         }
       ]
+    },
+    {
+      "class": "data-widget",
+      "name": "Data widget",
+      "repeat": {
+        "selector": ".nav-button",
+        "groupLabel": "Button"
+      },
+      "fields": []
     }
-  ],
-  "apiKey": "{90524103-7799-489C-9E53-C0D995207FB4}"
+  ]
 }
