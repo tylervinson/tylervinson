@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Compare — audio mastering analysis</title>
+<style>
+:root{
+  --bg:#fafafa; --card:#ffffff; --line:#e0e0e0; --ink:#1a1a1a; --ink2:#666;
+  --accent:#5fdaff; --good:#3aa76d; --warn:#c99a2e; --bad:#d1544f;
+  --shadow:0 1px 3px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  font-weight:400; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding:2rem 2rem 7rem;
+}
+h1,h2,h3{font-weight:300; margin:0}
+h1{font-size:1.9rem; letter-spacing:-.02em}
+h2{font-size:1.15rem; margin-bottom:.25rem}
+h3{font-size:.95rem}
+.sub{color:var(--ink2); font-size:.875rem}
+.wrap{max-width:1240px; margin:0 auto}
+header.page{margin-bottom:2rem}
+section{
+  background:var(--card); border:1px solid var(--line); border-radius:6px;
+  padding:2rem; margin-bottom:1.5rem;
+}
+section.tight{padding:1rem 2rem}
+.hidden{display:none !important}
+
+/* drop zone */
+#drop{
+  border:1px dashed var(--line); border-radius:6px; background:var(--card);
+  padding:3rem 2rem; text-align:center; transition:all .3s ease; cursor:pointer;
+}
+#drop:hover,#drop.over{border-color:var(--accent); background:#f7fdff}
+#drop .big{font-size:1.05rem; font-weight:300}
+#drop .small{color:var(--ink2); font-size:.8125rem; margin-top:.5rem}
+input[type=file]{display:none}
+
+button, .btn{
+  font-family:inherit; font-size:.8125rem; color:var(--ink);
+  background:#fff; border:1px solid var(--line); border-radius:4px;
+  padding:.5rem .9rem; cursor:pointer; transition:all .3s ease;
+}
+button:hover,.btn:hover{border-color:var(--accent); color:#0b7f9e}
+button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+button.primary{background:var(--ink); color:#fff; border-color:var(--ink)}
+button.primary:hover{background:#000; color:#fff}
+button:disabled{opacity:.4; cursor:default}
+
+/* progress */
+.bar{height:2px; background:var(--line); border-radius:2px; overflow:hidden}
+.bar > i{display:block; height:100%; background:var(--accent); width:0; transition:width .3s ease}
+
+/* table */
+table{border-collapse:collapse; width:100%; font-size:.8125rem}
+th,td{text-align:right; padding:.55rem .6rem; border-bottom:1px solid var(--line); white-space:nowrap}
+th{font-weight:400; color:var(--ink2); cursor:pointer; user-select:none; position:sticky; top:0; background:var(--card)}
+th:hover{color:var(--accent)}
+th.left,td.left{text-align:left}
+tbody tr{transition:background .3s ease}
+tbody tr:hover{background:#f7fdff}
+td.num{font-variant-numeric:tabular-nums}
+.swatch{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:.5rem; vertical-align:baseline}
+.flag{color:var(--bad); border-bottom:1px dotted var(--bad); cursor:help}
+.ok{color:var(--good)}
+.mid{color:var(--warn); border-bottom:1px dotted var(--warn); cursor:help}
+.scroll{overflow-x:auto}
+
+/* grid */
+.grid{display:grid; gap:1.5rem}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+
+canvas{display:block; width:100%; background:transparent}
+
+/* file cards */
+.card{border:1px solid var(--line); border-radius:6px; padding:1rem; margin-bottom:1rem; background:var(--card)}
+.card header{display:flex; align-items:center; gap:.6rem; margin-bottom:.75rem; flex-wrap:wrap}
+.card header .name{font-weight:400; font-size:.9375rem; flex:1; overflow:hidden; text-overflow:ellipsis}
+.meta{color:var(--ink2); font-size:.75rem}
+.kv{display:grid; grid-template-columns:repeat(auto-fill,minmax(128px,1fr)); gap:.5rem 1rem; margin-top:.75rem}
+.kv div{border-top:1px solid var(--line); padding-top:.35rem}
+.kv .k{color:var(--ink2); font-size:.6875rem; letter-spacing:.04em; text-transform:uppercase}
+.kv .v{font-size:.9375rem; font-variant-numeric:tabular-nums}
+
+/* score bars */
+.score-row{display:flex; align-items:center; gap:.75rem; margin-bottom:.4rem; font-size:.8125rem}
+.score-row .lbl{width:130px; color:var(--ink2)}
+.score-row .track{flex:1; height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden}
+.score-row .track i{display:block; height:100%; background:var(--accent); transition:width .3s ease}
+.score-row .val{width:36px; text-align:right; font-variant-numeric:tabular-nums}
+
+/* legend */
+.legend{display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; font-size:.75rem; color:var(--ink2); margin-top:.75rem}
+.legend span{display:flex; align-items:center; gap:.4rem}
+
+/* transport */
+#transport{
+  position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.97);
+  border-top:1px solid var(--line); padding:.75rem 2rem; z-index:900;
+  backdrop-filter:blur(8px); display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+}
+#transport .chips{display:flex; gap:.4rem; flex-wrap:wrap; flex:1}
+.chip{
+  font-size:.75rem; padding:.35rem .7rem; border:1px solid var(--line);
+  border-radius:20px; background:#fff; cursor:pointer; transition:all .3s ease;
+}
+.chip:hover{border-color:var(--accent)}
+.chip.active{background:var(--ink); color:#fff; border-color:var(--ink)}
+#seek{flex-basis:100%; height:3px; background:var(--line); border-radius:2px; cursor:pointer; position:relative}
+#seek i{display:block; height:100%; background:var(--accent); width:0; border-radius:2px}
+.tiny{font-size:.6875rem; color:var(--ink2); font-variant-numeric:tabular-nums}
+
+/* accordion */
+details{border-top:1px solid var(--line); padding-top:.75rem; margin-top:1rem}
+summary{cursor:pointer; font-size:.8125rem; color:var(--ink2); list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"+ "; color:var(--accent)}
+details[open] summary:before{content:"– "}
+details .body{font-size:.8125rem; color:var(--ink2); margin-top:.75rem; line-height:1.6}
+details .body b{color:var(--ink); font-weight:400}
+
+/* tooltips */
+.has-tip{border-bottom:1px dotted #b8b8b8; cursor:help}
+th.has-tip{border-bottom:1px solid var(--line)}
+#tip{
+  position:fixed; z-index:9998; max-width:320px; background:#1a1a1a; color:#fff;
+  font-size:.75rem; font-weight:400; line-height:1.5; padding:.7rem .85rem;
+  border-radius:5px; box-shadow:0 2px 10px rgba(0,0,0,.18); pointer-events:none;
+  opacity:0; transform:translateY(4px); transition:opacity .3s ease, transform .3s ease;
+}
+#tip.show{opacity:1; transform:translateY(0)}
+#tip b{display:block; font-weight:400; color:var(--accent); margin-bottom:.25rem}
+#tip em{display:block; font-style:normal; color:#aaa; margin-top:.4rem}
+
+/* plain-language blocks */
+.plain{font-size:.875rem; line-height:1.65; margin:.75rem 0 0}
+.plain + .plain{margin-top:.5rem}
+.verdict{
+  display:inline-block; font-size:.75rem; padding:.25rem .6rem; border-radius:3px;
+  border:1px solid var(--line); background:#fafafa; color:var(--ink2);
+}
+.verdict.good{border-color:#bfe3cf; background:#f2fbf6; color:#2c7d52}
+.verdict.warn{border-color:#eddcb0; background:#fdf9ef; color:#96731f}
+.verdict.bad{border-color:#f0c9c7; background:#fdf4f4; color:#a83f3b}
+.callout{
+  border-left:2px solid var(--accent); padding:.1rem 0 .1rem 1rem; margin:1.25rem 0 0;
+  font-size:.9375rem; line-height:1.7;
+}
+.pick{font-size:1.35rem; font-weight:300; letter-spacing:-.01em; margin:.25rem 0 .5rem}
+.compare-list{list-style:none; padding:0; margin:1.25rem 0 0; font-size:.875rem}
+.compare-list li{border-top:1px solid var(--line); padding:.6rem 0; display:flex; gap:1rem}
+.compare-list li span:first-child{color:var(--ink2); flex:0 0 150px}
+
+/* diagnostic checks */
+.check{border-top:1px solid var(--line); padding:.85rem 0}
+.check-head{display:flex; align-items:center; gap:.55rem}
+.check .dot{width:7px; height:7px; border-radius:50%; flex:0 0 7px; background:var(--good)}
+.check.warn .dot{background:var(--warn)}
+.check.bad .dot{background:var(--bad)}
+.check-title{font-size:.9375rem; font-weight:400; flex:1}
+.check-tag{font-size:.6875rem; color:var(--ink2); text-transform:uppercase; letter-spacing:.05em}
+.check.bad .check-tag{color:var(--bad)}
+.check.warn .check-tag{color:var(--warn)}
+.check-text{font-size:.875rem; line-height:1.65; margin:.4rem 0 0 1.2rem; color:var(--ink)}
+.check-fix{font-size:.8125rem; line-height:1.75; margin:.6rem 0 0 1.2rem; color:var(--ink2);
+  border-left:2px solid var(--accent); padding-left:.75rem}
+.check-fix i{font-style:italic}
+.check-fix b{color:var(--ink); font-weight:400}
+.check.good .check-text{color:var(--ink2)}
+
+.stem-badge{
+  display:inline-block; margin:.5rem 0 0 1.2rem; font-size:.6875rem; letter-spacing:.04em;
+  text-transform:uppercase; color:#7a5c17; background:#fdf9ef; border:1px solid #eddcb0;
+  border-radius:3px; padding:.2rem .5rem;
+}
+.stem-badge b{font-weight:400; color:#5a430f}
+.workflow{border:1px solid var(--line); border-radius:5px; background:#fff; margin-top:1.25rem}
+.workflow > summary{
+  padding:.85rem 1rem; cursor:pointer; font-size:.875rem; color:var(--ink);
+  list-style:none; display:flex; align-items:center; gap:.5rem;
+}
+.workflow > summary::before{content:'+'; color:var(--accent); font-size:1rem}
+.workflow[open] > summary::before{content:'−'}
+.workflow > summary::-webkit-details-marker{display:none}
+.workflow .body{padding:0 1rem 1rem; font-size:.875rem; line-height:1.7; color:var(--ink2)}
+.workflow .body b{color:var(--ink); font-weight:400}
+.workflow ol{margin:.5rem 0 1rem; padding-left:1.2rem}
+.workflow li{margin-bottom:.5rem}
+
+/* print button */
+
+#print-btn{
+  position:fixed; top:20px; right:20px; width:40px; height:40px; background:#1a1a1a;
+  opacity:.7; z-index:9999; border:none; border-radius:4px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:opacity .3s ease;
+}
+#print-btn:hover{opacity:1}
+#print-btn svg{width:18px; height:18px; stroke:#fff; fill:none; stroke-width:1.6}
+/* report blocks: hidden on screen, shown in the PDF */
+#report, #report-head{display:none}
+#report h2{margin-top:2.5rem}
+.rpt-head{border-bottom:2px solid var(--ink); padding-bottom:1.25rem; margin-bottom:2rem}
+.rpt-title{font-size:1.75rem; font-weight:300; letter-spacing:-.02em; color:var(--ink)}
+.rpt-meta{display:flex; flex-wrap:wrap; gap:.35rem 2rem; margin-top:.85rem; font-size:.8125rem; color:var(--ink2)}
+.rpt-meta b{font-weight:400; color:var(--ink)}
+.rpt-files{display:flex; flex-wrap:wrap; gap:.5rem 1.25rem; margin-top:.75rem; font-size:.8125rem; color:var(--ink2)}
+.rpt-files span{display:flex; align-items:center; gap:.4rem}
+.rpt-files i{width:9px; height:9px; border-radius:2px; display:inline-block}
+.rpt-file{margin-top:1.75rem; break-inside:avoid}
+.rpt-file h3{display:flex; align-items:center; gap:.6rem; font-size:1rem; font-weight:400}
+.rpt-table{width:100%; border-collapse:collapse; margin-top:.85rem; font-size:.8125rem}
+.rpt-table th{
+  text-align:left; font-weight:400; color:var(--ink2); border-bottom:1px solid var(--line);
+  padding:.5rem .6rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.04em;
+}
+.rpt-table td{border-bottom:1px solid #f0f0f0; padding:.55rem .6rem; vertical-align:top; line-height:1.6}
+.rpt-table td:nth-child(1){width:14%; color:var(--ink)}
+.rpt-table td:nth-child(2){width:16%; color:var(--ink2)}
+.rpt-table td:nth-child(3){width:15%; font-variant-numeric:tabular-nums}
+.rpt-table tr.rpt-flag{background:#fdf4f4}
+.rpt-table tr.rpt-mid{background:#fdf9ef}
+.rpt-off{color:var(--ink2); font-size:.75rem}
+.rpt-note{font-size:.8125rem; color:var(--ink2); margin-top:.75rem; line-height:1.6;
+  border-left:2px solid var(--accent); padding-left:.75rem}
+.rpt-note b{color:var(--ink); font-weight:400}
+.rpt-gloss{margin-top:1rem; font-size:.8125rem; columns:2; column-gap:2.5rem}
+.rpt-gloss dt{font-weight:400; color:var(--ink); margin-top:.7rem; break-after:avoid}
+.rpt-gloss dd{margin:.15rem 0 0; color:var(--ink2); line-height:1.55; break-inside:avoid}
+.rpt-gloss i{font-style:normal; color:#999}
+
+@media print{
+  *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  #print-btn, #tip{display:none !important}
+  #transport,#drop,.no-print{display:none !important}
+  body{padding:2rem 2.5rem; background:#fff}
+  #report, #report-head{display:block}
+  section{break-inside:avoid; box-shadow:none}
+  .card{break-inside:avoid}
+  /* accordions are forced open before printing, so show their contents */
+  details > .body, details.workflow > .body{display:block !important}
+  summary{list-style:none}
+  .has-tip{border-bottom:none}
+  .flag,.mid{border-bottom:none}
+  canvas{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<button id="print-btn" title="Save as PDF" aria-label="Save as PDF" onclick="printReport()">
+  <svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+<div class="wrap">
+
+<header class="page">
+  <h1>Master Compare</h1>
+  <p class="sub">Drop in two or more versions of the same track. Each one gets measured, explained in plain English, and lined up against the others — then you can play them back to back at matched volume and pick the one that sounds best. No experience with mastering required: any underlined term has an explanation attached, so hover it or tap it. Fixes are written as Audacity steps, and assume you are working from a finished stereo render with no multitrack behind it.</p>
+</header>
+
+<div id="report-head"></div>
+
+<div id="drop" class="no-print" tabindex="0" role="button" aria-label="Add audio files">
+  <div class="big">Drop audio files here, or click to choose</div>
+  <div class="small">WAV, AIFF, FLAC, MP3, M4A, OGG — everything is analysed locally in your browser, nothing is uploaded</div>
+  <input type="file" id="picker" multiple accept="audio/*,.wav,.aif,.aiff,.flac,.mp3,.m4a,.ogg">
+</div>
+
+<section id="status" class="tight hidden no-print">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+    <span id="status-text" class="sub">Analysing…</span>
+    <button id="clear-all">Clear all</button>
+  </div>
+  <div class="bar"><i id="status-bar"></i></div>
+</section>
+
+<section id="settings" class="tight hidden no-print">
+  <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
+    <label class="sub" style="display:flex;align-items:center;gap:.5rem">
+      <span class="has-tip" data-tip="profile">Style</span>
+      <select id="profile" style="font:inherit;font-size:.8125rem;border:1px solid var(--line);border-radius:4px;padding:.35rem .5rem;background:#fff">
+        <option value="doom">Doom / sludge / stoner</option>
+        <option value="metal">Heavy metal / modern metal</option>
+        <option value="neutral">Neutral / general</option>
+      </select>
+    </label>
+    <label class="sub" style="display:flex;align-items:center;gap:.5rem">
+      <span class="has-tip" data-tip="reference">Reference track</span>
+      <select id="reference" style="font:inherit;font-size:.8125rem;border:1px solid var(--line);border-radius:4px;padding:.35rem .5rem;background:#fff;max-width:260px">
+        <option value="-1">none — use style targets</option>
+      </select>
+    </label>
+    <span class="sub" style="flex:1;min-width:220px;color:var(--ink2)">Load a commercial track you trust and set it as the reference. Everything else is then measured against it rather than against a generic target.</span>
+  </div>
+  <p class="sub" id="profile-note" style="margin:.75rem 0 0"></p>
+</section>
+
+<section id="conclusion" class="hidden">
+  <h2>The short answer</h2>
+  <p class="sub">Written for ears, not meters. Every underlined term has a plain explanation — hover it, or tap it on a phone.</p>
+  <div id="conclusion-body"></div>
+</section>
+
+<section id="flatness" class="hidden">
+  <h2>Why it might sound flat</h2>
+  <p class="sub">The specific things that make a dense mix read as small or two‑dimensional, checked one at a time. Problems first, each with the Audacity steps to fix it.</p>
+
+  <details class="workflow">
+    <summary>The workflow these fixes assume</summary>
+    <div class="body">
+      <p>A generated track is a finished stereo render — there is no mix behind it. Anything aimed at one instrument therefore has to go through separation first, and any fix marked with a stem badge below needs this before it will work:</p>
+      <ol>
+        <li><b>Separate.</b> Effect ▸ OpenVINO AI Effects ▸ Music Separation, using the 4‑stem model. This splits the track into <b>drums</b>, <b>bass</b>, <b>vocals</b> and <b>other</b> — guitars and keys both land in <i>other</i>. Without Intel's OpenVINO plug‑in pack installed, run Demucs or a web separator and bring the results back via File ▸ Import ▸ Audio.</li>
+        <li><b>Treat one stem.</b> Click the track you want, apply the effect, leave the others alone. This is the entire point — it is what lets you cut 300 Hz out of the guitars without hollowing out the kick.</li>
+        <li><b>Recombine.</b> Select all with Ctrl+A, then Tracks ▸ Mix ▸ Mix and Render.</li>
+        <li><b>Export and re‑check.</b> File ▸ Export Audio as WAV, then drop the result back into this page alongside the original and compare them at matched volume.</li>
+      </ol>
+      <p><b>Separation is not free.</b> It leaves smearing and artefacts, particularly on cymbals and heavily distorted guitars, and a wall of saturated guitar is close to the worst case for it. Use the widest, gentlest moves that solve the problem — a 2 dB shelf across an octave will survive separation, a 9 dB surgical notch will not. If a fix needs more than about 3 dB, regenerating the track is usually the better answer than repairing it.</p>
+      <p>Fixes without a stem badge work on the whole file and need none of this.</p>
+    </div>
+  </details>
+
+  <div id="flat-body" style="margin-top:1.25rem"></div>
+</section>
+
+<section id="monosec" class="hidden">
+  <h2 class="has-tip" data-tip="monochart">Mono compatibility</h2>
+  <p class="sub">Phone speakers, most Bluetooth speakers, club PAs and a lot of bar systems are mono. This shows what each frequency range does when both speakers are folded into one — and how correlated left and right are in that range to begin with.</p>
+  <div class="grid g2" style="margin-top:1.25rem">
+    <div>
+      <h3>Level change when folded to mono</h3>
+      <p class="sub">Bars to the left mean that range gets quieter on a single speaker. Past about 3 dB it is a real problem.</p>
+      <canvas id="mono" height="360" style="margin-top:1rem"></canvas>
+    </div>
+    <div>
+      <h3 class="has-tip" data-tip="bandcorr">Left/right correlation by band</h3>
+      <p class="sub">1.0 is identical on both sides, 0 is fully decorrelated, below 0 means the channels are cancelling.</p>
+      <canvas id="bandcorr" height="360" style="margin-top:1rem"></canvas>
+    </div>
+  </div>
+  <div id="mono-verdict" style="margin-top:1.5rem"></div>
+</section>
+
+<section id="ranking" class="hidden">
+  <h2>Ranking</h2>
+  <p class="sub">A weighted read on technical quality. Treat it as a shortlist, not a verdict — the breakdown below each file shows what drove the number.</p>
+  <div id="rank-body" style="margin-top:1.25rem"></div>
+</section>
+
+<section id="summary" class="hidden">
+  <h2>Measurements</h2>
+  <p class="sub">Click any column heading to sort.</p>
+  <div class="scroll" style="margin-top:1rem"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  <div class="legend">
+    <span class="has-tip" data-tip="lufs"><b>LUFS‑I</b>&nbsp;how loud it sounds overall</span>
+    <span class="has-tip" data-tip="lra"><b>LRA</b>&nbsp;how much the volume moves</span>
+    <span class="has-tip" data-tip="tpDb"><b>dBTP</b>&nbsp;how close it comes to distorting</span>
+    <span class="has-tip" data-tip="plr"><b>PLR</b>&nbsp;how much punch is left</span>
+    <span class="has-tip" data-tip="psr"><b>PSR</b>&nbsp;punch inside the loud sections</span>
+    <span class="has-tip" data-tip="corr"><b>Corr</b>&nbsp;how wide the stereo is</span>
+    <span class="has-tip" data-tip="monoLoss"><b>Mono Δ</b>&nbsp;what it loses on one speaker</span>
+  </div>
+</section>
+
+<section id="charts" class="hidden">
+  <h2 class="has-tip" data-tip="spectrum">Tonal balance</h2>
+  <p class="sub">Deep bass on the left, treble on the right. Every curve is volume‑matched, so a difference in shape is a real difference in tone rather than one file simply being louder.</p>
+  <canvas id="spec" height="420" style="margin-top:1rem"></canvas>
+  <div id="spec-legend" class="legend"></div>
+
+  <div class="grid g2" style="margin-top:2rem">
+    <div>
+      <h3 class="has-tip" data-tip="bandchart">Band energy vs the group average</h3>
+      <p class="sub">Each file measured against the average of the set. A bar to the right means this file has more of that frequency range than the others do.</p>
+      <canvas id="bands" height="360" style="margin-top:1rem"></canvas>
+    </div>
+    <div>
+      <h3 class="has-tip" data-tip="scatter">Loudness against punch</h3>
+      <p class="sub">Top left is loud and squashed. Bottom right is quiet and open. Neither corner is automatically right — it depends on the music.</p>
+      <canvas id="scatter" height="360" style="margin-top:1rem"></canvas>
+    </div>
+  </div>
+</section>
+
+<section id="files" class="hidden">
+  <h2>File detail</h2>
+  <p class="sub">Waveform with short‑term loudness laid over it, plus stereo correlation along the timeline.</p>
+  <div id="file-cards" style="margin-top:1.25rem"></div>
+</section>
+
+<details id="notes" class="hidden">
+  <summary>How these numbers are measured, and what they can't tell you</summary>
+  <div class="body">
+    <p><b>The short version:</b> loudness and peak levels are measured the same way streaming services measure them, so the figures here are the ones that will decide how your track is treated when you upload it. Everything below is the detail behind that.</p>
+    <p><b>Loudness</b> follows ITU‑R BS.1770‑4: K‑weighting, 400 ms blocks at 75% overlap, absolute gate at −70 LUFS and a relative gate 10 LU below the ungated mean. Loudness range uses EBU Tech 3342 (3 s windows, −20 LU relative gate, 10th to 95th percentile).</p>
+    <p><b>True peak</b> is 4× oversampled with a 65‑tap windowed‑sinc polyphase interpolator. Accuracy is roughly ±0.5 dB worst case near a quarter of the sample rate, which matches what the standard expects of a 4× meter. Anything reading above −0.3 dBTP is worth checking in a dedicated meter before you commit.</p>
+    <p><b>Decoding</b> happens through the browser, so lossy files are measured after decode. An MP3 or AAC will often show a true peak above the WAV it came from — that is real, it is what the decoder produces, and it is one reason to leave headroom.</p>
+    <p><b>The style targets are reasoned, not sampled.</b> The band-ratio ranges are calibrated against a reference spectrum whose energy falls 3.5 dB per octave and rolls off below 40 Hz and above 16 kHz — a shape most finished records approximate. Genre offsets on top of that come from how the instrumentation behaves, not from a survey of commercial masters. They are useful defaults and they are not ground truth. If you load a record you trust as a reference track, the tool measures against that instead, and you should believe it over the presets every time.</p>
+    <p><b>Generated audio behaves differently.</b> It arrives already limited, often already band‑limited, and with a stereo image that can be much narrower than it sounds. Two consequences run through this report: anything destroyed before the render — crushed transients, missing high end — cannot be restored, only worked around or regenerated; and any fix aimed at a single instrument has to go through stem separation, which is itself lossy. Where regenerating is the better answer than repairing, the report says so rather than offering a fix that will not work.</p>
+    <p><b>The bandwidth check</b> looks for a knee where the spectrum starts falling faster than 30 dB per octave and keeps falling. A natural rolloff never does that; a codec or a model output ceiling always does. A merely dull mix is not flagged.</p>
+    <p><b>Kick punch and snare snap</b> are median band-limited crest factors over 300 ms windows. There is no standard for these, so treat the absolute numbers as relative indicators — comparing two versions of your own track is meaningful, comparing to an abstract target less so.</p>
+    <p><b>Mono folding</b> is measured per band as the level change between the summed signal and the average of the two channels. This is what actually happens on a phone speaker or a club PA, and it catches phase problems that a single overall correlation figure hides.</p>
+    <p><b>The score is a heuristic.</b> It rewards headroom, sane dynamics, a tonal balance near a pink‑ish reference tilt, and stereo behaviour that survives a mono fold. It has no idea what your track is supposed to sound like. A deliberately crushed loud master and a delicate acoustic master cannot both win. Use the component breakdown, look at the curves, and above all use the loudness‑matched player — measurement narrows the field, ears pick the winner.</p>
+    <p><b>Not measured:</b> bit depth and dither (lost during decode), codec artefacts, distortion character, phase rotation, timing, and anything about the arrangement or performance.</p>
+  </div>
+</details>
+
+</div>
+
+<section id="report"></section>
+
+<div id="transport" class="hidden no-print">
+  <div class="chips" id="chips"></div>
+  <span class="tiny" id="time">0:00</span>
+  <button id="play">Play</button>
+  <button id="monobtn" class="has-tip" data-tip="monobtn">Mono</button>
+  <label class="tiny" style="display:flex;align-items:center;gap:.4rem">
+    <span class="has-tip" data-tip="match">match volume to</span>
+    <select id="target" style="font:inherit;font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:.25rem">
+      <option value="-14">−14 LUFS</option>
+      <option value="-16">−16 LUFS</option>
+      <option value="-23">−23 LUFS</option>
+      <option value="quietest">quietest file</option>
+      <option value="off">no matching</option>
+    </select>
+  </label>
+  <div id="seek"><i></i></div>
+</div>
+
+<script>
+/* ============================== print ============================== */
+function printSinglePage(){
+  const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+  const style = document.createElement('style');
+  style.id = 'single-page-print';
+  style.textContent = `@page { size: ${w}px ${h}px; margin: 0; }
+    @media print { html,body{width:${w}px;height:${h}px;} * { break-inside:avoid; page-break-inside:avoid; } }`;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(()=>style.remove(), 1000);
+}
+
+/* Builds the full report, redraws every chart at print resolution, prints, and
+   puts the page back exactly as it was. Tooltips and collapsed accordions do
+   not survive a PDF, so their contents are written out as an appendix. */
+let reportState=null;
+function prepareReport(){
+  if(reportState || !files.length) return false;
+  reportState=[...document.querySelectorAll('details')].map(d=>[d,d.open]);
+  reportState.forEach(([d])=>d.open=true);
+  hideTip();
+  $('#report').innerHTML=reportHtml();
+  $('#report-head').innerHTML=reportHead();
+  document.body.classList.add('reporting');
+  printScale=3;                                  // crisp charts in the PDF
+  redrawCharts();
+  return true;
+}
+function teardownReport(){
+  if(!reportState) return;
+  printScale=null; redrawCharts();
+  document.body.classList.remove('reporting');
+  reportState.forEach(([d,o])=>d.open=o);
+  reportState=null;
+}
+/* The button produces the single tall page called for by the house style.
+   Ctrl+P still works and gives the same report, paginated by the browser. */
+function printReport(){
+  if(!files.length){ printSinglePage(); return; }
+  prepareReport();
+  setTimeout(()=>{ printSinglePage(); setTimeout(teardownReport, 2000); }, 120);
+}
+window.addEventListener('beforeprint', prepareReport);
+window.addEventListener('afterprint', teardownReport);
+function redrawCharts(){
+  if(!files.length) return;
+  renderSpectrum(); renderBands(); renderScatter(); renderMono(); renderCards();
+}
+function reportHead(){
+  const now=new Date();
+  const ref=refIndex>=0? esc(files[refIndex].name) : 'none — measured against style targets';
+  return `<div class="rpt-head">
+    <div class="rpt-title">Mastering analysis report</div>
+    <div class="rpt-meta">
+      <span><b>Generated</b> ${now.toLocaleDateString()} ${now.toLocaleTimeString()}</span>
+      <span><b>Style targets</b> ${esc(PROFILES[profileKey].name)}</span>
+      <span><b>Reference track</b> ${ref}</span>
+      <span><b>Files analysed</b> ${files.length}</span>
+    </div>
+    <div class="rpt-files">${files.map(f=>`<span><i style="background:${f.color}"></i>${esc(f.name)}</span>`).join('')}</div>
+  </div>`;
+}
+function reportHtml(){
+  const secs=[];
+  secs.push(`<h2>Appendix A — every measurement against its target</h2>
+    <p class="sub">On screen these targets and explanations live in tooltips, which a PDF cannot carry. They are written out here instead. Targets are those of the ${esc(PROFILES[profileKey].name)} profile.</p>`);
+
+  files.forEach(f=>{
+    const M=metrics(f).map(m=>({...m, st:metricStatus(m)}));
+    const order={flag:0, mid:1, ok:2, na:3};
+    M.sort((a,b)=>order[a.st]-order[b.st]);
+    const bad=M.filter(m=>m.st==='flag'||m.st==='mid').length;
+    secs.push(`<div class="rpt-file">
+      <h3><span class="swatch" style="background:${f.color}"></span>${esc(f.name)}
+        <span class="verdict ${bad?(M.some(m=>m.st==='flag')?'bad':'warn'):'good'}">${
+          bad? bad+' outside target' : 'all measurements on target'}</span></h3>
+      <table class="rpt-table">
+        <thead><tr><th>Measurement</th><th>Target</th><th>This file</th><th>Why it matters</th></tr></thead>
+        <tbody>${M.map(m=>{
+          const R=REASONS[m.key]||{unit:'',low:'',high:''};
+          const target=R.fmt? R.fmt(m.r) : fmtRange(m.r, R.unit, m.dp);
+          if(m.st==='na') return `<tr><td>${m.label}</td><td>${target}</td><td>—</td><td>Mono file — not applicable.</td></tr>`;
+          const val=m.v.toFixed(m.dp)+(R.unit?' '+R.unit:'');
+          const why = m.st==='ok'? 'On target.'
+            : (m.v<m.r[0]? R.low : R.high) || 'Outside the range for this style.';
+          const off = m.st==='ok'? '' : ` <span class="rpt-off">(${(m.v<m.r[0]? m.r[0]-m.v : m.v-m.r[1]).toFixed(m.dp)} ${m.v<m.r[0]?'below':'above'})</span>`;
+          return `<tr class="rpt-${m.st}"><td>${m.label}</td><td>${target}</td><td class="${m.st}">${val}${off}</td><td>${why}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+      ${f.bwCut? `<p class="rpt-note"><b>Bandwidth ceiling:</b> content stops at ${(f.bwCut/1000).toFixed(1)} kHz. ${
+        f.bwCut<17500? 'This is a hard cliff imposed by a lossy encode, the sample rate or the generator — not by the music, and not something EQ can restore.' : 'Full bandwidth, no action needed.'}</p>` : ''}
+    </div>`);
+  });
+
+  secs.push(`<h2>Appendix B — what the terms mean</h2>
+    <p class="sub">The same definitions attached to the underlined terms on screen.</p>
+    <dl class="rpt-gloss">${Object.keys(GLOSSARY).sort((a,b)=>GLOSSARY[a][0].localeCompare(GLOSSARY[b][0]))
+      .map(k=>{const g=GLOSSARY[k];
+        return `<dt>${esc(g[0])}</dt><dd>${esc(g[1])}${g[2]?` <i>${esc(g[2])}</i>`:''}</dd>`;}).join('')}</dl>`);
+
+  return secs.join('');
+}
+
+/* ============================== dsp ============================== */
+const PALETTE = ['#0d9fc4','#e07b39','#4aa96c','#9b6bd6','#d1544f','#c9a227','#4a72d6','#2fb3a0'];
+
+function biquad(x, b, a){
+  const y = new Float32Array(x.length);
+  let x1=0,x2=0,y1=0,y2=0;
+  for(let i=0;i<x.length;i++){
+    const xn=x[i];
+    const yn=b[0]*xn+b[1]*x1+b[2]*x2-a[1]*y1-a[2]*y2;
+    x2=x1;x1=xn;y2=y1;y1=yn;y[i]=yn;
+  }
+  return y;
+}
+function kWeight(x, fs){
+  const f0=1681.9744509555319,G=3.99984385397,Q1=0.7071752369554196;
+  const K=Math.tan(Math.PI*f0/fs), Vh=Math.pow(10,G/20), Vb=Math.pow(Vh,0.4996667741545416);
+  const a0=1+K/Q1+K*K;
+  const b1=[(Vh+Vb*K/Q1+K*K)/a0, 2*(K*K-Vh)/a0, (Vh-Vb*K/Q1+K*K)/a0];
+  const a1=[1, 2*(K*K-1)/a0, (1-K/Q1+K*K)/a0];
+  const f2=38.13547087602444,Q2=0.5003270373238773, K2=Math.tan(Math.PI*f2/fs);
+  const den=1+K2/Q2+K2*K2;
+  return biquad(biquad(x,b1,a1),[1,-2,1],[1,2*(K2*K2-1)/den,(1-K2/Q2+K2*K2)/den]);
+}
+const L2P = l => Math.pow(10,(l+0.691)/10);
+const P2L = p => -0.691+10*Math.log10(p);
+
+function integratedLoudness(w, fs){
+  const bs=Math.round(0.4*fs), hop=Math.round(bs*0.25), n=w[0].length, pow=[];
+  for(let s=0; s+bs<=n; s+=hop){
+    let sum=0;
+    for(const c of w){ let a=0; for(let i=s;i<s+bs;i++) a+=c[i]*c[i]; sum+=a/bs; }
+    pow.push(sum);
+  }
+  if(!pow.length) return {lufs:-Infinity};
+  const abs=pow.filter(p=>P2L(p)>-70);
+  if(!abs.length) return {lufs:-Infinity};
+  const m1=abs.reduce((a,b)=>a+b,0)/abs.length;
+  const thr=P2L(m1)-10;
+  const rel=abs.filter(p=>P2L(p)>thr);
+  if(!rel.length) return {lufs:-Infinity};
+  const m2=rel.reduce((a,b)=>a+b,0)/rel.length;
+  return {lufs:P2L(m2)};
+}
+function shortTermCurve(w, fs, hopSec){
+  const bs=Math.round(3*fs), hop=Math.round(hopSec*fs), n=w[0].length, out=[];
+  if(n<bs) return out;
+  const sums=w.map(c=>{let a=0;for(let i=0;i<bs;i++)a+=c[i]*c[i];return a;});
+  for(let s=0; s+bs<=n; s+=hop){
+    if(s>0) for(let ci=0;ci<w.length;ci++){
+      const c=w[ci];
+      for(let i=s-hop;i<s;i++) sums[ci]-=c[i]*c[i];
+      for(let i=s+bs-hop;i<s+bs;i++) sums[ci]+=c[i]*c[i];
+    }
+    let p=0; for(let ci=0;ci<w.length;ci++) p+=sums[ci]/bs;
+    out.push(P2L(Math.max(p,1e-20)));
+  }
+  return out;
+}
+function loudnessRange(st){
+  const abs=st.filter(v=>v>-70);
+  if(abs.length<2) return 0;
+  const mean=abs.map(L2P).reduce((a,b)=>a+b,0)/abs.length;
+  const thr=P2L(mean)-20;
+  const rel=abs.filter(v=>v>thr).sort((a,b)=>a-b);
+  if(rel.length<2) return 0;
+  const q=f=>rel[Math.min(rel.length-1,Math.max(0,Math.round(f*(rel.length-1))))];
+  return q(0.95)-q(0.10);
+}
+
+/* --- true peak: 4x windowed-sinc polyphase --- */
+const POLY = (()=>{
+  const taps=33, phases=4, cutoff=0.98, half=(taps-1)/2, banks=[];
+  for(let p=1;p<phases;p++){
+    const h=new Float64Array(taps); let sum=0;
+    for(let i=0;i<taps;i++){
+      const t=i-half-p/phases;
+      const s=(Math.abs(t)<1e-9)?cutoff:Math.sin(Math.PI*t*cutoff)/(Math.PI*t);
+      const w=0.42-0.5*Math.cos(2*Math.PI*i/(taps-1))+0.08*Math.cos(4*Math.PI*i/(taps-1));
+      h[i]=s*w; sum+=h[i];
+    }
+    for(let i=0;i<taps;i++) h[i]/=sum;
+    banks.push(h);
+  }
+  return {banks, half, taps};
+})();
+function truePeak(ch){
+  const {banks,half,taps}=POLY, n=ch.length;
+  let sp=0; for(let i=0;i<n;i++){const a=Math.abs(ch[i]); if(a>sp) sp=a;}
+  if(sp===0) return {sp:0, tp:0, overs:0};
+  const thr=sp*0.5; let peak=sp, overs=0;
+  // Inter-sample peaks sit next to local maxima, so only those need interpolating.
+  const evalAt=(i)=>{
+    if(i<half || i>=n-half) return false;
+    let over=false;
+    for(let b=0;b<banks.length;b++){
+      const h=banks[b]; let acc=0;
+      for(let k=0;k<taps;k++) acc+=h[k]*ch[i-half+k];
+      const a=acc<0?-acc:acc;
+      if(a>peak) peak=a;
+      if(a>1.0) over=true;
+    }
+    return over;
+  };
+  for(let i=1;i<n-1;i++){
+    const a=Math.abs(ch[i]);
+    if(a<thr) continue;
+    if(a>=Math.abs(ch[i-1]) && a>=Math.abs(ch[i+1])){
+      const o1=evalAt(i-1), o2=evalAt(i);
+      if(o1||o2) overs++;
+    }
+  }
+  return {sp, tp:peak, overs};
+}
+function clipRuns(ch){
+  let runs=0, run=0;
+  for(let i=0;i<ch.length;i++){
+    if(Math.abs(ch[i])>=0.9995){ run++; if(run===3) runs++; }
+    else run=0;
+  }
+  return runs;
+}
+
+/* --- fft --- */
+function fft(re, im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){
+    let bit=n>>1;
+    for(;j&bit;bit>>=1) j^=bit;
+    j^=bit;
+    if(i<j){const tr=re[i];re[i]=re[j];re[j]=tr;const ti=im[i];im[i]=im[j];im[j]=ti;}
+  }
+  for(let len=2;len<=n;len<<=1){
+    const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){
+      let cr=1,ci=0;
+      for(let k=0;k<len/2;k++){
+        const ur=re[i+k],ui=im[i+k];
+        const vr=re[i+k+len/2]*cr-im[i+k+len/2]*ci;
+        const vi=re[i+k+len/2]*ci+im[i+k+len/2]*cr;
+        re[i+k]=ur+vr; im[i+k]=ui+vi;
+        re[i+k+len/2]=ur-vr; im[i+k+len/2]=ui-vi;
+        const ncr=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=ncr;
+      }
+    }
+  }
+}
+const NFFT=8192;
+/* Accumulates left, right, mono-fold and cross-power spectra in one pass.
+   From these we can derive tonal balance, per-band correlation, and exactly
+   how much of each frequency range survives a fold to mono. */
+function avgSpectra(L, R, fs){
+  const win=new Float64Array(NFFT);
+  for(let i=0;i<NFFT;i++) win[i]=0.5-0.5*Math.cos(2*Math.PI*i/NFFT);
+  const H=NFFT/2;
+  const pL=new Float64Array(H), pR=new Float64Array(H), pM=new Float64Array(H), cx=new Float64Array(H);
+  const ar=new Float64Array(NFFT), ai=new Float64Array(NFFT);
+  const br=new Float64Array(NFFT), bi=new Float64Array(NFFT);
+  let frames=0;
+  for(let s=0; s+NFFT<=L.length; s+=NFFT){
+    let e=0;
+    for(let i=0;i<NFFT;i++) e+=L[s+i]*L[s+i]+R[s+i]*R[s+i];
+    if(e/(2*NFFT) < 1e-8) continue;                     // skip silence
+    for(let i=0;i<NFFT;i++){ ar[i]=L[s+i]*win[i]; ai[i]=0; br[i]=R[s+i]*win[i]; bi[i]=0; }
+    fft(ar,ai); fft(br,bi);
+    for(let k=0;k<H;k++){
+      const lr=ar[k], li=ai[k], rr=br[k], ri=bi[k];
+      pL[k]+=lr*lr+li*li;
+      pR[k]+=rr*rr+ri*ri;
+      const mr=(lr+rr)*0.5, mi=(li+ri)*0.5;
+      pM[k]+=mr*mr+mi*mi;
+      cx[k]+=lr*rr+li*ri;
+    }
+    frames++;
+  }
+  const freqs=new Float64Array(H), db=new Float64Array(H), pS=new Float64Array(H);
+  for(let k=0;k<H;k++){
+    freqs[k]=k*fs/NFFT;
+    pS[k]=(pL[k]+pR[k])*0.5/Math.max(1,frames);
+    db[k]=10*Math.log10(pS[k]/(NFFT*NFFT)+1e-20);
+  }
+  return {freqs, db, pS, pL, pR, pM, cx, frames, df:fs/NFFT};
+}
+/* mean power density across a frequency span, in dB — bandwidth cancels out,
+   so ratios between spans are directly comparable */
+function density(sp, lo, hi){
+  let s=0,c=0;
+  for(let k=1;k<sp.pS.length;k++){
+    const f=k*sp.df;
+    if(f>=lo && f<hi){ s+=sp.pS[k]; c++; }
+  }
+  return c? 10*Math.log10(s/c+1e-30) : -200;
+}
+function bandCorrelation(sp, lo, hi){
+  let a=0,b=0,x=0;
+  for(let k=1;k<sp.pL.length;k++){
+    const f=k*sp.df;
+    if(f>=lo && f<hi){ a+=sp.pL[k]; b+=sp.pR[k]; x+=sp.cx[k]; }
+  }
+  return (a>0&&b>0)? x/Math.sqrt(a*b) : 1;
+}
+/* dB gained or lost in this range when both speakers are folded into one */
+function bandMonoDelta(sp, lo, hi){
+  let m=0,s=0;
+  for(let k=1;k<sp.pM.length;k++){
+    const f=k*sp.df;
+    if(f>=lo && f<hi){ m+=sp.pM[k]; s+=(sp.pL[k]+sp.pR[k])*0.5; }
+  }
+  return s>0? 10*Math.log10((m+1e-30)/s) : 0;
+}
+/* Find the knee: the lowest frequency above 4 kHz where the spectrum starts
+   falling faster than 30 dB/octave and keeps falling. A natural taper never
+   does this; a lossy codec or a generator's output bandwidth always does. */
+function bandwidthLimit(freqs, sm, fs){
+  if(!freqs.length) return null;
+  const nyq=fs/2;
+  const lvl=f=>{
+    let b=1;
+    for(let k=1;k<freqs.length;k++) if(Math.abs(freqs[k]-f)<Math.abs(freqs[b]-f)) b=k;
+    return sm[b];
+  };
+  for(let f=4000; f<nyq*0.80; f*=1.06){
+    const hi=Math.min(f*1.26, nyq*0.98);
+    if((lvl(hi)-lvl(f))/Math.log2(hi/f) < -30){
+      const hi2=Math.min(f*2, nyq*0.98);
+      if((lvl(hi2)-lvl(f))/Math.log2(hi2/f) < -25){
+        // report the corner itself, not where it starts bending
+        const base=lvl(f);
+        for(let g=f; g<nyq*0.98; g*=1.01) if(lvl(g)<=base-3) return g;
+        return f;
+      }
+    }
+  }
+  return null;
+}
+
+/* band-limited crest factor — how much transient survives in one frequency range */
+function bandpass(x, fs, f0, Q){
+  const w0=2*Math.PI*f0/fs, al=Math.sin(w0)/(2*Q), c=Math.cos(w0), a0=1+al;
+  return biquad(x, [al/a0,0,-al/a0], [1,-2*c/a0,(1-al)/a0]);
+}
+function bandCrest(x, fs, winSec){
+  const w=Math.round(winSec*fs), out=[];
+  let gmax=0;
+  for(let i=0;i<x.length;i++){ const a=Math.abs(x[i]); if(a>gmax) gmax=a; }
+  if(gmax<1e-6) return NaN;
+  for(let s=0; s+w<=x.length; s+=w){
+    let pk=0, rms=0;
+    for(let i=s;i<s+w;i++){ const a=Math.abs(x[i]); if(a>pk) pk=a; rms+=x[i]*x[i]; }
+    rms=Math.sqrt(rms/w);
+    if(pk<gmax*0.1 || rms<1e-6) continue;
+    out.push(20*Math.log10(pk/rms));
+  }
+  if(!out.length) return NaN;
+  out.sort((a,b)=>a-b);
+  return out[Math.floor(out.length/2)];
+}
+function smoothOctave(freqs, db, fraction){
+  const out=new Float64Array(db.length);
+  const r=Math.pow(2, 1/(2*fraction));
+  for(let k=1;k<db.length;k++){
+    const lo=freqs[k]/r, hi=freqs[k]*r;
+    let a=k, b=k, sum=0, cnt=0;
+    while(a>1 && freqs[a]>lo) a--;
+    while(b<db.length-1 && freqs[b]<hi) b++;
+    for(let i=a;i<=b;i++){ sum+=Math.pow(10,db[i]/10); cnt++; }
+    out[k]=10*Math.log10(sum/cnt+1e-20);
+  }
+  out[0]=out[1];
+  return out;
+}
+const BANDS=[
+  ['Sub',20,60],['Low bass',60,120],['Bass',120,250],['Low mid',250,500],
+  ['Mid',500,1000],['Upper mid',1000,2000],['Presence',2000,6000],
+  ['Brilliance',6000,12000],['Air',12000,20000]
+];
+function bandEnergies(freqs, db){
+  return BANDS.map(([,lo,hi])=>{
+    let sum=0,cnt=0;
+    for(let k=1;k<freqs.length;k++){
+      if(freqs[k]>=lo && freqs[k]<hi){ sum+=Math.pow(10,db[k]/10); cnt++; }
+    }
+    return cnt? 10*Math.log10(sum+1e-20) : -120;
+  });
+}
+function spectralTilt(freqs, db){
+  // least squares of dB against log2(f) over 100 Hz .. 10 kHz
+  let n=0,sx=0,sy=0,sxx=0,sxy=0;
+  for(let k=1;k<freqs.length;k++){
+    const f=freqs[k];
+    if(f<100||f>10000) continue;
+    const x=Math.log2(f), y=db[k];
+    n++; sx+=x; sy+=y; sxx+=x*x; sxy+=x*y;
+  }
+  if(n<10) return 0;
+  return (n*sxy-sx*sy)/(n*sxx-sx*sx);   // dB per octave
+}
+function centroid(freqs, db){
+  let num=0, den=0;
+  for(let k=1;k<freqs.length;k++){
+    const p=Math.pow(10,db[k]/10);
+    num+=freqs[k]*p; den+=p;
+  }
+  return den? num/den : 0;
+}
+
+/* --- stereo --- */
+function stereoStats(L, R, fs){
+  let sll=0, srr=0, slr=0, dcL=0, dcR=0, mid=0, side=0;
+  const n=L.length;
+  for(let i=0;i<n;i++){
+    const l=L[i], r=R[i];
+    sll+=l*l; srr+=r*r; slr+=l*r; dcL+=l; dcR+=r;
+    const m=(l+r)*0.5, s=(l-r)*0.5;
+    mid+=m*m; side+=s*s;
+  }
+  const corr = (sll>0&&srr>0)? slr/Math.sqrt(sll*srr) : 1;
+  const width = mid>0 ? 10*Math.log10((side+1e-20)/mid) : -120;
+  const monoLoss = 20*Math.log10(Math.sqrt(mid/n)/(Math.sqrt((sll+srr)/(2*n))+1e-20));
+  return {corr, widthDb:width, monoLoss, dcL:dcL/n, dcR:dcR/n,
+          sideRatio: mid>0 ? Math.sqrt(side/mid) : 0};
+}
+function lowCorrelation(L, R, fs){
+  // correlation below ~120 Hz, via one-pole lowpass
+  const a=Math.exp(-2*Math.PI*120/fs);
+  let yl=0, yr=0, sll=0, srr=0, slr=0;
+  for(let i=0;i<L.length;i++){
+    yl=(1-a)*L[i]+a*yl; yr=(1-a)*R[i]+a*yr;
+    sll+=yl*yl; srr+=yr*yr; slr+=yl*yr;
+  }
+  return (sll>0&&srr>0)? slr/Math.sqrt(sll*srr) : 1;
+}
+function corrCurve(L, R, fs, hopSec){
+  const win=Math.round(hopSec*fs), out=[];
+  for(let s=0; s+win<=L.length; s+=win){
+    let sll=0,srr=0,slr=0;
+    for(let i=s;i<s+win;i++){ sll+=L[i]*L[i]; srr+=R[i]*R[i]; slr+=L[i]*R[i]; }
+    out.push((sll>1e-12&&srr>1e-12)? slr/Math.sqrt(sll*srr) : 1);
+  }
+  return out;
+}
+function envelope(ch, buckets){
+  const step=ch.length/buckets, out=new Float32Array(buckets*2);
+  for(let b=0;b<buckets;b++){
+    const s=Math.floor(b*step), e=Math.min(ch.length, Math.floor((b+1)*step));
+    let mn=0, mx=0;
+    for(let i=s;i<e;i++){ const v=ch[i]; if(v<mn)mn=v; if(v>mx)mx=v; }
+    out[b*2]=mn; out[b*2+1]=mx;
+  }
+  return out;
+}
+function noiseFloor(mono, fs){
+  const win=Math.round(0.05*fs), vals=[];
+  for(let s=0; s+win<=mono.length; s+=win){
+    let a=0; for(let i=s;i<s+win;i++) a+=mono[i]*mono[i];
+    vals.push(Math.sqrt(a/win));
+  }
+  if(!vals.length) return -120;
+  vals.sort((a,b)=>a-b);
+  return 20*Math.log10(vals[Math.floor(vals.length*0.05)]+1e-12);
+}
+
+/* ============================== profiles ============================== */
+/* The band-ratio ranges are calibrated against an ideally balanced spectrum:
+   density falling 3.5 dB per octave, rolling off below 40 Hz and above 16 kHz.
+   That reference scores subToBass 0.0, bassToMid 11.9, mud 8.5, scoop 1.2,
+   bite -6.7, air -13.9 — the ranges below sit around those figures with offsets
+   for what each style actually does. They are informed rules of thumb, not
+   measured genre averages: a reference track you trust always beats them. */
+const PROFILES={
+  doom:{
+    name:'Doom / sludge / stoner',
+    lufs:[-13,-8], plr:[7,14,3,22], lra:[2,8,0.5,16], tilt:[-4.8,-2.6,-9,1],
+    corr:[0.25,0.8,-0.3,1.02],
+    subToBass:[-3,6], bassToMid:[9,18], mud:[6,12], scoop:[-2,4.5], bite:[-9.5,-4], air:[-19,-9],
+    punchLow:5.5,
+    note:'Weight below 60 Hz matters more here than in almost any other genre, and the guitars carry the midrange rather than the vocals.'
+  },
+  metal:{
+    name:'Heavy metal / modern metal',
+    lufs:[-12,-7], plr:[6,13,3,20], lra:[2,7,0.5,14], tilt:[-4.5,-2.2,-9,1],
+    corr:[0.25,0.85,-0.3,1.02],
+    subToBass:[-6,2], bassToMid:[7,15], mud:[4.5,10], scoop:[-2,4], bite:[-8,-2.5], air:[-17,-8],
+    punchLow:6,
+    note:'Kick and snare have to punch through a continuous guitar wall, so transient survival and a controlled 200–450 Hz are the whole game.'
+  },
+  neutral:{
+    name:'Neutral / general',
+    lufs:[-16,-9], plr:[8,16,3,24], lra:[3,11,0.5,20], tilt:[-4.5,-2.5,-9,1.5],
+    corr:[0.2,0.85,-0.4,1.02],
+    subToBass:[-5,3], bassToMid:[8,16], mud:[5.5,11], scoop:[-2,4], bite:[-9,-4], air:[-18,-9],
+    punchLow:7,
+    note:'A broad target that suits most produced music.'
+  }
+};
+let profileKey='doom';
+const P = () => PROFILES[profileKey];
+const mid = r => (r[0]+r[1])/2;
+const dev = (v,r) => v - mid(r);      // how far off the style's centre, in dB
+
+/* ============================== diagnostics ==============================
+   Every fix assumes the input is a rendered stereo file with no multitrack
+   behind it, so instrument-level moves are gated on stem separation first.
+   All instructions are Audacity. */
+const SEP = 'Effect ▸ OpenVINO AI Effects ▸ Music Separation (4‑stem). If you don\u2019t have Intel\u2019s OpenVINO plug‑in pack installed, run Demucs or a web separator elsewhere and bring the stems back with File ▸ Import ▸ Audio.';
+const REMIX = 'Select all (Ctrl+A) and Tracks ▸ Mix ▸ Mix and Render, then File ▸ Export Audio as WAV.';
+
+function diagnose(f){
+  const p=P(), out=[];
+  const add=(status,title,text,fix,stem)=>out.push({status,title,text,fix,stem});
+
+  // 1. transients
+  if(f.punchLow<p.punchLow-2.5)
+    add('bad','Drum transients have been flattened',
+      `The kick and low toms only rise ${d1(f.punchLow)} dB above their own average level. In a mix this dense that reads as a wall with no impact behind it — usually the single biggest reason generated audio sounds flat.`,
+      `Limiting baked into the render can\u2019t be undone — nothing puts back a transient that was never rendered. What you can do is lift the drums relative to everything else.<br>
+       1. ${SEP}<br>
+       2. Click the drums track, then Effect ▸ Volume and Compression ▸ Amplify and enter <b>+2 dB</b>.<br>
+       3. ${REMIX}<br>
+       If it still reads flat afterwards, the fix is upstream: regenerate asking for a more dynamic, less compressed master.`,
+      'drums');
+  else if(f.punchLow<p.punchLow)
+    add('warn','Low-end transients are getting squeezed',
+      `Kick punch measures ${d1(f.punchLow)} dB of crest. There is impact there, but it is being shaved.`,
+      `Don\u2019t add to it. Skip any Normalize or Limiter step of your own, and if you need to hit a target level use Effect ▸ Volume and Compression ▸ Loudness Normalization at <b>−14 LUFS</b> rather than Amplify‑to‑clipping.`,
+      null);
+  else
+    add('good','Drum transients are intact',
+      `${d1(f.punchLow)} dB of crest in the kick range — the hits are still punching through.`,'',null);
+
+  // 2. midrange body
+  if(f.scoop<p.scoop[0])
+    add('bad','The midrange is scooped out',
+      `The 350–900 Hz region is ${d1(-dev(f.scoop,p.scoop))} dB lighter than this style normally runs. Scooped mids sound huge on a soloed guitar and thin, small and lifeless the moment everything plays at once — the classic reason a metal mix feels flat.`,
+      `1. ${SEP}<br>
+       2. Select the <b>other</b> stem — guitars and keys land there.<br>
+       3. Effect ▸ EQ and Filters ▸ Filter Curve EQ. Click to place points at <b>250 Hz</b> and <b>1.2 kHz</b> left at 0 dB, then drag a point at <b>550 Hz</b> up to <b>+2.5 dB</b>. Keeping the outer points flat is what makes the boost wide instead of honky.<br>
+       4. ${REMIX}`,
+      'other');
+  else if(f.scoop>p.scoop[1])
+    add('warn','The midrange is crowded',
+      `There is ${d1(dev(f.scoop,p.scoop))} dB more at 350–900 Hz than this style usually carries, which can read as honky or nasal.`,
+      `On the <b>other</b> stem, Effect ▸ EQ and Filters ▸ Filter Curve EQ: pull a point at <b>600 Hz</b> down <b>−2 dB</b> with points at 300 Hz and 1.5 kHz held at 0 dB. Separate stems first (${SEP.charAt(0).toLowerCase()+SEP.slice(1)})`,
+      'other');
+  else
+    add('good','Midrange body is present','The 350–900 Hz region is sitting where it should relative to its neighbours.','',null);
+
+  // 3. congestion
+  if(f.mud>p.mud[1]+2)
+    add('bad','Low mids are congested',
+      `The 180–450 Hz region is ${d1(dev(f.mud,p.mud))} dB heavier than this style normally runs. That is where guitars, bass and kick all overlap, and when it piles up the mix sounds boxy and closed‑in rather than full.`,
+      `Cut it on the guitars only. Doing this on the master takes the weight out of the kick and bass at the same time, which is what makes a mix thin instead of clear.<br>
+       1. ${SEP}<br>
+       2. Select the <b>other</b> stem.<br>
+       3. Filter Curve EQ: points at <b>120 Hz</b> and <b>900 Hz</b> at 0 dB, drag <b>300 Hz</b> down to <b>−2.5 dB</b>.<br>
+       4. ${REMIX}`,
+      'other');
+  else if(f.mud>p.mud[1])
+    add('warn','Low mids are on the full side',
+      `The 180–450 Hz region runs ${d1(dev(f.mud,p.mud))} dB above the centre of the range for this style.`,
+      `Only worth acting on if it sounds closed‑in on a small speaker. If so, a <b>−1.5 dB</b> point at 300 Hz in Filter Curve EQ on the separated <b>other</b> stem is enough.`,
+      'other');
+  else if(f.mud<p.mud[0])
+    add('warn','Low mids are thin',
+      `The 180–450 Hz region is ${d1(-dev(f.mud,p.mud))} dB lighter than this style usually runs, and that range carries most of the weight of a guitar tone.`,
+      `On the separated <b>other</b> stem, Filter Curve EQ: <b>+2 dB</b> at 250 Hz with 100 Hz and 800 Hz held at 0 dB.`,
+      'other');
+  else
+    add('good','Low mids are under control','The 180–450 Hz region is balanced against the upper mids.','',null);
+
+  // 4. low-end extension
+  if(f.subToBass<p.subToBass[0])
+    add('warn','No real weight below 45 Hz',
+      `The sub range is ${d1(-dev(f.subToBass,p.subToBass))} dB down on where this style normally sits. For doom and sludge this is often the difference between heavy and merely loud.`,
+      `1. ${SEP}<br>
+       2. Select the <b>bass</b> stem.<br>
+       3. Filter Curve EQ: <b>+3 dB</b> at 45 Hz, holding 120 Hz at 0 dB.<br>
+       4. ${REMIX} Check the true peak afterwards — low frequencies eat headroom fast.<br>
+       If the stem genuinely has nothing down there, EQ cannot invent it. Regenerate and ask for extended sub bass.`,
+      'bass');
+  else if(f.subToBass>p.subToBass[1])
+    add('warn','Sub-bass is eating the mix',
+      `There is ${d1(dev(f.subToBass,p.subToBass))} dB more below 45 Hz than this style normally carries. You may not hear it on small speakers, but any limiter does, and it steals headroom from everything else.`,
+      `This one is safe on the master, no separation needed: Effect ▸ EQ and Filters ▸ High‑Pass Filter, frequency <b>30 Hz</b>, rolloff <b>12 dB per octave</b>.`,
+      null);
+  else
+    add('good','Low-end extension is right','Sub and fundamental are in proportion — weight down there without bloat.','',null);
+
+  // 5. bite
+  if(f.bite<p.bite[0])
+    add('warn','The guitars lack bite',
+      `The 2–5 kHz range is ${d1(-dev(f.bite,p.bite))} dB down on where this style sits. That region carries pick attack and string definition; without it a wall of distortion turns into a blur.`,
+      `1. ${SEP}<br>
+       2. Select the <b>other</b> stem.<br>
+       3. Filter Curve EQ: <b>+2 dB</b> at 3.2 kHz, holding 1.5 kHz and 7 kHz at 0 dB.<br>
+       4. ${REMIX}`,
+      'other');
+  else if(f.bite>p.bite[1])
+    add('warn','Harsh in the bite range',
+      `The 2–5 kHz range is ${d1(dev(f.bite,p.bite))} dB hotter than this style usually runs — likely to be fatiguing at volume.`,
+      `On the separated <b>other</b> stem, Filter Curve EQ: <b>−2 dB</b> at 3.5 kHz with 1.5 kHz and 8 kHz at 0 dB. If it is a narrow ring rather than a broad harshness, Effect ▸ EQ and Filters ▸ Notch Filter at the offending frequency with Q around 4 is cleaner.`,
+      'other');
+  else
+    add('good','Pick attack is coming through','The 2–5 kHz range is where it needs to be for definition.','',null);
+
+  // 6. bandwidth ceiling — the AI/codec-specific one, checked before air
+  if(f.bwCut && f.bwCut<17500){
+    const nyq=f.fs/2;
+    const sampleRateCause = f.bwCut > nyq*0.85;
+    add(f.bwCut<14000?'bad':'warn','The high end stops dead at '+(f.bwCut/1000).toFixed(1)+' kHz',
+      `Above ${(f.bwCut/1000).toFixed(1)} kHz there is essentially nothing. This is a hard cliff rather than a gentle rolloff, which means it was imposed by ${sampleRateCause? `the ${Math.round(f.fs/1000)} kHz sample rate` : 'the generator or a lossy encode'} — not by the music.`,
+      `Do not try to EQ this back. There is no content above the cliff, so a high shelf only raises noise and artefacts.<br>
+       ${sampleRateCause? 'Export from the generator at a higher sample rate if it offers one.' : 'Re‑download or re‑export the track as <b>WAV</b> rather than MP3, at the highest quality the generator offers. If the generator itself is the limit, this is simply its ceiling and no amount of processing will change it.'}<br>
+       Everything else in this report is still valid — a 16 kHz ceiling is audible as a slight lack of sparkle, not as a broken master.`,
+      null);
+  }
+
+  // 7. air
+  if(f.air<p.air[0] && !(f.bwCut && f.bwCut<12000))
+    add('warn','Very little air',
+      `Above 9 kHz there is ${d1(-dev(f.air,p.air))} dB less than this style normally carries, which is on the dull side.`,
+      f.bwCut && f.bwCut<17500
+        ? `Work below the ceiling. On the master, Filter Curve EQ: a gentle <b>+1.5 dB</b> shelf starting at <b>8 kHz</b> and flattening before ${(f.bwCut/1000).toFixed(1)} kHz. Pushing above the cliff only amplifies artefacts.`
+        : `Safe on the master: Effect ▸ EQ and Filters ▸ Filter Curve EQ, drag a point at <b>12 kHz</b> up <b>+1.5 dB</b> with 6 kHz held at 0 dB. Do this before any loudness step, not after.`,
+      null);
+  else if(!(f.bwCut && f.bwCut<17500))
+    add('good','Top end is open','There is air above 9 kHz without it being harsh.','',null);
+
+  // 8. stereo image across the guitar range
+  if(f.stereo && f.guitarCorr>0.93)
+    add('bad','The guitars are effectively mono',
+      `Correlation across 800 Hz–5 kHz is ${d2(f.guitarCorr)}, meaning both sides carry almost the same signal. A mix where the guitars sit on top of the drums instead of around them always sounds two‑dimensional, whatever you do with EQ. Generated audio is often much narrower than it first appears.`,
+      `You cannot unmix one performance into two, but you can decorrelate what is there without hurting mono.<br>
+       1. ${SEP}<br>
+       2. Select the <b>other</b> stem and duplicate it (Ctrl+D).<br>
+       3. Click the first copy\u2019s name ▸ Split Stereo to Mono, pan one <b>100% left</b> and the other <b>100% right</b> using the track\u2019s pan slider.<br>
+       4. On the left copy only, Filter Curve EQ: <b>+1 dB</b> at 900 Hz and <b>−1 dB</b> at 2.5 kHz. On the right copy, exactly the opposite.<br>
+       5. ${REMIX}<br>
+       Deliberately avoid delay‑based widening. A few milliseconds between sides is the usual cause of the mono collapse this tool flags elsewhere.`,
+      'other');
+  else if(f.stereo && f.guitarCorr<0.05)
+    add('warn','The guitar range is extremely wide',
+      `Correlation across 800 Hz–5 kHz is ${d2(f.guitarCorr)}. It will sound impressive on headphones and lose substance anywhere else.`,
+      `Blend a little correlated signal back in. Duplicate the track (Ctrl+D), on the copy use Tracks ▸ Mix ▸ Mix Stereo Down to Mono, then Amplify that copy to <b>−9 dB</b> and the original to <b>−1 dB</b>, and ${REMIX.charAt(0).toLowerCase()+REMIX.slice(1)} Check the mono chart above again afterwards.`,
+      null);
+  else if(f.stereo)
+    add('good','Guitars are properly spread',`Correlation of ${d2(f.guitarCorr)} across the guitar range — wide, and still solid.`,'',null);
+
+  // 9. mono survival
+  const worst=f.monoBands.reduce((a,b,i)=>b<f.monoBands[a]?i:a,0);
+  const worstDb=f.monoBands[worst];
+  const lowBand = BANDS[worst][2] <= 250;
+  if(worstDb<-4)
+    add('bad','It falls apart in mono',
+      `Folded to a single speaker, the ${BANDS[worst][0].toLowerCase()} range (${BANDS[worst][1]}–${BANDS[worst][2]} Hz) loses ${d1(-worstDb)} dB. Phone speakers, most Bluetooth speakers and club PAs are all mono — this is not an edge case.`,
+      lowBand
+        ? `The loss is in the low end, so make just the low end mono and leave the rest untouched. No separation needed.<br>
+           1. Duplicate the track (Ctrl+D).<br>
+           2. On the copy: Effect ▸ EQ and Filters ▸ Low‑Pass Filter at <b>120 Hz</b>, rolloff 24 dB per octave, then Tracks ▸ Mix ▸ Mix Stereo Down to Mono.<br>
+           3. On the original: Effect ▸ EQ and Filters ▸ High‑Pass Filter at <b>120 Hz</b>, rolloff 24 dB per octave.<br>
+           4. ${REMIX}`
+        : `The loss is in the midrange, which usually means delay or phase differences between the sides.<br>
+           1. Duplicate the track (Ctrl+D).<br>
+           2. On the copy: Tracks ▸ Mix ▸ Mix Stereo Down to Mono.<br>
+           3. Effect ▸ Volume and Compression ▸ Amplify: copy to <b>−7 dB</b>, original to <b>−2 dB</b>.<br>
+           4. ${REMIX} Re‑analyse and repeat with less reduction if it now sounds too narrow.<br>
+           If the collapse is severe, separating stems and treating only the offending one is cleaner than narrowing the whole mix.`,
+      null);
+  else if(worstDb<-2)
+    add('warn','Some loss in mono',
+      `The ${BANDS[worst][0].toLowerCase()} range drops ${d1(-worstDb)} dB when summed to one speaker.`,
+      `Audible but survivable. Judge it first: press <b>M</b> in the player above and switch back and forth while it plays. To hear it in Audacity instead, Tracks ▸ Mix ▸ Mix Stereo Down to Mono on a duplicate, listen, then undo with Ctrl+Z.`,
+      null);
+  else
+    add('good','Holds up in mono',`Nothing loses more than ${d1(-worstDb)} dB when folded to a single speaker.`,'',null);
+
+  // 10. bass centring
+  if(f.stereo && f.lowCorr<0.6)
+    add('bad','The bass is not centred',
+      `Correlation below 120 Hz is ${d2(f.lowCorr)}. Low frequencies need to be near mono or they cancel, and on a big system the bottom end simply disappears.`,
+      `Mono the low end only — this is what almost every commercial metal master does, and it needs no separation.<br>
+       1. Duplicate the track (Ctrl+D).<br>
+       2. On the copy: Low‑Pass Filter at <b>120 Hz</b> (24 dB per octave), then Tracks ▸ Mix ▸ Mix Stereo Down to Mono.<br>
+       3. On the original: High‑Pass Filter at <b>120 Hz</b> (24 dB per octave).<br>
+       4. ${REMIX}`,
+      null);
+  else if(f.stereo)
+    add('good','Bass is centred',`Correlation of ${d2(f.lowCorr)} below 120 Hz — the low end will translate.`,'',null);
+
+  // 11. section contrast
+  if(f.lra<p.lra[0])
+    add('warn','Every section sits at the same level',
+      `A loudness range of ${d1(f.lra)} LU means the quiet passage and the heaviest riff arrive at almost the same volume. In doom especially, the drop hits because of what came before it.`,
+      `Put the contrast back by hand: select the Envelope Tool (<b>F2</b>), then click on the waveform to drop control points at the start and end of the quieter section and drag its level down <b>2–3 dB</b>. Switch back to the Selection Tool with F1 when you are done.`,
+      null);
+  else
+    add('good','Sections have contrast',`${d1(f.lra)} LU of range between the quietest and loudest parts.`,'',null);
+
+  // 12. limiting
+  if(f.plr<p.plr[0])
+    add('bad','Over-limited',
+      `A peak‑to‑loudness ratio of ${d1(f.plr)} dB is past what this style needs. Beyond a point a limiter stops making things louder and starts making them smaller.`,
+      `This is baked into the render and cannot be reversed. The important thing is not to compound it: do not run Effect ▸ Volume and Compression ▸ Limiter or Normalize on top. If you need a target level, use Loudness Normalization at <b>−14 LUFS</b>, which will turn it <i>down</i>. Then regenerate the track asking for less compression, and compare the two here at matched volume.`,
+      null);
+  else if(f.plr>p.plr[1])
+    add('warn','Lighter limiting than the style usually uses',`PLR of ${d1(f.plr)} dB.`,
+      `Not a fault. It will simply sound quieter than other releases on a playlist. If you want it to sit alongside them, Effect ▸ Volume and Compression ▸ Loudness Normalization at <b>−14 LUFS</b> is the gentlest way to get there.`,
+      null);
+  else
+    add('good','Limiting is proportionate',`PLR of ${d1(f.plr)} dB, in the normal range for this style.`,'',null);
+
+  // 13. noise and artefacts
+  if(f.noiseFloor>-55)
+    add('warn','Audible noise in the quiet moments',
+      `The noise floor sits at ${d1(f.noiseFloor)} dB. Generated audio often carries a bed of hiss or codec artefacts that becomes obvious in gaps and fades.`,
+      `Select a stretch of the quietest passage, then Effect ▸ Noise Removal and Repair ▸ Noise Reduction ▸ <b>Get Noise Profile</b>. Select the whole track (Ctrl+A), reopen the same effect and apply with <b>Noise reduction 8 dB, Sensitivity 6, Frequency smoothing 3</b>. Keep the reduction modest — pushing it harder introduces the watery, warbling sound that is worse than the hiss.`,
+      null);
+
+  const rank={bad:0,warn:1,good:2};
+  return out.sort((a,b)=>rank[a.status]-rank[b.status]);
+}
+
+/* ============================== scoring ============================== */
+function clamp(v,a,b){return Math.min(b,Math.max(a,v));}
+function band(v, idealLo, idealHi, softLo, softHi){
+  if(v>=idealLo && v<=idealHi) return 100;
+  if(v<idealLo) return clamp(100*(v-softLo)/(idealLo-softLo),0,100);
+  return clamp(100*(softHi-v)/(softHi-idealHi),0,100);
+}
+const inBand=(v,r)=>band(v, r[0], r[1], r[0]-(r[1]-r[0])-4, r[1]+(r[1]-r[0])+4);
+function scoreFile(f){
+  const p=P();
+  // headroom & peak safety
+  let head=100;
+  if(f.tpDb > -1) head -= (f.tpDb + 1) * 22;
+  if(f.tpDb > 0)  head -= (f.tpDb) * 40;
+  head -= Math.min(35, f.clipRuns * 1.5);
+  head -= Math.min(20, f.overs * 0.05);
+  head = clamp(head, 0, 100);
+
+  // dynamics, judged against the style's own norms
+  const plrScore = band(f.plr, p.plr[0], p.plr[1], p.plr[2], p.plr[3]);
+  const lraScore = band(f.lra, p.lra[0], p.lra[1], p.lra[2], p.lra[3]);
+  const psrScore = band(f.psr, p.plr[0], p.plr[1]+4, p.plr[2], p.plr[3]+4);
+  const dyn = clamp(plrScore*0.4 + lraScore*0.25 + psrScore*0.35, 0, 100);
+
+  // tonal balance
+  const tiltScore = band(f.tilt, p.tilt[0], p.tilt[1], p.tilt[2], p.tilt[3]);
+  const evenScore = clamp(100 - f.bandSpread * 3.5, 0, 100);
+  const tone = clamp(tiltScore*0.6 + evenScore*0.4, 0, 100);
+
+  // fullness — the thing that makes a dense mix sound big rather than flat
+  const punchScore = clamp(100 - Math.max(0, p.punchLow - f.punchLow) * 14, 0, 100);
+  const full = clamp(
+      inBand(f.scoop, p.scoop)*0.26 + inBand(f.mud, p.mud)*0.22 +
+      inBand(f.subToBass, p.subToBass)*0.16 + inBand(f.bite, p.bite)*0.14 +
+      inBand(f.air, p.air)*0.06 + punchScore*0.16, 0, 100);
+
+  // stereo width behaviour
+  const corrScore = band(f.corr, p.corr[0], p.corr[1], p.corr[2], p.corr[3]);
+  const guitarScore = f.stereo? band(f.guitarCorr, 0.1, 0.85, -0.35, 1.02) : 60;
+  const stereo = clamp(corrScore*0.5 + guitarScore*0.5, 0, 100);
+
+  // mono survival, weighted towards the ranges that carry the riff
+  const wts=[0.6,1,1,1,1,1,1,0.7,0.4];
+  let monoPen=0, wsum=0;
+  f.monoBands.forEach((d,i)=>{ monoPen += Math.max(0,-d-0.7)*wts[i]; wsum+=wts[i]; });
+  const lowPen = f.stereo? Math.max(0, 0.75-f.lowCorr)*40 : 0;
+  const mono = clamp(100 - (monoPen/wsum)*16 - lowPen, 0, 100);
+
+  // cleanliness
+  let clean=100;
+  clean -= clamp((Math.max(Math.abs(f.dcL),Math.abs(f.dcR)) - 0.0005) * 40000, 0, 45);
+  clean -= clamp((f.noiseFloor + 70) * 1.6, 0, 40);
+  clean = clamp(clean, 0, 100);
+
+  const total = head*0.16 + dyn*0.16 + tone*0.14 + full*0.22 + stereo*0.10 + mono*0.16 + clean*0.06;
+  return {head, dyn, tone, full, stereo, mono, clean, total};
+}
+
+/* ============================== glossary + tooltips ============================== */
+const GLOSSARY = {
+  score:['Score','A single 0–100 read on technical quality: headroom, dynamics, tonal balance, stereo behaviour and cleanliness, weighted together.','It cannot hear genre. Use it to shortlist, then listen.'],
+  head:['Headroom','How much room is left before the audio hits the digital ceiling and starts to distort.','Full marks means the loudest peak stops safely short of the limit.'],
+  dyn:['Dynamics','How much the volume moves — whether drums still hit and quiet parts stay quiet.','Both extremes lose points: crushed flat, or so wide it feels inconsistent.'],
+  tone:['Tonal balance','How the energy is spread from bass to treble, compared with the gentle downward slope most well-balanced music follows.','Full marks means nothing is obviously too bright, dull, thin or boomy.'],
+  stereo:['Stereo','How wide the track is, and whether it survives being played on a single speaker.','Wide is good until it starts cancelling itself out.'],
+  clean:['Cleanliness','Background noise and DC offset — the housekeeping.','Rarely the deciding factor, but it catches sloppy exports.'],
+  lufs:['LUFS-I (loudness)','How loud the whole track sounds to a human ear, averaged over its length. Less negative means louder.','Streaming services aim around −14. They turn louder tracks down, so being loud wins you nothing there.'],
+  stMax:['ST max (loudest moment)','The loudness of the single loudest three-second stretch — usually the last chorus.','Compare it with the overall loudness to see how much the track builds.'],
+  lra:['LRA (loudness range)','How much the volume moves between the quietest and loudest sections, in LU (roughly decibels).','Around 3–11 is normal for most releases. Under 3 means every section sits at the same level.'],
+  tpDb:['dBTP (true peak)','The real height of the loudest peak, including the peaks that appear between samples when the file is played back or converted to MP3.','Stay at or below −1. Above 0 will distort on lossy formats.'],
+  spDb:['Peak dBFS','The loudest single sample in the file. Simpler, and always slightly optimistic compared with true peak.','Only useful next to the true peak figure.'],
+  plr:['PLR (punch)','The gap between the loudest peak and the average loudness. The single best number for "does this thump or is it flattened".','Roughly 8–16 dB is a healthy master. Under 6 is very squashed.'],
+  psr:['PSR (moment-to-moment punch)','The same idea as PLR but measured across the track, so it shows whether the punch survives inside the loud sections.','If PSR is much lower than PLR, the loud parts are being flattened.'],
+  crest:['Crest factor','Peak level versus average level across the whole file. An older, blunter cousin of PLR.','Useful as a cross-check, not on its own.'],
+  clipRuns:['Clips','Places where the waveform ran into the ceiling and got sliced flat. Audible as crackle or grit on drums and vocals.','Anything above zero is worth investigating.'],
+  overs:['True-peak overs','Moments that stay under the ceiling as stored samples but overshoot it on playback or after MP3 conversion.','A handful is common. Hundreds means the limiter is being pushed too hard.'],
+  corr:['Correlation (stereo)','How similar the left and right channels are. 1 is mono, 0 is very wide, below 0 means the channels are fighting each other.','Healthy stereo music usually sits between 0.2 and 0.9.'],
+  lowCorr:['Low correlation (bass)','The same measurement, but only for the bass below 120 Hz.','Bass should be close to mono. Below 0.5 and the low end can disappear on club systems and phone speakers.'],
+  monoLoss:['Mono Δ','How much level the track loses when both speakers are folded into one — which is what happens on phone speakers, most Bluetooth speakers and club PAs.','Losing more than about 1.5 dB means something is cancelling out.'],
+  tilt:['Tilt','The overall slope from bass to treble, in decibels per octave. More negative is darker and warmer, closer to zero is brighter.','Most well-balanced music lands between −2.5 and −4.5.'],
+  centroid:['Centroid','The balance point of the spectrum, in Hz. A rough single-number measure of brightness.','Higher means brighter. Only meaningful compared with another version of the same track.'],
+  noiseFloor:['Noise floor','How loud the quietest background material is — hiss, hum, room tone.','Below −70 is clean. Above −60 and you may hear it in the gaps.'],
+  widthDb:['Side / mid','How much of the sound is stereo information versus centre information.','Higher means wider. Very high numbers usually mean a stereo widener has been pushed hard.'],
+  dur:['Length','Track duration.','Different lengths between files usually means you are comparing different edits, not different masters.'],
+  fs:['Rate','Sample rate of the file.','Not a quality ranking on its own — a good 44.1 kHz master beats a bad 96 kHz one.'],
+  spectrum:['Tonal balance curve','The average amount of energy at each frequency, from deep bass on the left to treble on the right.','Curves are gain-matched, so differences in shape are real differences in tone, not volume.'],
+  bandchart:['Band comparison','Each file measured against the average of the group, band by band.','A bar to the right means this file has more of that frequency range than the others.'],
+  scatter:['Loudness vs punch','Each file plotted by how loud it is and how much punch it kept.','Top-left is loud and squashed. Bottom-right is quiet and open.'],
+  waveform:['Waveform','The shape of the track over time. The line drawn over it is the loudness moving through the song.','A solid rectangle with no shape usually means heavy limiting.'],
+  corrstrip:['Stereo strip','The thin bar along the bottom: green is safe stereo, amber is very wide, red means the channels are cancelling.','Red patches are worth checking on a single speaker.'],
+  match:['Loudness matching','Playback volume is matched between files so louder does not automatically sound better.','This is the most important control here — untrained A/B tests almost always pick the louder file.'],
+  profile:['Style','Which set of targets to judge against. Metal and doom sit loud, tight and midrange-forward, so the generic targets flag them unfairly.','These are rules of thumb, not measured genre averages. A reference track beats them.'],
+  reference:['Reference track','Load a commercial release you think sounds right, set it here, and every other file gets measured against it band by band.','This is the closest thing to a benchmark you can get without trusted speakers.'],
+  monobtn:['Mono','Folds both channels into one, the way a phone speaker or a club PA does.','Switch it on and off while a track plays. If the riff loses weight, that is what most listeners will hear.'],
+  monochart:['Mono compatibility','How much of each frequency range survives being played on a single speaker.','Losing more than about 3 dB anywhere means something is out of phase.'],
+  bandcorr:['Correlation by band','How similar left and right are, measured separately in each frequency range.','Bass should be near 1. Guitars around 0.2–0.7. Below 0 anywhere means cancellation.'],
+  scoop:['Mid scoop','How much the 350–900 Hz region sits below the ranges either side of it.','Scooped mids sound huge on a soloed guitar and thin in a full mix. The most common reason a metal mix sounds small.'],
+  mud:['Low-mid congestion','Energy at 180–450 Hz compared with 900–2500 Hz. Guitars, bass and kick all pile up here.','Too much reads as boxy and closed-in; too little reads as thin.'],
+  subToBass:['Sub extension','Energy below 45 Hz compared with the bass fundamental above it.','For doom this is often the difference between heavy and merely loud. Too much steals headroom from everything else.'],
+  bwcut:['Bandwidth ceiling','The frequency where the high end stops dead rather than tapering off. A hard cliff means a lossy encode or the generator\u2019s own output limit.','You cannot EQ back what was never rendered. Below about 16 kHz it is audible as a slight lack of sparkle.'],
+  stems:['Stem separation','Splitting a finished stereo file back into drums, bass, vocals and other. Audacity does this via the OpenVINO plug-in pack, or you can import stems made elsewhere.','It is imperfect — expect smearing on cymbals and distorted guitars, so keep any move gentle and wide.'],
+  airdesc:['Air','Energy above 9 kHz relative to the midrange.','Metal masters usually sit somewhere between 8 and 18 dB down. Much less than that reads as dull; much more gets fatiguing.'],
+  bite:['Bite','Energy at 2–5 kHz relative to the lower mids. This is pick attack and string definition.','Without it a wall of distortion turns into a blur.'],
+  punchLow:['Kick punch','How far the kick and low toms rise above their own average level, in dB.','This is what limiting destroys first. Under about 6 dB the drums stop hitting.'],
+  snap:['Snare snap','The same measurement in the 2–5 kHz range, where snare crack and pick attack live.',''],
+  guitarCorr:['Guitar width','Left/right correlation across 800 Hz–5 kHz, where rhythm guitars sit.','Near 1.0 means both sides carry the same signal, which always sounds two-dimensional. Around 0.1–0.7 is properly double-tracked.'],
+  full:['Fullness','Whether the mix has body, weight and transient life, or whether it is technically clean but small.','The component most likely to explain a flat-sounding mix.'],
+  mono:['Mono','How well the track survives being played on one speaker.','Weighted towards the ranges that carry the riff.']
+};
+const tipAttr = k => {
+  const g=GLOSSARY[k];
+  return g? ` class="has-tip" data-tip="${k}"` : '';
+};
+const TIP = document.createElement('div');
+TIP.id='tip'; document.body.appendChild(TIP);
+let tipEl=null;
+function showTip(el){
+  let t,b,n;
+  if(el.dataset.tiptitle){ t=el.dataset.tiptitle; b=el.dataset.tipbody||''; n=el.dataset.tipnote||''; }
+  else { const g=GLOSSARY[el.dataset.tip]; if(!g) return; [t,b,n]=g; }
+  tipEl=el;
+  TIP.innerHTML=`<b>${t}</b>${b}${n?`<em>${n}</em>`:''}`;
+  TIP.classList.add('show');
+  const r=el.getBoundingClientRect();
+  TIP.style.visibility='hidden'; TIP.style.left='0'; TIP.style.top='0';
+  const tw=TIP.offsetWidth, th=TIP.offsetHeight;
+  let x=r.left+r.width/2-tw/2, y=r.top-th-8;
+  if(y<8) y=r.bottom+8;
+  x=Math.max(8, Math.min(window.innerWidth-tw-8, x));
+  TIP.style.left=x+'px'; TIP.style.top=y+'px'; TIP.style.visibility='visible';
+}
+function hideTip(){ TIP.classList.remove('show'); tipEl=null; }
+document.addEventListener('mouseover',e=>{
+  const el=e.target.closest('[data-tip],[data-tiptitle]');
+  if(el && el!==tipEl) showTip(el); else if(!el && tipEl) hideTip();
+});
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-tip],[data-tiptitle]');
+  if(el) { (el===tipEl)? hideTip() : showTip(el); } else hideTip();
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') hideTip(); });
+window.addEventListener('scroll',hideTip,{passive:true});
+
+/* ============================== plain language ============================== */
+function pick(v, table){
+  for(const [limit, text] of table) if(v < limit) return text;
+  return table[table.length-1][1];
+}
+function loudnessWords(f){
+  const l=f.lufs;
+  if(l>-8) return 'extremely loud, louder than almost any commercial release';
+  if(l>-11) return 'very loud, in the range of aggressive modern pop masters';
+  if(l>-15) return 'about as loud as a typical streaming release';
+  if(l>-19) return 'on the quiet side of modern releases';
+  return 'quiet by modern standards, the way classical and jazz are usually mastered';
+}
+function punchWords(f){
+  const p=f.plr;
+  if(p<6) return 'The loud and quiet parts have been flattened into a single level. This can sound impressive on a phone, but on decent speakers it tends to sound small and tiring after a minute.';
+  if(p<9) return 'Compressed hard, in the style of loud commercial pop. There is not much punch left, but it is a recognisable and deliberate sound.';
+  if(p<14) return 'A healthy amount of punch. Drums still hit and the track has room to breathe.';
+  if(p<20) return 'Open and dynamic, with plenty of life. It will sound quieter than heavily limited masters unless the listener is on a service that evens out volume.';
+  return 'Very dynamic, closer to an unmastered mix than a finished master. Lovely detail, but quiet moments may vanish in a car or on a phone.';
+}
+function toneWords(f){
+  const t=f.tilt;
+  if(t>-2.2) return 'Bright, with a lot of top end. Reads as crisp and detailed at first, and can become harsh over a full listen.';
+  if(t>-2.9) return 'Slightly bright of neutral. Crisp without being aggressive.';
+  if(t>-4.3) return 'Well balanced from bass to treble, close to the slope most finished records follow.';
+  if(t>-5.2) return 'Slightly warm and dark. Easy to listen to, though it may lack sparkle next to brighter releases.';
+  return 'Dark and bass-heavy. Likely to sound muffled on small speakers and laptops.';
+}
+function stereoWords(f){
+  if(!f.stereo) return 'This is a mono file, so there is no stereo image to judge.';
+  const bits=[];
+  if(f.corr<0) bits.push('The two channels are working against each other, which means parts of the mix cancel out. This needs fixing.');
+  else if(f.corr<0.2) bits.push('Very wide. Impressive on headphones, but fragile the moment it is played on a single speaker.');
+  else if(f.corr<0.6) bits.push('Wide and open, with a healthy amount of stereo information.');
+  else if(f.corr<0.92) bits.push('Moderately wide and safe on any system.');
+  else bits.push('Narrow, close to mono. Nothing wrong with that, but the image will feel small next to wider masters.');
+  if(f.lowCorr<0.5) bits.push('The bass is not sitting in the centre, so the low end can disappear on club systems and phone speakers.');
+  if(f.monoLoss<-1.5) bits.push(`Folded to a single speaker it loses ${d1(-f.monoLoss)} dB, which is enough to notice.`);
+  return bits.join(' ');
+}
+function safetyWords(f){
+  const bits=[];
+  if(f.tpDb>0) bits.push(`Peaks reach ${d2(f.tpDb)} above the digital ceiling. It will distort when converted to MP3 or AAC, which is what streaming services do to everything.`);
+  else if(f.tpDb>-0.3) bits.push('Peaks sit right against the ceiling with almost no safety margin left. Lossy conversion can push it over.');
+  else if(f.tpDb>-1) bits.push('There is a small safety margin at the top. Workable, though most engineers leave a little more.');
+  else bits.push('Comfortable safety margin at the top — nothing will overshoot on conversion.');
+  if(f.clipRuns>0) bits.push(`The waveform runs flat into the ceiling in ${f.clipRuns} place${f.clipRuns>1?'s':''}, which can be heard as grit or crackle on drums and vocals.`);
+  if(f.noiseFloor>-55) bits.push('There is audible background noise in the quiet moments.');
+  if(Math.abs(f.dcL)>0.001||Math.abs(f.dcR)>0.001) bits.push('The file carries a small DC offset. Harmless in itself, but it wastes headroom and is easy to remove.');
+  return bits.join(' ');
+}
+function bottomLine(f){
+  const blocker = f.tpDb>0 || f.clipRuns>20 || f.corr<0 || f.lowCorr<0.3;
+  const caution = f.tpDb>-0.3 || f.clipRuns>0 || f.monoLoss<-1.5 || f.plr<6 || f.lowCorr<0.5;
+  if(blocker) return ['bad','Fix this before releasing it'];
+  if(caution) return ['warn','Usable, but there is something worth fixing'];
+  return ['good','Technically ready to release'];
+}
+function fullnessWords(f){
+  const p=P(), bits=[];
+  if(f.punchLow<p.punchLow-2.5) bits.push('The drum transients have been flattened, which is usually the main reason a heavy mix sounds like a wall instead of a hit.');
+  else if(f.punchLow<p.punchLow) bits.push('The kick is punching, though it is being shaved by whatever is limiting the master.');
+  if(f.scoop<p.scoop[0]) bits.push('The midrange around 350–900 Hz has been scooped out, so the guitars lose body the moment everything plays at once.');
+  if(f.mud>p.mud[1]+2) bits.push('The 180–450 Hz region is piled up, which reads as boxy and closed-in rather than full.');
+  if(f.subToBass<p.subToBass[0]) bits.push('There is not much real weight below 45 Hz.');
+  if(!bits.length) bits.push('Body, weight and transient life are all where they should be for this style.');
+  return bits.join(' ');
+}
+function monoWords(f){
+  if(!f.stereo) return '';
+  const worst=Math.min(...f.monoBands);
+  const i=f.monoBands.indexOf(worst);
+  if(worst<-4) return `Played on a single speaker it loses ${d1(-worst)} dB in the ${BANDS[i][0].toLowerCase()} range — phones, Bluetooth speakers and club PAs are all mono, so this is not a corner case.`;
+  if(worst<-2) return `On a single speaker the ${BANDS[i][0].toLowerCase()} range drops ${d1(-worst)} dB. Audible, but survivable.`;
+  return 'It survives a fold to mono without losing anything significant.';
+}
+function plainSummary(f){
+  return `<p class="plain">At ${d1(f.lufs)}${tipSpan('lufs','LUFS')} it is ${loudnessWords(f)}. ${punchWords(f)}</p>
+    <p class="plain">${fullnessWords(f)} ${monoWords(f)}</p>
+    <p class="plain">${toneWords(f)} ${stereoWords(f)}</p>
+    <p class="plain">${safetyWords(f)}</p>`;
+}
+const tipSpan=(k,label)=>` <span class="has-tip" data-tip="${k}">${label}</span>`;
+
+/* ---------- comparison across files ---------- */
+function comparison(){
+  if(files.length<2) return '';
+  const by=(sel,dir)=>[...files].sort((a,b)=>(sel(b)-sel(a))*dir)[0];
+  const sorted=[...files].sort((a,b)=>b.score.total-a.score.total);
+  const win=sorted[0], second=sorted[1];
+  const margin=win.score.total-second.score.total;
+
+  const loudest=by(f=>f.lufs,1), quietest=by(f=>f.lufs,-1);
+  const punchiest=by(f=>f.plr,1), flattest=by(f=>f.plr,-1);
+  const brightest=by(f=>f.tilt,1), darkest=by(f=>f.tilt,-1);
+  const widest=by(f=>-f.corr,1);
+  const safest=by(f=>f.tpDb,-1);
+
+  // biggest tonal disagreement between the files, ignoring bands that are far too
+  // quiet to matter — a 20 dB difference 40 dB below everything else is inaudible
+  const norm=files.map(f=>f.bandsRaw.map(v=>v-f.lufs));
+  let ceiling=-Infinity;
+  norm.forEach(r=>r.forEach(v=>{ if(v>ceiling) ceiling=v; }));
+  let bigBand=-1, bigSpread=0;
+  BANDS.forEach((b,i)=>{
+    const vals=norm.map(r=>r[i]);
+    if(Math.max(...vals) < ceiling-40) return;
+    const s=Math.max(...vals)-Math.min(...vals);
+    if(s>bigSpread){ bigSpread=s; bigBand=i; }
+  });
+  const bandHigh=bigBand<0?null:files[norm.map(r=>r[bigBand]).indexOf(Math.max(...norm.map(r=>r[bigBand])))];
+  const bandLow =bigBand<0?null:files[norm.map(r=>r[bigBand]).indexOf(Math.min(...norm.map(r=>r[bigBand])))];
+
+  const lufsSpread=loudest.lufs-quietest.lufs;
+  const rows=[];
+  rows.push(['Loudest', lufsSpread<0.5
+    ? `They are all within half a decibel of each other, so loudness will not skew your judgement here.`
+    : `${esc(shortName(loudest.name))} — ${d1(lufsSpread)} LU louder than the quietest of the set. In a straight A/B that alone makes it sound better, which is why the player below matches volume for you.`]);
+  rows.push(['Most punch', `${esc(shortName(punchiest.name))}, at ${d1(punchiest.plr)} dB of ${tipSpan('plr','peak-to-loudness')}. ${esc(shortName(flattest.name))} is the most squashed at ${d1(flattest.plr)} dB.`]);
+  const tiltGap=brightest.tilt-darkest.tilt;
+  rows.push(['Brightest', tiltGap<0.3
+    ? `Nothing in it — all of these sit at the same brightness.`
+    : `${esc(shortName(brightest.name))}. The darkest is ${esc(shortName(darkest.name))}, and the gap between them is ${d1(tiltGap)} dB per octave${tiltGap>0.7?' — clearly audible':''}.`]);
+  if(bandHigh && bigSpread>0.4){
+    rows.push(['Biggest tonal gap', `The ${BANDS[bigBand][0].toLowerCase()} range (${BANDS[bigBand][1]}–${BANDS[bigBand][2]} Hz). ${esc(shortName(bandHigh.name))} has ${d1(bigSpread)} dB more of it than ${esc(shortName(bandLow.name))}.`]);
+  }
+  rows.push(['Widest stereo', `${esc(shortName(widest.name))}. ${widest.corr<0.2?'Wide enough that it is worth checking on a single speaker before you commit.':'Comfortably within safe territory.'}`]);
+  rows.push(['Most headroom', `${esc(shortName(safest.name))} at ${d2(safest.tpDb)}${tipSpan('tpDb','dBTP')}.`]);
+  const fullest=by(f=>f.score.full,1), punchy=by(f=>f.punchLow,1);
+  rows.push(['Most body', `${esc(shortName(fullest.name))}. ${esc(shortName(punchy.name))} keeps the most${tipSpan('punchLow','kick punch')} at ${d1(punchy.punchLow)} dB.`]);
+  const monoWorst=[...files].sort((a,b)=>Math.min(...a.monoBands)-Math.min(...b.monoBands))[0];
+  const monoBest=[...files].sort((a,b)=>Math.min(...b.monoBands)-Math.min(...a.monoBands))[0];
+  rows.push(['Best in mono', Math.min(...monoWorst.monoBands)<-2
+    ? `${esc(shortName(monoBest.name))}. ${esc(shortName(monoWorst.name))} is the one to watch — it loses ${d1(-Math.min(...monoWorst.monoBands))} dB somewhere when folded to a single speaker.`
+    : `All of them survive a fold to mono without losing more than ${d1(-Math.min(...monoWorst.monoBands))} dB.`]);
+
+  const problems=files.filter(f=>bottomLine(f)[0]==='bad');
+  let lead;
+  if(margin<3){
+    const gap = margin<0.5? 'by a fraction of a point' : `by ${margin.toFixed(0)} point${Math.round(margin)===1?'':'s'}`;
+    lead=`<div class="pick">${esc(win.name)} — just barely</div>
+      <p class="plain">It edges out ${esc(second.name)} ${gap}, which is close enough to be a coin toss on measurements alone. Use the player at the bottom of the page: it plays all of them at matched volume, so whichever one you keep reaching for is the right answer.</p>`;
+  } else {
+    lead=`<div class="pick">${esc(win.name)}</div>
+      <p class="plain">It comes out ${margin.toFixed(0)} points ahead of ${esc(second.name)}. ${winReason(win, second)}</p>`;
+  }
+  const warn = problems.length
+    ? `<p class="plain"><b>Before you go further:</b> ${problems.map(p=>esc(shortName(p.name))).join(', ')} ${problems.length>1?'have':'has'} a fault that would survive into the release — see the ranking below for what it is.</p>`
+    : '';
+
+  return `<div class="callout">${lead}${warn}</div>
+    <ul class="compare-list">${rows.map(([a,b])=>`<li><span>${a}</span><span>${b}</span></li>`).join('')}</ul>
+    <p class="plain" style="margin-top:1.5rem;color:var(--ink2)">Measurements narrow the field. They do not know what your track is meant to sound like, so treat this as the shortlist and let the${tipSpan('match','loudness-matched')} player make the final call.</p>`;
+}
+function winReason(win, second){
+  const diffs=[];
+  const s=win.score, t=second.score;
+  if(s.head-t.head>8) diffs.push('it leaves more room at the top, so it will not distort when streaming services convert it');
+  if(s.dyn-t.dyn>8) diffs.push('it keeps more punch — the drums still move air');
+  if(s.tone-t.tone>8) diffs.push('its balance from bass to treble is closer to what finished records look like');
+  if(s.stereo-t.stereo>8) diffs.push('its stereo image holds up better when played on a single speaker');
+  if(s.full-t.full>8) diffs.push('it has more body and weight — the thing that separates a big-sounding mix from a flat one');
+  if(s.mono-t.mono>8) diffs.push('it holds together better on a single speaker');
+  if(s.clean-t.clean>8) diffs.push('it is the cleaner export');
+  if(!diffs.length) return 'The advantage is spread thinly across everything rather than coming from one obvious win, so listen before you commit.';
+  return 'Mainly because '+diffs.join(', and ')+'.';
+}
+function renderConclusion(){
+  if(files.length===1){
+    const f=files[0], [cls,line]=bottomLine(f);
+    $('#conclusion-body').innerHTML=`<div class="callout">
+      <div class="pick">${esc(f.name)}</div>
+      <span class="verdict ${cls}">${line}</span>
+      ${plainSummary(f)}
+    </div>
+    <p class="plain" style="margin-top:1.5rem;color:var(--ink2)">Add a second version of the same track to get a direct comparison — that is where this tool earns its keep.</p>`;
+  } else {
+    $('#conclusion-body').innerHTML=comparison();
+  }
+}
+
+/* ============================== app ============================== */
+const files=[];
+let ac=null;
+const $=s=>document.querySelector(s);
+const fmtT=s=>{const m=Math.floor(s/60);const r=Math.floor(s%60);return m+':'+String(r).padStart(2,'0');};
+const d1=v=>Number.isFinite(v)?v.toFixed(1):'—';
+const d2=v=>Number.isFinite(v)?v.toFixed(2):'—';
+
+function ctx(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); return ac; }
+const yieldUI = () => new Promise(r=>setTimeout(r,0));
+
+$('#drop').addEventListener('click',()=>$('#picker').click());
+$('#drop').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#picker').click();} });
+$('#picker').addEventListener('change',e=>addFiles([...e.target.files]));
+['dragover','dragenter'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.add('over');}));
+['dragleave','drop'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.remove('over');}));
+$('#drop').addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+$('#clear-all').addEventListener('click',()=>{ stop(); files.length=0; render(); });
+
+async function addFiles(list){
+  const audio=list.filter(f=>/\.(wav|aif|aiff|flac|mp3|m4a|aac|ogg|opus|wma)$/i.test(f.name)||f.type.startsWith('audio'));
+  if(!audio.length){ setStatus('Those files aren\'t audio. Try WAV, FLAC, MP3, M4A or OGG.'); return; }
+  $('#status').classList.remove('hidden');
+  for(let i=0;i<audio.length;i++){
+    setStatus(`Analysing ${audio[i].name} — ${i+1} of ${audio.length}`, i/audio.length);
+    await yieldUI();
+    try{ files.push(await analyse(audio[i])); }
+    catch(err){ setStatus(`Couldn't decode ${audio[i].name}: ${err.message}`); await new Promise(r=>setTimeout(r,1800)); }
+  }
+  setStatus('Done', 1);
+  setTimeout(()=>$('#status').classList.add('hidden'), 700);
+  render();
+}
+function setStatus(t, p){
+  $('#status-text').textContent=t;
+  if(p!=null) $('#status-bar').style.width=(p*100)+'%';
+}
+
+async function analyse(file){
+  const buf = await ctx().decodeAudioData(await file.arrayBuffer());
+  const fs = buf.sampleRate;
+  const L = buf.getChannelData(0);
+  const R = buf.numberOfChannels>1 ? buf.getChannelData(1) : L;
+  const stereo = buf.numberOfChannels>1;
+  const n = L.length;
+
+  const mono=new Float32Array(n);
+  for(let i=0;i<n;i++) mono[i]=(L[i]+R[i])*0.5;
+
+  const chans = stereo ? [L,R] : [L];
+  const w = chans.map(c=>kWeight(c,fs));
+  const {lufs} = integratedLoudness(w, fs);
+  await yieldUI();
+
+  const stHop=0.25;
+  const st = shortTermCurve(w, fs, stHop);
+  const lra = loudnessRange(st);
+  const stMax = st.length? Math.max(...st) : -Infinity;
+
+  const tpL=truePeak(L), tpR = stereo? truePeak(R) : tpL;
+  const tp = Math.max(tpL.tp, tpR.tp), sp2 = Math.max(tpL.sp, tpR.sp);
+  const overs = tpL.overs + (stereo? tpR.overs:0);
+  const runs = clipRuns(L) + (stereo? clipRuns(R):0);
+  await yieldUI();
+
+  // PSR: peak in each 3 s window minus that window's short-term loudness
+  const winS=Math.round(3*fs), hopS=Math.round(stHop*fs);
+  const psrs=[];
+  for(let k=0;k<st.length;k++){
+    const s=k*hopS;
+    let p=0;
+    for(let i=s;i<Math.min(n,s+winS);i++){ const a=Math.abs(mono[i]); if(a>p)p=a; }
+    if(p>1e-6 && st[k]>-40) psrs.push(20*Math.log10(p)-st[k]);
+  }
+  psrs.sort((a,b)=>a-b);
+  const psr = psrs.length? psrs[Math.floor(psrs.length*0.5)] : NaN;
+
+  let rms=0; for(let i=0;i<n;i++) rms+=mono[i]*mono[i];
+  rms=Math.sqrt(rms/n);
+  const crest = 20*Math.log10(sp2/(rms+1e-12));
+  await yieldUI();
+
+  const sp = avgSpectra(L, R, fs);
+  const sm = sp.frames? smoothOctave(sp.freqs, sp.db, 6) : new Float64Array(0);
+  const bandsRaw = sp.frames? bandEnergies(sp.freqs, sp.db) : BANDS.map(()=>-120);
+  const tilt = sp.frames? spectralTilt(sp.freqs, sm) : 0;
+  const cent = sp.frames? centroid(sp.freqs, sp.db) : 0;
+  await yieldUI();
+
+  const dn=(lo,hi)=>density(sp,lo,hi);
+  const descriptors = sp.frames? {
+    subToBass: dn(20,45)-dn(45,90),
+    bassToMid: dn(45,140)-dn(400,1600),
+    mud:       dn(180,450)-dn(900,2500),
+    scoop:     dn(350,900)-(dn(120,300)+dn(1800,4000))/2,
+    bite:      dn(2000,5000)-dn(400,1600),
+    air:       dn(9000,18000)-dn(400,1600)
+  } : {subToBass:0,bassToMid:0,mud:0,scoop:0,bite:0,air:0};
+
+  const monoBands = BANDS.map(([,lo,hi])=> sp.frames&&stereo? bandMonoDelta(sp,lo,hi) : 0);
+  const corrBands = BANDS.map(([,lo,hi])=> sp.frames&&stereo? bandCorrelation(sp,lo,hi) : 1);
+  const guitarCorr = sp.frames&&stereo? bandCorrelation(sp,800,5000) : 1;
+  const guitarMono = sp.frames&&stereo? bandMonoDelta(sp,800,5000) : 0;
+  await yieldUI();
+
+  const bwCut = sp.frames? bandwidthLimit(sp.freqs, sm, fs) : null;
+  const punchLow = bandCrest(bandpass(mono, fs, 100, 0.7), fs, 0.3);
+  const snap = bandCrest(bandpass(mono, fs, 3162, 1.05), fs, 0.3);
+  await yieldUI();
+
+  const ss = stereoStats(L, R, fs);
+  const lowCorr = stereo? lowCorrelation(L,R,fs) : 1;
+
+  const f = {
+    name:file.name, size:file.size, fs, dur:buf.duration, ch:buf.numberOfChannels, buf,
+    lufs, stMax, lra, tpDb:20*Math.log10(tp+1e-12), spDb:20*Math.log10(sp2+1e-12),
+    overs, clipRuns:runs, psr, crest,
+    plr: 20*Math.log10(tp+1e-12) - lufs,
+    corr: stereo? ss.corr : 1, widthDb: ss.widthDb, monoLoss: stereo? ss.monoLoss : 0,
+    dcL: ss.dcL, dcR: ss.dcR, lowCorr, sideRatio: stereo? ss.sideRatio : 0,
+    noiseFloor: noiseFloor(mono, fs),
+    freqs: sp.freqs, spec: sm, sp, bandsRaw, tilt, centroid: cent,
+    monoBands, corrBands, guitarCorr, guitarMono, punchLow, snap, bwCut,
+    subToBass:descriptors.subToBass, bassToMid:descriptors.bassToMid, mud:descriptors.mud,
+    scoop:descriptors.scoop, bite:descriptors.bite, air:descriptors.air,
+    st, stHop, env: envelope(mono, 1400),
+    corrCurve: stereo? corrCurve(L,R,fs,0.25) : null,
+    stereo
+  };
+  // deviation of bands from this file's own mean — a proxy for how even it is
+  const mean = f.bandsRaw.reduce((a,b)=>a+b,0)/f.bandsRaw.length;
+  f.bandSpread = Math.sqrt(f.bandsRaw.reduce((a,b)=>a+(b-mean)*(b-mean),0)/f.bandsRaw.length) / 3;
+  return f;
+}
+
+/* ---------------------------- render ---------------------------- */
+let sortKey='total', sortDir=-1;
+const COLS=[
+  {k:'name', t:'File', left:true, f:f=>f.name},
+  {k:'total', t:'Score', f:f=>f.score.total.toFixed(0)},
+  {k:'lufs', t:'LUFS‑I', f:f=>d1(f.lufs)},
+  {k:'stMax', t:'ST max', f:f=>d1(f.stMax)},
+  {k:'lra', t:'LRA', f:f=>d1(f.lra)},
+  {k:'tpDb', t:'dBTP', f:f=>d2(f.tpDb), warn:f=>f.tpDb>-0.3?(f.tpDb>0?'flag':'mid'):''},
+  {k:'spDb', t:'Peak dBFS', f:f=>d2(f.spDb)},
+  {k:'plr', t:'PLR', f:f=>d1(f.plr)},
+  {k:'psr', t:'PSR', f:f=>d1(f.psr)},
+  {k:'crest', t:'Crest', f:f=>d1(f.crest)},
+  {k:'clipRuns', t:'Clips', f:f=>f.clipRuns, warn:f=>f.clipRuns>0?'flag':''},
+  {k:'overs', t:'TP overs', f:f=>f.overs, warn:f=>f.overs>0?'mid':''},
+  {k:'corr', t:'Corr', f:f=>d2(f.corr), warn:f=>f.corr<0?'flag':''},
+  {k:'lowCorr', t:'Low corr', f:f=>d2(f.lowCorr), warn:f=>f.lowCorr<0.5?'flag':''},
+  {k:'monoLoss', t:'Mono Δ', f:f=>d1(f.monoLoss), warn:f=>f.monoLoss<-1.5?'flag':''},
+  {k:'tilt', t:'Tilt dB/oct', f:f=>d2(f.tilt)},
+  {k:'centroid', t:'Centroid Hz', f:f=>Math.round(f.centroid)},
+  {k:'noiseFloor', t:'Floor dBFS', f:f=>d1(f.noiseFloor)},
+  {k:'dur', t:'Length', f:f=>fmtT(f.dur)},
+  {k:'fs', t:'Rate', f:f=>(f.fs/1000)+'k'},
+];
+
+let refIndex=-1;
+function render(){
+  const has=files.length>0;
+  ['#settings','#conclusion','#flatness','#monosec','#ranking','#summary','#charts','#files','#notes','#transport']
+    .forEach(s=>$(s).classList.toggle('hidden',!has));
+  if(!has){
+    $('#tbl thead').innerHTML=''; $('#tbl tbody').innerHTML='';
+    $('#rank-body').innerHTML=''; $('#file-cards').innerHTML=''; $('#chips').innerHTML='';
+    $('#conclusion-body').innerHTML=''; $('#flat-body').innerHTML=''; $('#mono-verdict').innerHTML='';
+    refIndex=-1;
+    return;
+  }
+  if(refIndex>=files.length) refIndex=-1;
+  files.forEach((f,i)=>{ f.color=PALETTE[i%PALETTE.length]; f.score=scoreFile(f); });
+  $('#profile-note').textContent=P().note+(refIndex>=0?` Reference targets are currently overridden by ${files[refIndex].name}.`:'');
+  $('#reference').innerHTML='<option value="-1">none — use style targets</option>'+
+    files.map((f,i)=>`<option value="${i}"${i===refIndex?' selected':''}>${esc(f.name)}</option>`).join('');
+  renderConclusion(); renderFlatness(); renderMono(); renderRanking(); renderTable();
+  renderSpectrum(); renderBands(); renderScatter(); renderCards(); renderTransport();
+}
+$('#profile').addEventListener('change',e=>{ profileKey=e.target.value; render(); });
+$('#reference').addEventListener('change',e=>{ refIndex=parseInt(e.target.value,10); render(); });
+
+function renderRanking(){
+  const sorted=[...files].sort((a,b)=>b.score.total-a.score.total);
+  const rows=sorted.map((f,i)=>{
+    const s=f.score, [cls,line]=bottomLine(f);
+    const parts=[['Fullness','full',s.full],['Headroom','head',s.head],['Dynamics','dyn',s.dyn],['Tonal balance','tone',s.tone],['Stereo','stereo',s.stereo],['Mono','mono',s.mono],['Cleanliness','clean',s.clean]];
+    return `<div class="card">
+      <header>
+        <span class="swatch" style="background:${f.color}"></span>
+        <span class="name">${i+1}. ${esc(f.name)}</span>
+        <span class="verdict ${cls}">${line}</span>
+        <span style="font-size:1.5rem;font-weight:300" class="has-tip" data-tip="score">${s.total.toFixed(0)}</span>
+      </header>
+      ${parts.map(([l,k,v])=>`<div class="score-row"><span class="lbl has-tip" data-tip="${k}">${l}</span>
+        <span class="track"><i style="width:${v.toFixed(0)}%;background:${f.color}"></i></span>
+        <span class="val">${v.toFixed(0)}</span></div>`).join('')}
+      ${plainSummary(f)}
+      <p class="meta" style="margin:.75rem 0 0">${verdict(f)}</p>
+    </div>`;
+  }).join('');
+  $('#rank-body').innerHTML=rows;
+}
+function verdict(f){
+  const out=[];
+  if(f.tpDb>0) out.push(`peaks ${d2(f.tpDb)} dBTP — over full scale, will distort on lossy encode`);
+  else if(f.tpDb>-0.3) out.push(`only ${d2(-f.tpDb)} dB of true‑peak headroom`);
+  if(f.clipRuns>0) out.push(`${f.clipRuns} clipped run${f.clipRuns>1?'s':''} in the samples themselves`);
+  if(f.plr<6) out.push(`PLR of ${d1(f.plr)} dB — heavily limited`);
+  else if(f.plr>18) out.push(`PLR of ${d1(f.plr)} dB — lots of unused headroom`);
+  if(f.lra<3) out.push(`loudness range ${d1(f.lra)} LU, very flat across the track`);
+  if(f.lra>14) out.push(`loudness range ${d1(f.lra)} LU, wide swings between sections`);
+  if(f.tilt>-2.2) out.push(`bright tilt at ${d2(f.tilt)} dB/oct`);
+  if(f.tilt<-5.2) out.push(`dark tilt at ${d2(f.tilt)} dB/oct`);
+  if(f.corr<0) out.push(`negative stereo correlation — phase problems`);
+  if(f.lowCorr<0.5) out.push(`low end is out of phase (${d2(f.lowCorr)} below 120 Hz)`);
+  if(f.monoLoss<-1.5) out.push(`drops ${d1(-f.monoLoss)} dB folded to mono`);
+  if(Math.abs(f.dcL)>0.001||Math.abs(f.dcR)>0.001) out.push(`DC offset present`);
+  return out.length? 'Watch: '+out.join('; ')+'.' : 'Nothing flagged — clean headroom, sane dynamics, stable stereo.';
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* Why a measurement misses its target, in both directions. Shown on hover
+   against any value that falls outside the range for the selected style. */
+const REASONS={
+  plr:{label:'Punch (PLR)', unit:'dB',
+    low:'Most of the peak energy has been limited away, so the drums stop hitting and the track reads as a continuous wall. On a finished render this cannot be undone — only avoided on the next generation.',
+    high:'Lighter limiting than this style normally uses. Not a fault; it will simply play quieter than other releases on a playlist.'},
+  tilt:{label:'Tilt', unit:'dB/oct',
+    low:'Energy is stacked further towards the bass, relative to the top end, than this style usually carries. Reads as muffled or blanketed, especially on laptops and phones.',
+    high:'The balance leans further towards treble than this style usually does. Crisp on first listen, fatiguing across a full track.'},
+  punchLow:{label:'Kick punch', unit:'dB', fmt:r=>`at least ${r[0].toFixed(1)} dB`,
+    low:'The kick is barely rising above its own average level, which is the signature of heavy limiting. This is the most common single reason a dense mix sounds flat.',
+    high:''},
+  scoop:{label:'Mid scoop', unit:'dB',
+    low:'The 350–900 Hz region has been hollowed out. Guitars sound enormous soloed and thin the moment everything plays together — the classic metal scoop trap.',
+    high:'More energy at 350–900 Hz than the ranges either side, which reads as honky or nasal.'},
+  mud:{label:'Low mids', unit:'dB',
+    low:'Little energy at 180–450 Hz, which is where most of the weight of a guitar tone lives. Usually a high-pass filter set too high.',
+    high:'Guitars, bass and kick are all piling up at 180–450 Hz. The result sounds boxy and closed-in rather than full.'},
+  subToBass:{label:'Sub', unit:'dB',
+    low:'Little real content below 45 Hz. For doom and sludge this is usually the difference between heavy and merely loud.',
+    high:'More energy below 45 Hz than in the fundamental above it. You may not hear it on small speakers, but any limiter does, and it steals headroom from everything else.'},
+  bite:{label:'Bite', unit:'dB',
+    low:'Little energy at 2–5 kHz, where pick attack and string definition live. Without it a wall of distortion turns into a blur.',
+    high:'More at 2–5 kHz than this style usually carries. It cuts through, and becomes fatiguing at volume.'},
+  air:{label:'Air', unit:'dB',
+    low:'Little above 9 kHz, which reads as dull or closed. If the bandwidth check also fired, the content is simply not there to boost.',
+    high:'More above 9 kHz than usual. Can read as brittle, and on generated audio it often means codec artefacts are being amplified.'},
+  guitarCorr:{label:'Guitar width', unit:'',
+    low:'The two sides are pushing against each other across the guitar range. Impressive on headphones, and thin or hollow anywhere the signal gets summed.',
+    high:'Both channels carry nearly the same signal across the guitar range, so the mix sits in a line rather than around you. Generated audio is often far narrower than it first sounds.'},
+  monoWorst:{label:'Worst in mono', unit:'dB', fmt:()=>'no worse than −2.0 dB',
+    low:'This much level disappears from one frequency range when both speakers are folded into one. Phone speakers, most Bluetooth speakers and club PAs are all mono, so this is what a lot of listeners will actually hear.',
+    high:''}
+};
+function fmtRange(r, unit, dp){
+  const u=unit?' '+unit:'';
+  if(r[1]>=90) return `${r[0].toFixed(dp)}${u} or more`;
+  if(r[0]<=-90) return `${r[1].toFixed(dp)}${u} or less`;
+  return `${r[0].toFixed(dp)} to ${r[1].toFixed(dp)}${u}`;
+}
+/* Every measurement that gets checked against a style target, in one place,
+   so the file cards and the printed appendix can never drift apart. */
+function metrics(f){
+  const p=P();
+  return [
+    {key:'plr',        tip:'plr',        label:'Punch (PLR)',    v:f.plr,                    r:[p.plr[0],p.plr[1]],   dp:1},
+    {key:'tilt',       tip:'tilt',       label:'Tilt',           v:f.tilt,                   r:[p.tilt[0],p.tilt[1]], dp:2},
+    {key:'punchLow',   tip:'punchLow',   label:'Kick punch',     v:f.punchLow,               r:[p.punchLow,99],       dp:1},
+    {key:'scoop',      tip:'scoop',      label:'Mid scoop',      v:f.scoop,                  r:p.scoop,               dp:1},
+    {key:'mud',        tip:'mud',        label:'Low mids',       v:f.mud,                    r:p.mud,                 dp:1},
+    {key:'subToBass',  tip:'subToBass',  label:'Sub',            v:f.subToBass,              r:p.subToBass,           dp:1},
+    {key:'bite',       tip:'bite',       label:'Bite',           v:f.bite,                   r:p.bite,                dp:1},
+    {key:'air',        tip:'airdesc',    label:'Air',            v:f.air,                    r:p.air,                 dp:1},
+    {key:'guitarCorr', tip:'guitarCorr', label:'Guitar width',   v:f.stereo?f.guitarCorr:NaN,r:[0.1,0.85],            dp:2},
+    {key:'monoWorst',  tip:'monochart',  label:'Worst in mono',  v:Math.min(...f.monoBands), r:[-2,99],               dp:1}
+  ];
+}
+const metricStatus = m => !Number.isFinite(m.v)? 'na'
+  : (m.v>=m.r[0] && m.v<=m.r[1])? 'ok'
+  : ((m.v<m.r[0]? m.r[0]-m.v : m.v-m.r[1]) > Math.max(1, m.r[1]>=90? Math.abs(m.r[0])||1 : m.r[1]-m.r[0])*0.5 ? 'flag' : 'mid');
+
+/* prints a value, tints it by how far outside the style's range it sits, and
+   attaches the target and the reason it was missed */
+function rng(v, r, dp, key){
+  if(!Number.isFinite(v)) return '—';
+  const txt=v.toFixed(dp);
+  const R=REASONS[key]||{label:'',unit:'',low:'',high:''};
+  const target=R.fmt? R.fmt(r) : fmtRange(r, R.unit, dp);
+  const reads=`This reads ${txt}${R.unit?' '+R.unit:''}.`;
+  if(v>=r[0] && v<=r[1])
+    return `<span class="ok" data-tiptitle="${esc(R.label+' — on target')}" data-tipbody="${esc(PROFILES[profileKey].name+' wants '+target+'. '+reads)}">${txt}</span>`;
+  const under = v<r[0];
+  const off = under? r[0]-v : v-r[1];
+  const span = Math.max(1, r[1]>=90? Math.abs(r[0])||1 : r[1]-r[0]);
+  const severe = off > span*0.5;
+  const why = under? R.low : R.high;
+  const head = `${R.label} — ${off.toFixed(dp)}${R.unit?' '+R.unit:''} ${under?'below':'above'} target`;
+  const body = `${PROFILES[profileKey].name} wants ${target}. ${reads}` + (why?' '+why:'');
+  return `<span class="${severe?'flag':'mid'}" data-tiptitle="${esc(head)}" data-tipbody="${esc(body)}"
+    data-tipnote="${esc('The fix is in “Why it might sound flat” above, with the Audacity steps.')}">${txt}</span>`;
+}
+
+function renderTable(){
+  const th=COLS.map(c=>`<th class="${c.left?'left':''}${GLOSSARY[c.k]?' has-tip':''}" data-k="${c.k}"${GLOSSARY[c.k]?` data-tip="${c.k}"`:''}>${c.t}${sortKey===c.k?(sortDir>0?' ▲':' ▼'):''}</th>`).join('');
+  $('#tbl thead').innerHTML=`<tr>${th}</tr>`;
+  const get=(f,k)=> k==='total'? f.score.total : f[k];
+  const sorted=[...files].sort((a,b)=>{
+    const x=get(a,sortKey), y=get(b,sortKey);
+    if(typeof x==='string') return x.localeCompare(y)*sortDir;
+    return ((x??-1e9)-(y??-1e9))*sortDir;
+  });
+  $('#tbl tbody').innerHTML=sorted.map(f=>`<tr>${COLS.map(c=>{
+    const cls=[c.left?'left':'num', c.warn?(c.warn(f)||''):''].filter(Boolean).join(' ');
+    const val=c.k==='name'? `<span class="swatch" style="background:${f.color}"></span>${esc(f.name)}` : c.f(f);
+    return `<td class="${cls}">${val}</td>`;
+  }).join('')}</tr>`).join('');
+  $('#tbl thead').querySelectorAll('th').forEach(t=>t.addEventListener('click',()=>{
+    const k=t.dataset.k;
+    if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir=(k==='name')?1:-1;}
+    renderTable();
+  }));
+}
+
+/* ---------- flatness diagnosis ---------- */
+const STATUS_LABEL={bad:'Problem', warn:'Worth checking', good:'Fine'};
+function renderFlatness(){
+  $('#flat-body').innerHTML=files.map(f=>{
+    const checks=diagnose(f);
+    const bad=checks.filter(c=>c.status==='bad').length;
+    const warn=checks.filter(c=>c.status==='warn').length;
+    const head = bad? `${bad} problem${bad>1?'s':''} found`
+      : warn? `Nothing broken, ${warn} thing${warn>1?'s':''} worth checking`
+      : 'Nothing flagged — this one is in good shape';
+    return `<div class="card">
+      <header>
+        <span class="swatch" style="background:${f.color}"></span>
+        <span class="name">${esc(f.name)}</span>
+        <span class="verdict ${bad?'bad':warn?'warn':'good'}">${head}</span>
+      </header>
+      ${checks.map(c=>`
+        <div class="check ${c.status}">
+          <div class="check-head"><span class="dot"></span><span class="check-title">${c.title}</span>
+            <span class="check-tag">${STATUS_LABEL[c.status]}</span></div>
+          <p class="check-text">${c.text}</p>
+          ${c.stem?`<div class="stem-badge">Needs stem separation — <b>${c.stem}</b></div>`:''}
+          ${c.fix?`<div class="check-fix"><b>In Audacity:</b> ${c.fix}</div>`:''}
+        </div>`).join('')}
+      ${refIndex>=0 && files[refIndex]!==f? referenceDelta(f, files[refIndex]) : ''}
+    </div>`;
+  }).join('');
+}
+/* ---------- reference comparison ---------- */
+function referenceDelta(f, ref){
+  const rows=BANDS.map(([nm,lo,hi],i)=>{
+    const d=(f.bandsRaw[i]-f.lufs)-(ref.bandsRaw[i]-ref.lufs);
+    return {nm, lo, hi, d};
+  });
+  const notable=rows.filter(r=>Math.abs(r.d)>1.2).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,4);
+  if(!notable.length) return `<p class="plain" style="color:var(--ink2);border-top:1px solid var(--line);padding-top:.9rem;margin-top:1rem">
+    Tonally this is within about a decibel of ${esc(shortName(ref.name))} in every band. Whatever is different between them is not a broad EQ difference.</p>`;
+  return `<div style="border-top:1px solid var(--line);padding-top:.9rem;margin-top:1rem">
+    <p class="plain" style="margin-top:0"><b>Against ${esc(shortName(ref.name))}</b>, volume‑matched:</p>
+    <ul class="compare-list" style="margin-top:.5rem">
+      ${notable.map(r=>`<li><span>${r.nm} · ${r.lo}–${r.hi} Hz</span><span>${r.d>0?'+':''}${d1(r.d)} dB ${r.d>0?'more':'less'} than the reference. ${
+        r.d>0? 'Cutting this range by roughly '+d1(Math.abs(r.d)*0.7)+' dB would move you towards it.'
+             : 'Adding roughly '+d1(Math.abs(r.d)*0.7)+' dB here would move you towards it.'}</span></li>`).join('')}
+    </ul>
+    <p class="sub" style="margin-top:.75rem">Below about 200 Hz these are usually safe to apply to the whole file with Filter Curve EQ. Above that, separate stems first and move the one that owns the range — a broad EQ on the master will drag the drums and vocals along with the guitars.</p>
+  </div>`;
+}
+/* ---------- mono compatibility ---------- */
+function renderMono(){
+  drawBandSeries($('#mono'), f=>f.monoBands, -8, 1, v=>v<-4?'#d1544f':v<-2?'#c99a2e':null, '0 dB = nothing lost');
+  drawBandSeries($('#bandcorr'), f=>f.corrBands, -1, 1, v=>v<0?'#d1544f':null, '');
+  const worst=files.map(f=>{
+    const i=f.monoBands.reduce((a,b,j)=>b<f.monoBands[a]?j:a,0);
+    return {f, i, d:f.monoBands[i]};
+  }).sort((a,b)=>a.d-b.d);
+  $('#mono-verdict').innerHTML=worst.map(({f,i,d})=>{
+    const cls=d<-4?'bad':d<-2?'warn':'good';
+    const txt=d<-4
+      ? `Loses ${d1(-d)} dB in the ${BANDS[i][0].toLowerCase()} range (${BANDS[i][1]}–${BANDS[i][2]} Hz) on a single speaker. That is enough to change the balance of the track, not just its width.`
+      : d<-2
+      ? `Loses ${d1(-d)} dB in the ${BANDS[i][0].toLowerCase()} range on a single speaker. Audible, but not fatal.`
+      : `Nothing drops more than ${d1(-d)} dB anywhere. This will translate to a phone or a PA.`;
+    return `<div class="score-row" style="align-items:flex-start;margin-bottom:.75rem">
+      <span class="lbl" style="width:auto;flex:0 0 190px"><span class="swatch" style="background:${f.color}"></span>${esc(shortName(f.name))}</span>
+      <span style="flex:1"><span class="verdict ${cls}" style="margin-right:.5rem">${cls==='good'?'Mono safe':cls==='warn'?'Some loss':'Collapses'}</span>${txt}</span>
+    </div>`;
+  }).join('') + `<p class="sub" style="margin-top:1rem">Use the <b>Mono</b> button in the player to hear it. Switch back and forth while the track runs — if the riff loses weight or the guitars step backwards, that is what everyone on a phone will hear.</p>`;
+}
+function drawBandSeries(cv, get, lo, hi, flag, note){
+  const H=360, {c,w,h}=setup(cv,H);
+  const P={l:78,r:16,t:10,b:26};
+  const n=BANDS.length, rowH=(h-P.t-P.b)/n;
+  const X=v=>P.l+((v-lo)/(hi-lo))*(w-P.l-P.r);
+  c.strokeStyle='#f2f2f2'; c.fillStyle='#999';
+  const step=(hi-lo)/4;
+  for(let g=lo; g<=hi+1e-9; g+=step){
+    const x=X(g);
+    c.beginPath(); c.moveTo(x,P.t); c.lineTo(x,h-P.b); c.stroke();
+    c.textAlign='center'; c.fillText(g.toFixed(g%1?1:0), x, h-P.b+14);
+  }
+  const zero=X(Math.min(hi,Math.max(lo,0)));
+  BANDS.forEach(([nm],i)=>{
+    const y0=P.t+i*rowH;
+    c.fillStyle='#666'; c.textAlign='right'; c.fillText(nm, P.l-8, y0+rowH/2+3);
+    const bh=Math.max(3,(rowH-8)/files.length);
+    files.forEach((f,j)=>{
+      const v=clamp(get(f)[i], lo, hi), y=y0+4+j*bh;
+      const x=X(v);
+      c.fillStyle=flag(get(f)[i])||f.color;
+      c.fillRect(Math.min(zero,x), y, Math.abs(x-zero), Math.max(2,bh-1));
+    });
+  });
+  c.strokeStyle='#1a1a1a'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(zero,P.t); c.lineTo(zero,h-P.b); c.stroke();
+  if(note){ c.fillStyle='#999'; c.textAlign='left'; c.fillText(note, zero+6, P.t+10); }
+}
+
+/* ---------- charts ---------- */
+let printScale=null;                       // raised while building the PDF
+function setup(cv, h){
+  const dpr=printScale || window.devicePixelRatio || 1;
+  const w=cv.clientWidth||900;
+  cv.width=w*dpr; cv.height=h*dpr;
+  cv.style.height=h+'px';
+  const c=cv.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,w,h);
+  c.font='11px -apple-system,BlinkMacSystemFont,Segoe UI,system-ui,sans-serif';
+  return {c,w,h};
+}
+function renderSpectrum(){
+  const H=420, {c,w,h}=setup($('#spec'),H);
+  const P={l:46,r:14,t:14,b:28};
+  const fmin=20, fmax=20000;
+  // normalise each curve to its own loudness so shapes compare
+  const curves=files.map(f=>{
+    if(!f.spec.length) return null;
+    const off = -f.lufs;
+    return {f, off};
+  }).filter(Boolean);
+  let dbMin=Infinity, dbMax=-Infinity;
+  curves.forEach(({f,off})=>{
+    for(let k=1;k<f.freqs.length;k++){
+      if(f.freqs[k]<fmin||f.freqs[k]>fmax) continue;
+      const v=f.spec[k]+off;
+      if(v<dbMin)dbMin=v; if(v>dbMax)dbMax=v;
+    }
+  });
+  if(!isFinite(dbMin)){dbMin=-100;dbMax=0;}
+  dbMin=Math.max(dbMin, dbMax-70);
+  const pad=(dbMax-dbMin)*0.06; dbMax+=pad; dbMin-=pad;
+  const X=f=>P.l+(Math.log10(f/fmin)/Math.log10(fmax/fmin))*(w-P.l-P.r);
+  const Y=v=>P.t+(1-(v-dbMin)/(dbMax-dbMin))*(h-P.t-P.b);
+
+  c.strokeStyle='#eee'; c.fillStyle='#666'; c.lineWidth=1;
+  [20,50,100,200,500,1000,2000,5000,10000,20000].forEach(f=>{
+    const x=X(f);
+    c.beginPath(); c.moveTo(x,P.t); c.lineTo(x,h-P.b); c.stroke();
+    c.textAlign='center';
+    c.fillText(f>=1000? (f/1000)+'k' : f, x, h-P.b+15);
+  });
+  const stepDb = (dbMax-dbMin)>50?12:6;
+  for(let v=Math.ceil(dbMin/stepDb)*stepDb; v<dbMax; v+=stepDb){
+    const y=Y(v);
+    c.strokeStyle='#f2f2f2'; c.beginPath(); c.moveTo(P.l,y); c.lineTo(w-P.r,y); c.stroke();
+    c.fillStyle='#999'; c.textAlign='right'; c.fillText(v.toFixed(0), P.l-6, y+3);
+  }
+  c.strokeStyle='#e0e0e0'; c.strokeRect(P.l,P.t,w-P.l-P.r,h-P.t-P.b);
+
+  curves.forEach(({f,off})=>{
+    c.strokeStyle=f.color; c.lineWidth=1.5; c.beginPath();
+    let started=false;
+    for(let k=1;k<f.freqs.length;k++){
+      const fr=f.freqs[k];
+      if(fr<fmin||fr>fmax) continue;
+      const x=X(fr), y=Y(f.spec[k]+off);
+      if(!started){c.moveTo(x,y);started=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+  });
+  $('#spec-legend').innerHTML=files.map(f=>
+    `<span><i class="swatch" style="background:${f.color}"></i>${esc(f.name)}</span>`).join('');
+}
+function renderBands(){
+  const H=360, {c,w,h}=setup($('#bands'),H);
+  const P={l:78,r:16,t:10,b:24};
+  const n=BANDS.length;
+  // normalise each file's bands by its own loudness, then compare to group mean
+  const norm=files.map(f=>f.bandsRaw.map(v=>v-f.lufs));
+  const mean=BANDS.map((_,i)=>norm.reduce((a,r)=>a+r[i],0)/norm.length);
+  const dev=norm.map(r=>r.map((v,i)=>v-mean[i]));
+  let max=0; dev.forEach(r=>r.forEach(v=>{ if(Math.abs(v)>max) max=Math.abs(v); }));
+  max=Math.max(1.5, Math.ceil(max));
+  const rowH=(h-P.t-P.b)/n;
+  const cx=P.l+(w-P.l-P.r)/2;
+  const sx=(w-P.l-P.r)/2/max;
+
+  c.strokeStyle='#f2f2f2';
+  for(let g=-max; g<=max; g+=max/3){
+    const x=cx+g*sx;
+    c.beginPath(); c.moveTo(x,P.t); c.lineTo(x,h-P.b); c.stroke();
+    c.fillStyle='#999'; c.textAlign='center';
+    c.fillText((g>0?'+':'')+g.toFixed(1), x, h-P.b+14);
+  }
+  BANDS.forEach(([nm],i)=>{
+    const y0=P.t+i*rowH;
+    c.fillStyle='#666'; c.textAlign='right';
+    c.fillText(nm, P.l-8, y0+rowH/2+3);
+    const bh=Math.max(3,(rowH-8)/files.length);
+    files.forEach((f,j)=>{
+      const v=dev[j][i], y=y0+4+j*bh;
+      c.fillStyle=f.color;
+      c.fillRect(Math.min(cx,cx+v*sx), y, Math.abs(v*sx), Math.max(2,bh-1));
+    });
+  });
+  c.strokeStyle='#1a1a1a'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(cx,P.t); c.lineTo(cx,h-P.b); c.stroke();
+}
+function renderScatter(){
+  const H=360, {c,w,h}=setup($('#scatter'),H);
+  const P={l:48,r:16,t:14,b:34};
+  const xs=files.map(f=>f.lufs), ys=files.map(f=>f.plr);
+  const xr=range(xs,1.5), yr=range(ys,1.5);
+  const X=v=>P.l+((v-xr[0])/(xr[1]-xr[0]))*(w-P.l-P.r);
+  const Y=v=>P.t+(1-(v-yr[0])/(yr[1]-yr[0]))*(h-P.t-P.b);
+  c.strokeStyle='#e0e0e0'; c.strokeRect(P.l,P.t,w-P.l-P.r,h-P.t-P.b);
+  c.fillStyle='#999';
+  for(let i=0;i<=4;i++){
+    const vx=xr[0]+(xr[1]-xr[0])*i/4, vy=yr[0]+(yr[1]-yr[0])*i/4;
+    c.textAlign='center'; c.fillText(vx.toFixed(1), X(vx), h-P.b+15);
+    c.textAlign='right'; c.fillText(vy.toFixed(1), P.l-6, Y(vy)+3);
+    c.strokeStyle='#f5f5f5';
+    c.beginPath(); c.moveTo(P.l,Y(vy)); c.lineTo(w-P.r,Y(vy)); c.stroke();
+  }
+  c.fillStyle='#666'; c.textAlign='center';
+  c.fillText('integrated loudness (LUFS)', (P.l+w-P.r)/2, h-4);
+  c.save(); c.translate(12,(P.t+h-P.b)/2); c.rotate(-Math.PI/2); c.textAlign='center';
+  c.fillText('peak to loudness ratio (dB)',0,0); c.restore();
+  files.forEach(f=>{
+    const x=X(f.lufs), y=Y(f.plr);
+    c.fillStyle=f.color; c.beginPath(); c.arc(x,y,5,0,7); c.fill();
+    c.fillStyle='#1a1a1a'; c.textAlign='left';
+    c.fillText(shortName(f.name), x+9, y+4);
+  });
+}
+function range(arr,pad){
+  let a=Math.min(...arr), b=Math.max(...arr);
+  if(b-a<pad*2){ const m=(a+b)/2; a=m-pad; b=m+pad; }
+  else { const p=(b-a)*0.15; a-=p; b+=p; }
+  return [a,b];
+}
+const shortName=n=>n.length>26? n.slice(0,24)+'…' : n;
+
+function renderCards(){
+  $('#file-cards').innerHTML=files.map((f,i)=>`
+    <div class="card">
+      <header>
+        <span class="swatch" style="background:${f.color}"></span>
+        <span class="name">${esc(f.name)}</span>
+        <span class="meta">${f.ch>1?'stereo':'mono'} · ${(f.fs/1000)}kHz · ${fmtT(f.dur)} · ${(f.size/1048576).toFixed(1)} MB</span>
+        <button class="no-print" data-remove="${i}">Remove</button>
+      </header>
+      <canvas class="wave" data-i="${i}" height="150"></canvas>
+      <div class="legend"><span class="has-tip" data-tip="waveform">waveform and loudness over time</span><span class="has-tip" data-tip="corrstrip">stereo strip along the bottom</span></div>
+      ${(()=>{
+        const M=metrics(f), by=k=>M.find(m=>m.key===k), cell=k=>{const m=by(k);return rng(m.v,m.r,m.dp,m.key);};
+        const unit=k=>k==='guitarCorr'?'':' dB';
+        return `<div class="kv">
+        <div><div class="k has-tip" data-tip="lufs">Loudness</div><div class="v">${d1(f.lufs)} LUFS</div></div>
+        <div><div class="k has-tip" data-tip="lra">Range</div><div class="v">${d1(f.lra)} LU</div></div>
+        <div><div class="k has-tip" data-tip="tpDb">True peak</div><div class="v">${d2(f.tpDb)} dBTP</div></div>
+        <div><div class="k has-tip" data-tip="plr">Punch (PLR)</div><div class="v">${cell('plr')} dB</div></div>
+        <div><div class="k has-tip" data-tip="psr">PSR (median)</div><div class="v">${d1(f.psr)} dB</div></div>
+        <div><div class="k has-tip" data-tip="corr">Correlation</div><div class="v">${d2(f.corr)}</div></div>
+        <div><div class="k has-tip" data-tip="widthDb">Side / mid</div><div class="v">${d1(f.widthDb)} dB</div></div>
+        <div><div class="k has-tip" data-tip="tilt">Tilt</div><div class="v">${cell('tilt')} dB/oct</div></div>
+      </div>
+      <div class="kv" style="margin-top:.75rem">
+        ${M.filter(m=>m.key!=='plr'&&m.key!=='tilt').map(m=>
+          `<div><div class="k has-tip" data-tip="${m.tip}">${m.label}</div><div class="v">${
+            Number.isFinite(m.v)? rng(m.v,m.r,m.dp,m.key)+unit(m.key) : '—'}</div></div>`).join('')}
+      </div>`;
+      })()}
+    </div>`).join('');
+  $('#file-cards').querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.remove;
+    if(playing && playing.idx===i) stop();
+    files.splice(i,1); render();
+  }));
+  files.forEach((f,i)=>drawWave($('#file-cards').querySelector(`canvas[data-i="${i}"]`), f));
+}
+function drawWave(cv, f){
+  if(!cv) return;
+  const H=150, {c,w,h}=setup(cv,H);
+  const mid=h*0.5, half=h*0.42;
+  const buckets=f.env.length/2;
+  c.fillStyle=f.color; c.globalAlpha=.35;
+  for(let b=0;b<buckets;b++){
+    const x=b/buckets*w, bw=Math.max(1,w/buckets);
+    const mn=f.env[b*2], mx=f.env[b*2+1];
+    c.fillRect(x, mid-mx*half, bw, Math.max(1,(mx-mn)*half));
+  }
+  c.globalAlpha=1;
+  // short-term loudness curve, mapped -40..0 LUFS
+  if(f.st.length){
+    c.strokeStyle=f.color; c.lineWidth=1.5; c.beginPath();
+    f.st.forEach((v,k)=>{
+      const t=(k*f.stHop+1.5)/f.dur;
+      const x=t*w, y=h-((clamp(v,-40,0)+40)/40)*h*0.9-4;
+      k? c.lineTo(x,y) : c.moveTo(x,y);
+    });
+    c.stroke();
+  }
+  // correlation strip along the bottom
+  if(f.corrCurve){
+    const sh=10;
+    f.corrCurve.forEach((v,k)=>{
+      const x=k/f.corrCurve.length*w, bw=Math.max(1,w/f.corrCurve.length);
+      c.fillStyle = v<0? '#d1544f' : v<0.3? '#c99a2e' : '#3aa76d';
+      c.globalAlpha=.75;
+      c.fillRect(x, h-sh, bw, sh);
+    });
+    c.globalAlpha=1;
+  }
+  c.strokeStyle='#e0e0e0'; c.strokeRect(0,0,w,h);
+  c.fillStyle='#999'; c.textAlign='left';
+  c.fillText('short-term loudness', 6, 13);
+}
+
+/* ---------------------------- transport ---------------------------- */
+let playing=null, startedAt=0, offset=0, raf=0;
+function renderTransport(){
+  $('#chips').innerHTML=files.map((f,i)=>
+    `<span class="chip" data-i="${i}"><i class="swatch" style="background:${f.color}"></i>${esc(shortName(f.name))}</span>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>switchTo(+ch.dataset.i)));
+  markChip();
+}
+function markChip(){
+  $('#chips').querySelectorAll('.chip').forEach(ch=>
+    ch.classList.toggle('active', playing && +ch.dataset.i===playing.idx));
+}
+function gainFor(f){
+  const t=$('#target').value;
+  if(t==='off') return 1;
+  const target = t==='quietest'? Math.min(...files.map(x=>x.lufs)) : parseFloat(t);
+  return Math.pow(10,(target-f.lufs)/20);
+}
+let monoMode=false;
+function startSource(idx, at){
+  const f=files[idx];
+  const src=ctx().createBufferSource();
+  src.buffer=f.buf;
+  const g=ctx().createGain();
+  g.gain.value=Math.min(gainFor(f), 4);
+  src.connect(g);
+  if(monoMode){
+    // sum both channels to one, then feed that sum to both outputs
+    const splitter=ctx().createChannelSplitter(2);
+    const sum=ctx().createGain();
+    sum.gain.value=0.5;
+    g.connect(splitter);
+    splitter.connect(sum,0); splitter.connect(sum,1);
+    sum.connect(ctx().destination);
+  } else {
+    g.connect(ctx().destination);
+  }
+  src.start(0, Math.min(at, f.dur-0.01));
+  playing={idx, src, g};
+  startedAt=ctx().currentTime; offset=at;
+  $('#play').textContent='Pause';
+  markChip();
+  src.onended=()=>{ if(playing&&playing.src===src&&pos()>=f.dur-0.05) stop(); };
+  tick();
+}
+function pos(){ return playing? offset+(ctx().currentTime-startedAt) : offset; }
+function stopSource(){ if(playing){ try{playing.src.onended=null; playing.src.stop();}catch(e){} } }
+function switchTo(idx){
+  const at=pos();
+  const wasPlaying=!!playing;
+  const same = playing && playing.idx===idx;
+  stopSource();
+  if(same && wasPlaying){ playing=null; offset=at; $('#play').textContent='Play'; markChip(); cancelAnimationFrame(raf); return; }
+  playing=null;
+  startSource(idx, Math.min(at, files[idx].dur-0.05));
+}
+function stop(){
+  stopSource(); playing=null; offset=0;
+  $('#play').textContent='Play'; $('#seek i').style.width='0';
+  $('#time').textContent='0:00'; cancelAnimationFrame(raf); markChip();
+}
+$('#play').addEventListener('click',()=>{
+  if(!files.length) return;
+  if(playing){ const at=pos(); stopSource(); playing=null; offset=at; $('#play').textContent='Play'; markChip(); cancelAnimationFrame(raf); }
+  else startSource(0, offset);
+});
+$('#monobtn').addEventListener('click',()=>{
+  monoMode=!monoMode;
+  $('#monobtn').classList.toggle('primary', monoMode);
+  $('#monobtn').textContent = monoMode? 'Mono (on)' : 'Mono';
+  if(playing){ const i=playing.idx, at=pos(); stopSource(); playing=null; startSource(i, at); }
+});
+$('#target').addEventListener('change',()=>{ if(playing) playing.g.gain.value=Math.min(gainFor(files[playing.idx]),4); });
+$('#seek').addEventListener('click',e=>{
+  if(!files.length) return;
+  const r=$('#seek').getBoundingClientRect();
+  const frac=(e.clientX-r.left)/r.width;
+  const idx=playing? playing.idx : 0;
+  const at=frac*files[idx].dur;
+  if(playing){ stopSource(); const i=playing.idx; playing=null; startSource(i, at); }
+  else { offset=at; paintSeek(at, files[idx].dur); }
+});
+function paintSeek(t, dur){
+  $('#seek i').style.width=(t/dur*100)+'%';
+  $('#time').textContent=fmtT(t);
+}
+function tick(){
+  if(!playing) return;
+  const f=files[playing.idx];
+  paintSeek(Math.min(pos(),f.dur), f.dur);
+  raf=requestAnimationFrame(tick);
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='SELECT'||e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ e.preventDefault(); $('#play').click(); }
+  if(e.key==='m'||e.key==='M'){ $('#monobtn').click(); }
+  const n=parseInt(e.key,10);
+  if(n>=1 && n<=Math.min(9,files.length)) switchTo(n-1);
+});
+window.addEventListener('resize',()=>{ if(files.length){ renderSpectrum(); renderBands(); renderScatter();
+  files.forEach((f,i)=>drawWave($('#file-cards').querySelector(`canvas[data-i="${i}"]`), f)); }});
+</script>
+</body>
+</html>
