@@ -1,6 +1,6 @@
 {
-  "version": "2.3.5",
-  "updatedAt": "2026-06-04T00:00:00.000Z",
+  "version": "2.6.0",
+  "updatedAt": "2026-10-10T12:45:20.865Z",
   "downloadUrl": "https://www.tylervinson.com/widget/",
   "widgets": [
     {
@@ -164,7 +164,55 @@
           "type": "richtext"
         }
       ]
+    },
+    {
+      "class": "data-widget",
+      "name": "Data widget",
+      "repeat": {
+        "selector": ".data-widget__slide",
+        "groupLabel": "Slide"
+      },
+      "fields": [
+        {
+          "key": "eyebrow",
+          "label": "Eyebrow",
+          "selector": ".data-widget__eyebrow",
+          "type": "text"
+        },
+        {
+          "key": "title",
+          "label": "Title",
+          "selector": ".data-widget__title",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "selector": ".data-widget__description",
+          "type": "textarea"
+        },
+        {
+          "key": "accent",
+          "label": "Accent",
+          "self": true,
+          "type": "text",
+          "attr": "data-accent"
+        },
+        {
+          "key": "labels",
+          "label": "Labels",
+          "self": true,
+          "type": "text",
+          "attr": "data-labels"
+        },
+        {
+          "key": "values",
+          "label": "Values",
+          "self": true,
+          "type": "text",
+          "attr": "data-values"
+        }
+      ]
     }
-  ],
-  "apiKey": "{90524103-7799-489C-9E53-C0D995207FB4}"
+  ]
 }
