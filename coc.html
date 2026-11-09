@@ -49,7 +49,7 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body {
   margin: 0; background: var(--azb-grey-100); color: var(--azb-ink);
   font-family: var(--azb-font-sans); font-size: 16px; line-height: 1.5;
-  -webkit-font-smoothing: antialiased; padding-bottom: 72px;
+  -webkit-font-smoothing: antialiased;
 }
 a { color: var(--azb-navy-link); text-decoration: underline; text-underline-offset: 2px; }
 a:hover { color: var(--azb-navy-hover); }
@@ -263,29 +263,6 @@ p { margin: 0; }
 .screen.active { display: block; }
 h1[tabindex] { outline: 0; }
 
-/* ---------- demo bar ---------- */
-#demobar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000;
-  background: #1c1c1c; border-top: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 300;
-  padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-#demobar .dot { width: 7px; height: 7px; border-radius: 50%; background: #FFBE5F; flex: 0 0 auto; }
-#demobar strong { color: #f2f2f2; font-weight: 500; }
-#demobar select {
-  background: #202020; color: #f2f2f2; border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px; padding: 6px 10px; font-family: inherit; font-size: 13px;
-}
-#demobar select:focus { outline: 0; border-color: rgba(255,190,95,0.35); background: rgba(255,255,255,0.03); }
-#demobar button {
-  background: transparent; color: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-  padding: 6px 14px; font-family: inherit; font-size: 13px; cursor: pointer;
-  transition: color .3s ease, border-color .3s ease;
-}
-#demobar button:hover { color: #FFBE5F; border-color: rgba(255,190,95,0.35); }
-#demobar .spacer { margin-left: auto; }
-
 #toast {
   position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(10px);
   background: var(--azb-navy); color: #fff; padding: 12px 20px;
@@ -296,8 +273,6 @@ h1[tabindex] { outline: 0; }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 @media (max-width: 900px) {
-  #demobar label[for="jump"] { display: none; }
-  body { padding-bottom: 116px; }
 }
 @media (max-width: 900px) {
   .screen[id^="step"] > .cols { grid-template-columns: minmax(0, 1fr); row-gap: 20px; }
@@ -468,7 +443,7 @@ body:has(.screen.active[id^="step"]) { background: #fff; }
   .screen[id^="step"] .rail-guidance { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-@media print { #demobar, #toast { display: none; } body { padding-bottom: 0; } }
+@media print { #toast { display: none; } }
 
 /* Intro: simple, white welcome screen with centered content. */
 body:has(#intro.active) { background: #fff; }
@@ -836,26 +811,6 @@ body:has(#intro.active) { background: #fff; }
 </section>
 </div>
 <div aria-live="polite" id="toast" role="status"></div>
-<div id="demobar">
-<span aria-hidden="true" class="dot"></span>
-<span><strong>Demo</strong> · nothing is saved</span>
-<label for="jump" style="margin-left:8px">Jump to</label>
-<select id="jump">
-<option value="intro">1. Opening</option>
-<option value="step1">2. Step 1, question 1</option>
-<option value="step1:no">— Step 1, answered No</option>
-<option value="step1:unsure">— Step 1, answered Not sure</option>
-<option value="step1:chose">— Step 1, change not covered</option>
-<option value="step2">3. Step 2, your care</option>
-<option value="step2:none">— Step 2, none of the above</option>
-<option value="step3">4. Step 3, your information</option>
-<option value="step4">5. Step 4, provider and submit</option>
-<option value="done">6. Confirmation</option>
-</select>
-<span class="spacer"></span>
-<button id="fill" type="button">Fill with sample answers</button>
-<button id="restart" type="button">Start over</button>
-</div>
 <script>
 (function () {
   'use strict';
@@ -1156,24 +1111,7 @@ body:has(#intro.active) { background: #fff; }
     if (last) last.focus();
   });
 
-  $('#jump').addEventListener('change', function () {
-    var parts = this.value.split(':');
-    var id = parts[0], preset = parts[1];
-    if (preset && id === 'step1') {
-      var net = preset === 'chose' ? 'yes' : preset;
-      $$('input[name="network"]').forEach(function (i) { i.checked = i.value === net; });
-      $$('input[name="change"]').forEach(function (i) { i.checked = preset === 'chose' && i.value === 'chose'; });
-    }
-    if (preset && id === 'step2') {
-      $$('#step2 input[name="care"]:not([value="none"])').forEach(function (i) { i.checked = false; });
-      var n = $('.exit-opt input[name="care"]');
-      if (n) n.checked = preset === 'none';
-    }
-    show(id);
-  });
-
-  $('#fill').addEventListener('click', fillSample);
-  $('#restart').addEventListener('click', reset);
+$('#fill').addEventListener('click', fillSample);
   $('#restart2').addEventListener('click', reset);
 
   addProvider();
