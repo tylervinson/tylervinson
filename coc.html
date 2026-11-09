@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Continuity of Care, Eligibility Check</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<style>
+:root {
+  /* ===== AZ Blue design system ===== */
+  --azb-navy: #0B3B60;
+  --azb-navy-link: #2273BA;
+  --azb-navy-hover: #082A45;
+  --azb-cyan-600: #0099D8;
+  --azb-cyan-500: #28BFE0;
+  --azb-cyan-200: #98E1FF;
+  --azb-orange-600: #FF8200;
+  --azb-orange-500: #FFBE5F;
+  --azb-orange-400: #FFC673;
+  --azb-orange-200: #FFD495;
+  --azb-ink: #2D2926;
+  --azb-ink-secondary: #595959;
+  --azb-grey-500: #AEAEAE;
+  --azb-grey-300: #E6E6E6;
+  --azb-grey-100: #F7F7F7;
+  --azb-white: #FFFFFF;
+  --azb-bg-tint: #F1F9FD;
+  --azb-success-500: #4CAF50;
+  --azb-success-200: #A5D6A7;
+  --azb-error-500: #DD524C;
+  --azb-font-sans: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --azb-radius-pill: 100px;
+  --azb-radius-card: 8px;
+  --azb-radius-input: 4px;
+  --azb-shadow-card: 0 1px 6px rgba(0,0,0,0.08);
+  --azb-tight: -0.01em;
+  --azb-wide: 0.06em;
+  --azb-tint-good: #EFF7EF;
+}
+
+* { box-sizing: border-box; }
+/* the reveal panels carry display:block for layout, which would otherwise
+   beat the hidden attribute's UA rule */
+[hidden] { display: none !important; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0; background: var(--azb-grey-100); color: var(--azb-ink);
+  font-family: var(--azb-font-sans); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; padding-bottom: 72px;
+}
+a { color: var(--azb-navy-link); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--azb-navy-hover); }
+h1, h2, h3 { margin: 0; letter-spacing: var(--azb-tight); }
+p { margin: 0; }
+
+/* ---------- layout ---------- */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 40px 32px 56px; }
+/* Base layout; the split-screen rules below control wizard pages. */
+.cols { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.rail { flex: 1 1 266px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.main { flex: 999 1 560px; min-width: 0; }
+.screen[id^="step"] > .cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  column-gap: 28px;
+  align-items: start;
+}
+.screen[id^="step"] > .cols > .rail,
+.screen[id^="step"] > .cols > .main { min-width: 0; width: 100%; }
+.screen[id^="step"] > .cols > .main { max-width: 800px; justify-self: center; }
+.narrow { max-width: 800px; margin: 0 auto; }
+.mobile-crumbs { display: none; }
+
+/* ---------- surfaces ---------- */
+.card {
+  background: var(--azb-white); border: 1px solid var(--azb-grey-300);
+  border-radius: var(--azb-radius-card); box-shadow: var(--azb-shadow-card); padding: 32px;
+}
+.card.tight { padding: 22px 24px; }
+
+.q { font-size: 28px; font-weight: 300; line-height: 1.25; color: var(--azb-navy); }
+.h-sm { font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--azb-ink); }
+.sub { font-size: 16px; line-height: 1.5; color: var(--azb-ink-secondary); max-width: 66ch; }
+.fine { font-size: 14px; line-height: 1.45; color: var(--azb-ink-secondary); }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: var(--azb-wide); text-transform: uppercase; color: var(--azb-navy); }
+.req { color: var(--azb-error-500); font-weight: 400; }
+.rule { border: 0; border-top: 1px solid var(--azb-grey-300); margin: 28px 0; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 48px; padding: 14px 32px;
+  background: var(--azb-orange-500); color: var(--azb-navy);
+  font-family: inherit; font-size: 16px; font-weight: 700;
+  border: 0; border-radius: var(--azb-radius-pill); text-decoration: none; cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.btn:hover { background: var(--azb-orange-400); box-shadow: 0 0 0 2px var(--azb-orange-500); color: var(--azb-navy); }
+.btn:focus-visible { outline: 3px solid var(--azb-cyan-600); outline-offset: 2px; }
+.btn.secondary { background: transparent; border: 1px solid var(--azb-navy); }
+.btn.secondary:hover { background: var(--azb-bg-tint); box-shadow: none; }
+.btn.sm { min-height: 40px; padding: 8px 20px; font-size: 14px; }
+.linkbtn {
+  background: none; border: 0; padding: 0; font-family: inherit;
+  font-size: 14px; font-weight: 700; color: var(--azb-navy-link);
+  cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ---------- progress rail ---------- */
+.steps { display: flex; flex-direction: column; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-col { display: flex; flex-direction: column; align-items: center; align-self: stretch; flex: 0 0 auto; }
+.bead {
+  width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  background: var(--azb-grey-100); border: 1px solid var(--azb-grey-300); color: var(--azb-ink-secondary);
+}
+.step.done .bead { background: var(--azb-success-500); border-color: var(--azb-success-500); color: #fff; }
+.step.now .bead { background: #fff; border: 3px solid var(--azb-navy); color: var(--azb-navy); }
+.spine { width: 2px; flex-grow: 1; min-height: 14px; background: var(--azb-grey-300); }
+.step.done .spine { background: var(--azb-success-200); }
+.step-body { padding-bottom: 16px; flex-grow: 1; min-width: 0; }
+.step-title { font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--azb-ink-secondary); }
+.step.now .step-title, .step.done .step-title { font-weight: 700; color: var(--azb-ink); }
+
+/* ---------- callouts ---------- */
+.note { border-radius: var(--azb-radius-card); padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; }
+.note p { font-size: 14px; line-height: 1.5; }
+.note.info { background: var(--azb-bg-tint); border: 1px solid var(--azb-cyan-200); }
+.note.good { background: var(--azb-tint-good); border: 1px solid var(--azb-success-200); }
+.note .ic { flex: 0 0 auto; margin-top: 1px; }
+
+/* ---------- choice cards ---------- */
+.opts { display: flex; flex-direction: column; gap: 11px; }
+.opts.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.opt {
+  position: relative; display: flex; gap: 13px; align-items: flex-start;
+  background: var(--azb-white); border: 0;
+  border-radius: 3px; padding: 16px 18px; cursor: pointer;
+  transition: background .2s ease;
+}
+.opt:hover { background: var(--azb-grey-100); }
+.opt > input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.ind {
+  width: 20px; height: 20px; flex: 0 0 auto; margin-top: 2px;
+  border: 2px solid var(--azb-grey-500); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.ind.radio { border-radius: 50%; }
+.ind.check { border-radius: 3px; }
+.ind.radio::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: 0; }
+.ind.check::after {
+  content: ""; width: 5px; height: 9px; border: solid #fff; border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) translate(-1px, -1px); opacity: 0;
+}
+.opt > input:checked ~ .ind, .sub-opt > input:checked ~ .ind { border-color: var(--azb-navy); background: var(--azb-navy); }
+.opt > input:checked ~ .ind::after, .sub-opt > input:checked ~ .ind::after { opacity: 1; }
+.opt:has(> input:checked) { background: var(--azb-bg-tint); }
+.opt:has(> input:checked):hover { background: var(--azb-bg-tint); }
+.opt:has(> input:focus-visible) { outline: 3px solid var(--azb-cyan-600); outline-offset: 2px; }
+.opt-main { flex-grow: 1; min-width: 0; }
+.opt-label { display: block; font-size: 16px; font-weight: 700; line-height: 1.4; }
+.ex { display: block; margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--azb-ink-secondary); }
+.exit-opt { margin-top: 20px; padding-top: 18px; border-top: 1px dashed var(--azb-grey-500); }
+
+.subs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.sub-opt { position: relative; display: flex; gap: 9px; align-items: flex-start; font-size: 14px; line-height: 1.4; cursor: pointer; padding: 4px 0; }
+.sub-opt > input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sub-opt .ind { width: 18px; height: 18px; margin-top: 0; }
+.sub-opt:has(> input:focus-visible) .ind { outline: 3px solid var(--azb-cyan-600); outline-offset: 2px; }
+
+/* ---------- reveal panels ---------- */
+.reveal {
+  background: var(--azb-bg-tint); border: 1px solid var(--azb-cyan-200);
+  border-radius: var(--azb-radius-card); padding: 18px 20px; margin-top: 12px;
+}
+
+
+/* Selected checkbox and its follow-up fields share one continuous blue surface. */
+.care-followups { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.care-followups:empty { display: none; }
+.care-followup-item {
+  display: flex; flex-direction: column; gap: 0; min-width: 0;
+  background: var(--azb-bg-tint); border-radius: 3px;
+}
+.care-followup-item > .opt {
+  width: 100%; flex: none; background: transparent;
+  border: 0; border-radius: 3px 3px 0 0;
+  padding: 16px 18px;
+}
+.care-followup-item > .opt:hover,
+.care-followup-item > .opt:has(> input:checked),
+.care-followup-item > .opt:has(> input:checked):hover { background: transparent; }
+.care-detail-panel {
+  min-width: 0; margin: 0;
+  padding: 0 18px 18px;
+  background: transparent;
+}
+.care-detail-panel > .reveal {
+  display: block; margin: 0; padding: 0;
+  background: transparent; border: 0; border-radius: 0;
+}
+.care-detail-panel > .ex { display: block; margin-top: 12px; }
+.care-detail-panel.pregnancy-followup { padding: 0 18px 18px; }
+.care-detail-panel > .h-sm { margin-top: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .care-detail-panel:not([hidden]) { animation: care-detail-in 260ms cubic-bezier(.22,1,.36,1) both; }
+  @keyframes care-detail-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ---------- fields ---------- */
+.fields { display: flex; flex-direction: column; gap: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.row > .field { flex: 1 1 220px; min-width: 0; }
+.field label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.field input {
+  width: 100%; min-height: 48px; padding: 12px 14px;
+  font-family: inherit; font-size: 16px; color: var(--azb-ink);
+  background: #fff; border: 1px solid var(--azb-grey-500); border-radius: var(--azb-radius-input);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.field input:hover { border-color: var(--azb-navy-link); }
+.field input:focus { outline: 0; border-color: var(--azb-navy); box-shadow: 0 0 0 3px rgba(34,115,186,0.18); }
+
+/* Keep the browser's native date picker clickable, with a visible AZ Blue icon. */
+.field input[type="date"] {
+  color-scheme: light;
+  cursor: pointer;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%230B3B60%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M7%203v4M17%203v4M3%2010h18%22%2F%3E%3C%2Fsvg%3E") center / 20px 20px no-repeat;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  opacity: 1;
+  cursor: pointer;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: .8;
+}
+
+/* ---------- providers ---------- */
+.provider { background: var(--azb-grey-100); border: 1px solid var(--azb-grey-300); border-radius: var(--azb-radius-card); padding: 22px 24px; margin-bottom: 14px; }
+.provider-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.adder { width: 100%; min-height: 52px; background: #fff; border: 1px dashed var(--azb-grey-500); border-radius: var(--azb-radius-card); color: var(--azb-navy-link); font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.adder:hover { border-color: var(--azb-navy-link); background: var(--azb-bg-tint); }
+
+/* ---------- confirmation ---------- */
+.tl { display: flex; gap: 15px; align-items: flex-start; }
+.tl-body { padding-bottom: 20px; flex-grow: 1; min-width: 0; }
+.tl-title { font-size: 16px; font-weight: 700; line-height: 1.4; }
+.tl-text { font-size: 14px; line-height: 1.55; color: var(--azb-ink-secondary); margin-top: 5px; max-width: 72ch; }
+
+/* ---------- screens ---------- */
+.screen { display: none; }
+.screen.active { display: block; }
+h1[tabindex] { outline: 0; }
+
+/* ---------- demo bar ---------- */
+#demobar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000;
+  background: #1c1c1c; border-top: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 300;
+  padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+#demobar .dot { width: 7px; height: 7px; border-radius: 50%; background: #FFBE5F; flex: 0 0 auto; }
+#demobar strong { color: #f2f2f2; font-weight: 500; }
+#demobar select {
+  background: #202020; color: #f2f2f2; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px; padding: 6px 10px; font-family: inherit; font-size: 13px;
+}
+#demobar select:focus { outline: 0; border-color: rgba(255,190,95,0.35); background: rgba(255,255,255,0.03); }
+#demobar button {
+  background: transparent; color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
+  padding: 6px 14px; font-family: inherit; font-size: 13px; cursor: pointer;
+  transition: color .3s ease, border-color .3s ease;
+}
+#demobar button:hover { color: #FFBE5F; border-color: rgba(255,190,95,0.35); }
+#demobar .spacer { margin-left: auto; }
+
+#toast {
+  position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--azb-navy); color: #fff; padding: 12px 20px;
+  border-radius: var(--azb-radius-pill); font-size: 14px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(11,59,96,.25); z-index: 9500;
+  opacity: 0; pointer-events: none; transition: opacity .3s ease, transform .3s ease;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 900px) {
+  #demobar label[for="jump"] { display: none; }
+  body { padding-bottom: 116px; }
+}
+@media (max-width: 900px) {
+  .screen[id^="step"] > .cols { grid-template-columns: minmax(0, 1fr); row-gap: 20px; }
+  .screen[id^="step"] > .cols > .main { max-width: 800px; width: 100%; }
+  .screen[id^="step"] .desktop-steps { display: none; }
+  .screen[id^="step"] .mobile-crumbs { display: block; }
+  .mobile-crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 9px; }
+  .mobile-crumbs li { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; line-height: 1.5; }
+  .mobile-crumbs li + li::before { content: "›"; color: var(--azb-grey-500); font-size: 18px; }
+  .mobile-crumbs button { background: none; border: 0; padding: 4px 0; color: var(--azb-navy-link); text-decoration: underline; text-underline-offset: 2px; font: inherit; cursor: pointer; }
+  .mobile-crumbs button:focus-visible { outline: 2px solid var(--azb-cyan-600); outline-offset: 3px; }
+  .mobile-crumbs [aria-current="step"] { color: var(--azb-navy); font-weight: 700; }
+  .opts.two, .subs { grid-template-columns: 1fr; }
+  .wrap { padding: 24px 16px 40px; }
+  .q { font-size: 24px; }
+}
+@media (max-width: 520px) {
+  .screen[id^="step"] .main > .card { padding: 24px 20px; }
+  .mobile-crumbs ol { column-gap: 7px; }
+  .mobile-crumbs li { gap: 7px; }
+}
+
+/* ===== Reference-inspired split-screen layout =====
+   The intro retains its original centered presentation. Subsequent pages
+   have independent full-height surfaces rather than two floating cards. */
+:root { --split-edge: clamp(28px, 3.2vw, 56px); --split-divider: #e8ebee; }
+body:has(.screen.active[id^="step"]) { background: #fff; }
+.wrap:has(.screen.active[id^="step"]) {
+  width: 100%; max-width: none; padding: 0; margin: 0;
+}
+.screen[id^="step"] > .cols {
+  display: grid;
+  grid-template-columns: 20% minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+  min-height: calc(100dvh - 62px);
+}
+.screen[id^="step"] > .cols > .rail {
+  width: 100%; min-width: 0;
+  background: #f7f8fa;
+  border-right: 1px solid var(--split-divider);
+  padding: 58px var(--split-edge) 72px;
+  align-items: flex-end;
+}
+.screen[id^="step"] .desktop-steps { width: 100%; max-width: 285px; }
+.screen[id^="step"] .desktop-steps.card {
+  padding: 0; background: transparent; border: 0;
+  border-radius: 0; box-shadow: none;
+}
+/* Branding now lives in the sidebar, with the form title in the content area. */
+.rail-logo { width: 100%; margin: 0 0 48px; min-height: 40px; }
+.rail-logo img { display: block; width: min(158px, 100%); height: auto; }
+.screen[id^="step"] .form-brand-eyebrow {
+  width: 100%; max-width: min(760px, calc(60vw - 64px));
+  position: relative; left: -10vw;
+  margin: 0 0 34px;
+  font-size: 12px; font-weight: 700; line-height: 1.5;
+  letter-spacing: var(--azb-wide); text-transform: uppercase;
+  color: var(--azb-navy);
+}
+.screen[id^="step"] .step { gap: 14px; }
+.screen[id^="step"] .step-title { font-size: 14px; line-height: 1.45; }
+.screen[id^="step"] .step-body { padding-bottom: 24px; }
+.screen[id^="step"] .step.now .step-title { color: var(--azb-navy); }
+.screen[id^="step"] .step-caption {
+  display: block; margin-top: 3px; font-size: 12px;
+  line-height: 1.5; color: var(--azb-ink-secondary); font-weight: 400;
+}
+.screen[id^="step"] > .cols > .main {
+  width: 100%; min-width: 0; max-width: none;
+  display: flex; flex-direction: column; align-items: center;
+  justify-self: stretch;
+  background: #fff;
+  padding: clamp(60px, 8vh, 100px) var(--split-edge) 100px;
+}
+.screen[id^="step"] .main > .card {
+  width: 100%; max-width: min(760px, calc(60vw - 64px));
+  position: relative; left: -10vw;
+  padding: 0; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none;
+}
+.screen[id^="step"] .main > .card + .card { margin-top: 32px; }
+.screen[id^="step"] .main > .card[style*="margin-bottom"] { margin-bottom: 0 !important; }
+.screen[id^="step"] .q { font-weight: 500; font-size: clamp(24px, 2.15vw, 30px); }
+.screen[id^="step"] .opts { margin-top: 18px; }
+.screen[id^="step"] .opts.two { margin-top: 0; }
+.screen[id^="step"] .main .actions { margin-bottom: 6px; }
+/* The form is offset by half of the 20vw sidebar so its center sits at
+   50vw (the full page center), not at the center of the right track.
+   Its width shrinks to retain a 32px minimum gap from the sidebar. */
+@media (max-width: 900px) {
+  body:has(.screen.active[id^="step"]) { background: #fff; }
+  .screen[id^="step"] > .cols { display: flex; flex-direction: column; min-height: 0; }
+  .screen[id^="step"] > .cols > .rail {
+    flex: 0 0 auto; padding: 17px 20px; background: #f7f8fa;
+    border-right: 0; border-bottom: 1px solid var(--split-divider);
+    align-items: stretch;
+  }
+  .screen[id^="step"] .desktop-steps { display: none; }
+  .screen[id^="step"] .mobile-crumbs { display: block; }
+  .mobile-crumbs ol { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: 3px; }
+  .mobile-crumbs li { white-space: nowrap; }
+  .screen[id^="step"] > .cols > .main {
+    flex: 0 0 auto; max-width: none; width: 100%; padding: 36px 24px 72px;
+  }
+  .screen[id^="step"] .main > .card {
+    padding: 0; max-width: 680px; left: auto;
+  }
+  .screen[id^="step"] .form-brand-eyebrow {
+    max-width: 680px; left: auto; margin-bottom: 24px;
+  }
+  .screen[id^="step"] .q { font-size: 24px; }
+}
+@media (max-width: 520px) {
+  .screen[id^="step"] > .cols > .main { padding: 32px 20px 72px; }
+  .screen[id^="step"] .main > .card { padding: 0; }
+  .screen[id^="step"] > .cols > .rail { padding: 14px 16px; }
+  .screen[id^="step"] .opts.two, .screen[id^="step"] .subs { grid-template-columns: 1fr; }
+}
+
+/* Integrated information area, separated by a quiet hairline divider. */
+.screen[id^="step"] .rail-guidance {
+  width: 100%; margin-top: 12px; padding: 24px 0 0;
+  border-top: 1px solid #dce2e7;
+}
+.rail-guidance-heading {
+  display: flex; align-items: flex-start; gap: 9px;
+  color: var(--azb-navy); font-size: 13px; font-weight: 700;
+  line-height: 1.45; margin-bottom: 9px;
+}
+.rail-guidance-heading svg { flex: 0 0 auto; margin-top: 1px; }
+.rail-guidance p { font-size: 12px; line-height: 1.65; color: var(--azb-ink-secondary); }
+
+/* Progress advances from the preceding marker, then settles softly. */
+@keyframes step-progress-in {
+  from { transform: translateY(-20px) scale(.92); opacity: .28; }
+  65% { transform: translateY(3px) scale(1.04); opacity: 1; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes step-content-in {
+  from { transform: translateY(17px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes step-choice-in {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen.active[id^="step"] .step.now .bead {
+    animation: step-progress-in 560ms cubic-bezier(.2,.7,.2,1) both;
+  }
+  .screen.active[id^="step"] .step.now .step-body {
+    animation: step-content-in 430ms ease-out 90ms both;
+  }
+  .screen.active[id^="step"] .main > .card {
+    animation: step-content-in 460ms cubic-bezier(.22,1,.36,1) both;
+  }
+  .screen.active[id^="step"] .main > .card .opts > .opt {
+    animation: step-choice-in 350ms ease-out both;
+  }
+  .screen.active[id^="step"] .main > .card .opts > .opt:nth-child(1) { animation-delay: 110ms; }
+  .screen.active[id^="step"] .main > .card .opts > .opt:nth-child(2) { animation-delay: 160ms; }
+  .screen.active[id^="step"] .main > .card .opts > .opt:nth-child(3) { animation-delay: 210ms; }
+  .screen.active[id^="step"] .main > .card .opts > .opt:nth-child(4) { animation-delay: 260ms; }
+  .screen.active[id^="step"] .main > .card .opts > .opt:nth-child(n+5) { animation-delay: 300ms; }
+}
+@media (max-width: 900px) {
+  .screen[id^="step"] .rail-guidance { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media print { #demobar, #toast { display: none; } body { padding-bottom: 0; } }
+
+/* Intro: simple, white welcome screen with centered content. */
+body:has(#intro.active) { background: #fff; }
+.wrap:has(#intro.active) {
+  max-width: none;
+  width: 100%;
+  padding: 0 24px;
+}
+#intro.active {
+  min-height: calc(100dvh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 7vh, 84px) 0;
+}
+#intro .narrow { width: 100%; max-width: 700px; margin: 0 auto; }
+#intro .card {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: center;
+}
+#intro .intro-logo {
+  display: block;
+  width: min(174px, 48vw);
+  height: auto;
+  margin: 0 auto 42px;
+}
+#intro .sub { margin-left: auto !important; margin-right: auto !important; }
+#intro .actions { justify-content: center; }
+#intro .fine { max-width: 590px; margin-left: auto; margin-right: auto; }
+#intro .rule { max-width: 580px; margin-left: auto; margin-right: auto; }
+@media (max-width: 600px) {
+  .wrap:has(#intro.active) { padding: 0 22px; }
+  #intro.active { min-height: calc(100dvh - 116px); padding: 40px 0; }
+  #intro .intro-logo { margin-bottom: 32px; }
+  #intro #intro-h { font-size: 28px !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<!-- ===================== INTRO ===================== -->
+<section aria-labelledby="intro-h" class="screen active" id="intro">
+<div class="narrow">
+<div class="card">
+<img alt="AZ Blue" class="intro-logo" height="44" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJMYXllcl8xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxNTggNDA7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxNTggNDAiIHg9IjBweCIgeT0iMHB4Ij4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojMDA5OUQ4O30KCS5zdDF7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojRkZGRkZGO30KCS5zdDJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojMkQyOTI2O30KPC9zdHlsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTYxLDMuOWMtNC45LDAtOS4xLTEuMi0xMy40LTMuM2MtMi44LDUuNS0zLjIsMTQuMy0wLjgsMjEuN0M0OS4xLDI5LjQsNTMuNiwzNS45LDYxLDQwJiN4QTsJYzcuNC00LjEsMTEuOS0xMC42LDE0LjItMTcuN2MyLjQtNy40LDItMTYuMy0wLjgtMjEuN0M3MC4yLDIuNyw2NS45LDMuOCw2MSwzLjl6Ii8+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MSwzNS4yTDYxLDM1LjJMNjEsMzUuMkw2MSwzNS4yeiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjEsMzYuN0w2MSwzNi43TDYxLDM2LjdjLTYuMS0zLjgtOS4zLTkuMi0xMS40LTE1LjNDNDcuOCwxNiw0Ny4zLDkuNyw0OS4zLDQuN2MzLDEsNC44LDEuNCw2LjUsMS42JiN4QTsJYzEuNSwwLjIsMi45LDAuNCw1LjIsMC40aDBjMi4zLDAsMy42LTAuMiw1LjItMC40YzEuNy0wLjMsMy40LTAuNiw2LjUtMS42YzIsNC45LDEuNiwxMS4zLTAuMywxNi43QzcwLjMsMjcuNSw2Ny4xLDMyLjksNjEsMzYuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTYxLDguMkw2MSw4LjJjLTEuNywwLTMuNS0wLjItNS4zLTAuNGMtMS44LTAuMi0zLjUtMC42LTUuMy0xLjFjLTEuMywzLjctMSw4LjMsMCwxMi40JiN4QTsJYzEuOSw3LjcsNi41LDEzLjYsMTAuNiwxNi4yYzQuMS0yLjYsOC44LTguNSwxMC42LTE2LjJjMS00LjEsMS4zLTguNywwLTEyLjRjLTEuOCwwLjUtMy42LDAuOS01LjMsMS4xQzY0LjUsOCw2Mi43LDguMiw2MSw4LjJ6Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02NS40LDExLjljLTAuMSwwLjMtMC4yLDAuMy0wLjQsMC41Yy0wLjQsMC40LTEsMC44LTEuNSwxLjNjLTAuMywwLjMtMC43LDAuNS0wLjksMC45JiN4QTsJYy0wLjEsMC4xLTAuMiwwLjMtMC4yLDAuM2MtMC45LTAuMi0xLjgtMC4yLTIuNi0wLjNsMC0wLjhjMCwwLDAuOSwwLDEtMC42YzAsMCwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuNC0wLjItMC41LTAuMiYjeEE7CWMwLjcsMC4xLDEuMywwLjQsMiwwLjdjMC0wLjEtMC4xLTAuMy0wLjEtMC40Yy0wLjEtMC4xLTAuMi0wLjItMC41LTAuM2MtMC40LTAuMS0xLjUtMC4yLTEuNS0wLjJzMC40LDAsMC45LDAmI3hBOwljMC4yLDAsMC41LTAuMSwwLjUtMC4yYzAuMS0wLjEsMC0wLjMtMC4yLTAuNGMtMC4xLTAuMS0wLjItMC4yLTAuMy0wLjNjLTAuMS0wLjEtMC4yLTAuNC0wLjQtMC42Yy0wLjItMC4zLTAuOS0wLjUtMC45LTAuNSYjeEE7CXMtMC4xLTAuNSwwLjEtMC43YzAuMS0wLjIsMC41LTAuMiwwLjYtMC4xYzAuNSwwLjMsMS4xLDAuNiwxLjgsMC43YzAuMSwwLjEsMC4yLDAuMSwwLjIsMC40YzAuMSwwLjUtMC4xLDEuMiwwLDEuNSYjeEE7CWMwLDAuMSwwLjEsMC4xLDAuMiwwLjFjMC42LTAuMywxLjEtMSwxLjctMS4yQzY0LjcsMTAuOCw2NS42LDExLjMsNjUuNCwxMS45Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02Mi41LDIwLjhjMCwwLDAuMS0xLjQsMC4xLTJjMC40LTAuMSwwLjQtMC41LDAuMy0wLjhjLTAuMS0wLjItMC40LTAuMy0wLjUtMC4zYy0wLjgtMC4yLTEuNS0wLjItMi4yLTAuMyYjeEE7CWMtMC43LTAuMS0xLjItMC4yLTEuOS0wLjNjLTEuMy0wLjMtMi40LTAuOS0zLTIuMWMtMC43LTEuNS0wLjEtMy4zLDEuMy00YzEuMS0wLjUsMi4yLTAuNCwzLjMsMGMwLjQsMC4xLDAuNiwwLjUsMC44LDAuOCYjeEE7CWMwLjEsMC4xLDAuMywwLjIsMC4zLDAuNGMwLjEsMC4xLTAuMSwwLjEtMC4xLDAuMWMtMC4yLDAuMS0xLDAuMS0xLjMsMGMtMC4zLDAtMC44LDAtMS4yLDBjMC4zLDAuMiwwLjcsMC40LDEsMC42JiN4QTsJYzAuMiwwLjEsMC40LDAuMSwwLjUsMC4yYzAuMSwwLDAuMywwLjEsMC4zLDAuMmMwLDAuMS0wLjIsMC4xLTAuMywwLjJjLTAuMywwLjEtMC43LDAuMS0xLjEsMGMtMC42LTAuMS0wLjktMC41LTEuMy0wLjMmI3hBOwljLTAuMywwLjItMC4zLDAuNS0wLjIsMC44YzAuMSwwLjUsMC43LDAuOCwxLjIsMC45YzEuNywwLjUsMy40LDAuMiw1LDEuMWMwLjYsMC4zLDEuMywxLDEuNSwxLjdDNjUuNywyMC41LDYyLjUsMjAuOCw2Mi41LDIwLjgiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTU5LjksMTcuOWMwLDAsMC4zLDAsMS4xLDAuMWMwLjYsMCwxLDAuMiwxLDAuMmwtMC4xLDIuOWMtMC43LTAuMS0xLjEtMC4yLTEuNy0wLjNjLTAuMi0xLjEtMC41LTEuNC0wLjktMi4yJiN4QTsJYy0wLjEtMC4yLDAtMC4yLDAtMC4zYzAuMS0wLjEsMC41LTAuMiwwLjUtMC4yTDU5LjksMTcuOXoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTY0LjMsMjQuM2MtMC4xLDAuNS0wLjQsMC44LTAuOSwxLjFjLTAuNSwwLjMtMS4xLDAuMy0xLjEsMC4zbDAtMS42YzAsMCwwLjEsMCwwLjItMC4xJiN4QTsJYzAuMS0wLjEsMC4xLTAuMiwwLjEtMC4zYzAtMC4xLTAuMS0wLjItMC4yLTAuM2MtMC4yLTAuMS0wLjQtMC4xLTAuNS0wLjFjLTAuOC0wLjEtMS41LTAuMi0yLjMtMC4zYy0xLjQtMC4yLTIuNC0xLTIuMy0yLjQmI3hBOwljMC4xLTAuOSwxLTEuMiwxLjctMS40YzAuMiwwLjQsMC40LDAuOCwwLjUsMWMwLjEsMC40LDAuMiwwLjYsMC4yLDAuNnMtMC4zLDAuMS0wLjMsMC4zYzAsMC4yLDAuMywwLjMsMC40LDAuM2MxLDAuMSwyLjMsMC4zLDMsMC41JiN4QTsJYzAuNSwwLjIsMC45LDAuNCwxLjIsMC44QzY0LjMsMjMuMyw2NC40LDIzLjcsNjQuMywyNC4zIi8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02MC40LDIzLjdjMC42LDAuMSwwLjksMC4xLDEuNCwwLjJsLTAuMSwyLjZsLTAuNi0wLjNsLTAuNi0wLjNMNjAuNCwyMy43eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjIuOSwzMGMtMC4zLDAuMy0wLjgsMC40LTAuOCwwLjRsMC0xLjFjMCwwLDAuMS0wLjEsMC4xLTAuM2MtMC4xLTAuMi0wLjktMC44LTEuMy0wLjljLTAuNC0wLjItMS0wLjMtMS40LTAuNSYjeEE7CWMtMS0wLjQtMS4zLTEuMy0wLjktMi4yYzAuMS0wLjMsMC41LTAuNiwwLjctMC43YzAuMi0wLjEsMC42LTAuMiwwLjYtMC4ybDAuMSwxLjNjMCwwLTAuMSwwLTAuMiwwLjJjLTAuMSwwLjIsMC4xLDAuNCwwLjIsMC40JiN4QTsJYzAuNiwwLjMsMS42LDAuNywyLjIsMWMwLjksMC41LDEuMiwwLjksMS4yLDEuNUM2My41LDI5LjQsNjMuMiwyOS43LDYyLjksMzAiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTYxLjcsMzIuOGMwLDAuMi0wLjEsMC40LTAuNSwwLjRjLTAuMywwLTAuNS0wLjEtMC41LTAuNWMtMC4xLTEuNS0wLjEtNC40LTAuMS00LjRzMC40LDAuMSwwLjYsMC4zJiN4QTsJYzAuMSwwLDAuMywwLjIsMC41LDAuNGMwLDAuMSwwLjEsMC4xLDAuMSwwLjJDNjEuNywzMC4zLDYxLjcsMzIuMyw2MS43LDMyLjgiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTYwLDMyLjNjLTAuMSwwLjMtMC4zLDAuMi0wLjQsMGMtMC4yLTAuMy0wLjMtMC41LTAuMy0wLjljLTAuMS0wLjcsMC4zLTEuMSwwLjUtMS4zYzAuMi0wLjIsMC40LTAuMywwLjQtMC4zJiN4QTsJbDAuMSwxLjJjMCwwLTAuMiwwLjEtMC4zLDAuNUM1OS45LDMyLDYwLjEsMzIuMiw2MCwzMi4zeiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTkuNCwxMS42YzAuMiwwLDAuMi0wLjEsMC40LTAuMmwwLjIsMGMtMC4zLTAuMy0xLTAuMy0xLjQtMC4zYzAuMSwwLjIsMC4yLDAuMSwwLjQsMC4yJiN4QTsJQzU5LjIsMTEuNCw1OS4xLDExLjYsNTkuNCwxMS42eiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjguNCwxMS41di0xMUgxMXYxMUgwVjI5aDExdjExaDE3LjVWMjloMTFWMTEuNUgyOC40eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjYuMywyOC43bC01LTkuM2MtMC40LTAuOC0wLjItMi4xLDEuMi0yLjNsNy4yLTAuN2gwaDBjMC40LDEuMiwwLjcsMi41LDAuNywzLjgmI3hBOwlDMzAuNSwyMy43LDI4LjgsMjYuNywyNi4zLDI4LjdMMjYuMywyOC43eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjUuNiwyOS4yTDI1LjYsMjkuMmMtMS43LDEuMS0zLjcsMS44LTUuOSwxLjhjLTIuMiwwLTQuMi0wLjctNS45LTEuOGwwLDB2MGwwLDBsNS4zLTcuOWMwLjQtMC41LDEtMC41LDEuMywwJiN4QTsJTDI1LjYsMjkuMkwyNS42LDI5LjJMMjUuNiwyOS4yeiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNOS42LDE2LjRsNy4yLDAuN2MxLjQsMC4yLDEuNSwxLjUsMS4yLDIuM2wtNSw5LjNsMCwwYy0yLjUtMi00LjEtNS00LjEtOC41QzguOSwxOC45LDkuMSwxNy42LDkuNiwxNi40eiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkuNywyMy4xbC0wLjIsMC4xbC0zLjYsNS42YzEuMiwwLjUsMi40LDAuOCwzLjgsMC44YzEuMywwLDIuNi0wLjMsMy44LTAuOGwtMy42LTUuNkwxOS43LDIzLjF6Ii8+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMC43LDE4Yy0wLjIsMC43LTAuMywxLjQtMC4zLDIuMmMwLDIuMywwLjgsNC40LDIuMiw2LjFsMy44LTcuM2MwLjEtMC4yLDAuMS0wLjQtMC4zLTAuNEwxMC43LDE4eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjkuNCwxNS43aC03LjdjLTEuMSwwLTEuNi0wLjctMS42LTEuMmMwLTAuNiwwLjEtMC44LDAuNi0xLjVjMC42LTAuNywwLjItMi4yLTEuMS0yLjJjLTEuMywwLTEuNiwxLjQtMS4xLDIuMiYjeEE7CWMwLjUsMC43LDAuNiwwLjksMC42LDEuNWMwLDAuNS0wLjUsMS4yLTEuNiwxLjJIOS45YzEuNy0zLjcsNS40LTYuMiw5LjgtNi4yQzI0LDkuNCwyNy43LDEyLDI5LjQsMTUuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTI2LjcsMTQuMmMtMS4yLTEuNC0yLjctMi40LTQuNS0yLjljMC41LDAuOSwwLjEsMi4xLTAuNCwyLjdjLTAuMSwwLjEsMCwwLjIsMCwwLjJIMjYuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTIzLjIsMTguNWMtMC40LDAtMC40LDAuMi0wLjMsMC40bDMuOCw3LjNjMS40LTEuNiwyLjItMy43LDIuMi02LjFjMC0wLjgtMC4xLTEuNS0wLjMtMi4yTDIzLjIsMTguNXoiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyLjYsMTQuMmg0LjljMC4xLDAsMC4xLTAuMSwwLTAuMmMtMC41LTAuNi0xLTEuOC0wLjQtMi43QzE1LjMsMTEuOCwxMy44LDEyLjgsMTIuNiwxNC4yeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNODQuNCwxMC43VjAuMmg0YzEuOS0wLjEsMy44LDAuNywzLjgsMi43YzAsMS4yLTAuOCwyLTEuOSwyLjN2MGMxLjMsMC4zLDIuMywxLjIsMi4zLDIuNyYjeEE7CWMwLDIuMS0yLjYsMi44LTQuMiwyLjdIODQuNHogTTg4LjUsNC40YzAuOSwwLDEuNS0wLjQsMS41LTEuMmMwLTAuOC0wLjUtMS4yLTEuNS0xLjJoLTEuOHYyLjVIODguNXogTTg4LjUsOWMxLjEsMCwxLjgtMC4yLDEuOC0xLjQmI3hBOwljMC0xLjItMC43LTEuNC0xLjgtMS40aC0xLjhWOUg4OC41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTQuMSwxMC43aDIuMlYwLjJoLTIuMlYxMC43eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTAyLjksOS44Yy0wLjUsMC43LTEuMiwxLjEtMi4zLDEuMWMtMC43LDAtMi4xLTAuNi0yLjQtMS42Yy0wLjEtMC41LTAuMS0wLjktMC4xLTEuMlYzLjRoMi4ydjQuNCYjeEE7CWMwLDAuOCwwLjIsMS43LDEuMywxLjdjMC43LDAsMS4zLTAuNiwxLjMtMS43VjMuNGgyLjJ2NmMwLDAuNCwwLDAuOSwwLjEsMS4zSDEwM0wxMDIuOSw5Ljh6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMDksNy43YzAsMC45LDAuMSwxLjgsMS4zLDEuOGMwLjgsMCwxLjEtMC4zLDEuMy0wLjloMmMtMC4yLDEuOC0xLjYsMi40LTMuMywyLjRjLTIuNSwwLTMuNS0xLjQtMy41LTMuOSYjeEE7CWMwLTIuMiwxLjMtMy45LDMuNS0zLjljMS40LDAsMi41LDAuNSwzLjEsMS43YzAuMiwwLjQsMC4zLDAuOCwwLjQsMS4zYzAuMSwwLjUsMC4xLDAuOSwwLjEsMS40SDEwOXogTTExMS41LDYuMiYjeEE7CWMwLTAuOC0wLjItMS41LTEuMy0xLjVjLTEsMC0xLjIsMC43LTEuMywxLjVIMTExLjV6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMjEuMiwzLjZjMC0xLjEtMC43LTItMi0yYy0xLjYsMC0yLDIuNC0yLDMuOGMwLDEuNSwwLjQsMy44LDIsMy44YzEuNCwwLDItMC45LDItMmgyLjQmI3hBOwljLTAuMSwyLjYtMiwzLjYtNC40LDMuNmMtMywwLTQuNC0yLjQtNC40LTUuNWMwLTMuMSwxLjQtNS41LDQuNC01LjVjMi40LDAsNC4zLDEsNC40LDMuNkgxMjEuMnoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEyNi43LDMuNGwwLDEuM2gwYzAuNS0xLjIsMS40LTEuNCwyLjUtMS40djEuOWgtMC45Yy0wLjQsMC0wLjgsMC4yLTEuMSwwLjVjLTAuMiwwLjQtMC4zLDAuOC0wLjMsMS4zdjMuNiYjeEE7CWgtMi4ybDAtNS45YzAtMC4zLDAtMC45LTAuMS0xLjVIMTI2Ljd6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMzQuMSwxMWMtMi40LDAtMy44LTEuNi0zLjgtMy45YzAtMi4zLDEuNC0zLjksMy44LTMuOWMyLjQsMCwzLjgsMS42LDMuOCwzLjlDMTM3LjksOS40LDEzNi41LDExLDEzNC4xLDExJiN4QTsJIE0xMzQuMSw5LjVjMS4zLDAsMS42LTEuMywxLjYtMi40YzAtMS4yLTAuMi0yLjQtMS42LTIuNGMtMS4zLDAtMS42LDEuMy0xLjYsMi40QzEzMi41LDguMiwxMzIuOCw5LjUsMTM0LjEsOS41Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xNDMuMiw1LjRjMC0wLjUtMC41LTAuNy0xLTAuN2MtMC42LDAtMC45LDAuMi0wLjksMC43YzAsMS4yLDQuMiwwLjUsNC4yLDMuMmMwLDEuNi0yLDIuNC0zLjMsMi40JiN4QTsJYy0xLjcsMC0zLjItMC43LTMuMi0yLjNoMmMwLDAuNiwwLjYsMC45LDEuMiwwLjljMC42LDAsMS0wLjIsMS0wLjhjMC0wLjYtMS0wLjgtMS41LTAuOWMtMS40LTAuMy0yLjctMC42LTIuNy0yLjMmI3hBOwljMC0xLjUsMS45LTIuMiwzLjEtMi4yYzEuNSwwLDIuOSwwLjYsMywyLjJIMTQzLjJ6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xNTAuNSw1LjRjMC0wLjUtMC41LTAuNy0xLTAuN2MtMC42LDAtMC45LDAuMi0wLjksMC43YzAsMS4yLDQuMiwwLjUsNC4yLDMuMmMwLDEuNi0yLDIuNC0zLjMsMi40JiN4QTsJYy0xLjcsMC0zLjItMC43LTMuMi0yLjNoMmMwLDAuNiwwLjYsMC45LDEuMiwwLjljMC42LDAsMS4xLTAuMiwxLjEtMC44YzAtMC42LTEuMS0wLjgtMS41LTAuOWMtMS40LTAuMy0yLjctMC42LTIuNy0yLjMmI3hBOwljMC0xLjUsMS45LTIuMiwzLjEtMi4yYzEuNSwwLDIuOSwwLjYsMywyLjJIMTUwLjV6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik04NC40LDI1VjE0LjVoNGMxLjktMC4xLDMuOCwwLjcsMy44LDIuN2MwLDEuMi0wLjgsMi0xLjksMi4zdjBjMS4zLDAuMywyLjMsMS4yLDIuMywyLjdjMCwyLjEtMi42LDIuOC00LjIsMi43JiN4QTsJSDg0LjR6IE04OC41LDE4LjdjMC45LDAsMS41LTAuNCwxLjUtMS4yYzAtMC44LTAuNS0xLjItMS41LTEuMmgtMS44djIuNUg4OC41eiBNODguNSwyMy4zYzEuMSwwLDEuOC0wLjIsMS44LTEuNCYjeEE7CWMwLTEuMi0wLjctMS40LTEuOC0xLjRoLTEuOHYyLjhIODguNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTk0LjEsMjVoMi4yVjE0LjVoLTIuMlYyNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEwMi45LDI0LjFjLTAuNSwwLjctMS4yLDEuMS0yLjMsMS4xYy0wLjcsMC0yLjEtMC42LTIuNC0xLjZjLTAuMS0wLjUtMC4xLTAuOS0wLjEtMS4ydi00LjhoMi4ydjQuNCYjeEE7CWMwLDAuOCwwLjIsMS43LDEuMywxLjdjMC43LDAsMS4zLTAuNiwxLjMtMS43di00LjRoMi4ydjZjMCwwLjQsMCwwLjksMC4xLDEuM0gxMDNMMTAyLjksMjQuMXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEwOSwyMS45YzAsMC45LDAuMSwxLjgsMS4zLDEuOGMwLjgsMCwxLjEtMC4zLDEuMy0wLjloMmMtMC4yLDEuOC0xLjYsMi40LTMuMywyLjRjLTIuNSwwLTMuNS0xLjQtMy41LTMuOSYjeEE7CWMwLTIuMiwxLjMtMy45LDMuNS0zLjljMS40LDAsMi41LDAuNSwzLjEsMS43YzAuMiwwLjQsMC4zLDAuOCwwLjQsMS4zYzAuMSwwLjUsMC4xLDAuOSwwLjEsMS40SDEwOXogTTExMS41LDIwLjUmI3hBOwljMC0wLjgtMC4yLTEuNS0xLjMtMS41Yy0xLDAtMS4yLDAuNy0xLjMsMS41SDExMS41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTIwLjksMTcuNWMtMC4xLTEuMS0wLjctMS42LTEuOC0xLjZjLTAuOCwwLTEuNywwLjQtMS43LDEuNGMwLDEuMSwxLDEuMywxLjksMS41YzEuNiwwLjQsNCwwLjksNCwzJiN4QTsJYzAsMi42LTIuMywzLjUtNC41LDMuNWMtMi40LDAtNC4xLTAuOS00LTMuNmgyLjNjLTAuMSwxLjIsMC42LDIsMS44LDJjMC45LDAsMi4xLTAuMywyLjEtMS40YzAtMS4yLTEuNS0xLjMtMi40LTEuNiYjeEE7CWMtMS41LTAuNC0zLjUtMS0zLjUtMi45YzAtMi40LDIuMi0zLjUsNC40LTMuNWMyLDAsMy42LDEuMSwzLjYsMy4ySDEyMC45eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTI0LjksMjVWMTQuNWgyLjJ2NC4xbDAsMGMwLjUtMC43LDEuMS0xLjEsMi4yLTEuMWMwLjcsMCwyLjEsMC41LDIuNCwxLjZjMC4xLDAuNSwwLjEsMC45LDAuMSwxLjJWMjVoLTIuMiYjeEE7CXYtNC40YzAtMC44LTAuMi0xLjctMS4zLTEuN2MtMC43LDAtMS4zLDAuNi0xLjMsMS43VjI1SDEyNC45eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTMzLjcsMTYuNGgyLjN2LTEuOWgtMi4zVjE2LjR6IE0xMzMuOCwyNWgyLjJ2LTcuM2gtMi4yVjI1eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTM5LjgsMjEuOWMwLDAuOSwwLjEsMS44LDEuMywxLjhjMC44LDAsMS4xLTAuMywxLjMtMC45aDJjLTAuMiwxLjgtMS42LDIuNC0zLjMsMi40Yy0yLjUsMC0zLjUtMS40LTMuNS0zLjkmI3hBOwljMC0yLjIsMS4zLTMuOSwzLjUtMy45YzEuNCwwLDIuNSwwLjUsMy4xLDEuN2MwLjIsMC40LDAuMywwLjgsMC40LDEuM2MwLjEsMC41LDAuMSwwLjksMC4xLDEuNEgxMzkuOHogTTE0Mi4zLDIwLjUmI3hBOwljMC0wLjgtMC4yLTEuNS0xLjMtMS41Yy0xLDAtMS4yLDAuNy0xLjMsMS41SDE0Mi4zeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTQ2LDI1aDIuMlYxNC41SDE0NlYyNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTE1NS4xLDE0LjVoMi4ydjkuMWMwLDAuNSwwLDEsMC4xLDEuNWgtMi4yYzAtMC40LTAuMS0wLjctMC4xLTFoMGMtMC41LDAuOS0xLjMsMS4zLTIuMiwxLjMmI3hBOwljLTIuMSwwLTMuMS0yLTMuMS0zLjljMC0yLDEuMi0zLjksMy40LTMuOWMwLjgsMCwxLjUsMC41LDIsMS4xaDBWMTQuNXogTTE1My41LDIzLjhjMS4yLDAsMS42LTEuNCwxLjYtMi40YzAtMS0wLjQtMi40LTEuNi0yLjQmI3hBOwljLTEuNCwwLTEuNiwxLjMtMS42LDIuNEMxNTEuOSwyMi41LDE1Mi4xLDIzLjgsMTUzLjUsMjMuOEwxNTMuNSwyMy44eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNjkuMiwzOC4xdi0wLjVoMC4zYzAuMiwwLDAuNCwwLDAuNCwwLjJjMCwwLjMtMC4yLDAuMy0wLjQsMC4zSDY5LjJ6IE02OS4yLDM4LjNoMC4zbDAuNCwwLjdoMC4zbC0wLjUtMC43JiN4QTsJYzAuMiwwLDAuNC0wLjIsMC40LTAuNWMwLTAuMy0wLjItMC41LTAuNi0wLjVoLTAuNlYzOWgwLjNWMzguM3ogTTY5LjUsMzkuNmMwLjgsMCwxLjUtMC42LDEuNS0xLjVjMC0wLjgtMC43LTEuNS0xLjUtMS41JiN4QTsJYy0wLjgsMC0xLjUsMC42LTEuNSwxLjVDNjgsMzksNjguNywzOS42LDY5LjUsMzkuNkw2OS41LDM5LjZ6IE02OC4zLDM4LjJjMC0wLjcsMC41LTEuMiwxLjItMS4yYzAuNywwLDEuMiwwLjUsMS4yLDEuMiYjeEE7CWMwLDAuNy0wLjUsMS4yLTEuMiwxLjJDNjguOCwzOS40LDY4LjMsMzguOSw2OC4zLDM4LjJMNjguMywzOC4yeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMzEuNSwzOC40di0wLjVoMC4zYzAuMiwwLDAuNCwwLDAuNCwwLjJjMCwwLjMtMC4yLDAuMy0wLjQsMC4zSDMxLjV6IE0zMS41LDM4LjZoMC4zbDAuNCwwLjdoMC4zTDMyLDM4LjYmI3hBOwljMC4yLDAsMC40LTAuMiwwLjQtMC41YzAtMC4zLTAuMi0wLjUtMC42LTAuNWgtMC42djEuN2gwLjNWMzguNnogTTMxLjgsNDBjMC44LDAsMS41LTAuNiwxLjUtMS41YzAtMC44LTAuNy0xLjUtMS41LTEuNSYjeEE7CWMtMC44LDAtMS41LDAuNi0xLjUsMS41QzMwLjMsMzkuMywzMSw0MCwzMS44LDQwTDMxLjgsNDB6IE0zMC42LDM4LjVjMC0wLjcsMC41LTEuMiwxLjItMS4yYzAuNywwLDEuMiwwLjUsMS4yLDEuMiYjeEE7CWMwLDAuNy0wLjUsMS4yLTEuMiwxLjJDMzEuMSwzOS43LDMwLjYsMzkuMiwzMC42LDM4LjVMMzAuNiwzOC41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTEuMiwzNkw4OSwzMC4yTDg2LjcsMzZIOTEuMnogTTg0LjQsMzkuNmw0LjEtMTAuMmgxLjFsNC4xLDEwLjJoLTFsLTEuMS0yLjhoLTUuMWwtMS4xLDIuOEg4NC40eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTUuNSwzOS42aC0wLjh2LTUuNWMwLTAuNiwwLTEuMS0wLjEtMS42aDAuOWwwLDFoMGMwLjMtMC43LDAuOS0xLjIsMS42LTEuM2MwLjMsMCwwLjYsMCwwLjksMHYwLjgmI3hBOwljLTAuMiwwLTAuNC0wLjEtMC41LTAuMWMtMS4zLDAtMS45LDAuOS0yLDIuM1YzOS42eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTkuMSwzOS42aDAuOHYtNy4xaC0wLjhWMzkuNnogTTk5LDMwLjRoMXYtMS4xaC0xVjMwLjR6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMDEuNCwzOC44bDQuMi01LjZoLTQuMnYtMC44aDUuMnYwLjhsLTQuMSw1LjZoNC4xdjAuOGgtNS4yVjM4Ljh6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMTAuOSwzMy4xYy0xLjcsMC0yLjQsMS43LTIuNCwzYzAsMS4zLDAuNywzLDIuNCwzYzEuNywwLDIuNC0xLjcsMi40LTNDMTEzLjMsMzQuNywxMTIuNiwzMy4xLDExMC45LDMzLjEmI3hBOwkgTTExNC4yLDM2LjFjMCwxLjktMSwzLjgtMy4zLDMuOGMtMi4zLDAtMy4zLTEuOS0zLjMtMy44YzAtMS45LDEuMS0zLjgsMy4zLTMuOEMxMTMuMiwzMi4zLDExNC4yLDM0LjIsMTE0LjIsMzYuMSIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTE2LjYsMzkuNmgtMC45di01LjVjMC0wLjYsMC0xLjEtMC4xLTEuNmgwLjlsMCwxLjFsMCwwYzAuNS0wLjksMS4zLTEuMywyLjItMS4zYzIuMywwLDIuNSwyLjEsMi41LDIuOXY0LjUmI3hBOwloLTAuOVYzNWMwLTEuMi0wLjctMi0xLjktMmMtMS40LDAtMiwxLjItMiwyLjVWMzkuNnoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEyNS4zLDM5LjFjMS45LDAsMi4yLTEuNSwyLjEtM2MtMS4yLDAtMy43LTAuMi0zLjcsMS42QzEyMy43LDM4LjYsMTI0LjQsMzkuMSwxMjUuMywzOS4xTDEyNS4zLDM5LjF6JiN4QTsJIE0xMjcuNCwzNC42Yy0wLjEtMS4yLTAuNy0xLjUtMS43LTEuNWMtMC45LDAtMS42LDAuMy0xLjcsMS4yaC0wLjljMC4yLTEuNSwxLjMtMiwyLjctMmMxLjYsMCwyLjYsMC43LDIuNSwyLjRWMzgmI3hBOwljMCwwLjYsMCwxLjEsMC4xLDEuNmgtMC45bDAtMS4xaDBsMCwwLjFjLTAuMywwLjYtMS4zLDEuMi0yLjIsMS4yYy0xLjMsMC0yLjQtMC44LTIuNC0yLjJjMC0xLDAuNi0xLjcsMS40LTIuMSYjeEE7CWMwLjktMC40LDIuMi0wLjMsMy4yLTAuM1YzNC42eiIvPgo8L3N2Zz4=" width="174"/>
+<p class="eyebrow" style="margin-bottom:10px">Eligibility Check and Next-Step Tool</p>
+<h1 class="q" id="intro-h" style="font-size:32px" tabindex="-1">What is Continuity of Care?</h1>
+<p class="sub" style="margin:14px 0 0;font-size:18px">Continuity of care benefits may allow you to temporarily continue certain ongoing care with a provider who is no longer in your AZ Blue network.</p>
+<hr class="rule"/>
+<h2 class="h-sm">Check Your Eligibility</h2>
+<p class="sub" style="margin:10px 0 22px">Use this tool to see if your situation may qualify for continuity of care and learn the next steps.</p>
+<button class="btn" data-go="step1" type="button">Check Your Eligibility</button>
+<hr class="rule"/>
+<p class="fine"><strong style="color:var(--azb-ink)">Important:</strong> This tool is <em>not</em> a prior authorization request and does <em>not</em> guarantee continuity-of-care approval, coverage, or payment. Your benefits and eligibility will be reviewed after you submit the requested information.</p>
+</div>
+</div>
+</section>
+<!-- ===================== STEP 1 ===================== -->
+<section aria-labelledby="s1-h" class="screen" id="step1">
+<div class="cols">
+<div class="rail" data-rail="1"></div>
+<div class="main">
+<p class="form-brand-eyebrow">Continuity of Care</p>
+<div class="card">
+<div aria-labelledby="s1-h" role="radiogroup">
+<h1 class="q" id="s1-h" tabindex="-1">Is your provider, or will your provider soon be, out of network with your new AZ Blue plan? <span aria-hidden="true" class="req">*</span></h1>
+<div class="opts" id="q-network" style="margin-top:18px">
+<label class="opt"><input name="network" type="radio" value="yes"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">Yes</span></span></label>
+<label class="opt"><input name="network" type="radio" value="no"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">No</span></span></label>
+<label class="opt"><input name="network" type="radio" value="unsure"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">I am not sure</span></span></label>
+</div>
+</div>
+<!-- If No -->
+<div hidden="" id="q1-no">
+<hr class="rule"/>
+<h2 class="h-sm" style="font-size:22px">You don't need to complete this form.</h2>
+<p class="sub" style="margin:10px 0 20px">Your provider is in network with your AZ Blue plan.</p>
+<p class="sub"><strong style="color:var(--azb-ink)">Not sure?</strong> Check the <a href="https://www.azblue.com/find-a-doctor" rel="noopener" target="_blank">Provider Directory</a>, <a href="https://www.azblue.com/contact-us" rel="noopener" target="_blank">Contact Us</a> or call Customer Service at <strong style="color:var(--azb-ink)">800-232-2345.</strong></p>
+</div>
+<!-- If I am not sure -->
+<div hidden="" id="q1-unsure">
+<hr class="rule"/>
+<p class="sub"><strong style="color:var(--azb-ink)">Not sure?</strong> Check the <a href="https://www.azblue.com/find-a-doctor" rel="noopener" target="_blank">Provider Directory</a>, <a href="https://www.azblue.com/contact-us" rel="noopener" target="_blank">Contact Us</a> or call Customer Service at <strong style="color:var(--azb-ink)">800-232-2345.</strong></p>
+</div>
+<div hidden="" id="q2-block">
+<hr class="rule"/>
+<div aria-labelledby="s1-h2" role="radiogroup">
+<h2 class="h-sm" id="s1-h2">Are you new to AZ Blue, or did your AZ Blue plan or network recently change? <span aria-hidden="true" class="req">*</span></h2>
+<p class="sub" style="margin:6px 0 16px">Choose the answer that best describes your situation.</p>
+<div class="opts two" id="q-change">
+<label class="opt"><input name="change" type="radio" value="new"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">Yes, I am new to AZ Blue.</span></span></label>
+<label class="opt"><input name="change" type="radio" value="employer"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">Yes, my employer or AZ Blue changed my plan or network.</span></span></label>
+<label class="opt"><input name="change" type="radio" value="chose"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">Yes, I chose to change plans, networks, or employers.</span></span></label>
+<label class="opt"><input name="change" type="radio" value="none"/><span aria-hidden="true" class="ind radio"></span><span class="opt-main"><span class="opt-label">No, none of these apply.</span></span></label>
+</div>
+</div>
+<!-- If chose, or none apply -->
+<div hidden="" id="q2-stop">
+<hr class="rule"/>
+<h2 class="h-sm" style="font-size:22px">Continuity of care does not apply to your situation.</h2>
+<p class="sub" style="margin-top:10px">For help checking your provider's network status or understanding your benefits, <a href="https://www.azblue.com/contact-us" rel="noopener" target="_blank">Contact Us</a> or call Customer Service at <strong style="color:var(--azb-ink)">800-232-2345</strong>.</p>
+</div>
+</div>
+<hr class="rule"/>
+<div class="actions" id="s1-actions">
+<button class="btn secondary" data-go="intro" type="button">Back</button>
+<button class="btn" data-next="step1" id="s1-continue" type="button">Continue</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== STEP 2 ===================== -->
+<section aria-labelledby="s2-h" class="screen" id="step2">
+<div class="cols">
+<div class="rail" data-rail="2"></div>
+<div class="main">
+<p class="form-brand-eyebrow">Continuity of Care</p>
+<div class="card">
+<div aria-labelledby="s2-h" role="group">
+<h1 class="q" id="s2-h" tabindex="-1">Are you currently receiving, or scheduled to receive, any of the following services from a provider who is no longer in your AZ Blue network or will be leaving the network soon?</h1>
+<p class="sub" style="margin:12px 0 20px">Select all that apply. <strong style="color:var(--azb-ink);text-decoration:underline">At least one option</strong> must be selected to continue.</p>
+<div class="opts" id="care-opts">
+<label class="opt" data-care="pregnancy-due">
+<input aria-controls="pregnancy-due-details" name="care" type="checkbox" value="pregnancy-due"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main"><span class="opt-label">I am pregnant and my due date is:</span></span>
+</label>
+<label class="opt" data-care="pregnancy-cond">
+<input aria-controls="pregnancy-cond-details" name="care" type="checkbox" value="pregnancy-cond"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main"><span class="opt-label">I am pregnant and receiving care for one or more of the following conditions (select all that apply):</span></span>
+</label>
+<label class="opt" data-care="surgery">
+<input aria-controls="surgery-details" name="care" type="checkbox" value="surgery"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main">
+<span class="opt-label">I have a surgery scheduled.</span>
+
+
+</span>
+</label>
+<label class="opt" data-care="complex">
+<input aria-controls="complex-details" name="care" type="checkbox" value="complex"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main">
+<span class="opt-label">I have a serious and complex condition and currently receive care from this provider.</span>
+
+
+</span>
+</label>
+<label class="opt" data-care="inpatient">
+<input name="care" type="checkbox" value="inpatient"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main"><span class="opt-label">I am currently receiving institutional or inpatient care</span></span>
+</label>
+<label class="opt" data-care="terminal">
+<input aria-controls="terminal-details" name="care" type="checkbox" value="terminal"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main">
+<span class="opt-label">My provider has determined that I have a terminal illness, and I am receiving treatment.</span>
+
+
+</span>
+</label>
+<label class="opt" data-care="treatment">
+<input aria-controls="treatment-details" name="care" type="checkbox" value="treatment"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main">
+<span class="opt-label">I am receiving one or more of the following treatments:</span>
+
+
+</span>
+</label>
+</div>
+<!-- Pregnancy follow-up fields live below the complete main checkbox list. -->
+<div aria-label="Additional care details" class="care-followups" id="care-followups">
+<div class="care-detail-panel" data-detail="pregnancy-due" hidden="" id="pregnancy-due-details">
+<h2 class="h-sm">Pregnancy due date</h2>
+<div class="field" style="max-width:240px;margin-top:14px">
+<label for="dueDate">Due date</label>
+<input data-model="dueDate" id="dueDate" type="date"/>
+</div>
+</div>
+<div class="care-detail-panel" data-detail="pregnancy-cond" hidden="" id="pregnancy-cond-details">
+<h2 class="h-sm">Pregnancy-related conditions</h2>
+<p class="fine" style="margin:7px 0 14px">Select all that apply.</p>
+<div class="subs">
+<label class="sub-opt"><input name="preg" type="checkbox" value="High blood pressure, preeclampsia, or eclampsia"/><span aria-hidden="true" class="ind check"></span>High blood pressure, preeclampsia, or eclampsia</label>
+<label class="sub-opt"><input name="preg" type="checkbox" value="Gestational diabetes"/><span aria-hidden="true" class="ind check"></span>Gestational diabetes</label>
+<label class="sub-opt"><input name="preg" type="checkbox" value="Placental problems"/><span aria-hidden="true" class="ind check"></span>Placental problems</label>
+<label class="sub-opt"><input name="preg" type="checkbox" value="Multiple pregnancy (such as twins)"/><span aria-hidden="true" class="ind check"></span>Multiple pregnancy (such as twins)</label>
+<label class="sub-opt"><input name="preg" type="checkbox" value="Amniotic fluid problems"/><span aria-hidden="true" class="ind check"></span>Amniotic fluid problems</label>
+<label class="sub-opt"><input name="preg" type="checkbox" value="Dehydration from severe nausea and vomiting"/><span aria-hidden="true" class="ind check"></span>Dehydration from severe nausea and vomiting</label>
+<label class="sub-opt"><input id="pregOther" name="preg" type="checkbox" value="Other"/><span aria-hidden="true" class="ind check"></span>Other:</label>
+</div>
+<div class="field" data-detail="pregOther" hidden="" style="margin-top:12px;max-width:420px">
+<label for="pregOtherText">Other</label>
+<input data-model="pregOtherText" id="pregOtherText" type="text"/>
+</div>
+</div>
+<div class="care-detail-panel" data-detail="surgery" hidden="" id="surgery-details"><span class="reveal">
+<span class="row">
+<span class="field" style="flex:2 1 260px;display:block">
+<label for="surgery">Surgery</label>
+<input data-model="surgery" id="surgery" type="text"/>
+</span>
+<span class="field" style="flex:1 1 170px;display:block">
+<label for="surgeryDate">Date</label>
+<input data-model="surgeryDate" id="surgeryDate" type="date"/>
+</span>
+</span>
+</span><span class="ex"><em>Examples: transplant; heart or blood vessel surgery; cancer-related tumor removal or biopsy; brain, spine, or orthopedic surgery; or surgery for traumatic injuries.</em></span></div><div class="care-detail-panel" data-detail="complex" hidden="" id="complex-details"><span class="reveal">
+<span class="field" style="display:block">
+<label for="complexCondition">Condition(s)</label>
+<input data-model="complexCondition" id="complexCondition" type="text"/>
+</span>
+</span><span class="ex"><em>Examples: advanced cancer, amyotrophic lateral sclerosis (ALS), Alzheimer's disease or dementia, diabetes with complications, multiple sclerosis (MS), heart, kidney, liver, or lung failure, severe mental illness, sickle cell disease, systemic lupus erythematosus (SLE).</em></span></div><div class="care-detail-panel" data-detail="terminal" hidden="" id="terminal-details"><span class="reveal">
+<span class="field" style="display:block">
+<label for="terminalCondition">Condition(s)</label>
+<input data-model="terminalCondition" id="terminalCondition" type="text"/>
+</span>
+</span><span class="ex"><em>Examples: advanced cancer, end-stage liver or lung disease, or organ failure.</em></span></div><div class="care-detail-panel" data-detail="treatment" hidden="" id="treatment-details"><span class="reveal">
+<span class="field" style="display:block">
+<label for="treatments">Treatment(s)</label>
+<input data-model="treatments" id="treatments" type="text"/>
+</span>
+<span class="field" style="display:block;margin-top:14px;max-width:240px">
+<label for="nextAppt">Next appointment</label>
+<input data-model="nextAppt" id="nextAppt" type="date"/>
+</span>
+</span><span class="ex"><em>Examples: chemotherapy, radiation, infusion therapy, advanced imaging (MRI, CT, PET, ultrasound, nuclear medicine, or fluoroscopy), skilled home health care, required durable medical equipment (DME), physical, occupational, or speech therapy, specialty medications, medical foods, intensive outpatient or partial hospitalization programs, and medication-assisted treatment.</em></span></div></div>
+<div class="exit-opt">
+<label class="opt">
+<input name="care" type="checkbox" value="none"/>
+<span aria-hidden="true" class="ind check"></span>
+<span class="opt-main"><span class="opt-label">None of the above</span></span>
+</label>
+</div>
+<!-- If None of the above -->
+<div hidden="" id="care-stop">
+<hr class="rule"/>
+<h2 class="h-sm" style="font-size:22px">Continuity of Care does not apply to your situation.</h2>
+<p class="sub" style="margin:10px 0 16px">Don't worry, we're here to help you find the right next step:</p>
+<ul style="margin:0;padding-left:22px;font-size:16px;line-height:1.9;color:var(--azb-ink-secondary)">
+<li>Use <a href="https://www.azblue.com/find-a-doctor" rel="noopener" target="_blank"><strong>Find a Doctor</strong></a> to search for an in-network provider</li>
+<li>Call <strong style="color:var(--azb-ink)">800-232-2345</strong> if you have questions about your plan or benefits</li>
+<li>Connect with <a href="https://www.azblue.com/clinical-health-experts" rel="noopener" target="_blank"><strong>Clinical Health Experts</strong></a> if you need support managing your care</li>
+</ul>
+</div>
+</div>
+<hr class="rule"/>
+<div class="actions" id="s2-actions">
+<button class="btn secondary" data-go="step1" type="button">Back</button>
+<button class="btn" data-next="step2" id="s2-continue" type="button">Continue</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== STEP 3 ===================== -->
+<section aria-labelledby="s3-h" class="screen" id="step3">
+<div class="cols">
+<div class="rail" data-rail="3"></div>
+<div class="main">
+<p class="form-brand-eyebrow">Continuity of Care</p>
+<div class="card">
+<h1 class="q" id="s3-h" tabindex="-1">Step 3: Your information</h1>
+<div class="fields" style="margin-top:24px">
+<div class="row">
+<div class="field"><label for="first">First name <span aria-hidden="true" class="req">*</span></label><input data-model="first" id="first" type="text"/></div>
+<div class="field"><label for="last">Last name <span aria-hidden="true" class="req">*</span></label><input data-model="last" id="last" type="text"/></div>
+</div>
+<div class="row">
+<div class="field"><label for="dob">Date of birth <span aria-hidden="true" class="req">*</span></label><input data-model="dob" id="dob" type="date"/></div>
+<div class="field"><label for="memberId">Member ID <span aria-hidden="true" class="req">*</span></label><input data-model="memberId" id="memberId" type="text"/></div>
+</div>
+<div class="row">
+<div class="field"><label for="email">Email <span aria-hidden="true" class="req">*</span></label><input data-model="email" id="email" type="email"/></div>
+<div class="field"><label for="phone">Phone number <span aria-hidden="true" class="req">*</span></label><input data-model="phone" id="phone" type="tel"/></div>
+</div>
+<div class="field"><label for="address">Address <span aria-hidden="true" class="req">*</span></label><input data-model="address" id="address" type="text"/></div>
+<div class="field"><label for="csz">City, state, ZIP <span aria-hidden="true" class="req">*</span></label><input data-model="csz" id="csz" type="text"/></div>
+</div>
+<hr class="rule"/>
+<div class="actions">
+<button class="btn secondary" data-go="step2" type="button">Back</button>
+<button class="btn" data-next="step3" type="button">Continue</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== STEP 4 ===================== -->
+<section aria-labelledby="s4-h" class="screen" id="step4">
+<div class="cols">
+<div class="rail" data-rail="4"></div>
+<div class="main">
+<p class="form-brand-eyebrow">Continuity of Care</p>
+<div class="card" style="margin-bottom:20px">
+<h1 class="q" id="s4-h" tabindex="-1">Step 4: Provider or facility information</h1>
+<p class="sub" style="margin:12px 0 24px"><strong style="color:var(--azb-ink)">Add the out-of-network provider or facility involved in the care you want to continue.</strong></p>
+<div id="providers"></div>
+<button class="adder" id="addProvider" type="button">Add another provider or facility</button>
+</div>
+<div class="card">
+<h2 class="h-sm" style="margin-bottom:16px">Before you submit</h2>
+<div class="opts" id="acks">
+<label class="opt"><input name="ack" type="checkbox" value="a1"/><span aria-hidden="true" class="ind check"></span><span class="opt-main"><span style="font-size:15px;line-height:1.55">I understand that submitting this information does <strong>not</strong> confirm that I qualify for continuity of care.</span></span></label>
+<label class="opt"><input name="ack" type="checkbox" value="a2"/><span aria-hidden="true" class="ind check"></span><span class="opt-main"><span style="font-size:15px;line-height:1.55">I understand that this is <strong>not</strong> a prior authorization request and that my provider will need to submit a prior authorization request.</span></span></label>
+<label class="opt"><input name="ack" type="checkbox" value="a3"/><span aria-hidden="true" class="ind check"></span><span class="opt-main"><span style="font-size:15px;line-height:1.55">I confirm that the information I provided is accurate to the best of my knowledge.</span></span></label>
+</div>
+<hr class="rule"/>
+<div class="actions">
+<button class="btn secondary" data-go="step3" type="button">Back</button>
+<button class="btn" data-next="step4" type="button">Send</button>
+</div>
+<p class="fine" style="margin-top:16px">PDF option: Email the completed form to <a href="mailto:MemberHelp@azblue.com">MemberHelp@azblue.com</a>.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================== CONFIRMATION ===================== -->
+<section aria-labelledby="done-h" class="screen" id="done">
+<div class="cols">
+<div class="main">
+<div class="card">
+<div style="display:flex;gap:16px;align-items:center;margin-bottom:26px;flex-wrap:wrap">
+<div style="width:44px;height:44px;border-radius:50%;background:var(--azb-success-500);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg aria-hidden="true" fill="none" height="23" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24" width="23"><path d="M20 6 9 17l-5-5"></path></svg>
+</div>
+<h1 class="q" id="done-h" style="flex-grow:1;min-width:0" tabindex="-1">Thank you for submitting your information.</h1>
+</div>
+<h2 class="h-sm" style="margin-bottom:20px">Here are your next steps:</h2>
+<div class="tl">
+<div class="step-col"><div class="bead">1</div><div class="spine"></div></div>
+<div class="tl-body">
+<div class="tl-title">Talk with your provider.</div>
+<p class="tl-text">Ask if continuity of care may be available for your situation. If your provider is not in the AZ Blue network, they will need to submit a prior authorization request on your behalf, even if the service does not require prior authorization.</p>
+</div>
+</div>
+<div class="tl">
+<div class="step-col"><div class="bead">2</div></div>
+<div class="tl-body" style="padding-bottom:0">
+<div class="tl-title">We'll review your information.</div>
+<p class="tl-text">If we need more details, we'll contact you. We may also reach out to your provider or connect you with an AZ Blue care manager for additional support.</p>
+</div>
+</div>
+<hr class="rule"/>
+<p class="sub"><strong style="color:var(--azb-ink)">Questions?</strong> <a href="https://www.azblue.com/contact-us" rel="noopener" target="_blank">Contact us</a> or call us at <strong style="color:var(--azb-ink)">800-232-2345</strong>.</p>
+</div>
+</div>
+<div class="rail">
+<div class="card tight">
+<p class="eyebrow" style="margin-bottom:10px">Demo</p>
+<p class="fine" style="margin-bottom:14px">Nothing was saved. Run through it again with different answers to see the other paths.</p>
+<button class="btn secondary sm" id="restart2" type="button">Start over</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div aria-live="polite" id="toast" role="status"></div>
+<div id="demobar">
+<span aria-hidden="true" class="dot"></span>
+<span><strong>Demo</strong> · nothing is saved</span>
+<label for="jump" style="margin-left:8px">Jump to</label>
+<select id="jump">
+<option value="intro">1. Opening</option>
+<option value="step1">2. Step 1, question 1</option>
+<option value="step1:no">— Step 1, answered No</option>
+<option value="step1:unsure">— Step 1, answered Not sure</option>
+<option value="step1:chose">— Step 1, change not covered</option>
+<option value="step2">3. Step 2, your care</option>
+<option value="step2:none">— Step 2, none of the above</option>
+<option value="step3">4. Step 3, your information</option>
+<option value="step4">5. Step 4, provider and submit</option>
+<option value="done">6. Confirmation</option>
+</select>
+<span class="spacer"></span>
+<button id="fill" type="button">Fill with sample answers</button>
+<button id="restart" type="button">Start over</button>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var providerCount = 0;
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  function careSelected() {
+    return $$('input[name="care"]:checked', $('#step2')).filter(function (i) { return i.value !== 'none'; }).map(function (i) { return i.value; });
+  }
+  function noneChecked() {
+    var n = $('.exit-opt input[name="care"]');
+    return !!(n && n.checked);
+  }
+
+  /* ---------- progress rail ----------
+     The only thing on screen that is not in the V3 document. */
+  var STEPS = [
+    { n: 1, title: 'Tell us what changed' },
+    { n: 2, title: 'Tell us about the care you are currently receiving' },
+    { n: 3, title: 'Your information' },
+    { n: 4, title: 'Provider or facility information' }
+  ];
+
+  function renderRails() {
+    $$('[data-rail]').forEach(function (rail) {
+      var current = +rail.getAttribute('data-rail');
+      var html = '<div class="card tight desktop-steps"><div class="rail-logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJMYXllcl8xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxNTggNDA7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxNTggNDAiIHg9IjBweCIgeT0iMHB4Ij4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojMDA5OUQ4O30KCS5zdDF7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojRkZGRkZGO30KCS5zdDJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7ZmlsbDojMkQyOTI2O30KPC9zdHlsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTYxLDMuOWMtNC45LDAtOS4xLTEuMi0xMy40LTMuM2MtMi44LDUuNS0zLjIsMTQuMy0wLjgsMjEuN0M0OS4xLDI5LjQsNTMuNiwzNS45LDYxLDQwJiN4QTsJYzcuNC00LjEsMTEuOS0xMC42LDE0LjItMTcuN2MyLjQtNy40LDItMTYuMy0wLjgtMjEuN0M3MC4yLDIuNyw2NS45LDMuOCw2MSwzLjl6Ii8+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MSwzNS4yTDYxLDM1LjJMNjEsMzUuMkw2MSwzNS4yeiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjEsMzYuN0w2MSwzNi43TDYxLDM2LjdjLTYuMS0zLjgtOS4zLTkuMi0xMS40LTE1LjNDNDcuOCwxNiw0Ny4zLDkuNyw0OS4zLDQuN2MzLDEsNC44LDEuNCw2LjUsMS42JiN4QTsJYzEuNSwwLjIsMi45LDAuNCw1LjIsMC40aDBjMi4zLDAsMy42LTAuMiw1LjItMC40YzEuNy0wLjMsMy40LTAuNiw2LjUtMS42YzIsNC45LDEuNiwxMS4zLTAuMywxNi43QzcwLjMsMjcuNSw2Ny4xLDMyLjksNjEsMzYuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTYxLDguMkw2MSw4LjJjLTEuNywwLTMuNS0wLjItNS4zLTAuNGMtMS44LTAuMi0zLjUtMC42LTUuMy0xLjFjLTEuMywzLjctMSw4LjMsMCwxMi40JiN4QTsJYzEuOSw3LjcsNi41LDEzLjYsMTAuNiwxNi4yYzQuMS0yLjYsOC44LTguNSwxMC42LTE2LjJjMS00LjEsMS4zLTguNywwLTEyLjRjLTEuOCwwLjUtMy42LDAuOS01LjMsMS4xQzY0LjUsOCw2Mi43LDguMiw2MSw4LjJ6Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02NS40LDExLjljLTAuMSwwLjMtMC4yLDAuMy0wLjQsMC41Yy0wLjQsMC40LTEsMC44LTEuNSwxLjNjLTAuMywwLjMtMC43LDAuNS0wLjksMC45JiN4QTsJYy0wLjEsMC4xLTAuMiwwLjMtMC4yLDAuM2MtMC45LTAuMi0xLjgtMC4yLTIuNi0wLjNsMC0wLjhjMCwwLDAuOSwwLDEtMC42YzAsMCwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuNC0wLjItMC41LTAuMiYjeEE7CWMwLjcsMC4xLDEuMywwLjQsMiwwLjdjMC0wLjEtMC4xLTAuMy0wLjEtMC40Yy0wLjEtMC4xLTAuMi0wLjItMC41LTAuM2MtMC40LTAuMS0xLjUtMC4yLTEuNS0wLjJzMC40LDAsMC45LDAmI3hBOwljMC4yLDAsMC41LTAuMSwwLjUtMC4yYzAuMS0wLjEsMC0wLjMtMC4yLTAuNGMtMC4xLTAuMS0wLjItMC4yLTAuMy0wLjNjLTAuMS0wLjEtMC4yLTAuNC0wLjQtMC42Yy0wLjItMC4zLTAuOS0wLjUtMC45LTAuNSYjeEE7CXMtMC4xLTAuNSwwLjEtMC43YzAuMS0wLjIsMC41LTAuMiwwLjYtMC4xYzAuNSwwLjMsMS4xLDAuNiwxLjgsMC43YzAuMSwwLjEsMC4yLDAuMSwwLjIsMC40YzAuMSwwLjUtMC4xLDEuMiwwLDEuNSYjeEE7CWMwLDAuMSwwLjEsMC4xLDAuMiwwLjFjMC42LTAuMywxLjEtMSwxLjctMS4yQzY0LjcsMTAuOCw2NS42LDExLjMsNjUuNCwxMS45Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02Mi41LDIwLjhjMCwwLDAuMS0xLjQsMC4xLTJjMC40LTAuMSwwLjQtMC41LDAuMy0wLjhjLTAuMS0wLjItMC40LTAuMy0wLjUtMC4zYy0wLjgtMC4yLTEuNS0wLjItMi4yLTAuMyYjeEE7CWMtMC43LTAuMS0xLjItMC4yLTEuOS0wLjNjLTEuMy0wLjMtMi40LTAuOS0zLTIuMWMtMC43LTEuNS0wLjEtMy4zLDEuMy00YzEuMS0wLjUsMi4yLTAuNCwzLjMsMGMwLjQsMC4xLDAuNiwwLjUsMC44LDAuOCYjeEE7CWMwLjEsMC4xLDAuMywwLjIsMC4zLDAuNGMwLjEsMC4xLTAuMSwwLjEtMC4xLDAuMWMtMC4yLDAuMS0xLDAuMS0xLjMsMGMtMC4zLDAtMC44LDAtMS4yLDBjMC4zLDAuMiwwLjcsMC40LDEsMC42JiN4QTsJYzAuMiwwLjEsMC40LDAuMSwwLjUsMC4yYzAuMSwwLDAuMywwLjEsMC4zLDAuMmMwLDAuMS0wLjIsMC4xLTAuMywwLjJjLTAuMywwLjEtMC43LDAuMS0xLjEsMGMtMC42LTAuMS0wLjktMC41LTEuMy0wLjMmI3hBOwljLTAuMywwLjItMC4zLDAuNS0wLjIsMC44YzAuMSwwLjUsMC43LDAuOCwxLjIsMC45YzEuNywwLjUsMy40LDAuMiw1LDEuMWMwLjYsMC4zLDEuMywxLDEuNSwxLjdDNjUuNywyMC41LDYyLjUsMjAuOCw2Mi41LDIwLjgiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTU5LjksMTcuOWMwLDAsMC4zLDAsMS4xLDAuMWMwLjYsMCwxLDAuMiwxLDAuMmwtMC4xLDIuOWMtMC43LTAuMS0xLjEtMC4yLTEuNy0wLjNjLTAuMi0xLjEtMC41LTEuNC0wLjktMi4yJiN4QTsJYy0wLjEtMC4yLDAtMC4yLDAtMC4zYzAuMS0wLjEsMC41LTAuMiwwLjUtMC4yTDU5LjksMTcuOXoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTY0LjMsMjQuM2MtMC4xLDAuNS0wLjQsMC44LTAuOSwxLjFjLTAuNSwwLjMtMS4xLDAuMy0xLjEsMC4zbDAtMS42YzAsMCwwLjEsMCwwLjItMC4xJiN4QTsJYzAuMS0wLjEsMC4xLTAuMiwwLjEtMC4zYzAtMC4xLTAuMS0wLjItMC4yLTAuM2MtMC4yLTAuMS0wLjQtMC4xLTAuNS0wLjFjLTAuOC0wLjEtMS41LTAuMi0yLjMtMC4zYy0xLjQtMC4yLTIuNC0xLTIuMy0yLjQmI3hBOwljMC4xLTAuOSwxLTEuMiwxLjctMS40YzAuMiwwLjQsMC40LDAuOCwwLjUsMWMwLjEsMC40LDAuMiwwLjYsMC4yLDAuNnMtMC4zLDAuMS0wLjMsMC4zYzAsMC4yLDAuMywwLjMsMC40LDAuM2MxLDAuMSwyLjMsMC4zLDMsMC41JiN4QTsJYzAuNSwwLjIsMC45LDAuNCwxLjIsMC44QzY0LjMsMjMuMyw2NC40LDIzLjcsNjQuMywyNC4zIi8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik02MC40LDIzLjdjMC42LDAuMSwwLjksMC4xLDEuNCwwLjJsLTAuMSwyLjZsLTAuNi0wLjNsLTAuNi0wLjNMNjAuNCwyMy43eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjIuOSwzMGMtMC4zLDAuMy0wLjgsMC40LTAuOCwwLjRsMC0xLjFjMCwwLDAuMS0wLjEsMC4xLTAuM2MtMC4xLTAuMi0wLjktMC44LTEuMy0wLjljLTAuNC0wLjItMS0wLjMtMS40LTAuNSYjeEE7CWMtMS0wLjQtMS4zLTEuMy0wLjktMi4yYzAuMS0wLjMsMC41LTAuNiwwLjctMC43YzAuMi0wLjEsMC42LTAuMiwwLjYtMC4ybDAuMSwxLjNjMCwwLTAuMSwwLTAuMiwwLjJjLTAuMSwwLjIsMC4xLDAuNCwwLjIsMC40JiN4QTsJYzAuNiwwLjMsMS42LDAuNywyLjIsMWMwLjksMC41LDEuMiwwLjksMS4yLDEuNUM2My41LDI5LjQsNjMuMiwyOS43LDYyLjksMzAiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTYxLjcsMzIuOGMwLDAuMi0wLjEsMC40LTAuNSwwLjRjLTAuMywwLTAuNS0wLjEtMC41LTAuNWMtMC4xLTEuNS0wLjEtNC40LTAuMS00LjRzMC40LDAuMSwwLjYsMC4zJiN4QTsJYzAuMSwwLDAuMywwLjIsMC41LDAuNGMwLDAuMSwwLjEsMC4xLDAuMSwwLjJDNjEuNywzMC4zLDYxLjcsMzIuMyw2MS43LDMyLjgiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTYwLDMyLjNjLTAuMSwwLjMtMC4zLDAuMi0wLjQsMGMtMC4yLTAuMy0wLjMtMC41LTAuMy0wLjljLTAuMS0wLjcsMC4zLTEuMSwwLjUtMS4zYzAuMi0wLjIsMC40LTAuMywwLjQtMC4zJiN4QTsJbDAuMSwxLjJjMCwwLTAuMiwwLjEtMC4zLDAuNUM1OS45LDMyLDYwLjEsMzIuMiw2MCwzMi4zeiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTkuNCwxMS42YzAuMiwwLDAuMi0wLjEsMC40LTAuMmwwLjIsMGMtMC4zLTAuMy0xLTAuMy0xLjQtMC4zYzAuMSwwLjIsMC4yLDAuMSwwLjQsMC4yJiN4QTsJQzU5LjIsMTEuNCw1OS4xLDExLjYsNTkuNCwxMS42eiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjguNCwxMS41di0xMUgxMXYxMUgwVjI5aDExdjExaDE3LjVWMjloMTFWMTEuNUgyOC40eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjYuMywyOC43bC01LTkuM2MtMC40LTAuOC0wLjItMi4xLDEuMi0yLjNsNy4yLTAuN2gwaDBjMC40LDEuMiwwLjcsMi41LDAuNywzLjgmI3hBOwlDMzAuNSwyMy43LDI4LjgsMjYuNywyNi4zLDI4LjdMMjYuMywyOC43eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjUuNiwyOS4yTDI1LjYsMjkuMmMtMS43LDEuMS0zLjcsMS44LTUuOSwxLjhjLTIuMiwwLTQuMi0wLjctNS45LTEuOGwwLDB2MGwwLDBsNS4zLTcuOWMwLjQtMC41LDEtMC41LDEuMywwJiN4QTsJTDI1LjYsMjkuMkwyNS42LDI5LjJMMjUuNiwyOS4yeiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNOS42LDE2LjRsNy4yLDAuN2MxLjQsMC4yLDEuNSwxLjUsMS4yLDIuM2wtNSw5LjNsMCwwYy0yLjUtMi00LjEtNS00LjEtOC41QzguOSwxOC45LDkuMSwxNy42LDkuNiwxNi40eiIvPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkuNywyMy4xbC0wLjIsMC4xbC0zLjYsNS42YzEuMiwwLjUsMi40LDAuOCwzLjgsMC44YzEuMywwLDIuNi0wLjMsMy44LTAuOGwtMy42LTUuNkwxOS43LDIzLjF6Ii8+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMC43LDE4Yy0wLjIsMC43LTAuMywxLjQtMC4zLDIuMmMwLDIuMywwLjgsNC40LDIuMiw2LjFsMy44LTcuM2MwLjEtMC4yLDAuMS0wLjQtMC4zLTAuNEwxMC43LDE4eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjkuNCwxNS43aC03LjdjLTEuMSwwLTEuNi0wLjctMS42LTEuMmMwLTAuNiwwLjEtMC44LDAuNi0xLjVjMC42LTAuNywwLjItMi4yLTEuMS0yLjJjLTEuMywwLTEuNiwxLjQtMS4xLDIuMiYjeEE7CWMwLjUsMC43LDAuNiwwLjksMC42LDEuNWMwLDAuNS0wLjUsMS4yLTEuNiwxLjJIOS45YzEuNy0zLjcsNS40LTYuMiw5LjgtNi4yQzI0LDkuNCwyNy43LDEyLDI5LjQsMTUuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTI2LjcsMTQuMmMtMS4yLTEuNC0yLjctMi40LTQuNS0yLjljMC41LDAuOSwwLjEsMi4xLTAuNCwyLjdjLTAuMSwwLjEsMCwwLjIsMCwwLjJIMjYuN3oiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTIzLjIsMTguNWMtMC40LDAtMC40LDAuMi0wLjMsMC40bDMuOCw3LjNjMS40LTEuNiwyLjItMy43LDIuMi02LjFjMC0wLjgtMC4xLTEuNS0wLjMtMi4yTDIzLjIsMTguNXoiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyLjYsMTQuMmg0LjljMC4xLDAsMC4xLTAuMSwwLTAuMmMtMC41LTAuNi0xLTEuOC0wLjQtMi43QzE1LjMsMTEuOCwxMy44LDEyLjgsMTIuNiwxNC4yeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNODQuNCwxMC43VjAuMmg0YzEuOS0wLjEsMy44LDAuNywzLjgsMi43YzAsMS4yLTAuOCwyLTEuOSwyLjN2MGMxLjMsMC4zLDIuMywxLjIsMi4zLDIuNyYjeEE7CWMwLDIuMS0yLjYsMi44LTQuMiwyLjdIODQuNHogTTg4LjUsNC40YzAuOSwwLDEuNS0wLjQsMS41LTEuMmMwLTAuOC0wLjUtMS4yLTEuNS0xLjJoLTEuOHYyLjVIODguNXogTTg4LjUsOWMxLjEsMCwxLjgtMC4yLDEuOC0xLjQmI3hBOwljMC0xLjItMC43LTEuNC0xLjgtMS40aC0xLjhWOUg4OC41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTQuMSwxMC43aDIuMlYwLjJoLTIuMlYxMC43eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTAyLjksOS44Yy0wLjUsMC43LTEuMiwxLjEtMi4zLDEuMWMtMC43LDAtMi4xLTAuNi0yLjQtMS42Yy0wLjEtMC41LTAuMS0wLjktMC4xLTEuMlYzLjRoMi4ydjQuNCYjeEE7CWMwLDAuOCwwLjIsMS43LDEuMywxLjdjMC43LDAsMS4zLTAuNiwxLjMtMS43VjMuNGgyLjJ2NmMwLDAuNCwwLDAuOSwwLjEsMS4zSDEwM0wxMDIuOSw5Ljh6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMDksNy43YzAsMC45LDAuMSwxLjgsMS4zLDEuOGMwLjgsMCwxLjEtMC4zLDEuMy0wLjloMmMtMC4yLDEuOC0xLjYsMi40LTMuMywyLjRjLTIuNSwwLTMuNS0xLjQtMy41LTMuOSYjeEE7CWMwLTIuMiwxLjMtMy45LDMuNS0zLjljMS40LDAsMi41LDAuNSwzLjEsMS43YzAuMiwwLjQsMC4zLDAuOCwwLjQsMS4zYzAuMSwwLjUsMC4xLDAuOSwwLjEsMS40SDEwOXogTTExMS41LDYuMiYjeEE7CWMwLTAuOC0wLjItMS41LTEuMy0xLjVjLTEsMC0xLjIsMC43LTEuMywxLjVIMTExLjV6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMjEuMiwzLjZjMC0xLjEtMC43LTItMi0yYy0xLjYsMC0yLDIuNC0yLDMuOGMwLDEuNSwwLjQsMy44LDIsMy44YzEuNCwwLDItMC45LDItMmgyLjQmI3hBOwljLTAuMSwyLjYtMiwzLjYtNC40LDMuNmMtMywwLTQuNC0yLjQtNC40LTUuNWMwLTMuMSwxLjQtNS41LDQuNC01LjVjMi40LDAsNC4zLDEsNC40LDMuNkgxMjEuMnoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEyNi43LDMuNGwwLDEuM2gwYzAuNS0xLjIsMS40LTEuNCwyLjUtMS40djEuOWgtMC45Yy0wLjQsMC0wLjgsMC4yLTEuMSwwLjVjLTAuMiwwLjQtMC4zLDAuOC0wLjMsMS4zdjMuNiYjeEE7CWgtMi4ybDAtNS45YzAtMC4zLDAtMC45LTAuMS0xLjVIMTI2Ljd6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMzQuMSwxMWMtMi40LDAtMy44LTEuNi0zLjgtMy45YzAtMi4zLDEuNC0zLjksMy44LTMuOWMyLjQsMCwzLjgsMS42LDMuOCwzLjlDMTM3LjksOS40LDEzNi41LDExLDEzNC4xLDExJiN4QTsJIE0xMzQuMSw5LjVjMS4zLDAsMS42LTEuMywxLjYtMi40YzAtMS4yLTAuMi0yLjQtMS42LTIuNGMtMS4zLDAtMS42LDEuMy0xLjYsMi40QzEzMi41LDguMiwxMzIuOCw5LjUsMTM0LjEsOS41Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xNDMuMiw1LjRjMC0wLjUtMC41LTAuNy0xLTAuN2MtMC42LDAtMC45LDAuMi0wLjksMC43YzAsMS4yLDQuMiwwLjUsNC4yLDMuMmMwLDEuNi0yLDIuNC0zLjMsMi40JiN4QTsJYy0xLjcsMC0zLjItMC43LTMuMi0yLjNoMmMwLDAuNiwwLjYsMC45LDEuMiwwLjljMC42LDAsMS0wLjIsMS0wLjhjMC0wLjYtMS0wLjgtMS41LTAuOWMtMS40LTAuMy0yLjctMC42LTIuNy0yLjMmI3hBOwljMC0xLjUsMS45LTIuMiwzLjEtMi4yYzEuNSwwLDIuOSwwLjYsMywyLjJIMTQzLjJ6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xNTAuNSw1LjRjMC0wLjUtMC41LTAuNy0xLTAuN2MtMC42LDAtMC45LDAuMi0wLjksMC43YzAsMS4yLDQuMiwwLjUsNC4yLDMuMmMwLDEuNi0yLDIuNC0zLjMsMi40JiN4QTsJYy0xLjcsMC0zLjItMC43LTMuMi0yLjNoMmMwLDAuNiwwLjYsMC45LDEuMiwwLjljMC42LDAsMS4xLTAuMiwxLjEtMC44YzAtMC42LTEuMS0wLjgtMS41LTAuOWMtMS40LTAuMy0yLjctMC42LTIuNy0yLjMmI3hBOwljMC0xLjUsMS45LTIuMiwzLjEtMi4yYzEuNSwwLDIuOSwwLjYsMywyLjJIMTUwLjV6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik04NC40LDI1VjE0LjVoNGMxLjktMC4xLDMuOCwwLjcsMy44LDIuN2MwLDEuMi0wLjgsMi0xLjksMi4zdjBjMS4zLDAuMywyLjMsMS4yLDIuMywyLjdjMCwyLjEtMi42LDIuOC00LjIsMi43JiN4QTsJSDg0LjR6IE04OC41LDE4LjdjMC45LDAsMS41LTAuNCwxLjUtMS4yYzAtMC44LTAuNS0xLjItMS41LTEuMmgtMS44djIuNUg4OC41eiBNODguNSwyMy4zYzEuMSwwLDEuOC0wLjIsMS44LTEuNCYjeEE7CWMwLTEuMi0wLjctMS40LTEuOC0xLjRoLTEuOHYyLjhIODguNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTk0LjEsMjVoMi4yVjE0LjVoLTIuMlYyNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEwMi45LDI0LjFjLTAuNSwwLjctMS4yLDEuMS0yLjMsMS4xYy0wLjcsMC0yLjEtMC42LTIuNC0xLjZjLTAuMS0wLjUtMC4xLTAuOS0wLjEtMS4ydi00LjhoMi4ydjQuNCYjeEE7CWMwLDAuOCwwLjIsMS43LDEuMywxLjdjMC43LDAsMS4zLTAuNiwxLjMtMS43di00LjRoMi4ydjZjMCwwLjQsMCwwLjksMC4xLDEuM0gxMDNMMTAyLjksMjQuMXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEwOSwyMS45YzAsMC45LDAuMSwxLjgsMS4zLDEuOGMwLjgsMCwxLjEtMC4zLDEuMy0wLjloMmMtMC4yLDEuOC0xLjYsMi40LTMuMywyLjRjLTIuNSwwLTMuNS0xLjQtMy41LTMuOSYjeEE7CWMwLTIuMiwxLjMtMy45LDMuNS0zLjljMS40LDAsMi41LDAuNSwzLjEsMS43YzAuMiwwLjQsMC4zLDAuOCwwLjQsMS4zYzAuMSwwLjUsMC4xLDAuOSwwLjEsMS40SDEwOXogTTExMS41LDIwLjUmI3hBOwljMC0wLjgtMC4yLTEuNS0xLjMtMS41Yy0xLDAtMS4yLDAuNy0xLjMsMS41SDExMS41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTIwLjksMTcuNWMtMC4xLTEuMS0wLjctMS42LTEuOC0xLjZjLTAuOCwwLTEuNywwLjQtMS43LDEuNGMwLDEuMSwxLDEuMywxLjksMS41YzEuNiwwLjQsNCwwLjksNCwzJiN4QTsJYzAsMi42LTIuMywzLjUtNC41LDMuNWMtMi40LDAtNC4xLTAuOS00LTMuNmgyLjNjLTAuMSwxLjIsMC42LDIsMS44LDJjMC45LDAsMi4xLTAuMywyLjEtMS40YzAtMS4yLTEuNS0xLjMtMi40LTEuNiYjeEE7CWMtMS41LTAuNC0zLjUtMS0zLjUtMi45YzAtMi40LDIuMi0zLjUsNC40LTMuNWMyLDAsMy42LDEuMSwzLjYsMy4ySDEyMC45eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTI0LjksMjVWMTQuNWgyLjJ2NC4xbDAsMGMwLjUtMC43LDEuMS0xLjEsMi4yLTEuMWMwLjcsMCwyLjEsMC41LDIuNCwxLjZjMC4xLDAuNSwwLjEsMC45LDAuMSwxLjJWMjVoLTIuMiYjeEE7CXYtNC40YzAtMC44LTAuMi0xLjctMS4zLTEuN2MtMC43LDAtMS4zLDAuNi0xLjMsMS43VjI1SDEyNC45eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTMzLjcsMTYuNGgyLjN2LTEuOWgtMi4zVjE2LjR6IE0xMzMuOCwyNWgyLjJ2LTcuM2gtMi4yVjI1eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTM5LjgsMjEuOWMwLDAuOSwwLjEsMS44LDEuMywxLjhjMC44LDAsMS4xLTAuMywxLjMtMC45aDJjLTAuMiwxLjgtMS42LDIuNC0zLjMsMi40Yy0yLjUsMC0zLjUtMS40LTMuNS0zLjkmI3hBOwljMC0yLjIsMS4zLTMuOSwzLjUtMy45YzEuNCwwLDIuNSwwLjUsMy4xLDEuN2MwLjIsMC40LDAuMywwLjgsMC40LDEuM2MwLjEsMC41LDAuMSwwLjksMC4xLDEuNEgxMzkuOHogTTE0Mi4zLDIwLjUmI3hBOwljMC0wLjgtMC4yLTEuNS0xLjMtMS41Yy0xLDAtMS4yLDAuNy0xLjMsMS41SDE0Mi4zeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTQ2LDI1aDIuMlYxNC41SDE0NlYyNXoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTE1NS4xLDE0LjVoMi4ydjkuMWMwLDAuNSwwLDEsMC4xLDEuNWgtMi4yYzAtMC40LTAuMS0wLjctMC4xLTFoMGMtMC41LDAuOS0xLjMsMS4zLTIuMiwxLjMmI3hBOwljLTIuMSwwLTMuMS0yLTMuMS0zLjljMC0yLDEuMi0zLjksMy40LTMuOWMwLjgsMCwxLjUsMC41LDIsMS4xaDBWMTQuNXogTTE1My41LDIzLjhjMS4yLDAsMS42LTEuNCwxLjYtMi40YzAtMS0wLjQtMi40LTEuNi0yLjQmI3hBOwljLTEuNCwwLTEuNiwxLjMtMS42LDIuNEMxNTEuOSwyMi41LDE1Mi4xLDIzLjgsMTUzLjUsMjMuOEwxNTMuNSwyMy44eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNjkuMiwzOC4xdi0wLjVoMC4zYzAuMiwwLDAuNCwwLDAuNCwwLjJjMCwwLjMtMC4yLDAuMy0wLjQsMC4zSDY5LjJ6IE02OS4yLDM4LjNoMC4zbDAuNCwwLjdoMC4zbC0wLjUtMC43JiN4QTsJYzAuMiwwLDAuNC0wLjIsMC40LTAuNWMwLTAuMy0wLjItMC41LTAuNi0wLjVoLTAuNlYzOWgwLjNWMzguM3ogTTY5LjUsMzkuNmMwLjgsMCwxLjUtMC42LDEuNS0xLjVjMC0wLjgtMC43LTEuNS0xLjUtMS41JiN4QTsJYy0wLjgsMC0xLjUsMC42LTEuNSwxLjVDNjgsMzksNjguNywzOS42LDY5LjUsMzkuNkw2OS41LDM5LjZ6IE02OC4zLDM4LjJjMC0wLjcsMC41LTEuMiwxLjItMS4yYzAuNywwLDEuMiwwLjUsMS4yLDEuMiYjeEE7CWMwLDAuNy0wLjUsMS4yLTEuMiwxLjJDNjguOCwzOS40LDY4LjMsMzguOSw2OC4zLDM4LjJMNjguMywzOC4yeiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMzEuNSwzOC40di0wLjVoMC4zYzAuMiwwLDAuNCwwLDAuNCwwLjJjMCwwLjMtMC4yLDAuMy0wLjQsMC4zSDMxLjV6IE0zMS41LDM4LjZoMC4zbDAuNCwwLjdoMC4zTDMyLDM4LjYmI3hBOwljMC4yLDAsMC40LTAuMiwwLjQtMC41YzAtMC4zLTAuMi0wLjUtMC42LTAuNWgtMC42djEuN2gwLjNWMzguNnogTTMxLjgsNDBjMC44LDAsMS41LTAuNiwxLjUtMS41YzAtMC44LTAuNy0xLjUtMS41LTEuNSYjeEE7CWMtMC44LDAtMS41LDAuNi0xLjUsMS41QzMwLjMsMzkuMywzMSw0MCwzMS44LDQwTDMxLjgsNDB6IE0zMC42LDM4LjVjMC0wLjcsMC41LTEuMiwxLjItMS4yYzAuNywwLDEuMiwwLjUsMS4yLDEuMiYjeEE7CWMwLDAuNy0wLjUsMS4yLTEuMiwxLjJDMzEuMSwzOS43LDMwLjYsMzkuMiwzMC42LDM4LjVMMzAuNiwzOC41eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTEuMiwzNkw4OSwzMC4yTDg2LjcsMzZIOTEuMnogTTg0LjQsMzkuNmw0LjEtMTAuMmgxLjFsNC4xLDEwLjJoLTFsLTEuMS0yLjhoLTUuMWwtMS4xLDIuOEg4NC40eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTUuNSwzOS42aC0wLjh2LTUuNWMwLTAuNiwwLTEuMS0wLjEtMS42aDAuOWwwLDFoMGMwLjMtMC43LDAuOS0xLjIsMS42LTEuM2MwLjMsMCwwLjYsMCwwLjksMHYwLjgmI3hBOwljLTAuMiwwLTAuNC0wLjEtMC41LTAuMWMtMS4zLDAtMS45LDAuOS0yLDIuM1YzOS42eiIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNOTkuMSwzOS42aDAuOHYtNy4xaC0wLjhWMzkuNnogTTk5LDMwLjRoMXYtMS4xaC0xVjMwLjR6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMDEuNCwzOC44bDQuMi01LjZoLTQuMnYtMC44aDUuMnYwLjhsLTQuMSw1LjZoNC4xdjAuOGgtNS4yVjM4Ljh6Ii8+CjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMTAuOSwzMy4xYy0xLjcsMC0yLjQsMS43LTIuNCwzYzAsMS4zLDAuNywzLDIuNCwzYzEuNywwLDIuNC0xLjcsMi40LTNDMTEzLjMsMzQuNywxMTIuNiwzMy4xLDExMC45LDMzLjEmI3hBOwkgTTExNC4yLDM2LjFjMCwxLjktMSwzLjgtMy4zLDMuOGMtMi4zLDAtMy4zLTEuOS0zLjMtMy44YzAtMS45LDEuMS0zLjgsMy4zLTMuOEMxMTMuMiwzMi4zLDExNC4yLDM0LjIsMTE0LjIsMzYuMSIvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTE2LjYsMzkuNmgtMC45di01LjVjMC0wLjYsMC0xLjEtMC4xLTEuNmgwLjlsMCwxLjFsMCwwYzAuNS0wLjksMS4zLTEuMywyLjItMS4zYzIuMywwLDIuNSwyLjEsMi41LDIuOXY0LjUmI3hBOwloLTAuOVYzNWMwLTEuMi0wLjctMi0xLjktMmMtMS40LDAtMiwxLjItMiwyLjVWMzkuNnoiLz4KPHBhdGggY2xhc3M9InN0MiIgZD0iTTEyNS4zLDM5LjFjMS45LDAsMi4yLTEuNSwyLjEtM2MtMS4yLDAtMy43LTAuMi0zLjcsMS42QzEyMy43LDM4LjYsMTI0LjQsMzkuMSwxMjUuMywzOS4xTDEyNS4zLDM5LjF6JiN4QTsJIE0xMjcuNCwzNC42Yy0wLjEtMS4yLTAuNy0xLjUtMS43LTEuNWMtMC45LDAtMS42LDAuMy0xLjcsMS4yaC0wLjljMC4yLTEuNSwxLjMtMiwyLjctMmMxLjYsMCwyLjYsMC43LDIuNSwyLjRWMzgmI3hBOwljMCwwLjYsMCwxLjEsMC4xLDEuNmgtMC45bDAtMS4xaDBsMCwwLjFjLTAuMywwLjYtMS4zLDEuMi0yLjIsMS4yYy0xLjMsMC0yLjQtMC44LTIuNC0yLjJjMC0xLDAuNi0xLjcsMS40LTIuMSYjeEE7CWMwLjktMC40LDIuMi0wLjMsMy4yLTAuM1YzNC42eiIvPgo8L3N2Zz4=" width="158" height="40" alt="AZ Blue"></div><div class="steps">';
+      STEPS.forEach(function (s, i) {
+        var cls = s.n < current ? 'done' : (s.n === current ? 'now' : '');
+        var last = i === STEPS.length - 1;
+        html += '<div class="step ' + cls + '">'
+          + '<div class="step-col"><div class="bead">' + (s.n < current
+              ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>'
+              : s.n) + '</div>'
+          + (last ? '' : '<div class="spine"></div>') + '</div>'
+          + '<div class="step-body"' + (last ? ' style="padding-bottom:0"' : '') + '>'
+          + '<div class="step-title">' + s.title + '</div>'
+          + '<span class="step-caption">Step ' + s.n + ' of ' + STEPS.length + '</span>'
+          + '</div></div>';
+      });
+      html += '</div>';
+      // Contextual guidance sits in the sidebar surface rather than another card.
+      var guidance = {
+        1: { heading: 'What is Continuity of Care?', body: 'Continuity of care benefits may allow you to temporarily continue certain ongoing care with a provider who is no longer in your AZ Blue network.' },
+        2: { heading: 'Selecting your care', body: 'Select at least one service or care situation. If none apply, choose “None of the above” to see other options.' },
+        3: { heading: 'Your information', body: 'Have your AZ Blue member ID and contact information ready to complete this step.' },
+        4: { heading: 'Provider details', body: 'Add the out-of-network provider or facility involved in the care you want to continue.' }
+      };
+      var tip = guidance[current];
+      html += '<aside class="rail-guidance" aria-label="Helpful information">'
+        + '<div class="rail-guidance-heading"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>'
+        + '<span>' + tip.heading + '</span></div>'
+        + '<p>' + tip.body + '</p></aside>';
+      html += '</div>';
+      // On narrow viewports, show the completed steps and current step as breadcrumbs.
+      // Future steps remain visible in the desktop progress rail only.
+      html += '<nav class="mobile-crumbs" aria-label="Form progress"><ol>';
+      STEPS.forEach(function (s) {
+        if (s.n > current) return;
+        html += '<li>' + (s.n === current
+          ? '<span aria-current="step">Step ' + s.n + ': ' + s.title + '</span>'
+          : '<button type="button" data-go="step' + s.n + '">Step ' + s.n + ': ' + s.title + '</button>')
+          + '</li>';
+      });
+      html += '</ol></nav>';
+      rail.innerHTML = html;
+    });
+  }
+
+  /* ---------- navigation ---------- */
+  function show(id) {
+    $$('.screen').forEach(function (s) { s.classList.remove('active'); });
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('active');
+    syncStep1();
+    syncCare();
+    renderRails();
+    var jump = $('#jump');
+    if (jump && jump.value !== id) jump.value = id;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    var h = el.querySelector('h1[tabindex]');
+    if (h) h.focus({ preventScroll: true });
+  }
+
+  /* ---------- step 1 conditional display ---------- */
+  function syncStep1() {
+    var net = ($('input[name="network"]:checked') || {}).value || '';
+    var chg = ($('input[name="change"]:checked') || {}).value || '';
+    var stopped = (chg === 'chose' || chg === 'none');
+
+    $('#q1-no').hidden = net !== 'no';
+    $('#q1-unsure').hidden = net !== 'unsure';
+    $('#q2-block').hidden = !(net === 'yes' || net === 'unsure');
+    $('#q2-stop').hidden = !stopped;
+
+    var canContinue = (net === 'yes' || net === 'unsure') && chg && !stopped;
+    $('#s1-continue').style.display = canContinue ? '' : 'none';
+  }
+
+  /* ---------- step 2 conditional display and moving options ---------- */
+  var movingCare = ['pregnancy-due', 'pregnancy-cond', 'surgery', 'complex', 'terminal', 'treatment'];
+  var careItems = {};
+  function initCareItems() {
+    var followups = $('#care-followups');
+    movingCare.forEach(function (type, index) {
+      var opt = $('#care-opts [data-care="' + type + '"]');
+      var panel = document.getElementById(type + '-details');
+      if (!opt || !panel) return;
+      var placeholder = document.createComment('original ' + type + ' position');
+      opt.parentNode.insertBefore(placeholder, opt);
+      // The panel begins detached; its wrapper travels with its selected checkbox.
+      var wrapper = document.createElement('div');
+      wrapper.className = 'care-followup-item';
+      wrapper.dataset.careFollowup = type;
+      wrapper.appendChild(panel);
+      careItems[type] = { option: opt, panel: panel, anchor: placeholder, wrapper: wrapper, order: index };
+    });
+  }
+  function syncCare(animateMove) {
+    var followups = $('#care-followups');
+    var animate = !!animateMove && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    movingCare.forEach(function (type) {
+      var item = careItems[type];
+      if (!item) return;
+      var input = item.option.querySelector('input[name="care"]');
+      var selected = input.checked;
+      var wasSelected = item.option.parentNode === item.wrapper;
+      if (selected !== wasSelected) {
+        var oldRect = item.option.getBoundingClientRect();
+        if (selected) {
+          // Insert in the original question order, even when selections are made out of order.
+          var next = Array.prototype.find.call(followups.children, function (child) {
+            var nextItem = careItems[child.dataset.careFollowup];
+            return nextItem && nextItem.order > item.order;
+          });
+          followups.insertBefore(item.wrapper, next || null);
+          item.wrapper.insertBefore(item.option, item.panel);
+        } else {
+          item.anchor.parentNode.insertBefore(item.option, item.anchor.nextSibling);
+          item.wrapper.remove();
+        }
+        if (animate) {
+          var newRect = item.option.getBoundingClientRect();
+          var dx = oldRect.left - newRect.left, dy = oldRect.top - newRect.top;
+          // FLIP: visually travel from the old location to the new one.
+          item.option.animate([
+            { transform: 'translate(' + dx + 'px,' + dy + 'px)', opacity: .85 },
+            { transform: 'translate(0,0)', opacity: 1 }
+          ], { duration: 420, easing: 'cubic-bezier(.22,1,.36,1)' });
+        }
+      }
+      item.panel.hidden = !selected;
+      input.setAttribute('aria-expanded', String(selected));
+    });
+    var other = $('#pregOther');
+    var otherField = $('[data-detail="pregOther"]');
+    if (other && otherField) otherField.hidden = !other.checked;
+    var stopped = noneChecked();
+    $('#care-stop').hidden = !stopped;
+    $('#s2-continue').style.display = stopped ? 'none' : '';
+  }
+
+  /* ---------- providers ---------- */
+  function addProvider(prefill) {
+    providerCount++;
+    var n = providerCount;
+    var wrap = document.createElement('div');
+    wrap.className = 'provider';
+    wrap.setAttribute('data-provider', n);
+    wrap.innerHTML =
+      '<div class="provider-head"><p class="eyebrow">Provider or facility ' + n + '</p>'
+      + (n > 1 ? '<button class="linkbtn" type="button" data-remove="' + n + '">Remove</button>' : '')
+      + '</div>'
+      + '<div class="fields">'
+      + '<div class="field"><label for="pname' + n + '">Name <span class="req" aria-hidden="true">*</span></label><input type="text" id="pname' + n + '"></div>'
+      + '<div class="row">'
+      + '<div class="field"><label for="pspec' + n + '">Specialty or type of facility <span class="req" aria-hidden="true">*</span></label><input type="text" id="pspec' + n + '"></div>'
+      + '<div class="field" style="flex:1 1 180px"><label for="pphone' + n + '">Phone number <span class="req" aria-hidden="true">*</span></label><input type="tel" id="pphone' + n + '"></div>'
+      + '</div>'
+      + '<div class="row">'
+      + '<div class="field"><label for="pcity' + n + '">City and state <span class="req" aria-hidden="true">*</span></label><input type="text" id="pcity' + n + '"></div>'
+      + '<div class="field" style="flex:1 1 180px"><label for="pdate' + n + '">Next appointment or service date</label><input type="date" id="pdate' + n + '"></div>'
+      + '</div>'
+      + '</div>';
+    $('#providers').appendChild(wrap);
+
+    if (prefill) {
+      $('#pname' + n).value = prefill.name || '';
+      $('#pspec' + n).value = prefill.spec || '';
+      $('#pphone' + n).value = prefill.phone || '';
+      $('#pcity' + n).value = prefill.city || '';
+      if (prefill.date) $('#pdate' + n).value = prefill.date;
+    }
+    $('#addProvider').style.display = providerCount >= 3 ? 'none' : '';
+  }
+
+  /* ---------- demo helpers ---------- */
+  function fillSample() {
+    var d = new Date(); d.setDate(d.getDate() + 12);
+    var iso = d.toISOString().slice(0, 10);
+
+    var yes = $('input[name="network"][value="yes"]'); if (yes) yes.checked = true;
+    var emp = $('input[name="change"][value="employer"]'); if (emp) emp.checked = true;
+    syncStep1();
+
+    $$('#step2 input[name="care"]:not([value="none"])').forEach(function (i) { i.checked = i.value === 'surgery'; });
+    var none = $('.exit-opt input[name="care"]'); if (none) none.checked = false;
+    syncCare();
+    $('#surgery').value = 'Lumbar spinal fusion';
+    $('#surgeryDate').value = iso;
+
+    var vals = { first: 'Maria', last: 'Reyes', dob: '1979-04-18', memberId: 'XZB 804 229 11', email: 'maria.reyes@example.com', phone: '602-555-0148', address: '1420 W Ray Rd', csz: 'Chandler, AZ 85224' };
+    Object.keys(vals).forEach(function (k) { var el = $('#' + k); if (el) el.value = vals[k]; });
+
+    $('#providers').innerHTML = '';
+    providerCount = 0;
+    addProvider({ name: 'Desert Valley Orthopedics', spec: 'Orthopedic surgery', phone: '480-555-0133', city: 'Chandler, AZ', date: iso });
+    $$('#acks input[name="ack"]').forEach(function (a) { a.checked = true; });
+
+    renderRails();
+    toast('Sample answers filled in.');
+  }
+
+  function reset() {
+    $$('input').forEach(function (i) {
+      if (i.type === 'checkbox' || i.type === 'radio') { if (i.id !== 'hl') i.checked = false; }
+      else i.value = '';
+    });
+    $('#providers').innerHTML = '';
+    providerCount = 0;
+    addProvider();
+    syncStep1();
+    syncCare();
+    show('intro');
+  }
+
+  /* ---------- wiring ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go],[data-next],[data-toast],[data-remove]');
+    if (!t) return;
+
+    if (t.hasAttribute('data-toast')) { toast(t.getAttribute('data-toast')); return; }
+
+    if (t.hasAttribute('data-remove')) {
+      var block = $('[data-provider="' + t.getAttribute('data-remove') + '"]');
+      if (block) block.remove();
+      $('#addProvider').style.display = $$('#providers .provider').length >= 3 ? 'none' : '';
+      return;
+    }
+
+    if (t.hasAttribute('data-go')) { show(t.getAttribute('data-go')); return; }
+
+    if (t.hasAttribute('data-next')) {
+      var from = t.getAttribute('data-next');
+      if (from === 'step1') return show('step2');
+      if (from === 'step2') return show('step3');
+      if (from === 'step3') return show('step4');
+      if (from === 'step4') return show('done');
+    }
+  });
+
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.name === 'care') {
+      var isNone = t.closest('.exit-opt');
+      if (isNone && t.checked) {
+        $$('#step2 input[name="care"]:not([value="none"])').forEach(function (i) { i.checked = false; });
+      } else if (!isNone && t.checked) {
+        var none = $('.exit-opt input[name="care"]');
+        if (none) none.checked = false;
+      }
+      syncCare(true);
+    }
+    if (t.name === 'preg' || t.id === 'pregOther') syncCare();
+    if (t.name === 'network' || t.name === 'change') syncStep1();
+  });
+
+  // keep clicks inside a reveal panel from toggling the parent checkbox
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.reveal') && !e.target.closest('.sub-opt')) e.stopPropagation();
+  }, true);
+
+  $('#addProvider').addEventListener('click', function () {
+    addProvider();
+    var last = $('#providers .provider:last-child input');
+    if (last) last.focus();
+  });
+
+  $('#jump').addEventListener('change', function () {
+    var parts = this.value.split(':');
+    var id = parts[0], preset = parts[1];
+    if (preset && id === 'step1') {
+      var net = preset === 'chose' ? 'yes' : preset;
+      $$('input[name="network"]').forEach(function (i) { i.checked = i.value === net; });
+      $$('input[name="change"]').forEach(function (i) { i.checked = preset === 'chose' && i.value === 'chose'; });
+    }
+    if (preset && id === 'step2') {
+      $$('#step2 input[name="care"]:not([value="none"])').forEach(function (i) { i.checked = false; });
+      var n = $('.exit-opt input[name="care"]');
+      if (n) n.checked = preset === 'none';
+    }
+    show(id);
+  });
+
+  $('#fill').addEventListener('click', fillSample);
+  $('#restart').addEventListener('click', reset);
+  $('#restart2').addEventListener('click', reset);
+
+  addProvider();
+  initCareItems();
+  syncStep1();
+  syncCare();
+  renderRails();
+})();
+</script>
+</body>
+</html>
