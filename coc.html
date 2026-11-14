@@ -404,6 +404,13 @@ body:has(.screen.active[id^="step"]) { background: #fff; }
   line-height: 1.45; margin-bottom: 9px;
 }
 .rail-guidance-heading svg { flex: 0 0 auto; margin-top: 1px; }
+.rail-guidance-link {
+  background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.rail-guidance-link:hover { color: var(--azb-navy-link); }
+.rail-guidance-link:focus-visible { outline: 2px solid var(--azb-cyan-600); outline-offset: 3px; }
 .rail-guidance p { font-size: 12px; line-height: 1.65; color: var(--azb-ink-secondary); }
 
 /* Progress advances from the preceding marker, then settles softly. */
@@ -909,7 +916,7 @@ body:has(#intro.active) { background: #fff; }
       html += '</div>';
       // Contextual guidance sits in the sidebar surface rather than another card.
       var guidance = {
-        1: { heading: 'What is Continuity of Care?', body: 'Continuity of care benefits may allow you to temporarily continue certain ongoing care with a provider who is no longer in your AZ Blue network.' },
+        1: { heading: 'What is Continuity of Care?', link: 'intro', body: 'Continuity of care benefits may allow you to temporarily continue certain ongoing care with a provider who is no longer in your AZ Blue network.' },
         2: { heading: 'Selecting your care', body: 'Select at least one service or care situation. If none apply, choose “None of the above” to see other options.' },
         3: { heading: 'Your information', body: 'Have your AZ Blue member ID and contact information ready to complete this step.' },
         4: { heading: 'Provider details', body: 'Add the out-of-network provider or facility involved in the care you want to continue.' }
@@ -917,7 +924,10 @@ body:has(#intro.active) { background: #fff; }
       var tip = guidance[current];
       html += '<aside class="rail-guidance" aria-label="Helpful information">'
         + '<div class="rail-guidance-heading"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>'
-        + '<span>' + tip.heading + '</span></div>'
+        + (tip.link
+            ? '<button type="button" class="rail-guidance-link" data-go="' + tip.link + '">'
+              + tip.heading + '</button>'
+            : '<span>' + tip.heading + '</span>') + '</div>'
         + '<p>' + tip.body + '</p></aside>';
       html += '</div>';
       // On narrow viewports, show the completed steps and current step as breadcrumbs.
